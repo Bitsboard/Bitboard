@@ -17,6 +17,8 @@ import {
   NewListingModal,
   AuthModal,
 } from "@/components";
+import { mockListings, mockSavedSearches } from "@/lib/mockData";
+import type { Unit, Layout, AdType, Category, Place, Seller, Listing, SavedSearch, User } from "@/lib/types";
 
 /**
  * Bitboard — full demo page
@@ -30,62 +32,6 @@ import {
  * - "Sign in to post" (simulated) + "Post a listing" flow with demo invoice
  * - Denom toggle (sats/BTC) and CAD always shown under price
  */
-
-type Unit = "sats" | "BTC";
-type Layout = "grid" | "list";
-type AdType = "all" | "sell" | "want";
-type Category =
-  | "Featured"
-  | "Electronics"
-  | "Mining Gear"
-  | "Home & Garden"
-  | "Sports & Bikes"
-  | "Tools"
-  | "Games & Hobbies"
-  | "Furniture"
-  | "Services";
-
-type Place = { name: string; lat: number; lng: number };
-
-type Seller = {
-  name: string;
-  score: number;
-  deals: number;
-  rating: number;
-  verifications: { email?: boolean; phone?: boolean; lnurl?: boolean };
-  onTimeRelease: number;
-};
-
-type Listing = {
-  id: string;
-  title: string;
-  desc: string;
-  priceSats: number;
-  category: Category | Exclude<string, never>;
-  location: string;
-  lat: number;
-  lng: number;
-  type: "sell" | "want";
-  images: string[];
-  boostedUntil: number;
-  seller: Seller;
-  createdAt: number;
-};
-
-type SavedSearch = {
-  id: string;
-  name: string;
-  notify: boolean;
-  lastOpenedAt: number;
-  newCount: number;
-  query: string;
-  category: Category;
-  center: Place;
-  radiusKm: number;
-  adType: AdType;
-};
-
-type User = { id: string; email: string; handle: string };
 
 const categories: Category[] = [
   "Featured",
@@ -124,7 +70,7 @@ function kmBetween(lat1: number, lon1: number, lat2: number, lon2: number) {
   return R * c;
 }
 
-// --- Demo data ------------------------------------------------------------
+// --- Mock data loaded from centralized file ---
 const seedListings: Listing[] = [
   {
     id: "l1",
@@ -221,7 +167,7 @@ const seedListings: Listing[] = [
 export default function Page() {
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Category>("Featured");
-  const [listings, setListings] = useState<Listing[]>(seedListings);
+  const [listings, setListings] = useState<Listing[]>(mockListings);
   const [btcCad, setBtcCad] = useState(0);
   const [rateUpdatedAt, setRateUpdatedAt] = useState<Date | null>(null);
 
@@ -235,7 +181,7 @@ export default function Page() {
   const [dark, setDark] = useState(true);
 
   // Saved searches
-  const [saved, setSaved] = useState<SavedSearch[]>([]);
+  const [saved, setSaved] = useState<SavedSearch[]>(mockSavedSearches);
 
   // Display prefs
   const [unit, setUnit] = useState<Unit>("sats");
