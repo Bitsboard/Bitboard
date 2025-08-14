@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   Nav,
   LocationAutocomplete,
-  SavedSearchesBar,
   SafetyTipsSection,
   TermsSection,
   UnitToggle,
@@ -17,8 +16,8 @@ import {
   NewListingModal,
   AuthModal,
 } from "@/components";
-import { mockListings, mockSavedSearches } from "@/lib/mockData";
-import type { Unit, Layout, AdType, Category, Place, Seller, Listing, SavedSearch, User } from "@/lib/types";
+import { mockListings } from "@/lib/mockData";
+import type { Unit, Layout, AdType, Category, Place, Seller, Listing, User } from "@/lib/types";
 
 /**
  * Bitboard — full demo page
@@ -180,7 +179,7 @@ export default function Page() {
   const [dark, setDark] = useState(true);
 
   // Saved searches
-  const [saved, setSaved] = useState<SavedSearch[]>(mockSavedSearches);
+
 
   // Display prefs
   const [unit, setUnit] = useState<Unit>("sats");
@@ -276,21 +275,8 @@ export default function Page() {
     ? "border-neutral-800 bg-neutral-900 text-neutral-100 placeholder-neutral-500 focus:border-orange-500"
     : "border-neutral-300 bg-white text-neutral-900 placeholder-neutral-400 focus:border-orange-500";
 
-  // Saved search helpers
+  // Filter helpers
   const currentFilter = () => ({ query, category: cat, center, radiusKm, adType });
-  const computeNewCount = (s: SavedSearch) => {
-    const since = s.lastOpenedAt || 0;
-    return listings.filter((l: Listing) => {
-      const inCat =
-        s.category === "Featured" ||
-        (s.category === "Services" ? l.category === "Services" : l.category === s.category);
-      const inGeo = kmBetween(s.center.lat, s.center.lng, l.lat, l.lng) <= s.radiusKm;
-      const inText =
-        !s.query || `${l.title} ${l.desc} ${l.location}`.toLowerCase().includes(s.query.toLowerCase());
-      const inType = s.adType === "all" || l.type === s.adType;
-      return inCat && inGeo && inText && inType && l.createdAt > since;
-    }).length;
-  };
   const handleSaveSearch = () => {
     const s = currentFilter();
     const name = `${s.query || "All"} • ${s.center.name} • ${s.radiusKm}km${s.category !== "Featured" ? " • " + s.category : ""
@@ -376,37 +362,16 @@ export default function Page() {
                 >
                   Browse deals
                 </a>
-                <button
-                  onClick={handleSaveSearch}
-                  className={cn(
-                    "rounded-2xl px-5 py-3 font-semibold transition",
-                    dark ? "border border-neutral-700 hover:border-neutral-500 hover:bg-neutral-900" : "border border-neutral-300 hover:bg-neutral-100"
-                  )}
-                >
-                  Save search
-                </button>
+
                 <span className={cn("ml-2 text-sm", dark ? "text-neutral-400" : "text-neutral-600")}>
                   * Demo — payments & auth simulated
                 </span>
               </div>
             </div>
-            <aside className={cn("flex w-full max-w-md flex-col gap-4 rounded-2xl border p-5", panel)}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-semibold text-neutral-200">BTC → CAD</span>
-                    <div className="h-1 w-1 rounded-full bg-orange-400"></div>
-                    <strong className="text-xl font-bold text-orange-400">
-                      {btcCad ? formatFiat(btcCad, "CAD").replace(" CAD", "") : "—"}
-                    </strong>
-                  </div>
-                </div>
-                <UnitToggle unit={unit} setUnit={setUnit} />
-              </div>
-              <div className={cn("rounded-xl p-3 text-sm", dark ? "bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/20 text-orange-200" : "bg-gradient-to-r from-orange-100 to-amber-100 border border-orange-200 text-orange-800")}>
-                💱 Prices display in <span className="font-semibold">{unit === "sats" ? "sats" : "BTC"}</span>
-              </div>
-            </aside>
+            <div className={cn("flex items-center gap-3 text-sm font-semibold", dark ? "text-neutral-200" : "text-neutral-700")}>
+              <span>Display prices in:</span>
+              <UnitToggle unit={unit} setUnit={setUnit} />
+            </div>
           </div>
 
           {/* Search Row */}
@@ -444,16 +409,7 @@ export default function Page() {
               <TypeToggle adType={adType} setAdType={setAdType} dark={dark} />
             </div>
 
-            {/* Saved Searches bar */}
-            <div className="md:col-span-12">
-              <SavedSearchesBar
-                saved={saved}
-                onRun={applySaved}
-                onToggleBell={toggleSavedBell}
-                onDelete={deleteSaved}
-                dark={dark}
-              />
-            </div>
+
             <div className="md:col-span-12 flex flex-wrap gap-2" role="tablist">
               {categories.map((c) => (
                 <button

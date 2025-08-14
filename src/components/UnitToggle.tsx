@@ -15,11 +15,34 @@ function cn(...xs: Array<string | false | null | undefined>) {
 
 export function UnitToggle({ unit, setUnit }: UnitToggleProps) {
   return (
-    <div className="inline-flex rounded-xl border overflow-hidden">
-      <button onClick={() => setUnit("sats")} className={cn("px-3 py-1 text-xs", unit === "sats" ? "bg-orange-500 text-neutral-950" : "opacity-80")}>
+    <div className="relative inline-flex rounded-2xl bg-neutral-200 p-1 shadow-lg border border-neutral-300">
+      <div
+        className={cn(
+          "absolute inset-1 rounded-xl bg-white shadow-md transition-all duration-300 ease-out",
+          unit === "sats" ? "translate-x-0" : "translate-x-full"
+        )}
+        style={{ width: 'calc(50% - 4px)' }}
+      />
+      <button
+        onClick={() => setUnit("sats")}
+        className={cn(
+          "relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl",
+          unit === "sats"
+            ? "text-orange-700 font-extrabold"
+            : "text-neutral-600 hover:text-neutral-700"
+        )}
+      >
         sats
       </button>
-      <button onClick={() => setUnit("BTC")} className={cn("px-3 py-1 text-xs", unit === "BTC" ? "bg-orange-500 text-neutral-950" : "opacity-80")}>
+      <button
+        onClick={() => setUnit("BTC")}
+        className={cn(
+          "relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl",
+          unit === "BTC"
+            ? "text-orange-700 font-extrabold"
+            : "text-neutral-600 hover:text-neutral-800"
+        )}
+      >
         BTC
       </button>
     </div>
