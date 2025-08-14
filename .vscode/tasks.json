@@ -1,0 +1,139 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "🚀 Start Development Server",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": [],
+      "detail": "Start Next.js development server on http://localhost:3000"
+    },
+    {
+      "label": "🔨 Build Production",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "build"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      },
+      "problemMatcher": ["$tsc"],
+      "detail": "Build the application for production"
+    },
+    {
+      "label": "🧹 Lint & Fix",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "lint"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      },
+      "problemMatcher": [],
+      "detail": "Run ESLint to check and fix code quality issues"
+    },
+    {
+      "label": "🗄️ Database: Generate Prisma Client",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "prisma:generate"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      },
+      "detail": "Generate Prisma client from schema"
+    },
+    {
+      "label": "🗄️ Database: Run Migrations",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "prisma:migrate"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      },
+      "detail": "Run database migrations"
+    },
+    {
+      "label": "🌱 Seed Database",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "seed"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      },
+      "detail": "Seed the database with sample data"
+    },
+    {
+      "label": "📦 Install Dependencies",
+      "type": "shell",
+      "command": "npm",
+      "args": ["install"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      },
+      "detail": "Install all npm dependencies"
+    },
+    {
+      "label": "🧪 Run Tests",
+      "type": "shell",
+      "command": "npm",
+      "args": ["test"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      },
+      "detail": "Run test suite"
+    },
+    {
+      "label": "🚀 Deploy to Vercel",
+      "type": "shell",
+      "command": "vercel",
+      "args": ["--prod"],
+      "group": "deploy",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      },
+      "detail": "Deploy to Vercel production"
+    }
+  ]
+}

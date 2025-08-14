@@ -1,0 +1,23 @@
+{
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.suggest.autoImports": true,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "emmet.includeLanguages": {
+    "typescript": "html",
+    "typescriptreact": "html"
+  },
+  "tailwindCSS.includeLanguages": {
+    "typescript": "html",
+    "typescriptreact": "html"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    ["cn\\(([^)]*)\\)", "([^)]*)"],
+    ["className\\s*=\\s*[\"'`]([^\"'`]*)[\"'`]", "([^)]*)"]
+  ],
+  "files.associations": {
+    "*.css": "tailwindcss"
+  }
+}
