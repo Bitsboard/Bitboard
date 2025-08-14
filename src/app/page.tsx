@@ -169,7 +169,6 @@ export default function Page() {
   const [cat, setCat] = useState<Category>("Featured");
   const [listings, setListings] = useState<Listing[]>(mockListings);
   const [btcCad, setBtcCad] = useState(0);
-  const [rateUpdatedAt, setRateUpdatedAt] = useState<Date | null>(null);
 
   const [center, setCenter] = useState<Place>(places[0]);
   const [radiusKm, setRadiusKm] = useState(25);
@@ -210,9 +209,8 @@ export default function Page() {
         const j = await r.json();
         if (j?.cad) {
           setBtcCad(Number(j.cad));
-          setRateUpdatedAt(new Date());
         }
-      } catch {}
+      } catch { }
       t = setTimeout(load, 60_000);
     }
     load();
@@ -295,9 +293,8 @@ export default function Page() {
   };
   const handleSaveSearch = () => {
     const s = currentFilter();
-    const name = `${s.query || "All"} • ${s.center.name} • ${s.radiusKm}km${
-      s.category !== "Featured" ? " • " + s.category : ""
-    }${s.adType !== "all" ? " • " + (s.adType === "sell" ? "Selling" : "Looking For") : ""}`;
+    const name = `${s.query || "All"} • ${s.center.name} • ${s.radiusKm}km${s.category !== "Featured" ? " • " + s.category : ""
+      }${s.adType !== "all" ? " • " + (s.adType === "sell" ? "Selling" : "Looking For") : ""}`;
     const item: SavedSearch = {
       id: `s${Date.now()}`,
       name,
@@ -393,23 +390,21 @@ export default function Page() {
                 </span>
               </div>
             </div>
-            <aside className={cn("flex w-full max-w-md flex-col gap-3 rounded-2xl border p-4", panel)}>
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <span>BTC → CAD:</span>
-                  <strong>{btcCad ? formatFiat(btcCad, "CAD") : "—"}</strong>
-                  {rateUpdatedAt && (
-                    <span className="text-xs text-neutral-500">
-                      updated {rateUpdatedAt.toLocaleTimeString()}
-                    </span>
-                  )}
+            <aside className={cn("flex w-full max-w-md flex-col gap-4 rounded-2xl border p-5", panel)}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-semibold text-neutral-200">BTC → CAD</span>
+                    <div className="h-1 w-1 rounded-full bg-orange-400"></div>
+                    <strong className="text-xl font-bold text-orange-400">
+                      {btcCad ? formatFiat(btcCad, "CAD").replace(" CAD", "") : "—"}
+                    </strong>
+                  </div>
                 </div>
                 <UnitToggle unit={unit} setUnit={setUnit} />
               </div>
-              <div className={cn("rounded-lg p-3 text-xs", dark ? "bg-neutral-800/60 text-neutral-400" : "bg-neutral-100 text-neutral-600")}>
-                Prices display in {unit === "sats" ? "sats" : "BTC"}. CAD estimate shown underneath
-                for reference. <strong>Keep all correspondence in-app for safety.</strong> Off-app
-                contact is against our guidelines.
+              <div className={cn("rounded-xl p-3 text-sm", dark ? "bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/20 text-orange-200" : "bg-gradient-to-r from-orange-100 to-amber-100 border border-orange-200 text-orange-800")}>
+                💱 Prices display in <span className="font-semibold">{unit === "sats" ? "sats" : "BTC"}</span>
               </div>
             </aside>
           </div>
@@ -471,8 +466,8 @@ export default function Page() {
                     cat === c
                       ? "bg-orange-500 text-neutral-950 shadow shadow-orange-500/30"
                       : dark
-                      ? "border border-neutral-800 text-neutral-300 hover:border-neutral-600 hover:bg-neutral-900"
-                      : "border border-neutral-300 text-neutral-700 hover:border-neutral-400 hover:bg-neutral-100"
+                        ? "border border-neutral-800 text-neutral-300 hover:border-neutral-600 hover:bg-neutral-900"
+                        : "border border-neutral-300 text-neutral-700 hover:border-neutral-400 hover:bg-neutral-100"
                   )}
                 >
                   {c}
