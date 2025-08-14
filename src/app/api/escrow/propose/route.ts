@@ -1,9 +1,41 @@
 import { NextResponse } from "next/server";
-import { createHoldInvoice } from "@/lib/escrow";
+import { createLightningBackend, calculateEscrowFee, calculateTotalAmount } from "@/lib/escrow";
 
 export async function POST(req: Request) {
-  const { amountSats } = await req.json();
-  if (!amountSats || amountSats <= 0) return NextResponse.json({ error: "amountSats required" }, { status: 400 });
-  const hold = await createHoldInvoice(amountSats);
-  return NextResponse.json(hold);
+  try {
+    const { amountSats } = await req.json();
+    
+    if (!amountSats || amountSats <= 0) {
+      return NextResponse.json({ error: "amountSats required" }, { status: 400 });
+    }
+
+    // Create Lightning backend (defaults to mock for now)
+    const lightningBackend = createLightningBackend("mock", {});
+    
+    // Calculate fees and total
+    const feeSats = calculateEscrowFee(amountSats);
+    const totalSats = calculateTotalAmount(amountSats);
+    
+    // Create hold invoice
+    const holdInvoice = await lightningBackend.createHoldInvoice(
+      totalSats,
+      `Escrow proposal for ${amountSats} sats`
+    );
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        amountSats,
+        feeSats,
+        totalSats,
+        holdInvoice,
+      }
+    });
+  } catch (error) {
+    console.error("Escrow proposal error:", error);
+    return NextResponse.json(
+      { error: "Failed to create escrow proposal" },
+      { status: 500 }
+    );
+  }
 }
