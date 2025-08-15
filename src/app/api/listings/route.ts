@@ -15,6 +15,18 @@ export async function GET(req: Request) {
     const limit = Math.min(100, parseInt(url.searchParams.get("limit") ?? "50", 10) || 50);
     const offset = Math.max(0, parseInt(url.searchParams.get("offset") ?? "0", 10) || 0);
 
+    // Ensure minimal schema exists so queries don't explode on fresh DBs
+    try {
+      await db
+        .prepare(`CREATE TABLE IF NOT EXISTS listings (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          price_sat INTEGER NOT NULL,
+          created_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+        )`)
+        .run();
+    } catch {}
+
     let results: any[] = [];
     try {
       // Try rich schema first
@@ -57,7 +69,8 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ listings: results, total });
   } catch (err: any) {
-    return NextResponse.json({ error: err?.message ?? "Internal Server Error" }, { status: 500 });
+    const message = err?.message ?? "Internal Server Error";
+    return NextResponse.json({ error: message, hint: "Ensure D1 binding 'DB' is set for this environment and schema exists" }, { status: 500 });
   }
 }
 
