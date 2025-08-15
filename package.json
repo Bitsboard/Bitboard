@@ -13,6 +13,7 @@
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
+    "@cloudflare/next-on-pages": "^1.13.13",
     "@prisma/client": "^5.18.0",
     "clsx": "^2.1.1",
     "next": "14.2.5",
@@ -23,7 +24,6 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.13",
     "@cloudflare/workers-types": "^4.20240821.0",
     "@types/node": "^20.11.30",
     "@types/react": "^18.2.73",
