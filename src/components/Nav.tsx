@@ -25,13 +25,22 @@ function cn(...xs: Array<string | false | null | undefined>) {
 }
 
 export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, layout, setLayout }: NavProps) {
+  const isStaging =
+    process.env.NEXT_PUBLIC_BRANCH === "staging" ||
+    process.env.NEXT_PUBLIC_ENV === "staging";
+
   return (
     <nav
       className={cn(
-        "sticky top-0 z-40 backdrop-blur",
+        "sticky top-0 z-40 backdrop-blur relative",
         dark ? "border-b border-neutral-900 bg-neutral-950/80" : "border-b border-neutral-200 bg-white/80"
       )}
     >
+      {isStaging && (
+        <span className="absolute left-2 top-2 rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow">
+          staging
+        </span>
+      )}
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
           <LogoMinimal dark={dark} />
