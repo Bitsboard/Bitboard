@@ -10,5 +10,6 @@ export { };
 
 // Type shim for dynamic import of @cloudflare/next-on-pages in build-time type checking
 declare module "@cloudflare/next-on-pages" {
-  export function getRequestContext(): { env: Record<string, unknown> };
+    export function getRequestContext(): { env: Record<string, unknown> };
+    export const on: any;
 }
