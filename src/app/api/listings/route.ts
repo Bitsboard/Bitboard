@@ -18,7 +18,15 @@ export async function GET(req: Request) {
     const { results } = await db
       .prepare(`SELECT id,
                        title,
+                       description,
+                       category,
+                       ad_type AS adType,
+                       location,
+                       lat,
+                       lng,
+                       image_url AS imageUrl,
                        price_sat AS priceSat,
+                       boosted_until AS boostedUntil,
                        created_at AS createdAt
                 FROM listings
                 ORDER BY id DESC
@@ -38,25 +46,78 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const db = getRequestContext().env.DB as D1Database;
   try {
-    const body = (await req.json()) as { title?: unknown; price_sat?: unknown; priceSat?: unknown };
+    const body = (await req.json()) as {
+      title?: unknown;
+      description?: unknown;
+      category?: unknown;
+      ad_type?: unknown;
+      adType?: unknown;
+      location?: unknown;
+      lat?: unknown;
+      lng?: unknown;
+      image_url?: unknown;
+      imageUrl?: unknown;
+      price_sat?: unknown;
+      priceSat?: unknown;
+      boosted_until?: unknown;
+      boostedUntil?: unknown;
+    };
     const title = (body?.title ?? "").toString().trim();
     const priceSat = Number(body?.price_sat ?? body?.priceSat);
+    const description = (body?.description ?? "").toString();
+    const category = (body?.category ?? "Misc").toString();
+    const adType = (body?.ad_type ?? body?.adType ?? "sell").toString();
+    const location = (body?.location ?? "").toString();
+    const lat = Number(body?.lat ?? 0);
+    const lng = Number(body?.lng ?? 0);
+    const imageUrl = (body?.image_url ?? body?.imageUrl ?? "").toString();
+    const boostedUntil = body?.boosted_until ?? body?.boostedUntil;
 
     if (!title || !Number.isFinite(priceSat) || priceSat < 0) {
       return NextResponse.json({ error: "title (string) and price_sat (number) required" }, { status: 400 });
     }
 
-    const res = await db
-      .prepare("INSERT INTO listings (title, price_sat) VALUES (?, ?)")
-      .bind(title.slice(0, 120), Math.round(priceSat))
-      .run();
+    // Try extended schema insert; fall back to legacy minimal schema
+    let res: any;
+    try {
+      res = await db
+        .prepare(`INSERT INTO listings (
+          title, description, category, ad_type, location, lat, lng, image_url, price_sat, boosted_until
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+        .bind(
+          title.slice(0, 120),
+          description,
+          category,
+          adType,
+          location,
+          Number.isFinite(lat) ? lat : 0,
+          Number.isFinite(lng) ? lng : 0,
+          imageUrl,
+          Math.round(priceSat),
+          boostedUntil ?? null
+        )
+        .run();
+    } catch {
+      res = await db
+        .prepare("INSERT INTO listings (title, price_sat) VALUES (?, ?)")
+        .bind(title.slice(0, 120), Math.round(priceSat))
+        .run();
+    }
 
     const id = (res as any).meta?.last_row_id ?? null;
 
     const row = await db
       .prepare(`SELECT id,
                        title,
+                       description,
+                       category,
+                       ad_type AS adType,
+                       location,
+                       lat,
+                       lng,
+                       image_url AS imageUrl,
                        price_sat AS priceSat,
+                       boosted_until AS boostedUntil,
                        created_at AS createdAt
                 FROM listings WHERE id = ?`)
       .bind(id)
