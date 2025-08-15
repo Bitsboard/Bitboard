@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
-import { getRequestContext } from "@cloudflare/next-on-pages";
+// Avoid hard crashing if the adapter isn't available; import dynamically inside handler
 
 export const runtime = "edge";
 
 export async function GET() {
   try {
-    const env = getRequestContext().env as { DB?: D1Database };
+    // Dynamically import to prevent top-level import errors in non-adapted envs
+    const mod = await import("@cloudflare/next-on-pages").catch(() => null as any);
+    if (!mod || typeof mod.getRequestContext !== "function") {
+      return NextResponse.json({ ok: false, error: "@cloudflare/next-on-pages not available", hint: "Ensure Next-on-Pages adapter is used in this deployment" }, { status: 500 });
+    }
+    const env = mod.getRequestContext().env as { DB?: D1Database };
     const db = env.DB;
     const branch = process.env.NEXT_PUBLIC_BRANCH || null;
     const envName = process.env.NEXT_PUBLIC_ENV || null;

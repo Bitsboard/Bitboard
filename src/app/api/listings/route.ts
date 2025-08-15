@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
-import { getRequestContext } from "@cloudflare/next-on-pages";
+// Avoid hard crashes if the adapter is missing in some envs
 
 export const runtime = "edge";
 
 export async function GET(req: Request) {
   try {
-    const env = getRequestContext().env as { DB?: D1Database };
+    const mod = await import("@cloudflare/next-on-pages").catch(() => null as any);
+    if (!mod || typeof mod.getRequestContext !== "function") {
+      return NextResponse.json({ error: "@cloudflare/next-on-pages not available", hint: "Enable Functions and adapter; ensure D1 binding 'DB' is configured" }, { status: 500 });
+    }
+    const env = mod.getRequestContext().env as { DB?: D1Database };
     const db = env.DB;
     if (!db) {
       return NextResponse.json({ error: "D1 binding 'DB' is not configured for this environment" }, { status: 500 });
@@ -75,7 +79,11 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const db = getRequestContext().env.DB as D1Database;
+  const mod = await import("@cloudflare/next-on-pages").catch(() => null as any);
+  if (!mod || typeof mod.getRequestContext !== "function") {
+    return NextResponse.json({ error: "@cloudflare/next-on-pages not available", hint: "Enable Functions and adapter; ensure D1 binding 'DB' is configured" }, { status: 500 });
+  }
+  const db = mod.getRequestContext().env.DB as D1Database;
   try {
     const body = (await req.json()) as {
       title?: unknown;
