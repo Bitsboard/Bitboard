@@ -15,24 +15,42 @@ export async function GET(req: Request) {
     const limit = Math.min(100, parseInt(url.searchParams.get("limit") ?? "50", 10) || 50);
     const offset = Math.max(0, parseInt(url.searchParams.get("offset") ?? "0", 10) || 0);
 
-    const { results } = await db
-      .prepare(`SELECT id,
-                       title,
-                       description,
-                       category,
-                       ad_type AS adType,
-                       location,
-                       lat,
-                       lng,
-                       image_url AS imageUrl,
-                       price_sat AS priceSat,
-                       boosted_until AS boostedUntil,
-                       created_at AS createdAt
-                FROM listings
-                ORDER BY id DESC
-                LIMIT ? OFFSET ?`)
-      .bind(limit, offset)
-      .all();
+    let results: any[] = [];
+    try {
+      // Try rich schema first
+      const rich = await db
+        .prepare(`SELECT id,
+                         title,
+                         description,
+                         category,
+                         ad_type AS adType,
+                         location,
+                         lat,
+                         lng,
+                         image_url AS imageUrl,
+                         price_sat AS priceSat,
+                         boosted_until AS boostedUntil,
+                         created_at AS createdAt
+                  FROM listings
+                  ORDER BY id DESC
+                  LIMIT ? OFFSET ?`)
+        .bind(limit, offset)
+        .all();
+      results = rich.results ?? [];
+    } catch {
+      // Fallback to legacy minimal schema
+      const minimal = await db
+        .prepare(`SELECT id,
+                         title,
+                         price_sat AS priceSat,
+                         created_at AS createdAt
+                  FROM listings
+                  ORDER BY id DESC
+                  LIMIT ? OFFSET ?`)
+        .bind(limit, offset)
+        .all();
+      results = minimal.results ?? [];
+    }
 
     const totalRow = await db.prepare("SELECT COUNT(*) AS c FROM listings").all();
     const total = (totalRow.results?.[0] as any)?.c ?? 0;
