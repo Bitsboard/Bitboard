@@ -4,26 +4,35 @@ import { getRequestContext } from "@cloudflare/next-on-pages";
 export const runtime = "edge";
 
 export async function GET(req: Request) {
-  const db = getRequestContext().env.DB as D1Database;
-  const url = new URL(req.url);
-  const limit = Math.min(100, parseInt(url.searchParams.get("limit") ?? "50", 10) || 50);
-  const offset = Math.max(0, parseInt(url.searchParams.get("offset") ?? "0", 10) || 0);
+  try {
+    const env = getRequestContext().env as { DB?: D1Database };
+    const db = env.DB;
+    if (!db) {
+      return NextResponse.json({ error: "D1 binding 'DB' is not configured for this environment" }, { status: 500 });
+    }
 
-  const { results } = await db
-    .prepare(`SELECT id,
-                     title,
-                     price_sat AS priceSat,
-                     created_at AS createdAt
-              FROM listings
-              ORDER BY id DESC
-              LIMIT ? OFFSET ?`)
-    .bind(limit, offset)
-    .all();
+    const url = new URL(req.url);
+    const limit = Math.min(100, parseInt(url.searchParams.get("limit") ?? "50", 10) || 50);
+    const offset = Math.max(0, parseInt(url.searchParams.get("offset") ?? "0", 10) || 0);
 
-  const totalRow = await db.prepare("SELECT COUNT(*) AS c FROM listings").all();
-  const total = (totalRow.results?.[0] as any)?.c ?? 0;
+    const { results } = await db
+      .prepare(`SELECT id,
+                       title,
+                       price_sat AS priceSat,
+                       created_at AS createdAt
+                FROM listings
+                ORDER BY id DESC
+                LIMIT ? OFFSET ?`)
+      .bind(limit, offset)
+      .all();
 
-  return NextResponse.json({ listings: results, total });
+    const totalRow = await db.prepare("SELECT COUNT(*) AS c FROM listings").all();
+    const total = (totalRow.results?.[0] as any)?.c ?? 0;
+
+    return NextResponse.json({ listings: results, total });
+  } catch (err: any) {
+    return NextResponse.json({ error: err?.message ?? "Internal Server Error" }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
