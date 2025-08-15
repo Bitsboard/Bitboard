@@ -4,6 +4,10 @@ compatibility_date = "2024-09-01"
 # Required by @cloudflare/next-on-pages
 compatibility_flags = ["nodejs_compat"]
 
+# Tell Pages where the built output lives (used to validate config and
+# apply flags from this file). This silences the Pages warning.
+pages_build_output_dir = ".vercel/output/static"
+
 # If you later bind D1/KV/Queues/etc, add them here (example):
 # [[d1_databases]]
 # binding = "DB"
