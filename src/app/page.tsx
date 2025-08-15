@@ -124,6 +124,7 @@ export default function HomePage() {
 
   return (
     <div className={cn("min-h-screen", bg, dark ? "dark" : "")}>
+      {/* staging deploy trigger */}
       <Nav
         onPost={() => requireAuth(() => setShowNew(true))}
         onToggleTheme={() => setDark((d) => !d)}
