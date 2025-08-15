@@ -1,6 +1,6 @@
-# Bitboard 🪙
+# bitsbarter 🪙
 
-A modern, Bitcoin-native local classifieds platform built with Next.js, TypeScript, and Tailwind CSS. Bitboard enables users to buy, sell, and trade goods and services using Bitcoin (sats/BTC) with built-in chat and Lightning escrow functionality.
+A modern, Bitcoin-native local classifieds platform built with Next.js, TypeScript, and Tailwind CSS. bitsbarter enables users to buy, sell, and trade goods and services using Bitcoin (sats/BTC) with built-in chat and Lightning escrow functionality.
 
 ## ✨ Features
 
@@ -172,4 +172,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ and ⚡ by the Bitboard team**
+**Built with ❤️ and ⚡ by the bitsbarter team**

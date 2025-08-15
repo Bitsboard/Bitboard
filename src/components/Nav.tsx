@@ -2,6 +2,9 @@
 
 import React from "react";
 import { LogoMinimal } from "./LogoMinimal";
+import { UnitToggle } from "./UnitToggle";
+import { ThemeToggle } from "./ThemeToggle";
+import { ViewToggle } from "./ViewToggle";
 
 type User = { id: string; email: string; handle: string };
 
@@ -11,13 +14,17 @@ interface NavProps {
   dark: boolean;
   user: User | null;
   onAuth: () => void;
+  unit: "sats" | "BTC";
+  setUnit: (unit: "sats" | "BTC") => void;
+  layout: "grid" | "list";
+  setLayout: (layout: "grid" | "list") => void;
 }
 
 function cn(...xs: Array<string | false | null | undefined>) {
   return xs.filter(Boolean).join(" ");
 }
 
-export function Nav({ onPost, onToggleTheme, dark, user, onAuth }: NavProps) {
+export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, layout, setLayout }: NavProps) {
   return (
     <nav
       className={cn(
@@ -29,7 +36,7 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth }: NavProps) {
         <div className="flex items-center gap-3">
           <LogoMinimal dark={dark} />
           <div className="flex items-center gap-2">
-            <span className="text-lg font-extrabold tracking-tight">Bitboard</span>
+            <span className={cn("text-lg font-extrabold tracking-tight leading-none", dark ? "text-white" : "text-black")}>bitsbarter</span>
             <span
               className={cn(
                 "hidden rounded-full px-2 py-0.5 text-xs sm:inline",
@@ -41,12 +48,6 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth }: NavProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={onToggleTheme}
-            className={cn("rounded-xl px-3 py-2 text-sm", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}
-          >
-            {dark ? "☀️ Light" : "🌙 Dark"}
-          </button>
           <a
             href="#how"
             className={cn("rounded-xl px-3 py-2 text-sm", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}
@@ -64,10 +65,38 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth }: NavProps) {
               Post a listing
             </button>
           ) : (
-            <button onClick={onAuth} className="rounded-xl border px-4 py-2 text-sm font-semibold transition hover:border-orange-400 hover:text-orange-600">
+            <button onClick={onAuth} className={cn("rounded-xl border px-4 py-2 text-sm font-semibold transition", dark ? "border-neutral-700 text-neutral-300 hover:border-orange-400 hover:text-orange-600" : "border-neutral-300 text-orange-600 hover:border-orange-400 hover:text-orange-700")}>
               Sign in
             </button>
           )}
+          {/* Settings Dropdown */}
+          <div className="relative group">
+            <button className={cn("rounded-xl px-3 py-2 text-sm", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}>
+              ☰
+            </button>
+            <div className={cn("absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl backdrop-blur-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200", dark ? "border-neutral-700/50 bg-neutral-900/90" : "border-neutral-300/50 bg-white/95")}>
+              <div className="p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>
+                    Display prices in:
+                  </span>
+                  <UnitToggle unit={unit} setUnit={setUnit} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>
+                    Display Theme:
+                  </span>
+                  <ThemeToggle dark={dark} onToggle={onToggleTheme} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>
+                    Layout View:
+                  </span>
+                  <ViewToggle layout={layout} setLayout={setLayout} dark={dark} />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </nav>

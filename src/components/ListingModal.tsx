@@ -36,7 +36,7 @@ type Listing = {
   lng: number;
   type: "sell" | "want";
   images: string[];
-  boostedUntil: number;
+  boostedUntil: number | null;
   seller: Seller;
   createdAt: number;
 };
@@ -45,7 +45,7 @@ interface ListingModalProps {
   listing: Listing;
   onClose: () => void;
   unit: Unit;
-  btcCad: number;
+  btcCad: number | null;
   dark: boolean;
   onChat: () => void;
 }
@@ -62,7 +62,7 @@ function stars(rating: number) {
 
 export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: ListingModalProps) {
   const boosted = listing.boostedUntil && listing.boostedUntil > Date.now();
-  
+
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className={cn("w-full max-w-4xl overflow-hidden rounded-2xl", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-200 bg-white")}>

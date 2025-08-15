@@ -7,7 +7,6 @@ export const mockUsers: User[] = [
     email: 'alice@example.com',
     handle: 'alice_crypto',
     image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
-    createdAt: new Date('2024-01-01'),
     rating: 4.8,
     deals: 12
   },
@@ -16,7 +15,6 @@ export const mockUsers: User[] = [
     email: 'bob@example.com',
     handle: 'bob_miner',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-    createdAt: new Date('2024-01-15'),
     rating: 4.9,
     deals: 8
   },
@@ -25,7 +23,6 @@ export const mockUsers: User[] = [
     email: 'carol@example.com',
     handle: 'carol_trader',
     image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
-    createdAt: new Date('2024-02-01'),
     rating: 4.7,
     deals: 15
   }
@@ -71,7 +68,7 @@ export const mockListings: Listing[] = [
     images: [
       'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&h=300&fit=crop'
     ],
-    boostedUntil: Date.now() + 3 * 24 * 60 * 60 * 1000, // 3 days from now
+    boostedUntil: null, // Not boosted
     createdAt: Date.now() - 3 * 24 * 60 * 60 * 1000, // 3 days ago
     seller: {
       name: mockUsers[1].handle,
@@ -95,7 +92,7 @@ export const mockListings: Listing[] = [
     images: [
       'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop'
     ],
-    boostedUntil: Date.now() + 5 * 24 * 60 * 60 * 1000, // 5 days from now
+    boostedUntil: null, // Not boosted
     createdAt: Date.now() - 5 * 24 * 60 * 60 * 1000, // 5 days ago
     seller: {
       name: mockUsers[2].handle,
@@ -119,7 +116,7 @@ export const mockListings: Listing[] = [
     images: [
       'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=300&fit=crop'
     ],
-    boostedUntil: Date.now() + 2 * 24 * 60 * 60 * 1000, // 2 days from now
+    boostedUntil: null, // Not boosted
     createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000, // 2 days ago
     seller: {
       name: mockUsers[0].handle,
@@ -144,7 +141,7 @@ export const mockListings: Listing[] = [
       'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
       'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=400&h=300&fit=crop'
     ],
-    boostedUntil: Date.now() + 10 * 24 * 60 * 60 * 1000, // 10 days from now
+    boostedUntil: null, // Not boosted
     createdAt: Date.now() - 10 * 24 * 60 * 60 * 1000, // 10 days ago
     seller: {
       name: mockUsers[1].handle,
@@ -168,7 +165,7 @@ export const mockListings: Listing[] = [
     images: [
       'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=400&h=300&fit=crop'
     ],
-    boostedUntil: Date.now() + 1 * 24 * 60 * 60 * 1000, // 1 day from now
+    boostedUntil: null, // Not boosted
     createdAt: Date.now() - 1 * 24 * 60 * 60 * 1000, // 1 day ago
     seller: {
       name: mockUsers[2].handle,

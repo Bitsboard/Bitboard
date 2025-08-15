@@ -36,7 +36,7 @@ type Listing = {
   lng: number;
   type: "sell" | "want";
   images: string[];
-  boostedUntil: number;
+  boostedUntil: number | null;
   seller: Seller;
   createdAt: number;
 };
@@ -45,7 +45,7 @@ interface ChatModalProps {
   listing: Listing;
   onClose: () => void;
   dark: boolean;
-  btcCad: number;
+  btcCad: number | null;
   unit: Unit;
 }
 
@@ -156,7 +156,7 @@ function EscrowFlow({ listing, onClose, dark }: { listing: Listing; onClose: () 
   const fee = Math.ceil((listing.priceSats * feeBps) / 10000);
   const total = listing.priceSats + fee;
   const [invoice, setInvoice] = useState(() => `lnbchold${total}n1p${Math.random().toString(36).slice(2, 10)}...`);
-  
+
   return (
     <div className="grid grid-cols-1 gap-4 p-4">
       <div className={cn("rounded-xl p-3 text-sm", dark ? "border border-neutral-800 bg-neutral-900" : "border border-neutral-300 bg-white")}>

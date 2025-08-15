@@ -17,14 +17,14 @@ export function TermsSection({ dark }: TermsSectionProps) {
         <h3 className="text-lg font-bold">Terms & Conditions</h3>
         <div className={cn("mt-3 space-y-3 text-sm", dark ? "text-neutral-300" : "text-neutral-700")}>
           <p>
-            By using Bitboard, you agree to keep all correspondence in-app for safety. Off-app contact may limit our ability to help in disputes.
+            By using bitsbarter, you agree to keep all correspondence in-app for safety. Off-app contact may limit our ability to help in disputes.
           </p>
           <p>Listings must comply with local laws. You are responsible for ensuring legality and authenticity of items and services.</p>
           <p>Escrow is provided via Lightning hold invoices. Funds are released only when both parties confirm, or a mediator decides in good faith based on in-app evidence.</p>
           <p id="policy">
             <strong>Prohibited items</strong> include: weapons, illicit drugs, stolen goods, counterfeit items, recalled/unsafe goods, and anything illegal in your jurisdiction.
           </p>
-          <p>We are a venue: transactions are between users. Bitboard is not a bank and does not custody fiat. Bitcoin price estimates are informational only.</p>
+          <p>We are a venue: transactions are between users. bitsbarter is not a bank and does not custody fiat. Bitcoin price estimates are informational only.</p>
           <p>Violations of these terms can result in deletion of content and/or account suspension.</p>
         </div>
       </div>

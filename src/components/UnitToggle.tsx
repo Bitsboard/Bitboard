@@ -15,7 +15,7 @@ function cn(...xs: Array<string | false | null | undefined>) {
 
 export function UnitToggle({ unit, setUnit }: UnitToggleProps) {
   return (
-    <div className="relative inline-flex rounded-2xl bg-neutral-200 p-1 shadow-lg border border-neutral-300">
+    <div className="relative inline-flex rounded-2xl bg-neutral-200/50 p-1 shadow-lg border border-neutral-300/50 backdrop-blur-sm">
       <div
         className={cn(
           "absolute inset-1 rounded-xl bg-white shadow-md transition-all duration-300 ease-out",
@@ -26,7 +26,7 @@ export function UnitToggle({ unit, setUnit }: UnitToggleProps) {
       <button
         onClick={() => setUnit("sats")}
         className={cn(
-          "relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl",
+          "relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105",
           unit === "sats"
             ? "text-orange-700 font-extrabold"
             : "text-neutral-600 hover:text-neutral-700"
@@ -37,7 +37,7 @@ export function UnitToggle({ unit, setUnit }: UnitToggleProps) {
       <button
         onClick={() => setUnit("BTC")}
         className={cn(
-          "relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl",
+          "relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105",
           unit === "BTC"
             ? "text-orange-700 font-extrabold"
             : "text-neutral-600 hover:text-neutral-800"

@@ -44,7 +44,7 @@ export type Listing = {
   lng: number;
   type: "sell" | "want";
   images: string[];
-  boostedUntil: number;
+  boostedUntil: number | null;
   seller: Seller;
   createdAt: number;
 };
@@ -90,7 +90,7 @@ export type Chat = {
 };
 
 // Escrow Types
-export type EscrowStatus = 
+export type EscrowStatus =
   | "PROPOSED"
   | "FUNDED"
   | "RELEASED"
@@ -198,14 +198,14 @@ export type ThemeProps = {
 };
 
 // Event Types
-export type ListingEvent = 
+export type ListingEvent =
   | "created"
   | "updated"
   | "deleted"
   | "boosted"
   | "expired";
 
-export type EscrowEvent = 
+export type EscrowEvent =
   | "proposed"
   | "funded"
   | "released"

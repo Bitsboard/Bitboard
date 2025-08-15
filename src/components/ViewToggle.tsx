@@ -16,12 +16,39 @@ function cn(...xs: Array<string | false | null | undefined>) {
 
 export function ViewToggle({ layout, setLayout, dark }: ViewToggleProps) {
   return (
-    <div className={cn("flex items-center justify-center rounded-2xl", dark ? "border border-neutral-800 bg-neutral-900" : "border border-neutral-300 bg-white")}>
-      <button onClick={() => setLayout("grid")} className={cn("px-3 py-3 text-sm", layout === "grid" ? "text-orange-500" : "opacity-70")} title="Grid">
-        ▦
+    <div className="relative inline-flex rounded-2xl bg-neutral-200/50 p-0.5 shadow-lg border border-neutral-300/50 backdrop-blur-sm">
+      <div
+        className={cn(
+          "absolute inset-1 rounded-xl bg-white shadow-md transition-all duration-300 ease-out",
+          layout === "grid" ? "translate-x-0" : "translate-x-full"
+        )}
+        style={{ width: 'calc(50% - 4px)' }}
+      />
+      <button
+        onClick={() => setLayout("grid")}
+        className={cn(
+          "relative z-10 px-4 py-1 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105",
+          layout === "grid"
+            ? "text-orange-700 font-extrabold"
+            : "text-neutral-600 hover:text-neutral-700"
+        )}
+        title="Grid View"
+      >
+        <span className="text-lg">⊞</span>
+        <span>Grid</span>
       </button>
-      <button onClick={() => setLayout("list")} className={cn("px-3 py-3 text-sm", layout === "list" ? "text-orange-500" : "opacity-70")} title="List">
-        ≣
+      <button
+        onClick={() => setLayout("list")}
+        className={cn(
+          "relative z-10 px-4 py-1 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105",
+          layout === "list"
+            ? "text-orange-700 font-extrabold"
+            : "text-neutral-600 hover:text-neutral-700"
+        )}
+        title="List View"
+      >
+        <span className="text-lg">☰</span>
+        <span>List</span>
       </button>
     </div>
   );

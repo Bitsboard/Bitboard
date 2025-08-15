@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Bitboard Quick Start Script"
+echo "🚀 bitsbarter Quick Start Script"
 echo "================================"
 
 # Check if Node.js is installed

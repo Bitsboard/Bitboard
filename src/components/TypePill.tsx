@@ -9,12 +9,12 @@ interface TypePillProps {
 export function TypePill({ type }: TypePillProps) {
   if (type === "want")
     return (
-      <span className="rounded-full bg-fuchsia-500/15 px-2 py-0.5 text-[10px] font-semibold text-fuchsia-400">
+      <span className="rounded-full bg-fuchsia-500/80 px-2 py-0.5 text-[10px] font-semibold text-white shadow-lg">
         Looking For
       </span>
     );
   return (
-    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+    <span className="rounded-full bg-emerald-500/80 px-2 py-0.5 text-[10px] font-semibold text-white shadow-lg">
       Selling
     </span>
   );

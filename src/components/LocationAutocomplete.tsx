@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 type Place = { name: string; lat: number; lng: number };
 
@@ -30,41 +30,56 @@ export function LocationAutocomplete({ value, onSelect, inputBase, dark }: Locat
   const [open, setOpen] = useState(false);
   const [text, setText] = useState(value?.name || "");
   const [filtered, setFiltered] = useState<Place[]>(places);
-  
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     setText(value?.name || "");
   }, [value]);
-  
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   function onChange(v: string) {
     setText(v);
     const f = places.filter((p) => p.name.toLowerCase().includes(v.toLowerCase()));
     setFiltered(f);
     setOpen(true);
   }
-  
+
   function choose(p: Place) {
     onSelect(p);
     setOpen(false);
   }
-  
+
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <input
         value={text}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setOpen(true)}
         placeholder="Search area (e.g., North York)"
-        className={cn("w-full rounded-2xl px-4 py-4", inputBase)}
+        className={cn(
+          "w-full bg-transparent px-4 sm:px-6 py-4 sm:py-5 text-base sm:text-lg transition-all duration-300 focus:outline-none focus-visible:outline-none focus:ring-0",
+          dark ? "text-neutral-100 placeholder-neutral-400" : "text-neutral-900 placeholder-neutral-500"
+        )}
       />
       {open && (
-        <div className={cn("absolute z-20 mt-2 w-full overflow-hidden rounded-xl border", dark ? "border-neutral-800 bg-neutral-900" : "border-neutral-300 bg-white")}>
+        <div className={cn("absolute z-50 mt-3 w-full max-h-60 overflow-y-auto rounded-2xl border shadow-2xl", dark ? "border-neutral-700/50 bg-neutral-900" : "border-neutral-300/50 bg-white")}>
           {filtered.length === 0 && (
-            <div className={cn("px-3 py-2 text-sm", dark ? "text-neutral-400" : "text-neutral-600")}>
+            <div className={cn("px-4 py-3 text-sm", dark ? "text-neutral-400" : "text-neutral-600")}>
               No matches. Try: Toronto, Downtown, North York…
             </div>
           )}
           {filtered.map((p) => (
-            <button key={p.name} onClick={() => choose(p)} className={cn("block w-full px-3 py-2 text-left text-sm", dark ? "hover:bg-neutral-800" : "hover:bg-neutral-100")}>
+            <button key={p.name} onClick={() => choose(p)} className={cn("block w-full px-4 py-3 text-left text-sm transition-colors", dark ? "hover:bg-neutral-800/50" : "hover:bg-neutral-100/50")}>
               {p.name}
             </button>
           ))}

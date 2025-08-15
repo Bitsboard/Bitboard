@@ -7,6 +7,7 @@ export { TermsSection } from "./TermsSection";
 export { UnitToggle } from "./UnitToggle";
 export { ViewToggle } from "./ViewToggle";
 export { TypeToggle } from "./TypeToggle";
+export { ThemeToggle } from "./ThemeToggle";
 export { ListingCard } from "./ListingCard";
 export { ListingRow } from "./ListingRow";
 export { ListingModal } from "./ListingModal";

@@ -67,3 +67,71 @@
 .glass-dark {
   @apply backdrop-blur-md bg-black/10 border border-white/10;
 }
+
+/* Boosted listing - no special styling, just the pill tag */
+.boosted-ring {
+  /* Add orange outline that goes outward from the card */
+  outline: 2px solid #f97316;
+  outline-offset: 2px;
+}
+
+/* Left-moving gradient for BOOSTED tag */
+@keyframes left-gradient {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-rotate-gradient {
+  background: linear-gradient(90deg, #f97316, #fbbf24, #f97316, #fbbf24, #f97316);
+  background-size: 200% 200%;
+  animation: left-gradient 6s linear infinite;
+}
+
+/* Cyan/blue pulsing gradient for verified badge */
+@keyframes verified-pulse {
+  0% {
+    background: #3b82f6;
+  }
+  50% {
+    background: #06b6d4;
+  }
+  100% {
+    background: #3b82f6;
+  }
+}
+
+.verified-badge {
+  animation: verified-pulse 2s ease-in-out infinite;
+}
+
+/* Ensure gradient text has proper spacing */
+.gradient-text-safe {
+  line-height: 1.1;
+  padding-bottom: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Prevent white flash/rectangles on tap/click focus highlights */
+button,
+[role="button"],
+input,
+select,
+textarea,
+a {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+button:focus, button:focus-visible,
+[role="button"]:focus, [role="button"]:focus-visible,
+input:focus, input:focus-visible,
+select:focus, select:focus-visible,
+textarea:focus, textarea:focus-visible,
+a:focus, a:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
