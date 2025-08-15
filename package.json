@@ -33,6 +33,9 @@
     "tailwindcss": "^3.4.4",
     "typescript": "^5.4.5"
   },
+  "browser": {
+    "async_hooks": "./async_hooks/index.js"
+  },
   "engines": {
     "node": "22"
   }
