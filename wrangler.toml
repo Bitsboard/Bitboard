@@ -8,6 +8,12 @@ compatibility_flags = ["nodejs_compat"]
 # apply flags from this file). This silences the Pages warning.
 pages_build_output_dir = ".vercel/output/static"
 
+# D1 database binding (fill in database_name and database_id in CF Dashboard or when using wrangler)
+[[d1_databases]]
+binding = "DB"
+database_name = "<your-d1-name>"
+database_id = "<your-d1-id>"
+
 # If you later bind D1/KV/Queues/etc, add them here (example):
 # [[d1_databases]]
 # binding = "DB"
