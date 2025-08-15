@@ -1,8 +1,125 @@
 <!doctype html>
 <html>
-  <head><meta charset="utf-8"><title>BitsBarter</title></head>
+  <head>
+    <meta charset="utf-8" />
+    <title>BitsBarter</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      :root { --bg:#0f0f11; --card:#17181b; --text:#e8e8ea; --muted:#a7a7ad; --accent:#ff9500; --ok:#1db954; }
+      * { box-sizing: border-box; }
+      body { margin:0; font:16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--text); }
+      .wrap { max-width:900px; margin:40px auto; padding:0 16px; }
+      header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+      h1 { margin:0; font-size:28px; }
+      .card { background:var(--card); border:1px solid #1f2024; border-radius:14px; padding:16px; box-shadow: 0 4px 18px rgba(0,0,0,.25); }
+      form { display:grid; grid-template-columns: 1fr 220px auto; gap:10px; align-items:end; }
+      label { display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
+      input[type="text"], input[type="number"] {
+        width:100%; padding:10px 12px; border-radius:10px; border:1px solid #2a2c31; background:#111215; color:var(--text);
+      }
+      button { padding:10px 14px; border-radius:10px; border:1px solid #2a2c31; background:var(--accent); color:#111; font-weight:700; cursor:pointer; }
+      button:disabled { opacity:.6; cursor:not-allowed; }
+      .hint { color:var(--muted); font-size:13px; margin-top:8px; }
+      table { width:100%; border-collapse: collapse; margin-top:16px; }
+      th, td { padding:12px; border-bottom:1px solid #232429; text-align:left; }
+      th { color:var(--muted); font-weight:600; font-size:13px; }
+      .ok { color:var(--ok); }
+      .empty { color:var(--muted); text-align:center; padding:32px; }
+      a { color:#8ab4ff; text-decoration:underline; }
+    </style>
+  </head>
   <body>
-    <h1>BitsBarter</h1>
-    <p>It works! <a href="/api/healthcheck">healthcheck</a></p>
+    <div class="wrap">
+      <header>
+        <h1>BitsBarter</h1>
+        <small class="hint">API: <a href="/api/healthcheck">healthcheck</a></small>
+      </header>
+
+      <div class="card" style="margin-bottom:16px;">
+        <form id="addForm">
+          <div>
+            <label for="title">Listing title</label>
+            <input id="title" name="title" type="text" placeholder="Used office chair" maxlength="120" required />
+          </div>
+          <div>
+            <label for="price">Price (sats)</label>
+            <input id="price" name="price" type="number" min="0" step="1" placeholder="125000" required />
+          </div>
+          <div>
+            <button id="addBtn" type="submit">Add listing</button>
+            <div class="hint" id="msg"></div>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <table id="tbl">
+          <thead>
+            <tr><th>ID</th><th>Title</th><th>Price (sats)</th><th>Created</th></tr>
+          </thead>
+          <tbody id="rows"><tr><td class="empty" colspan="4">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      const fmt = (n) => Number(n).toLocaleString();
+      const rows = document.getElementById('rows');
+      const msg  = document.getElementById('msg');
+      const addBtn = document.getElementById('addBtn');
+
+      async function load() {
+        rows.innerHTML = '<tr><td class="empty" colspan="4">Loading…</td></tr>';
+        const r = await fetch('/api/listings');
+        const data = await r.json();
+        if (!Array.isArray(data) || data.length === 0) {
+          rows.innerHTML = '<tr><td class="empty" colspan="4">No listings yet</td></tr>';
+          return;
+        }
+        rows.innerHTML = data.map(x => `
+          <tr>
+            <td>${x.id}</td>
+            <td>${escapeHtml(x.title)}</td>
+            <td><strong>${fmt(x.price_sat)}</strong></td>
+            <td>${new Date(x.created_at).toLocaleString()}</td>
+          </tr>`).join('');
+      }
+
+      function escapeHtml(s) {
+        return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+      }
+
+      document.getElementById('addForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        msg.textContent = '';
+        addBtn.disabled = true;
+
+        const title = document.getElementById('title').value.trim();
+        const price = Number(document.getElementById('price').value);
+        if (!title || !Number.isFinite(price) || price < 0) {
+          msg.textContent = 'Enter a title and a non-negative price in sats.';
+          addBtn.disabled = false;
+          return;
+        }
+
+        const res = await fetch('/api/listings', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ title, price_sat: Math.round(price) })
+        }).then(r => r.json()).catch(() => ({ error: 'network' }));
+
+        if (res && res.ok) {
+          msg.innerHTML = '<span class="ok">Added!</span>';
+          (document.getElementById('title').value = '');
+          (document.getElementById('price').value = '');
+          await load();
+        } else {
+          msg.textContent = 'Failed to add listing: ' + (res?.error || 'unknown error');
+        }
+        addBtn.disabled = false;
+      });
+
+      load();
+    </script>
   </body>
 </html>
