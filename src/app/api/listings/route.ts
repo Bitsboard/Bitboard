@@ -1,3 +1,4 @@
+import 'node:async_hooks';
 import { NextResponse } from "next/server";
 // Avoid hard crashes if the adapter is missing in some envs
 

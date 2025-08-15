@@ -1,3 +1,4 @@
+import 'node:async_hooks';
 import { NextResponse } from "next/server";
 // Avoid hard crashing if the adapter isn't available; import dynamically inside handler
 
