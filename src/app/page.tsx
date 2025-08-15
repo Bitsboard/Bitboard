@@ -52,7 +52,7 @@ export default function HomePage() {
   // Fetch BTC rate
   useEffect(() => {
     fetch("/api/rate")
-      .then((r) => r.json())
+      .then((r) => r.json() as Promise<{ cad: number | null }>)
       .then((data) => setBtcCad(data.cad))
       .catch(() => { });
   }, []);

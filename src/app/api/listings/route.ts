@@ -29,7 +29,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const db = getRequestContext().env.DB as D1Database;
   try {
-    const body = await req.json();
+    const body = (await req.json()) as { title?: unknown; price_sat?: unknown; priceSat?: unknown };
     const title = (body?.title ?? "").toString().trim();
     const priceSat = Number(body?.price_sat ?? body?.priceSat);
 
