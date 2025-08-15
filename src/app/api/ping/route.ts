@@ -1,6 +1,7 @@
-// Force adapter to include async_hooks shim under Workers by referencing it explicitly
-// This is harmless under nodejs_compat and helps avoid missing module errors in preview
-import 'node:async_hooks';
+// Provide shim for async_hooks when bundling at the edge
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import '../../shims/async_hooks';
 export const runtime = "edge";
 
 export async function GET() {

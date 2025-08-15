@@ -1,4 +1,6 @@
-import 'node:async_hooks';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import '../../../shims/async_hooks';
 import { NextResponse } from "next/server";
 // Import dynamically to avoid top-level failures if adapter not present
 
