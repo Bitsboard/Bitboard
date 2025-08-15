@@ -13,6 +13,7 @@
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
+    "async_hooks": "file:./async_hooks",
     "@cloudflare/next-on-pages": "1.13.0",
     "@prisma/client": "^5.18.0",
     "clsx": "^2.1.1",
