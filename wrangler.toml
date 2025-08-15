@@ -8,6 +8,9 @@ compatibility_flags = ["nodejs_compat"]
 # apply flags from this file). This silences the Pages warning.
 pages_build_output_dir = ".vercel/output/static"
 
+[build]
+command = "npm run build:cf"
+
 # Preview/Staging D1 binding (used by non-production deployments)
 [[d1_databases]]
 binding = "DB"
