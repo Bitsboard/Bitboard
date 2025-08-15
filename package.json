@@ -6,7 +6,7 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
-    "build:cf": "npx @cloudflare/next-on-pages@1.13.0",
+    "build:cf": "npm ci || npm install && npx @cloudflare/next-on-pages@1.13.0",
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
