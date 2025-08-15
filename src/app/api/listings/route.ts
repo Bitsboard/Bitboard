@@ -7,13 +7,11 @@ export async function GET(req: Request) {
   try {
     const mod = await import("@cloudflare/next-on-pages").catch(() => null as any);
     if (!mod || typeof mod.getRequestContext !== "function") {
-      return NextResponse.json({ error: "@cloudflare/next-on-pages not available", hint: "Enable Functions and adapter; ensure D1 binding 'DB' is configured" }, { status: 500 });
+      return NextResponse.json({ error: "adapter_missing" }, { status: 200 });
     }
     const env = mod.getRequestContext().env as { DB?: D1Database };
     const db = env.DB;
-    if (!db) {
-      return NextResponse.json({ error: "D1 binding 'DB' is not configured for this environment" }, { status: 500 });
-    }
+    if (!db) return NextResponse.json({ error: "no_db_binding" }, { status: 200 });
 
     const url = new URL(req.url);
     const limit = Math.min(100, parseInt(url.searchParams.get("limit") ?? "50", 10) || 50);
@@ -74,14 +72,14 @@ export async function GET(req: Request) {
     return NextResponse.json({ listings: results, total });
   } catch (err: any) {
     const message = err?.message ?? "Internal Server Error";
-    return NextResponse.json({ error: message, hint: "Ensure D1 binding 'DB' is set for this environment and schema exists" }, { status: 500 });
+    return NextResponse.json({ error: message, hint: "Ensure D1 binding 'DB' is set and schema exists" }, { status: 200 });
   }
 }
 
 export async function POST(req: Request) {
   const mod = await import("@cloudflare/next-on-pages").catch(() => null as any);
   if (!mod || typeof mod.getRequestContext !== "function") {
-    return NextResponse.json({ error: "@cloudflare/next-on-pages not available", hint: "Enable Functions and adapter; ensure D1 binding 'DB' is configured" }, { status: 500 });
+    return NextResponse.json({ error: "adapter_missing" }, { status: 200 });
   }
   const db = mod.getRequestContext().env.DB as D1Database;
   try {
