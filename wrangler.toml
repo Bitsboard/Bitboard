@@ -1,0 +1,12 @@
+name = "bitboard"
+# Pin a compatibility date for Workers runtime
+compatibility_date = "2024-09-01"
+# Required by @cloudflare/next-on-pages
+compatibility_flags = ["nodejs_compat"]
+
+# If you later bind D1/KV/Queues/etc, add them here (example):
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "your-d1-name"
+# database_id = "<uuid>"
+
