@@ -57,6 +57,42 @@ export default function HomePage() {
       .catch(() => { });
   }, []);
 
+  // Load listings from D1 in deployed environments (staging/main)
+  useEffect(() => {
+    const env = process.env.NEXT_PUBLIC_ENV;
+    if (env === "staging" || env === "main") {
+      fetch("/api/listings?limit=100")
+        .then((r) => r.json() as Promise<{ listings?: Array<{ id: number; title: string; priceSat: number; createdAt: number }> }>)
+        .then((data) => {
+          const rows = data.listings ?? [];
+          const mapped: Listing[] = rows.map((row) => ({
+            id: String(row.id),
+            title: row.title,
+            desc: "",
+            priceSats: Number(row.priceSat) || 0,
+            category: "Electronics",
+            location: "Toronto, ON",
+            lat: 43.6532,
+            lng: -79.3832,
+            type: "sell",
+            images: ["https://images.unsplash.com/photo-1555617117-08d3a8fef16c?w=1200&q=80&auto=format&fit=crop"],
+            boostedUntil: null,
+            seller: {
+              name: "demo_seller",
+              score: 10,
+              deals: 0,
+              rating: 5,
+              verifications: { email: true, phone: true, lnurl: false },
+              onTimeRelease: 0.98,
+            },
+            createdAt: Number(row.createdAt) * 1000, // convert seconds -> ms
+          }));
+          setListings(mapped);
+        })
+        .catch(() => { /* leave mock listings on error */ });
+    }
+  }, []);
+
   // ESC key handler
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
