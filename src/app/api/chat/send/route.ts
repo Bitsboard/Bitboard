@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+export const runtime = "edge";
 export async function POST(req: Request) {
   const { chatId, text } = (await req.json()) as { chatId?: string; text?: string };
   if (!chatId || !text) return NextResponse.json({ error: "chatId & text required" }, { status: 400 });
