@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3000",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3000",
+    "build:cf": "npx @cloudflare/next-on-pages@1",
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
@@ -20,11 +21,9 @@
     "react-dom": "18.3.1",
     "tailwind-merge": "^3.3.1",
     "zod": "^3.23.8"
-    "@cloudflare/next-on-pages": "^1.12.0"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.12.0",
-    "@cloudflare/workers-types": "^4.20240821.0"
+    "@cloudflare/next-on-pages": "^1.13.13",
     "@types/node": "^20.11.30",
     "@types/react": "^18.2.73",
     "@types/react-dom": "^18.2.24",
@@ -35,5 +34,8 @@
     "prisma": "^5.18.0",
     "tailwindcss": "^3.4.4",
     "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
