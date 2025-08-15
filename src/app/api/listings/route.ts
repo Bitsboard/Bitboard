@@ -25,7 +25,7 @@ export async function GET(req: Request) {
           created_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
         )`)
         .run();
-    } catch {}
+    } catch { }
 
     let results: any[] = [];
     try {
