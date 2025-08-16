@@ -148,18 +148,35 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                         </div>
                     </div>
 
-                    <div>
-                        <label className={cn("text-xs mb-1 block", dark ? "text-neutral-400" : "text-neutral-500")}>Radius</label>
-                        <select value={radiusKm} onChange={(e) => setRadiusKm(Number(e.target.value))} className={cn("w-full rounded-xl px-4 py-3 text-sm border", dark ? "border-neutral-700 bg-neutral-800 text-neutral-100" : "border-neutral-300 bg-white text-neutral-900")}>
-                            <option value={5}>5 kilometers</option>
-                            <option value={10}>10 kilometers</option>
-                            <option value={25}>25 kilometers</option>
-                            <option value={40}>40 kilometers</option>
-                            <option value={80}>80 kilometers</option>
-                        </select>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label className={cn("text-xs mb-1 block", dark ? "text-neutral-400" : "text-neutral-500")}>Location</label>
+                            <div className={cn("relative rounded-xl border", dark ? "border-neutral-700 bg-neutral-800" : "border-neutral-300 bg-white")}>
+                                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Enter a city" className={cn("w-full rounded-xl px-4 py-3 text-sm bg-transparent", dark ? "text-neutral-100" : "text-neutral-900")} />
+                                {suggestions.length > 0 && (
+                                    <div className={cn("absolute left-0 right-0 top-full z-10 mt-1 max-h-60 overflow-auto rounded-xl border shadow", dark ? "border-neutral-700 bg-neutral-900" : "border-neutral-300 bg-white")}>
+                                        {suggestions.map((s) => (
+                                            <button key={`${s.name}-${s.postal ?? ''}`} onClick={() => { setCenter({ name: s.name, lat: s.lat, lng: s.lng }); setQuery(s.name); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-orange-500/10">
+                                                {s.name}{s.postal ? ` • ${s.postal}` : ""}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div>
+                            <label className={cn("text-xs mb-1 block", dark ? "text-neutral-400" : "text-neutral-500")}>Radius</label>
+                            <select value={radiusKm} onChange={(e) => setRadiusKm(Number(e.target.value))} className={cn("w-full rounded-xl px-4 py-3 text-sm border", dark ? "border-neutral-700 bg-neutral-800 text-neutral-100" : "border-neutral-300 bg-white text-neutral-900")}>
+                                <option value={5}>5 kilometers</option>
+                                <option value={10}>10 kilometers</option>
+                                <option value={25}>25 kilometers</option>
+                                <option value={40}>40 kilometers</option>
+                                <option value={80}>80 kilometers</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div className="rounded-xl overflow-hidden" style={{ height: 360 }}>
+                    <div className="rounded-xl overflow-hidden" style={{ height: 280 }}>
                         <div ref={containerRef} className="w-full h-full" />
                     </div>
                 </div>

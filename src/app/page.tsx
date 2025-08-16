@@ -501,7 +501,7 @@ export default function HomePage() {
           onApply={(place, r) => {
             setCenter(place);
             setRadiusKm(r);
-            try { localStorage.setItem('userLocation', JSON.stringify(place)); } catch { }
+            try { localStorage.setItem('userLocation', JSON.stringify(place)); localStorage.setItem('userRadiusKm', String(r)); } catch {}
             setShowLocationModal(false);
           }}
         />

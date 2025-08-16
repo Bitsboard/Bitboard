@@ -53,6 +53,10 @@ export default function SearchClient() {
     const [city, setCity] = useState<string>("");
     const [centerLat, setCenterLat] = useState<string>(latParam ?? "");
     const [centerLng, setCenterLng] = useState<string>(lngParam ?? "");
+    const [radiusKm, setRadiusKm] = useState<number>(() => {
+      try { const v = localStorage.getItem('userRadiusKm'); if (v) return Number(v); } catch {}
+      return 25;
+    });
     const [showLocationModal, setShowLocationModal] = useState(false);
 
     useEffect(() => { setInputQuery(q); }, [q]);
@@ -62,6 +66,22 @@ export default function SearchClient() {
     useEffect(() => { setMaxPrice(maxPriceParam ?? ""); }, [maxPriceParam]);
     useEffect(() => { setSortChoice(`${sortByParam}:${sortOrderParam}`); }, [sortByParam, sortOrderParam]);
     useEffect(() => { setCenterLat(latParam ?? ""); setCenterLng(lngParam ?? ""); }, [latParam, lngParam]);
+    // If no lat/lng in URL, attempt to seed from saved location
+    useEffect(() => {
+      if (!latParam || !lngParam) {
+        try {
+          const raw = localStorage.getItem('userLocation');
+          if (raw) {
+            const p = JSON.parse(raw) as { lat: number; lng: number; name?: string };
+            if (p?.lat && p?.lng) {
+              setCenterLat(String(p.lat));
+              setCenterLng(String(p.lng));
+            }
+          }
+        } catch {}
+      }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
     useEffect(() => { setLayout(layoutParam === "list" ? "list" : "grid"); }, [layoutParam]);
 
     useEffect(() => {
@@ -259,12 +279,13 @@ export default function SearchClient() {
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
                             <div className="font-semibold mb-2">Location</div>
                             <div className="flex items-center justify-between gap-2 mb-3">
-                                <div className={cn("text-sm truncate", dark ? "text-neutral-200" : "text-neutral-800")}>{(centerLat && centerLng) ? "Custom location" : "Set location"}</div>
+                                <div className={cn("text-sm truncate", dark ? "text-neutral-200" : "text-neutral-800")}>{(() => {
+                                  try { const raw = localStorage.getItem('userLocation'); if (raw) { const p = JSON.parse(raw) as { name?: string }; if (p?.name) return `${p.name}`; } } catch {}
+                                  return (centerLat && centerLng) ? "Selected location" : "Set location";
+                                })()}</div>
                                 <button onClick={() => setShowLocationModal(true)} className={cn("rounded-xl px-3 py-1 text-xs", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>Change…</button>
                             </div>
-                            {(centerLat && centerLng) && (
-                                <div className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>Lat {Number(centerLat).toFixed(3)}, Lng {Number(centerLng).toFixed(3)}</div>
-                            )}
+                            <div className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>Radius: {radiusKm} km</div>
                         </div>
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
                             <div className="font-semibold mb-3">Category</div>
@@ -353,11 +374,12 @@ export default function SearchClient() {
                     open={showLocationModal}
                     onClose={() => setShowLocationModal(false)}
                     initialCenter={{ lat: Number(centerLat || 43.6532), lng: Number(centerLng || -79.3832), name: '' }}
-                    initialRadiusKm={25}
+                    initialRadiusKm={radiusKm}
                     dark={dark}
                     onApply={(place) => {
                         setCenterLat(String(place.lat));
                         setCenterLng(String(place.lng));
+                        try { localStorage.setItem('userLocation', JSON.stringify(place)); } catch {}
                         const sp = buildParams();
                         sp.set('lat', String(place.lat));
                         sp.set('lng', String(place.lng));
