@@ -1,5 +1,5 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+// Deprecated: Prisma seeding is no longer used; use D1 SQL seeds in d1/seed_staging.sql
+export {};
 async function main() {
   const alice = await prisma.user.upsert({
     where: { email: "alice@example.com" },
