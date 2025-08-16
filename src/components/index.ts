@@ -11,6 +11,7 @@ export { ThemeToggle } from "./ThemeToggle";
 export { ListingCard } from "./ListingCard";
 export { ListingRow } from "./ListingRow";
 export { ListingModal } from "./ListingModal";
+export { Carousel } from "./Carousel";
 export { ChatModal } from "./ChatModal";
 export { NewListingModal } from "./NewListingModal";
 export { AuthModal } from "./AuthModal";

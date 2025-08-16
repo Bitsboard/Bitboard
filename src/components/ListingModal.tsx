@@ -2,6 +2,7 @@
 
 import React from "react";
 import { PriceBlock } from "./PriceBlock";
+import { Carousel } from "./Carousel";
 
 type Category =
   | "Featured"
@@ -77,9 +78,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
         </div>
         <div className="grid grid-cols-1 md:grid-cols-5">
           <div className="md:col-span-3">
-            <div className="aspect-[4/3] overflow-hidden">
-              <img src={listing.images?.[0]} alt={listing.title} className="h-full w-full object-cover" />
-            </div>
+            <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[4/3]" />
             <div className="p-4">
               <h3 className="font-semibold">Description</h3>
               <p className={cn("mt-2 text-sm", dark ? "text-neutral-300" : "text-neutral-700")}>{listing.desc}</p>

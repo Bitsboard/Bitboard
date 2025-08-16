@@ -3,6 +3,7 @@
 import React from "react";
 import { PriceBlock } from "./PriceBlock";
 import { TypePill } from "./TypePill";
+import { Carousel } from "./Carousel";
 
 type Category =
   | "Featured"
@@ -88,9 +89,9 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
         </div>
       )}
 
-      <div className="aspect-[4/3] overflow-hidden relative">
-        <img src={listing.images?.[0]} alt={listing.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
-        <div className="absolute bottom-2 right-2 flex items-center gap-2">
+      <div className="relative">
+        <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[4/3]" />
+        <div className="absolute bottom-2 right-2 z-10 flex items-center gap-2">
           <TypePill type={listing.type} />
           <span className={cn("rounded-full bg-gradient-to-r px-2 py-0.5 text-[10px] font-semibold text-white whitespace-nowrap shadow-lg", a.chip)}>
             {listing.category === "Services" ? "Service" : listing.category}

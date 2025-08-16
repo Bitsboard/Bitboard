@@ -3,6 +3,7 @@
 import React from "react";
 import { PriceBlock } from "./PriceBlock";
 import { TypePill } from "./TypePill";
+import { Carousel } from "./Carousel";
 
 type Category =
   | "Featured"
@@ -87,9 +88,9 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
         </div>
       )}
 
-      {/* Image */}
-      <div className="col-span-3 aspect-[4/3] overflow-hidden rounded-xl">
-        <img src={listing.images?.[0]} alt={listing.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+      {/* Images */}
+      <div className="col-span-3">
+        <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[4/3]" />
       </div>
 
       {/* Content */}
