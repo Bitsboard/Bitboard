@@ -13,8 +13,8 @@ import {
   ChatModal,
   NewListingModal,
   AuthModal,
-  ItemsCarousel,
 } from "@/components";
+import { ItemsCarousel } from "@/components/ItemsCarousel";
 import { cn } from "@/lib/utils";
 import { mockListings } from "@/lib/mockData";
 import type { Listing, User, Unit, Layout, AdType, Category, Place } from "@/lib/types";
@@ -451,11 +451,11 @@ export default function HomePage() {
         {/* Services Section */}
         <section className="mt-20">
           <div className="mb-6 flex items-baseline justify-between">
-            <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}>
+            <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}> 
               <span className="text-2xl">🛠️</span>
               Services
             </h2>
-            <span className={cn("text-sm font-medium", dark ? "text-neutral-400" : "text-neutral-500")}>
+            <span className={cn("text-sm font-medium", dark ? "text-neutral-400" : "text-neutral-500")}> 
               {services.length} result{services.length !== 1 ? 's' : ''}
             </span>
           </div>
