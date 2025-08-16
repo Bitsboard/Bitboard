@@ -2,8 +2,8 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ListingCard, ListingRow, Nav } from "@/components";
-import type { Listing, AdType, Category } from "@/lib/types";
+import { ListingCard, ListingRow, Nav, ViewToggle } from "@/components";
+import type { Listing, AdType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export default function SearchClient() {
@@ -30,22 +30,20 @@ export default function SearchClient() {
   const sortByParam = (params.get("sortBy") || "date").trim();
   const sortOrderParam = (params.get("sortOrder") || "desc").trim();
 
-  // Local input state for the search bar
+  // Local input state for the search bar and filters
   const [inputQuery, setInputQuery] = useState(q);
   const [minPrice, setMinPrice] = useState<string>(minPriceParam ?? "");
   const [maxPrice, setMaxPrice] = useState<string>(maxPriceParam ?? "");
   const [selCategory, setSelCategory] = useState<string>(category);
   const [selAdType, setSelAdType] = useState<AdType>(adTypeParam);
-  const [sortBy, setSortBy] = useState<string>(sortByParam);
-  const [sortOrder, setSortOrder] = useState<string>(sortOrderParam);
+  const [sortChoice, setSortChoice] = useState<string>(`${sortByParam}:${sortOrderParam}`);
 
   useEffect(() => { setInputQuery(q); }, [q]);
   useEffect(() => { setSelCategory(category); }, [category]);
   useEffect(() => { setSelAdType(adTypeParam); }, [adTypeParam]);
   useEffect(() => { setMinPrice(minPriceParam ?? ""); }, [minPriceParam]);
   useEffect(() => { setMaxPrice(maxPriceParam ?? ""); }, [maxPriceParam]);
-  useEffect(() => { setSortBy(sortByParam); }, [sortByParam]);
-  useEffect(() => { setSortOrder(sortOrderParam); }, [sortOrderParam]);
+  useEffect(() => { setSortChoice(`${sortByParam}:${sortOrderParam}`); }, [sortByParam, sortOrderParam]);
 
   useEffect(() => {
     fetch("/api/rate").then(r => r.json() as Promise<{ cad: number | null }>).then(d => setBtcCad(d.cad)).catch(() => {});
@@ -67,6 +65,14 @@ export default function SearchClient() {
     createdAt: Number(row.createdAt) * 1000,
   })), []);
 
+  const satsFromUnitValue = (val: string): string | null => {
+    if (!val) return null;
+    const num = Number(val);
+    if (!Number.isFinite(num)) return null;
+    if (unit === "BTC") return String(Math.round(num * 1e8));
+    return String(Math.round(num));
+  };
+
   const buildQuery = useCallback((offset: number) => {
     const sp = new URLSearchParams();
     sp.set("limit", String(pageSize));
@@ -74,12 +80,15 @@ export default function SearchClient() {
     if (q) sp.set("q", q);
     if (selCategory) sp.set("category", selCategory);
     if (selAdType && selAdType !== "all") sp.set("adType", selAdType);
-    if (minPrice) sp.set("minPrice", minPrice);
-    if (maxPrice) sp.set("maxPrice", maxPrice);
-    if (sortBy) sp.set("sortBy", sortBy);
-    if (sortOrder) sp.set("sortOrder", sortOrder);
+    const minSats = satsFromUnitValue(minPrice);
+    const maxSats = satsFromUnitValue(maxPrice);
+    if (minSats) sp.set("minPrice", minSats);
+    if (maxSats) sp.set("maxPrice", maxSats);
+    const [sb, so] = (sortChoice || "date:desc").split(":");
+    sp.set("sortBy", sb);
+    sp.set("sortOrder", so);
     return `/api/listings?${sp.toString()}`;
-  }, [q, selCategory, selAdType, minPrice, maxPrice, sortBy, sortOrder]);
+  }, [q, selCategory, selAdType, minPrice, maxPrice, sortChoice, unit]);
 
   // Initial load and when params change
   useEffect(() => {
@@ -147,10 +156,13 @@ export default function SearchClient() {
     if (inputQuery) sp.set("q", inputQuery);
     if (selCategory) sp.set("category", selCategory);
     if (selAdType && selAdType !== "all") sp.set("adType", selAdType);
-    if (minPrice) sp.set("minPrice", minPrice);
-    if (maxPrice) sp.set("maxPrice", maxPrice);
-    if (sortBy) sp.set("sortBy", sortBy);
-    if (sortOrder) sp.set("sortOrder", sortOrder);
+    const minSats = satsFromUnitValue(minPrice);
+    const maxSats = satsFromUnitValue(maxPrice);
+    if (minSats) sp.set("minPrice", minSats);
+    if (maxSats) sp.set("maxPrice", maxSats);
+    const [sb, so] = (sortChoice || "date:desc").split(":");
+    sp.set("sortBy", sb);
+    sp.set("sortOrder", so);
     router.push(`/search?${sp.toString()}`);
   };
 
@@ -162,7 +174,8 @@ export default function SearchClient() {
 
   const showNoResults = initialLoaded && listings.length === 0;
 
-  const categories: Category[] = [
+  const categories = [
+    "All",
     "Featured",
     "Electronics",
     "Mining Gear",
@@ -174,6 +187,8 @@ export default function SearchClient() {
     "Services",
   ];
 
+  const priceLabel = unit === "BTC" ? "Price (BTC)" : "Price (sats)";
+
   return (
     <div className={cn("min-h-screen", bg, dark ? "dark" : "")}> 
       <Nav onPost={() => {}} onToggleTheme={() => setDark((d) => !d)} dark={dark} user={null} onAuth={() => {}} unit={unit} setUnit={setUnit} layout={layout} setLayout={setLayout} />
@@ -181,7 +196,7 @@ export default function SearchClient() {
       <div className="mx-auto max-w-7xl px-4 py-8">
         {/* Search bar */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-12">
-          <div className="sm:col-span-8 relative">
+          <div className="sm:col-span-7 relative">
             <input
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
@@ -191,26 +206,21 @@ export default function SearchClient() {
             />
             <div className="pointer-events-none absolute right-6 top-1/2 -translate-y-1/2 text-xl opacity-60">🔍</div>
           </div>
-          <div className="sm:col-span-2">
-            <button
-              onClick={submitSearch}
-              className="w-full rounded-3xl px-6 py-5 text-lg font-semibold transition-all duration-300 hover:scale-[1.02] active:scale-95 bg-gradient-to-r from-orange-500 to-red-500 text-white"
+          <div className="sm:col-span-3 flex items-center gap-2">
+            <select
+              value={sortChoice}
+              onChange={(e) => { setSortChoice(e.target.value); setHasMore(true); setListings([]); }}
+              onBlur={submitSearch}
+              className={cn("w-full rounded-3xl px-4 py-4 text-sm", inputBase)}
             >
-              Search
-            </button>
+              <option value="date:desc">Newest</option>
+              <option value="date:asc">Oldest</option>
+              <option value="price:desc">Price: Highest to Lowest</option>
+              <option value="price:asc">Price: Lowest to Highest</option>
+            </select>
           </div>
-          <div className="sm:col-span-2 flex items-center justify-end gap-2">
-            <select value={sortBy} onChange={(e) => { setSortBy(e.target.value); submitSearch(); }} className={cn("rounded-2xl px-4 py-3 text-sm", inputBase)}>
-              <option value="date">Newest</option>
-              <option value="price">Price</option>
-            </select>
-            <select value={sortOrder} onChange={(e) => { setSortOrder(e.target.value); submitSearch(); }} className={cn("rounded-2xl px-4 py-3 text-sm", inputBase)}>
-              <option value="desc">Desc</option>
-              <option value="asc">Asc</option>
-            </select>
-            <button onClick={() => setLayout(layout === 'grid' ? 'list' : 'grid')} className={cn("rounded-2xl px-4 py-3 text-sm", inputBase)}>
-              {layout === 'grid' ? 'List' : 'Grid'}
-            </button>
+          <div className="sm:col-span-2 flex items-center justify-end">
+            <ViewToggle layout={layout} setLayout={setLayout} dark={dark} />
           </div>
         </div>
 
@@ -223,8 +233,8 @@ export default function SearchClient() {
                 {categories.map((c) => (
                   <button
                     key={c}
-                    onClick={() => { setSelCategory(c === 'Featured' ? '' : c); setHasMore(true); submitSearch(); }}
-                    className={cn("rounded-xl px-3 py-1 text-sm", selCategory === c ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}
+                    onClick={() => { setSelCategory(c === 'All' || c === 'Featured' ? '' : c); setHasMore(true); submitSearch(); }}
+                    className={cn("rounded-xl px-3 py-1 text-sm", (selCategory || '') === (c === 'All' || c === 'Featured' ? '' : c) ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}
                   >
                     {c}
                   </button>
@@ -242,11 +252,11 @@ export default function SearchClient() {
             </div>
 
             <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}> 
-              <div className="font-semibold mb-3">Price (sats)</div>
+              <div className="font-semibold mb-3">{priceLabel}</div>
               <div className="flex items-center gap-2">
-                <input value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder="Min" className={cn("w-1/2 rounded-xl px-3 py-2 text-sm", inputBase)} />
+                <input value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder={unit === 'BTC' ? "Min BTC" : "Min sats"} className={cn("w-1/2 rounded-xl px-3 py-2 text-sm", inputBase)} />
                 <span className={cn(dark ? "text-neutral-400" : "text-neutral-500")}>—</span>
-                <input value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="Max" className={cn("w-1/2 rounded-xl px-3 py-2 text-sm", inputBase)} />
+                <input value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder={unit === 'BTC' ? "Max BTC" : "Max sats"} className={cn("w-1/2 rounded-xl px-3 py-2 text-sm", inputBase)} />
               </div>
               <div className="mt-3 flex gap-2">
                 <button onClick={() => submitSearch()} className="rounded-xl px-3 py-2 text-sm bg-gradient-to-r from-orange-500 to-red-500 text-white">Apply</button>

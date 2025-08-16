@@ -43,18 +43,20 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
       )}
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
-          <LogoMinimal dark={dark} />
-          <div className="flex items-center gap-2">
-            <span className={cn("text-lg font-extrabold tracking-tight leading-none", dark ? "text-white" : "text-black")}>bitsbarter</span>
-            <span
-              className={cn(
-                "hidden rounded-full px-2 py-0.5 text-xs sm:inline",
-                dark ? "border border-neutral-800 text-neutral-400" : "border border-neutral-300 text-neutral-600"
-              )}
-            >
-              Toronto
-            </span>
-          </div>
+          <a href="/" aria-label="Home" className="inline-flex items-center gap-2">
+            <LogoMinimal dark={dark} />
+            <div className="flex items-center gap-2">
+              <span className={cn("text-lg font-extrabold tracking-tight leading-none", dark ? "text-white" : "text-black")}>bitsbarter</span>
+              <span
+                className={cn(
+                  "hidden rounded-full px-2 py-0.5 text-xs sm:inline",
+                  dark ? "border border-neutral-800 text-neutral-400" : "border border-neutral-300 text-neutral-600"
+                )}
+              >
+                Toronto
+              </span>
+            </div>
+          </a>
         </div>
         <div className="flex items-center gap-2">
           <a
@@ -83,7 +85,7 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
             <button className={cn("rounded-xl px-3 py-2 text-sm", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}>
               ☰
             </button>
-            <div className={cn("absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl backdrop-blur-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200", dark ? "border-neutral-700/50 bg-neutral-900/90" : "border-neutral-300/50 bg-white/95")}>
+            <div className={cn("absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl backdrop-blur-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200", dark ? "border-neutral-700/50 bg-neutral-900/90" : "border-neutral-300/50 bg-white/95")}> 
               <div className="p-4 space-y-4">
                 <div className="flex items-center justify-between">
                   <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>
