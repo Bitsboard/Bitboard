@@ -4,5 +4,23 @@
     "compatibility_flags": [
         "nodejs_compat"
     ],
-    "compatibility_date": "2024-09-23"
+    "compatibility_date": "2024-09-23",
+    "d1_databases": [
+        {
+            "binding": "DB",
+            "database_name": "bitsbarter-staging",
+            "database_id": "d5ed8250-15da-4131-8b78-c364a40515f4"
+        }
+    ],
+    "env": {
+        "production": {
+            "d1_databases": [
+                {
+                    "binding": "DB",
+                    "database_name": "bitsbarter-prod",
+                    "database_id": "8c9de8f7-451b-4c90-b92c-5cd447907d46"
+                }
+            ]
+        }
+    }
 }
