@@ -13,8 +13,8 @@ import {
   ChatModal,
   NewListingModal,
   AuthModal,
+  ItemsCarousel,
 } from "@/components";
-import { ItemsCarousel } from "@/components/ItemsCarousel";
 import { cn } from "@/lib/utils";
 import { mockListings } from "@/lib/mockData";
 import type { Listing, User, Unit, Layout, AdType, Category, Place } from "@/lib/types";
@@ -46,6 +46,19 @@ export default function HomePage() {
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
+
+  // Load saved user location on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("userLocation");
+      if (raw) {
+        const p = JSON.parse(raw) as Place;
+        if (p && typeof p.lat === 'number' && typeof p.lng === 'number' && p.name) {
+          setCenter(p);
+        }
+      }
+    } catch {}
+  }, []);
 
   // Categories
   const categories: Category[] = [
@@ -211,9 +224,6 @@ export default function HomePage() {
 
   const featured = useMemo(() => listings.filter(l => l.category !== "Services").slice(0, 12), [listings]);
 
-  // Filter helpers
-  const currentFilter = () => ({ query, category: cat, center, radiusKm, adType });
-
   // Auth helper
   const requireAuth = (fn: () => void) => {
     if (user) fn();
@@ -325,7 +335,10 @@ export default function HomePage() {
               <div className="md:col-span-4">
                 <div className={cn("flex rounded-3xl border", inputBase)}>
                   <div className="flex-1">
-                    <LocationAutocomplete value={center} onSelect={setCenter} inputBase={inputBase} dark={dark} />
+                    <LocationAutocomplete value={center} onSelect={(p) => {
+                      setCenter(p);
+                      try { localStorage.setItem('userLocation', JSON.stringify(p)); } catch { }
+                    }} inputBase={inputBase} dark={dark} />
                   </div>
                   <div className={cn("w-px", dark ? "bg-neutral-700/50" : "bg-neutral-300/50")}></div>
                   <div className="w-1/4 flex items-center justify-center px-4">
@@ -478,17 +491,10 @@ export default function HomePage() {
               {services.map((l) => (
                 <ListingRow key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
               ))}
-              {services.length === 0 && (
-                <div className={cn("rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}> 
-                  <div className="text-4xl mb-4">🔧</div>
-                  <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No services match your search</p>
-                  <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try adjusting your filters</p>
-                </div>
-              )}
             </div>
           )}
         </section>
-
+ 
         {/* Safety Tips */}
         <SafetyTipsSection dark={dark} />
       </main>
