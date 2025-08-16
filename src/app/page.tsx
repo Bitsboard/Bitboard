@@ -13,8 +13,8 @@ import {
   ChatModal,
   NewListingModal,
   AuthModal,
-  ItemsCarousel,
 } from "@/components";
+import { ItemsCarousel } from "@/components/ItemsCarousel";
 import { cn } from "@/lib/utils";
 import { mockListings } from "@/lib/mockData";
 import type { Listing, User, Unit, Layout, AdType, Category, Place } from "@/lib/types";
@@ -57,7 +57,7 @@ export default function HomePage() {
           setCenter(p);
         }
       }
-    } catch {}
+    } catch { }
   }, []);
 
   // Categories
@@ -245,7 +245,7 @@ export default function HomePage() {
   }, [adType, cat, query, router]);
 
   return (
-    <div className={cn("min-h-screen", bg, dark ? "dark" : "")}> 
+    <div className={cn("min-h-screen", bg, dark ? "dark" : "")}>
       {/* staging deploy trigger */}
       <Nav
         onPost={() => requireAuth(() => setShowNew(true))}
@@ -415,7 +415,7 @@ export default function HomePage() {
         <section className="mt-16">
           <div className="mb-6 flex items-baseline justify-between">
             <div className="flex items-center gap-4">
-              <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}> 
+              <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}>
                 <span className="text-2xl">🛒</span>
                 Goods
               </h2>
@@ -431,7 +431,7 @@ export default function HomePage() {
                 <ListingCard key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
               ))}
               {goods.length === 0 && (
-                <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}> 
+                <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
                   <div className="text-4xl mb-4">🔍</div>
                   <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No goods match your search</p>
                   <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try widening your radius or clearing filters</p>
@@ -444,7 +444,7 @@ export default function HomePage() {
                 <ListingRow key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
               ))}
               {goods.length === 0 && (
-                <div className={cn("rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}> 
+                <div className={cn("rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
                   <div className="text-4xl mb-4">🔍</div>
                   <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No goods match your search</p>
                   <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try widening your radius or clearing filters</p>
@@ -452,7 +452,7 @@ export default function HomePage() {
               )}
               {isDeployed && (
                 <div ref={loadMoreRef} className="pt-4">
-                  <div className={cn("text-center text-sm", dark ? "text-neutral-400" : "text-neutral-600")}> 
+                  <div className={cn("text-center text-sm", dark ? "text-neutral-400" : "text-neutral-600")}>
                     {isLoadingMore ? "Loading more…" : (hasMore ? "" : "No more results")}
                   </div>
                 </div>
@@ -464,11 +464,11 @@ export default function HomePage() {
         {/* Services Section */}
         <section className="mt-20">
           <div className="mb-6 flex items-baseline justify-between">
-            <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}> 
+            <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}>
               <span className="text-2xl">🛠️</span>
               Services
             </h2>
-            <span className={cn("text-sm font-medium", dark ? "text-neutral-400" : "text-neutral-500")}> 
+            <span className={cn("text-sm font-medium", dark ? "text-neutral-400" : "text-neutral-500")}>
               {services.length} result{services.length !== 1 ? 's' : ''}
             </span>
           </div>
@@ -479,7 +479,7 @@ export default function HomePage() {
                 <ListingCard key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
               ))}
               {services.length === 0 && (
-                <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}> 
+                <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
                   <div className="text-4xl mb-4">🔧</div>
                   <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No services match your search</p>
                   <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try adjusting your filters</p>
@@ -494,17 +494,17 @@ export default function HomePage() {
             </div>
           )}
         </section>
- 
+
         {/* Safety Tips */}
         <SafetyTipsSection dark={dark} />
       </main>
 
       {/* Footer */}
-      <footer className={cn("border-t", dark ? "border-neutral-800/50 bg-neutral-900/30" : "border-neutral-200/50 bg-white/50")}> 
+      <footer className={cn("border-t", dark ? "border-neutral-800/50 bg-neutral-900/30" : "border-neutral-200/50 bg-white/50")}>
         <div className="mx-auto max-w-7xl px-4 py-16">
           <div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
             <div className="max-w-md">
-              <p className={cn("text-lg font-medium", dark ? "text-neutral-200" : "text-neutral-700")}> 
+              <p className={cn("text-lg font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>
                 ⚡ Bitboard — in-app chat + Lightning escrow. Keep correspondence in-app; off-app
                 contact is against our guidelines.
               </p>
