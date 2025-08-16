@@ -1,15 +1,15 @@
-import React, { Suspense } from "react";
-import SearchClient from "./SearchClient";
+"use client";
+
+import React from "react";
+import dynamic from "next/dynamic";
 
 export const dynamic = "force-dynamic";
-export const runtime = "edge";
+export const runtime = 'edge';
+
+const SearchClient = dynamic(() => import("./SearchClient"), { ssr: false });
 
 export default function SearchPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-sm opacity-70">Loading…</div>}>
-      <SearchClient />
-    </Suspense>
-  );
+  return <SearchClient />;
 }
 
 

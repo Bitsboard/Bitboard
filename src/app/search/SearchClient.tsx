@@ -17,6 +17,8 @@ export default function SearchClient() {
     const params = useSearchParams();
     const router = useRouter();
     const [dark, setDark] = useState(true);
+    const layoutParam = (params.get("layout") || "grid").trim();
+    const [layout, setLayout] = useState<"grid" | "list">(layoutParam === "list" ? "list" : "grid");
     const [unit, setUnit] = useState<"sats" | "BTC">("sats");
     const [btcCad, setBtcCad] = useState<number | null>(null);
     const [listings, setListings] = useState<Listing[]>([]);
@@ -59,10 +61,22 @@ export default function SearchClient() {
     useEffect(() => { setMaxPrice(maxPriceParam ?? ""); }, [maxPriceParam]);
     useEffect(() => { setSortChoice(`${sortByParam}:${sortOrderParam}`); }, [sortByParam, sortOrderParam]);
     useEffect(() => { setCenterLat(latParam ?? ""); setCenterLng(lngParam ?? ""); }, [latParam, lngParam]);
+    useEffect(() => { setLayout(layoutParam === "list" ? "list" : "grid"); }, [layoutParam]);
 
     useEffect(() => {
         fetch("/api/rate").then(r => r.json() as Promise<{ cad: number | null }>).then(d => setBtcCad(d.cad)).catch(() => { });
     }, []);
+
+    // Reflect layout to URL without touching data params
+    useEffect(() => {
+        const sp = new URLSearchParams(window.location.search);
+        if (layout) sp.set("layout", layout);
+        const newUrl = `/search?${sp.toString()}`;
+        if (newUrl !== window.location.pathname + window.location.search) {
+            router.replace(newUrl);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [layout]);
 
     const mapRows = useCallback((rows: any[]): Listing[] => rows.map((row: any) => ({
         id: String(row.id),
@@ -202,7 +216,7 @@ export default function SearchClient() {
 
     return (
         <div className={cn("min-h-screen", bg, dark ? "dark" : "")}>
-            <Nav onPost={() => { }} onToggleTheme={() => setDark((d) => !d)} dark={dark} user={null} onAuth={() => { }} unit={unit} setUnit={setUnit} layout={"grid"} setLayout={() => { }} />
+            <Nav onPost={() => { }} onToggleTheme={() => setDark((d) => !d)} dark={dark} user={null} onAuth={() => { }} unit={unit} setUnit={setUnit} layout={layout} setLayout={setLayout} />
 
             <div className="mx-auto max-w-7xl px-4 py-8">
                 {/* Search bar */}
@@ -217,7 +231,7 @@ export default function SearchClient() {
                         />
                         <button
                             onClick={applyFilters}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2 text-sm font-semibold text-white shadow"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2 text-sm font-semibold text-white shadow"
                         >
                             Search
                         </button>
@@ -226,7 +240,8 @@ export default function SearchClient() {
                         <select
                             value={sortChoice}
                             onChange={(e) => { const v = e.target.value; setSortChoice(v); const sp = buildParams(v); router.push(`/search?${sp.toString()}`); }}
-                            className={cn("w-full rounded-3xl px-6 py-5 text-lg", inputBase)}
+                            className={cn("w-full max-w-xs rounded-3xl px-6 pr-10 py-5 text-lg appearance-none bg-no-repeat bg-right", inputBase)}
+                            style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.75rem center', backgroundSize: '1.25em 1.25em' }}
                         >
                             <option value="date:desc">Newest</option>
                             <option value="date:asc">Oldest</option>
@@ -303,18 +318,33 @@ export default function SearchClient() {
 
                     {/* Results */}
                     <section className="lg:col-span-9">
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+                        {layout === "grid" ? (
+                          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
                             {listings.map((l) => (
-                                <ListingCard key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
+                              <ListingCard key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
                             ))}
                             {showNoResults && (
-                                <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}> 
-                                    <div className="text-4xl mb-4">🔍</div>
-                                    <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No results found</p>
-                                    <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try different keywords or clear filters</p>
-                                </div>
+                              <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}> 
+                                <div className="text-4xl mb-4">🔍</div>
+                                <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No results found</p>
+                                <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try different keywords or clear filters</p>
+                              </div>
                             )}
-                        </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {listings.map((l) => (
+                              <ListingRow key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
+                            ))}
+                            {showNoResults && (
+                              <div className={cn("rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}> 
+                                <div className="text-4xl mb-4">🔍</div>
+                                <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No results found</p>
+                                <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try different keywords or clear filters</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         {/* Bottom status / sentinel */}
                         {hasMore && (

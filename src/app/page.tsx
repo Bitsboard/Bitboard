@@ -306,7 +306,7 @@ export default function HomePage() {
                 />
                 <button
                   onClick={handleSearchNavigate}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2 text-sm font-semibold text-white shadow"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2 text-sm font-semibold text-white shadow"
                 >
                   Search
                 </button>
@@ -314,12 +314,7 @@ export default function HomePage() {
 
               {/* Location + Radius Combined */}
               <div className="md:col-span-4">
-                <div className={cn("flex rounded-3xl border cursor-pointer", inputBase)} onClick={() => {
-                  try {
-                    const el = document.querySelector('#radiusSelect');
-                    if (el && el instanceof HTMLSelectElement) el.focus();
-                  } catch { }
-                }}>
+                <div className={cn("flex rounded-3xl border", inputBase)}>
                   <div className="flex-1">
                     <LocationAutocomplete value={center} onSelect={(p) => {
                       setCenter(p);
@@ -327,7 +322,12 @@ export default function HomePage() {
                     }} inputBase={inputBase} dark={dark} />
                   </div>
                   <div className={cn("w-px", dark ? "bg-neutral-700/50" : "bg-neutral-300/50")}></div>
-                  <div className="w-1/4 flex items-center justify-center px-4">
+                  <div className="w-1/4 flex items-center justify-center px-4 cursor-pointer" onMouseDown={(e) => {
+                    try {
+                      const el = document.getElementById('radiusSelect') as HTMLSelectElement | null;
+                      if (el) { el.focus(); setTimeout(() => el.click(), 0); }
+                    } catch { }
+                  }}>
                     <select
                       id="radiusSelect"
                       value={radiusKm}
