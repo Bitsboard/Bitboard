@@ -250,13 +250,22 @@ export default function SearchClient() {
                             <option value="price:asc">Lowest Price</option>
                             <option value="distance:asc">Closest</option>
                         </select>
-                        <button onClick={() => setShowLocationModal(true)} className={cn("rounded-3xl px-4 py-3 text-sm", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>Change location</button>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
                     {/* Sidebar Filters */}
                     <aside className="lg:col-span-3 space-y-4">
+                        <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
+                            <div className="font-semibold mb-2">Location</div>
+                            <div className="flex items-center justify-between gap-2 mb-3">
+                                <div className={cn("text-sm truncate", dark ? "text-neutral-200" : "text-neutral-800")}>{(centerLat && centerLng) ? "Custom location" : "Set location"}</div>
+                                <button onClick={() => setShowLocationModal(true)} className={cn("rounded-xl px-3 py-1 text-xs", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>Change…</button>
+                            </div>
+                            {(centerLat && centerLng) && (
+                                <div className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>Lat {Number(centerLat).toFixed(3)}, Lng {Number(centerLng).toFixed(3)}</div>
+                            )}
+                        </div>
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
                             <div className="font-semibold mb-3">Category</div>
                             <div className="flex flex-wrap gap-2">
@@ -288,11 +297,6 @@ export default function SearchClient() {
                                 <span className={cn(dark ? "text-neutral-400" : "text-neutral-500")}>—</span>
                                 <input value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder={unit === 'BTC' ? "Max BTC" : "Max sats"} className={cn("w-1/2 rounded-xl px-3 py-2 text-sm", inputBase)} />
                             </div>
-                        </div>
-
-                        <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
-                            <div className="font-semibold mb-3">Location</div>
-                            <button onClick={() => setShowLocationModal(true)} className={cn("w-full rounded-xl px-4 py-3 text-left text-sm", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>Change location…</button>
                         </div>
 
                         <div className="flex gap-2">

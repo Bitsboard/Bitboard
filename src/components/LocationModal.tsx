@@ -131,7 +131,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                     <h2 className="text-xl font-bold">Change location</h2>
                     <button onClick={onClose} className="rounded-full w-8 h-8 flex items-center justify-center hover:bg-neutral-800/40">✕</button>
                 </div>
-                <div className="px-6 py-4 space-y-3">
+                <div className="px-6 py-4 space-y-3" style={{ maxHeight: "calc(90vh - 120px)", overflow: "auto" }}>
                     <div>
                         <label className={cn("text-xs mb-1 block", dark ? "text-neutral-400" : "text-neutral-500")}>Search by city or ZIP / postal code</label>
                         <div className={cn("relative rounded-xl border", dark ? "border-neutral-700 bg-neutral-800" : "border-neutral-300 bg-white")}>
@@ -163,7 +163,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                         <div ref={containerRef} className="w-full h-full" />
                     </div>
                 </div>
-                <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-neutral-700/30">
+                <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-neutral-700/30 sticky bottom-0 bg-inherit">
                     <button onClick={onClose} className={cn("rounded-xl px-4 py-2 text-sm", dark ? "bg-neutral-800 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>Cancel</button>
                     <button onClick={() => onApply(center, radiusKm)} className="rounded-xl px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-red-500">Apply</button>
                 </div>

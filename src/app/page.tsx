@@ -298,7 +298,7 @@ export default function HomePage() {
           <div className="mt-16">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
               {/* Search Input */}
-              <div className="md:col-span-6 relative">
+              <div className="md:col-span-7 relative">
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -315,7 +315,7 @@ export default function HomePage() {
               </div>
 
               {/* Location + Radius Combined */}
-              <div className="md:col-span-4">
+              <div className="md:col-span-3">
                 <button onClick={() => setShowLocationModal(true)} className={cn("w-full rounded-3xl border px-6 py-5 text-left", inputBase)}>
                   <div className="flex items-center justify-between gap-3">
                     <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>
