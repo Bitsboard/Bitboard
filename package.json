@@ -1,29 +1,27 @@
 {
-  "name": "bitboard",
-  "version": "0.1.0",
+  "name": "bitsbarter",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start -p 3000",
-    "build:cf": "npx @cloudflare/next-on-pages@1",
     "lint": "next lint",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "seed": "node prisma/seed.js"
+    "build:cf": "npx @cloudflare/next-on-pages@^1.13.12"
   },
   "dependencies": {
-    "@cloudflare/next-on-pages": "^1.13.13",
-    "@prisma/client": "^5.18.0",
-    "clsx": "^2.1.1",
     "next": "14.2.5",
-    "next-themes": "^0.3.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "next-themes": "^0.3.0",
+    "clsx": "^2.1.1",
     "tailwind-merge": "^3.3.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.12",
     "@cloudflare/workers-types": "^4.20240821.0",
     "@types/node": "^20.11.30",
     "@types/react": "^18.2.73",
@@ -32,11 +30,10 @@
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.5",
     "postcss": "^8.4.35",
-    "prisma": "^5.18.0",
     "tailwindcss": "^3.4.4",
-    "typescript": "^5.4.5"
+    "typescript": "^5.6.2"
   },
-  "engines": {
-    "node": ">=20"
+  "browser": {
+    "async_hooks": "./async_hooks/index.js"
   }
 }

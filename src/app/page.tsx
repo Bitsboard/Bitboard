@@ -22,7 +22,9 @@ export default function HomePage() {
   // State
   const [dark, setDark] = useState(true);
   const [user, setUser] = useState<User | null>(null);
-  const [listings, setListings] = useState<Listing[]>(mockListings);
+  const ENV = process.env.NEXT_PUBLIC_ENV;
+  const isDeployed = ENV === "staging" || ENV === "production" || ENV === "main";
+  const [listings, setListings] = useState<Listing[]>(isDeployed ? [] : mockListings);
   const [active, setActive] = useState<Listing | null>(null);
   const [chatFor, setChatFor] = useState<Listing | null>(null);
   const [showNew, setShowNew] = useState(false);
@@ -56,6 +58,41 @@ export default function HomePage() {
       .then((data) => setBtcCad(data.cad))
       .catch(() => { });
   }, []);
+
+  // Load listings from D1 in deployed environments (staging/production/main)
+  useEffect(() => {
+    if (isDeployed) {
+      fetch("/api/listings?limit=100")
+        .then((r) => r.json() as Promise<{ listings?: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number }> }>)
+        .then((data) => {
+          const rows = data.listings ?? [];
+          const mapped: Listing[] = rows.map((row) => ({
+            id: String(row.id),
+            title: row.title,
+            desc: row.description ?? "",
+            priceSats: Number(row.priceSat) || 0,
+            category: (row.category as any) || "Electronics",
+            location: row.location || "Toronto, ON",
+            lat: Number.isFinite(row.lat as any) ? (row.lat as number) : 43.6532,
+            lng: Number.isFinite(row.lng as any) ? (row.lng as number) : -79.3832,
+            type: (row.adType as any) === "want" ? "want" : "sell",
+            images: [row.imageUrl || "https://images.unsplash.com/photo-1555617117-08d3a8fef16c?w=1200&q=80&auto=format&fit=crop"],
+            boostedUntil: row.boostedUntil ?? null,
+            seller: {
+              name: "demo_seller",
+              score: 10,
+              deals: 0,
+              rating: 5,
+              verifications: { email: true, phone: true, lnurl: false },
+              onTimeRelease: 0.98,
+            },
+            createdAt: Number(row.createdAt) * 1000, // seconds -> ms
+          }));
+          setListings(mapped);
+        })
+        .catch(() => { /* in deployed envs, do not show mocks */ });
+    }
+  }, [isDeployed]);
 
   // ESC key handler
   useEffect(() => {
@@ -124,6 +161,7 @@ export default function HomePage() {
 
   return (
     <div className={cn("min-h-screen", bg, dark ? "dark" : "")}>
+      {/* staging deploy trigger */}
       <Nav
         onPost={() => requireAuth(() => setShowNew(true))}
         onToggleTheme={() => setDark((d) => !d)}

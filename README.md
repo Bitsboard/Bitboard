@@ -20,7 +20,7 @@ A modern, Bitcoin-native local classifieds platform built with Next.js, TypeScri
 
 - Node.js 18+ 
 - npm or yarn
-- PostgreSQL database (for production)
+- Cloudflare D1 database (production & staging)
 
 ### Installation
 
@@ -48,17 +48,10 @@ A modern, Bitcoin-native local classifieds platform built with Next.js, TypeScri
    COINGECKO_URL="https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=cad"
    ```
 
-4. **Set up the database**
-   ```bash
-   # Generate Prisma client
-   npm run prisma:generate
-   
-   # Run database migrations
-   npm run prisma:migrate
-   
-   # Seed the database (optional)
-   npm run seed
-   ```
+4. **Set up the database (Cloudflare D1)**
+   - Create two D1 databases in Cloudflare Dashboard: `bitsbarter-prod` and `bitsbarter-staging`
+   - Apply schema (run against each DB in the dashboard Query editor): `d1/0001_init.sql`
+   - Optional: seed staging data by running `d1/seed_staging.sql` against the staging DB
 
 5. **Start the development server**
    ```bash
@@ -100,10 +93,10 @@ src/
 
 - **Frontend**: Next.js 14, React 18, TypeScript
 - **Styling**: Tailwind CSS, CSS Modules
-- **Database**: PostgreSQL with Prisma ORM
+- **Database**: Cloudflare D1 (SQLite) via `@cloudflare/next-on-pages`
 - **Authentication**: NextAuth.js (planned)
 - **Bitcoin**: Lightning Network integration (planned)
-- **Deployment**: Vercel, Railway, or self-hosted
+- **Deployment**: Cloudflare Pages + D1
 
 ## 📱 API Endpoints
 
