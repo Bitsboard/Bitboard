@@ -1,42 +1,19 @@
 {
-  "name": "bitboard",
-  "version": "0.1.0",
+  "name": "bitsbarter",
   "private": true,
+  "engines": { "node": ">=20" },
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "next dev",
     "build": "next build",
-    "start": "next start -p 3000",
-    "build:cf": "npx @cloudflare/next-on-pages@1.13.0",
-    "lint": "next lint"
+    "build:cf": "npx @cloudflare/next-on-pages@^1.13.12"
   },
   "dependencies": {
-    "async_hooks": "file:./async_hooks",
-    "@cloudflare/next-on-pages": "1.13.0",
-    "clsx": "^2.1.1",
     "next": "14.2.5",
-    "next-themes": "^0.3.0",
     "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "tailwind-merge": "^3.3.1",
-    "zod": "^3.23.8"
+    "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "vercel": "46.0.0",
-    "@cloudflare/workers-types": "^4.20240821.0",
-    "@types/node": "^20.11.30",
-    "@types/react": "^18.2.73",
-    "@types/react-dom": "^18.2.24",
-    "autoprefixer": "^10.4.18",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "14.2.5",
-    "postcss": "^8.4.35",
-    "tailwindcss": "^3.4.4",
-    "typescript": "^5.4.5"
-  },
-  "browser": {
-    "async_hooks": "./async_hooks/index.js"
-  },
-  "engines": {
-    "node": "22"
+    "@cloudflare/next-on-pages": "^1.13.12",
+    "typescript": "^5.6.2"
   }
 }
