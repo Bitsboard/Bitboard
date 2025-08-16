@@ -31,10 +31,10 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
   const [lang, setLang] = useState<string>("en");
 
   React.useEffect(() => {
-    try { const v = localStorage.getItem("lang"); if (v) setLang(v); } catch {}
+    try { const v = localStorage.getItem("lang"); if (v) setLang(v); } catch { }
   }, []);
   React.useEffect(() => {
-    try { localStorage.setItem("lang", lang); } catch {}
+    try { localStorage.setItem("lang", lang); } catch { }
   }, [lang]);
 
   return (
@@ -84,7 +84,7 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
               Post a listing
             </button>
           ) : (
-            <button onClick={onAuth} className={cn("rounded-xl border px-4 py-2 text-sm font-semibold transition", dark ? "border-neutral-700 text-neutral-300 hover:border-orange-400 hover:text-orange-600" : "border-neutral-300 text-orange-600 hover:border-orange-400 hover:text-orange-700")}>
+            <button onClick={onAuth} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-neutral-950 shadow shadow-orange-500/30 transition hover:bg-orange-400">
               Sign in
             </button>
           )}

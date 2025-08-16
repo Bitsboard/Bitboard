@@ -285,29 +285,7 @@ export default function HomePage() {
               <p className={cn("mt-6 text-xl leading-relaxed", dark ? "text-neutral-300" : "text-neutral-600")}>
                 Your Bitcoin-native local marketplace.
               </p>
-              <div className="mt-8 flex flex-wrap items-center gap-4">
-                <button
-                  onClick={() => (user ? setShowNew(true) : setShowAuth(true))}
-                  className="group relative overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-8 py-4 font-bold text-white shadow-2xl shadow-orange-500/25 transition-all duration-300 hover:shadow-orange-500/40 hover:scale-105 active:scale-95"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-red-600 opacity-0 transition-opacity group-hover:opacity-100" />
-                  <span className="relative">{user ? "Post a listing" : "Sign in to post"}</span>
-                </button>
-                <button
-                  onClick={handleSearchNavigate}
-                  className={cn(
-                    "rounded-2xl px-8 py-4 font-semibold transition-all duration-300 hover:scale-105 active:scale-95",
-                    dark
-                      ? "border-2 border-neutral-700 text-neutral-200 hover:border-neutral-500 hover:bg-neutral-800/50"
-                      : "border-2 border-neutral-300 text-neutral-700 hover:border-neutral-400 hover:bg-neutral-100"
-                  )}
-                >
-                  Search
-                </button>
-                <span className={cn("text-sm", dark ? "text-neutral-400" : "text-neutral-500")}>
-                  * Demo — payments & auth simulated
-                </span>
-              </div>
+              <div className="mt-8" />
             </div>
 
             {/* Right Content - Empty for now */}
@@ -324,16 +302,24 @@ export default function HomePage() {
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") handleSearchNavigate(); }}
                   placeholder="Search bikes, ASICs, consoles…"
-                  className={cn("w-full rounded-3xl px-6 py-5 pr-12 text-lg focus:outline-none transition-all duration-300 hover:border-orange-500/50", inputBase)}
+                  className={cn("w-full rounded-3xl px-6 pr-28 py-5 text-lg focus:outline-none transition-all duration-300 hover:border-orange-500/50", inputBase)}
                 />
-                <div className="pointer-events-none absolute right-6 top-1/2 -translate-y-1/2 text-xl opacity-60">
-                  🔍
-                </div>
+                <button
+                  onClick={handleSearchNavigate}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2 text-sm font-semibold text-white shadow"
+                >
+                  Search
+                </button>
               </div>
 
               {/* Location + Radius Combined */}
               <div className="md:col-span-4">
-                <div className={cn("flex rounded-3xl border", inputBase)}>
+                <div className={cn("flex rounded-3xl border cursor-pointer", inputBase)} onClick={() => {
+                  try {
+                    const el = document.querySelector('#radiusSelect');
+                    if (el && el instanceof HTMLSelectElement) el.focus();
+                  } catch {}
+                }}>
                   <div className="flex-1">
                     <LocationAutocomplete value={center} onSelect={(p) => {
                       setCenter(p);
@@ -343,6 +329,7 @@ export default function HomePage() {
                   <div className={cn("w-px", dark ? "bg-neutral-700/50" : "bg-neutral-300/50")}></div>
                   <div className="w-1/4 flex items-center justify-center px-4">
                     <select
+                      id="radiusSelect"
                       value={radiusKm}
                       onChange={(e) => setRadiusKm(Number(e.target.value))}
                       className={cn("w-full text-sm bg-transparent focus:outline-none text-center", dark ? "text-neutral-100" : "text-neutral-900")}
