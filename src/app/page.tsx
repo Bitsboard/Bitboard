@@ -22,7 +22,9 @@ export default function HomePage() {
   // State
   const [dark, setDark] = useState(true);
   const [user, setUser] = useState<User | null>(null);
-  const [listings, setListings] = useState<Listing[]>(mockListings);
+  const ENV = process.env.NEXT_PUBLIC_ENV;
+  const isDeployed = ENV === "staging" || ENV === "production" || ENV === "main";
+  const [listings, setListings] = useState<Listing[]>(isDeployed ? [] : mockListings);
   const [active, setActive] = useState<Listing | null>(null);
   const [chatFor, setChatFor] = useState<Listing | null>(null);
   const [showNew, setShowNew] = useState(false);
@@ -57,10 +59,9 @@ export default function HomePage() {
       .catch(() => { });
   }, []);
 
-  // Load listings from D1 in deployed environments (staging/main)
+  // Load listings from D1 in deployed environments (staging/production/main)
   useEffect(() => {
-    const env = process.env.NEXT_PUBLIC_ENV;
-    if (env === "staging" || env === "main") {
+    if (isDeployed) {
       fetch("/api/listings?limit=100")
         .then((r) => r.json() as Promise<{ listings?: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number }> }>)
         .then((data) => {
@@ -89,9 +90,9 @@ export default function HomePage() {
           }));
           setListings(mapped);
         })
-        .catch(() => { /* leave mock listings on error */ });
+        .catch(() => { /* in deployed envs, do not show mocks */ });
     }
-  }, []);
+  }, [isDeployed]);
 
   // ESC key handler
   useEffect(() => {
