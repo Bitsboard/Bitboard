@@ -318,7 +318,7 @@ export default function HomePage() {
                   try {
                     const el = document.querySelector('#radiusSelect');
                     if (el && el instanceof HTMLSelectElement) el.focus();
-                  } catch {}
+                  } catch { }
                 }}>
                   <div className="flex-1">
                     <LocationAutocomplete value={center} onSelect={(p) => {
