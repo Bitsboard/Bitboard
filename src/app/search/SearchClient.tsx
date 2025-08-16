@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ListingCard, ListingRow, Nav, ViewToggle, ListingModal } from "@/components";
+import { ListingCard, ListingRow, Nav, ListingModal } from "@/components";
 import type { Listing, AdType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +17,6 @@ export default function SearchClient() {
     const params = useSearchParams();
     const router = useRouter();
     const [dark, setDark] = useState(true);
-    const [layout, setLayout] = useState<"grid" | "list">("grid");
     const [unit, setUnit] = useState<"sats" | "BTC">("sats");
     const [btcCad, setBtcCad] = useState<number | null>(null);
     const [listings, setListings] = useState<Listing[]>([]);
@@ -95,26 +94,32 @@ export default function SearchClient() {
         return { lat: centerLat, lng: centerLng };
     };
 
-    const buildQuery = useCallback((offset: number) => {
+    const buildParams = useCallback((overrideSort?: string) => {
         const sp = new URLSearchParams();
-        sp.set("limit", String(pageSize));
-        sp.set("offset", String(offset));
-        if (q) sp.set("q", q);
+        if (inputQuery) sp.set("q", inputQuery);
         if (selCategory) sp.set("category", selCategory);
         if (selAdType && selAdType !== "all") sp.set("adType", selAdType);
         const minSats = satsFromUnitValue(minPrice);
         const maxSats = satsFromUnitValue(maxPrice);
         if (minSats) sp.set("minPrice", minSats);
         if (maxSats) sp.set("maxPrice", maxSats);
-        const [sb, so] = (sortChoice || "date:desc").split(":");
+        const sc = overrideSort ?? sortChoice;
+        const [sb, so] = (sc || "date:desc").split(":");
         sp.set("sortBy", sb === 'distance' ? 'distance' : sb);
         sp.set("sortOrder", sb === 'distance' ? 'asc' : so);
         if (sb === 'distance') {
             const { lat, lng } = resolveLatLng();
             if (lat && lng) { sp.set("lat", lat); sp.set("lng", lng); }
         }
+        return sp;
+    }, [inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice, unit, country, region, city, centerLat, centerLng]);
+
+    const buildQuery = useCallback((offset: number) => {
+        const sp = buildParams();
+        sp.set("limit", String(pageSize));
+        sp.set("offset", String(offset));
         return `/api/listings?${sp.toString()}`;
-    }, [q, selCategory, selAdType, minPrice, maxPrice, sortChoice, unit, country, region, city, centerLat, centerLng]);
+    }, [buildParams]);
 
     // Initial load and when params change
     useEffect(() => {
@@ -178,21 +183,7 @@ export default function SearchClient() {
         : "border-neutral-300/50 bg-white/80 text-neutral-900 placeholder-neutral-500 focus:border-orange-500/50 focus:bg-white backdrop-blur-sm";
 
     const applyFilters = () => {
-        const sp = new URLSearchParams();
-        if (inputQuery) sp.set("q", inputQuery);
-        if (selCategory) sp.set("category", selCategory);
-        if (selAdType && selAdType !== "all") sp.set("adType", selAdType);
-        const minSats = satsFromUnitValue(minPrice);
-        const maxSats = satsFromUnitValue(maxPrice);
-        if (minSats) sp.set("minPrice", minSats);
-        if (maxSats) sp.set("maxPrice", maxSats);
-        const [sb, so] = (sortChoice || "date:desc").split(":");
-        sp.set("sortBy", sb === 'distance' ? 'distance' : sb);
-        sp.set("sortOrder", sb === 'distance' ? 'asc' : so);
-        if (sb === 'distance') {
-            const { lat, lng } = resolveLatLng();
-            if (lat && lng) { sp.set("lat", lat); sp.set("lng", lng); }
-        }
+        const sp = buildParams();
         router.push(`/search?${sp.toString()}`);
     };
 
@@ -211,12 +202,12 @@ export default function SearchClient() {
 
     return (
         <div className={cn("min-h-screen", bg, dark ? "dark" : "")}>
-            <Nav onPost={() => { }} onToggleTheme={() => setDark((d) => !d)} dark={dark} user={null} onAuth={() => { }} unit={unit} setUnit={setUnit} layout={layout} setLayout={setLayout} />
+            <Nav onPost={() => { }} onToggleTheme={() => setDark((d) => !d)} dark={dark} user={null} onAuth={() => { }} unit={unit} setUnit={setUnit} layout={"grid"} setLayout={() => {}} />
 
             <div className="mx-auto max-w-7xl px-4 py-8">
                 {/* Search bar */}
                 <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-12">
-                    <div className="sm:col-span-7 relative">
+                    <div className="sm:col-span-9 relative">
                         <input
                             value={inputQuery}
                             onChange={(e) => setInputQuery(e.target.value)}
@@ -234,8 +225,8 @@ export default function SearchClient() {
                     <div className="sm:col-span-3 flex items-center gap-2">
                         <select
                             value={sortChoice}
-                            onChange={(e) => setSortChoice(e.target.value)}
-                            className={cn("w-full rounded-3xl px-4 py-4 text-sm", inputBase)}
+                            onChange={(e) => { const v = e.target.value; setSortChoice(v); const sp = buildParams(v); router.push(`/search?${sp.toString()}`); }}
+                            className={cn("w-full rounded-3xl px-6 py-5 text-lg", inputBase)}
                         >
                             <option value="date:desc">Newest</option>
                             <option value="date:asc">Oldest</option>
@@ -243,15 +234,6 @@ export default function SearchClient() {
                             <option value="price:asc">Lowest Price</option>
                             <option value="distance:asc">Closest</option>
                         </select>
-                    </div>
-                    <div className="sm:col-span-2 flex items-center justify-end gap-2">
-                        <ViewToggle layout={layout} setLayout={setLayout} dark={dark} />
-                        <button
-                            onClick={applyFilters}
-                            className="rounded-3xl px-6 py-4 text-sm font-semibold bg-gradient-to-r from-orange-500 to-red-500 text-white"
-                        >
-                            Apply
-                        </button>
                     </div>
                 </div>
 
