@@ -135,3 +135,16 @@ a:focus, a:focus-visible {
   outline: none;
   box-shadow: none;
 }
+
+/* Minimal orange map styling helpers */
+.bb-map .leaflet-control-zoom a {
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+  border: 1px solid rgba(249, 115, 22, 0.35);
+}
+.bb-map .leaflet-control-zoom a:hover {
+  background: rgba(249, 115, 22, 0.25);
+}
+.bb-map .leaflet-container {
+  filter: saturate(0.9) contrast(1.05) hue-rotate(-10deg);
+}
