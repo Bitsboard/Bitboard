@@ -25,8 +25,11 @@ export async function GET(req: Request) {
     const maxPriceRaw = url.searchParams.get("maxPrice");
     const minPrice = minPriceRaw != null && minPriceRaw !== "" ? Number(minPriceRaw) : null;
     const maxPrice = maxPriceRaw != null && maxPriceRaw !== "" ? Number(maxPriceRaw) : null;
-    const sortByParam = (url.searchParams.get("sortBy") || "date").trim(); // 'date' | 'price'
+    const sortByParam = (url.searchParams.get("sortBy") || "date").trim(); // 'date' | 'price' | 'distance'
     const sortOrderParam = (url.searchParams.get("sortOrder") || "desc").trim().toLowerCase(); // 'asc' | 'desc'
+    const centerLat = Number(url.searchParams.get("lat") ?? "");
+    const centerLng = Number(url.searchParams.get("lng") ?? "");
+    const hasCenter = Number.isFinite(centerLat) && Number.isFinite(centerLng);
 
     // Ensure minimal schema exists so queries don't explode on fresh DBs
     try {
@@ -76,10 +79,15 @@ export async function GET(req: Request) {
     const whereClauseRich = whereRich.length ? `WHERE ${whereRich.join(" AND ")}` : "";
     const whereClauseMinimal = whereMinimal.length ? `WHERE ${whereMinimal.join(" AND ")}` : "";
 
-    // ORDER BY whitelist
+    // ORDER BY whitelist (rich schema can sort by distance)
     const sortField = sortByParam === 'price' ? 'price_sat' : 'created_at';
     const sortOrder = sortOrderParam === 'asc' ? 'ASC' : 'DESC';
-    const orderClause = `ORDER BY ${sortField} ${sortOrder}`;
+    let orderClause = `ORDER BY ${sortField} ${sortOrder}`;
+    let orderBinds: any[] = [];
+    if (sortByParam === 'distance' && hasCenter) {
+      orderClause = `ORDER BY ((lat - ?)*(lat - ?)+(lng - ?)*(lng - ?)) ASC`;
+      orderBinds = [centerLat, centerLat, centerLng, centerLng];
+    }
 
     let results: any[] = [];
     try {
@@ -101,11 +109,11 @@ export async function GET(req: Request) {
                   ${whereClauseRich}
                   ${orderClause}
                   LIMIT ? OFFSET ?`)
-        .bind(...bindsRich, limit, offset)
+        .bind(...bindsRich, ...orderBinds, limit, offset)
         .all();
       results = rich.results ?? [];
     } catch {
-      // Fallback to legacy minimal schema
+      // Fallback to legacy minimal schema (no lat/lng -> ignore distance sort)
       const minimal = await db
         .prepare(`SELECT id,
                          title,
@@ -113,7 +121,7 @@ export async function GET(req: Request) {
                          created_at AS createdAt
                   FROM listings
                   ${whereClauseMinimal}
-                  ${orderClause}
+                  ORDER BY ${sortField} ${sortOrder}
                   LIMIT ? OFFSET ?`)
         .bind(...bindsMinimal, limit, offset)
         .all();

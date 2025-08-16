@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ListingCard, ListingRow, Nav, ViewToggle } from "@/components";
-import type { Listing, AdType } from "@/lib/types";
+import type { Listing, AdType, Place } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export default function SearchClient() {
@@ -29,6 +29,8 @@ export default function SearchClient() {
   const maxPriceParam = params.get("maxPrice");
   const sortByParam = (params.get("sortBy") || "date").trim();
   const sortOrderParam = (params.get("sortOrder") || "desc").trim();
+  const latParam = params.get("lat");
+  const lngParam = params.get("lng");
 
   // Local input state for the search bar and filters
   const [inputQuery, setInputQuery] = useState(q);
@@ -37,6 +39,8 @@ export default function SearchClient() {
   const [selCategory, setSelCategory] = useState<string>(category);
   const [selAdType, setSelAdType] = useState<AdType>(adTypeParam);
   const [sortChoice, setSortChoice] = useState<string>(`${sortByParam}:${sortOrderParam}`);
+  const [centerLat, setCenterLat] = useState<string>(latParam ?? "");
+  const [centerLng, setCenterLng] = useState<string>(lngParam ?? "");
 
   useEffect(() => { setInputQuery(q); }, [q]);
   useEffect(() => { setSelCategory(category); }, [category]);
@@ -44,6 +48,7 @@ export default function SearchClient() {
   useEffect(() => { setMinPrice(minPriceParam ?? ""); }, [minPriceParam]);
   useEffect(() => { setMaxPrice(maxPriceParam ?? ""); }, [maxPriceParam]);
   useEffect(() => { setSortChoice(`${sortByParam}:${sortOrderParam}`); }, [sortByParam, sortOrderParam]);
+  useEffect(() => { setCenterLat(latParam ?? ""); setCenterLng(lngParam ?? ""); }, [latParam, lngParam]);
 
   useEffect(() => {
     fetch("/api/rate").then(r => r.json() as Promise<{ cad: number | null }>).then(d => setBtcCad(d.cad)).catch(() => {});
@@ -85,10 +90,14 @@ export default function SearchClient() {
     if (minSats) sp.set("minPrice", minSats);
     if (maxSats) sp.set("maxPrice", maxSats);
     const [sb, so] = (sortChoice || "date:desc").split(":");
-    sp.set("sortBy", sb);
-    sp.set("sortOrder", so);
+    sp.set("sortBy", sb === 'distance' ? 'distance' : sb);
+    sp.set("sortOrder", sb === 'distance' ? 'asc' : so);
+    if (sb === 'distance' && centerLat && centerLng) {
+      sp.set("lat", centerLat);
+      sp.set("lng", centerLng);
+    }
     return `/api/listings?${sp.toString()}`;
-  }, [q, selCategory, selAdType, minPrice, maxPrice, sortChoice, unit]);
+  }, [q, selCategory, selAdType, minPrice, maxPrice, sortChoice, unit, centerLat, centerLng]);
 
   // Initial load and when params change
   useEffect(() => {
@@ -151,7 +160,7 @@ export default function SearchClient() {
     ? "border-neutral-700/50 bg-neutral-800/50 text-neutral-100 placeholder-neutral-400 focus:border-orange-500/50 focus:bg-neutral-800/70 backdrop-blur-sm"
     : "border-neutral-300/50 bg-white/80 text-neutral-900 placeholder-neutral-500 focus:border-orange-500/50 focus:bg-white backdrop-blur-sm";
 
-  const submitSearch = () => {
+  const applyFilters = () => {
     const sp = new URLSearchParams();
     if (inputQuery) sp.set("q", inputQuery);
     if (selCategory) sp.set("category", selCategory);
@@ -161,8 +170,12 @@ export default function SearchClient() {
     if (minSats) sp.set("minPrice", minSats);
     if (maxSats) sp.set("maxPrice", maxSats);
     const [sb, so] = (sortChoice || "date:desc").split(":");
-    sp.set("sortBy", sb);
-    sp.set("sortOrder", so);
+    sp.set("sortBy", sb === 'distance' ? 'distance' : sb);
+    sp.set("sortOrder", sb === 'distance' ? 'asc' : so);
+    if (sb === 'distance' && centerLat && centerLng) {
+      sp.set("lat", centerLat);
+      sp.set("lng", centerLng);
+    }
     router.push(`/search?${sp.toString()}`);
   };
 
@@ -196,11 +209,11 @@ export default function SearchClient() {
       <div className="mx-auto max-w-7xl px-4 py-8">
         {/* Search bar */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-12">
-          <div className="sm:col-span-7 relative">
+          <div className="sm:col-span-6 relative">
             <input
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") submitSearch(); }}
+              onKeyDown={(e) => { if (e.key === "Enter") applyFilters(); }}
               placeholder="Search bikes, ASICs, consoles…"
               className={cn("w-full rounded-3xl px-6 py-5 pr-12 text-lg focus:outline-none transition-all duration-300 hover:border-orange-500/50", inputBase)}
             />
@@ -209,18 +222,24 @@ export default function SearchClient() {
           <div className="sm:col-span-3 flex items-center gap-2">
             <select
               value={sortChoice}
-              onChange={(e) => { setSortChoice(e.target.value); setHasMore(true); setListings([]); }}
-              onBlur={submitSearch}
+              onChange={(e) => setSortChoice(e.target.value)}
               className={cn("w-full rounded-3xl px-4 py-4 text-sm", inputBase)}
             >
               <option value="date:desc">Newest</option>
               <option value="date:asc">Oldest</option>
-              <option value="price:desc">Price: Highest to Lowest</option>
-              <option value="price:asc">Price: Lowest to Highest</option>
+              <option value="price:desc">Highest Price</option>
+              <option value="price:asc">Lowest Price</option>
+              <option value="distance:asc">Closest</option>
             </select>
           </div>
-          <div className="sm:col-span-2 flex items-center justify-end">
+          <div className="sm:col-span-3 flex items-center justify-end gap-2">
             <ViewToggle layout={layout} setLayout={setLayout} dark={dark} />
+            <button
+              onClick={applyFilters}
+              className="rounded-3xl px-6 py-4 text-sm font-semibold bg-gradient-to-r from-orange-500 to-red-500 text-white"
+            >
+              Apply
+            </button>
           </div>
         </div>
 
@@ -233,7 +252,7 @@ export default function SearchClient() {
                 {categories.map((c) => (
                   <button
                     key={c}
-                    onClick={() => { setSelCategory(c === 'All' || c === 'Featured' ? '' : c); setHasMore(true); submitSearch(); }}
+                    onClick={() => setSelCategory(c === 'All' || c === 'Featured' ? '' : c)}
                     className={cn("rounded-xl px-3 py-1 text-sm", (selCategory || '') === (c === 'All' || c === 'Featured' ? '' : c) ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}
                   >
                     {c}
@@ -246,7 +265,7 @@ export default function SearchClient() {
               <div className="font-semibold mb-3">Type</div>
               <div className="flex gap-2">
                 {(["all", "sell", "want"] as AdType[]).map((t) => (
-                  <button key={t} onClick={() => { setSelAdType(t); setHasMore(true); submitSearch(); }} className={cn("rounded-xl px-3 py-1 text-sm capitalize", selAdType === t ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>{t}</button>
+                  <button key={t} onClick={() => setSelAdType(t)} className={cn("rounded-xl px-3 py-1 text-sm capitalize", selAdType === t ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>{t}</button>
                 ))}
               </div>
             </div>
@@ -258,13 +277,21 @@ export default function SearchClient() {
                 <span className={cn(dark ? "text-neutral-400" : "text-neutral-500")}>—</span>
                 <input value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder={unit === 'BTC' ? "Max BTC" : "Max sats"} className={cn("w-1/2 rounded-xl px-3 py-2 text-sm", inputBase)} />
               </div>
-              <div className="mt-3 flex gap-2">
-                <button onClick={() => submitSearch()} className="rounded-xl px-3 py-2 text-sm bg-gradient-to-r from-orange-500 to-red-500 text-white">Apply</button>
-                <button onClick={() => { setMinPrice(""); setMaxPrice(""); submitSearch(); }} className={cn("rounded-xl px-3 py-2 text-sm", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>Clear</button>
-              </div>
             </div>
 
-            <button onClick={clearFilters} className={cn("w-full rounded-2xl px-4 py-3 text-sm", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>Clear all filters</button>
+            <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}> 
+              <div className="font-semibold mb-3">Center (lat, lng) for Closest</div>
+              <div className="flex items-center gap-2">
+                <input value={centerLat} onChange={(e) => setCenterLat(e.target.value)} placeholder="Lat" className={cn("w-1/2 rounded-xl px-3 py-2 text-sm", inputBase)} />
+                <input value={centerLng} onChange={(e) => setCenterLng(e.target.value)} placeholder="Lng" className={cn("w-1/2 rounded-xl px-3 py-2 text-sm", inputBase)} />
+              </div>
+              <p className={cn("mt-2 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>Used when sorting by Closest.</p>
+            </div>
+
+            <div className="flex gap-2">
+              <button onClick={applyFilters} className="flex-1 rounded-2xl px-4 py-3 text-sm bg-gradient-to-r from-orange-500 to-red-500 text-white">Apply</button>
+              <button onClick={clearFilters} className={cn("flex-1 rounded-2xl px-4 py-3 text-sm", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>Clear all</button>
+            </div>
           </aside>
 
           {/* Results */}
