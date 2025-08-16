@@ -21,8 +21,10 @@ export async function GET(req: Request) {
     const category = (url.searchParams.get("category") || "").trim();
     const adTypeParam = (url.searchParams.get("adType") || "").trim().toLowerCase();
     const adType = adTypeParam === "sell" || adTypeParam === "want" ? adTypeParam : "";
-    const minPrice = Number(url.searchParams.get("minPrice") ?? "");
-    const maxPrice = Number(url.searchParams.get("maxPrice") ?? "");
+    const minPriceRaw = url.searchParams.get("minPrice");
+    const maxPriceRaw = url.searchParams.get("maxPrice");
+    const minPrice = minPriceRaw != null && minPriceRaw !== "" ? Number(minPriceRaw) : null;
+    const maxPrice = maxPriceRaw != null && maxPriceRaw !== "" ? Number(maxPriceRaw) : null;
     const sortByParam = (url.searchParams.get("sortBy") || "date").trim(); // 'date' | 'price'
     const sortOrderParam = (url.searchParams.get("sortOrder") || "desc").trim().toLowerCase(); // 'asc' | 'desc'
 
@@ -58,13 +60,13 @@ export async function GET(req: Request) {
       whereRich.push("(ad_type = ?)");
       bindsRich.push(adType);
     }
-    if (Number.isFinite(minPrice)) {
+    if (minPrice !== null && Number.isFinite(minPrice)) {
       whereRich.push("(price_sat >= ?)");
       bindsRich.push(Math.round(minPrice));
       whereMinimal.push("(price_sat >= ?)");
       bindsMinimal.push(Math.round(minPrice));
     }
-    if (Number.isFinite(maxPrice)) {
+    if (maxPrice !== null && Number.isFinite(maxPrice)) {
       whereRich.push("(price_sat <= ?)");
       bindsRich.push(Math.round(maxPrice));
       whereMinimal.push("(price_sat <= ?)");
