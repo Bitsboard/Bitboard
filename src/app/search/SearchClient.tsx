@@ -292,24 +292,7 @@ export default function SearchClient() {
 
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
                             <div className="font-semibold mb-3">Location</div>
-                            <div className="flex flex-col gap-2">
-                                <select value={country} onChange={(e) => { const v = e.target.value; setCountry(v); setRegion(''); setCity(''); }} className={cn("rounded-xl px-3 py-2 text-sm", inputBase)}>
-                                    <option value="">All</option>
-                                    {countries.map(c => <option key={c} value={c}>{c}</option>)}
-                                </select>
-                                {country && (
-                                    <select value={region} onChange={(e) => { const v = e.target.value; setRegion(v); setCity(''); }} className={cn("rounded-xl px-3 py-2 text-sm", inputBase)}>
-                                        <option value="">All</option>
-                                        {regionsList.map(r => <option key={r} value={r}>{r}</option>)}
-                                    </select>
-                                )}
-                                {country && region && (
-                                    <select value={city} onChange={(e) => setCity(e.target.value)} className={cn("rounded-xl px-3 py-2 text-sm", inputBase)}>
-                                        <option value="">All</option>
-                                        {citiesList.map(c => <option key={c} value={c}>{c}</option>)}
-                                    </select>
-                                )}
-                            </div>
+                            <button onClick={() => setShowLocationModal(true)} className={cn("w-full rounded-xl px-4 py-3 text-left text-sm", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>Change location…</button>
                         </div>
 
                         <div className="flex gap-2">

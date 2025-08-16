@@ -279,9 +279,9 @@ export default function HomePage() {
             {/* Left Content */}
             <div className="max-w-2xl">
               <h1 className="text-5xl font-black tracking-tight sm:text-7xl">
-                <span className={cn("block leading-tight", dark ? "text-white" : "text-black")}>Better deals, with</span>
+                <span className={cn("block leading-tight", dark ? "text-white" : "text-black")}>Get better deals, use</span>
                 <span className="block bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent" style={{ lineHeight: '1.2', paddingBottom: '2rem', marginBottom: '1rem' }}>
-                  Better money.
+                  better money.
                 </span>
               </h1>
               <p className={cn("mt-6 text-xl leading-relaxed", dark ? "text-neutral-300" : "text-neutral-600")}>
@@ -316,29 +316,14 @@ export default function HomePage() {
 
               {/* Location + Radius Combined */}
               <div className="md:col-span-4">
-                <div className={cn("flex rounded-3xl border", inputBase)}>
-                  <div className="flex-1">
-                    <LocationAutocomplete value={center} onSelect={(p: Place) => {
-                      setCenter(p);
-                      try { localStorage.setItem('userLocation', JSON.stringify(p)); } catch { }
-                    }} inputBase={inputBase} dark={dark} />
+                <button onClick={() => setShowLocationModal(true)} className={cn("w-full rounded-3xl border px-6 py-5 text-left", inputBase)}>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>
+                      {center?.name || "Choose location"}
+                    </div>
+                    <div className={cn("text-sm", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm} km</div>
                   </div>
-                  <div className={cn("w-px", dark ? "bg-neutral-700/50" : "bg-neutral-300/50")}></div>
-                  <div className="w-1/4 flex items-center justify-center px-4 cursor-pointer" onClick={() => setShowLocationModal(true)}>
-                    <select
-                      id="radiusSelect"
-                      value={radiusKm}
-                      onChange={(e) => setRadiusKm(Number(e.target.value))}
-                      className={cn("w-full text-sm bg-transparent focus:outline-none text-center", dark ? "text-neutral-100" : "text-neutral-900")}
-                    >
-                      <option value={2}>2km</option>
-                      <option value={5}>5km</option>
-                      <option value={10}>10km</option>
-                      <option value={25}>25km</option>
-                      <option value={50}>50km</option>
-                    </select>
-                  </div>
-                </div>
+                </button>
               </div>
 
               {/* Type Filter - Now Dropdown */}
@@ -516,7 +501,7 @@ export default function HomePage() {
           onApply={(place, r) => {
             setCenter(place);
             setRadiusKm(r);
-            try { localStorage.setItem('userLocation', JSON.stringify(place)); } catch {}
+            try { localStorage.setItem('userLocation', JSON.stringify(place)); } catch { }
             setShowLocationModal(false);
           }}
         />
