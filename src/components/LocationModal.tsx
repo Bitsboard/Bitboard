@@ -108,7 +108,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         }
     }, [center.lat, center.lng]);
 
-    // Remote suggestions (OpenStreetMap Nominatim)
+    // Remote suggestions via our Edge endpoint (Nominatim-backed)
     React.useEffect(() => {
         const q = query.trim();
         if (!open) return;
@@ -116,18 +116,10 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         const ctl = new AbortController();
         const t = setTimeout(async () => {
             try {
-                const u = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=10&q=${encodeURIComponent(q)}&email=noreply@bitsbarter.app`;
-                const r = await fetch(u, { headers: { 'Accept': 'application/json', 'User-Agent': 'bitsbarter/1.0 (+https://bitsbarter.app)' }, signal: ctl.signal, mode: 'cors' as RequestMode });
-                const js = (await r.json()) as Array<any>;
-                const xs = js.map((it) => {
-                    const nameParts = [it.address?.city || it.address?.town || it.address?.village || it.display_name?.split(',')[0] || ''];
-                    if (it.address?.state) nameParts.push(it.address.state);
-                    if (it.address?.country) nameParts.push(it.address.country);
-                    const name = nameParts.filter(Boolean).join(', ');
-                    const postal = it.address?.postcode as string | undefined;
-                    return { name, lat: Number(it.lat), lng: Number(it.lon), postal };
-                });
-                setRemoteResults(xs);
+                const u = `/api/places?q=${encodeURIComponent(q)}&limit=12`;
+                const r = await fetch(u, { headers: { 'Accept': 'application/json' }, signal: ctl.signal });
+                const js = (await r.json()) as { results: Array<{ name: string; lat: number; lng: number; postal?: string }> };
+                setRemoteResults(js.results || []);
             } catch { /* ignore */ }
         }, 250);
         return () => { clearTimeout(t); ctl.abort(); };
@@ -136,7 +128,18 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     const suggestions = React.useMemo(() => {
         const q = query.trim().toLowerCase();
         const local = q ? SAMPLE_PLACES.filter((p) => p.name.toLowerCase().includes(q) || (p.postal ? p.postal.toLowerCase().startsWith(q) : false)) : [];
-        return [...remoteResults, ...local].slice(0, 20);
+        // Prioritize remote results; fallback to local
+        const merged = [...remoteResults, ...local];
+        // De-dup by name
+        const seen = new Set<string>();
+        const out: typeof merged = [];
+        for (const s of merged) {
+            const key = (s.name + (s.postal || '')).toLowerCase();
+            if (seen.has(key)) continue;
+            seen.add(key);
+            out.push(s);
+        }
+        return out.slice(0, 20);
     }, [query, remoteResults]);
 
     if (!open) return null;
