@@ -5,6 +5,7 @@ import { LogoMinimal } from "./LogoMinimal";
 import { UnitToggle } from "./UnitToggle";
 import { ThemeToggle } from "./ThemeToggle";
 import { ViewToggle } from "./ViewToggle";
+import { useLang, setLang, t } from "@/lib/i18n";
 
 type User = { id: string; email: string; handle: string };
 
@@ -28,17 +29,9 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
   const isStaging =
     process.env.NEXT_PUBLIC_BRANCH === "staging" ||
     process.env.NEXT_PUBLIC_ENV === "staging";
-  const [lang, setLang] = useState<string>("en");
+  const lang = useLang();
 
-  React.useEffect(() => {
-    try { const v = localStorage.getItem("lang"); if (v) setLang(v); } catch { }
-  }, []);
-  React.useEffect(() => {
-    try { localStorage.setItem("lang", lang); } catch { }
-    if (typeof document !== 'undefined') {
-      document.documentElement.lang = lang;
-    }
-  }, [lang]);
+  React.useEffect(() => { /* i18n hook drives updates */ }, [lang]);
 
   return (
     <nav
@@ -74,21 +67,21 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
             href="#how"
             className={cn("rounded-xl px-3 py-2 text-sm", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}
           >
-            How it works
+            {t('how_it_works')}
           </a>
           <a
             href="#pricing"
             className={cn("rounded-xl px-3 py-2 text-sm", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}
           >
-            Pricing
+            {t('pricing')}
           </a>
           {user ? (
             <button className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-neutral-950 shadow shadow-orange-500/30 transition hover:bg-orange-400" onClick={onPost}>
-              Post a listing
+              {t('post_listing')}
             </button>
           ) : (
             <button onClick={onAuth} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow shadow-orange-500/30 transition hover:bg-orange-400">
-              Sign in
+              {t('sign_in')}
             </button>
           )}
           {/* Settings Dropdown */}
@@ -112,7 +105,7 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
                 </div>
                 <div className="flex items-center justify-between">
                   <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>Language:</span>
-                  <select value={lang} onChange={(e) => setLang(e.target.value)} className={cn("rounded-xl px-3 py-2 text-sm", dark ? "bg-neutral-800 text-neutral-200" : "bg-neutral-100 text-neutral-800")}>
+                  <select value={lang} onChange={(e) => setLang(e.target.value as any)} className={cn("rounded-xl px-3 py-2 text-sm", dark ? "bg-neutral-800 text-neutral-200" : "bg-neutral-100 text-neutral-800")}>
                     <option value="en">🇺🇸 English</option>
                     <option value="fr">🇫🇷 Français</option>
                     <option value="es">🇪🇸 Español</option>

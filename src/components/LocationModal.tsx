@@ -3,6 +3,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import type { Place } from "@/lib/types";
+import { t, useLang } from "@/lib/i18n";
 
 type LocationModalProps = {
     open: boolean;
@@ -28,6 +29,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     const mapRef = React.useRef<any>(null);
     const circleRef = React.useRef<any>(null);
     const markerRef = React.useRef<any>(null);
+    const lang = useLang();
     const [query, setQuery] = React.useState<string>("");
     const [radiusKm, setRadiusKm] = React.useState<number>(initialRadiusKm);
     const [center, setCenter] = React.useState<Place>({
@@ -149,15 +151,15 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             <div className={cn("w-full max-w-2xl rounded-2xl shadow-2xl", dark ? "bg-neutral-900 text-neutral-100 border border-neutral-800" : "bg-white text-neutral-900 border border-neutral-200")}
                 style={{ maxHeight: "90vh" }}>
                 <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-700/30">
-                    <h2 className="text-xl font-bold">Change location</h2>
-                    <button onClick={onClose} className={cn("rounded-lg px-3 py-1", dark ? "text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200" : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-800")}>Close</button>
+                    <h2 className="text-xl font-bold">{t('change_location', lang)}</h2>
+                    <button onClick={onClose} className={cn("rounded-lg px-3 py-1", dark ? "text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200" : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-800")}>{t('close', lang)}</button>
                 </div>
                 <div className="px-6 py-4 space-y-3" style={{ maxHeight: "calc(90vh - 120px)", overflow: "auto" }}>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div className="sm:col-span-2">
-                            <label className={cn("text-xs mb-1 block", dark ? "text-neutral-400" : "text-neutral-500")}>Location</label>
+                            <label className={cn("text-xs mb-1 block", dark ? "text-neutral-400" : "text-neutral-500")}>{t('location', lang)}</label>
                             <div className={cn("relative rounded-xl border", dark ? "border-neutral-700 bg-neutral-800" : "border-neutral-300 bg-white")}>
-                                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Enter a city" className={cn("w-full rounded-xl px-4 py-3 text-sm bg-transparent", dark ? "text-neutral-100" : "text-neutral-900")} />
+                                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('enter_city', lang)} className={cn("w-full rounded-xl px-4 py-3 text-sm bg-transparent", dark ? "text-neutral-100" : "text-neutral-900")} />
                                 {suggestions.length > 0 && (
                                     <div className={cn("absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-auto rounded-xl border shadow", dark ? "border-neutral-700 bg-neutral-900" : "border-neutral-300 bg-white")}>
                                         {suggestions.map((s, idx) => (
@@ -170,7 +172,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                             </div>
                         </div>
                         <div>
-                            <label className={cn("text-xs mb-1 block", dark ? "text-neutral-400" : "text-neutral-500")}>Radius</label>
+                            <label className={cn("text-xs mb-1 block", dark ? "text-neutral-400" : "text-neutral-500")}>{t('radius', lang)}</label>
                             <select
                                 value={radiusKm}
                                 onChange={(e) => setRadiusKm(Number(e.target.value))}
@@ -191,8 +193,8 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                     </div>
                 </div>
                 <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-neutral-700/30 sticky bottom-0 bg-inherit">
-                    <button onClick={onClose} className={cn("rounded-xl px-4 py-2 text-sm", dark ? "bg-neutral-800 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>Cancel</button>
-                    <button onClick={() => onApply(center, radiusKm)} className="rounded-xl px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-red-500">Apply</button>
+                    <button onClick={onClose} className={cn("rounded-xl px-4 py-2 text-sm", dark ? "bg-neutral-800 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>{t('cancel', lang)}</button>
+                    <button onClick={() => onApply(center, radiusKm)} className="rounded-xl px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-red-500">{t('apply', lang)}</button>
                 </div>
             </div>
         </div>

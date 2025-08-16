@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { ListingCard, ListingRow, Nav, ListingModal, LocationModal } from "@/components";
 import type { Listing, AdType } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { t, useLang } from "@/lib/i18n";
 
 // Lightweight location catalog (sample). Replace/expand with a full open-source dataset.
 const LOCATIONS = [
@@ -30,6 +31,7 @@ export default function SearchClient() {
     const isFetchingRef = useRef(false);
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
     const pageSize = 24;
+    const lang = useLang();
 
     const q = (params.get("q") || "").trim();
     const category = (params.get("category") || "").trim();
@@ -247,14 +249,14 @@ export default function SearchClient() {
                             value={inputQuery}
                             onChange={(e) => setInputQuery(e.target.value)}
                             onKeyDown={(e) => { if (e.key === "Enter") applyFilters(); }}
-                            placeholder="Search bikes, ASICs, consoles…"
+                            placeholder={t('search', lang) + " bikes, ASICs, consoles…"}
                             className={cn("w-full rounded-3xl px-6 pr-32 py-5 text-lg focus:outline-none transition-all duration-300 hover:border-orange-500/50", inputBase)}
                         />
                         <button
                             onClick={applyFilters}
                             className="absolute right-3 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2 text-sm font-semibold text-white shadow"
                         >
-                            Search
+                            {t('search', lang)}
                         </button>
                     </div>
                     <div className="sm:col-span-3 flex items-center gap-2">
@@ -264,11 +266,11 @@ export default function SearchClient() {
                             className={cn("w-full max-w-xs rounded-3xl px-6 pr-10 py-5 text-lg appearance-none bg-no-repeat bg-right", inputBase)}
                             style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.75rem center', backgroundSize: '1.25em 1.25em' }}
                         >
-                            <option value="date:desc">Newest</option>
-                            <option value="date:asc">Oldest</option>
-                            <option value="price:desc">Highest Price</option>
-                            <option value="price:asc">Lowest Price</option>
-                            <option value="distance:asc">Closest</option>
+                            <option value="date:desc">{t('newest', lang)}</option>
+                            <option value="date:asc">{t('oldest', lang)}</option>
+                            <option value="price:desc">{t('highest_price', lang)}</option>
+                            <option value="price:asc">{t('lowest_price', lang)}</option>
+                            <option value="distance:asc">{t('closest', lang)}</option>
                         </select>
                     </div>
                 </div>
@@ -278,9 +280,9 @@ export default function SearchClient() {
                     <aside className="lg:col-span-3 space-y-4">
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
                             <div className="grid grid-cols-2 gap-y-1 items-center">
-                                <div className="font-semibold">Location</div>
+                                <div className="font-semibold">{t('location', lang)}</div>
                                 <div className="text-right">
-                                    <button onClick={() => setShowLocationModal(true)} className="rounded-xl px-3 py-1 text-xs text-white bg-gradient-to-r from-orange-500 to-red-500">Change</button>
+                                    <button onClick={() => setShowLocationModal(true)} className="rounded-xl px-3 py-1 text-xs text-white bg-gradient-to-r from-orange-500 to-red-500">{t('change', lang)}</button>
                                 </div>
                                 <div className={cn("truncate", dark ? "text-neutral-200" : "text-neutral-800")} title={(() => { try { const raw = localStorage.getItem('userLocation'); if (raw) { const p = JSON.parse(raw) as { name?: string }; if (p?.name) return p.name; } } catch { }; return undefined; })()}>{(() => {
                                     try { const raw = localStorage.getItem('userLocation'); if (raw) { const p = JSON.parse(raw) as { name?: string }; if (p?.name) return `${p.name}`; } } catch { }
@@ -291,7 +293,7 @@ export default function SearchClient() {
                         </div>
 
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
-                            <div className="font-semibold mb-3">Category</div>
+                            <div className="font-semibold mb-3">{t('category', lang)}</div>
                             <div className="flex flex-wrap gap-2">
                                 {["All", "Electronics", "Mining Gear", "Home & Garden", "Sports & Bikes", "Tools", "Games & Hobbies", "Furniture", "Services"].map((c) => (
                                     <button
@@ -306,7 +308,7 @@ export default function SearchClient() {
                         </div>
 
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
-                            <div className="font-semibold mb-3">Type</div>
+                            <div className="font-semibold mb-3">{t('type', lang)}</div>
                             <div className="flex gap-2">
                                 <button onClick={() => setSelAdType('all')} className={cn("rounded-xl px-3 py-1 text-sm", selAdType === 'all' ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>All Listings</button>
                                 <button onClick={() => setSelAdType('sell')} className={cn("rounded-xl px-3 py-1 text-sm", selAdType === 'sell' ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>Selling</button>
@@ -315,7 +317,7 @@ export default function SearchClient() {
                         </div>
 
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
-                            <div className="font-semibold mb-3">{unit === 'BTC' ? 'Price (BTC)' : 'Price (sats)'}</div>
+                            <div className="font-semibold mb-3">{unit === 'BTC' ? t('price_btc', lang) : t('price_sats', lang)}</div>
                             <div className="flex items-center gap-2">
                                 <input value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder={unit === 'BTC' ? "Min BTC" : "Min sats"} className={cn("w-1/2 rounded-xl px-3 py-2 text-sm", inputBase)} />
                                 <span className={cn(dark ? "text-neutral-400" : "text-neutral-500")}>—</span>
@@ -324,8 +326,8 @@ export default function SearchClient() {
                         </div>
 
                         <div className="flex gap-2">
-                            <button onClick={applyFilters} className="flex-1 rounded-2xl px-4 py-3 text-sm bg-gradient-to-r from-orange-500 to-red-500 text-white">Apply</button>
-                            <button onClick={clearFilters} className={cn("flex-1 rounded-2xl px-4 py-3 text-sm", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>Clear all</button>
+                            <button onClick={applyFilters} className="flex-1 rounded-2xl px-4 py-3 text-sm bg-gradient-to-r from-orange-500 to-red-500 text-white">{t('apply', lang)}</button>
+                            <button onClick={clearFilters} className={cn("flex-1 rounded-2xl px-4 py-3 text-sm", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>{t('clear_all', lang)}</button>
                         </div>
                     </aside>
 
@@ -339,8 +341,8 @@ export default function SearchClient() {
                                 {showNoResults && (
                                     <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
                                         <div className="text-4xl mb-4">🔍</div>
-                                        <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No results found</p>
-                                        <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try different keywords or clear filters</p>
+                                        <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>{t('no_results', lang)}</p>
+                                        <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>{t('try_different', lang)}</p>
                                     </div>
                                 )}
                             </div>
@@ -352,8 +354,8 @@ export default function SearchClient() {
                                 {showNoResults && (
                                     <div className={cn("rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
                                         <div className="text-4xl mb-4">🔍</div>
-                                        <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No results found</p>
-                                        <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try different keywords or clear filters</p>
+                                        <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>{t('no_results', lang)}</p>
+                                        <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>{t('try_different', lang)}</p>
                                     </div>
                                 )}
                             </div>
