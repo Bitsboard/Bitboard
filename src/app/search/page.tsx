@@ -59,7 +59,7 @@ export default function SearchPage() {
             try {
                 isFetchingRef.current = true;
                 const r = await fetch(buildQuery(0));
-                const data = await r.json();
+                const data = await r.json() as { listings?: any[]; total?: number };
                 const rows = data.listings ?? [];
                 const mapped = mapRows(rows);
                 setListings(mapped);
@@ -78,7 +78,7 @@ export default function SearchPage() {
         isFetchingRef.current = true;
         try {
             const r = await fetch(buildQuery(listings.length));
-            const data = await r.json();
+            const data = await r.json() as { listings?: any[]; total?: number };
             const rows = data.listings ?? [];
             const mapped = mapRows(rows);
             setListings(prev => [...prev, ...mapped]);
