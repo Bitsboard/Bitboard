@@ -276,18 +276,18 @@ export default function SearchClient() {
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
                     {/* Sidebar Filters */}
                     <aside className="lg:col-span-3 space-y-4">
-                        <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}> 
-                          <div className="grid grid-cols-2 gap-y-1 items-center">
-                            <div className="font-semibold">Location</div>
-                            <div className="text-right">
-                              <button onClick={() => setShowLocationModal(true)} className={cn("rounded-xl px-3 py-1 text-xs", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>Change…</button>
+                        <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
+                            <div className="grid grid-cols-2 gap-y-1 items-center">
+                                <div className="font-semibold">Location</div>
+                                <div className="text-right">
+                                    <button onClick={() => setShowLocationModal(true)} className="rounded-xl px-3 py-1 text-xs text-white bg-gradient-to-r from-orange-500 to-red-500">Change</button>
+                                </div>
+                                <div className={cn("truncate", dark ? "text-neutral-200" : "text-neutral-800")}>{(() => {
+                                    try { const raw = localStorage.getItem('userLocation'); if (raw) { const p = JSON.parse(raw) as { name?: string }; if (p?.name) return `${p.name}`; } } catch { }
+                                    return (centerLat && centerLng) ? "Selected location" : "Set location";
+                                })()}</div>
+                                <div className={cn("text-right text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>{radiusKm} km</div>
                             </div>
-                            <div className={cn("truncate", dark ? "text-neutral-200" : "text-neutral-800")}>{(() => {
-                              try { const raw = localStorage.getItem('userLocation'); if (raw) { const p = JSON.parse(raw) as { name?: string }; if (p?.name) return `${p.name}`; } } catch {}
-                              return (centerLat && centerLng) ? "Selected location" : "Set location";
-                            })()}</div>
-                            <div className={cn("text-right text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>{radiusKm} km</div>
-                          </div>
                         </div>
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
                             <div className="font-semibold mb-3">Category</div>
