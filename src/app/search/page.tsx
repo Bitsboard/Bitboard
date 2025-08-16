@@ -2,6 +2,7 @@ import React, { Suspense } from "react";
 import SearchClient from "./SearchClient";
 
 export const dynamic = "force-dynamic";
+export const runtime = "edge";
 
 export default function SearchPage() {
   return (
