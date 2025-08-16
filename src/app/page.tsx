@@ -415,10 +415,7 @@ export default function HomePage() {
         <section className="mt-16">
           <div className="mb-6 flex items-baseline justify-between">
             <div className="flex items-center gap-4">
-              <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}>
-                <span className="text-2xl">🛒</span>
-                Goods
-              </h2>
+              <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}>Latest</h2>
               <span className={cn("text-sm font-medium", dark ? "text-neutral-400" : "text-neutral-500")}>
                 {goods.length} result{goods.length !== 1 ? 's' : ''}
               </span>
