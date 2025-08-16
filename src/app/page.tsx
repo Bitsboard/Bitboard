@@ -13,6 +13,7 @@ import {
   ChatModal,
   NewListingModal,
   AuthModal,
+  LocationModal,
 } from "@/components";
 import { ItemsCarousel } from "@/components/ItemsCarousel";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,7 @@ export default function HomePage() {
   const [cat, setCat] = useState<Category>("Featured");
   const [center, setCenter] = useState<Place>({ name: "Toronto (City Center)", lat: 43.653, lng: -79.383 });
   const [radiusKm, setRadiusKm] = useState(25);
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const [adType, setAdType] = useState<AdType>("all");
   const [layout, setLayout] = useState<Layout>("grid");
   const [unit, setUnit] = useState<Unit>("sats");
@@ -316,18 +318,13 @@ export default function HomePage() {
               <div className="md:col-span-4">
                 <div className={cn("flex rounded-3xl border", inputBase)}>
                   <div className="flex-1">
-                    <LocationAutocomplete value={center} onSelect={(p) => {
+                    <LocationAutocomplete value={center} onSelect={(p: Place) => {
                       setCenter(p);
                       try { localStorage.setItem('userLocation', JSON.stringify(p)); } catch { }
                     }} inputBase={inputBase} dark={dark} />
                   </div>
                   <div className={cn("w-px", dark ? "bg-neutral-700/50" : "bg-neutral-300/50")}></div>
-                  <div className="w-1/4 flex items-center justify-center px-4 cursor-pointer" onMouseDown={(e) => {
-                    try {
-                      const el = document.getElementById('radiusSelect') as HTMLSelectElement | null;
-                      if (el) { el.focus(); setTimeout(() => el.click(), 0); }
-                    } catch { }
-                  }}>
+                  <div className="w-1/4 flex items-center justify-center px-4 cursor-pointer" onClick={() => setShowLocationModal(true)}>
                     <select
                       id="radiusSelect"
                       value={radiusKm}
@@ -509,6 +506,21 @@ export default function HomePage() {
       </footer>
 
       {/* Modals */}
+      {showLocationModal && (
+        <LocationModal
+          open={showLocationModal}
+          onClose={() => setShowLocationModal(false)}
+          initialCenter={{ lat: center.lat, lng: center.lng, name: center.name }}
+          initialRadiusKm={radiusKm}
+          dark={dark}
+          onApply={(place, r) => {
+            setCenter(place);
+            setRadiusKm(r);
+            try { localStorage.setItem('userLocation', JSON.stringify(place)); } catch {}
+            setShowLocationModal(false);
+          }}
+        />
+      )}
       {active && (
         <ListingModal
           listing={active}
@@ -526,7 +538,7 @@ export default function HomePage() {
         <NewListingModal
           dark={dark}
           onClose={() => setShowNew(false)}
-          onPublish={(item) => {
+          onPublish={(item: Listing) => {
             setListings((prev) => [{ ...item, id: `l${prev.length + 1}` }, ...prev]);
             setShowNew(false);
           }}
@@ -536,7 +548,7 @@ export default function HomePage() {
         <AuthModal
           dark={dark}
           onClose={() => setShowAuth(false)}
-          onAuthed={(u) => {
+          onAuthed={(u: User) => {
             setUser(u);
             setShowAuth(false);
           }}

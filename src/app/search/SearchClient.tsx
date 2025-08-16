@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ListingCard, ListingRow, Nav, ListingModal } from "@/components";
+import { ListingCard, ListingRow, Nav, ListingModal, LocationModal } from "@/components";
 import type { Listing, AdType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -53,6 +53,7 @@ export default function SearchClient() {
     const [city, setCity] = useState<string>("");
     const [centerLat, setCenterLat] = useState<string>(latParam ?? "");
     const [centerLng, setCenterLng] = useState<string>(lngParam ?? "");
+    const [showLocationModal, setShowLocationModal] = useState(false);
 
     useEffect(() => { setInputQuery(q); }, [q]);
     useEffect(() => { setSelCategory(category); }, [category]);
@@ -249,6 +250,7 @@ export default function SearchClient() {
                             <option value="price:asc">Lowest Price</option>
                             <option value="distance:asc">Closest</option>
                         </select>
+                        <button onClick={() => setShowLocationModal(true)} className={cn("rounded-3xl px-4 py-3 text-sm", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>Change location</button>
                     </div>
                 </div>
 
@@ -319,31 +321,31 @@ export default function SearchClient() {
                     {/* Results */}
                     <section className="lg:col-span-9">
                         {layout === "grid" ? (
-                          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-                            {listings.map((l) => (
-                              <ListingCard key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
-                            ))}
-                            {showNoResults && (
-                              <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}> 
-                                <div className="text-4xl mb-4">🔍</div>
-                                <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No results found</p>
-                                <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try different keywords or clear filters</p>
-                              </div>
-                            )}
-                          </div>
+                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+                                {listings.map((l) => (
+                                    <ListingCard key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
+                                ))}
+                                {showNoResults && (
+                                    <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
+                                        <div className="text-4xl mb-4">🔍</div>
+                                        <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No results found</p>
+                                        <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try different keywords or clear filters</p>
+                                    </div>
+                                )}
+                            </div>
                         ) : (
-                          <div className="space-y-4">
-                            {listings.map((l) => (
-                              <ListingRow key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
-                            ))}
-                            {showNoResults && (
-                              <div className={cn("rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}> 
-                                <div className="text-4xl mb-4">🔍</div>
-                                <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No results found</p>
-                                <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try different keywords or clear filters</p>
-                              </div>
-                            )}
-                          </div>
+                            <div className="space-y-4">
+                                {listings.map((l) => (
+                                    <ListingRow key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
+                                ))}
+                                {showNoResults && (
+                                    <div className={cn("rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
+                                        <div className="text-4xl mb-4">🔍</div>
+                                        <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No results found</p>
+                                        <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try different keywords or clear filters</p>
+                                    </div>
+                                )}
+                            </div>
                         )}
 
                         {/* Bottom status / sentinel */}
@@ -358,6 +360,24 @@ export default function SearchClient() {
 
             {active && (
                 <ListingModal listing={active} onClose={() => setActive(null)} unit={unit} btcCad={btcCad} dark={dark} onChat={() => { }} />
+            )}
+            {showLocationModal && (
+                <LocationModal
+                    open={showLocationModal}
+                    onClose={() => setShowLocationModal(false)}
+                    initialCenter={{ lat: Number(centerLat || 43.6532), lng: Number(centerLng || -79.3832), name: '' }}
+                    initialRadiusKm={25}
+                    dark={dark}
+                    onApply={(place) => {
+                        setCenterLat(String(place.lat));
+                        setCenterLng(String(place.lng));
+                        const sp = buildParams();
+                        sp.set('lat', String(place.lat));
+                        sp.set('lng', String(place.lng));
+                        router.push(`/search?${sp.toString()}`);
+                        setShowLocationModal(false);
+                    }}
+                />
             )}
         </div>
     );
