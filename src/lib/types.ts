@@ -47,6 +47,7 @@ export type Listing = {
   boostedUntil: number | null;
   seller: Seller;
   createdAt: number;
+  postedBy?: string;
 };
 
 export type SavedSearch = {

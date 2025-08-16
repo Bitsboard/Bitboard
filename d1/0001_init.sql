@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS listings (
   lng REAL DEFAULT 0,
   image_url TEXT DEFAULT '',
   price_sat INTEGER NOT NULL,
+  posted_by TEXT DEFAULT '',
   boosted_until INTEGER,
   created_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
 );

@@ -103,6 +103,7 @@ export async function GET(req: Request) {
                          lng,
                          image_url AS imageUrl,
                          price_sat AS priceSat,
+                         posted_by AS postedBy,
                          boosted_until AS boostedUntil,
                          created_at AS createdAt
                   FROM listings
@@ -170,6 +171,8 @@ export async function POST(req: Request) {
       imageUrl?: unknown;
       price_sat?: unknown;
       priceSat?: unknown;
+      posted_by?: unknown;
+      postedBy?: unknown;
       boosted_until?: unknown;
       boostedUntil?: unknown;
     };
@@ -182,6 +185,7 @@ export async function POST(req: Request) {
     const lat = Number(body?.lat ?? 0);
     const lng = Number(body?.lng ?? 0);
     const imageUrl = (body?.image_url ?? body?.imageUrl ?? "").toString();
+    const postedBy = (body?.posted_by ?? body?.postedBy ?? "").toString();
     const boostedUntil = body?.boosted_until ?? body?.boostedUntil;
 
     if (!title || !Number.isFinite(priceSat) || priceSat < 0) {
@@ -193,8 +197,8 @@ export async function POST(req: Request) {
     try {
       res = await db
         .prepare(`INSERT INTO listings (
-          title, description, category, ad_type, location, lat, lng, image_url, price_sat, boosted_until
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+          title, description, category, ad_type, location, lat, lng, image_url, price_sat, posted_by, boosted_until
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
         .bind(
           title.slice(0, 120),
           description,
@@ -205,6 +209,7 @@ export async function POST(req: Request) {
           Number.isFinite(lng) ? lng : 0,
           imageUrl,
           Math.round(priceSat),
+          postedBy,
           (boostedUntil as any) ?? null
         )
         .run();
@@ -228,6 +233,7 @@ export async function POST(req: Request) {
                        lng,
                        image_url AS imageUrl,
                        price_sat AS priceSat,
+                       posted_by AS postedBy,
                        boosted_until AS boostedUntil,
                        created_at AS createdAt
                 FROM listings WHERE id = ?`)
