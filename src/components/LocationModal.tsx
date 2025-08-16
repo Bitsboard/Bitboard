@@ -112,12 +112,12 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     React.useEffect(() => {
         const q = query.trim();
         if (!open) return;
-        if (q.length < 2) { setRemoteResults([]); return; }
+        if (q.length < 1) { setRemoteResults([]); return; }
         const ctl = new AbortController();
         const t = setTimeout(async () => {
             try {
-                const u = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=10&q=${encodeURIComponent(q)}`;
-                const r = await fetch(u, { headers: { 'Accept': 'application/json' }, signal: ctl.signal });
+                const u = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=10&q=${encodeURIComponent(q)}&email=noreply@bitsbarter.app`;
+                const r = await fetch(u, { headers: { 'Accept': 'application/json', 'User-Agent': 'bitsbarter/1.0 (+https://bitsbarter.app)' }, signal: ctl.signal, mode: 'cors' as RequestMode });
                 const js = (await r.json()) as Array<any>;
                 const xs = js.map((it) => {
                     const nameParts = [it.address?.city || it.address?.town || it.address?.village || it.display_name?.split(',')[0] || ''];
@@ -147,11 +147,11 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                 style={{ maxHeight: "90vh" }}>
                 <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-700/30">
                     <h2 className="text-xl font-bold">Change location</h2>
-                    <button onClick={onClose} className="rounded-xl px-3 py-1 text-sm hover:bg-neutral-800/40">Close</button>
+                    <button onClick={onClose} className={cn("rounded-lg px-3 py-1", dark ? "text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200" : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-800")}>Close</button>
                 </div>
                 <div className="px-6 py-4 space-y-3" style={{ maxHeight: "calc(90vh - 120px)", overflow: "auto" }}>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="sm:col-span-2">
                             <label className={cn("text-xs mb-1 block", dark ? "text-neutral-400" : "text-neutral-500")}>Location</label>
                             <div className={cn("relative rounded-xl border", dark ? "border-neutral-700 bg-neutral-800" : "border-neutral-300 bg-white")}>
                                 <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Enter a city" className={cn("w-full rounded-xl px-4 py-3 text-sm bg-transparent", dark ? "text-neutral-100" : "text-neutral-900")} />
