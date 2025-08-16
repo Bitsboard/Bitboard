@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { LogoMinimal } from "./LogoMinimal";
 import { UnitToggle } from "./UnitToggle";
 import { ThemeToggle } from "./ThemeToggle";
@@ -28,6 +28,7 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
   const isStaging =
     process.env.NEXT_PUBLIC_BRANCH === "staging" ||
     process.env.NEXT_PUBLIC_ENV === "staging";
+  const [lang, setLang] = useState<string>("en");
 
   return (
     <nav
@@ -76,35 +77,39 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
               Post a listing
             </button>
           ) : (
-            <button onClick={onAuth} className={cn("rounded-xl border px-4 py-2 text-sm font-semibold transition", dark ? "border-neutral-700 text-neutral-300 hover:border-orange-400 hover:text-orange-600" : "border-neutral-300 text-orange-600 hover:border-orange-400 hover:text-orange-700")}>
+            <button onClick={onAuth} className={cn("rounded-xl border px-4 py-2 text-sm font-semibold transition", dark ? "border-neutral-700 text-neutral-300 hover:border-orange-400 hover:text-orange-600" : "border-neutral-300 text-orange-600 hover:border-orange-400 hover:text-orange-700")}> 
               Sign in
             </button>
           )}
           {/* Settings Dropdown */}
           <div className="relative group">
-            <button className={cn("rounded-xl px-3 py-2 text-sm", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}>
+            <button className={cn("rounded-xl px-3 py-2 text-sm", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}> 
               ☰
             </button>
             <div className={cn("absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl backdrop-blur-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200", dark ? "border-neutral-700/50 bg-neutral-900/90" : "border-neutral-300/50 bg-white/95")}> 
               <div className="p-4 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>
-                    Display prices in:
-                  </span>
+                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>Display prices in:</span>
                   <UnitToggle unit={unit} setUnit={setUnit} />
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>
-                    Display Theme:
-                  </span>
+                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>Display Theme:</span>
                   <ThemeToggle dark={dark} onToggle={onToggleTheme} />
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>
-                    Layout View:
-                  </span>
+                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>Layout View:</span>
                   <ViewToggle layout={layout} setLayout={setLayout} dark={dark} />
                 </div>
+                <div className="flex items-center justify-between">
+                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>Language:</span>
+                  <select value={lang} onChange={(e) => setLang(e.target.value)} className={cn("rounded-xl px-3 py-2 text-sm", dark ? "bg-neutral-800 text-neutral-200" : "bg-neutral-100 text-neutral-800")}> 
+                    <option value="en">🇺🇸 English</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                  </select>
+                </div>
+                <p className={cn("text-[11px] opacity-70", dark ? "text-neutral-300" : "text-neutral-600")}>Interface text will be translated; listing content remains in the original language.</p>
               </div>
             </div>
           </div>
