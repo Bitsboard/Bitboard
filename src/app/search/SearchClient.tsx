@@ -222,11 +222,11 @@ export default function SearchClient() {
                             onChange={(e) => setInputQuery(e.target.value)}
                             onKeyDown={(e) => { if (e.key === "Enter") applyFilters(); }}
                             placeholder="Search bikes, ASICs, consoles…"
-                            className={cn("w-full rounded-3xl px-6 pr-28 py-5 text-lg focus:outline-none transition-all duration-300 hover:border-orange-500/50", inputBase)}
+                            className={cn("w-full rounded-3xl px-6 pr-32 py-5 text-lg focus:outline-none transition-all duration-300 hover:border-orange-500/50", inputBase)}
                         />
                         <button
                             onClick={applyFilters}
-                            className="absolute right-1 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2 text-sm font-semibold text-white shadow"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2 text-sm font-semibold text-white shadow"
                         >
                             Search
                         </button>
@@ -261,7 +261,7 @@ export default function SearchClient() {
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
                             <div className="font-semibold mb-3">Category</div>
                             <div className="flex flex-wrap gap-2">
-                                {["All","Electronics","Mining Gear","Home & Garden","Sports & Bikes","Tools","Games & Hobbies","Furniture","Services"].map((c) => (
+                                {["All", "Electronics", "Mining Gear", "Home & Garden", "Sports & Bikes", "Tools", "Games & Hobbies", "Furniture", "Services"].map((c) => (
                                     <button
                                         key={c}
                                         onClick={() => setSelCategory(c === 'All' ? '' : c)}
@@ -310,7 +310,6 @@ export default function SearchClient() {
                                         {citiesList.map(c => <option key={c} value={c}>{c}</option>)}
                                     </select>
                                 )}
-                                <p className={cn("mt-1 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>Used when sorting by Closest.</p>
                             </div>
                         </div>
 

@@ -31,10 +31,10 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
   const [lang, setLang] = useState<string>("en");
 
   React.useEffect(() => {
-    try { const v = localStorage.getItem("lang"); if (v) setLang(v); } catch { }
+    try { const v = localStorage.getItem("lang"); if (v) setLang(v); } catch {}
   }, []);
   React.useEffect(() => {
-    try { localStorage.setItem("lang", lang); } catch { }
+    try { localStorage.setItem("lang", lang); } catch {}
   }, [lang]);
 
   return (
@@ -84,16 +84,16 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
               Post a listing
             </button>
           ) : (
-            <button onClick={onAuth} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-neutral-950 shadow shadow-orange-500/30 transition hover:bg-orange-400">
+            <button onClick={onAuth} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow shadow-orange-500/30 transition hover:bg-orange-400">
               Sign in
             </button>
           )}
           {/* Settings Dropdown */}
           <div className="relative group">
-            <button className={cn("rounded-xl px-3 py-2 text-sm", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}>
+            <button className={cn("rounded-xl px-3 py-2 text-sm", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}> 
               ☰
             </button>
-            <div className={cn("absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl backdrop-blur-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200", dark ? "border-neutral-700/50 bg-neutral-900/90" : "border-neutral-300/50 bg-white/95")}>
+            <div className={cn("absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl backdrop-blur-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200", dark ? "border-neutral-700/50 bg-neutral-900/90" : "border-neutral-300/50 bg-white/95")}> 
               <div className="p-4 space-y-4">
                 <div className="flex items-center justify-between">
                   <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>Display prices in:</span>
@@ -109,14 +109,13 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
                 </div>
                 <div className="flex items-center justify-between">
                   <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>Language:</span>
-                  <select value={lang} onChange={(e) => setLang(e.target.value)} className={cn("rounded-xl px-3 py-2 text-sm", dark ? "bg-neutral-800 text-neutral-200" : "bg-neutral-100 text-neutral-800")}>
+                  <select value={lang} onChange={(e) => setLang(e.target.value)} className={cn("rounded-xl px-3 py-2 text-sm", dark ? "bg-neutral-800 text-neutral-200" : "bg-neutral-100 text-neutral-800")}> 
                     <option value="en">🇺🇸 English</option>
                     <option value="fr">🇫🇷 Français</option>
                     <option value="es">🇪🇸 Español</option>
                     <option value="de">🇩🇪 Deutsch</option>
                   </select>
                 </div>
-                <p className={cn("text-[11px] opacity-70", dark ? "text-neutral-300" : "text-neutral-600")}>Interface text will be translated; listing content remains in the original language.</p>
               </div>
             </div>
           </div>
