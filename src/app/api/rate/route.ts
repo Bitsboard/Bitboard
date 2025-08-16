@@ -1,3 +1,4 @@
+import '../../../shims/async_hooks';
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
