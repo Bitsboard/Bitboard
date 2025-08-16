@@ -35,6 +35,9 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
   }, []);
   React.useEffect(() => {
     try { localStorage.setItem("lang", lang); } catch { }
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = lang;
+    }
   }, [lang]);
 
   return (

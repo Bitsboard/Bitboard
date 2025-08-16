@@ -279,9 +279,9 @@ export default function HomePage() {
             {/* Left Content */}
             <div className="max-w-2xl">
               <h1 className="text-5xl font-black tracking-tight sm:text-7xl">
-                <span className={cn("block leading-tight", dark ? "text-white" : "text-black")}>Get better deals, use</span>
+                <span className={cn("block leading-tight", dark ? "text-white" : "text-black")}>Get better deals,</span>
                 <span className="block bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent" style={{ lineHeight: '1.2', paddingBottom: '2rem', marginBottom: '1rem' }}>
-                  better money.
+                  use better money.
                 </span>
               </h1>
               <p className={cn("mt-6 text-xl leading-relaxed", dark ? "text-neutral-300" : "text-neutral-600")}>
@@ -501,7 +501,7 @@ export default function HomePage() {
           onApply={(place, r) => {
             setCenter(place);
             setRadiusKm(r);
-            try { localStorage.setItem('userLocation', JSON.stringify(place)); localStorage.setItem('userRadiusKm', String(r)); } catch {}
+            try { localStorage.setItem('userLocation', JSON.stringify(place)); localStorage.setItem('userRadiusKm', String(r)); } catch { }
             setShowLocationModal(false);
           }}
         />

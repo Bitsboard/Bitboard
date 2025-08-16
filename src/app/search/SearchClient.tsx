@@ -282,116 +282,115 @@ export default function SearchClient() {
                                 <div className="text-right">
                                     <button onClick={() => setShowLocationModal(true)} className="rounded-xl px-3 py-1 text-xs text-white bg-gradient-to-r from-orange-500 to-red-500">Change</button>
                                 </div>
-                                <div className={cn("truncate", dark ? "text-neutral-200" : "text-neutral-800")}>{(() => {
-                                    try { const raw = localStorage.getItem('userLocation'); if (raw) { const p = JSON.parse(raw) as { name?: string }; if (p?.name) return `${p.name}`; } } catch { }
-                                    return (centerLat && centerLng) ? "Selected location" : "Set location";
-                                })()}</div>
-                                <div className={cn("text-right text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>{radiusKm} km</div>
-                            </div>
-                        </div>
-                        <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
-                            <div className="font-semibold mb-3">Category</div>
-                            <div className="flex flex-wrap gap-2">
-                                {["All", "Electronics", "Mining Gear", "Home & Garden", "Sports & Bikes", "Tools", "Games & Hobbies", "Furniture", "Services"].map((c) => (
-                                    <button
-                                        key={c}
-                                        onClick={() => setSelCategory(c === 'All' ? '' : c)}
-                                        className={cn("rounded-xl px-3 py-1 text-sm", (selCategory || '') === (c === 'All' ? '' : c) ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}
-                                    >
-                                        {c}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                                <div className={cn("truncate", dark ? "text-neutral-200" : "text-neutral-800")} title={(() => { try { const raw = localStorage.getItem('userLocation'); if (raw) { const p = JSON.parse(raw) as { name?: string }; if (p?.name) return p.name; } } catch {}; return undefined; })()}>{(() => {
+                   try { const raw = localStorage.getItem('userLocation'); if (raw) { const p = JSON.parse(raw) as { name?: string }; if (p?.name) return `${p.name}`; } } catch {}
+                   return (centerLat && centerLng) ? "Selected location" : "Set location";
+                 })()}</div>
+                <div className={cn("text-right text-xs whitespace-nowrap", dark ? "text-neutral-400" : "text-neutral-600")}>{radiusKm} km</div>
+              </div>
+            </div>
 
-                        <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
-                            <div className="font-semibold mb-3">Type</div>
-                            <div className="flex gap-2">
-                                <button onClick={() => setSelAdType('all')} className={cn("rounded-xl px-3 py-1 text-sm", selAdType === 'all' ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>All Listings</button>
-                                <button onClick={() => setSelAdType('sell')} className={cn("rounded-xl px-3 py-1 text-sm", selAdType === 'sell' ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>Selling</button>
-                                <button onClick={() => setSelAdType('want')} className={cn("rounded-xl px-3 py-1 text-sm", selAdType === 'want' ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>Looking For</button>
-                            </div>
-                        </div>
-
-                        <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
-                            <div className="font-semibold mb-3">{unit === 'BTC' ? 'Price (BTC)' : 'Price (sats)'}</div>
-                            <div className="flex items-center gap-2">
-                                <input value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder={unit === 'BTC' ? "Min BTC" : "Min sats"} className={cn("w-1/2 rounded-xl px-3 py-2 text-sm", inputBase)} />
-                                <span className={cn(dark ? "text-neutral-400" : "text-neutral-500")}>—</span>
-                                <input value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder={unit === 'BTC' ? "Max BTC" : "Max sats"} className={cn("w-1/2 rounded-xl px-3 py-2 text-sm", inputBase)} />
-                            </div>
-                        </div>
-
-                        <div className="flex gap-2">
-                            <button onClick={applyFilters} className="flex-1 rounded-2xl px-4 py-3 text-sm bg-gradient-to-r from-orange-500 to-red-500 text-white">Apply</button>
-                            <button onClick={clearFilters} className={cn("flex-1 rounded-2xl px-4 py-3 text-sm", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>Clear all</button>
-                        </div>
-                    </aside>
-
-                    {/* Results */}
-                    <section className="lg:col-span-9">
-                        {layout === "grid" ? (
-                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-                                {listings.map((l) => (
-                                    <ListingCard key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
-                                ))}
-                                {showNoResults && (
-                                    <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
-                                        <div className="text-4xl mb-4">🔍</div>
-                                        <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No results found</p>
-                                        <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try different keywords or clear filters</p>
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {listings.map((l) => (
-                                    <ListingRow key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
-                                ))}
-                                {showNoResults && (
-                                    <div className={cn("rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
-                                        <div className="text-4xl mb-4">🔍</div>
-                                        <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No results found</p>
-                                        <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try different keywords or clear filters</p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Bottom status / sentinel */}
-                        {hasMore && (
-                            <div ref={loadMoreRef} className="py-8 text-center text-sm opacity-70">
-                                {isLoadingMore ? "Loading more…" : ""}
-                            </div>
-                        )}
-                    </section>
+            <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
+                <div className="font-semibold mb-3">Category</div>
+                <div className="flex flex-wrap gap-2">
+                    {["All", "Electronics", "Mining Gear", "Home & Garden", "Sports & Bikes", "Tools", "Games & Hobbies", "Furniture", "Services"].map((c) => (
+                        <button
+                            key={c}
+                            onClick={() => setSelCategory(c === 'All' ? '' : c)}
+                            className={cn("rounded-xl px-3 py-1 text-sm", (selCategory || '') === (c === 'All' ? '' : c) ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}
+                        >
+                            {c}
+                        </button>
+                    ))}
                 </div>
             </div>
 
-            {active && (
-                <ListingModal listing={active} onClose={() => setActive(null)} unit={unit} btcCad={btcCad} dark={dark} onChat={() => { }} />
+            <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
+                <div className="font-semibold mb-3">Type</div>
+                <div className="flex gap-2">
+                    <button onClick={() => setSelAdType('all')} className={cn("rounded-xl px-3 py-1 text-sm", selAdType === 'all' ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>All Listings</button>
+                    <button onClick={() => setSelAdType('sell')} className={cn("rounded-xl px-3 py-1 text-sm", selAdType === 'sell' ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>Selling</button>
+                    <button onClick={() => setSelAdType('want')} className={cn("rounded-xl px-3 py-1 text-sm", selAdType === 'want' ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>Looking For</button>
+                </div>
+            </div>
+
+            <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
+                <div className="font-semibold mb-3">{unit === 'BTC' ? 'Price (BTC)' : 'Price (sats)'}</div>
+                <div className="flex items-center gap-2">
+                    <input value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder={unit === 'BTC' ? "Min BTC" : "Min sats"} className={cn("w-1/2 rounded-xl px-3 py-2 text-sm", inputBase)} />
+                    <span className={cn(dark ? "text-neutral-400" : "text-neutral-500")}>—</span>
+                    <input value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder={unit === 'BTC' ? "Max BTC" : "Max sats"} className={cn("w-1/2 rounded-xl px-3 py-2 text-sm", inputBase)} />
+                </div>
+            </div>
+
+            <div className="flex gap-2">
+                <button onClick={applyFilters} className="flex-1 rounded-2xl px-4 py-3 text-sm bg-gradient-to-r from-orange-500 to-red-500 text-white">Apply</button>
+                <button onClick={clearFilters} className={cn("flex-1 rounded-2xl px-4 py-3 text-sm", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>Clear all</button>
+            </div>
+        </aside>
+
+        {/* Results */}
+        <section className="lg:col-span-9">
+            {layout === "grid" ? (
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+                    {listings.map((l) => (
+                        <ListingCard key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
+                    ))}
+                    {showNoResults && (
+                        <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
+                            <div className="text-4xl mb-4">🔍</div>
+                            <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No results found</p>
+                            <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try different keywords or clear filters</p>
+                        </div>
+                    )}
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {listings.map((l) => (
+                        <ListingRow key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
+                    ))}
+                    {showNoResults && (
+                        <div className={cn("rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
+                            <div className="text-4xl mb-4">🔍</div>
+                            <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No results found</p>
+                            <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try different keywords or clear filters</p>
+                        </div>
+                    )}
+                </div>
             )}
-            {showLocationModal && (
-                <LocationModal
-                    open={showLocationModal}
-                    onClose={() => setShowLocationModal(false)}
-                    initialCenter={{ lat: Number(centerLat || 43.6532), lng: Number(centerLng || -79.3832), name: '' }}
-                    initialRadiusKm={radiusKm}
-                    dark={dark}
-                    onApply={(place) => {
-                        setCenterLat(String(place.lat));
-                        setCenterLng(String(place.lng));
-                        try { localStorage.setItem('userLocation', JSON.stringify(place)); } catch { }
-                        const sp = buildParams();
-                        sp.set('lat', String(place.lat));
-                        sp.set('lng', String(place.lng));
-                        router.push(`/search?${sp.toString()}`);
-                        setShowLocationModal(false);
-                    }}
-                />
+
+            {/* Bottom status / sentinel */}
+            {hasMore && (
+                <div ref={loadMoreRef} className="py-8 text-center text-sm opacity-70">
+                    {isLoadingMore ? "Loading more…" : ""}
+                </div>
             )}
-        </div>
-    );
-}
+        </section>
+    </div>
+</div>
+
+{active && (
+    <ListingModal listing={active} onClose={() => setActive(null)} unit={unit} btcCad={btcCad} dark={dark} onChat={() => { }} />
+)}
+{showLocationModal && (
+    <LocationModal
+        open={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        initialCenter={{ lat: Number(centerLat || 43.6532), lng: Number(centerLng || -79.3832), name: '' }}
+        initialRadiusKm={radiusKm}
+        dark={dark}
+        onApply={(place) => {
+            setCenterLat(String(place.lat));
+            setCenterLng(String(place.lng));
+            try { localStorage.setItem('userLocation', JSON.stringify(place)); } catch { }
+            const sp = buildParams();
+            sp.set('lat', String(place.lat));
+            sp.set('lng', String(place.lng));
+            router.push(`/search?${sp.toString()}`);
+            setShowLocationModal(false);
+        }}
+    />
+)}
+</div>
 
 
