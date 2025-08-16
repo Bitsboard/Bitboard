@@ -202,7 +202,7 @@ export default function SearchClient() {
 
     return (
         <div className={cn("min-h-screen", bg, dark ? "dark" : "")}>
-            <Nav onPost={() => { }} onToggleTheme={() => setDark((d) => !d)} dark={dark} user={null} onAuth={() => { }} unit={unit} setUnit={setUnit} layout={"grid"} setLayout={() => {}} />
+            <Nav onPost={() => { }} onToggleTheme={() => setDark((d) => !d)} dark={dark} user={null} onAuth={() => { }} unit={unit} setUnit={setUnit} layout={"grid"} setLayout={() => { }} />
 
             <div className="mx-auto max-w-7xl px-4 py-8">
                 {/* Search bar */}
@@ -303,33 +303,18 @@ export default function SearchClient() {
 
                     {/* Results */}
                     <section className="lg:col-span-9">
-                        {layout === "grid" ? (
-                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-                                {listings.map((l) => (
-                                    <ListingCard key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
-                                ))}
-                                {showNoResults && (
-                                    <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
-                                        <div className="text-4xl mb-4">🔍</div>
-                                        <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No results found</p>
-                                        <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try different keywords or clear filters</p>
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {listings.map((l) => (
-                                    <ListingRow key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
-                                ))}
-                                {showNoResults && (
-                                    <div className={cn("rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
-                                        <div className="text-4xl mb-4">🔍</div>
-                                        <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No results found</p>
-                                        <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try different keywords or clear filters</p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+                            {listings.map((l) => (
+                                <ListingCard key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
+                            ))}
+                            {showNoResults && (
+                                <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}> 
+                                    <div className="text-4xl mb-4">🔍</div>
+                                    <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No results found</p>
+                                    <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try different keywords or clear filters</p>
+                                </div>
+                            )}
+                        </div>
 
                         {/* Bottom status / sentinel */}
                         {hasMore && (
