@@ -17,6 +17,10 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const limit = Math.min(100, parseInt(url.searchParams.get("limit") ?? "50", 10) || 50);
     const offset = Math.max(0, parseInt(url.searchParams.get("offset") ?? "0", 10) || 0);
+    const q = (url.searchParams.get("q") || "").trim();
+    const category = (url.searchParams.get("category") || "").trim();
+    const adTypeParam = (url.searchParams.get("adType") || "").trim().toLowerCase();
+    const adType = adTypeParam === "sell" || adTypeParam === "want" ? adTypeParam : "";
 
     // Ensure minimal schema exists so queries don't explode on fresh DBs
     try {
@@ -29,6 +33,30 @@ export async function GET(req: Request) {
         )`)
         .run();
     } catch { }
+
+    // Build optional filters (rich schema vs minimal fallback)
+    const whereRich: string[] = [];
+    const bindsRich: any[] = [];
+    const whereMinimal: string[] = [];
+    const bindsMinimal: any[] = [];
+
+    if (q) {
+      whereRich.push("(title LIKE ? OR description LIKE ?)");
+      bindsRich.push(`%${q}%`, `%${q}%`);
+      whereMinimal.push("(title LIKE ?)");
+      bindsMinimal.push(`%${q}%`);
+    }
+    if (category && category.toLowerCase() !== "featured") {
+      whereRich.push("(category = ?)");
+      bindsRich.push(category);
+    }
+    if (adType) {
+      whereRich.push("(ad_type = ?)");
+      bindsRich.push(adType);
+    }
+
+    const whereClauseRich = whereRich.length ? `WHERE ${whereRich.join(" AND ")}` : "";
+    const whereClauseMinimal = whereMinimal.length ? `WHERE ${whereMinimal.join(" AND ")}` : "";
 
     let results: any[] = [];
     try {
@@ -47,9 +75,10 @@ export async function GET(req: Request) {
                          boosted_until AS boostedUntil,
                          created_at AS createdAt
                   FROM listings
+                  ${whereClauseRich}
                   ORDER BY id DESC
                   LIMIT ? OFFSET ?`)
-        .bind(limit, offset)
+        .bind(...bindsRich, limit, offset)
         .all();
       results = rich.results ?? [];
     } catch {
@@ -60,14 +89,27 @@ export async function GET(req: Request) {
                          price_sat AS priceSat,
                          created_at AS createdAt
                   FROM listings
+                  ${whereClauseMinimal}
                   ORDER BY id DESC
                   LIMIT ? OFFSET ?`)
-        .bind(limit, offset)
+        .bind(...bindsMinimal, limit, offset)
         .all();
       results = minimal.results ?? [];
     }
 
-    const totalRow = await db.prepare("SELECT COUNT(*) AS c FROM listings").all();
+    // Compute total with same filters
+    let totalRow: any;
+    try {
+      totalRow = await db
+        .prepare(`SELECT COUNT(*) AS c FROM listings ${whereClauseRich}`)
+        .bind(...bindsRich)
+        .all();
+    } catch {
+      totalRow = await db
+        .prepare(`SELECT COUNT(*) AS c FROM listings ${whereClauseMinimal}`)
+        .bind(...bindsMinimal)
+        .all();
+    }
     const total = (totalRow.results?.[0] as any)?.c ?? 0;
 
     return NextResponse.json({ listings: results, total });
@@ -132,7 +174,7 @@ export async function POST(req: Request) {
           Number.isFinite(lng) ? lng : 0,
           imageUrl,
           Math.round(priceSat),
-          boostedUntil ?? null
+          (boostedUntil as any) ?? null
         )
         .run();
     } catch {

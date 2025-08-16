@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   Nav,
   LocationAutocomplete,
@@ -13,10 +13,12 @@ import {
   ChatModal,
   NewListingModal,
   AuthModal,
+  ItemsCarousel,
 } from "@/components";
 import { cn } from "@/lib/utils";
 import { mockListings } from "@/lib/mockData";
 import type { Listing, User, Unit, Layout, AdType, Category, Place } from "@/lib/types";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
   // State
@@ -37,6 +39,13 @@ export default function HomePage() {
   const [layout, setLayout] = useState<Layout>("grid");
   const [unit, setUnit] = useState<Unit>("sats");
   const [btcCad, setBtcCad] = useState<number | null>(null);
+  const [total, setTotal] = useState<number>(0);
+  const pageSize = 24;
+  const isFetchingRef = useRef(false);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
 
   // Categories
   const categories: Category[] = [
@@ -59,40 +68,96 @@ export default function HomePage() {
       .catch(() => { });
   }, []);
 
-  // Load listings from D1 in deployed environments (staging/production/main)
+  // Helper to map API rows -> Listing
+  const mapRowsToListings = useCallback((rows: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number }>): Listing[] => {
+    return rows.map((row) => ({
+      id: String(row.id),
+      title: row.title,
+      desc: row.description ?? "",
+      priceSats: Number(row.priceSat) || 0,
+      category: (row.category as any) || "Electronics",
+      location: row.location || "Toronto, ON",
+      lat: Number.isFinite(row.lat as any) ? (row.lat as number) : 43.6532,
+      lng: Number.isFinite(row.lng as any) ? (row.lng as number) : -79.3832,
+      type: (row.adType as any) === "want" ? "want" : "sell",
+      images: [row.imageUrl || "https://images.unsplash.com/photo-1555617117-08d3a8fef16c?w=1200&q=80&auto=format&fit=crop"],
+      boostedUntil: row.boostedUntil ?? null,
+      seller: {
+        name: "demo_seller",
+        score: 10,
+        deals: 0,
+        rating: 5,
+        verifications: { email: true, phone: true, lnurl: false },
+        onTimeRelease: 0.98,
+      },
+      createdAt: Number(row.createdAt) * 1000,
+    }));
+  }, []);
+
+  // Initial page load (deployed envs only)
   useEffect(() => {
-    if (isDeployed) {
-      fetch("/api/listings?limit=100")
-        .then((r) => r.json() as Promise<{ listings?: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number }> }>)
-        .then((data) => {
-          const rows = data.listings ?? [];
-          const mapped: Listing[] = rows.map((row) => ({
-            id: String(row.id),
-            title: row.title,
-            desc: row.description ?? "",
-            priceSats: Number(row.priceSat) || 0,
-            category: (row.category as any) || "Electronics",
-            location: row.location || "Toronto, ON",
-            lat: Number.isFinite(row.lat as any) ? (row.lat as number) : 43.6532,
-            lng: Number.isFinite(row.lng as any) ? (row.lng as number) : -79.3832,
-            type: (row.adType as any) === "want" ? "want" : "sell",
-            images: [row.imageUrl || "https://images.unsplash.com/photo-1555617117-08d3a8fef16c?w=1200&q=80&auto=format&fit=crop"],
-            boostedUntil: row.boostedUntil ?? null,
-            seller: {
-              name: "demo_seller",
-              score: 10,
-              deals: 0,
-              rating: 5,
-              verifications: { email: true, phone: true, lnurl: false },
-              onTimeRelease: 0.98,
-            },
-            createdAt: Number(row.createdAt) * 1000, // seconds -> ms
-          }));
-          setListings(mapped);
-        })
-        .catch(() => { /* in deployed envs, do not show mocks */ });
-    }
+    if (!isDeployed) return;
+    const load = async () => {
+      try {
+        isFetchingRef.current = true;
+        const r = await fetch(`/api/listings?limit=${pageSize}&offset=0`);
+        const data = (await r.json()) as { listings?: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number }>; total?: number };
+        const rows = data.listings ?? [];
+        const mapped = mapRowsToListings(rows);
+        setListings(mapped);
+        const t = Number(data.total ?? 0);
+        setTotal(t);
+        setHasMore(mapped.length < t);
+      } catch {
+        // ignore
+      } finally {
+        isFetchingRef.current = false;
+      }
+    };
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDeployed]);
+
+  const loadMore = useCallback(async () => {
+    if (!isDeployed) return;
+    if (isFetchingRef.current) return;
+    if (!hasMore) return;
+    try {
+      isFetchingRef.current = true;
+      setIsLoadingMore(true);
+      const offset = listings.length;
+      const r = await fetch(`/api/listings?limit=${pageSize}&offset=${offset}`);
+      const data = (await r.json()) as { listings?: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number }>; total?: number };
+      const rows = data.listings ?? [];
+      const mapped = mapRowsToListings(rows);
+      setListings((prev) => [...prev, ...mapped]);
+      const t = Number(data.total ?? total);
+      setTotal(t);
+      setHasMore(prev => prev && (offset + mapped.length) < t);
+    } catch {
+      // ignore
+    } finally {
+      isFetchingRef.current = false;
+      setIsLoadingMore(false);
+    }
+  }, [isDeployed, hasMore, listings.length, mapRowsToListings, pageSize, total]);
+
+  // IntersectionObserver to trigger loadMore when sentinel is visible
+  useEffect(() => {
+    if (!isDeployed) return;
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) {
+          loadMore();
+          break;
+        }
+      }
+    }, { rootMargin: "1000px 0px" });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [isDeployed, loadMore]);
 
   // ESC key handler
   useEffect(() => {
@@ -144,6 +209,8 @@ export default function HomePage() {
     return [];
   }, [filteredBase, cat]);
 
+  const featured = useMemo(() => listings.filter(l => l.category !== "Services").slice(0, 12), [listings]);
+
   // Filter helpers
   const currentFilter = () => ({ query, category: cat, center, radiusKm, adType });
 
@@ -159,8 +226,16 @@ export default function HomePage() {
     ? "border-neutral-700/50 bg-neutral-800/50 text-neutral-100 placeholder-neutral-400 focus:border-orange-500/50 focus:bg-neutral-800/70 backdrop-blur-sm"
     : "border-neutral-300/50 bg-white/80 text-neutral-900 placeholder-neutral-500 focus:border-orange-500/50 focus:bg-white backdrop-blur-sm";
 
+  const handleSearchNavigate = useCallback(() => {
+    const sp = new URLSearchParams();
+    if (query) sp.set("q", query);
+    if (cat && cat !== "Featured") sp.set("category", cat);
+    if (adType && adType !== "all") sp.set("adType", adType);
+    router.push(`/search?${sp.toString()}`);
+  }, [adType, cat, query, router]);
+
   return (
-    <div className={cn("min-h-screen", bg, dark ? "dark" : "")}>
+    <div className={cn("min-h-screen", bg, dark ? "dark" : "")}> 
       {/* staging deploy trigger */}
       <Nav
         onPost={() => requireAuth(() => setShowNew(true))}
@@ -208,8 +283,8 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-red-600 opacity-0 transition-opacity group-hover:opacity-100" />
                   <span className="relative">{user ? "Post a listing" : "Sign in to post"}</span>
                 </button>
-                <a
-                  href="#browse"
+                <button
+                  onClick={handleSearchNavigate}
                   className={cn(
                     "rounded-2xl px-8 py-4 font-semibold transition-all duration-300 hover:scale-105 active:scale-95",
                     dark
@@ -217,8 +292,8 @@ export default function HomePage() {
                       : "border-2 border-neutral-300 text-neutral-700 hover:border-neutral-400 hover:bg-neutral-100"
                   )}
                 >
-                  Browse Listings
-                </a>
+                  Search
+                </button>
                 <span className={cn("text-sm", dark ? "text-neutral-400" : "text-neutral-500")}>
                   * Demo — payments & auth simulated
                 </span>
@@ -237,6 +312,7 @@ export default function HomePage() {
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleSearchNavigate(); }}
                   placeholder="Search bikes, ASICs, consoles…"
                   className={cn("w-full rounded-3xl px-6 py-5 pr-12 text-lg focus:outline-none transition-all duration-300 hover:border-orange-500/50", inputBase)}
                 />
@@ -310,11 +386,23 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main id="browse" className="mx-auto max-w-7xl px-4 pb-24">
+        {/* Featured Row */}
+        {featured.length > 0 && (
+          <section className="mt-12">
+            <div className="mb-6 flex items-baseline justify-between">
+              <div className="flex items-center gap-3">
+                <h2 className={cn("text-3xl font-bold", dark ? "text-white" : "text-neutral-900")}>Featured</h2>
+              </div>
+            </div>
+            <ItemsCarousel listings={featured} unit={unit} btcCad={btcCad} dark={dark} onOpen={(l) => setActive(l)} />
+          </section>
+        )}
+
         {/* Goods Section */}
         <section className="mt-16">
           <div className="mb-6 flex items-baseline justify-between">
             <div className="flex items-center gap-4">
-              <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}>
+              <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}> 
                 <span className="text-2xl">🛒</span>
                 Goods
               </h2>
@@ -330,7 +418,7 @@ export default function HomePage() {
                 <ListingCard key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
               ))}
               {goods.length === 0 && (
-                <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
+                <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}> 
                   <div className="text-4xl mb-4">🔍</div>
                   <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No goods match your search</p>
                   <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try widening your radius or clearing filters</p>
@@ -343,10 +431,17 @@ export default function HomePage() {
                 <ListingRow key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
               ))}
               {goods.length === 0 && (
-                <div className={cn("rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
+                <div className={cn("rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}> 
                   <div className="text-4xl mb-4">🔍</div>
                   <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No goods match your search</p>
                   <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try widening your radius or clearing filters</p>
+                </div>
+              )}
+              {isDeployed && (
+                <div ref={loadMoreRef} className="pt-4">
+                  <div className={cn("text-center text-sm", dark ? "text-neutral-400" : "text-neutral-600")}> 
+                    {isLoadingMore ? "Loading more…" : (hasMore ? "" : "No more results")}
+                  </div>
                 </div>
               )}
             </div>
@@ -371,7 +466,7 @@ export default function HomePage() {
                 <ListingCard key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
               ))}
               {services.length === 0 && (
-                <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
+                <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}> 
                   <div className="text-4xl mb-4">🔧</div>
                   <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No services match your search</p>
                   <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try adjusting your filters</p>
@@ -384,7 +479,7 @@ export default function HomePage() {
                 <ListingRow key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
               ))}
               {services.length === 0 && (
-                <div className={cn("rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
+                <div className={cn("rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}> 
                   <div className="text-4xl mb-4">🔧</div>
                   <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No services match your search</p>
                   <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try adjusting your filters</p>
@@ -399,11 +494,11 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className={cn("border-t", dark ? "border-neutral-800/50 bg-neutral-900/30" : "border-neutral-200/50 bg-white/50")}>
+      <footer className={cn("border-t", dark ? "border-neutral-800/50 bg-neutral-900/30" : "border-neutral-200/50 bg-white/50")}> 
         <div className="mx-auto max-w-7xl px-4 py-16">
           <div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
             <div className="max-w-md">
-              <p className={cn("text-lg font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>
+              <p className={cn("text-lg font-medium", dark ? "text-neutral-200" : "text-neutral-700")}> 
                 ⚡ Bitboard — in-app chat + Lightning escrow. Keep correspondence in-app; off-app
                 contact is against our guidelines.
               </p>
