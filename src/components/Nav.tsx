@@ -63,6 +63,12 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
           </a>
         </div>
         <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-1 mr-2">
+            <button aria-label="English" onClick={() => setLang('en' as any)} className={cn("px-2 py-1 rounded-md text-sm", lang === 'en' ? "bg-neutral-800 text-white" : dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}>🇺🇸</button>
+            <button aria-label="Français" onClick={() => setLang('fr' as any)} className={cn("px-2 py-1 rounded-md text-sm", lang === 'fr' ? "bg-neutral-800 text-white" : dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}>🇫🇷</button>
+            <button aria-label="Español" onClick={() => setLang('es' as any)} className={cn("px-2 py-1 rounded-md text-sm", lang === 'es' ? "bg-neutral-800 text-white" : dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}>🇪🇸</button>
+            <button aria-label="Deutsch" onClick={() => setLang('de' as any)} className={cn("px-2 py-1 rounded-md text-sm", lang === 'de' ? "bg-neutral-800 text-white" : dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}>🇩🇪</button>
+          </div>
           <a
             href="#how"
             className={cn("rounded-xl px-3 py-2 text-sm", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}
@@ -102,15 +108,6 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
                 <div className="flex items-center justify-between">
                   <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>Layout View:</span>
                   <ViewToggle layout={layout} setLayout={setLayout} dark={dark} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>Language:</span>
-                  <select value={lang} onChange={(e) => setLang(e.target.value as any)} className={cn("rounded-xl px-3 py-2 text-sm", dark ? "bg-neutral-800 text-neutral-200" : "bg-neutral-100 text-neutral-800")}>
-                    <option value="en">🇺🇸 English</option>
-                    <option value="fr">🇫🇷 Français</option>
-                    <option value="es">🇪🇸 Español</option>
-                    <option value="de">🇩🇪 Deutsch</option>
-                  </select>
                 </div>
               </div>
             </div>

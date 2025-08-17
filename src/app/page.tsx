@@ -323,7 +323,7 @@ export default function HomePage() {
                     <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>
                       {center?.name || "Choose location"}
                     </div>
-                    <div className={cn("text-sm", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm} km</div>
+                    <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm} km</div>
                   </div>
                 </button>
               </div>

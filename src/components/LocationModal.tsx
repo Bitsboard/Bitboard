@@ -163,7 +163,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                                 {suggestions.length > 0 && (
                                     <div className={cn("absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-auto rounded-xl border shadow", dark ? "border-neutral-700 bg-neutral-900" : "border-neutral-300 bg-white")}>
                                         {suggestions.map((s, idx) => (
-                                            <button key={`${s.name}-${s.postal ?? ''}-${idx}`} onClick={() => { setCenter({ name: s.name, lat: s.lat, lng: s.lng }); setQuery(s.name); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-orange-500/10">
+                                            <button key={`${s.name}-${s.postal ?? ''}-${idx}`} onClick={() => { setCenter({ name: s.name, lat: s.lat, lng: s.lng }); setQuery(s.name); setRemoteResults([]); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-orange-500/10">
                                                 {s.name}{s.postal ? ` • ${s.postal}` : ""}
                                             </button>
                                         ))}
