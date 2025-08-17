@@ -82,15 +82,15 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
     <article
       onClick={onOpen}
       className={cn(
-        "group relative cursor-pointer overflow-hidden rounded-2xl transition-all duration-300",
+        "group relative cursor-pointer overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]",
         dark
-          ? "border border-neutral-800 bg-neutral-950 hover:border-orange-400/40 hover:shadow-[0_10px_30px_-12px_rgba(255,140,0,0.25)]"
-          : "border border-neutral-200 bg-white hover:border-orange-400/50 hover:shadow-[0_10px_30px_-12px_rgba(255,140,0,0.35)]"
+          ? "border border-neutral-800 bg-neutral-950 hover:border-orange-400/60"
+          : "border border-neutral-200 bg-white hover:border-orange-400/60"
       )}
     >
       <div className={cn("h-1 w-full bg-gradient-to-r rounded-t-2xl", a.stripe)} />
       <div className="relative">
-        <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[4/3]" />
+        <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[4/3] rounded-b-none" />
         {/* tags under image, not overlay */}
       </div>
       <div className="p-4">
