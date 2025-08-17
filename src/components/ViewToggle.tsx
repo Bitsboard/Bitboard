@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { t, useLang } from "@/lib/i18n";
 
 type Layout = "grid" | "list";
 
@@ -15,6 +16,7 @@ function cn(...xs: Array<string | false | null | undefined>) {
 }
 
 export function ViewToggle({ layout, setLayout, dark }: ViewToggleProps) {
+  const lang = useLang();
   return (
     <div className="relative inline-flex rounded-2xl bg-neutral-200/50 p-0.5 shadow-lg border border-neutral-300/50 backdrop-blur-sm">
       <div
@@ -35,7 +37,7 @@ export function ViewToggle({ layout, setLayout, dark }: ViewToggleProps) {
         title="Grid View"
       >
         <span className="text-lg">⊞</span>
-        <span>Grid</span>
+        <span>{t('grid', lang)}</span>
       </button>
       <button
         onClick={() => setLayout("list")}
@@ -48,7 +50,7 @@ export function ViewToggle({ layout, setLayout, dark }: ViewToggleProps) {
         title="List View"
       >
         <span className="text-lg">☰</span>
-        <span>List</span>
+        <span>{t('list', lang)}</span>
       </button>
     </div>
   );

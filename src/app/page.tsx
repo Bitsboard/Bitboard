@@ -282,7 +282,7 @@ export default function HomePage() {
             <div className="max-w-2xl">
               <h1 className="text-5xl font-black tracking-tight sm:text-7xl">
                 <span className={cn("block leading-tight", dark ? "text-white" : "text-black")}>{t('title_hero_1', lang)}</span>
-                <span className="block bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent" style={{ lineHeight: '1.2', paddingBottom: '2rem', marginBottom: '1rem' }}>
+                <span className="block bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent" style={{ lineHeight: '1.2' }}>
                   {t('title_hero_2', lang)}
                 </span>
               </h1>
@@ -361,14 +361,14 @@ export default function HomePage() {
                   )}
                 >
                   {c === 'Featured' ? t('featured', lang) :
-                   c === 'Electronics' ? t('cat_electronics', lang) :
-                   c === 'Mining Gear' ? t('cat_mining_gear', lang) :
-                   c === 'Home & Garden' ? t('cat_home_garden', lang) :
-                   c === 'Sports & Bikes' ? t('cat_sports_bikes', lang) :
-                   c === 'Tools' ? t('cat_tools', lang) :
-                   c === 'Games & Hobbies' ? t('cat_games_hobbies', lang) :
-                   c === 'Furniture' ? t('cat_furniture', lang) :
-                   c === 'Services' ? t('cat_services', lang) : c}
+                    c === 'Electronics' ? t('cat_electronics', lang) :
+                      c === 'Mining Gear' ? t('cat_mining_gear', lang) :
+                        c === 'Home & Garden' ? t('cat_home_garden', lang) :
+                          c === 'Sports & Bikes' ? t('cat_sports_bikes', lang) :
+                            c === 'Tools' ? t('cat_tools', lang) :
+                              c === 'Games & Hobbies' ? t('cat_games_hobbies', lang) :
+                                c === 'Furniture' ? t('cat_furniture', lang) :
+                                  c === 'Services' ? t('cat_services', lang) : c}
                 </button>
               ))}
             </div>

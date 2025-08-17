@@ -76,13 +76,13 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
             <span className="rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2 py-0.5 text-[10px] font-bold text-neutral-950">BOOSTED</span>
           )}
         </div>
-        <ModalCloseButton onClose={onClose} dark={dark} />
+        <ModalCloseButton onClose={onClose} dark={dark} label={t('close', lang)} />
       </ModalHeader>
       <div className="grid grid-cols-1 md:grid-cols-5">
         <div className="md:col-span-3">
           <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[4/3]" />
           <div className="p-4">
-            <h3 className="font-semibold">Description</h3>
+            <h3 className="font-semibold">{t('description', lang)}</h3>
             <p className={cn("mt-2 text-sm", dark ? "text-neutral-300" : "text-neutral-700")}>{listing.desc}</p>
           </div>
         </div>
@@ -114,7 +114,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
               {t('listing_warning', lang)}
             </div>
             <button className={cn("mt-2 w-full rounded-xl px-3 py-2 text-xs", dark ? "text-neutral-400 hover:bg-neutral-900" : "text-neutral-600 hover:bg-neutral-100")}>
-              Report listing
+              {t('report_listing', lang)}
             </button>
           </div>
         </div>

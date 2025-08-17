@@ -27,7 +27,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         apply: "Apply",
         clear_all: "Clear all",
         cancel: "Cancel",
-        close: "Close",
+        // close already defined above in base keys; avoid duplicate
         change_location: "Change location",
         radius: "Radius",
         enter_city: "Enter a city",
@@ -56,6 +56,11 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         prohibited_items: "Prohibited items",
         safety_tips: "Safety tips",
         terms: "Terms",
+        grid: "Grid",
+        list: "List",
+        description: "Description",
+        report_listing: "Report listing",
+        close: "Close",
         // Listing modal
         message_seller: "Message seller",
         listing_warning: "Keep all correspondence in-app for safety. Off-app contact is against our guidelines. When ready, attach an escrow proposal from the chat composer.",
@@ -130,6 +135,10 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         prohibited_items: "Objets interdits",
         safety_tips: "Conseils de sécurité",
         terms: "Conditions",
+        grid: "Grille",
+        list: "Liste",
+        description: "Description",
+        report_listing: "Signaler l'annonce",
         // Listing modal
         message_seller: "Contacter le vendeur",
         listing_warning: "Gardez toutes les conversations dans l'application pour votre sécurité. Le contact hors application est contraire à nos directives. Lorsque vous êtes prêt, joignez une proposition d'entiercement depuis le composeur de discussion.",
@@ -204,6 +213,10 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         prohibited_items: "Artículos prohibidos",
         safety_tips: "Consejos de seguridad",
         terms: "Términos",
+        grid: "Cuadrícula",
+        list: "Lista",
+        description: "Descripción",
+        report_listing: "Reportar anuncio",
         // Listing modal
         message_seller: "Enviar mensaje al vendedor",
         listing_warning: "Mantén toda la correspondencia en la app por seguridad. El contacto fuera de la app va en contra de nuestras directrices. Cuando estés listo, adjunta una propuesta de depósito desde el compositor del chat.",
@@ -278,6 +291,10 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         prohibited_items: "Verbotene Artikel",
         safety_tips: "Sicherheitstipps",
         terms: "Bedingungen",
+        grid: "Raster",
+        list: "Liste",
+        description: "Beschreibung",
+        report_listing: "Anzeige melden",
         // Listing modal
         message_seller: "Nachricht an Verkäufer",
         listing_warning: "Halte die gesamte Korrespondenz aus Sicherheitsgründen in der App. Kontakt außerhalb der App verstößt gegen unsere Richtlinien. Hänge eine Treuhandvorschlag aus dem Chat-Composer an, wenn du soweit bist.",
