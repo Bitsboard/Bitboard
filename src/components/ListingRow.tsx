@@ -71,6 +71,16 @@ function accent(listing: Listing) {
 export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowProps) {
   const boosted = listing.boostedUntil && listing.boostedUntil > Date.now();
   const a = accent(listing);
+  function stars(rating: number) {
+    const full = Math.floor(rating);
+    const half = rating - full >= 0.5;
+    return "★".repeat(full) + (half ? "½" : "");
+  }
+  function sanitizeTitle(raw: string, type: "sell" | "want"): string {
+    if (type !== "want") return raw;
+    const cleaned = raw.replace(/^\s*(looking\s*for\s*:?-?\s*)/i, "");
+    return cleaned.trim();
+  }
 
   return (
     <article
@@ -95,20 +105,23 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
       {/* Content */}
       <div className="col-span-6 flex flex-col justify-between">
         <div>
-          <h3 className={cn("line-clamp-2 text-lg font-bold", dark ? "text-white" : "text-neutral-900")}>{listing.title}</h3>
+          <div className="flex items-center gap-2">
+            <span className={cn("rounded-full bg-gradient-to-r px-2 py-0.5 text-[10px] font-semibold text-white", a.chip)}>{listing.type === 'want' ? 'Looking For' : 'Selling'}</span>
+            <h3 className={cn("line-clamp-2 text-lg font-bold", dark ? "text-white" : "text-neutral-900")}>{sanitizeTitle(listing.title, listing.type)}</h3>
+          </div>
           <div className="flex items-center justify-between gap-3 mt-1">
             <div className="shrink-0"><PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} /></div>
             <span className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>📍 {listing.location}</span>
           </div>
           <div className="flex items-center gap-2 mb-2">
             <span className={cn("rounded-full bg-gradient-to-r px-2 py-0.5 text-[10px] font-semibold text-white", a.chip)}>{listing.category}</span>
-            <TypePill type={listing.type} />
+            <span className={cn("rounded-full px-2 py-0.5 text-[10px]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
           </div>
         </div>
 
-        <div className="flex items-center justify-between mt-2">
-          <div className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-500")}>Seller {listing.seller.name}</div>
-          <div className={cn("text-sm", dark ? "text-neutral-400" : "text-neutral-500")}>{stars(listing.seller.rating)}</div>
+        <div className="flex items-center justify-between mt-2 text-xs">
+          <div className={cn(dark ? "text-neutral-400" : "text-neutral-500")}>@{listing.seller.name}</div>
+          <div className={cn(dark ? "text-neutral-400" : "text-neutral-500")}>{stars(listing.seller.rating)} · +{listing.seller.score}</div>
         </div>
       </div>
 
