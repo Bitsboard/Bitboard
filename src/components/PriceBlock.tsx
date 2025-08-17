@@ -9,7 +9,7 @@ interface PriceBlockProps {
   unit: Unit;
   btcCad: number | null;
   dark: boolean;
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
 }
 
 function cn(...xs: Array<string | false | null | undefined>) {
@@ -36,8 +36,8 @@ function formatBTCFromSats(sats: number) {
 export function PriceBlock({ sats, unit, btcCad, dark, size = "sm" }: PriceBlockProps) {
   const primary = unit === "sats" ? `${formatSats(sats)} sats` : `₿ ${formatBTCFromSats(sats)}`;
   const cad = btcCad ? formatFiat(satsToFiat(sats, btcCad), "CAD") : null;
-  const mainSize = size === "md" ? "text-base" : "text-sm";
-  const subSize = size === "md" ? "text-sm" : "text-xs";
+  const mainSize = size === "lg" ? "text-lg" : size === "md" ? "text-base" : "text-sm";
+  const subSize = size === "lg" ? "text-base" : size === "md" ? "text-sm" : "text-xs";
 
   return (
     <div className="flex flex-col items-start">
