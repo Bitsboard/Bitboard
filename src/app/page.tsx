@@ -299,7 +299,7 @@ export default function HomePage() {
           </div>
 
           {/* Search Interface */}
-          <div className="mt-16">
+          <div className="mt-10">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
               {/* Search Input */}
               <div className="md:col-span-7 relative">
@@ -343,36 +343,6 @@ export default function HomePage() {
                   <option value="want">{t('buyer_listings', lang)}</option>
                 </select>
               </div>
-            </div>
-
-            {/* Category Tabs */}
-            <div className="mt-8 flex flex-wrap gap-3" role="tablist">
-              {categories.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setCat(c)}
-                  role="tab"
-                  aria-selected={cat === c}
-                  className={cn(
-                    "rounded-2xl px-6 py-3 text-sm font-semibold transition-all duration-300 hover:scale-105 active:scale-95",
-                    cat === c
-                      ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/25"
-                      : dark
-                        ? "border border-neutral-700/50 text-neutral-300 hover:border-neutral-500 hover:bg-neutral-800/50"
-                        : "border border-neutral-300/50 text-neutral-600 hover:border-neutral-400 hover:bg-neutral-100"
-                  )}
-                >
-                  {c === 'Featured' ? t('featured', lang) :
-                    c === 'Electronics' ? t('cat_electronics', lang) :
-                      c === 'Mining Gear' ? t('cat_mining_gear', lang) :
-                        c === 'Home & Garden' ? t('cat_home_garden', lang) :
-                          c === 'Sports & Bikes' ? t('cat_sports_bikes', lang) :
-                            c === 'Tools' ? t('cat_tools', lang) :
-                              c === 'Games & Hobbies' ? t('cat_games_hobbies', lang) :
-                                c === 'Furniture' ? t('cat_furniture', lang) :
-                                  c === 'Services' ? t('cat_services', lang) : c}
-                </button>
-              ))}
             </div>
           </div>
         </div>
