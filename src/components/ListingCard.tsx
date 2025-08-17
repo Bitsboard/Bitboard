@@ -109,8 +109,13 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
         <div className="mt-3 flex items-end justify-between">
           <div className="shrink-0"><PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="lg" /></div>
           <div className="text-right text-sm">
-            <div className={cn(dark ? "text-neutral-300" : "text-neutral-700")}>@{listing.seller.name}</div>
-            <div className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍 reputation</div>
+            <div className={cn("inline-flex items-center gap-1", dark ? "text-neutral-300" : "text-neutral-700")}> 
+              {listing.seller.score >= 50 && (
+                <span className="inline-block h-3 w-3 animate-pulse rounded-full bg-gradient-to-r from-sky-400 to-blue-600 shadow-[0_0_8px_rgba(56,189,248,0.8)]" aria-label="Verified" />
+              )}
+              <span>@{listing.seller.name}</span>
+            </div>
+            <div className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍</div>
           </div>
         </div>
       </div>

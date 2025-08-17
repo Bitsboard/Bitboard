@@ -283,9 +283,9 @@ export default function HomePage() {
             {/* Left Content */}
             <div className="max-w-2xl">
               <h1 className="text-5xl font-black tracking-tight sm:text-7xl">
-                <span className={cn("block leading-tight", dark ? "text-white" : "text-black")}>{t('title_hero_1', lang)}</span>
+                <span className={cn("block leading-tight", dark ? "text-white" : "text-black")}>Find better deals,</span>
                 <span className="block bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent" style={{ lineHeight: '1.2' }}>
-                  {t('title_hero_2', lang)}
+                  use better money.
                 </span>
               </h1>
               <p className={cn("mt-6 text-xl leading-relaxed", dark ? "text-neutral-300" : "text-neutral-600")}>
