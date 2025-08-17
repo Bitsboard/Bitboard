@@ -58,7 +58,7 @@ export function ItemsCarousel({ listings, unit, btcCad, dark, onOpen }: ItemsCar
                 aria-label="Previous"
                 onClick={() => scrollByAmount(-400)}
             >
-                ←
+                <span className="font-extrabold">←</span>
             </button>
             <button
                 className={cn(
@@ -67,7 +67,7 @@ export function ItemsCarousel({ listings, unit, btcCad, dark, onOpen }: ItemsCar
                 aria-label="Next"
                 onClick={() => scrollByAmount(400)}
             >
-                →
+                <span className="font-extrabold">→</span>
             </button>
         </div>
     );

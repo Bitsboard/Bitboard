@@ -82,7 +82,7 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
     <article
       onClick={onOpen}
       className={cn(
-        "group relative cursor-pointer overflow-hidden rounded-2xl transition-transform duration-300 hover:scale-[1.03] hover:ring-2 hover:ring-orange-400/60 hover:shadow-[0_20px_60px_-12px_rgba(255,140,0,0.35)]",
+        "group relative cursor-pointer overflow-hidden rounded-2xl transition-transform duration-300 hover:scale-[1.02] hover:ring-2 hover:ring-orange-500/80",
         dark
           ? "border border-neutral-800 bg-neutral-950 hover:border-orange-400/60"
           : "border border-neutral-200 bg-white hover:border-orange-400/60"
