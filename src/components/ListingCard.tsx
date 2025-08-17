@@ -56,10 +56,9 @@ function cn(...xs: Array<string | false | null | undefined>) {
 }
 
 function accent(listing: Listing) {
-  const isService = listing.category === "Services";
   return {
-    stripe: isService ? "from-fuchsia-500 to-violet-500" : "from-sky-500 to-cyan-500",
-    chip: isService ? "from-fuchsia-500 to-violet-500" : "from-sky-500 to-cyan-500",
+    stripe: "from-orange-500 to-red-500",
+    chip: "from-orange-500 to-red-500",
   };
 }
 
@@ -78,27 +77,24 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
       )}
     >
       <div className={cn("h-1 w-full bg-gradient-to-r rounded-t-2xl", a.stripe)} />
-      {boosted && (
-        <div className="absolute right-3 top-3 z-10 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1 text-xs font-bold text-neutral-950 shadow-lg">
-          BOOSTED
-        </div>
-      )}
-
       <div className="relative">
         <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[4/3]" />
-        <div className="absolute bottom-2 right-2 z-10 flex items-center gap-2">
-          <TypePill type={listing.type} />
-          <span className={cn("rounded-full bg-gradient-to-r px-2 py-0.5 text-[10px] font-semibold text-white whitespace-nowrap shadow-lg", a.chip)}>
-            {listing.category === "Services" ? "Service" : listing.category}
+        <div className="absolute left-2 top-2 z-10 flex items-center gap-2">
+          <span className={cn("rounded-full bg-gradient-to-r px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow", a.chip)}>
+            {listing.type === 'want' ? 'Looking For' : 'Selling'}
           </span>
         </div>
       </div>
       <div className="space-y-3 p-4">
-        <h3 className={cn("line-clamp-2 text-base sm:text-lg font-semibold leading-snug", dark ? "text-white" : "text-neutral-900")}>{listing.title}</h3>
-        <p className={cn("line-clamp-2 text-sm leading-relaxed", dark ? "text-neutral-400" : "text-neutral-600")}>{listing.desc}</p>
         <div className="flex items-center justify-between gap-2">
-          <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} />
-          <div className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>📍 {listing.location}</div>
+          <h3 className={cn("line-clamp-2 text-base sm:text-lg font-semibold leading-snug", dark ? "text-white" : "text-neutral-900")}>{listing.title}</h3>
+          <div className="shrink-0"><PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} /></div>
+        </div>
+        <div className="flex items-center justify-between text-xs">
+          <span className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>📍 {listing.location}</span>
+          <span className={cn("rounded-full bg-gradient-to-r px-2 py-0.5 text-[10px] font-semibold text-white whitespace-nowrap", a.chip)}>
+            {listing.category}
+          </span>
         </div>
       </div>
     </article>

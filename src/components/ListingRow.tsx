@@ -62,10 +62,9 @@ function stars(rating: number) {
 }
 
 function accent(listing: Listing) {
-  const isService = listing.category === "Services";
   return {
-    stripe: isService ? "from-fuchsia-500 to-violet-500" : "from-sky-500 to-cyan-500",
-    chip: isService ? "from-fuchsia-500 to-violet-500" : "from-sky-500 to-cyan-500",
+    stripe: "from-orange-500 to-red-500",
+    chip: "from-orange-500 to-red-500",
   };
 }
 
@@ -96,49 +95,25 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
       {/* Content */}
       <div className="col-span-6 flex flex-col justify-between">
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h3 className={cn("text-lg font-bold truncate", dark ? "text-white" : "text-neutral-900")}>
-              {listing.title}
-            </h3>
+          <div className="flex items-start justify-between gap-3 mb-1">
+            <h3 className={cn("text-lg font-bold truncate", dark ? "text-white" : "text-neutral-900")}>{listing.title}</h3>
+            <div className="shrink-0"><PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} /></div>
+          </div>
+          <div className="flex items-center gap-2 mb-2">
+            <span className={cn("rounded-full bg-gradient-to-r px-2 py-0.5 text-[10px] font-semibold text-white", a.chip)}>{listing.category}</span>
             <TypePill type={listing.type} />
-            <span className={cn("rounded-full bg-gradient-to-r px-3 py-1 text-xs font-semibold text-white shadow-sm", a.chip)}>
-              {listing.category === "Services" ? "Service" : listing.category}
-            </span>
+            <span className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>📍 {listing.location}</span>
           </div>
-          <p className={cn("line-clamp-2 text-sm leading-relaxed", dark ? "text-neutral-300" : "text-neutral-600")}>
-            {listing.desc}
-          </p>
         </div>
 
-        <div className="flex items-center justify-between mt-3">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-full bg-neutral-300 flex items-center justify-center">
-                <svg className="w-3 h-3 text-neutral-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <span className={cn("text-sm font-medium", dark ? "text-neutral-300" : "text-neutral-600")}>
-                {listing.seller.name}
-              </span>
-            </div>
-            <span className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-500")}>
-              +{listing.seller.score}👍 Reputation
-            </span>
-          </div>
-          <div className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-500")}>
-            📍 {listing.location}
-          </div>
+        <div className="flex items-center justify-between mt-2">
+          <div className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-500")}>Seller {listing.seller.name}</div>
+          <div className={cn("text-sm", dark ? "text-neutral-400" : "text-neutral-500")}>{stars(listing.seller.rating)}</div>
         </div>
       </div>
 
-      {/* Price and Rating */}
-      <div className="col-span-3 flex flex-col items-end justify-between">
-        <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} />
-        <div className={cn("text-sm", dark ? "text-neutral-400" : "text-neutral-500")}>
-          {stars(listing.seller.rating)}
-        </div>
-      </div>
+      {/* Spacer to balance grid */}
+      <div className="col-span-3" />
     </article>
   );
 }
