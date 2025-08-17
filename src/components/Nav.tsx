@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { LogoMinimal } from "./LogoMinimal";
 import { UnitToggle } from "./UnitToggle";
 import { ThemeToggle } from "./ThemeToggle";
 import { ViewToggle } from "./ViewToggle";
@@ -50,11 +49,10 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
           <a href="/" aria-label="Home" className="inline-flex items-center gap-2">
-            <LogoMinimal dark={dark} />
             <div className="flex items-center gap-2">
               <span className={cn("text-lg tracking-tight leading-none", dark ? "text-white" : "text-black")} style={{ fontFamily: 'Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>
-                <span className="font-extrabold">bits</span>
-                <span className="font-medium">barter</span>
+                <span className="font-bold text-orange-500">bits</span>
+                <span className={cn("font-bold", dark ? "text-white" : "text-black")}>barter</span>
               </span>
               <span
                 className={cn(
