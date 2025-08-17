@@ -71,8 +71,10 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             }
             const map = L.map(containerRef.current).setView([center.lat, center.lng], 10);
             mapRef.current = map;
-            // Base tiles
-            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
+            // Base tiles (light/dark)
+            const lightUrl = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+            const darkUrl = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+            const base = L.tileLayer(dark ? darkUrl : lightUrl, { maxZoom: 19, attribution: "© OpenStreetMap © CARTO" }).addTo(map);
             // Orange tint overlay via pane
             const pane = (map as any).createPane('orangeTint');
             (pane as any).style.mixBlendMode = 'multiply';
