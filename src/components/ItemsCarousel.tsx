@@ -40,12 +40,12 @@ export function ItemsCarousel({ listings, unit, btcCad, dark, onOpen }: ItemsCar
             <div
                 ref={containerRef}
                 className={cn(
-                    "no-scrollbar flex gap-4 overflow-x-auto scroll-px-4 snap-x snap-mandatory",
+                    "no-scrollbar flex gap-4 overflow-x-auto overflow-y-visible scroll-px-4 snap-x snap-mandatory py-4",
                     dark ? "[&::-webkit-scrollbar]:hidden" : "[&::-webkit-scrollbar]:hidden"
                 )}
             >
                 {items.map((l) => (
-                    <div key={l.id} className="snap-center shrink-0 grow-0 basis-[260px] sm:basis-[280px] md:basis-[300px]">
+                    <div key={l.id} className="snap-center shrink-0 grow-0 basis-[260px] sm:basis-[280px] md:basis-[300px]" style={{ willChange: "transform" }}>
                         <ListingCard listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => onOpen(l)} />
                     </div>
                 ))}
