@@ -374,7 +374,7 @@ export default function SearchClient() {
                         {/* Bottom status / sentinel */}
                         {hasMore && (
                             <div ref={loadMoreRef} className="py-8 text-center text-sm opacity-70">
-                                {isLoadingMore ? "Loading more…" : ""}
+                                {isLoadingMore ? t('loading_more', lang) : ""}
                             </div>
                         )}
                     </section>

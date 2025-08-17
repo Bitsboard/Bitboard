@@ -4,6 +4,7 @@ import React from "react";
 import { PriceBlock } from "./PriceBlock";
 import { Carousel } from "./Carousel";
 import { Modal, ModalHeader, ModalTitle, ModalCloseButton } from "./Modal";
+import { t, useLang } from "@/lib/i18n";
 
 type Category =
   | "Featured"
@@ -64,6 +65,7 @@ function stars(rating: number) {
 
 export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: ListingModalProps) {
   const boosted = listing.boostedUntil && listing.boostedUntil > Date.now();
+  const lang = useLang();
 
   return (
     <Modal open={true} onClose={onClose} dark={dark} size="lg" ariaLabel={listing.title}>
@@ -105,11 +107,11 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
             </div>
             <div className="grid grid-cols-1 gap-2">
               <button onClick={onChat} className="rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2 font-semibold text-neutral-950 shadow shadow-orange-500/30">
-                Message seller
+                {t('message_seller', lang)}
               </button>
             </div>
-            <div className={cn("rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-400" : "bg-neutral-100 text-neutral-600")}>
-              Keep all correspondence in-app for safety. Off-app contact is against our guidelines. When ready, attach an escrow proposal from the chat composer.
+            <div className={cn("rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-400" : "bg-neutral-100 text-neutral-600")}> 
+              {t('listing_warning', lang)}
             </div>
             <button className={cn("mt-2 w-full rounded-xl px-3 py-2 text-xs", dark ? "text-neutral-400 hover:bg-neutral-900" : "text-neutral-600 hover:bg-neutral-100")}>
               Report listing

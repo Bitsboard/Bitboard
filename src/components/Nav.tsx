@@ -88,21 +88,21 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
             href="#how"
             className={cn("rounded-xl px-3 py-2 text-sm", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}
           >
-            {t('how_it_works')}
+            {t('how_it_works', lang)}
           </a>
           <a
             href="#pricing"
             className={cn("rounded-xl px-3 py-2 text-sm", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}
           >
-            {t('pricing')}
+            {t('pricing', lang)}
           </a>
           {user ? (
             <button className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-neutral-950 shadow shadow-orange-500/30 transition hover:bg-orange-400" onClick={onPost}>
-              {t('post_listing')}
+              {t('post_listing', lang)}
             </button>
           ) : (
             <button onClick={onAuth} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow shadow-orange-500/30 transition hover:bg-orange-400">
-              {t('sign_in')}
+              {t('sign_in', lang)}
             </button>
           )}
           {/* Settings Dropdown */}

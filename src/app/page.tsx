@@ -287,7 +287,7 @@ export default function HomePage() {
                 </span>
               </h1>
               <p className={cn("mt-6 text-xl leading-relaxed", dark ? "text-neutral-300" : "text-neutral-600")}>
-                Your Bitcoin-native local marketplace.
+                {t('subheading', lang)}
               </p>
               <div className="mt-8" />
             </div>
@@ -305,7 +305,7 @@ export default function HomePage() {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") handleSearchNavigate(); }}
-                  placeholder="Search bikes, ASICs, consoles…"
+                  placeholder={t('search_placeholder', lang)}
                   className={cn("w-full rounded-3xl px-6 pr-32 py-5 text-lg focus:outline-none transition-all duration-300 hover:border-orange-500/50", inputBase)}
                 />
                 <button
@@ -321,7 +321,7 @@ export default function HomePage() {
                 <button onClick={() => setShowLocationModal(true)} className={cn("w-full rounded-3xl border px-6 py-5 text-left", inputBase)}>
                   <div className="flex items-center justify-between gap-3">
                     <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>
-                      {center?.name || "Choose location"}
+                      {center?.name || t('choose_location', lang)}
                     </div>
                     <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm} km</div>
                   </div>
@@ -336,9 +336,9 @@ export default function HomePage() {
                   className={cn("w-full rounded-3xl px-6 py-5 text-lg focus:outline-none transition-all duration-300 appearance-none bg-no-repeat bg-right pr-12", inputBase)}
                   style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 1rem center', backgroundSize: '1.5em 1.5em' }}
                 >
-                  <option value="all">All Listings</option>
-                  <option value="sell">Seller Listings</option>
-                  <option value="want">Buyer Listings</option>
+                  <option value="all">{t('all_listings', lang)}</option>
+                  <option value="sell">{t('seller_listings', lang)}</option>
+                  <option value="want">{t('buyer_listings', lang)}</option>
                 </select>
               </div>
             </div>
@@ -360,7 +360,15 @@ export default function HomePage() {
                         : "border border-neutral-300/50 text-neutral-600 hover:border-neutral-400 hover:bg-neutral-100"
                   )}
                 >
-                  {c}
+                  {c === 'Featured' ? t('featured', lang) :
+                   c === 'Electronics' ? t('cat_electronics', lang) :
+                   c === 'Mining Gear' ? t('cat_mining_gear', lang) :
+                   c === 'Home & Garden' ? t('cat_home_garden', lang) :
+                   c === 'Sports & Bikes' ? t('cat_sports_bikes', lang) :
+                   c === 'Tools' ? t('cat_tools', lang) :
+                   c === 'Games & Hobbies' ? t('cat_games_hobbies', lang) :
+                   c === 'Furniture' ? t('cat_furniture', lang) :
+                   c === 'Services' ? t('cat_services', lang) : c}
                 </button>
               ))}
             </div>
@@ -386,7 +394,7 @@ export default function HomePage() {
         <section className="mt-16">
           <div className="mb-6 flex items-baseline justify-between">
             <div className="flex items-center gap-4">
-              <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}>Latest</h2>
+              <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}>{t('latest', lang)}</h2>
               <span className={cn("text-sm font-medium", dark ? "text-neutral-400" : "text-neutral-500")}>
                 {goods.length} result{goods.length !== 1 ? 's' : ''}
               </span>
@@ -401,8 +409,8 @@ export default function HomePage() {
               {goods.length === 0 && (
                 <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
                   <div className="text-4xl mb-4">🔍</div>
-                  <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No goods match your search</p>
-                  <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try widening your radius or clearing filters</p>
+                  <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>{t('no_goods_match', lang)}</p>
+                  <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>{t('try_widen_radius', lang)}</p>
                 </div>
               )}
             </div>
@@ -414,14 +422,14 @@ export default function HomePage() {
               {goods.length === 0 && (
                 <div className={cn("rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
                   <div className="text-4xl mb-4">🔍</div>
-                  <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No goods match your search</p>
-                  <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try widening your radius or clearing filters</p>
+                  <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>{t('no_goods_match', lang)}</p>
+                  <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>{t('try_widen_radius', lang)}</p>
                 </div>
               )}
               {isDeployed && (
                 <div ref={loadMoreRef} className="pt-4">
                   <div className={cn("text-center text-sm", dark ? "text-neutral-400" : "text-neutral-600")}>
-                    {isLoadingMore ? "Loading more…" : (hasMore ? "" : "No more results")}
+                    {isLoadingMore ? t('loading_more', lang) : (hasMore ? "" : t('no_more_results', lang))}
                   </div>
                 </div>
               )}
@@ -434,7 +442,7 @@ export default function HomePage() {
           <div className="mb-6 flex items-baseline justify-between">
             <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}>
               <span className="text-2xl">🛠️</span>
-              Services
+              {t('services_label', lang)}
             </h2>
             <span className={cn("text-sm font-medium", dark ? "text-neutral-400" : "text-neutral-500")}>
               {services.length} result{services.length !== 1 ? 's' : ''}
@@ -449,8 +457,8 @@ export default function HomePage() {
               {services.length === 0 && (
                 <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
                   <div className="text-4xl mb-4">🔧</div>
-                  <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>No services match your search</p>
-                  <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>Try adjusting your filters</p>
+                  <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>{t('no_services_match', lang)}</p>
+                  <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>{t('try_adjust_filters', lang)}</p>
                 </div>
               )}
             </div>
