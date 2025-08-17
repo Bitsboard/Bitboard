@@ -88,9 +88,9 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
           : "border border-neutral-200 bg-white hover:border-orange-400/60"
       )}
     >
-      <div className={cn("h-1 w-full bg-gradient-to-r rounded-t-2xl", a.stripe)} />
       <div className="relative">
         <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-square" rounded="rounded-t-2xl" />
+        <div className={cn("pointer-events-none absolute left-0 right-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r", a.stripe)} />
         {/* tags under image, not overlay */}
       </div>
       <div className="p-4 pt-6">
