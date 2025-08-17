@@ -76,7 +76,7 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
               {lang === 'fr' ? '🇫🇷' : lang === 'es' ? '🇪🇸' : lang === 'de' ? '🇩🇪' : '🇺🇸'}
             </button>
             {langOpen && (
-              <div className={cn("absolute right-0 mt-2 w-44 rounded-xl border shadow-2xl z-50", dark ? "border-neutral-700/50 bg-neutral-900/95" : "border-neutral-300/50 bg-white/95")}> 
+              <div className={cn("absolute right-0 mt-2 w-44 rounded-xl border shadow-2xl z-50", dark ? "border-neutral-700/50 bg-neutral-900/95" : "border-neutral-300/50 bg-white/95")}>
                 <button onClick={() => { setLang('en' as any); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇺🇸 English</button>
                 <button onClick={() => { setLang('fr' as any); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇫🇷 Français</button>
                 <button onClick={() => { setLang('es' as any); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇪🇸 Español</button>
@@ -113,15 +113,15 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
             <div className={cn("absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl backdrop-blur-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200", dark ? "border-neutral-700/50 bg-neutral-900/90" : "border-neutral-300/50 bg-white/95")}>
               <div className="p-4 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>Display prices in:</span>
+                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>{t('menu_display_prices_in', lang)}</span>
                   <UnitToggle unit={unit} setUnit={setUnit} />
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>Display Theme:</span>
+                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>{t('menu_display_theme', lang)}</span>
                   <ThemeToggle dark={dark} onToggle={onToggleTheme} />
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>Layout View:</span>
+                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>{t('menu_layout_view', lang)}</span>
                   <ViewToggle layout={layout} setLayout={setLayout} dark={dark} />
                 </div>
               </div>

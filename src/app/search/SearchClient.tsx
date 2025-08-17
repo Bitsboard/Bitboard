@@ -295,13 +295,23 @@ export default function SearchClient() {
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
                             <div className="font-semibold mb-3">{t('category', lang)}</div>
                             <div className="flex flex-wrap gap-2">
-                                {["All", "Electronics", "Mining Gear", "Home & Garden", "Sports & Bikes", "Tools", "Games & Hobbies", "Furniture", "Services"].map((c) => (
+                                {[
+                                    { key: 'cat_all', value: '' },
+                                    { key: 'cat_electronics', value: 'Electronics' },
+                                    { key: 'cat_mining_gear', value: 'Mining Gear' },
+                                    { key: 'cat_home_garden', value: 'Home & Garden' },
+                                    { key: 'cat_sports_bikes', value: 'Sports & Bikes' },
+                                    { key: 'cat_tools', value: 'Tools' },
+                                    { key: 'cat_games_hobbies', value: 'Games & Hobbies' },
+                                    { key: 'cat_furniture', value: 'Furniture' },
+                                    { key: 'cat_services', value: 'Services' },
+                                ].map((c) => (
                                     <button
-                                        key={c}
-                                        onClick={() => setSelCategory(c === 'All' ? '' : c)}
-                                        className={cn("rounded-xl px-3 py-1 text-sm", (selCategory || '') === (c === 'All' ? '' : c) ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}
+                                        key={c.key}
+                                        onClick={() => setSelCategory(c.value)}
+                                        className={cn("rounded-xl px-3 py-1 text-sm", (selCategory || '') === c.value ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}
                                     >
-                                        {c}
+                                        {t(c.key, lang)}
                                     </button>
                                 ))}
                             </div>
@@ -310,9 +320,9 @@ export default function SearchClient() {
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
                             <div className="font-semibold mb-3">{t('type', lang)}</div>
                             <div className="flex gap-2">
-                                <button onClick={() => setSelAdType('all')} className={cn("rounded-xl px-3 py-1 text-sm", selAdType === 'all' ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>All Listings</button>
-                                <button onClick={() => setSelAdType('sell')} className={cn("rounded-xl px-3 py-1 text-sm", selAdType === 'sell' ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>Selling</button>
-                                <button onClick={() => setSelAdType('want')} className={cn("rounded-xl px-3 py-1 text-sm", selAdType === 'want' ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>Looking For</button>
+                                <button onClick={() => setSelAdType('all')} className={cn("rounded-xl px-3 py-1 text-sm", selAdType === 'all' ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>{t('all_listings', lang)}</button>
+                                <button onClick={() => setSelAdType('sell')} className={cn("rounded-xl px-3 py-1 text-sm", selAdType === 'sell' ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>{t('selling', lang)}</button>
+                                <button onClick={() => setSelAdType('want')} className={cn("rounded-xl px-3 py-1 text-sm", selAdType === 'want' ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>{t('looking_for', lang)}</button>
                             </div>
                         </div>
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { PriceBlock } from "./PriceBlock";
+import { Modal } from "./Modal";
 
 type Category =
   | "Featured"
@@ -71,82 +72,87 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit }: ChatModalPro
   }
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className={cn("flex w-full max-w-5xl flex-col overflow-hidden rounded-2xl md:flex-row", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-200 bg-white")}>
-        <div className={cn("flex items-center justify-between border-b px-4 py-3 md:border-b-0 md:border-r", dark ? "border-neutral-900" : "border-neutral-200")}>
-          <div>
-            <div className="text-sm opacity-70">Chat about</div>
-            <div className="font-semibold">{listing.title}</div>
-          </div>
-          <button onClick={onClose} className={cn("rounded-lg px-3 py-1", dark ? "text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200" : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-800")}>
-            Close
-          </button>
+    <Modal
+      open={true}
+      onClose={onClose}
+      dark={dark}
+      size="xl"
+      ariaLabel={`Chat about ${listing.title}`}
+      panelClassName={cn("flex w-full flex-col md:flex-row")}
+    >
+      <div className={cn("flex items-center justify-between border-b px-4 py-3 md:border-b-0 md:border-r", dark ? "border-neutral-900" : "border-neutral-200")}>
+        <div>
+          <div className="text-sm opacity-70">Chat about</div>
+          <div className="font-semibold">{listing.title}</div>
         </div>
+        <button onClick={onClose} className={cn("rounded-lg px-3 py-1", dark ? "text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200" : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-800")}>
+          Close
+        </button>
+      </div>
 
-        {/* Chat column */}
-        <div className="flex flex-1 flex-col">
-          {showTips && (
-            <div className={cn("m-3 rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <strong className="mr-2">Safety tips:</strong>
-                  Meet in a <em>very public</em> place (mall, café, police e-commerce zone), bring a friend, keep chats in-app, verify serials and condition before paying, and prefer Lightning escrow over cash.
-                </div>
-                <button onClick={() => setShowTips(false)} className={cn("rounded px-2 py-1", dark ? "hover:bg-neutral-800" : "hover:bg-neutral-200")}>
-                  Hide
-                </button>
+      {/* Chat column */}
+      <div className="flex flex-1 flex-col">
+        {showTips && (
+          <div className={cn("m-3 rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <strong className="mr-2">Safety tips:</strong>
+                Meet in a <em>very public</em> place (mall, café, police e-commerce zone), bring a friend, keep chats in-app, verify serials and condition before paying, and prefer Lightning escrow over cash.
               </div>
-            </div>
-          )}
-          <div className="flex-1 space-y-2 overflow-auto p-4">
-            {messages.map((m) => (
-              <div
-                key={m.id}
-                className={cn(
-                  "max-w-[70%] rounded-2xl px-3 py-2 text-sm",
-                  m.who === "me" ? "ml-auto bg-orange-500 text-neutral-950" : dark ? "bg-neutral-900" : "bg-neutral-100"
-                )}
-              >
-                {m.text}
-              </div>
-            ))}
-          </div>
-          <div className={cn("flex items-center gap-2 border-t p-3", dark ? "border-neutral-900" : "border-neutral-200")}>
-            <input
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Write a message…"
-              className={cn("flex-1 rounded-xl px-3 py-2 focus:outline-none", dark ? "border border-neutral-800 bg-neutral-900 text-neutral-100" : "border border-neutral-300 bg-white text-neutral-900")}
-            />
-            <label className={cn("flex items-center gap-2 rounded-xl px-3 py-2 text-xs", dark ? "border border-neutral-800" : "border border-neutral-300")}>
-              <input type="checkbox" checked={attachEscrow} onChange={(e) => setAttachEscrow(e.target.checked)} /> Attach escrow proposal
-            </label>
-            <button onClick={send} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-neutral-950">
-              Send
-            </button>
-          </div>
-        </div>
-
-        {/* Escrow side panel */}
-        {showEscrow && (
-          <div className={cn("w-full max-w-md border-l", dark ? "border-neutral-900" : "border-neutral-200")}>
-            <div className="flex items-center justify-between px-4 py-3">
-              <div className="font-semibold">Escrow proposal</div>
-              <button onClick={() => setShowEscrow(false)} className={cn("rounded px-2 py-1 text-xs", dark ? "hover:bg-neutral-900" : "hover:bg-neutral-100")}>
+              <button onClick={() => setShowTips(false)} className={cn("rounded px-2 py-1", dark ? "hover:bg-neutral-800" : "hover:bg-neutral-200")}>
                 Hide
               </button>
             </div>
-            <div className="px-4 pb-4">
-              <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} />
-              <div className={cn("mt-1 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>
-                Funds are locked via Lightning hold invoice until both parties confirm release.
-              </div>
-            </div>
-            <EscrowFlow listing={listing} onClose={() => setShowEscrow(false)} dark={dark} />
           </div>
         )}
+        <div className="flex-1 space-y-2 overflow-auto p-4">
+          {messages.map((m) => (
+            <div
+              key={m.id}
+              className={cn(
+                "max-w-[70%] rounded-2xl px-3 py-2 text-sm",
+                m.who === "me" ? "ml-auto bg-orange-500 text-neutral-950" : dark ? "bg-neutral-900" : "bg-neutral-100"
+              )}
+            >
+              {m.text}
+            </div>
+          ))}
+        </div>
+        <div className={cn("flex items-center gap-2 border-t p-3", dark ? "border-neutral-900" : "border-neutral-200")}>
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Write a message…"
+            className={cn("flex-1 rounded-xl px-3 py-2 focus:outline-none", dark ? "border border-neutral-800 bg-neutral-900 text-neutral-100" : "border border-neutral-300 bg-white text-neutral-900")}
+          />
+          <label className={cn("flex items-center gap-2 rounded-xl px-3 py-2 text-xs", dark ? "border border-neutral-800" : "border border-neutral-300")}>
+            <input type="checkbox" checked={attachEscrow} onChange={(e) => setAttachEscrow(e.target.checked)} /> Attach escrow proposal
+          </label>
+          <button onClick={send} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-neutral-950">
+            Send
+          </button>
+        </div>
       </div>
-    </div>
+
+      {/* Escrow side panel */}
+      {showEscrow && (
+        <div className={cn("w-full max-w-md border-l", dark ? "border-neutral-900" : "border-neutral-200")}>
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="font-semibold">Escrow proposal</div>
+            <button onClick={() => setShowEscrow(false)} className={cn("rounded px-2 py-1 text-xs", dark ? "hover:bg-neutral-900" : "hover:bg-neutral-100")}>
+              Hide
+            </button>
+          </div>
+          <div className="px-4 pb-4">
+            <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} />
+            <div className={cn("mt-1 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>
+              Funds are locked via Lightning hold invoice until both parties confirm release.
+            </div>
+          </div>
+          <EscrowFlow listing={listing} onClose={() => setShowEscrow(false)} dark={dark} />
+        </div>
+      )}
+    </Modal>
   );
 }
 

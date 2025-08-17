@@ -2,6 +2,7 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
+import { Modal, ModalHeader, ModalBody, ModalFooter, ModalCloseButton } from "./Modal";
 import type { Place } from "@/lib/types";
 import { t, useLang } from "@/lib/i18n";
 
@@ -25,7 +26,6 @@ const SAMPLE_PLACES: Array<Place & { postal?: string }> = [
 
 export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 25, onApply, dark }: LocationModalProps) {
     const containerRef = React.useRef<HTMLDivElement | null>(null);
-    const overlayRef = React.useRef<HTMLDivElement | null>(null);
     const mapRef = React.useRef<any>(null);
     const circleRef = React.useRef<any>(null);
     const markerRef = React.useRef<any>(null);
@@ -146,59 +146,54 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         return out.slice(0, 20);
     }, [query, remoteResults]);
 
-    if (!open) return null;
-
     return (
-        <div ref={overlayRef} className={cn("fixed inset-0 z-[100] flex items-center justify-center p-4", dark ? "bg-black/60" : "bg-black/40")} role="dialog" aria-modal="true" onMouseDown={(e) => { if (e.target === overlayRef.current) onClose(); }}>
-            <div className={cn("w-full max-w-2xl rounded-2xl shadow-2xl", dark ? "bg-neutral-900 text-neutral-100 border border-neutral-800" : "bg-white text-neutral-900 border border-neutral-200")}
-                style={{ maxHeight: "90vh" }}>
-                <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-700/30">
-                    <h2 className="text-xl font-bold">{t('change_location', lang)}</h2>
-                    <button onClick={onClose} className={cn("rounded-lg px-3 py-1", dark ? "text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200" : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-800")}>{t('close', lang)}</button>
-                </div>
-                <div className="px-6 py-4 space-y-3" style={{ maxHeight: "calc(90vh - 120px)", overflow: "auto" }}>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div className="sm:col-span-2">
-                            <label className={cn("text-xs mb-1 block", dark ? "text-neutral-400" : "text-neutral-500")}>{t('location', lang)}</label>
-                            <div className={cn("relative rounded-xl border", dark ? "border-neutral-700 bg-neutral-800" : "border-neutral-300 bg-white")}>
-                                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('enter_city', lang)} className={cn("w-full rounded-xl px-4 py-3 text-sm bg-transparent", dark ? "text-neutral-100" : "text-neutral-900")} />
-                                {suggestions.length > 0 && (
-                                    <div className={cn("absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-auto rounded-xl border shadow", dark ? "border-neutral-700 bg-neutral-900" : "border-neutral-300 bg-white")}>
-                                        {suggestions.map((s, idx) => (
-                                            <button key={`${s.name}-${s.postal ?? ''}-${idx}`} onClick={() => { setCenter({ name: s.name, lat: s.lat, lng: s.lng }); setQuery(s.name); setRemoteResults([]); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-orange-500/10">
-                                                {s.name}{s.postal ? ` • ${s.postal}` : ""}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                        <div>
-                            <label className={cn("text-xs mb-1 block", dark ? "text-neutral-400" : "text-neutral-500")}>{t('radius', lang)}</label>
-                            <select
-                                value={radiusKm}
-                                onChange={(e) => setRadiusKm(Number(e.target.value))}
-                                className={cn("w-full rounded-xl px-4 py-3 text-sm border appearance-none bg-no-repeat pr-10", dark ? "border-neutral-700 bg-neutral-800 text-neutral-100" : "border-neutral-300 bg-white text-neutral-900")}
-                                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 1.25rem center', backgroundSize: '1.25em 1.25em' }}
-                            >
-                                <option value={5}>5 km</option>
-                                <option value={10}>10 km</option>
-                                <option value={25}>25 km</option>
-                                <option value={40}>40 km</option>
-                                <option value={80}>80 km</option>
-                            </select>
+        <Modal open={open} onClose={onClose} dark={dark} size="md" ariaLabel={t('change_location', lang)}>
+            <ModalHeader dark={dark}>
+                <h2 className="text-xl font-bold">{t('change_location', lang)}</h2>
+                <ModalCloseButton onClose={onClose} dark={dark} label={t('close', lang)} />
+            </ModalHeader>
+            <ModalBody className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="sm:col-span-2">
+                        <label className={cn("text-xs mb-1 block", dark ? "text-neutral-400" : "text-neutral-500")}>{t('location', lang)}</label>
+                        <div className={cn("relative rounded-xl border", dark ? "border-neutral-700 bg-neutral-800" : "border-neutral-300 bg-white")}>
+                            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('enter_city', lang)} className={cn("w-full rounded-xl px-4 py-3 text-sm bg-transparent", dark ? "text-neutral-100" : "text-neutral-900")} />
+                            {suggestions.length > 0 && (
+                                <div className={cn("absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-auto rounded-xl border shadow", dark ? "border-neutral-700 bg-neutral-900" : "border-neutral-300 bg-white")}>
+                                    {suggestions.map((s, idx) => (
+                                        <button key={`${s.name}-${s.postal ?? ''}-${idx}`} onClick={() => { setCenter({ name: s.name, lat: s.lat, lng: s.lng }); setQuery(s.name); setRemoteResults([]); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-orange-500/10">
+                                            {s.name}{s.postal ? ` • ${s.postal}` : ""}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
+                    <div>
+                        <label className={cn("text-xs mb-1 block", dark ? "text-neutral-400" : "text-neutral-500")}>{t('radius', lang)}</label>
+                        <select
+                            value={radiusKm}
+                            onChange={(e) => setRadiusKm(Number(e.target.value))}
+                            className={cn("w-full rounded-xl px-4 py-3 text-sm border appearance-none bg-no-repeat pr-10", dark ? "border-neutral-700 bg-neutral-800 text-neutral-100" : "border-neutral-300 bg-white text-neutral-900")}
+                            style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 1.25rem center', backgroundSize: '1.25em 1.25em' }}
+                        >
+                            <option value={5}>5 km</option>
+                            <option value={10}>10 km</option>
+                            <option value={25}>25 km</option>
+                            <option value={40}>40 km</option>
+                            <option value={80}>80 km</option>
+                        </select>
+                    </div>
+                </div>
 
-                    <div className="rounded-xl overflow-hidden relative z-0 bb-map" style={{ height: 280 }}>
-                        <div ref={containerRef} className="w-full h-full" />
-                    </div>
+                <div className="rounded-xl overflow-hidden relative z-0 bb-map" style={{ height: 280 }}>
+                    <div ref={containerRef} className="w-full h-full" />
                 </div>
-                <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-neutral-700/30 sticky bottom-0 bg-inherit">
-                    <button onClick={onClose} className={cn("rounded-xl px-4 py-2 text-sm", dark ? "bg-neutral-800 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>{t('cancel', lang)}</button>
-                    <button onClick={() => onApply(center, radiusKm)} className="rounded-xl px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-red-500">{t('apply', lang)}</button>
-                </div>
-            </div>
-        </div>
+            </ModalBody>
+            <ModalFooter dark={dark}>
+                <button onClick={onClose} className={cn("rounded-xl px-4 py-2 text-sm", dark ? "bg-neutral-800 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>{t('cancel', lang)}</button>
+                <button onClick={() => onApply(center, radiusKm)} className="rounded-xl px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-red-500">{t('apply', lang)}</button>
+            </ModalFooter>
+        </Modal>
     );
 }

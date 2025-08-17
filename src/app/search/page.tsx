@@ -9,7 +9,7 @@ export const runtime = 'edge';
 const SearchClient = NextDynamic(() => import("./SearchClient"), { ssr: false });
 
 export default function SearchPage() {
-  return <SearchClient />;
+    return <SearchClient />;
 }
 
 

@@ -37,6 +37,23 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         pricing: "Pricing",
         post_listing: "Post a listing",
         sign_in: "Sign in",
+        // Categories
+        cat_all: "All",
+        cat_electronics: "Electronics",
+        cat_mining_gear: "Mining Gear",
+        cat_home_garden: "Home & Garden",
+        cat_sports_bikes: "Sports & Bikes",
+        cat_tools: "Tools",
+        cat_games_hobbies: "Games & Hobbies",
+        cat_furniture: "Furniture",
+        cat_services: "Services",
+        // Menu
+        menu_display_prices_in: "Display prices in:",
+        menu_display_theme: "Display Theme:",
+        menu_layout_view: "Layout View:",
+        // Types (singular labels)
+        selling: "Selling",
+        looking_for: "Looking For",
     },
     fr: {
         search: "Rechercher",
@@ -72,6 +89,23 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         pricing: "Tarifs",
         post_listing: "Publier une annonce",
         sign_in: "Se connecter",
+        // Categories
+        cat_all: "Tous",
+        cat_electronics: "Électronique",
+        cat_mining_gear: "Matériel de minage",
+        cat_home_garden: "Maison & Jardin",
+        cat_sports_bikes: "Sports & Vélos",
+        cat_tools: "Outils",
+        cat_games_hobbies: "Jeux & Loisirs",
+        cat_furniture: "Meubles",
+        cat_services: "Services",
+        // Menu
+        menu_display_prices_in: "Afficher les prix en :",
+        menu_display_theme: "Thème d'affichage :",
+        menu_layout_view: "Affichage :",
+        // Types (singular labels)
+        selling: "Vente",
+        looking_for: "Recherche",
     },
     es: {
         search: "Buscar",
@@ -107,6 +141,23 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         pricing: "Precios",
         post_listing: "Publicar anuncio",
         sign_in: "Iniciar sesión",
+        // Categories
+        cat_all: "Todos",
+        cat_electronics: "Electrónica",
+        cat_mining_gear: "Equipo de minería",
+        cat_home_garden: "Hogar y Jardín",
+        cat_sports_bikes: "Deportes y Bicis",
+        cat_tools: "Herramientas",
+        cat_games_hobbies: "Juegos y Aficiones",
+        cat_furniture: "Muebles",
+        cat_services: "Servicios",
+        // Menu
+        menu_display_prices_in: "Mostrar precios en:",
+        menu_display_theme: "Tema de visualización:",
+        menu_layout_view: "Vista de diseño:",
+        // Types (singular labels)
+        selling: "Venta",
+        looking_for: "Se busca",
     },
     de: {
         search: "Suche",
@@ -142,6 +193,23 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         pricing: "Preise",
         post_listing: "Anzeige einstellen",
         sign_in: "Anmelden",
+        // Categories
+        cat_all: "Alle",
+        cat_electronics: "Elektronik",
+        cat_mining_gear: "Mining-Ausrüstung",
+        cat_home_garden: "Haus & Garten",
+        cat_sports_bikes: "Sport & Fahrräder",
+        cat_tools: "Werkzeuge",
+        cat_games_hobbies: "Spiele & Hobbys",
+        cat_furniture: "Möbel",
+        cat_services: "Dienstleistungen",
+        // Menu
+        menu_display_prices_in: "Preise anzeigen in:",
+        menu_display_theme: "Anzeige-Thema:",
+        menu_layout_view: "Layout-Ansicht:",
+        // Types (singular labels)
+        selling: "Verkauf",
+        looking_for: "Suche",
     },
 };
 
