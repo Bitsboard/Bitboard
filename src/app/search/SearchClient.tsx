@@ -18,8 +18,13 @@ export default function SearchClient() {
     const params = useSearchParams();
     const router = useRouter();
     const [dark, setDark] = useState(true);
-    const layoutParam = (params.get("layout") || "grid").trim();
-    const [layout, setLayout] = useState<"grid" | "list">(layoutParam === "list" ? "list" : "grid");
+    const layoutParam = (params.get("layout") || "").trim();
+    const initialLayout: "grid" | "list" = layoutParam === "list"
+        ? "list"
+        : layoutParam === "grid"
+            ? "grid"
+            : (typeof window !== "undefined" && (localStorage.getItem("layoutPref") as "grid" | "list" | null)) || "grid";
+    const [layout, setLayout] = useState<"grid" | "list">(initialLayout);
     const [unit, setUnit] = useState<"sats" | "BTC">("sats");
     const [btcCad, setBtcCad] = useState<number | null>(null);
     const [listings, setListings] = useState<Listing[]>([]);
@@ -84,7 +89,9 @@ export default function SearchClient() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-    useEffect(() => { setLayout(layoutParam === "list" ? "list" : "grid"); }, [layoutParam]);
+    useEffect(() => {
+        if (layoutParam) setLayout(layoutParam === "list" ? "list" : "grid");
+    }, [layoutParam]);
 
     useEffect(() => {
         fetch("/api/rate").then(r => r.json() as Promise<{ cad: number | null }>).then(d => setBtcCad(d.cad)).catch(() => { });
@@ -92,6 +99,7 @@ export default function SearchClient() {
 
     // Reflect layout to URL without touching data params
     useEffect(() => {
+        try { localStorage.setItem("layoutPref", layout); } catch {}
         const sp = new URLSearchParams(window.location.search);
         if (layout) sp.set("layout", layout);
         const newUrl = `/search?${sp.toString()}`;
@@ -144,12 +152,14 @@ export default function SearchClient() {
         const [sb, so] = (sc || "date:desc").split(":");
         sp.set("sortBy", sb === 'distance' ? 'distance' : sb);
         sp.set("sortOrder", sb === 'distance' ? 'asc' : so);
+        // Persist layout selection across filter applications
+        sp.set("layout", layout);
         if (sb === 'distance') {
             const { lat, lng } = resolveLatLng();
             if (lat && lng) { sp.set("lat", lat); sp.set("lng", lng); }
         }
         return sp;
-    }, [inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice, unit, country, region, city, centerLat, centerLng]);
+    }, [inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice, unit, country, region, city, centerLat, centerLng, layout]);
 
     const buildQuery = useCallback((offset: number) => {
         const sp = buildParams();
