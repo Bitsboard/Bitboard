@@ -86,7 +86,7 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
     <article
       onClick={onOpen}
       className={cn(
-        "group relative grid grid-cols-12 gap-4 overflow-hidden rounded-2xl p-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.01] cursor-pointer",
+        "group relative grid grid-cols-12 gap-4 overflow-hidden rounded-2xl p-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.01] cursor-pointer min-h-[10rem] sm:min-h-[11rem] md:min-h-[12rem]",
         dark ? "border border-neutral-800 bg-neutral-950 hover:border-orange-500/50" : "border border-neutral-300 bg-white hover:border-orange-500/50"
       )}
     >
@@ -98,7 +98,7 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
       )}
 
       {/* Images */}
-      <div className="col-span-3 overflow-hidden rounded-l-2xl h-full -ml-4 -my-4 mr-0">
+      <div className="col-span-3 overflow-hidden rounded-l-2xl -ml-4 -my-4 mr-0 h-[10rem] sm:h-[11rem] md:h-[12rem]">
         <Carousel images={listing.images} alt={listing.title} dark={dark} className="h-full rounded-r-none" />
       </div>
 
