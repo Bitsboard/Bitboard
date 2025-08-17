@@ -103,30 +103,25 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
       </div>
 
       {/* Content */}
-      <div className="col-span-6 flex flex-col justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className={cn("rounded-full bg-gradient-to-r px-2 py-0.5 text-[10px] font-semibold text-white", a.chip)}>{listing.type === 'want' ? 'Looking For' : 'Selling'}</span>
-            <h3 className={cn("line-clamp-2 text-lg font-bold", dark ? "text-white" : "text-neutral-900")}>{sanitizeTitle(listing.title, listing.type)}</h3>
-          </div>
-          <div className="flex items-center justify-between gap-3 mt-1">
-            <div className="shrink-0"><PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} /></div>
-            <span className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>📍 {listing.location}</span>
-          </div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className={cn("rounded-full bg-gradient-to-r px-2 py-0.5 text-[10px] font-semibold text-white", a.chip)}>{listing.category}</span>
-            <span className={cn("rounded-full px-2 py-0.5 text-[10px]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
-          </div>
+      <div className="col-span-9 flex flex-col">
+        {/* Tag row */}
+        <div className="flex items-center justify-between mb-1">
+          <span className={cn("rounded-full bg-gradient-to-r px-2 py-0.5 text-[10px] font-semibold text-white", a.chip)}>{listing.type === 'want' ? 'Looking For' : 'Selling'}</span>
+          <span className={cn("rounded-full px-2 py-0.5 text-[10px]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
         </div>
-
-        <div className="flex items-center justify-between mt-2 text-xs">
-          <div className={cn(dark ? "text-neutral-400" : "text-neutral-500")}>@{listing.seller.name}</div>
-          <div className={cn(dark ? "text-neutral-400" : "text-neutral-500")}>{stars(listing.seller.rating)} · +{listing.seller.score}</div>
+        {/* Title */}
+        <h3 className={cn("line-clamp-2 text-lg font-bold", dark ? "text-white" : "text-neutral-900")}>{sanitizeTitle(listing.title, listing.type)}</h3>
+        {/* Bottom meta */}
+        <div className="mt-auto flex items-end justify-between pt-2">
+          <div className="shrink-0">
+            <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} />
+          </div>
+          <div className="text-right text-xs">
+            <div className={cn(dark ? "text-neutral-300" : "text-neutral-700")}>@{listing.seller.name}</div>
+            <div className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍 reputation</div>
+          </div>
         </div>
       </div>
-
-      {/* Spacer to balance grid */}
-      <div className="col-span-3" />
     </article>
   );
 }

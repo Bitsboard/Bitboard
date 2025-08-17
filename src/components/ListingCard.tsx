@@ -91,25 +91,29 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
       <div className={cn("h-1 w-full bg-gradient-to-r rounded-t-2xl", a.stripe)} />
       <div className="relative">
         <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[4/3]" />
-        {/* No overlay badges to keep heights stable */}
+        {/* tags under image, not overlay */}
       </div>
       <div className="p-4">
-        {/* Title block with type label before title */}
-        <div className="min-h-[56px]">
-          <div className="flex items-center gap-2 mb-1">
-            <span className={cn("rounded-full bg-gradient-to-r px-2 py-0.5 text-[10px] font-semibold text-white", a.chip)}>
-              {listing.type === 'want' ? 'Looking For' : 'Selling'}
-            </span>
-            <h3 className={cn("line-clamp-2 text-lg font-semibold leading-snug", dark ? "text-white" : "text-neutral-900")}>{sanitizeTitle(listing.title, listing.type)}</h3>
+        {/* Row of tags under image */}
+        <div className="flex items-center justify-between mb-2">
+          <span className={cn("rounded-full bg-gradient-to-r px-2 py-0.5 text-[10px] font-semibold text-white", a.chip)}>
+            {listing.type === 'want' ? 'Looking For' : 'Selling'}
+          </span>
+          <span className={cn("rounded-full px-2 py-0.5 text-[10px]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>
+            📍 {listing.location}
+          </span>
+        </div>
+        {/* Two-line title */}
+        <h3 className={cn("line-clamp-2 text-lg font-semibold leading-snug", dark ? "text-white" : "text-neutral-900")}>{sanitizeTitle(listing.title, listing.type)}</h3>
+        {/* Bottom meta: left price (sats + fiat), right seller + rep */}
+        <div className="mt-3 flex items-end justify-between">
+          <div className="shrink-0">
+            <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} />
           </div>
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="shrink-0"><PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} /></div>
-          <span className={cn("max-w-[50%] overflow-hidden text-ellipsis whitespace-nowrap rounded-full px-2 py-0.5 text-[10px]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
-        </div>
-        <div className="mt-2 flex items-center justify-between text-xs">
-          <span className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>@{listing.seller.name}</span>
-          <span className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>{stars(listing.seller.rating)} · +{listing.seller.score}</span>
+          <div className="text-right text-xs">
+            <div className={cn(dark ? "text-neutral-300" : "text-neutral-700")}>@{listing.seller.name}</div>
+            <div className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍 reputation</div>
+          </div>
         </div>
       </div>
     </article>
