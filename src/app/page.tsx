@@ -292,8 +292,28 @@ export default function HomePage() {
               <div className="mt-8" />
             </div>
 
-            {/* Right Content - Empty for now */}
-            <div></div>
+            {/* Right Content - Decorative graphic */}
+            <div className="relative hidden md:block">
+              <div className="pointer-events-none select-none">
+                <div className="relative h-48 w-72 sm:h-56 sm:w-80 md:h-64 md:w-96">
+                  {/* Glow rings */}
+                  <div className="absolute -top-6 -right-8 h-40 w-40 rounded-full bg-orange-500/20 blur-2xl" />
+                  <div className="absolute top-10 -right-12 h-44 w-44 rounded-full bg-amber-300/30 blur-2xl" />
+                  {/* Card grid */}
+                  <div className={cn(
+                    "grid grid-cols-3 gap-3 rounded-3xl p-3 shadow-2xl ring-1",
+                    dark ? "bg-neutral-900/60 ring-neutral-800/80" : "bg-white/70 ring-neutral-200/80"
+                  )}>
+                    {Array.from({ length: 9 }).map((_, i) => (
+                      <div key={i} className={cn(
+                        "aspect-square rounded-xl",
+                        i % 3 === 0 ? "bg-gradient-to-br from-amber-400 to-orange-500" : dark ? "bg-neutral-800" : "bg-neutral-100"
+                      )} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Search Interface */}
