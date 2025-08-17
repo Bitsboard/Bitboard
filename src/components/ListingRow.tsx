@@ -90,7 +90,7 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
         dark ? "border border-neutral-800 bg-neutral-950 hover:border-orange-500/50" : "border border-neutral-300 bg-white hover:border-orange-500/50"
       )}
     >
-      <div className={cn("absolute left-0 top-0 h-full w-1 bg-gradient-to-b", a.stripe)} />
+      <div className={cn("absolute right-0 top-0 h-full w-1 bg-gradient-to-b", a.stripe)} />
       {boosted && (
         <div className="absolute right-4 top-3 z-10 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1 text-xs font-bold text-neutral-950 shadow-lg">
           BOOSTED
@@ -102,6 +102,7 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
         <div className="relative h-full">
           <Carousel images={listing.images} alt={listing.title} dark={dark} className="h-full" rounded="rounded-l-2xl" />
           <div className={cn("pointer-events-none absolute left-0 right-0 top-0 h-1 rounded-l-2xl bg-gradient-to-r", a.stripe)} />
+          <div className={cn("pointer-events-none absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-gradient-to-b", a.stripe)} />
         </div>
       </div>
 
