@@ -383,7 +383,7 @@ export default function HomePage() {
           <section className="mt-12">
             <div className="mb-6 flex items-baseline justify-between">
               <div className="flex items-center gap-3">
-                <h2 className={cn("text-3xl font-bold", dark ? "text-white" : "text-neutral-900")}>Featured</h2>
+                <h2 className={cn("text-3xl font-bold", dark ? "text-white" : "text-neutral-900")}>{t('featured', lang)}</h2>
               </div>
             </div>
             <ItemsCarousel listings={featured} unit={unit} btcCad={btcCad} dark={dark} onOpen={(l) => setActive(l)} />
@@ -481,19 +481,18 @@ export default function HomePage() {
           <div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
             <div className="max-w-md">
               <p className={cn("text-lg font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>
-                ⚡ Bitboard — in-app chat + Lightning escrow. Keep correspondence in-app; off-app
-                contact is against our guidelines.
+                {t('footer_tagline', lang)}
               </p>
             </div>
             <div className="flex items-center gap-6">
               <a className={cn("hover:text-orange-500 transition-colors font-medium", dark ? "text-neutral-300" : "text-neutral-600")} href="#policy">
-                Prohibited items
+                {t('prohibited_items', lang)}
               </a>
               <a className={cn("hover:text-orange-500 transition-colors font-medium", dark ? "text-neutral-300" : "text-neutral-600")} href="#tips">
-                Safety tips
+                {t('safety_tips', lang)}
               </a>
               <a className={cn("hover:text-orange-500 transition-colors font-medium", dark ? "text-neutral-300" : "text-neutral-600")} href="/terms">
-                Terms
+                {t('terms', lang)}
               </a>
             </div>
           </div>
