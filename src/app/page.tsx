@@ -292,26 +292,30 @@ export default function HomePage() {
               <div className="mt-8" />
             </div>
 
-            {/* Right Content - Decorative graphic */}
+            {/* Right Content - Gradient coin */}
             <div className="relative hidden md:block">
-              <div className="pointer-events-none select-none">
-                <div className="relative h-48 w-72 sm:h-56 sm:w-80 md:h-64 md:w-96">
-                  {/* Glow rings */}
-                  <div className="absolute -top-6 -right-8 h-40 w-40 rounded-full bg-orange-500/20 blur-2xl" />
-                  <div className="absolute top-10 -right-12 h-44 w-44 rounded-full bg-amber-300/30 blur-2xl" />
-                  {/* Card grid */}
-                  <div className={cn(
-                    "grid grid-cols-3 gap-3 rounded-3xl p-3 shadow-2xl ring-1",
-                    dark ? "bg-neutral-900/60 ring-neutral-800/80" : "bg-white/70 ring-neutral-200/80"
-                  )}>
-                    {Array.from({ length: 9 }).map((_, i) => (
-                      <div key={i} className={cn(
-                        "aspect-square rounded-xl",
-                        i % 3 === 0 ? "bg-gradient-to-br from-amber-400 to-orange-500" : dark ? "bg-neutral-800" : "bg-neutral-100"
-                      )} />
-                    ))}
-                  </div>
-                </div>
+              <div className="pointer-events-none select-none relative h-56 w-56 md:h-72 md:w-72">
+                <div className="absolute -inset-8 bg-gradient-to-tr from-orange-500/25 via-amber-300/10 to-transparent blur-3xl" />
+                <svg viewBox="0 0 200 200" className="relative drop-shadow-2xl animate-[spin_18s_linear_infinite]">
+                  <defs>
+                    <linearGradient id="coinGrad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#f59e0b" />
+                      <stop offset="100%" stopColor="#ef4444" />
+                    </linearGradient>
+                    <radialGradient id="shine" cx="30%" cy="25%" r="70%">
+                      <stop offset="0%" stopColor="white" stopOpacity="0.35" />
+                      <stop offset="60%" stopColor="white" stopOpacity="0" />
+                    </radialGradient>
+                  </defs>
+                  <circle cx="100" cy="100" r="88" fill="url(#coinGrad)" stroke="#ffffff" strokeOpacity="0.6" strokeWidth="2" />
+                  <circle cx="100" cy="100" r="76" fill="none" stroke="#ffffff" strokeOpacity="0.25" strokeWidth="2" />
+                  <circle cx="100" cy="100" r="64" fill="none" stroke="#ffffff" strokeOpacity="0.15" strokeDasharray="4 6" strokeWidth="2" />
+                  <circle cx="100" cy="100" r="52" fill="url(#shine)" />
+                  <g transform="translate(100,110)">
+                    <text textAnchor="middle" fontSize="84" fontWeight="800" fill="#111827" fillOpacity="0.85">₿</text>
+                  </g>
+                </svg>
+                <div className="absolute -bottom-5 left-1/2 h-16 w-40 -translate-x-1/2 rounded-full bg-black/30 blur-2xl" />
               </div>
             </div>
           </div>
