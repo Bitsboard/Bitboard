@@ -99,7 +99,7 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
 
       {/* Images */}
       <div className="col-span-3 overflow-hidden rounded-l-2xl h-full -ml-4 -my-4 mr-0">
-        <Carousel images={listing.images} alt={listing.title} dark={dark} className="h-full aspect-video rounded-r-none" />
+        <Carousel images={listing.images} alt={listing.title} dark={dark} className="h-full rounded-r-none" />
       </div>
 
       {/* Content */}
@@ -107,7 +107,7 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
         {/* Tag row */}
         <div className="flex items-center justify-between mb-1 gap-2 min-w-0">
           <span className={cn("flex-shrink-0 rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>{listing.type === 'want' ? 'Looking For' : 'Selling'}</span>
-          <span className={cn("flex-1 truncate rounded-full px-2 py-0.5 text-[10px]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
+          <span className={cn("truncate rounded-full px-3 py-1 text-[11px] max-w-[40%]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
         </div>
         {/* Title */}
         <h3 className={cn("line-clamp-2 text-xl font-bold", dark ? "text-white" : "text-neutral-900")}>{sanitizeTitle(listing.title, listing.type)}</h3>
