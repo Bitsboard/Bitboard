@@ -62,10 +62,10 @@ function stars(rating: number) {
 }
 
 function accent(listing: Listing) {
-  return {
-    stripe: "from-orange-500 to-red-500",
-    chip: "from-orange-500 to-red-500",
-  };
+  if (listing.type === "sell") {
+    return { stripe: "from-emerald-500 to-teal-500", chip: "from-emerald-500 to-teal-500" };
+  }
+  return { stripe: "from-fuchsia-500 to-violet-500", chip: "from-fuchsia-500 to-violet-500" };
 }
 
 export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowProps) {
@@ -95,14 +95,14 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
       {/* Content */}
       <div className="col-span-6 flex flex-col justify-between">
         <div>
-          <div className="flex items-start justify-between gap-3 mb-1">
-            <h3 className={cn("text-lg font-bold truncate", dark ? "text-white" : "text-neutral-900")}>{listing.title}</h3>
+          <h3 className={cn("line-clamp-2 text-lg font-bold", dark ? "text-white" : "text-neutral-900")}>{listing.title}</h3>
+          <div className="flex items-center justify-between gap-3 mt-1">
             <div className="shrink-0"><PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} /></div>
+            <span className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>📍 {listing.location}</span>
           </div>
           <div className="flex items-center gap-2 mb-2">
             <span className={cn("rounded-full bg-gradient-to-r px-2 py-0.5 text-[10px] font-semibold text-white", a.chip)}>{listing.category}</span>
             <TypePill type={listing.type} />
-            <span className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>📍 {listing.location}</span>
           </div>
         </div>
 

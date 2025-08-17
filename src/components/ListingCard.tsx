@@ -56,10 +56,10 @@ function cn(...xs: Array<string | false | null | undefined>) {
 }
 
 function accent(listing: Listing) {
-  return {
-    stripe: "from-orange-500 to-red-500",
-    chip: "from-orange-500 to-red-500",
-  };
+  if (listing.type === "sell") {
+    return { stripe: "from-emerald-500 to-teal-500", chip: "from-emerald-500 to-teal-500" };
+  }
+  return { stripe: "from-fuchsia-500 to-violet-500", chip: "from-fuchsia-500 to-violet-500" };
 }
 
 export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCardProps) {
@@ -85,16 +85,11 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
           </span>
         </div>
       </div>
-      <div className="space-y-3 p-4">
-        <div className="flex items-center justify-between gap-2">
-          <h3 className={cn("line-clamp-2 text-base sm:text-lg font-semibold leading-snug", dark ? "text-white" : "text-neutral-900")}>{listing.title}</h3>
+      <div className="space-y-2 p-4">
+        <h3 className={cn("line-clamp-2 text-lg font-semibold leading-snug", dark ? "text-white" : "text-neutral-900")}>{listing.title}</h3>
+        <div className="flex items-center justify-between">
           <div className="shrink-0"><PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} /></div>
-        </div>
-        <div className="flex items-center justify-between text-xs">
-          <span className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>📍 {listing.location}</span>
-          <span className={cn("rounded-full bg-gradient-to-r px-2 py-0.5 text-[10px] font-semibold text-white whitespace-nowrap", a.chip)}>
-            {listing.category}
-          </span>
+          <span className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>📍 {listing.location}</span>
         </div>
       </div>
     </article>
