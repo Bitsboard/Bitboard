@@ -86,7 +86,7 @@ export default function HomePage() {
   }, []);
 
   // Helper to map API rows -> Listing
-  const mapRowsToListings = useCallback((rows: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number }>): Listing[] => {
+  const mapRowsToListings = useCallback((rows: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number; postedBy?: string }>): Listing[] => {
     return rows.map((row) => ({
       id: String(row.id),
       title: row.title,
@@ -99,14 +99,21 @@ export default function HomePage() {
       type: (row.adType as any) === "want" ? "want" : "sell",
       images: [row.imageUrl || "https://images.unsplash.com/photo-1555617117-08d3a8fef16c?w=1200&q=80&auto=format&fit=crop"],
       boostedUntil: row.boostedUntil ?? null,
-      seller: {
-        name: "demo_seller",
-        score: 10,
-        deals: 0,
-        rating: 5,
-        verifications: { email: true, phone: true, lnurl: false },
-        onTimeRelease: 0.98,
-      },
+      seller: (() => {
+        const name = (row.postedBy || "demo_seller").replace(/^@/, "");
+        const base = Number(row.id) % 100;
+        const score = 5 + (base % 80);
+        const deals = base % 40;
+        const verified = score >= 50;
+        return {
+          name,
+          score,
+          deals,
+          rating: 4 + ((base % 10) / 10),
+          verifications: { email: true, phone: verified, lnurl: verified },
+          onTimeRelease: verified ? 0.97 : 0.9,
+        };
+      })(),
       createdAt: Number(row.createdAt) * 1000,
     }));
   }, []);
