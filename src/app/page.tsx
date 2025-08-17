@@ -292,32 +292,8 @@ export default function HomePage() {
               <div className="mt-8" />
             </div>
 
-            {/* Right Content - Gradient coin */}
-            <div className="relative hidden md:block">
-              <div className="pointer-events-none select-none relative h-56 w-56 md:h-72 md:w-72">
-                <div className="absolute -inset-8 bg-gradient-to-tr from-orange-500/25 via-amber-300/10 to-transparent blur-3xl" />
-                <svg viewBox="0 0 200 200" className="relative drop-shadow-2xl animate-[spin_18s_linear_infinite]">
-                  <defs>
-                    <linearGradient id="coinGrad" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#f59e0b" />
-                      <stop offset="100%" stopColor="#ef4444" />
-                    </linearGradient>
-                    <radialGradient id="shine" cx="30%" cy="25%" r="70%">
-                      <stop offset="0%" stopColor="white" stopOpacity="0.35" />
-                      <stop offset="60%" stopColor="white" stopOpacity="0" />
-                    </radialGradient>
-                  </defs>
-                  <circle cx="100" cy="100" r="88" fill="url(#coinGrad)" stroke="#ffffff" strokeOpacity="0.6" strokeWidth="2" />
-                  <circle cx="100" cy="100" r="76" fill="none" stroke="#ffffff" strokeOpacity="0.25" strokeWidth="2" />
-                  <circle cx="100" cy="100" r="64" fill="none" stroke="#ffffff" strokeOpacity="0.15" strokeDasharray="4 6" strokeWidth="2" />
-                  <circle cx="100" cy="100" r="52" fill="url(#shine)" />
-                  <g transform="translate(100,110)">
-                    <text textAnchor="middle" fontSize="84" fontWeight="800" fill="#111827" fillOpacity="0.85">₿</text>
-                  </g>
-                </svg>
-                <div className="absolute -bottom-5 left-1/2 h-16 w-40 -translate-x-1/2 rounded-full bg-black/30 blur-2xl" />
-              </div>
-            </div>
+            {/* Right Content removed per request */}
+            <div className="hidden md:block" />
           </div>
 
           {/* Search Interface */}

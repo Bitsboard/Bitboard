@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prefer Ubuntu for brand wordmark */
+@font-face {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: local('Ubuntu');
+}
+
 :root {
   --bb-orange-start: #fbbf24;
   --bb-orange-end: #f97316;

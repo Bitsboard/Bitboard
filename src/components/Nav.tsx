@@ -52,7 +52,10 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
           <a href="/" aria-label="Home" className="inline-flex items-center gap-2">
             <LogoMinimal dark={dark} />
             <div className="flex items-center gap-2">
-              <span className={cn("text-lg font-extrabold tracking-tight leading-none", dark ? "text-white" : "text-black")}>bitsbarter</span>
+              <span className={cn("text-lg tracking-tight leading-none", dark ? "text-white" : "text-black")} style={{ fontFamily: 'Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>
+                <span className="font-extrabold">bits</span>
+                <span className="font-medium">barter</span>
+              </span>
               <span
                 className={cn(
                   "hidden rounded-full px-2 py-0.5 text-xs sm:inline",
