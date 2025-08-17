@@ -98,10 +98,8 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
       )}
 
       {/* Images */}
-      <div className="col-span-3 overflow-hidden rounded-l-2xl">
-        <div className="h-full">
-          <Carousel images={listing.images} alt={listing.title} dark={dark} className="h-full aspect-video rounded-r-none" />
-        </div>
+      <div className="col-span-3 overflow-hidden rounded-l-2xl h-full">
+        <Carousel images={listing.images} alt={listing.title} dark={dark} className="h-full aspect-video rounded-r-none" />
       </div>
 
       {/* Content */}
