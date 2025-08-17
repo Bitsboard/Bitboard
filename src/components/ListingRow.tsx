@@ -112,11 +112,11 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
         {/* Title */}
         <h3 className={cn("line-clamp-2 text-lg font-bold", dark ? "text-white" : "text-neutral-900")}>{sanitizeTitle(listing.title, listing.type)}</h3>
         {/* Bottom meta */}
-        <div className="mt-auto flex items-end justify-between pt-2">
+        <div className="mt-auto flex items-end justify-between pt-3">
           <div className="shrink-0">
-            <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} />
+            <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="md" />
           </div>
-          <div className="text-right text-xs">
+          <div className="text-right text-sm">
             <div className={cn(dark ? "text-neutral-300" : "text-neutral-700")}>@{listing.seller.name}</div>
             <div className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍 reputation</div>
           </div>

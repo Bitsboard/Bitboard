@@ -9,6 +9,7 @@ interface PriceBlockProps {
   unit: Unit;
   btcCad: number | null;
   dark: boolean;
+  size?: "sm" | "md";
 }
 
 function cn(...xs: Array<string | false | null | undefined>) {
@@ -23,7 +24,7 @@ function satsToFiat(sats: number, btcFiat: number) {
   return (sats / 1e8) * btcFiat;
 }
 
-function formatFiat(n: number, currency = "USD") {
+function formatFiat(n: number, currency = "CAD") {
   return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 2 }).format(n);
 }
 
@@ -32,14 +33,16 @@ function formatBTCFromSats(sats: number) {
   return btc.toLocaleString(undefined, { maximumFractionDigits: 8 });
 }
 
-export function PriceBlock({ sats, unit, btcCad, dark }: PriceBlockProps) {
+export function PriceBlock({ sats, unit, btcCad, dark, size = "sm" }: PriceBlockProps) {
   const primary = unit === "sats" ? `${formatSats(sats)} sats` : `₿ ${formatBTCFromSats(sats)}`;
-  const usd = btcCad ? formatFiat(satsToFiat(sats, btcCad), "USD") : "— USD";
+  const cad = btcCad ? formatFiat(satsToFiat(sats, btcCad), "CAD") : null;
+  const mainSize = size === "md" ? "text-base" : "text-sm";
+  const subSize = size === "md" ? "text-sm" : "text-xs";
 
   return (
     <div className="flex flex-col items-start">
-      <span className="font-bold text-orange-500">{primary}</span>
-      <span className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>~{usd}</span>
+      <span className={cn("font-bold text-orange-500", mainSize)}>{primary}</span>
+      {cad && <span className={cn(subSize, dark ? "text-neutral-400" : "text-neutral-600")}>~{cad}</span>}
     </div>
   );
 }
