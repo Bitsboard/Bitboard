@@ -287,7 +287,7 @@ export default function HomePage() {
                 </span>
               </h1>
               <p className={cn("mt-6 text-xl leading-relaxed", dark ? "text-neutral-300" : "text-neutral-600")}>
-                {t('subheading', lang)}
+                The Bitcoin-native marketplace
               </p>
               <div className="mt-8" />
             </div>
@@ -380,7 +380,7 @@ export default function HomePage() {
       <main id="browse" className="mx-auto max-w-7xl px-4 pb-24">
         {/* Featured Row */}
         {featured.length > 0 && (
-          <section className="mt-12">
+          <section className="mt-6">
             <div className="mb-6 flex items-baseline justify-between">
               <div className="flex items-center gap-3">
                 <h2 className={cn("text-3xl font-bold", dark ? "text-white" : "text-neutral-900")}>{t('featured', lang)}</h2>
@@ -437,39 +437,7 @@ export default function HomePage() {
           )}
         </section>
 
-        {/* Services Section */}
-        <section className="mt-20">
-          <div className="mb-6 flex items-baseline justify-between">
-            <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}>
-              <span className="text-2xl">🛠️</span>
-              {t('services_label', lang)}
-            </h2>
-            <span className={cn("text-sm font-medium", dark ? "text-neutral-400" : "text-neutral-500")}>
-              {services.length} result{services.length !== 1 ? 's' : ''}
-            </span>
-          </div>
-
-          {layout === "grid" ? (
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {services.map((l) => (
-                <ListingCard key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
-              ))}
-              {services.length === 0 && (
-                <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
-                  <div className="text-4xl mb-4">🔧</div>
-                  <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>{t('no_services_match', lang)}</p>
-                  <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>{t('try_adjust_filters', lang)}</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {services.map((l) => (
-                <ListingRow key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
-              ))}
-            </div>
-          )}
-        </section>
+        {/* Services Section removed per request */}
 
         {/* Safety Tips */}
         <SafetyTipsSection dark={dark} />

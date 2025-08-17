@@ -53,23 +53,23 @@ export function ItemsCarousel({ listings, unit, btcCad, dark, onOpen }: ItemsCar
 
             <button
                 className={cn(
-                    "absolute -left-6 top-1/2 -translate-y-1/2 rounded-full p-3 shadow-lg",
-                    dark ? "bg-neutral-950 text-white hover:bg-neutral-900" : "bg-white text-neutral-900 hover:bg-neutral-100"
+                    "absolute -left-8 top-1/2 -translate-y-1/2 rounded-xl px-3 py-2 text-sm font-semibold ring-1 transition",
+                    dark ? "bg-neutral-950/80 text-white ring-neutral-800 hover:bg-neutral-900" : "bg-white/80 text-neutral-900 ring-neutral-300 hover:bg-white"
                 )}
                 aria-label="Previous"
                 onClick={() => scrollByAmount(-400)}
             >
-                ‹
+                ←
             </button>
             <button
                 className={cn(
-                    "absolute -right-6 top-1/2 -translate-y-1/2 rounded-full p-3 shadow-lg",
-                    dark ? "bg-neutral-950 text-white hover:bg-neutral-900" : "bg-white text-neutral-900 hover:bg-neutral-100"
+                    "absolute -right-8 top-1/2 -translate-y-1/2 rounded-xl px-3 py-2 text-sm font-semibold ring-1 transition",
+                    dark ? "bg-neutral-950/80 text-white ring-neutral-800 hover:bg-neutral-900" : "bg-white/80 text-neutral-900 ring-neutral-300 hover:bg-white"
                 )}
                 aria-label="Next"
                 onClick={() => scrollByAmount(400)}
             >
-                ›
+                →
             </button>
         </div>
     );
