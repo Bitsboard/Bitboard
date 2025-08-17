@@ -30,8 +30,15 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
     process.env.NEXT_PUBLIC_BRANCH === "staging" ||
     process.env.NEXT_PUBLIC_ENV === "staging";
   const lang = useLang();
-
-  React.useEffect(() => { /* i18n hook drives updates */ }, [lang]);
+  const [langOpen, setLangOpen] = React.useState(false);
+  const langRef = React.useRef<HTMLDivElement | null>(null);
+  React.useEffect(() => {
+    function onDoc(e: MouseEvent) {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false);
+    }
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, []);
 
   return (
     <nav
@@ -40,11 +47,6 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
         dark ? "border-b border-neutral-900 bg-neutral-950/80" : "border-b border-neutral-200 bg-white/80"
       )}
     >
-      {isStaging && (
-        <span className="absolute left-2 top-2 rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow">
-          staging
-        </span>
-      )}
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
           <a href="/" aria-label="Home" className="inline-flex items-center gap-2">
@@ -59,15 +61,28 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
               >
                 BETA
               </span>
+              {isStaging && (
+                <span className="hidden sm:inline rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow">
+                  STAGING
+                </span>
+              )}
             </div>
           </a>
         </div>
         <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-1 mr-2">
-            <button aria-label="English" onClick={() => setLang('en' as any)} className={cn("px-2 py-1 rounded-md text-sm", lang === 'en' ? "bg-neutral-800 text-white" : dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}>🇺🇸</button>
-            <button aria-label="Français" onClick={() => setLang('fr' as any)} className={cn("px-2 py-1 rounded-md text-sm", lang === 'fr' ? "bg-neutral-800 text-white" : dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}>🇫🇷</button>
-            <button aria-label="Español" onClick={() => setLang('es' as any)} className={cn("px-2 py-1 rounded-md text-sm", lang === 'es' ? "bg-neutral-800 text-white" : dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}>🇪🇸</button>
-            <button aria-label="Deutsch" onClick={() => setLang('de' as any)} className={cn("px-2 py-1 rounded-md text-sm", lang === 'de' ? "bg-neutral-800 text-white" : dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}>🇩🇪</button>
+          <div ref={langRef} className="relative hidden sm:block mr-2">
+            <button onClick={() => setLangOpen((v) => !v)} aria-label="Language"
+              className={cn("px-2 py-1 rounded-md text-sm", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}>
+              {lang === 'fr' ? '🇫🇷' : lang === 'es' ? '🇪🇸' : lang === 'de' ? '🇩🇪' : '🇺🇸'}
+            </button>
+            {langOpen && (
+              <div className={cn("absolute right-0 mt-2 w-44 rounded-xl border shadow-2xl z-50", dark ? "border-neutral-700/50 bg-neutral-900/95" : "border-neutral-300/50 bg-white/95")}> 
+                <button onClick={() => { setLang('en' as any); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇺🇸 English</button>
+                <button onClick={() => { setLang('fr' as any); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇫🇷 Français</button>
+                <button onClick={() => { setLang('es' as any); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇪🇸 Español</button>
+                <button onClick={() => { setLang('de' as any); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇩🇪 Deutsch</button>
+              </div>
+            )}
           </div>
           <a
             href="#how"
