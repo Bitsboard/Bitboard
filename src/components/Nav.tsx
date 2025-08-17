@@ -87,13 +87,13 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
           </div>
           <a
             href="#how"
-            className={cn("rounded-xl px-3 py-2 text-sm", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}
+            className={cn("rounded-xl px-3 py-2 text-sm font-semibold", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}
           >
             {t('how_it_works', lang)}
           </a>
           <a
             href="#pricing"
-            className={cn("rounded-xl px-3 py-2 text-sm", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}
+            className={cn("rounded-xl px-3 py-2 text-sm font-semibold", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}
           >
             {t('pricing', lang)}
           </a>
@@ -108,9 +108,7 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
           )}
           {/* Settings Dropdown */}
           <div className="relative group">
-            <button className={cn("rounded-xl px-3 py-2 text-sm", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}>
-              ☰
-            </button>
+            <button className={cn("rounded-xl px-3 py-2 text-base font-bold shadow ring-1", dark ? "text-neutral-200 hover:bg-neutral-900 ring-neutral-800" : "text-neutral-800 hover:bg-neutral-100 ring-neutral-300")}>☰</button>
             <div className={cn("absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl backdrop-blur-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200", dark ? "border-neutral-700/50 bg-neutral-900/90" : "border-neutral-300/50 bg-white/95")}>
               <div className="p-4 space-y-4">
                 <div className="flex items-center justify-between">
