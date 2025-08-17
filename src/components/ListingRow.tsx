@@ -98,14 +98,14 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
       )}
 
       {/* Images */}
-      <div className="col-span-3 -m-4 mr-0">
+      <div className="col-span-3 overflow-hidden rounded-l-2xl">
         <div className="h-full">
           <Carousel images={listing.images} alt={listing.title} dark={dark} className="h-full aspect-video rounded-r-none" />
         </div>
       </div>
 
       {/* Content */}
-      <div className="col-span-9 flex flex-col">
+      <div className="col-span-9 flex flex-col pl-2 sm:pl-4 md:pl-6">
         {/* Tag row */}
         <div className="flex items-center justify-between mb-1 gap-2 min-w-0">
           <span className={cn("flex-shrink-0 rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>{listing.type === 'want' ? 'Looking For' : 'Selling'}</span>

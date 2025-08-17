@@ -415,7 +415,7 @@ export default function HomePage() {
               )}
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 max-w-5xl mx-auto w-full">
               {goods.map((l) => (
                 <ListingRow key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
               ))}
