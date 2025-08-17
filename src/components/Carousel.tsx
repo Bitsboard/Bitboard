@@ -9,13 +9,14 @@ interface CarouselProps {
     className?: string;
     showDots?: boolean;
     showArrows?: boolean;
+    rounded?: string; // tailwind rounding classes applied to the image container
 }
 
 function cn(...xs: Array<string | false | null | undefined>) {
     return xs.filter(Boolean).join(" ");
 }
 
-export function Carousel({ images, alt, dark, className, showDots = true, showArrows = true }: CarouselProps) {
+export function Carousel({ images, alt, dark, className, showDots = true, showArrows = true, rounded = "rounded-xl" }: CarouselProps) {
     const validImages = images && images.length > 0 ? images : [
         "https://images.unsplash.com/photo-1555617117-08d3a8fef16c?w=1200&q=80&auto=format&fit=crop",
     ];
@@ -74,7 +75,7 @@ export function Carousel({ images, alt, dark, className, showDots = true, showAr
             onTouchEnd={onTouchEnd}
             aria-roledescription="carousel"
         >
-            <div className="relative h-full w-full overflow-hidden rounded-xl">
+            <div className={cn("relative h-full w-full overflow-hidden", rounded)}>
                 <div
                     className="flex h-full w-full transition-transform duration-300"
                     style={{ transform: `translateX(-${index * 100}%)` }}

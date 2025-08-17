@@ -245,7 +245,7 @@ export default function HomePage() {
     if (query) sp.set("q", query);
     if (cat && cat !== "Featured") sp.set("category", cat);
     if (adType && adType !== "all") sp.set("adType", adType);
-    try { localStorage.setItem('layoutPref', layout); } catch {}
+    try { localStorage.setItem('layoutPref', layout); } catch { }
     sp.set('layout', layout);
     router.push(`/search?${sp.toString()}`);
   }, [adType, cat, query, layout, router]);

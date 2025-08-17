@@ -90,7 +90,7 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
     >
       <div className={cn("h-1 w-full bg-gradient-to-r rounded-t-2xl", a.stripe)} />
       <div className="relative">
-        <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-square rounded-b-none" />
+        <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-square" rounded="rounded-t-2xl" />
         {/* tags under image, not overlay */}
       </div>
       <div className="p-4">
