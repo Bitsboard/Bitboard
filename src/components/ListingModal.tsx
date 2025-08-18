@@ -115,8 +115,8 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
           {/* Left: media + seller + safety/report (static) */}
           <div className="md:col-span-3 overflow-hidden">
             <div className="relative">
-              <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[5/4]" showThumbnails showDots={false} />
-              <div className={cn("pointer-events-none absolute left-0 right-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r", a.stripe)} />
+              <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[5/4]" showThumbnails showDots={false} rounded="" />
+              <div className={cn("pointer-events-none absolute left-0 right-0 top-0 h-1 bg-gradient-to-r", a.stripe)} />
               {/* Overlay chips removed per request */}
             </div>
             <div className="p-4">
