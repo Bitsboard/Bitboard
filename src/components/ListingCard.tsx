@@ -89,7 +89,7 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
       )}
     >
       <div className="relative">
-        <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[5/4]" rounded="rounded-t-2xl" />
+        <Carousel images={[listing.images[0]]} alt={listing.title} dark={dark} className="aspect-[5/4]" rounded="rounded-t-2xl" showDots={false} showArrows={false} />
         <div className={cn("pointer-events-none absolute left-0 right-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r", a.stripe)} />
         {/* Overlay: type bottom-left, location bottom-right */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">

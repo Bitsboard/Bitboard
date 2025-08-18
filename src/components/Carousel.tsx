@@ -135,7 +135,7 @@ export function Carousel({ images, alt, dark, className, showDots = true, showAr
 
                 {/* Thumbnails */}
                 {showThumbnails && validImages.length > 1 && (
-                    <div className="pointer-events-auto absolute bottom-2 left-2 right-2 flex items-center justify-start gap-2 overflow-x-auto">
+                    <div className="pointer-events-auto absolute bottom-2 left-0 right-0 flex items-center justify-center gap-2 px-2 overflow-x-auto">
                         {validImages.map((src, i) => (
                             <button
                                 key={i}

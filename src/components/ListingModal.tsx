@@ -126,12 +126,15 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
         {/* Right: scrollable title + long description and action */}
         <div className={cn("md:col-span-2 border-l overflow-auto", dark ? "border-neutral-900" : "border-neutral-200")}> 
           <div className="p-4">
-            <h2 className={cn("text-2xl font-bold mb-3", dark ? "text-white" : "text-neutral-900")}>{listing.title}</h2>
-            <div className={cn("prose prose-sm max-w-none", dark ? "prose-invert" : "")}> 
+            <h2 className={cn("text-2xl font-bold", dark ? "text-white" : "text-neutral-900")}>{listing.title}</h2>
+            <div className="mt-2">
+              <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="lg" compactFiat />
+            </div>
+            <div className={cn("prose prose-sm max-w-none mt-4", dark ? "prose-invert" : "")}> 
               <p className={cn("whitespace-pre-wrap", dark ? "text-neutral-300" : "text-neutral-800")}>{listing.desc}</p>
             </div>
             <div className="mt-6">
-              <button onClick={onChat} className="rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2 font-semibold text-neutral-950 shadow shadow-orange-500/30">
+              <button onClick={onChat} className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-red-500 px-4 py-3 font-semibold text-white shadow">
                 {t('message_seller', lang)}
               </button>
             </div>
