@@ -103,6 +103,13 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         return () => cleanup();
     }, [open]);
 
+    // When the modal opens, seed the search box with the current selection so it's not blank
+    React.useEffect(() => {
+        if (!open) return;
+        const currentName = center?.name || initialCenter?.name || "";
+        if (currentName && !query) setQuery(currentName);
+    }, [open]);
+
     // Update circle when radius changes
     React.useEffect(() => {
         if (circleRef.current) {
