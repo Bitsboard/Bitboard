@@ -188,7 +188,8 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                         <select
                             value={radiusKm}
                             onChange={(e) => setRadiusKm(Number(e.target.value))}
-                            className={cn("w-full rounded-xl px-4 py-3 text-sm border appearance-none bg-no-repeat pr-10", dark ? "border-neutral-700 bg-neutral-800 text-neutral-100" : "border-neutral-300 bg-white text-neutral-900")}
+                            disabled={(() => { const n = (center?.name || initialCenter?.name || '').trim(); if (!n) return false; const parts = n.split(',').map(s=>s.trim()).filter(Boolean); return parts.length === 1; })()}
+                            className={cn("w-full rounded-xl px-4 py-3 text-sm border appearance-none bg-no-repeat pr-10", dark ? "border-neutral-700 bg-neutral-800 text-neutral-100" : "border-neutral-300 bg-white text-neutral-900", ((center?.name || initialCenter?.name || '').trim().split(',').filter(Boolean).length === 1) && "opacity-60 cursor-not-allowed")}
                             style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 1.25rem center', backgroundSize: '1.25em 1.25em' }}
                         >
                             {[2,5,10,25,50,100,250,500].map((n) => (
