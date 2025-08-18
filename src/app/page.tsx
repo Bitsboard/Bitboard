@@ -308,7 +308,7 @@ export default function HomePage() {
               <p className={cn("mt-6 text-xl leading-relaxed", dark ? "text-neutral-300" : "text-neutral-600")}>
                 {t('subheading', lang)}
               </p>
-              
+
             </div>
 
             {/* Right: Location above search */}

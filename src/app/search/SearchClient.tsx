@@ -243,8 +243,8 @@ export default function SearchClient() {
 
     const bg = dark ? "bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950" : "bg-gradient-to-br from-neutral-50 via-white to-neutral-100";
     const inputBase = dark
-        ? "border-neutral-700/50 bg-neutral-800/50 text-neutral-100 placeholder-neutral-400 focus:border-orange-500/50 focus:bg-neutral-800/70 backdrop-blur-sm"
-        : "border-neutral-300/50 bg-white/80 text-neutral-900 placeholder-neutral-500 focus:border-orange-500/50 focus:bg-white backdrop-blur-sm";
+        ? "border border-white/30 bg-neutral-800/50 text-neutral-100 placeholder-neutral-400 backdrop-blur-sm"
+        : "border border-neutral-700/30 bg-white/80 text-neutral-900 placeholder-neutral-500 backdrop-blur-sm";
 
     const applyFilters = () => {
         const sp = buildParams();
@@ -277,7 +277,7 @@ export default function SearchClient() {
                             onChange={(e) => setInputQuery(e.target.value)}
                             onKeyDown={(e) => { if (e.key === "Enter") applyFilters(); }}
                             placeholder={t('search', lang) + " bikes, ASICs, consoles…"}
-                            className={cn("w-full rounded-3xl px-6 pr-32 py-5 text-lg focus:outline-none transition-all duration-300 hover:border-orange-500/50", inputBase)}
+                            className={cn("w-full rounded-3xl px-6 pr-32 py-5 text-lg focus:outline-none transition-all duration-300", inputBase)}
                         />
                         <button
                             onClick={applyFilters}
