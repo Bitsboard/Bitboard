@@ -145,7 +145,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
                 </div>
                 {/* Row 2, Col 2: safety warning + localized learn more link */}
                 <div className="flex justify-end">
-                  <div className={cn("flex items-center gap-2 text-xs text-right whitespace-nowrap", dark ? "text-neutral-400" : "text-neutral-600")}> 
+                  <div className={cn("flex items-center gap-2 text-xs text-right whitespace-nowrap", dark ? "text-neutral-400" : "text-neutral-600")}>
                     <span>{t('listing_warning', lang)}</span>
                     <a href={`/${lang}/safety`} className={cn("font-semibold underline", dark ? "text-neutral-300" : "text-neutral-700")}>{t('learn_more', lang)}</a>
                   </div>

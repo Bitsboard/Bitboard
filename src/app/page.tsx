@@ -254,8 +254,8 @@ export default function HomePage() {
   const bg = dark ? "bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950" : "bg-gradient-to-br from-neutral-50 via-white to-neutral-100";
   const panel = dark ? "border-neutral-800/50 bg-neutral-900/30 backdrop-blur-sm" : "border-neutral-200/50 bg-white/80 backdrop-blur-sm";
   const inputBase = dark
-    ? "border border-white/60 bg-neutral-800/50 text-neutral-100 placeholder-neutral-400 focus:border-white/80 focus:bg-neutral-800/70 backdrop-blur-sm"
-    : "border border-white bg-white/80 text-neutral-900 placeholder-neutral-500 focus:border-white focus:bg-white backdrop-blur-sm";
+    ? "border border-white/30 bg-neutral-800/50 text-neutral-100 placeholder-neutral-400 backdrop-blur-sm"
+    : "border border-neutral-700/30 bg-white/80 text-neutral-900 placeholder-neutral-500 backdrop-blur-sm";
 
   const handleSearchNavigate = useCallback(() => {
     const sp = new URLSearchParams();
@@ -295,7 +295,7 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_50%)]" />
         </div>
 
-        <div className="relative mx-auto max-w-7xl px-4 py-14 sm:py-20">
+        <div className="relative mx-auto max-w-7xl px-4 py-8 sm:py-10">
           <div className="flex flex-col-reverse items-start gap-3 md:flex-row md:items-center md:justify-between">
             {/* Left Content */}
             <div className="max-w-2xl">
@@ -308,7 +308,7 @@ export default function HomePage() {
               <p className={cn("mt-6 text-xl leading-relaxed", dark ? "text-neutral-300" : "text-neutral-600")}>
                 {t('subheading', lang)}
               </p>
-              <div className="mt-4" />
+              
             </div>
 
             {/* Right: Location above search */}
@@ -321,7 +321,7 @@ export default function HomePage() {
                   </div>
                 </button>
               </div>
-              <div className="relative mt-3">
+              <div className="relative mt-2">
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -340,7 +340,7 @@ export default function HomePage() {
       <main id="browse" className="mx-auto max-w-7xl px-4 pb-24">
         {/* Featured Row */}
         {featured.length > 0 && (
-          <section className="mt-10">
+          <section className="mt-6">
             <div className="mb-6 flex items-baseline justify-between">
               <div className="flex items-center gap-3">
                 <h2 className={cn("text-3xl font-bold", dark ? "text-white" : "text-neutral-900")}>{t('featured', lang)}</h2>
