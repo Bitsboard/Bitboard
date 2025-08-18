@@ -126,6 +126,16 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         }
     }, [center.lat, center.lng]);
 
+    // If a country-only location is selected, auto-set radius to Nationally
+    React.useEffect(() => {
+        const n = (center?.name || initialCenter?.name || '').trim();
+        const isCountryOnly = n && n.split(',').map(s => s.trim()).filter(Boolean).length === 1;
+        if (!isCountryOnly) return;
+        if (radiusKm !== 1000000 && radiusKm !== 5000000) {
+            setRadiusKm(1000000);
+        }
+    }, [center?.name]);
+
     // Remote suggestions via our Edge endpoint (Nominatim-backed)
     React.useEffect(() => {
         const q = query.trim();
