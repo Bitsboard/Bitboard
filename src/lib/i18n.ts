@@ -64,7 +64,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         close: "Close",
         // Listing modal
         message_seller: "Message seller",
-        listing_warning: "Keep all correspondence in-app for safety. Off-app contact is against our guidelines. When ready, attach an escrow proposal from the chat composer.",
+        listing_warning: "For safety, please keep all correspondence in-app.",
         // Categories
         cat_all: "All",
         cat_electronics: "Electronics",

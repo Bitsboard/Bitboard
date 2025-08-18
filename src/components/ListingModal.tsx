@@ -123,7 +123,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
                     <span className="opacity-80">+{listing.seller.score} 👍</span>
                   </div>
                   <button onClick={onChat} className="min-w-[240px] rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2 text-sm font-semibold text-white shadow">
-                    {t('message_seller', lang)}
+                    Send a Message
                   </button>
                 </div>
               </div>
@@ -142,7 +142,6 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
               </div>
               <div className={cn("my-3 h-px", dark ? "bg-neutral-900" : "bg-neutral-200")} />
               {/* Info previously on the right column has been moved under the image; keep right column focused on price/location and description. */}
-              <div className={cn("my-3 h-px", dark ? "bg-neutral-900" : "bg-neutral-200")} />
             </div>
             <div className="flex-1 overflow-y-auto p-4 pr-10">
               <div className={cn("prose prose-sm max-w-none", dark ? "prose-invert" : "")}>
