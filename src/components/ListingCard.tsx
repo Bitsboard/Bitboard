@@ -94,15 +94,10 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
         {/* tags under image, not overlay */}
       </div>
       <div className="p-4 pt-6">
-        {/* Top meta: left (location then type), right (seller + rep) */}
-        <div className="mb-2 min-w-0">
+        {/* Top meta: left location, right seller */}
+        <div className="min-w-0">
           <div className="flex items-start justify-between gap-3">
-            <div className="flex min-w-0 flex-col gap-1">
-              <span className={cn("truncate max-w-[12rem] sm:max-w-[16rem] rounded-full px-3 py-1 text-[11px]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
-              <span className={cn("flex-shrink-0 rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>
-                {listing.type === 'want' ? 'Looking For' : 'Selling'}
-              </span>
-            </div>
+            <span className={cn("truncate max-w-[12rem] sm:max-w-[16rem] rounded-full px-3 py-1 text-[11px]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
             <div className="text-right text-xs sm:text-sm">
               <div className={cn("inline-flex items-center gap-1", dark ? "text-neutral-300" : "text-neutral-700")}> 
                 {listing.seller.score >= 50 && (
@@ -119,19 +114,26 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
                 )}
                 <span className="truncate max-w-[8rem] sm:max-w-[10rem]">@{listing.seller.name}</span>
               </div>
-              <div className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>
+              <div className={cn("mt-0.5", dark ? "text-neutral-400" : "text-neutral-600")}>
                 +{listing.seller.score} 👍
               </div>
             </div>
           </div>
         </div>
+        {/* subtle divider */}
+        <div className={cn("my-3 h-px", dark ? "bg-neutral-900" : "bg-neutral-200")} />
         {/* Two-line title */}
         <div className="min-h-[3.5rem]">
           <h3 className={cn("line-clamp-2 text-xl font-semibold leading-snug", dark ? "text-white" : "text-neutral-900")}>{sanitizeTitle(listing.title, listing.type)}</h3>
         </div>
-        {/* Price under title */}
-        <div className="mt-3">
-          <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="lg" />
+        {/* Bottom row: type chip left, price right */}
+        <div className="mt-3 flex items-end justify-between">
+          <span className={cn("flex-shrink-0 rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>
+            {listing.type === 'want' ? 'Looking For' : 'Selling'}
+          </span>
+          <div className="shrink-0">
+            <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="lg" />
+          </div>
         </div>
       </div>
     </article>
