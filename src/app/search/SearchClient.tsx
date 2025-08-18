@@ -71,12 +71,12 @@ export default function SearchClient() {
     useEffect(() => {
         try {
             const first = window.location.pathname.split('/').filter(Boolean)[0];
-            const known = ['en','fr','es','de'];
+            const known = ['en', 'fr', 'es', 'de'];
             if (first && known.includes(first)) {
                 // Force document lang to match
                 document.documentElement.lang = first;
             }
-        } catch {}
+        } catch { }
     }, []);
     useEffect(() => { setSelCategory(category); }, [category]);
     useEffect(() => { setSelAdType(adTypeParam); }, [adTypeParam]);

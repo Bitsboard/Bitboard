@@ -2,8 +2,8 @@ import "./../styles/globals.css";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
-import { getLang, setLang } from "@/lib/i18n";
-import { useEffect } from "react";
+import { getLang } from "@/lib/i18n";
+import { LocaleHydrator } from "./LocaleHydrator";
 
 export const metadata: Metadata = {
   title: "bitsbarter - Local Classifieds in Bitcoin",
@@ -18,20 +18,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const lang = getLang();
-  useEffect(() => {
-    try {
-      const known = ['en','fr','es','de'];
-      const first = window.location.pathname.split('/').filter(Boolean)[0];
-      if (first && known.includes(first)) {
-        // @ts-ignore
-        if (first !== getLang()) setLang(first as any);
-      }
-    } catch {}
-  }, []);
   return (
     <html lang={lang} suppressHydrationWarning>
       <body className="antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          <LocaleHydrator />
           {children}
         </ThemeProvider>
       </body>
