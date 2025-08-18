@@ -89,7 +89,7 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
       )}
     >
       <div className="relative">
-        <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-square" rounded="rounded-t-2xl" />
+        <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[5/4]" rounded="rounded-t-2xl" />
         <div className={cn("pointer-events-none absolute left-0 right-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r", a.stripe)} />
         {/* Overlay: type bottom-left, location bottom-right */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">
@@ -108,11 +108,11 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
         </div>
         {/* Price and fiat */}
         <div className="mt-3">
-          <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="lg" />
+          <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="lg" compactFiat />
         </div>
-        {/* Seller info at bottom */}
-        <div className="mt-4 text-right text-sm">
-          <div className={cn("inline-flex items-center gap-1", dark ? "text-neutral-300" : "text-neutral-700")}> 
+        {/* Seller info at bottom (one line, left) */}
+        <div className="mt-4 text-left text-sm">
+          <div className={cn("inline-flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}> 
             {listing.seller.score >= 50 && (
               <span
                 className={cn(
@@ -126,8 +126,8 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
               </span>
             )}
             <span className="truncate max-w-[8rem] sm:max-w-[10rem]">@{listing.seller.name}</span>
+            <span className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍</span>
           </div>
-          <div className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍</div>
         </div>
       </div>
     </article>
