@@ -109,6 +109,19 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
             <div className="flex justify-end">
               <span className={cn("text-sm font-bold cursor-pointer text-right", dark ? "text-red-400" : "text-red-600")}>{t('report_listing', lang)}</span>
             </div>
+            {/* Seller info + button on the right side of the left column */}
+            <div className="mt-2 flex flex-col items-end gap-2">
+              <div className={cn("text-sm flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}> 
+                {listing.seller.score >= 50 && (
+                  <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-extrabold shadow-[0_0_8px_rgba(56,189,248,0.8)]", dark ? "bg-sky-500" : "bg-sky-500")} aria-label="Verified" title="User has verified their identity">✓</span>
+                )}
+                <span>{listing.seller.name}</span>
+                <span className="opacity-80">+{listing.seller.score} 👍</span>
+              </div>
+              <button onClick={onChat} className="min-w-[240px] rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2 text-sm font-semibold text-white shadow">
+                Send a Message
+              </button>
+            </div>
           </div>
         </div>
 
@@ -123,19 +136,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
               <span className={cn("truncate max-w-[60%] rounded-full px-3 py-1 text-[11px]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
             </div>
             <div className={cn("my-3 h-px", dark ? "bg-neutral-900" : "bg-neutral-200")} />
-            {/* Seller info + button (static, above scrolling) */}
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <div className={cn("text-sm flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}>
-                {listing.seller.score >= 50 && (
-                  <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-extrabold shadow-[0_0_8px_rgba(56,189,248,0.8)]", dark ? "bg-sky-500" : "bg-sky-500")} aria-label="Verified" title="User has verified their identity">✓</span>
-                )}
-                <span>{listing.seller.name}</span>
-                <span className="opacity-80">+{listing.seller.score} 👍</span>
-              </div>
-              <button onClick={onChat} className="min-w-[240px] rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2 text-sm font-semibold text-white shadow">
-                Send a Message
-              </button>
-            </div>
+            {/* Removed seller info/button from right column */}
             <div className={cn("my-3 h-px", dark ? "bg-neutral-900" : "bg-neutral-200")} />
           </div>
           <div className="flex-1 overflow-y-auto p-4 pr-10">
