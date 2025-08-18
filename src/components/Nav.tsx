@@ -39,6 +39,21 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
     return () => document.removeEventListener('mousedown', onDoc);
   }, []);
 
+  function navigateToLocale(next: 'en' | 'fr' | 'es' | 'de') {
+    try {
+      const { pathname, search, hash } = window.location;
+      const parts = pathname.split('/').filter(Boolean);
+      const first = parts[0];
+      const known = ['en', 'fr', 'es', 'de'];
+      if (first && known.includes(first)) parts.shift();
+      const newPath = '/' + [next, ...parts].join('/');
+      const url = newPath + (search || '') + (hash || '');
+      window.location.assign(url);
+    } catch {
+      setLang(next);
+    }
+  }
+
   return (
     <nav
       className={cn(
@@ -79,10 +94,10 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
             </button>
             {langOpen && (
               <div className={cn("absolute right-0 mt-2 w-44 rounded-xl border shadow-2xl z-50", dark ? "border-neutral-700/50 bg-neutral-900/95" : "border-neutral-300/50 bg-white/95")}>
-                <button onClick={() => { setLang('en' as any); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇺🇸 English</button>
-                <button onClick={() => { setLang('fr' as any); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇫🇷 Français</button>
-                <button onClick={() => { setLang('es' as any); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇪🇸 Español</button>
-                <button onClick={() => { setLang('de' as any); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇩🇪 Deutsch</button>
+                <button onClick={() => { navigateToLocale('en'); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇺🇸 English</button>
+                <button onClick={() => { navigateToLocale('fr'); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇫🇷 Français</button>
+                <button onClick={() => { navigateToLocale('es'); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇪🇸 Español</button>
+                <button onClick={() => { navigateToLocale('de'); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇩🇪 Deutsch</button>
               </div>
             )}
           </div>

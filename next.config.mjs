@@ -14,6 +14,10 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_BRANCH: branch,
     NEXT_PUBLIC_ENV: process.env.NEXT_PUBLIC_ENV || inferredEnv
+  },
+  i18n: {
+    locales: ["en", "fr", "es", "de"],
+    defaultLocale: "en"
   }
 };
 export default nextConfig;

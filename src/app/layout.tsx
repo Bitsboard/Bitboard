@@ -2,6 +2,7 @@ import "./../styles/globals.css";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
+import { getLang } from "@/lib/i18n";
 
 export const metadata: Metadata = {
   title: "bitsbarter - Local Classifieds in Bitcoin",
@@ -15,8 +16,9 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  const lang = getLang();
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={lang} suppressHydrationWarning>
       <body className="antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           {children}
