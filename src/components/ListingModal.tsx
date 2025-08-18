@@ -115,8 +115,8 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
             <div className="mt-2 flex items-start justify-between gap-3">
               <div className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>{t('listing_warning', lang)}</div>
               <div className="flex flex-col items-end gap-2">
-                <button onClick={onChat} className="min-w-[220px] rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2 text-sm font-semibold text-white shadow">
-                  {t('message_seller', lang)}
+                <button onClick={onChat} className="min-w-[240px] rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2 text-sm font-semibold text-white shadow">
+                  Send a Message
                 </button>
                 <span className={cn("text-sm font-bold cursor-pointer text-right", dark ? "text-red-400" : "text-red-600")}>{t('report_listing', lang)}</span>
               </div>
@@ -124,9 +124,9 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
           </div>
         </div>
 
-        {/* Right: scrollable meta + top row + description */}
-        <div className={cn("md:col-span-2 border-l overflow-y-auto", dark ? "border-neutral-900" : "border-neutral-200")} style={{ maxHeight: "calc(90vh - 64px)" }}> 
-          <div className="p-4 pr-6">
+        {/* Right: static top row + scrollable description with extra right padding */}
+        <div className={cn("md:col-span-2 border-l flex flex-col", dark ? "border-neutral-900" : "border-neutral-200")} style={{ maxHeight: "calc(90vh - 64px)" }}> 
+          <div className="p-4 pr-6 shrink-0">
             {/* Top row: price left, location right */}
             <div className="mb-2 flex items-center justify-between gap-2">
               <div className="shrink-0">
@@ -135,10 +135,11 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
               <span className={cn("truncate max-w-[60%] rounded-full px-3 py-1 text-[11px]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
             </div>
             <div className={cn("my-3 h-px", dark ? "bg-neutral-900" : "bg-neutral-200")} />
-            <div className={cn("prose prose-sm max-w-none mt-4", dark ? "prose-invert" : "")}>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 pr-8">
+            <div className={cn("prose prose-sm max-w-none", dark ? "prose-invert" : "")}> 
               <p className={cn("whitespace-pre-wrap", dark ? "text-neutral-300" : "text-neutral-800")}>{listing.desc}</p>
             </div>
-            {/* Message button moved to left column below report link */}
           </div>
         </div>
         </div>
