@@ -66,7 +66,8 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         message_seller: "Message seller",
         send_message: "Send a Message",
         share_listing: "Share listing",
-        listing_warning: "For safety, keep correspondence in-app. Learn more",
+        listing_warning: "For safety, keep correspondence in-app.",
+        learn_more: "Learn more",
         results: "results",
         // Categories
         cat_all: "All",
@@ -149,7 +150,8 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         message_seller: "Contacter le vendeur",
         send_message: "Envoyer un message",
         share_listing: "Partager l'annonce",
-        listing_warning: "Pour votre sécurité, gardez la correspondance dans l'application. En savoir plus",
+        listing_warning: "Pour votre sécurité, gardez la correspondance dans l'application.",
+        learn_more: "En savoir plus",
         results: "résultats",
         // Categories
         cat_all: "Tous",
@@ -232,7 +234,8 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         message_seller: "Enviar mensaje al vendedor",
         send_message: "Enviar mensaje",
         share_listing: "Compartir anuncio",
-        listing_warning: "Por seguridad, mantén la correspondencia en la app. Más información",
+        listing_warning: "Por seguridad, mantén la correspondencia en la app.",
+        learn_more: "Más información",
         results: "resultados",
         // Categories
         cat_all: "Todos",
@@ -315,7 +318,8 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         message_seller: "Nachricht an Verkäufer",
         send_message: "Nachricht senden",
         share_listing: "Anzeige teilen",
-        listing_warning: "Zur Sicherheit Korrespondenz in der App führen. Mehr erfahren",
+        listing_warning: "Zur Sicherheit Korrespondenz in der App führen.",
+        learn_more: "Mehr erfahren",
         results: "Ergebnisse",
         // Categories
         cat_all: "Alle",
