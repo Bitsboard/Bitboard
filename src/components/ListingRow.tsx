@@ -120,7 +120,21 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
             <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="lg" />
           </div>
           <div className="text-right text-base">
-            <div className={cn(dark ? "text-neutral-300" : "text-neutral-700")}>@{listing.seller.name}</div>
+            <div className={cn("inline-flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}>
+              {listing.seller.score >= 50 && (
+                <span
+                  className={cn(
+                    "verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-extrabold shadow-[0_0_8px_rgba(56,189,248,0.8)]",
+                    dark ? "bg-sky-500" : "bg-sky-500"
+                  )}
+                  aria-label="Verified"
+                  title="Verified"
+                >
+                  ✓
+                </span>
+              )}
+              <span className="truncate max-w-[12rem] sm:max-w-[16rem] md:max-w-[20rem]">@{listing.seller.name}</span>
+            </div>
             <div className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍 reputation</div>
           </div>
         </div>

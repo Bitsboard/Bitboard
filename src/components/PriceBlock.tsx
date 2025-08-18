@@ -36,7 +36,7 @@ function formatBTCFromSats(sats: number) {
 export function PriceBlock({ sats, unit, btcCad, dark, size = "sm" }: PriceBlockProps) {
   const primary = unit === "sats" ? `${formatSats(sats)} sats` : `₿ ${formatBTCFromSats(sats)}`;
   const cad = btcCad ? formatFiat(satsToFiat(sats, btcCad), "CAD") : null;
-  const mainSize = size === "lg" ? "text-lg" : size === "md" ? "text-base" : "text-sm";
+  const mainSize = size === "lg" ? "text-2xl" : size === "md" ? "text-xl" : "text-base";
   const subSize = size === "lg" ? "text-base" : size === "md" ? "text-sm" : "text-xs";
 
   return (
