@@ -275,6 +275,24 @@ export default function SearchClient() {
     const regionsList = useMemo(() => Array.from(new Set(regionsForCountry.map(l => l.region))), [regionsForCountry]);
     const citiesList = useMemo(() => regionsForCountry.filter(l => l.region === region).map(l => l.city), [regionsForCountry, region]);
 
+    function getSavedPlaceName(): string | null {
+        try {
+            const raw = localStorage.getItem('userLocation');
+            if (!raw) return null;
+            const p = JSON.parse(raw) as { name?: string };
+            return p?.name || null;
+        } catch { return null; }
+    }
+
+    function deriveCountry(name: string | null): string | null {
+        if (!name) return null;
+        const parts = name.split(',').map(s => s.trim()).filter(Boolean);
+        if (parts.length === 0) return null;
+        const last = parts[parts.length - 1];
+        if (last && last.length > 2) return last;
+        return null;
+    }
+
     return (
         <div className={cn("min-h-screen", bg, dark ? "dark" : "")}>
             <Nav onPost={() => { }} onToggleTheme={() => setDark((d) => !d)} dark={dark} user={null} onAuth={() => { }} unit={unit} setUnit={setUnit} layout={layout} setLayout={setLayout} />
@@ -318,15 +336,15 @@ export default function SearchClient() {
                     <aside className="lg:col-span-3 space-y-4">
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
                             <div className="flex items-start justify-between">
-                                <div className="font-semibold">{t('location', lang)}</div>
+                                <div className={cn("font-semibold", dark ? "text-neutral-200" : "text-neutral-900")}>{t('location', lang)}</div>
                                 <div>
                                     <button onClick={() => setShowLocationModal(true)} className="rounded-xl px-3 py-1 text-xs text-white bg-gradient-to-r from-orange-500 to-red-500">{t('change', lang)}</button>
                                 </div>
                             </div>
-                            {radiusKm >= 1000000 ? (
+                            {radiusKm >= 5000000 ? (
                                 <div className={cn("mt-3", dark ? "text-neutral-200" : "text-neutral-800")}>{t('all_listings', lang)} globally</div>
-                            ) : radiusKm >= 500000 ? (
-                                <div className={cn("mt-3", dark ? "text-neutral-200" : "text-neutral-800")}>{t('all_listings', lang)} nationally</div>
+                            ) : radiusKm >= 1000000 ? (
+                                <div className={cn("mt-3", dark ? "text-neutral-200" : "text-neutral-800")}>All of {deriveCountry(getSavedPlaceName()) || 'your country'}</div>
                             ) : (
                                 <>
                                     <div className={cn("mt-3 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>
@@ -343,7 +361,7 @@ export default function SearchClient() {
                         </div>
 
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
-                            <div className="font-semibold mb-3">{t('category', lang)}</div>
+                            <div className={cn("font-semibold mb-3", dark ? "text-neutral-200" : "text-neutral-900")}>{t('category', lang)}</div>
                             <div className="flex flex-wrap gap-2">
                                 {[
                                     { key: 'cat_all', value: '' },
@@ -368,7 +386,7 @@ export default function SearchClient() {
                         </div>
 
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
-                            <div className="font-semibold mb-3">{t('type', lang)}</div>
+                            <div className={cn("font-semibold mb-3", dark ? "text-neutral-200" : "text-neutral-900")}>{t('type', lang)}</div>
                             <div className="flex gap-2">
                                 <button onClick={() => setSelAdType('all')} className={cn("rounded-xl px-3 py-1 text-sm", selAdType === 'all' ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>{t('all_listings', lang)}</button>
                                 <button onClick={() => setSelAdType('sell')} className={cn("rounded-xl px-3 py-1 text-sm", selAdType === 'sell' ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>{t('selling', lang)}</button>
@@ -377,7 +395,7 @@ export default function SearchClient() {
                         </div>
 
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
-                            <div className="font-semibold mb-3">{unit === 'BTC' ? t('price_btc', lang) : t('price_sats', lang)}</div>
+                            <div className={cn("font-semibold mb-3", dark ? "text-neutral-200" : "text-neutral-900")}>{unit === 'BTC' ? t('price_btc', lang) : t('price_sats', lang)}</div>
                             <div className="flex items-center gap-2">
                                 <input value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder={unit === 'BTC' ? "Min BTC" : "Min sats"} className={cn("w-1/2 rounded-xl px-3 py-2 text-sm", inputBase)} />
                                 <span className={cn(dark ? "text-neutral-400" : "text-neutral-500")}>—</span>
