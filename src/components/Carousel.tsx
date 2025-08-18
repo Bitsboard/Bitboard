@@ -10,13 +10,14 @@ interface CarouselProps {
     showDots?: boolean;
     showArrows?: boolean;
     rounded?: string; // tailwind rounding classes applied to the image container
+    showThumbnails?: boolean;
 }
 
 function cn(...xs: Array<string | false | null | undefined>) {
     return xs.filter(Boolean).join(" ");
 }
 
-export function Carousel({ images, alt, dark, className, showDots = true, showArrows = true, rounded = "rounded-xl" }: CarouselProps) {
+export function Carousel({ images, alt, dark, className, showDots = true, showArrows = true, rounded = "rounded-xl", showThumbnails = false }: CarouselProps) {
     const validImages = images && images.length > 0 ? images : [
         "https://images.unsplash.com/photo-1555617117-08d3a8fef16c?w=1200&q=80&auto=format&fit=crop",
     ];
@@ -129,6 +130,27 @@ export function Carousel({ images, alt, dark, className, showDots = true, showAr
                                 )}
                             />)
                         )}
+                    </div>
+                )}
+
+                {/* Thumbnails */}
+                {showThumbnails && validImages.length > 1 && (
+                    <div className="pointer-events-auto absolute bottom-2 left-2 right-2 flex items-center justify-start gap-2 overflow-x-auto">
+                        {validImages.map((src, i) => (
+                            <button
+                                key={i}
+                                onClick={(e) => { e.stopPropagation(); goTo(i); }}
+                                className={cn(
+                                    "h-10 w-10 overflow-hidden rounded-md border",
+                                    i === index
+                                        ? (dark ? "border-white/90 ring-2 ring-white/70" : "border-neutral-900/90 ring-2 ring-neutral-900/70")
+                                        : (dark ? "border-white/30" : "border-neutral-400/60")
+                                )}
+                                aria-label={`Go to image ${i + 1}`}
+                            >
+                                <img src={src} alt="thumbnail" className="h-full w-full object-cover" />
+                            </button>
+                        ))}
                     </div>
                 )}
             </div>
