@@ -300,8 +300,8 @@ export default function HomePage() {
             {/* Left Content */}
             <div className="max-w-2xl">
               <h1 className="text-5xl font-black tracking-tight sm:text-7xl">
-                <span className={cn("block leading-tight", dark ? "text-white" : "text-black")}>{t('title_hero_1', lang)}</span>
-                <span className="block bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent" style={{ lineHeight: '1.2' }}>
+                <span className={cn(lang === 'en' ? 'block' : 'inline', "leading-tight", dark ? "text-white" : "text-black")}>{t('title_hero_1', lang)}</span>
+                <span className={cn(lang === 'en' ? 'block' : 'inline', "bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent")} style={{ lineHeight: '1.2' }}>
                   {t('title_hero_2', lang)}
                 </span>
               </h1>
@@ -312,7 +312,7 @@ export default function HomePage() {
             </div>
 
             {/* Right: Location above search */}
-            <div className="w-full md:w-[520px] md:self-center">
+            <div className="w-full md:w-[460px] md:self-center">
               <div className="mb-2 md:mb-1">
                 <button onClick={() => setShowLocationModal(true)} className={cn("w-full rounded-3xl border px-6 py-5 text-left", inputBase)}>
                   <div className="flex items-center justify-between gap-3">
@@ -321,7 +321,7 @@ export default function HomePage() {
                   </div>
                 </button>
               </div>
-              <div className="relative mt-1">
+              <div className="relative mt-3">
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -340,7 +340,7 @@ export default function HomePage() {
       <main id="browse" className="mx-auto max-w-7xl px-4 pb-24">
         {/* Featured Row */}
         {featured.length > 0 && (
-          <section className="mt-6">
+          <section className="mt-16">
             <div className="mb-6 flex items-baseline justify-between">
               <div className="flex items-center gap-3">
                 <h2 className={cn("text-3xl font-bold", dark ? "text-white" : "text-neutral-900")}>{t('featured', lang)}</h2>
