@@ -139,8 +139,10 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
                 <div>
                   <span className={cn("text-xs font-bold cursor-pointer", dark ? "text-red-400" : "text-red-600")}>{t('report_listing', lang)}</span>
                 </div>
-                {/* Row 2, Col 2: one-line safety warning */}
-                <div className={cn("text-xs text-right whitespace-nowrap", dark ? "text-neutral-400" : "text-neutral-600")}>{t('listing_warning', lang)}</div>
+                {/* Row 2, Col 2: one-line safety warning aligned with button */}
+                <div className="flex justify-end">
+                  <div className={cn("text-xs text-right whitespace-nowrap", dark ? "text-neutral-400" : "text-neutral-600")}>{t('listing_warning', lang)}</div>
+                </div>
               </div>
             </div>
           </div>
