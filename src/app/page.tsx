@@ -264,7 +264,8 @@ export default function HomePage() {
     if (adType && adType !== "all") sp.set("adType", adType);
     try { localStorage.setItem('layoutPref', layout); } catch { }
     sp.set('layout', layout);
-    router.push(`/search?${sp.toString()}`);
+    const prefix = `/${lang}`;
+    router.push(`${prefix}/search?${sp.toString()}`);
   }, [adType, cat, query, layout, router]);
 
   return (

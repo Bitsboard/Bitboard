@@ -102,7 +102,7 @@ export default function SearchClient() {
         try { localStorage.setItem("layoutPref", layout); } catch {}
         const sp = new URLSearchParams(window.location.search);
         if (layout) sp.set("layout", layout);
-        const newUrl = `/search?${sp.toString()}`;
+        const newUrl = `/${lang}/search?${sp.toString()}`;
         if (newUrl !== window.location.pathname + window.location.search) {
             router.replace(newUrl);
         }
@@ -248,13 +248,13 @@ export default function SearchClient() {
 
     const applyFilters = () => {
         const sp = buildParams();
-        router.push(`/search?${sp.toString()}`);
+        router.push(`/${lang}/search?${sp.toString()}`);
     };
 
     const clearFilters = () => {
         const sp = new URLSearchParams();
         if (inputQuery) sp.set("q", inputQuery);
-        router.push(`/search?${sp.toString()}`);
+        router.push(`/${lang}/search?${sp.toString()}`);
     };
 
     const showNoResults = initialLoaded && listings.length === 0;
@@ -289,7 +289,7 @@ export default function SearchClient() {
                     <div className="sm:col-span-3 flex items-center gap-2">
                         <select
                             value={sortChoice}
-                            onChange={(e) => { const v = e.target.value; setSortChoice(v); const sp = buildParams(v); router.push(`/search?${sp.toString()}`); }}
+                            onChange={(e) => { const v = e.target.value; setSortChoice(v); const sp = buildParams(v); router.push(`/${lang}/search?${sp.toString()}`); }}
                             className={cn("w-full max-w-xs rounded-3xl px-6 pr-10 py-5 text-lg appearance-none bg-no-repeat bg-right", inputBase)}
                             style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.75rem center', backgroundSize: '1.25em 1.25em' }}
                         >
@@ -425,7 +425,7 @@ export default function SearchClient() {
                         const sp = buildParams();
                         sp.set('lat', String(place.lat));
                         sp.set('lng', String(place.lng));
-                        router.push(`/search?${sp.toString()}`);
+                        router.push(`/${lang}/search?${sp.toString()}`);
                         setShowLocationModal(false);
                     }}
                 />
