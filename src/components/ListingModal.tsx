@@ -101,7 +101,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
                 // @ts-ignore - navigator.share not in SSR
                 if (typeof navigator !== 'undefined' && navigator.share) navigator.share(shareData);
                 else if (typeof navigator !== 'undefined' && navigator.clipboard && typeof window !== 'undefined') navigator.clipboard.writeText(window.location.href);
-              } catch {}
+              } catch { }
             }}
             className={cn("rounded-lg px-3 py-1", dark ? "text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200" : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-800")}
           >
@@ -122,7 +122,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
             <div className="p-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 items-center">
                 {/* Row 1, Col 1: seller info */}
-                <div className={cn("text-sm flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}> 
+                <div className={cn("text-sm flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}>
                   {listing.seller.score >= 50 && (
                     <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-extrabold shadow-[0_0_8px_rgba(56,189,248,0.8)]", dark ? "bg-sky-500" : "bg-sky-500")} aria-label="Verified" title={t('verified_tooltip', lang)}>✓</span>
                   )}

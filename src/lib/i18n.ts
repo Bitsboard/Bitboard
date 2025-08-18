@@ -149,7 +149,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         message_seller: "Contacter le vendeur",
         send_message: "Envoyer un message",
         share_listing: "Partager l'annonce",
-        listing_warning: "Gardez toutes les conversations dans l'application pour votre sécurité. Le contact hors application est contraire à nos directives. Lorsque vous êtes prêt, joignez une proposition d'entiercement depuis le composeur de discussion.",
+        listing_warning: "Pour votre sécurité, gardez toute la correspondance dans l'application.",
         results: "résultats",
         // Categories
         cat_all: "Tous",
@@ -232,7 +232,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         message_seller: "Enviar mensaje al vendedor",
         send_message: "Enviar mensaje",
         share_listing: "Compartir anuncio",
-        listing_warning: "Mantén toda la correspondencia en la app por seguridad. El contacto fuera de la app va en contra de nuestras directrices. Cuando estés listo, adjunta una propuesta de depósito desde el compositor del chat.",
+        listing_warning: "Por seguridad, mantén toda la correspondencia en la app.",
         results: "resultados",
         // Categories
         cat_all: "Todos",
@@ -315,7 +315,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         message_seller: "Nachricht an Verkäufer",
         send_message: "Nachricht senden",
         share_listing: "Anzeige teilen",
-        listing_warning: "Halte die gesamte Korrespondenz aus Sicherheitsgründen in der App. Kontakt außerhalb der App verstößt gegen unsere Richtlinien. Hänge eine Treuhandvorschlag aus dem Chat-Composer an, wenn du soweit bist.",
+        listing_warning: "Zur Sicherheit bitte die gesamte Korrespondenz in der App führen.",
         results: "Ergebnisse",
         // Categories
         cat_all: "Alle",
