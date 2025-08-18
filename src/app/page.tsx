@@ -295,8 +295,8 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_50%)]" />
         </div>
 
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:py-28">
-          <div className="flex flex-col items-start gap-8 md:flex-row md:items-end md:justify-between">
+        <div className="relative mx-auto max-w-7xl px-4 py-14 sm:py-20">
+          <div className="flex flex-col-reverse items-start gap-6 md:flex-row md:items-end md:justify-between">
             {/* Left Content */}
             <div className="max-w-2xl">
               <h1 className="text-5xl font-black tracking-tight sm:text-7xl">
@@ -308,18 +308,20 @@ export default function HomePage() {
               <p className={cn("mt-6 text-xl leading-relaxed", dark ? "text-neutral-300" : "text-neutral-600")}>
                 The Bitcoin-native marketplace
               </p>
-              <div className="mt-8" />
+              <div className="mt-4" />
             </div>
 
-            {/* Right Content removed per request */}
-            <div className="hidden md:block" />
-          </div>
-
-          {/* Search Interface */}
-          <div className="mt-10">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
-              {/* Search Input */}
-              <div className="md:col-span-7 relative">
+            {/* Right: Location above search */}
+            <div className="w-full md:w-[520px]">
+              <div className="mb-3">
+                <button onClick={() => setShowLocationModal(true)} className={cn("w-full rounded-3xl border px-6 py-5 text-left", inputBase)}>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>{center?.name || t('choose_location', lang)}</div>
+                    <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm} km</div>
+                  </div>
+                </button>
+              </div>
+              <div className="relative">
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -327,38 +329,7 @@ export default function HomePage() {
                   placeholder={t('search_placeholder', lang)}
                   className={cn("w-full rounded-3xl px-6 pr-32 py-5 text-lg focus:outline-none transition-all duration-300 hover:border-orange-500/50", inputBase)}
                 />
-                <button
-                  onClick={handleSearchNavigate}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2 text-sm font-semibold text-white shadow"
-                >
-                  {t('search', lang)}
-                </button>
-              </div>
-
-              {/* Location + Radius Combined */}
-              <div className="md:col-span-3">
-                <button onClick={() => setShowLocationModal(true)} className={cn("w-full rounded-3xl border px-6 py-5 text-left", inputBase)}>
-                  <div className="flex items-center justify-between gap-3">
-                    <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>
-                      {center?.name || t('choose_location', lang)}
-                    </div>
-                    <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm} km</div>
-                  </div>
-                </button>
-              </div>
-
-              {/* Type Filter - Now Dropdown */}
-              <div className="md:col-span-2">
-                <select
-                  value={adType}
-                  onChange={(e) => setAdType(e.target.value as "all" | "sell" | "want")}
-                  className={cn("w-full rounded-3xl px-6 py-5 text-lg focus:outline-none transition-all duration-300 appearance-none bg-no-repeat bg-right pr-12", inputBase)}
-                  style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 1rem center', backgroundSize: '1.5em 1.5em' }}
-                >
-                  <option value="all">{t('all_listings', lang)}</option>
-                  <option value="sell">{t('seller_listings', lang)}</option>
-                  <option value="want">{t('buyer_listings', lang)}</option>
-                </select>
+                <button onClick={handleSearchNavigate} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2 text-sm font-semibold text-white shadow">{t('search', lang)}</button>
               </div>
             </div>
           </div>

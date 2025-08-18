@@ -81,13 +81,14 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             (pane as any).style.background = 'linear-gradient(0deg, rgba(255,149,0,0.10), rgba(255,149,0,0.10))';
             (pane as any).style.pointerEvents = 'none';
             (L as any).tileLayer('', { pane: 'orangeTint' }).addTo(map);
-            const orangeIcon = (L as any).divIcon({
-                className: "",
-                html: '<div style="width:22px;height:22px;background:linear-gradient(180deg,#f97316,#ef4444);border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.35)"></div>',
-                iconSize: [22, 22],
-                iconAnchor: [11, 20],
+            const bbIcon = (L as any).icon({
+                iconUrl: "/Bitsbarterlogo.svg",
+                iconRetinaUrl: "/Bitsbarterlogo.svg",
+                iconSize: [36, 36],
+                iconAnchor: [18, 34],
+                shadowUrl: undefined,
             });
-            const marker = (L as any).marker([center.lat, center.lng], { draggable: false, icon: orangeIcon }).addTo(map);
+            const marker = (L as any).marker([center.lat, center.lng], { draggable: false, icon: bbIcon }).addTo(map);
             markerRef.current = marker;
             const circle = (L as any).circle([center.lat, center.lng], { radius: radiusKm * 1000, color: "#f97316" }).addTo(map);
             circleRef.current = circle;
