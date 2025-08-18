@@ -147,7 +147,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
               <div className="flex flex-col items-end gap-2">
                 <div className={cn("text-sm flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}>
                   {listing.seller.score >= 50 && (
-                    <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-extrabold shadow-[0_0_8px_rgba(56,189,248,0.8)]", dark ? "bg-sky-500" : "bg-sky-500")} aria-label="Verified" title="User has verified their identity">✓</span>
+                    <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-extrabold shadow-[0_0_8px_rgba(56,189,248,0.8)]", dark ? "bg-sky-500" : "bg-sky-500")} aria-label="Verified" title={t('verified_tooltip', useLang())}>✓</span>
                   )}
                   <span>{listing.seller.name}</span>
                   <span className="opacity-80">+{listing.seller.score} 👍</span>

@@ -82,6 +82,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         // Types (singular labels)
         selling: "Selling",
         looking_for: "Looking For",
+        verified_tooltip: "User has verified their identity",
     },
     fr: {
         search: "Rechercher",
@@ -161,6 +162,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         // Types (singular labels)
         selling: "Vente",
         looking_for: "Recherche",
+        verified_tooltip: "L'utilisateur a vérifié son identité",
     },
     es: {
         search: "Buscar",
@@ -240,6 +242,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         // Types (singular labels)
         selling: "Venta",
         looking_for: "Se busca",
+        verified_tooltip: "El usuario ha verificado su identidad",
     },
     de: {
         search: "Suche",
@@ -319,6 +322,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         // Types (singular labels)
         selling: "Verkauf",
         looking_for: "Suche",
+        verified_tooltip: "Benutzer hat seine Identität verifiziert",
     },
 };
 

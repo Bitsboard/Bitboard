@@ -2,6 +2,7 @@
 
 import React from "react";
 import { PriceBlock } from "./PriceBlock";
+import { t, useLang } from "@/lib/i18n";
 import { TypePill } from "./TypePill";
 import { Carousel } from "./Carousel";
 
@@ -120,7 +121,7 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
                   dark ? "bg-sky-500" : "bg-sky-500"
                 )}
                 aria-label="Verified"
-                title="User has verified their identity"
+                title={t('verified_tooltip', useLang())}
               >
                 ✓
               </span>
