@@ -423,7 +423,7 @@ export default function HomePage() {
               <a className={cn("hover:text-orange-500 transition-colors font-medium", dark ? "text-neutral-300" : "text-neutral-600")} href="#tips">
                 {t('safety_tips', lang)}
               </a>
-              <a className={cn("hover:text-orange-500 transition-colors font-medium", dark ? "text-neutral-300" : "text-neutral-600")} href="/terms">
+              <a className={cn("hover:text-orange-500 transition-colors font-medium", dark ? "text-neutral-300" : "text-neutral-600")} href={`/${lang}/terms`}>
                 {t('terms', lang)}
               </a>
             </div>

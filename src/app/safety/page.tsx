@@ -7,6 +7,7 @@ import { useLang, t } from "@/lib/i18n";
 export default function SafetyPage() {
   const lang = useLang();
   const dark = true;
+  const homeHref = `/${lang}`;
   return (
     <main className={cn("min-h-screen", dark ? "bg-neutral-950 text-neutral-100" : "bg-white text-neutral-900")}> 
       <div className="mx-auto max-w-3xl px-4 py-12">
@@ -20,7 +21,7 @@ export default function SafetyPage() {
           <li>Trust your instincts. If something feels off, walk away and report the listing.</li>
         </ol>
         <div className="mt-8">
-          <a href="/" className="text-orange-400 font-semibold">← Back to home</a>
+          <a href={homeHref} className="text-orange-400 font-semibold">← Back to home</a>
         </div>
       </div>
     </main>
