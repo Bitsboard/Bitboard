@@ -170,7 +170,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
                   <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="md" compactFiat />
                 </div>
                 <div className="text-right">
-                  <span className={cn("truncate max-w-[60%] rounded-full px-3 py-1 text-[11px] inline-block", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
+                  <span className={cn("rounded-full px-3 py-1 text-[11px] inline-block", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
                   <div className={cn("mt-1 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>{postedAgo(listing.createdAt)}</div>
                 </div>
               </div>
