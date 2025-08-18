@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   Nav,
-  LocationAutocomplete,
   SafetyTipsSection,
   UnitToggle,
   TypeToggle,
@@ -93,6 +92,11 @@ export default function HomePage() {
           setCenter(p);
         }
       }
+      const r = localStorage.getItem('userRadiusKm');
+      if (r) {
+        const n = Number(r);
+        if (Number.isFinite(n) && n > 0) setRadiusKm(n);
+      }
     } catch { }
   }, []);
 
@@ -166,7 +170,13 @@ export default function HomePage() {
     const load = async () => {
       try {
         isFetchingRef.current = true;
-        const r = await fetch(`/api/listings?limit=${pageSize}&offset=0`);
+        const sp = new URLSearchParams({ limit: String(pageSize), offset: "0" });
+        if (Number.isFinite(center.lat as any) && Number.isFinite(center.lng as any)) {
+          sp.set('lat', String(center.lat));
+          sp.set('lng', String(center.lng));
+        }
+        if (Number.isFinite(radiusKm as any) && radiusKm > 0) sp.set('radiusKm', String(radiusKm));
+        const r = await fetch(`/api/listings?${sp.toString()}`);
         const data = (await r.json()) as { listings?: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number }>; total?: number };
         const rows = data.listings ?? [];
         const mapped = mapRowsToListings(rows);
@@ -182,7 +192,7 @@ export default function HomePage() {
     };
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDeployed]);
+  }, [isDeployed, center.lat, center.lng, radiusKm]);
 
   const loadMore = useCallback(async () => {
     if (!isDeployed) return;
@@ -192,7 +202,13 @@ export default function HomePage() {
       isFetchingRef.current = true;
       setIsLoadingMore(true);
       const offset = listings.length;
-      const r = await fetch(`/api/listings?limit=${pageSize}&offset=${offset}`);
+      const sp = new URLSearchParams({ limit: String(pageSize), offset: String(offset) });
+      if (Number.isFinite(center.lat as any) && Number.isFinite(center.lng as any)) {
+        sp.set('lat', String(center.lat));
+        sp.set('lng', String(center.lng));
+      }
+      if (Number.isFinite(radiusKm as any) && radiusKm > 0) sp.set('radiusKm', String(radiusKm));
+      const r = await fetch(`/api/listings?${sp.toString()}`);
       const data = (await r.json()) as { listings?: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number }>; total?: number };
       const rows = data.listings ?? [];
       const mapped = mapRowsToListings(rows);
@@ -206,7 +222,7 @@ export default function HomePage() {
       isFetchingRef.current = false;
       setIsLoadingMore(false);
     }
-  }, [isDeployed, hasMore, listings.length, mapRowsToListings, pageSize, total]);
+  }, [isDeployed, hasMore, listings.length, mapRowsToListings, pageSize, total, center.lat, center.lng, radiusKm]);
 
   // IntersectionObserver to trigger loadMore when sentinel is visible
   useEffect(() => {

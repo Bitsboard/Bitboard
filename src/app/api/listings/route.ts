@@ -30,6 +30,9 @@ export async function GET(req: Request) {
     const centerLat = Number(url.searchParams.get("lat") ?? "");
     const centerLng = Number(url.searchParams.get("lng") ?? "");
     const hasCenter = Number.isFinite(centerLat) && Number.isFinite(centerLng);
+    const radiusKmParam = url.searchParams.get("radiusKm");
+    const radiusKm = radiusKmParam != null && radiusKmParam !== "" ? Number(radiusKmParam) : null;
+    const hasRadius = radiusKm != null && Number.isFinite(radiusKm) && (radiusKm as number) > 0;
 
     // Ensure minimal schema exists so queries don't explode on fresh DBs
     try {
@@ -74,6 +77,25 @@ export async function GET(req: Request) {
       bindsRich.push(Math.round(maxPrice));
       whereMinimal.push("(price_sat <= ?)");
       bindsMinimal.push(Math.round(maxPrice));
+    }
+
+    // Optional geospatial radius filter via bounding box (SQLite-friendly)
+    // Skip if radius is extremely large (used for national/global) or center missing
+    if (hasCenter && hasRadius && (radiusKm as number) < 900000) {
+      const R_KM_PER_DEG = 111.32; // Approx conversion
+      const deltaLat = (radiusKm as number) / R_KM_PER_DEG;
+      const rad = (centerLat * Math.PI) / 180;
+      const cosLat = Math.cos(rad);
+      const safeCos = Math.max(0.01, Math.abs(cosLat));
+      const deltaLng = (radiusKm as number) / (R_KM_PER_DEG * safeCos);
+      const minLat = centerLat - deltaLat;
+      const maxLat = centerLat + deltaLat;
+      const minLng = centerLng - deltaLng;
+      const maxLng = centerLng + deltaLng;
+      whereRich.push("(lat BETWEEN ? AND ?)");
+      bindsRich.push(minLat, maxLat);
+      whereRich.push("(lng BETWEEN ? AND ?)");
+      bindsRich.push(minLng, maxLng);
     }
 
     const whereClauseRich = whereRich.length ? `WHERE ${whereRich.join(" AND ")}` : "";
