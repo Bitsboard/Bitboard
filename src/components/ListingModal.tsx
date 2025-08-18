@@ -81,6 +81,17 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
     return cleaned.trim();
   }
 
+  function postedAgo(ts: number): string {
+    const now = Date.now();
+    const diffMs = Math.max(0, now - ts);
+    const minutes = Math.floor(diffMs / (60 * 1000));
+    const hours = Math.floor(diffMs / (60 * 60 * 1000));
+    const days = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+    if (days >= 1) return `Posted ${days} day${days === 1 ? "" : "s"} ago`;
+    if (hours >= 1) return `Posted ${hours} hour${hours === 1 ? "" : "s"} ago`;
+    return `Posted ${Math.max(1, minutes)} minute${minutes === 1 ? "" : "s"} ago`;
+  }
+
   return (
     <Modal open={true} onClose={onClose} dark={dark} size="lg" ariaLabel={listing.title}>
       <ModalHeader dark={dark}>
@@ -158,7 +169,10 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
                 <div className="shrink-0">
                   <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="md" compactFiat />
                 </div>
-                <span className={cn("truncate max-w-[60%] rounded-full px-3 py-1 text-[11px]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
+                <div className="text-right">
+                  <span className={cn("truncate max-w-[60%] rounded-full px-3 py-1 text-[11px] inline-block", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
+                  <div className={cn("mt-1 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>{postedAgo(listing.createdAt)}</div>
+                </div>
               </div>
               <div className={cn("mt-2 h-px", dark ? "bg-neutral-900" : "bg-neutral-200")} />
               {/* Info previously on the right column has been moved under the image; keep right column focused on price/location and description. */}
