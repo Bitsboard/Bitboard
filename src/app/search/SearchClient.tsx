@@ -67,6 +67,17 @@ export default function SearchClient() {
     const [showLocationModal, setShowLocationModal] = useState(false);
 
     useEffect(() => { setInputQuery(q); }, [q]);
+    // Sync lang from URL prefix to ensure translations show correctly when landing directly on /{lang}/search
+    useEffect(() => {
+        try {
+            const first = window.location.pathname.split('/').filter(Boolean)[0];
+            const known = ['en','fr','es','de'];
+            if (first && known.includes(first)) {
+                // Force document lang to match
+                document.documentElement.lang = first;
+            }
+        } catch {}
+    }, []);
     useEffect(() => { setSelCategory(category); }, [category]);
     useEffect(() => { setSelAdType(adTypeParam); }, [adTypeParam]);
     useEffect(() => { setMinPrice(minPriceParam ?? ""); }, [minPriceParam]);
@@ -99,7 +110,7 @@ export default function SearchClient() {
 
     // Reflect layout to URL without touching data params
     useEffect(() => {
-        try { localStorage.setItem("layoutPref", layout); } catch {}
+        try { localStorage.setItem("layoutPref", layout); } catch { }
         const sp = new URLSearchParams(window.location.search);
         if (layout) sp.set("layout", layout);
         const newUrl = `/${lang}/search?${sp.toString()}`;

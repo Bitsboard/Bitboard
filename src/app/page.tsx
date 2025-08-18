@@ -264,9 +264,12 @@ export default function HomePage() {
     if (adType && adType !== "all") sp.set("adType", adType);
     try { localStorage.setItem('layoutPref', layout); } catch { }
     sp.set('layout', layout);
-    const prefix = `/${lang}`;
+    const known = ['en','fr','es','de'] as const;
+    const first = (typeof window !== 'undefined' ? window.location.pathname.split('/').filter(Boolean)[0] : '') as typeof known[number] | '';
+    const locale = (first && (known as readonly string[]).includes(first)) ? first : lang;
+    const prefix = `/${locale}`;
     router.push(`${prefix}/search?${sp.toString()}`);
-  }, [adType, cat, query, layout, router]);
+  }, [adType, cat, query, layout, router, lang]);
 
   return (
     <div className={cn("min-h-screen", bg, dark ? "dark" : "")}>
