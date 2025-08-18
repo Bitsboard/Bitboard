@@ -2,7 +2,8 @@
 
 import React from "react";
 import { PriceBlock } from "./PriceBlock";
-import { t, useLang } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n-client";
 import { TypePill } from "./TypePill";
 import { Carousel } from "./Carousel";
 

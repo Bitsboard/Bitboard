@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import { UnitToggle } from "./UnitToggle";
 import { ThemeToggle } from "./ThemeToggle";
 import { ViewToggle } from "./ViewToggle";
-import { useLang, setLang, t } from "@/lib/i18n";
+import { setLang, t } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n-client";
 
 type User = { id: string; email: string; handle: string };
 

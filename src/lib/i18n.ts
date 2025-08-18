@@ -1,4 +1,4 @@
-import * as React from "react";
+// React-free i18n utilities (safe in server and client)
 
 export type Lang = "en" | "fr" | "es" | "de";
 
@@ -401,15 +401,7 @@ export function setLang(lang: Lang) {
 
 export function subscribeLang(fn: () => void) {
     listeners.add(fn);
-    return () => listeners.delete(fn);
-}
-
-export function useLang(): Lang {
-    const [langState, setLangState] = React.useState<Lang>(() => getLang());
-    React.useEffect(() => {
-        return subscribeLang(() => setLangState(getLang()));
-    }, []);
-    return langState;
+    return () => { listeners.delete(fn); };
 }
 
 export function t(key: string, lang?: Lang): string {

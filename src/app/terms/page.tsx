@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { LogoMinimal } from "@/components";
 import { cn } from "@/lib/utils";
-import { useLang } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n-client";
 
 export default function TermsPage() {
     const [dark, setDark] = useState(true);

@@ -4,7 +4,8 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Modal, ModalHeader, ModalBody, ModalFooter, ModalCloseButton } from "./Modal";
 import type { Place } from "@/lib/types";
-import { t, useLang } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n-client";
 
 type LocationModalProps = {
     open: boolean;

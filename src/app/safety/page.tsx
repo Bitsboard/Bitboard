@@ -2,7 +2,8 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { useLang, t } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n-client";
 
 export default function SafetyPage() {
   const lang = useLang();

@@ -4,7 +4,8 @@ import React from "react";
 import { PriceBlock } from "./PriceBlock";
 import { Carousel } from "./Carousel";
 import { Modal, ModalHeader, ModalTitle, ModalCloseButton } from "./Modal";
-import { t, useLang, formatPostedAgo } from "@/lib/i18n";
+import { t, formatPostedAgo } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n-client";
 
 type Category =
   | "Featured"

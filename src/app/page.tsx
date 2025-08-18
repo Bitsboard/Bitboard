@@ -19,7 +19,8 @@ import { cn } from "@/lib/utils";
 import { mockListings } from "@/lib/mockData";
 import type { Listing, User, Unit, Layout, AdType, Category, Place } from "@/lib/types";
 import { useRouter } from "next/navigation";
-import { t, useLang } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n-client";
 
 export default function HomePage() {
   // State

@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import { Modal, ModalHeader, ModalTitle, ModalBody, ModalCloseButton } from "./Modal";
-import { t, useLang } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n-client";
 
 type Category =
   | "Featured"

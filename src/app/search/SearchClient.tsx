@@ -5,7 +5,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { ListingCard, ListingRow, Nav, ListingModal, LocationModal } from "@/components";
 import type { Listing, AdType } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { t, useLang } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n-client";
 
 // Lightweight location catalog (sample). Replace/expand with a full open-source dataset.
 const LOCATIONS = [
