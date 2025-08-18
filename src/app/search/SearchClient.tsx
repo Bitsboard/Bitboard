@@ -373,7 +373,7 @@ export default function SearchClient() {
                             {radiusKm >= 5000000 ? (
                                 <div className={cn("mt-3", dark ? "text-neutral-200" : "text-neutral-800")}>{t('all_listings_globally', lang)}</div>
                             ) : radiusKm >= 1000000 ? (
-                                <div className={cn("mt-3", dark ? "text-neutral-200" : "text-neutral-800")}>{t('all_of_country', lang).replace('{country}', deriveCountry(getSavedPlaceName()) || 'your country')}</div>
+                                <div className={cn("mt-3", dark ? "text-neutral-200" : "text-neutral-800")}>{t('all_listings_in_country', lang).replace('{country}', deriveCountry(getSavedPlaceName()) || 'your country')}</div>
                             ) : (
                                 <>
                                     <div className={cn("mt-3 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>

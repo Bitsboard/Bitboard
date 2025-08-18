@@ -72,6 +72,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         results: "results",
         all_listings_globally: "All Listings Globally",
         all_of_country: "All of {country}",
+        all_listings_in_country: "All Listings in {country}",
         nationally: "Nationally",
         globally: "Globally",
         // Categories
@@ -161,6 +162,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         results: "résultats",
         all_listings_globally: "Toutes les annonces dans le monde",
         all_of_country: "Toutes les annonces en {country}",
+        all_listings_in_country: "Toutes les annonces en {country}",
         nationally: "À l'échelle nationale",
         globally: "À l'échelle mondiale",
         // Categories
@@ -250,6 +252,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         results: "resultados",
         all_listings_globally: "Todos los anuncios en todo el mundo",
         all_of_country: "Todos los anuncios en {country}",
+        all_listings_in_country: "Todos los anuncios en {country}",
         nationally: "A nivel nacional",
         globally: "A nivel mundial",
         // Categories
@@ -339,6 +342,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         results: "Ergebnisse",
         all_listings_globally: "Alle Anzeigen weltweit",
         all_of_country: "Alle Anzeigen in {country}",
+        all_listings_in_country: "Alle Anzeigen in {country}",
         nationally: "Landesweit",
         globally: "Weltweit",
         // Categories
