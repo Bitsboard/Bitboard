@@ -135,6 +135,12 @@ a {
   outline: none;
 }
 
+/* Enable momentum/bounce scrolling for overflow containers on iOS/Safari */
+.scroll-bounce {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
 button:focus, button:focus-visible,
 [role="button"]:focus, [role="button"]:focus-visible,
 input:focus, input:focus-visible,

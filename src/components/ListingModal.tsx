@@ -160,7 +160,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
               <div className={cn("mt-2 h-px", dark ? "bg-neutral-900" : "bg-neutral-200")} />
               {/* Info previously on the right column has been moved under the image; keep right column focused on price/location and description. */}
             </div>
-            <div className="flex-1 overflow-y-auto overscroll-contain p-3 pr-10 mr-2 md:mr-3">
+            <div className="flex-1 overflow-y-auto overscroll-contain scroll-bounce p-3 pr-10 mr-2 md:mr-3">
               <div className={cn("prose prose-sm max-w-none", dark ? "prose-invert" : "")}>
                 <p className={cn("whitespace-pre-wrap", dark ? "text-neutral-300" : "text-neutral-800")}>{listing.desc}</p>
               </div>
