@@ -54,7 +54,7 @@ export function ItemsCarousel({ listings, unit, btcCad, dark, onOpen }: ItemsCar
     }, []);
 
     return (
-        <div className="relative" onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
+        <div className="relative px-2 sm:px-0" onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
             <div
                 ref={containerRef}
                 className={cn(

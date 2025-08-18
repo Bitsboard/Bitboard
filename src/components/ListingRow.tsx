@@ -87,8 +87,8 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
     <article
       onClick={onOpen}
       className={cn(
-        "group relative grid grid-cols-12 gap-4 overflow-hidden rounded-2xl p-4 transition-all duration-300 cursor-pointer min-h-[10rem] sm:min-h-[11rem] md:min-h-[12rem]",
-        dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white"
+        "group relative grid grid-cols-12 gap-4 overflow-hidden rounded-2xl p-4 transition-transform duration-300 hover:scale-[1.02] hover:ring-2 hover:ring-orange-500/80 cursor-pointer min-h-[10rem] sm:min-h-[11rem] md:min-h-[12rem]",
+        dark ? "border border-neutral-800 bg-neutral-950 hover:border-orange-400/60" : "border border-neutral-300 bg-white hover:border-orange-400/60"
       )}
     >
       <div className={cn("absolute right-0 top-0 h-full w-1 bg-gradient-to-b", a.stripe)} />
