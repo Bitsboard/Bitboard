@@ -96,7 +96,7 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
         <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">
           <div className="flex items-end justify-between gap-2">
             <span className={cn("rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>
-              {listing.type === 'want' ? 'Looking For' : 'Selling'}
+              {listing.type === 'want' ? t('looking_for', useLang()) : t('selling', useLang())}
             </span>
             <span className={cn("truncate max-w-[60%] rounded-full px-3 py-1 text-[11px] backdrop-blur-sm", dark ? "bg-neutral-900/80 text-neutral-200" : "bg-white/80 text-neutral-700")}>📍 {listing.location}</span>
           </div>

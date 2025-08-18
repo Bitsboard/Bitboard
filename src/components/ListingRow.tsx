@@ -110,7 +110,7 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
       <div className="col-span-9 flex flex-col pl-2 sm:pl-4 md:pl-6">
         {/* Tag row */}
         <div className="flex items-center justify-between mb-1 gap-2 min-w-0">
-          <span className={cn("flex-shrink-0 rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>{listing.type === 'want' ? 'Looking For' : 'Selling'}</span>
+          <span className={cn("flex-shrink-0 rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>{listing.type === 'want' ? t('looking_for', useLang()) : t('selling', useLang())}</span>
           <span className={cn("truncate rounded-full px-3 py-1 text-[11px] max-w-[40%]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
         </div>
         {/* Title */}

@@ -296,7 +296,7 @@ export default function HomePage() {
         </div>
 
         <div className="relative mx-auto max-w-7xl px-4 py-14 sm:py-20">
-          <div className="flex flex-col-reverse items-start gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="flex flex-col-reverse items-start gap-3 md:flex-row md:items-center md:justify-between">
             {/* Left Content */}
             <div className="max-w-2xl">
               <h1 className="text-5xl font-black tracking-tight sm:text-7xl">
@@ -305,15 +305,15 @@ export default function HomePage() {
                   {t('title_hero_2', lang)}
                 </span>
               </h1>
-              <p className={cn("mt-6 text-xl leading-relaxed", dark ? "text-neutral-300" : "text-neutral-600")}> 
+              <p className={cn("mt-6 text-xl leading-relaxed", dark ? "text-neutral-300" : "text-neutral-600")}>
                 {t('subheading', lang)}
               </p>
               <div className="mt-4" />
             </div>
 
             {/* Right: Location above search */}
-            <div className="w-full md:w-[520px]">
-              <div className="mb-3">
+            <div className="w-full md:w-[520px] md:self-center">
+              <div className="mb-2 md:mb-1">
                 <button onClick={() => setShowLocationModal(true)} className={cn("w-full rounded-3xl border px-6 py-5 text-left", inputBase)}>
                   <div className="flex items-center justify-between gap-3">
                     <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>{center?.name || t('choose_location', lang)}</div>
@@ -321,7 +321,7 @@ export default function HomePage() {
                   </div>
                 </button>
               </div>
-              <div className="relative">
+              <div className="relative mt-1">
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -355,7 +355,7 @@ export default function HomePage() {
           <div className="mb-6 flex items-baseline justify-between">
             <div className="flex items-center gap-4">
               <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}>{t('latest', lang)}</h2>
-              <span className={cn("text-sm font-medium", dark ? "text-neutral-400" : "text-neutral-500")}> 
+              <span className={cn("text-sm font-medium", dark ? "text-neutral-400" : "text-neutral-500")}>
                 {goods.length} {t('results', lang)}
               </span>
             </div>

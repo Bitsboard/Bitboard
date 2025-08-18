@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Modal, ModalHeader, ModalTitle, ModalBody, ModalCloseButton } from "./Modal";
+import { t, useLang } from "@/lib/i18n";
 
 type Category =
   | "Featured"
@@ -98,8 +99,8 @@ export function NewListingModal({ onClose, onPublish, dark }: NewListingModalPro
             </Field>
             <Field label="Ad type">
               <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as "sell" | "want" })} className={cn("w-full rounded-xl px-3 py-2 focus:outline-none", inputBase)}>
-                <option value="sell">Selling</option>
-                <option value="want">Looking For</option>
+                <option value="sell">{t('selling', useLang())}</option>
+                <option value="want">{t('looking_for', useLang())}</option>
               </select>
             </Field>
           </div>
@@ -187,7 +188,7 @@ export function NewListingModal({ onClose, onPublish, dark }: NewListingModalPro
               <ul className="mt-2 space-y-1 opacity-90">
                 <li className="flex justify-between">
                   <span>Ad type</span>
-                  <span>{form.type === "sell" ? "Selling" : "Looking For"}</span>
+                  <span>{form.type === "sell" ? t('selling', useLang()) : t('looking_for', useLang())}</span>
                 </li>
                 <li className="flex justify-between">
                   <span>Listing fee</span>
