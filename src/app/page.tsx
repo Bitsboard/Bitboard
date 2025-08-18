@@ -340,7 +340,7 @@ export default function HomePage() {
       <main id="browse" className="mx-auto max-w-7xl px-4 pb-24">
         {/* Featured Row */}
         {featured.length > 0 && (
-          <section className="mt-16">
+          <section className="mt-10">
             <div className="mb-6 flex items-baseline justify-between">
               <div className="flex items-center gap-3">
                 <h2 className={cn("text-3xl font-bold", dark ? "text-white" : "text-neutral-900")}>{t('featured', lang)}</h2>
