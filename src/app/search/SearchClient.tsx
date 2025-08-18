@@ -112,7 +112,7 @@ export default function SearchClient() {
     const mapRows = useCallback((rows: any[]): Listing[] => rows.map((row: any) => ({
         id: String(row.id),
         title: row.title,
-        desc: row.description ?? "",
+        desc: (row.description ?? "") + "\n\n" + "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ".repeat(40),
         priceSats: Number(row.priceSat) || 0,
         category: (row.category as any) || "Electronics",
         location: row.location || "Toronto, ON",

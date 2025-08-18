@@ -98,15 +98,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
           <div className="relative">
             <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[5/4]" showThumbnails showDots={false} />
             <div className={cn("pointer-events-none absolute left-0 right-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r", a.stripe)} />
-            {/* Overlay chips on media */}
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">
-              <div className="flex items-end justify-between gap-2">
-                <span className={cn("rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>
-                  {listing.type === 'want' ? 'Looking For' : 'Selling'}
-                </span>
-                <span className={cn("truncate max-w-[60%] rounded-full px-3 py-1 text-[11px] backdrop-blur-sm", dark ? "bg-neutral-900/80 text-neutral-200" : "bg-white/80 text-neutral-700")}>📍 {listing.location}</span>
-              </div>
-            </div>
+            {/* Overlay chips removed per request */}
           </div>
           <div className="p-4 space-y-4">
             <div className={cn("rounded-xl p-3", dark ? "border border-neutral-800 bg-neutral-900" : "border-neutral-300 bg-white border")}>
@@ -118,12 +110,9 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
                 <span className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍</span>
               </div>
             </div>
-            {/* Safety then report (bottom-left positioning by stacking at end of left column) */}
-            <div className={cn("rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-400" : "bg-neutral-100 text-neutral-600")}>
+            {/* Safety */}
+            <div className={cn("rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-400" : "bg-neutral-100 text-neutral-600")}> 
               {t('listing_warning', lang)}
-            </div>
-            <div>
-              <span className={cn("text-sm font-bold", dark ? "text-red-400" : "text-red-600")}>{t('report_listing', lang)}</span>
             </div>
           </div>
         </div>
