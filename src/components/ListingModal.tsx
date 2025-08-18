@@ -106,16 +106,16 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
               {listing.seller.score >= 50 && (
                 <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-extrabold shadow-[0_0_8px_rgba(56,189,248,0.8)]", dark ? "bg-sky-500" : "bg-sky-500")} aria-label="Verified" title="Verified">✓</span>
               )}
-              <span>@{listing.seller.name}</span>
+              <span>{listing.seller.name}</span>
               <span className="opacity-80">+{listing.seller.score} 👍</span>
             </div>
             <div className="mt-2 flex items-start justify-between gap-3">
               <div className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>{t('listing_warning', lang)}</div>
               <div className="flex flex-col items-end gap-2">
-                <span className={cn("text-sm font-bold cursor-pointer", dark ? "text-red-400" : "text-red-600")}>{t('report_listing', lang)}</span>
-                <button onClick={onChat} className="rounded-xl bg-gradient-to-r from-amber-500 to-red-500 px-4 py-2 font-semibold text-white shadow">
+                <button onClick={onChat} className="min-w-[220px] rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2 text-sm font-semibold text-white shadow">
                   {t('message_seller', lang)}
                 </button>
+                <span className={cn("text-sm font-bold cursor-pointer text-right", dark ? "text-red-400" : "text-red-600")}>{t('report_listing', lang)}</span>
               </div>
             </div>
           </div>
