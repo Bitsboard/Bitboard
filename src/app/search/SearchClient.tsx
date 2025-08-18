@@ -288,13 +288,32 @@ export default function SearchClient() {
         if (!name) return null;
         const parts = name.split(',').map(s => s.trim()).filter(Boolean);
         if (parts.length === 0) return null;
-        if (parts.length === 1) return parts[0]; // single token like "Canada" or "United States"
+        const expand: Record<string, string> = {
+            CA: 'Canada', CAN: 'Canada',
+            US: 'United States', USA: 'United States',
+            UK: 'United Kingdom', GB: 'United Kingdom', GBR: 'United Kingdom',
+            DE: 'Germany', DEU: 'Germany',
+            FR: 'France', FRA: 'France',
+            ES: 'Spain', ESP: 'Spain',
+            MX: 'Mexico', MEX: 'Mexico',
+            IT: 'Italy', ITA: 'Italy',
+            BR: 'Brazil', BRA: 'Brazil',
+            AU: 'Australia', AUS: 'Australia',
+            JP: 'Japan', JPN: 'Japan'
+        };
+        if (parts.length === 1) {
+            const p = parts[0];
+            return expand[p as keyof typeof expand] || p;
+        }
         // Prefer the last non-abbreviation token
         for (let i = parts.length - 1; i >= 0; i--) {
             const token = parts[i];
             if (token.length > 2) return token;
+            const expanded = expand[token as keyof typeof expand];
+            if (expanded) return expanded;
         }
-        return parts[parts.length - 1] || null;
+        const last = parts[parts.length - 1];
+        return expand[last as keyof typeof expand] || last || null;
     }
 
     return (
