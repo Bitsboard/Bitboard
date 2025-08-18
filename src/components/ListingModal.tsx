@@ -92,33 +92,27 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
         </div>
         <ModalCloseButton onClose={onClose} dark={dark} label={t('close', lang)} />
       </ModalHeader>
-      <div className="grid grid-cols-1 md:grid-cols-5">
+      <div className="relative">
+        <div className="grid grid-cols-1 md:grid-cols-5" style={{ maxHeight: "calc(90vh - 64px)" }}>
         {/* Left: media + seller + safety/report (static) */}
-        <div className="md:col-span-3">
+        <div className="md:col-span-3 overflow-hidden">
           <div className="relative">
             <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[5/4]" showThumbnails showDots={false} />
             <div className={cn("pointer-events-none absolute left-0 right-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r", a.stripe)} />
             {/* Overlay chips removed per request */}
           </div>
-          <div className="p-4 space-y-4">
-            <div className={cn("rounded-xl p-3", dark ? "border border-neutral-800 bg-neutral-900" : "border-neutral-300 bg-white border")}>
-              <div className="flex items-center gap-2 text-sm">
-                {listing.seller.score >= 50 && (
-                  <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-extrabold shadow-[0_0_8px_rgba(56,189,248,0.8)]", dark ? "bg-sky-500" : "bg-sky-500")} aria-label="Verified" title="Verified">✓</span>
-                )}
-                <span className="truncate max-w-[12rem]">@{listing.seller.name}</span>
-                <span className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍</span>
-              </div>
+          <div className="p-4 space-y-3">
+            <div className={cn("text-sm", dark ? "text-neutral-300" : "text-neutral-700")}> 
+              <span className="font-semibold">Seller</span> @{listing.seller.name} · <span className="opacity-80">+{listing.seller.score} 👍</span>
             </div>
-            {/* Safety */}
-            <div className={cn("rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-400" : "bg-neutral-100 text-neutral-600")}> 
+            <div className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}> 
               {t('listing_warning', lang)}
             </div>
           </div>
         </div>
 
         {/* Right: scrollable meta + title + price + long description and action */}
-        <div className={cn("md:col-span-2 border-l overflow-auto", dark ? "border-neutral-900" : "border-neutral-200")}>
+        <div className={cn("md:col-span-2 border-l overflow-y-auto", dark ? "border-neutral-900" : "border-neutral-200")} style={{ maxHeight: "calc(90vh - 64px)" }}> 
           <div className="p-4">
             {/* Top row: type chip left, location pill right */}
             <div className="mb-3 flex items-center justify-between gap-2">
@@ -127,8 +121,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
               </span>
               <span className={cn("truncate max-w-[60%] rounded-full px-3 py-1 text-[11px]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
             </div>
-            <h2 className={cn("text-2xl font-bold", dark ? "text-white" : "text-neutral-900")}>{sanitizeTitle(listing.title, listing.type)}</h2>
-            <div className="mt-2">
+            <div>
               <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="lg" compactFiat />
             </div>
             <div className={cn("prose prose-sm max-w-none mt-4", dark ? "prose-invert" : "")}>
@@ -140,6 +133,11 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
               </button>
             </div>
           </div>
+        </div>
+        </div>
+        {/* Sticky report link bottom-right of modal panel */}
+        <div className="pointer-events-none absolute bottom-3 right-4">
+          <span className={cn("pointer-events-auto cursor-pointer text-sm font-bold", dark ? "text-red-400" : "text-red-600")}>{t('report_listing', lang)}</span>
         </div>
       </div>
     </Modal>
