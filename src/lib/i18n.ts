@@ -72,8 +72,8 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         results: "results",
         all_listings_globally: "All Listings Globally",
         all_of_country: "All of {country}",
-        nationally: "nationally",
-        globally: "globally",
+        nationally: "Nationally",
+        globally: "Globally",
         // Categories
         cat_all: "All",
         cat_electronics: "Electronics",
@@ -161,8 +161,8 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         results: "résultats",
         all_listings_globally: "Toutes les annonces dans le monde",
         all_of_country: "Toutes les annonces en {country}",
-        nationally: "à l'échelle nationale",
-        globally: "à l'échelle mondiale",
+        nationally: "À l'échelle nationale",
+        globally: "À l'échelle mondiale",
         // Categories
         cat_all: "Tous",
         cat_electronics: "Électronique",
@@ -250,8 +250,8 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         results: "resultados",
         all_listings_globally: "Todos los anuncios en todo el mundo",
         all_of_country: "Todos los anuncios en {country}",
-        nationally: "a nivel nacional",
-        globally: "a nivel mundial",
+        nationally: "A nivel nacional",
+        globally: "A nivel mundial",
         // Categories
         cat_all: "Todos",
         cat_electronics: "Electrónica",
@@ -339,8 +339,8 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         results: "Ergebnisse",
         all_listings_globally: "Alle Anzeigen weltweit",
         all_of_country: "Alle Anzeigen in {country}",
-        nationally: "landesweit",
-        globally: "weltweit",
+        nationally: "Landesweit",
+        globally: "Weltweit",
         // Categories
         cat_all: "Alle",
         cat_electronics: "Elektronik",

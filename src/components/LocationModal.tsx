@@ -185,24 +185,18 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                     </div>
                     <div>
                         <label className={cn("text-xs mb-1 block", dark ? "text-neutral-400" : "text-neutral-500")}>{t('radius', lang)}</label>
-                        {(() => { const n = (center?.name || initialCenter?.name || '').trim(); const isCountryOnly = n && n.split(',').map(s=>s.trim()).filter(Boolean).length === 1; return isCountryOnly ? (
-                            <div className={cn("w-full rounded-xl px-4 py-3 text-sm border", dark ? "border-neutral-700 bg-neutral-800 text-neutral-100" : "border-neutral-300 bg-white text-neutral-900")}> 
-                                {radiusKm >= 5000000 ? t('globally', lang) : t('nationally', lang)}
-                            </div>
-                        ) : (
-                            <select
-                                value={radiusKm}
-                                onChange={(e) => setRadiusKm(Number(e.target.value))}
-                                className={cn("w-full rounded-xl px-4 py-3 text-sm border appearance-none bg-no-repeat pr-10", dark ? "border-neutral-700 bg-neutral-800 text-neutral-100" : "border-neutral-300 bg-white text-neutral-900")}
-                                style={{ backgroundImage: `url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e\")`, backgroundPosition: 'right 1.25rem center', backgroundSize: '1.25em 1.25em' }}
-                            >
-                                {[2,5,10,25,50,100,250,500].map((n) => (
-                                    <option key={n} value={n}>{n} km</option>
-                                ))}
-                                <option value={1000000}>National</option>
-                                <option value={5000000}>Global</option>
-                            </select>
-                        ); })()}
+                        <select
+                            value={radiusKm}
+                            onChange={(e) => setRadiusKm(Number(e.target.value))}
+                            className={cn("w-full rounded-xl px-4 py-3 text-sm border appearance-none bg-no-repeat pr-10", dark ? "border-neutral-700 bg-neutral-800 text-neutral-100" : "border-neutral-300 bg-white text-neutral-900")}
+                            style={{ backgroundImage: `url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e\")`, backgroundPosition: 'right 1.25rem center', backgroundSize: '1.25em 1.25em' }}
+                        >
+                            {[2, 5, 10, 25, 50, 100, 250, 500].map((n) => (
+                                <option key={n} value={n}>{n} km</option>
+                            ))}
+                            <option value={1000000}>{t('nationally', lang)}</option>
+                            <option value={5000000}>{t('globally', lang)}</option>
+                        </select>
                     </div>
                 </div>
 
