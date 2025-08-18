@@ -50,6 +50,7 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
         <div className="flex items-center gap-3">
           <a href="/" aria-label="Home" className="inline-flex items-center gap-2">
             <div className="flex items-center gap-2">
+              <img src="/Bitsbarterlogo.svg" alt="Bitsbarter" className="h-7 w-7 md:h-8 md:w-8" />
               <span className={cn("text-2xl md:text-3xl tracking-tight leading-none", dark ? "text-white" : "text-black")} style={{ fontFamily: 'Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>
                 <span className="font-bold text-orange-500">bits</span>
                 <span className={cn("font-bold", dark ? "text-white" : "text-black")}>barter</span>

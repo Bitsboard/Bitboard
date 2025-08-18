@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   title: "bitsbarter - Local Classifieds in Bitcoin",
   description: "Local classifieds in sats or BTC. Built-in chat and Lightning escrow for safer meetups.",
   keywords: ["bitcoin", "classifieds", "local", "escrow", "lightning"],
+  icons: {
+    icon: "/Bitsbarterlogo.svg",
+    shortcut: "/Bitsbarterlogo.svg",
+    apple: "/Bitsbarterlogo.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
