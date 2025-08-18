@@ -4,7 +4,7 @@ import React from "react";
 import { PriceBlock } from "./PriceBlock";
 import { Carousel } from "./Carousel";
 import { Modal, ModalHeader, ModalTitle, ModalCloseButton } from "./Modal";
-import { t, useLang } from "@/lib/i18n";
+import { t, useLang, formatPostedAgo } from "@/lib/i18n";
 
 type Category =
   | "Featured"
@@ -82,14 +82,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
   }
 
   function postedAgo(ts: number): string {
-    const now = Date.now();
-    const diffMs = Math.max(0, now - ts);
-    const minutes = Math.floor(diffMs / (60 * 1000));
-    const hours = Math.floor(diffMs / (60 * 60 * 1000));
-    const days = Math.floor(diffMs / (24 * 60 * 60 * 1000));
-    if (days >= 1) return `Posted ${days} day${days === 1 ? "" : "s"} ago`;
-    if (hours >= 1) return `Posted ${hours} hour${hours === 1 ? "" : "s"} ago`;
-    return `Posted ${Math.max(1, minutes)} minute${minutes === 1 ? "" : "s"} ago`;
+    return formatPostedAgo(ts, lang);
   }
 
   return (

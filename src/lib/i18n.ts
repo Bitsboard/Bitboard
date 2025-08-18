@@ -391,6 +391,48 @@ export function t(key: string, lang?: Lang): string {
     return dictionaries[l][key] ?? dictionaries.en[key] ?? key;
 }
 
+export function formatPostedAgo(ts: number, lang?: Lang): string {
+    const l = lang || currentLang;
+    const now = Date.now();
+    const diffMs = Math.max(0, now - ts);
+    const minutes = Math.floor(diffMs / (60 * 1000));
+    const hours = Math.floor(diffMs / (60 * 60 * 1000));
+    const days = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+
+    function en(): string {
+        if (days >= 1) return `Posted ${days} day${days === 1 ? '' : 's'} ago`;
+        if (hours >= 1) return `Posted ${hours} hour${hours === 1 ? '' : 's'} ago`;
+        const m = Math.max(1, minutes);
+        return `Posted ${m} minute${m === 1 ? '' : 's'} ago`;
+    }
+
+    function fr(): string {
+        if (days >= 1) return `Publié il y a ${days} jour${days === 1 ? '' : 's'}`;
+        if (hours >= 1) return `Publié il y a ${hours} heure${hours === 1 ? '' : 's'}`;
+        const m = Math.max(1, minutes);
+        return `Publié il y a ${m} minute${m === 1 ? '' : 's'}`;
+    }
+
+    function es(): string {
+        if (days >= 1) return `Publicado hace ${days} día${days === 1 ? '' : 's'}`;
+        if (hours >= 1) return `Publicado hace ${hours} hora${hours === 1 ? '' : 's'}`;
+        const m = Math.max(1, minutes);
+        return `Publicado hace ${m} minuto${m === 1 ? '' : 's'}`;
+    }
+
+    function de(): string {
+        if (days >= 1) return `Veröffentlicht vor ${days} Tag${days === 1 ? '' : 'en'}`;
+        if (hours >= 1) return `Veröffentlicht vor ${hours} Stunde${hours === 1 ? '' : 'n'}`;
+        const m = Math.max(1, minutes);
+        return `Veröffentlicht vor ${m} Minute${m === 1 ? '' : 'n'}`;
+    }
+
+    if (l === 'fr') return fr();
+    if (l === 'es') return es();
+    if (l === 'de') return de();
+    return en();
+}
+
 // Explicit named exports for bundlers
 export { dictionaries as _dict_debug };
 
