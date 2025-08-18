@@ -288,9 +288,13 @@ export default function SearchClient() {
         if (!name) return null;
         const parts = name.split(',').map(s => s.trim()).filter(Boolean);
         if (parts.length === 0) return null;
-        const last = parts[parts.length - 1];
-        if (last && last.length > 2) return last;
-        return null;
+        if (parts.length === 1) return parts[0]; // single token like "Canada" or "United States"
+        // Prefer the last non-abbreviation token
+        for (let i = parts.length - 1; i >= 0; i--) {
+            const token = parts[i];
+            if (token.length > 2) return token;
+        }
+        return parts[parts.length - 1] || null;
     }
 
     return (

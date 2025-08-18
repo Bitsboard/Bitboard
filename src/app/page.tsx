@@ -321,7 +321,7 @@ export default function HomePage() {
                 <button onClick={() => setShowLocationModal(true)} className={cn("w-full md:w-[calc(100%-120px)] rounded-3xl px-6 py-5 text-left focus:outline-none", inputBase)}>
                   <div className="flex items-center justify-between gap-3">
                     <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>{center?.name || t('choose_location', lang)}</div>
-                    <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm} km</div>
+                    <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm >= 1000000 ? "" : `${radiusKm} km`}</div>
                   </div>
                 </button>
               </div>
