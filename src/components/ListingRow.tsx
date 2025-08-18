@@ -128,7 +128,7 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
                     dark ? "bg-sky-500" : "bg-sky-500"
                   )}
                   aria-label="Verified"
-                  title="Verified"
+                  title="User has verified their identity"
                 >
                   ✓
                 </span>
