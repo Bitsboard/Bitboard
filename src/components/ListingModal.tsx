@@ -86,7 +86,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
       <ModalHeader dark={dark}>
         <div className="flex items-center gap-2">
           <span className={cn("flex-shrink-0 rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>
-            {listing.type === 'want' ? 'Looking For' : 'Selling'}
+            {listing.type === 'want' ? t('looking_for', lang) : t('selling', lang)}
           </span>
           <ModalTitle>{listing.title}</ModalTitle>
           {boosted && (
@@ -105,7 +105,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
             }}
             className={cn("rounded-lg px-3 py-1", dark ? "text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200" : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-800")}
           >
-            Share listing
+            {t('share_listing', lang)}
           </button>
           <ModalCloseButton onClose={onClose} dark={dark} label={t('close', lang)} />
         </div>
@@ -124,7 +124,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
                 {/* Row 1, Col 1: seller info */}
                 <div className={cn("text-sm flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}> 
                   {listing.seller.score >= 50 && (
-                    <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-extrabold shadow-[0_0_8px_rgba(56,189,248,0.8)]", dark ? "bg-sky-500" : "bg-sky-500")} aria-label="Verified" title="User has verified their identity">✓</span>
+                    <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-extrabold shadow-[0_0_8px_rgba(56,189,248,0.8)]", dark ? "bg-sky-500" : "bg-sky-500")} aria-label="Verified" title={t('verified_tooltip', lang)}>✓</span>
                   )}
                   <span>{listing.seller.name}</span>
                   <span className="opacity-80">+{listing.seller.score} 👍</span>
@@ -132,7 +132,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
                 {/* Row 1, Col 2: button */}
                 <div className="flex justify-end">
                   <button onClick={onChat} className="min-w-[240px] rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2 text-sm font-semibold text-white shadow">
-                    Send a Message
+                    {t('send_message', lang)}
                   </button>
                 </div>
                 {/* Row 2, Col 1: report (same size as warning, bold) */}
@@ -147,18 +147,18 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
 
           {/* Right: static top area + scrollable description with extra right padding */}
           <div className={cn("md:col-span-2 border-l flex flex-col", dark ? "border-neutral-900" : "border-neutral-200")} style={{ maxHeight: "calc(90vh - 64px)" }}>
-            <div className="p-4 pr-6 shrink-0">
+            <div className="p-3 pr-6 shrink-0">
               {/* Top row: price left, location right */}
-              <div className="mb-2 flex items-center justify-between gap-2">
+              <div className="flex items-center justify-between gap-2">
                 <div className="shrink-0">
                   <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="md" compactFiat />
                 </div>
                 <span className={cn("truncate max-w-[60%] rounded-full px-3 py-1 text-[11px]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
               </div>
-              <div className={cn("my-3 h-px", dark ? "bg-neutral-900" : "bg-neutral-200")} />
+              <div className={cn("mt-2 h-px", dark ? "bg-neutral-900" : "bg-neutral-200")} />
               {/* Info previously on the right column has been moved under the image; keep right column focused on price/location and description. */}
             </div>
-            <div className="flex-1 overflow-y-auto p-4 pr-10">
+            <div className="flex-1 overflow-y-auto p-3 pr-10">
               <div className={cn("prose prose-sm max-w-none", dark ? "prose-invert" : "")}>
                 <p className={cn("whitespace-pre-wrap", dark ? "text-neutral-300" : "text-neutral-800")}>{listing.desc}</p>
               </div>

@@ -300,13 +300,13 @@ export default function HomePage() {
             {/* Left Content */}
             <div className="max-w-2xl">
               <h1 className="text-5xl font-black tracking-tight sm:text-7xl">
-                <span className={cn("block leading-tight", dark ? "text-white" : "text-black")}>Find better deals,</span>
+                <span className={cn("block leading-tight", dark ? "text-white" : "text-black")}>{t('title_hero_1', lang)}</span>
                 <span className="block bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent" style={{ lineHeight: '1.2' }}>
-                  use better money.
+                  {t('title_hero_2', lang)}
                 </span>
               </h1>
-              <p className={cn("mt-6 text-xl leading-relaxed", dark ? "text-neutral-300" : "text-neutral-600")}>
-                The Bitcoin-native marketplace
+              <p className={cn("mt-6 text-xl leading-relaxed", dark ? "text-neutral-300" : "text-neutral-600")}> 
+                {t('subheading', lang)}
               </p>
               <div className="mt-4" />
             </div>
@@ -355,8 +355,8 @@ export default function HomePage() {
           <div className="mb-6 flex items-baseline justify-between">
             <div className="flex items-center gap-4">
               <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}>{t('latest', lang)}</h2>
-              <span className={cn("text-sm font-medium", dark ? "text-neutral-400" : "text-neutral-500")}>
-                {goods.length} result{goods.length !== 1 ? 's' : ''}
+              <span className={cn("text-sm font-medium", dark ? "text-neutral-400" : "text-neutral-500")}> 
+                {goods.length} {t('results', lang)}
               </span>
             </div>
           </div>

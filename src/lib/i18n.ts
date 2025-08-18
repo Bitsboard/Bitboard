@@ -31,14 +31,14 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         change_location: "Change location",
         radius: "Radius",
         enter_city: "Enter a city",
-        title_hero_1: "Get better deals,",
+        title_hero_1: "Find better deals,",
         title_hero_2: "use better money.",
         how_it_works: "How it works",
         pricing: "Pricing",
         post_listing: "Post a listing",
         sign_in: "Sign in",
         // Homepage
-        subheading: "Your Bitcoin-native local marketplace.",
+        subheading: "The Bitcoin-native marketplace",
         search_placeholder: "Search bikes, ASICs, consoles…",
         choose_location: "Choose location",
         featured: "Featured",
@@ -64,7 +64,10 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         close: "Close",
         // Listing modal
         message_seller: "Message seller",
+        send_message: "Send a Message",
+        share_listing: "Share listing",
         listing_warning: "For safety, please keep all correspondence in-app.",
+        results: "results",
         // Categories
         cat_all: "All",
         cat_electronics: "Electronics",
@@ -119,7 +122,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         post_listing: "Publier une annonce",
         sign_in: "Se connecter",
         // Homepage
-        subheading: "Votre marché local natif Bitcoin.",
+        subheading: "Le marché natif Bitcoin",
         search_placeholder: "Rechercher vélos, ASICs, consoles…",
         choose_location: "Choisir un lieu",
         featured: "À la une",
@@ -144,7 +147,10 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         report_listing: "Signaler l'annonce",
         // Listing modal
         message_seller: "Contacter le vendeur",
+        send_message: "Envoyer un message",
+        share_listing: "Partager l'annonce",
         listing_warning: "Gardez toutes les conversations dans l'application pour votre sécurité. Le contact hors application est contraire à nos directives. Lorsque vous êtes prêt, joignez une proposition d'entiercement depuis le composeur de discussion.",
+        results: "résultats",
         // Categories
         cat_all: "Tous",
         cat_electronics: "Électronique",
@@ -199,7 +205,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         post_listing: "Publicar anuncio",
         sign_in: "Iniciar sesión",
         // Homepage
-        subheading: "Tu mercado local nativo de Bitcoin.",
+        subheading: "El mercado nativo de Bitcoin",
         search_placeholder: "Buscar bicis, ASICs, consolas…",
         choose_location: "Elegir ubicación",
         featured: "Destacados",
@@ -224,7 +230,10 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         report_listing: "Reportar anuncio",
         // Listing modal
         message_seller: "Enviar mensaje al vendedor",
+        send_message: "Enviar mensaje",
+        share_listing: "Compartir anuncio",
         listing_warning: "Mantén toda la correspondencia en la app por seguridad. El contacto fuera de la app va en contra de nuestras directrices. Cuando estés listo, adjunta una propuesta de depósito desde el compositor del chat.",
+        results: "resultados",
         // Categories
         cat_all: "Todos",
         cat_electronics: "Electrónica",
@@ -279,7 +288,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         post_listing: "Anzeige einstellen",
         sign_in: "Anmelden",
         // Homepage
-        subheading: "Dein Bitcoin-nativer lokaler Marktplatz.",
+        subheading: "Der Bitcoin-native Marktplatz",
         search_placeholder: "Suche nach Fahrrädern, ASICs, Konsolen…",
         choose_location: "Ort wählen",
         featured: "Empfohlen",
@@ -304,7 +313,10 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         report_listing: "Anzeige melden",
         // Listing modal
         message_seller: "Nachricht an Verkäufer",
+        send_message: "Nachricht senden",
+        share_listing: "Anzeige teilen",
         listing_warning: "Halte die gesamte Korrespondenz aus Sicherheitsgründen in der App. Kontakt außerhalb der App verstößt gegen unsere Richtlinien. Hänge eine Treuhandvorschlag aus dem Chat-Composer an, wenn du soweit bist.",
+        results: "Ergebnisse",
         // Categories
         cat_all: "Alle",
         cat_electronics: "Elektronik",
