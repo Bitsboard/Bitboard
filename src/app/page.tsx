@@ -314,7 +314,7 @@ export default function HomePage() {
             {/* Right: Location above search */}
             <div className="w-full md:w-[460px] md:self-center">
               <div className="mb-2 md:mb-1">
-                <button onClick={() => setShowLocationModal(true)} className={cn("w-full rounded-3xl border px-6 py-5 text-left", inputBase)}>
+                <button onClick={() => setShowLocationModal(true)} className={cn("w-full md:w-[75%] ml-auto rounded-3xl border px-6 py-5 text-left", inputBase)}>
                   <div className="flex items-center justify-between gap-3">
                     <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>{center?.name || t('choose_location', lang)}</div>
                     <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm} km</div>
