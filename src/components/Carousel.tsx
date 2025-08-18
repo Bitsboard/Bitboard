@@ -139,7 +139,7 @@ export function Carousel({ images, alt, dark, className, showDots = true, showAr
                 {/* Thumbnails */}
                 {showThumbnails && validImages.length > 1 && (
                     <div className="pointer-events-auto absolute bottom-2 left-0 right-0 flex items-center justify-center gap-2 px-2 py-2">
-                        <div className="pointer-events-none absolute inset-x-3 -inset-y-1 rounded-xl bg-black/35 blur-md" />
+                        <div className="pointer-events-none absolute inset-x-2 -inset-y-1 rounded-xl bg-black/45 blur-md" />
                         {validImages.map((src, i) => (
                             <button
                                 key={i}

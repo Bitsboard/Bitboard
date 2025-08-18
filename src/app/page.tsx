@@ -254,8 +254,8 @@ export default function HomePage() {
   const bg = dark ? "bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950" : "bg-gradient-to-br from-neutral-50 via-white to-neutral-100";
   const panel = dark ? "border-neutral-800/50 bg-neutral-900/30 backdrop-blur-sm" : "border-neutral-200/50 bg-white/80 backdrop-blur-sm";
   const inputBase = dark
-    ? "border-neutral-700/50 bg-neutral-800/50 text-neutral-100 placeholder-neutral-400 focus:border-orange-500/50 focus:bg-neutral-800/70 backdrop-blur-sm"
-    : "border-neutral-300/50 bg-white/80 text-neutral-900 placeholder-neutral-500 focus:border-orange-500/50 focus:bg-white backdrop-blur-sm";
+    ? "border-neutral-700/50 bg-neutral-800/50 text-neutral-100 placeholder-neutral-400 focus:border-white/70 focus:bg-neutral-800/70 backdrop-blur-sm"
+    : "border-neutral-300/50 bg-white/80 text-neutral-900 placeholder-neutral-500 focus:border-white focus:bg-white backdrop-blur-sm";
 
   const handleSearchNavigate = useCallback(() => {
     const sp = new URLSearchParams();
@@ -314,7 +314,7 @@ export default function HomePage() {
             {/* Right: Location above search */}
             <div className="w-full md:w-[460px] md:self-center">
               <div className="mb-2 md:mb-1">
-                <button onClick={() => setShowLocationModal(true)} className={cn("w-full md:w-[75%] ml-auto rounded-3xl border px-6 py-5 text-left", inputBase)}>
+                <button onClick={() => setShowLocationModal(true)} className={cn("w-full md:w-[calc(100%-120px)] md:ml-auto rounded-3xl border px-6 py-5 text-left focus:outline-none", inputBase)}>
                   <div className="flex items-center justify-between gap-3">
                     <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>{center?.name || t('choose_location', lang)}</div>
                     <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm} km</div>
@@ -327,7 +327,7 @@ export default function HomePage() {
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") handleSearchNavigate(); }}
                   placeholder={t('search_placeholder', lang)}
-                  className={cn("w-full rounded-3xl px-6 pr-32 py-5 text-lg focus:outline-none transition-all duration-300 hover:border-orange-500/50", inputBase)}
+                  className={cn("w-full rounded-3xl px-6 pr-32 py-5 text-lg focus:outline-none transition-all duration-300", inputBase)}
                 />
                 <button onClick={handleSearchNavigate} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2 text-sm font-semibold text-white shadow">{t('search', lang)}</button>
               </div>
