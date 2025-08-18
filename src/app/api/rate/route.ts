@@ -16,7 +16,7 @@ export async function GET() {
         const cad = j?.bitcoin?.cad ?? null;
         if (cad && Number.isFinite(cad)) return NextResponse.json({ cad });
       }
-    } catch {}
+    } catch { }
 
     // 2) Coinbase
     try {
@@ -26,7 +26,7 @@ export async function GET() {
         const cad2 = j2?.data?.amount ? Number(j2.data.amount) : null;
         if (cad2 && Number.isFinite(cad2)) return NextResponse.json({ cad: cad2 });
       }
-    } catch {}
+    } catch { }
 
     // 3) Coindesk
     try {
@@ -36,7 +36,7 @@ export async function GET() {
         const cad3 = j3?.bpi?.CAD?.rate_float ?? null;
         if (cad3 && Number.isFinite(cad3)) return NextResponse.json({ cad: cad3 });
       }
-    } catch {}
+    } catch { }
 
     return NextResponse.json({ cad: null }, { status: 200 });
   } catch (e) {

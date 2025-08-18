@@ -70,6 +70,8 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         listing_warning: "For safety, keep correspondence in-app.",
         learn_more: "Learn more",
         results: "results",
+        all_listings_globally: "All Listings Globally",
+        all_of_country: "All of {country}",
         // Categories
         cat_all: "All",
         cat_electronics: "Electronics",
@@ -155,6 +157,8 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         listing_warning: "Pour votre sécurité, gardez la correspondance dans l'application.",
         learn_more: "En savoir plus",
         results: "résultats",
+        all_listings_globally: "Toutes les annonces dans le monde",
+        all_of_country: "Toutes les annonces en {country}",
         // Categories
         cat_all: "Tous",
         cat_electronics: "Électronique",
@@ -240,6 +244,8 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         listing_warning: "Por seguridad, mantén la correspondencia en la app.",
         learn_more: "Más información",
         results: "resultados",
+        all_listings_globally: "Todos los anuncios en todo el mundo",
+        all_of_country: "Todos los anuncios en {country}",
         // Categories
         cat_all: "Todos",
         cat_electronics: "Electrónica",
@@ -325,6 +331,8 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         listing_warning: "Zur Sicherheit Korrespondenz in der App führen.",
         learn_more: "Mehr erfahren",
         results: "Ergebnisse",
+        all_listings_globally: "Alle Anzeigen weltweit",
+        all_of_country: "Alle Anzeigen in {country}",
         // Categories
         cat_all: "Alle",
         cat_electronics: "Elektronik",
