@@ -63,9 +63,17 @@ function stars(rating: number) {
   return "★".repeat(full) + (half ? "½" : "");
 }
 
+function accent(listing: Listing) {
+  if (listing.type === "sell") {
+    return { stripe: "from-emerald-500 to-teal-500", chip: "from-emerald-500 to-teal-500" };
+  }
+  return { stripe: "from-fuchsia-500 to-violet-500", chip: "from-fuchsia-500 to-violet-500" };
+}
+
 export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: ListingModalProps) {
   const boosted = listing.boostedUntil && listing.boostedUntil > Date.now();
   const lang = useLang();
+  const a = accent(listing);
 
   return (
     <Modal open={true} onClose={onClose} dark={dark} size="lg" ariaLabel={listing.title}>
@@ -79,43 +87,78 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
         <ModalCloseButton onClose={onClose} dark={dark} label={t('close', lang)} />
       </ModalHeader>
       <div className="grid grid-cols-1 md:grid-cols-5">
+        {/* Left: media + description */}
         <div className="md:col-span-3">
-          <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[4/3]" />
+          <div className="relative">
+            <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[5/4]" />
+            <div className={cn("pointer-events-none absolute left-0 right-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r", a.stripe)} />
+            {/* Overlay chips on media */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">
+              <div className="flex items-end justify-between gap-2">
+                <span className={cn("rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>
+                  {listing.type === 'want' ? 'Looking For' : 'Selling'}
+                </span>
+                <span className={cn("truncate max-w-[60%] rounded-full px-3 py-1 text-[11px] backdrop-blur-sm", dark ? "bg-neutral-900/80 text-neutral-200" : "bg-white/80 text-neutral-700")}>📍 {listing.location}</span>
+              </div>
+            </div>
+          </div>
           <div className="p-4">
             <h3 className="font-semibold">{t('description', lang)}</h3>
             <p className={cn("mt-2 text-sm", dark ? "text-neutral-300" : "text-neutral-700")}>{listing.desc}</p>
           </div>
         </div>
-        <div className={cn("md:col-span-2 border-l", dark ? "border-neutral-900" : "border-neutral-200")}>
-          <div className="space-y-3 p-4">
-            <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} />
-            <div className="text-sm opacity-80">📍 {listing.location}</div>
+
+        {/* Right: price + seller + actions */}
+        <div className={cn("md:col-span-2 border-l", dark ? "border-neutral-900" : "border-neutral-200")}> 
+          <div className="space-y-4 p-4">
+            <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="lg" />
             <div className={cn("rounded-xl p-3", dark ? "border border-neutral-800 bg-neutral-900" : "border-neutral-300 bg-white border")}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-semibold">Seller {listing.seller.name}</div>
-                  <div className="text-xs opacity-80">
+              {/* Seller header line */}
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className={cn("inline-flex items-center gap-2", dark ? "text-neutral-200" : "text-neutral-800")}> 
+                    {listing.seller.score >= 50 && (
+                      <span
+                        className={cn(
+                          "verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-extrabold shadow-[0_0_8px_rgba(56,189,248,0.8)]",
+                          dark ? "bg-sky-500" : "bg-sky-500"
+                        )}
+                        aria-label="Verified"
+                        title="Verified"
+                      >
+                        ✓
+                      </span>
+                    )}
+                    <span className="truncate max-w-[12rem]">@{listing.seller.name}</span>
+                    <span className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍</span>
+                  </div>
+                  <div className={cn("mt-1 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}> 
                     {stars(listing.seller.rating)} · {listing.seller.deals} deals · On-time releases {Math.round(listing.seller.onTimeRelease * 100)}%
                   </div>
                 </div>
-                <div className="flex gap-1 text-[10px]">
-                  {listing.seller.verifications.email && <span className="rounded bg-emerald-500/20 px-2 py-1 text-emerald-400">email</span>}
-                  {listing.seller.verifications.phone && <span className="rounded bg-emerald-500/20 px-2 py-1 text-emerald-400">phone</span>}
-                  {listing.seller.verifications.lnurl && <span className="rounded bg-emerald-500/20 px-2 py-1 text-emerald-400">lnurl</span>}
-                </div>
+              </div>
+              {/* Verifications */}
+              <div className="mt-3 flex flex-wrap gap-1 text-[10px]">
+                {listing.seller.verifications.email && <span className="rounded bg-emerald-500/20 px-2 py-1 text-emerald-400">email</span>}
+                {listing.seller.verifications.phone && <span className="rounded bg-emerald-500/20 px-2 py-1 text-emerald-400">phone</span>}
+                {listing.seller.verifications.lnurl && <span className="rounded bg-emerald-500/20 px-2 py-1 text-emerald-400">lnurl</span>}
               </div>
             </div>
+
+            {/* Actions */}
             <div className="grid grid-cols-1 gap-2">
               <button onClick={onChat} className="rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2 font-semibold text-neutral-950 shadow shadow-orange-500/30">
                 {t('message_seller', lang)}
               </button>
+              <button className={cn("rounded-xl px-4 py-2 text-sm", dark ? "border border-neutral-800 bg-neutral-950 text-neutral-200 hover:bg-neutral-900" : "border border-neutral-300 bg-white text-neutral-800 hover:bg-neutral-100")}> 
+                {t('report_listing', lang)}
+              </button>
             </div>
+
+            {/* Safety */}
             <div className={cn("rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-400" : "bg-neutral-100 text-neutral-600")}> 
               {t('listing_warning', lang)}
             </div>
-            <button className={cn("mt-2 w-full rounded-xl px-3 py-2 text-xs", dark ? "text-neutral-400 hover:bg-neutral-900" : "text-neutral-600 hover:bg-neutral-100")}>
-              {t('report_listing', lang)}
-            </button>
           </div>
         </div>
       </div>
