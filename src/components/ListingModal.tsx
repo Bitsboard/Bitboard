@@ -75,6 +75,12 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
   const lang = useLang();
   const a = accent(listing);
 
+  function sanitizeTitle(raw: string, type: "sell" | "want"): string {
+    if (type !== "want") return raw;
+    const cleaned = raw.replace(/^\s*(looking\s*for\s*:?-?\s*)/i, "");
+    return cleaned.trim();
+  }
+
   return (
     <Modal open={true} onClose={onClose} dark={dark} size="lg" ariaLabel={listing.title}>
       <ModalHeader dark={dark}>
@@ -87,10 +93,10 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
         <ModalCloseButton onClose={onClose} dark={dark} label={t('close', lang)} />
       </ModalHeader>
       <div className="grid grid-cols-1 md:grid-cols-5">
-        {/* Left: media + price/seller + safety/report (static) */}
+        {/* Left: media + seller + safety/report (static) */}
         <div className="md:col-span-3">
           <div className="relative">
-            <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[5/4]" showThumbnails />
+            <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[5/4]" showThumbnails showDots={false} />
             <div className={cn("pointer-events-none absolute left-0 right-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r", a.stripe)} />
             {/* Overlay chips on media */}
             <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">
@@ -103,7 +109,6 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
             </div>
           </div>
           <div className="p-4 space-y-4">
-            <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="lg" compactFiat />
             <div className={cn("rounded-xl p-3", dark ? "border border-neutral-800 bg-neutral-900" : "border-neutral-300 bg-white border")}> 
               <div className="flex items-center gap-2 text-sm">
                 {listing.seller.score >= 50 && (
@@ -123,10 +128,17 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
           </div>
         </div>
 
-        {/* Right: scrollable title + long description and action */}
+        {/* Right: scrollable meta + title + price + long description and action */}
         <div className={cn("md:col-span-2 border-l overflow-auto", dark ? "border-neutral-900" : "border-neutral-200")}> 
           <div className="p-4">
-            <h2 className={cn("text-2xl font-bold", dark ? "text-white" : "text-neutral-900")}>{listing.title}</h2>
+            {/* Top row: type chip left, location pill right */}
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <span className={cn("flex-shrink-0 rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>
+                {listing.type === 'want' ? 'Looking For' : 'Selling'}
+              </span>
+              <span className={cn("truncate max-w-[60%] rounded-full px-3 py-1 text-[11px]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
+            </div>
+            <h2 className={cn("text-2xl font-bold", dark ? "text-white" : "text-neutral-900")}>{sanitizeTitle(listing.title, listing.type)}</h2>
             <div className="mt-2">
               <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="lg" compactFiat />
             </div>

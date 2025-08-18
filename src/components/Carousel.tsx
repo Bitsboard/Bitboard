@@ -100,7 +100,7 @@ export function Carousel({ images, alt, dark, className, showDots = true, showAr
                         <button
                             onClick={(e) => { e.stopPropagation(); prev(); }}
                             className={cn(
-                                "absolute left-2 top-1/2 -translate-y-1/2 rounded-full p-4 text-xl shadow-xl transition bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-400 hover:to-red-400"
+                                "absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full flex items-center justify-center text-xl shadow-xl transition bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-400 hover:to-red-400"
                             )}
                             aria-label="Previous image"
                         >
@@ -109,7 +109,7 @@ export function Carousel({ images, alt, dark, className, showDots = true, showAr
                         <button
                             onClick={(e) => { e.stopPropagation(); next(); }}
                             className={cn(
-                                "absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-4 text-xl shadow-xl transition bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-400 hover:to-red-400"
+                                "absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full flex items-center justify-center text-xl shadow-xl transition bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-400 hover:to-red-400"
                             )}
                             aria-label="Next image"
                         >
