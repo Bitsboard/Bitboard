@@ -26,6 +26,24 @@ function cn(...xs: Array<string | false | null | undefined>) {
   return xs.filter(Boolean).join(" ");
 }
 
+const COUNTRY_EXPAND: Record<string, string> = {
+  CA: "Canada", CAN: "Canada",
+  US: "United States", USA: "United States",
+  UK: "United Kingdom", GB: "United Kingdom", GBR: "United Kingdom",
+  DE: "Germany", DEU: "Germany",
+  FR: "France", FRA: "France",
+  ES: "Spain", ESP: "Spain",
+  MX: "Mexico", MEX: "Mexico",
+  IT: "Italy", ITA: "Italy",
+  BR: "Brazil", BRA: "Brazil",
+  AU: "Australia", AUS: "Australia",
+  JP: "Japan", JPN: "Japan",
+};
+
+function expandCountryToken(token: string): string {
+  return COUNTRY_EXPAND[token as keyof typeof COUNTRY_EXPAND] || token;
+}
+
 export function LocationAutocomplete({ value, onSelect, inputBase, dark }: LocationAutocompleteProps) {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState(value?.name || "");
@@ -59,10 +77,27 @@ export function LocationAutocomplete({ value, onSelect, inputBase, dark }: Locat
     setOpen(false);
   }
 
+  function pretty(s: string): string {
+    // Expand single/token country codes like CAN, USA when typed alone
+    const trimmed = s.trim();
+    if (!trimmed) return s;
+    if (!trimmed.includes(",") && trimmed.length <= 3) {
+      return expandCountryToken(trimmed.toUpperCase());
+    }
+    // For comma separated values, only expand the last token if it matches a code
+    const parts = trimmed.split(',');
+    const last = parts[parts.length - 1].trim().toUpperCase();
+    if (COUNTRY_EXPAND[last]) {
+      parts[parts.length - 1] = COUNTRY_EXPAND[last];
+      return parts.join(', ');
+    }
+    return s;
+  }
+
   return (
     <div className="relative" ref={dropdownRef}>
       <input
-        value={text}
+        value={pretty(text)}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setOpen(true)}
         placeholder="Search area (e.g., North York)"
@@ -79,8 +114,8 @@ export function LocationAutocomplete({ value, onSelect, inputBase, dark }: Locat
             </div>
           )}
           {filtered.map((p) => (
-            <button key={p.name} onClick={() => choose(p)} className={cn("block w-full px-4 py-3 text-left text-sm transition-colors", dark ? "hover:bg-neutral-800/50" : "hover:bg-neutral-100/50")}>
-              {p.name}
+            <button key={p.name} onClick={() => choose(p)} className={cn("block w-full px-4 py-3 text-left text-sm transition-colors", dark ? "hover:bg-neutral-800/50" : "hover:bg-neutral-100/50")}> 
+              {pretty(p.name)}
             </button>
           ))}
         </div>
