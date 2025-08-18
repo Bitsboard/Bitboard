@@ -93,7 +93,22 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
             <span className="rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2 py-0.5 text-[10px] font-bold text-neutral-950">BOOSTED</span>
           )}
         </div>
-        <ModalCloseButton onClose={onClose} dark={dark} label={t('close', lang)} />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              try {
+                const shareData = { title: listing.title, text: listing.title, url: typeof window !== 'undefined' ? window.location.href : undefined } as ShareData;
+                // @ts-ignore - navigator.share not in SSR
+                if (typeof navigator !== 'undefined' && navigator.share) navigator.share(shareData);
+                else if (typeof navigator !== 'undefined' && navigator.clipboard && typeof window !== 'undefined') navigator.clipboard.writeText(window.location.href);
+              } catch {}
+            }}
+            className={cn("rounded-lg px-3 py-1", dark ? "text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200" : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-800")}
+          >
+            Share listing
+          </button>
+          <ModalCloseButton onClose={onClose} dark={dark} label={t('close', lang)} />
+        </div>
       </ModalHeader>
       <div className="relative">
         <div className="grid grid-cols-1 md:grid-cols-5" style={{ maxHeight: "calc(90vh - 64px)" }}>
@@ -106,23 +121,25 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
             </div>
             <div className="p-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                {/* Bottom-left (now): seller info */}
-                <div className={cn("text-sm flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}> 
-                  {listing.seller.score >= 50 && (
-                    <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-extrabold shadow-[0_0_8px_rgba(56,189,248,0.8)]", dark ? "bg-sky-500" : "bg-sky-500")} aria-label="Verified" title="User has verified their identity">✓</span>
-                  )}
-                  <span>{listing.seller.name}</span>
-                  <span className="opacity-80">+{listing.seller.score} 👍</span>
+                {/* Bottom-left: seller info, then report link */}
+                <div>
+                  <div className={cn("text-sm flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}> 
+                    {listing.seller.score >= 50 && (
+                      <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-extrabold shadow-[0_0_8px_rgba(56,189,248,0.8)]", dark ? "bg-sky-500" : "bg-sky-500")} aria-label="Verified" title="User has verified their identity">✓</span>
+                    )}
+                    <span>{listing.seller.name}</span>
+                    <span className="opacity-80">+{listing.seller.score} 👍</span>
+                  </div>
+                  <div className="mt-2">
+                    <span className={cn("text-sm font-bold cursor-pointer", dark ? "text-red-400" : "text-red-600")}>{t('report_listing', lang)}</span>
+                  </div>
                 </div>
-                {/* Bottom-right (now): button then safety warning+report */}
+                {/* Bottom-right: button, then one-line safety warning */}
                 <div className="flex flex-col items-end gap-2">
                   <button onClick={onChat} className="min-w-[240px] rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2 text-sm font-semibold text-white shadow">
                     Send a Message
                   </button>
-                  <div className={cn("text-xs text-right", dark ? "text-neutral-400" : "text-neutral-600")}>{t('listing_warning', lang)}</div>
-                  <div className="mt-1">
-                    <span className={cn("text-sm font-bold cursor-pointer", dark ? "text-red-400" : "text-red-600")}>{t('report_listing', lang)}</span>
-                  </div>
+                  <div className={cn("text-xs text-right whitespace-nowrap", dark ? "text-neutral-400" : "text-neutral-600")}>{t('listing_warning', lang)}</div>
                 </div>
               </div>
             </div>
