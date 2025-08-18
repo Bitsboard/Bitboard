@@ -32,10 +32,10 @@ export function AuthModal({ onClose, onAuthed, dark }: AuthModalProps) {
         </label>
         <label className="block space-y-2">
           <span className="text-sm">Handle (shown publicly)</span>
-          <input value={handle} onChange={(e) => setHandle(e.target.value)} className={cn("w-full rounded-xl px-3 py-2 focus:outline-none", inputBase)} placeholder="@satoshi" />
+          <input value={handle} onChange={(e) => setHandle(e.target.value)} className={cn("w-full rounded-xl px-3 py-2 focus:outline-none", inputBase)} placeholder="satoshi" />
         </label>
         <button
-          onClick={() => onAuthed({ id: "u1", email, handle: handle || "@you" })}
+          onClick={() => onAuthed({ id: "u1", email, handle: handle || "you" })}
           disabled={!email}
           className={cn("w-full rounded-xl px-4 py-3 font-semibold", email ? "bg-orange-500 text-neutral-950" : dark ? "bg-neutral-800 text-neutral-600" : "bg-neutral-200 text-neutral-500")}
         >

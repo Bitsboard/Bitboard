@@ -225,7 +225,7 @@ export function NewListingModal({ onClose, onPublish, dark }: NewListingModalPro
                         : ["https://images.unsplash.com/photo-1549924231-f129b911e442?q=80&w=1600&auto=format&fit=crop"],
                       boostedUntil: boost ? Date.now() + 1000 * 60 * 60 * 24 : 0,
                       seller: {
-                        name: "@you",
+                        name: "you",
                         score: 0,
                         deals: 0,
                         rating: 5.0,

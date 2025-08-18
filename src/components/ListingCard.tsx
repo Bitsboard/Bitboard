@@ -126,7 +126,7 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
                 ✓
               </span>
             )}
-            <span className="truncate max-w-[8rem] sm:max-w-[10rem]">@{listing.seller.name}</span>
+            <span className="truncate max-w-[8rem] sm:max-w-[10rem]">{listing.seller.name}</span>
             <span className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍</span>
           </div>
         </div>

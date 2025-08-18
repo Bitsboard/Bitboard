@@ -155,7 +155,7 @@ export async function GET(req: Request) {
       '1541532713592-79a0317b6b77',
       '1555617117-08d3a8fef16c'
     ];
-    const sellers = ['@demo_seller', '@satoshi', '@luna', '@rob', '@mika', '@arya', '@nova', '@kai'];
+    const sellers = ['demo_seller', 'satoshi', 'luna', 'rob', 'mika', 'arya', 'nova', 'kai'];
     const listings = results.map((r: any, i: number) => ({
       ...r,
       imageUrl: r.imageUrl && r.imageUrl.trim() ? r.imageUrl : `https://images.unsplash.com/photo-${stock[i % stock.length]}?q=80&w=1600&auto=format&fit=crop`,

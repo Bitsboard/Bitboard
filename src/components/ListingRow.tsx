@@ -134,7 +134,7 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
                   ✓
                 </span>
               )}
-              <span className="truncate max-w-[12rem] sm:max-w-[16rem] md:max-w-[20rem]">@{listing.seller.name}</span>
+              <span className="truncate max-w-[12rem] sm:max-w-[16rem] md:max-w-[20rem]">{listing.seller.name}</span>
             </div>
             <div className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍 reputation</div>
           </div>
