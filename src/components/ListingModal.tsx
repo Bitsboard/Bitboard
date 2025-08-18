@@ -102,11 +102,21 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
             {/* Overlay chips removed per request */}
           </div>
           <div className="p-4 space-y-3">
-            <div className={cn("text-sm", dark ? "text-neutral-300" : "text-neutral-700")}> 
-              <span className="font-semibold">Seller</span> @{listing.seller.name} · <span className="opacity-80">+{listing.seller.score} 👍</span>
+            <div className={cn("text-sm flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}>
+              {listing.seller.score >= 50 && (
+                <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-extrabold shadow-[0_0_8px_rgba(56,189,248,0.8)]", dark ? "bg-sky-500" : "bg-sky-500")} aria-label="Verified" title="Verified">✓</span>
+              )}
+              <span>@{listing.seller.name}</span>
+              <span className="opacity-80">+{listing.seller.score} 👍</span>
             </div>
-            <div className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}> 
-              {t('listing_warning', lang)}
+            <div className="mt-2 flex items-start justify-between gap-3">
+              <div className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>{t('listing_warning', lang)}</div>
+              <div className="flex flex-col items-end gap-2">
+                <span className={cn("text-sm font-bold cursor-pointer", dark ? "text-red-400" : "text-red-600")}>{t('report_listing', lang)}</span>
+                <button onClick={onChat} className="rounded-xl bg-gradient-to-r from-amber-500 to-red-500 px-4 py-2 font-semibold text-white shadow">
+                  {t('message_seller', lang)}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -127,17 +137,9 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
             <div className={cn("prose prose-sm max-w-none mt-4", dark ? "prose-invert" : "")}>
               <p className={cn("whitespace-pre-wrap", dark ? "text-neutral-300" : "text-neutral-800")}>{listing.desc}</p>
             </div>
-            <div className="mt-6">
-              <button onClick={onChat} className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-red-500 px-4 py-3 font-semibold text-white shadow">
-                {t('message_seller', lang)}
-              </button>
-            </div>
+            {/* Message button moved to left column below report link */}
           </div>
         </div>
-        </div>
-        {/* Sticky report link bottom-right of modal panel */}
-        <div className="pointer-events-none absolute bottom-3 right-4">
-          <span className={cn("pointer-events-auto cursor-pointer text-sm font-bold", dark ? "text-red-400" : "text-red-600")}>{t('report_listing', lang)}</span>
         </div>
       </div>
     </Modal>
