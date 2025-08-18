@@ -85,6 +85,9 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
     <Modal open={true} onClose={onClose} dark={dark} size="lg" ariaLabel={listing.title}>
       <ModalHeader dark={dark}>
         <div className="flex items-center gap-2">
+          <span className={cn("flex-shrink-0 rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>
+            {listing.type === 'want' ? 'Looking For' : 'Selling'}
+          </span>
           <ModalTitle>{listing.title}</ModalTitle>
           {boosted && (
             <span className="rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2 py-0.5 text-[10px] font-bold text-neutral-950">BOOSTED</span>
@@ -121,19 +124,17 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
           </div>
         </div>
 
-        {/* Right: scrollable meta + title + price + long description and action */}
+        {/* Right: scrollable meta + top row + description */}
         <div className={cn("md:col-span-2 border-l overflow-y-auto", dark ? "border-neutral-900" : "border-neutral-200")} style={{ maxHeight: "calc(90vh - 64px)" }}> 
-          <div className="p-4">
-            {/* Top row: type chip left, location pill right */}
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <span className={cn("flex-shrink-0 rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>
-                {listing.type === 'want' ? 'Looking For' : 'Selling'}
-              </span>
+          <div className="p-4 pr-6">
+            {/* Top row: price left, location right */}
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <div className="shrink-0">
+                <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="md" compactFiat />
+              </div>
               <span className={cn("truncate max-w-[60%] rounded-full px-3 py-1 text-[11px]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
             </div>
-            <div>
-              <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="lg" compactFiat />
-            </div>
+            <div className={cn("my-3 h-px", dark ? "bg-neutral-900" : "bg-neutral-200")} />
             <div className={cn("prose prose-sm max-w-none mt-4", dark ? "prose-invert" : "")}>
               <p className={cn("whitespace-pre-wrap", dark ? "text-neutral-300" : "text-neutral-800")}>{listing.desc}</p>
             </div>
