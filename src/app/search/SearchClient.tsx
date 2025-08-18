@@ -189,7 +189,18 @@ export default function SearchClient() {
             if (savedRadius && Number.isFinite(savedRadius) && savedRadius > 0) sp.set('radiusKm', String(savedRadius));
         } else {
             // If user set a national/global radius, include country for filtering
-            const placeName = (() => { try { const raw = localStorage.getItem('userLocation'); if (raw) { const p = JSON.parse(raw) as { name?: string }; return p?.name || ''; } } catch { return ''; } })();
+            const placeName = (() => {
+                try {
+                    const raw = localStorage.getItem('userLocation');
+                    if (raw) {
+                        const p = JSON.parse(raw) as { name?: string };
+                        return p?.name || '';
+                    }
+                    return '';
+                } catch {
+                    return '';
+                }
+            })();
             const country = deriveCountry(placeName);
             const km = savedRadius;
             if (country && km && km >= 1000000) sp.set('country', country);

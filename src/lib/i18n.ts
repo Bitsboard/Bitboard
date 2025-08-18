@@ -405,9 +405,11 @@ export function subscribeLang(fn: () => void) {
 }
 
 export function useLang(): Lang {
-    // Use SyncExternalStore for concurrent-safe subscriptions
-    // @ts-ignore
-    return React.useSyncExternalStore(subscribeLang, getLang, getLang);
+    const [langState, setLangState] = React.useState<Lang>(() => getLang());
+    React.useEffect(() => {
+        return subscribeLang(() => setLangState(getLang()));
+    }, []);
+    return langState;
 }
 
 export function t(key: string, lang?: Lang): string {
