@@ -82,6 +82,27 @@ export default function HomePage() {
     return COUNTRY_EXPAND[last as keyof typeof COUNTRY_EXPAND] || last || null;
   }
 
+  function toAlpha3Country(input: string | null): string | null {
+    if (!input) return null;
+    const s = input.trim();
+    if (!s) return null;
+    const up = s.toUpperCase();
+    const NAME_TO_A3: Record<string, string> = {
+      'UNITED STATES': 'USA', 'USA': 'USA', 'US': 'USA', 'U.S.': 'USA', 'U.S.A.': 'USA', 'UNITED STATES OF AMERICA': 'USA',
+      'CANADA': 'CAN', 'CAN': 'CAN', 'CA': 'CAN',
+      'MEXICO': 'MEX', 'MEX': 'MEX', 'MX': 'MEX',
+      'UNITED KINGDOM': 'GBR', 'UK': 'GBR', 'GB': 'GBR', 'GREAT BRITAIN': 'GBR', 'GBR': 'GBR',
+      'GERMANY': 'DEU', 'DE': 'DEU', 'DEU': 'DEU',
+      'FRANCE': 'FRA', 'FR': 'FRA', 'FRA': 'FRA',
+      'SPAIN': 'ESP', 'ES': 'ESP', 'ESP': 'ESP',
+      'ITALY': 'ITA', 'IT': 'ITA', 'ITA': 'ITA',
+      'AUSTRALIA': 'AUS', 'AU': 'AUS', 'AUS': 'AUS',
+      'BRAZIL': 'BRA', 'BR': 'BRA', 'BRA': 'BRA',
+      'JAPAN': 'JPN', 'JP': 'JPN', 'JPN': 'JPN'
+    };
+    return NAME_TO_A3[up] || up;
+  }
+
   // Load saved user location on mount
   useEffect(() => {
     try {
@@ -176,6 +197,10 @@ export default function HomePage() {
           sp.set('lng', String(center.lng));
         }
         if (Number.isFinite(radiusKm as any) && radiusKm > 0) sp.set('radiusKm', String(radiusKm));
+        if (radiusKm >= 1000000) {
+          const c = toAlpha3Country(deriveCountry(center?.name));
+          if (c) sp.set('country', c);
+        }
         const r = await fetch(`/api/listings?${sp.toString()}`);
         const data = (await r.json()) as { listings?: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number }>; total?: number };
         const rows = data.listings ?? [];
@@ -208,6 +233,10 @@ export default function HomePage() {
         sp.set('lng', String(center.lng));
       }
       if (Number.isFinite(radiusKm as any) && radiusKm > 0) sp.set('radiusKm', String(radiusKm));
+      if (radiusKm >= 1000000) {
+        const c = toAlpha3Country(deriveCountry(center?.name));
+        if (c) sp.set('country', c);
+      }
       const r = await fetch(`/api/listings?${sp.toString()}`);
       const data = (await r.json()) as { listings?: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number }>; total?: number };
       const rows = data.listings ?? [];
