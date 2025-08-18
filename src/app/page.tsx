@@ -51,6 +51,38 @@ export default function HomePage() {
   const router = useRouter();
   const lang = useLang();
 
+  // Helper to derive a full country name from a location string
+  const COUNTRY_EXPAND: Record<string, string> = {
+    CA: "Canada", CAN: "Canada",
+    US: "United States", USA: "United States",
+    UK: "United Kingdom", GB: "United Kingdom", GBR: "United Kingdom",
+    DE: "Germany", DEU: "Germany",
+    FR: "France", FRA: "France",
+    ES: "Spain", ESP: "Spain",
+    MX: "Mexico", MEX: "Mexico",
+    IT: "Italy", ITA: "Italy",
+    BR: "Brazil", BRA: "Brazil",
+    AU: "Australia", AUS: "Australia",
+    JP: "Japan", JPN: "Japan",
+  };
+  function deriveCountry(name?: string | null): string | null {
+    if (!name) return null;
+    const parts = name.split(',').map(s => s.trim()).filter(Boolean);
+    if (parts.length === 0) return null;
+    if (parts.length === 1) {
+      const p = parts[0];
+      return COUNTRY_EXPAND[p as keyof typeof COUNTRY_EXPAND] || p;
+    }
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const token = parts[i];
+      if (token.length > 2) return token;
+      const expanded = COUNTRY_EXPAND[token as keyof typeof COUNTRY_EXPAND];
+      if (expanded) return expanded;
+    }
+    const last = parts[parts.length - 1];
+    return COUNTRY_EXPAND[last as keyof typeof COUNTRY_EXPAND] || last || null;
+  }
+
   // Load saved user location on mount
   useEffect(() => {
     try {
@@ -320,7 +352,13 @@ export default function HomePage() {
               <div className="mb-2 md:mb-1 flex md:justify-end">
                 <button onClick={() => setShowLocationModal(true)} className={cn("w-full md:w-[calc(100%-120px)] rounded-3xl px-6 py-5 text-left focus:outline-none", inputBase)}>
                   <div className="flex items-center justify-between gap-3">
-                    <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>{center?.name || t('choose_location', lang)}</div>
+                    <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>
+                      {radiusKm >= 5000000
+                        ? t('all_listings_globally', lang)
+                        : radiusKm >= 1000000
+                          ? t('all_listings_in_country', lang).replace('{country}', deriveCountry(center?.name) || 'your country')
+                          : (center?.name || t('choose_location', lang))}
+                    </div>
                     <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm >= 1000000 ? "" : `${radiusKm} km`}</div>
                   </div>
                 </button>
