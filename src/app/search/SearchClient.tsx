@@ -323,15 +323,23 @@ export default function SearchClient() {
                                     <button onClick={() => setShowLocationModal(true)} className="rounded-xl px-3 py-1 text-xs text-white bg-gradient-to-r from-orange-500 to-red-500">{t('change', lang)}</button>
                                 </div>
                             </div>
-                            <div className={cn("mt-3 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>
-                                {t('within_km_of', lang).replace('{n}', String(radiusKm))}
-                            </div>
-                            <div className={cn("mt-1", dark ? "text-neutral-200" : "text-neutral-800")} title={(() => { try { const raw = localStorage.getItem('userLocation'); if (raw) { const p = JSON.parse(raw) as { name?: string }; if (p?.name) return p.name; } } catch { }; return undefined; })()}>
-                                {(() => {
-                                    try { const raw = localStorage.getItem('userLocation'); if (raw) { const p = JSON.parse(raw) as { name?: string }; if (p?.name) return `${p.name}`; } } catch { }
-                                    return t('set_location', lang);
-                                })()}
-                            </div>
+                            {radiusKm >= 1000000 ? (
+                                <div className={cn("mt-3", dark ? "text-neutral-200" : "text-neutral-800")}>{t('all_listings', lang)} globally</div>
+                            ) : radiusKm >= 500000 ? (
+                                <div className={cn("mt-3", dark ? "text-neutral-200" : "text-neutral-800")}>{t('all_listings', lang)} nationally</div>
+                            ) : (
+                                <>
+                                    <div className={cn("mt-3 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>
+                                        {t('within_km_of', lang).replace('{n}', String(radiusKm))}
+                                    </div>
+                                    <div className={cn("mt-1", dark ? "text-neutral-200" : "text-neutral-800")} title={(() => { try { const raw = localStorage.getItem('userLocation'); if (raw) { const p = JSON.parse(raw) as { name?: string }; if (p?.name) return p.name; } } catch { }; return undefined; })()}>
+                                        {(() => {
+                                            try { const raw = localStorage.getItem('userLocation'); if (raw) { const p = JSON.parse(raw) as { name?: string }; if (p?.name) return `${p.name}`; } } catch { }
+                                            return t('set_location', lang);
+                                        })()}
+                                    </div>
+                                </>
+                            )}
                         </div>
 
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
