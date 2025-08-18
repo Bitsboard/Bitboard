@@ -52,6 +52,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         no_more_results: "No more results",
         selected_location: "Selected location",
         set_location: "Set location",
+        within_km_of: "Within {n} km of",
         // Footer
         prohibited_items: "Prohibited items",
         safety_tips: "Safety tips",
@@ -137,6 +138,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         no_more_results: "Plus de résultats",
         selected_location: "Lieu sélectionné",
         set_location: "Définir le lieu",
+        within_km_of: "Dans un rayon de {n} km de",
         // Footer
         prohibited_items: "Objets interdits",
         safety_tips: "Conseils de sécurité",
@@ -221,6 +223,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         no_more_results: "No hay más resultados",
         selected_location: "Ubicación seleccionada",
         set_location: "Establecer ubicación",
+        within_km_of: "A {n} km de",
         // Footer
         prohibited_items: "Artículos prohibidos",
         safety_tips: "Consejos de seguridad",
@@ -305,6 +308,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         no_more_results: "Keine weiteren Ergebnisse",
         selected_location: "Ausgewählter Ort",
         set_location: "Ort festlegen",
+        within_km_of: "Im Umkreis von {n} km von",
         // Footer
         prohibited_items: "Verbotene Artikel",
         safety_tips: "Sicherheitstipps",
