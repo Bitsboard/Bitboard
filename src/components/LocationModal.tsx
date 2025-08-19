@@ -91,7 +91,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             });
             const marker = (L as any).marker([center.lat, center.lng], { draggable: false, icon: bbIcon }).addTo(map);
             markerRef.current = marker;
-            const circle = (L as any).circle([center.lat, center.lng], { radius: radiusKm * 1000, color: "#f97316" }).addTo(map);
+            const circle = (L as any).circle([center.lat, center.lng], { radius: Math.max(1, radiusKm) * 1000, color: "#f97316" }).addTo(map);
             circleRef.current = circle;
             // Pin is fixed; users can change by searching/selecting
             cleanup = () => {
@@ -113,7 +113,13 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
 
     // Update circle when radius changes
     React.useEffect(() => {
-        if (circleRef.current) {
+        if (!mapRef.current || !circleRef.current) return;
+        if (radiusKm === 0) {
+            // Everywhere: tint whole map
+            (mapRef.current.getPane('orangeTint') as any).style.background = 'linear-gradient(0deg, rgba(255,149,0,0.25), rgba(255,149,0,0.25))';
+            circleRef.current.setRadius(1); // effectively hide circle
+        } else {
+            (mapRef.current.getPane('orangeTint') as any).style.background = 'linear-gradient(0deg, rgba(255,149,0,0.10), rgba(255,149,0,0.10))';
             circleRef.current.setRadius(radiusKm * 1000);
         }
     }, [radiusKm]);

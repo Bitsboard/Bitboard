@@ -373,7 +373,7 @@ export default function HomePage() {
                     <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>
                       {radiusKm === 0 ? t('all_listings_globally', lang) : (center?.name || t('choose_location', lang))}
                     </div>
-                    <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm === 0 ? "" : `${radiusKm} km`}</div>
+                    <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm === 0 ? t('change', lang) : `${radiusKm} km`}</div>
                   </div>
                 </button>
               </div>
