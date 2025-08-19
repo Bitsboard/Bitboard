@@ -24,6 +24,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     const mapRef = React.useRef<any>(null);
     const circleRef = React.useRef<any>(null);
     const markerRef = React.useRef<any>(null);
+    const leafletRef = React.useRef<any>(null);
     const lang = useLang();
     const [query, setQuery] = React.useState<string>("");
     const [radiusKm, setRadiusKm] = React.useState<number>(initialRadiusKm);
@@ -169,6 +170,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         (async () => {
             if (!open || !containerRef.current) return;
             const L = await import("leaflet");
+            leafletRef.current = L;
             // Fix default icon paths
             // @ts-ignore
             delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -250,95 +252,48 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lang]);
 
-    // Update circle when radius changes (visual circle is fixed pixel size; we adjust zoom)
+    function recreateCircle(currentRadius: number, at: { lat: number; lng: number }) {
+        if (!mapRef.current || !leafletRef.current) return;
+        const L = (leafletRef.current as any).default || (leafletRef.current as any);
+        // Remove any existing circle
+        try { circleRef.current?.remove(); } catch {}
+        if (currentRadius === 0) {
+            circleRef.current = (L as any).circle([0, -5], { radius: 100000 * 1000, color: '#f97316', fillColor: '#f97316', fillOpacity: 0.15 }).addTo(mapRef.current);
+            setCircleMode('global');
+        } else {
+            circleRef.current = (L as any).circleMarker([at.lat, at.lng], { radius: getCircleRadiusPx(), color: '#f97316', fillColor: '#f97316', fillOpacity: 0.15 }).addTo(mapRef.current);
+            setCircleMode('local');
+        }
+    }
+
+    // Single effect to update view and circle for both radius and center changes
     React.useEffect(() => {
         if (!mapRef.current) return;
-        // Keep a subtle base tint regardless
+        // Tint
         (mapRef.current.getPane('orangeTint') as any).style.background = 'linear-gradient(0deg, rgba(255,149,0,0.10), rgba(255,149,0,0.10))';
-        // Adjust zoom based on radius and keep circle same on-screen size (except global, where we draw a geodesic circle)
-        (async () => {
-            if (radiusKm === 0) {
-                mapRef.current.setView([0, -5], zoomForRadiusKm(0));
-                // If currently local circleMarker, replace with geodesic Circle
-                if (circleMode !== 'global') {
-                    // @ts-ignore
-                    circleRef.current?.remove();
-                    const L = (await import('leaflet')).default as any;
-                    circleRef.current = (L as any).circle([0, -5], { radius: 100000 * 1000, color: '#f97316', fillColor: '#f97316', fillOpacity: 0.15 }).addTo(mapRef.current);
-                    setCircleMode('global');
-                } else {
-                    circleRef.current.setLatLng([0, -5]);
-                    circleRef.current.setRadius(100000 * 1000);
-                }
-                markerRef.current?.setLatLng([center.lat, center.lng]);
-            } else {
-                mapRef.current.setView([center.lat, center.lng], zoomForRadiusKm(radiusKm));
-                // If currently global Circle, replace with pixel CircleMarker
-                if (circleMode !== 'local') {
-                    // @ts-ignore
-                    circleRef.current?.remove();
-                    const L = (await import('leaflet')).default as any;
-                    circleRef.current = (L as any).circleMarker([center.lat, center.lng], { radius: getCircleRadiusPx(), color: '#f97316', fillColor: '#f97316', fillOpacity: 0.15 }).addTo(mapRef.current);
-                    setCircleMode('local');
-                } else {
-                    circleRef.current.setLatLng([center.lat, center.lng]);
-                    circleRef.current.setRadius(getCircleRadiusPx());
-                }
-                markerRef.current?.setLatLng([center.lat, center.lng]);
-            }
-        })();
-    }, [radiusKm]);
-
-    // Update map center when center changes (from search select)
-    React.useEffect(() => {
-        (async () => {
-            if (!mapRef.current || !markerRef.current) return;
-            if (radiusKm === 0) {
-                mapRef.current.setView([0, -5], zoomForRadiusKm(0));
-                markerRef.current.setLatLng([center.lat, center.lng]);
-                if (circleMode !== 'global') {
-                    // @ts-ignore
-                    circleRef.current?.remove();
-                    const L = (await import('leaflet')).default as any;
-                    circleRef.current = (L as any).circle([0, -5], { radius: 100000 * 1000, color: '#f97316', fillColor: '#f97316', fillOpacity: 0.15 }).addTo(mapRef.current);
-                    setCircleMode('global');
-                } else {
-                    circleRef.current.setLatLng([0, -5]);
-                    circleRef.current.setRadius(100000 * 1000);
-                }
-            } else {
-                mapRef.current.setView([center.lat, center.lng], zoomForRadiusKm(radiusKm));
-                markerRef.current.setLatLng([center.lat, center.lng]);
-                if (circleMode !== 'local') {
-                    // @ts-ignore
-                    circleRef.current?.remove();
-                    const L = (await import('leaflet')).default as any;
-                    circleRef.current = (L as any).circleMarker([center.lat, center.lng], { radius: getCircleRadiusPx(), color: '#f97316', fillColor: '#f97316', fillOpacity: 0.15 }).addTo(mapRef.current);
-                    setCircleMode('local');
-                } else {
-                    circleRef.current.setLatLng([center.lat, center.lng]);
-                    circleRef.current.setRadius(getCircleRadiusPx());
-                }
-            }
-        })();
-    }, [center.lat, center.lng, radiusKm]);
+        if (radiusKm === 0) {
+            mapRef.current.setView([0, -5], zoomForRadiusKm(0));
+            markerRef.current?.setLatLng([center.lat, center.lng]);
+            recreateCircle(0, center);
+        } else {
+            mapRef.current.setView([center.lat, center.lng], zoomForRadiusKm(radiusKm));
+            markerRef.current?.setLatLng([center.lat, center.lng]);
+            recreateCircle(radiusKm, center);
+        }
+    }, [radiusKm, center.lat, center.lng]);
 
     // Recompute pixel radius on window resize
     React.useEffect(() => {
         function onResize() {
             if (circleRef.current) {
                 try {
-                    if (radiusKm === 0) {
-                        circleRef.current.setRadius(100000 * 1000);
-                    } else {
-                        circleRef.current.setRadius(getCircleRadiusPx());
-                    }
+                    if (circleMode === 'local') circleRef.current.setRadius(getCircleRadiusPx());
                 } catch {}
             }
         }
         window.addEventListener('resize', onResize);
         return () => window.removeEventListener('resize', onResize);
-    }, [radiusKm]);
+    }, [circleMode]);
 
     // National scope removed; radius is one of fixed values or Everywhere (0)
 
