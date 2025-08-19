@@ -263,6 +263,18 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         }
     }, [center.name, usingMyLocation, open]);
 
+    // Safety net: if center changes to a concrete city (not My Location/coords), exit My Location mode
+    React.useEffect(() => {
+        if (!open) return;
+        const name = center?.name || '';
+        const isCoords = /\d+\.\d+,\s*\d+\.\d+/.test(name);
+        const isMyLoc = name === t('my_location', lang) || isCoords;
+        if (!isMyLoc && usingMyLocation) {
+            setUsingMyLocation(false);
+            try { localStorage.setItem('usingMyLocation', '0'); } catch {}
+        }
+    }, [center.name, open, lang, usingMyLocation]);
+
     function recreateCircle(currentRadius: number, at: { lat: number; lng: number }) {
         if (!mapRef.current || !leafletRef.current) return;
         const L = (leafletRef.current as any).default || (leafletRef.current as any);
