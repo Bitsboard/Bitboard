@@ -196,9 +196,9 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             // Grey tiles always
             const greyUrl = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
             const base = L.tileLayer(greyUrl, { maxZoom: 19, attribution: "© OpenStreetMap © CARTO", noWrap: true }).addTo(map);
-            // Solid orange tint overlay that covers the entire map container (below markers)
+            // Pane reserved (no tint by default); circle will provide orange fill in Worldwide
             const pane = (map as any).createPane('worldTint');
-            (pane as any).style.zIndex = 350; // above tiles, below markers
+            (pane as any).style.zIndex = 350;
             (pane as any).style.background = 'transparent';
             (pane as any).style.pointerEvents = 'none';
             (L as any).tileLayer('', { pane: 'worldTint' }).addTo(map);
@@ -212,7 +212,8 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             const marker = (L as any).marker([center.lat, center.lng], { draggable: false, icon: bbIcon }).addTo(map);
             markerRef.current = marker;
             if (radiusKm === 0) {
-                circleRef.current = null;
+                const circle = (L as any).circle([0, 0], { radius: 100000 * 1000, color: '#f97316', fillColor: '#f97316', fillOpacity: 0.25, weight: 2 }).addTo(map);
+                circleRef.current = circle;
             } else {
                 const circle = (L as any).circleMarker([center.lat, center.lng], { radius: getCircleRadiusPx(), color: "#f97316", fillColor: "#f97316", fillOpacity: 0.15 }).addTo(map);
                 circleRef.current = circle;
@@ -287,7 +288,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         // Remove any existing circle
         try { circleRef.current?.remove(); } catch {}
         if (currentRadius === 0) {
-            circleRef.current = null;
+            circleRef.current = (L as any).circle([0, 0], { radius: 100000 * 1000, color: '#f97316', fillColor: '#f97316', fillOpacity: 0.25, weight: 2 }).addTo(mapRef.current);
             setCircleMode('global');
         } else {
             circleRef.current = (L as any).circleMarker([at.lat, at.lng], { radius: getCircleRadiusPx(), color: '#f97316', fillColor: '#f97316', fillOpacity: 0.15 }).addTo(mapRef.current);
@@ -298,9 +299,9 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     // Single effect to update view and circle for both radius and center changes
     React.useEffect(() => {
         if (!mapRef.current) return;
-        // Toggle full-container tint only in worldwide mode
+        // No pane tint; circle provides orange in Worldwide
         const tint = mapRef.current.getPane('worldTint') as any;
-        if (tint) tint.style.background = radiusKm === 0 ? 'rgba(249, 115, 22, 0.35)' : 'transparent';
+        if (tint) tint.style.background = 'transparent';
         if (radiusKm === 0) {
             mapRef.current.setView([0, 0], zoomForRadiusKm(0));
             markerRef.current?.setLatLng([center.lat, center.lng]);
