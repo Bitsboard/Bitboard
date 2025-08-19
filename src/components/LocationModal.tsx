@@ -219,10 +219,15 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                                                     const admin1 = (first?.admin1 || '').toString();
                                                     const cc2 = (first?.country_code || '').toString().toUpperCase();
                                                     const name = [city, admin1 || undefined, cc2 || undefined].filter(Boolean).join(', ');
-                                                    setCenter({ name: name || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`, lat: latitude, lng: longitude });
-                                                    setQuery(name || city || '');
+                                                    const finalName = name || city || '';
+                                                    if (finalName) {
+                                                        setCenter({ name: finalName, lat: latitude, lng: longitude });
+                                                        setQuery(finalName);
+                                                    } else {
+                                                        // If reverse lookup fails to yield a city, keep existing center; do not show raw coords
+                                                    }
                                                 } catch {
-                                                    setCenter({ name: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`, lat: latitude, lng: longitude });
+                                                    // On failure, do not replace with coordinates; keep prior selection
                                                 }
                                                 resolve();
                                             })();
