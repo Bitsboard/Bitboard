@@ -37,7 +37,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     const [usingMyLocation, setUsingMyLocation] = React.useState<boolean>(false);
     // Map zoom helper tied to radius
     function zoomForRadiusKm(r: number): number {
-        if (r <= 0) return 2; // world view
+        if (r <= 0) return 1; // world view, show all continents
         if (r <= 2) return 12;
         if (r <= 5) return 11;
         if (r <= 10) return 10;
@@ -206,7 +206,9 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             });
             const marker = (L as any).marker([center.lat, center.lng], { draggable: false, icon: bbIcon }).addTo(map);
             markerRef.current = marker;
-            const circle = (L as any).circleMarker([center.lat, center.lng], { radius: getCircleRadiusPx(), color: "#f97316", fillColor: "#f97316", fillOpacity: 0.15 }).addTo(map);
+            const circle = radiusKm === 0
+                ? (L as any).circle([center.lat, center.lng], { radius: 100000 * 1000, color: "#f97316", fillColor: "#f97316", fillOpacity: 0.15 }).addTo(map)
+                : (L as any).circleMarker([center.lat, center.lng], { radius: getCircleRadiusPx(), color: "#f97316", fillColor: "#f97316", fillOpacity: 0.15 }).addTo(map);
             circleRef.current = circle;
             // Pin is fixed; users can change by searching/selecting
             cleanup = () => {
@@ -240,10 +242,14 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         if (!mapRef.current || !circleRef.current) return;
         // Keep a subtle base tint regardless
         (mapRef.current.getPane('orangeTint') as any).style.background = 'linear-gradient(0deg, rgba(255,149,0,0.10), rgba(255,149,0,0.10))';
-        // Adjust zoom based on radius and keep circle same on-screen size
+        // Adjust zoom based on radius and keep circle same on-screen size (except global, where we draw a geodesic circle)
         try {
             mapRef.current.setView([center.lat, center.lng], zoomForRadiusKm(radiusKm));
-            circleRef.current.setRadius(getCircleRadiusPx());
+            if (radiusKm === 0) {
+                circleRef.current.setRadius(100000 * 1000);
+            } else {
+                circleRef.current.setRadius(getCircleRadiusPx());
+            }
         } catch {}
     }, [radiusKm]);
 
