@@ -56,6 +56,12 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         const w = containerRef.current?.clientWidth ?? 400;
         return Math.floor(Math.min(h, w) * 0.32); // ~64% diameter, leaves padding top/bottom
     }
+    function getGlobalRadiusPx(): number {
+        const h = containerRef.current?.clientHeight ?? 280;
+        const w = containerRef.current?.clientWidth ?? 400;
+        const diag = Math.sqrt(h * h + w * w);
+        return Math.ceil(diag / 2) + 20; // cover full map with small padding
+    }
     // Helpers for reverse-geocoding and formatting
     const US_STATE_ABBR: Record<string, string> = {
         'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR', 'California': 'CA', 'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE', 'Florida': 'FL', 'Georgia': 'GA', 'Hawaii': 'HI', 'Idaho': 'ID', 'Illinois': 'IL', 'Indiana': 'IN', 'Iowa': 'IA', 'Kansas': 'KS', 'Kentucky': 'KY', 'Louisiana': 'LA', 'Maine': 'ME', 'Maryland': 'MD', 'Massachusetts': 'MA', 'Michigan': 'MI', 'Minnesota': 'MN', 'Mississippi': 'MS', 'Missouri': 'MO', 'Montana': 'MT', 'Nebraska': 'NE', 'Nevada': 'NV', 'New Hampshire': 'NH', 'New Jersey': 'NJ', 'New Mexico': 'NM', 'New York': 'NY', 'North Carolina': 'NC', 'North Dakota': 'ND', 'Ohio': 'OH', 'Oklahoma': 'OK', 'Oregon': 'OR', 'Pennsylvania': 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC', 'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT', 'Vermont': 'VT', 'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV', 'Wisconsin': 'WI', 'Wyoming': 'WY', 'District of Columbia': 'DC'
@@ -183,7 +189,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                 mapRef.current.remove();
             }
             const initLat = radiusKm === 0 ? 0 : center.lat;
-            const initLng = radiusKm === 0 ? -5 : center.lng;
+            const initLng = radiusKm === 0 ? 5 : center.lng;
             const map = L.map(containerRef.current, { zoomControl: false }).setView([initLat, initLng], zoomForRadiusKm(radiusKm));
             mapRef.current = map;
             // Disable interactions
@@ -212,7 +218,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             const marker = (L as any).marker([center.lat, center.lng], { draggable: false, icon: bbIcon }).addTo(map);
             markerRef.current = marker;
             if (radiusKm === 0) {
-                const circle = (L as any).circle([0, 5], { radius: 250000 * 1000, color: '#f97316', fillColor: '#f97316', fillOpacity: 0.25, weight: 2 }).addTo(map);
+                const circle = (L as any).circleMarker([0, 5], { radius: getGlobalRadiusPx(), stroke: false, fillColor: '#f97316', fillOpacity: 0.25 }).addTo(map);
                 circleRef.current = circle;
             } else {
                 const circle = (L as any).circleMarker([center.lat, center.lng], { radius: getCircleRadiusPx(), color: "#f97316", fillColor: "#f97316", fillOpacity: 0.15 }).addTo(map);
@@ -288,7 +294,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         // Remove any existing circle
         try { circleRef.current?.remove(); } catch {}
         if (currentRadius === 0) {
-            circleRef.current = (L as any).circle([0, 5], { radius: 250000 * 1000, color: '#f97316', fillColor: '#f97316', fillOpacity: 0.25, weight: 2 }).addTo(mapRef.current);
+            circleRef.current = (L as any).circleMarker([0, 5], { radius: getGlobalRadiusPx(), stroke: false, fillColor: '#f97316', fillOpacity: 0.25 }).addTo(mapRef.current);
             setCircleMode('global');
         } else {
             circleRef.current = (L as any).circleMarker([at.lat, at.lng], { radius: getCircleRadiusPx(), color: '#f97316', fillColor: '#f97316', fillOpacity: 0.15 }).addTo(mapRef.current);
@@ -319,6 +325,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             if (circleRef.current) {
                 try {
                     if (circleMode === 'local') circleRef.current.setRadius(getCircleRadiusPx());
+                    if (circleMode === 'global') circleRef.current.setRadius(getGlobalRadiusPx());
                 } catch {}
             }
         }
