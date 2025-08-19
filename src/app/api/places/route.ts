@@ -46,6 +46,9 @@ export async function GET(req: Request) {
         const js = (await r.json()) as Array<any>;
         const mapped = js.map((it) => {
             const addr = it.address || {};
+            // Only accept true cities
+            const typ = (it.type || '').toString();
+            if (typ !== 'city') return null;
             const cc2 = addr.country_code as string | undefined;
             const countryShort = countryToAlpha3(cc2);
             const iso = (addr["ISO3166-2-lvl4"] as string | undefined) || (addr["ISO3166-2-lvl6"] as string | undefined) || (addr["ISO3166-2-lvl3"] as string | undefined);
@@ -53,18 +56,17 @@ export async function GET(req: Request) {
             const city = addr.city || addr.town || addr.village || addr.municipality || '';
             // Only accept city-like results; skip country/state/region-only entries
             if (!city) return null;
+            const cleanCity = String(city).replace(/\s*\(.*?\)\s*/g, '').replace(/\s+-\s+.*/g, '').trim();
             let nameParts: string[] = [];
-            if (city) nameParts.push(city);
+            if (cleanCity) nameParts.push(cleanCity);
             if (stateAbbr) nameParts.push(stateAbbr);
             else if (addr.state) nameParts.push(String(addr.state));
             if (countryShort) nameParts.push(countryShort);
             const name = nameParts.filter(Boolean).join(', ');
-            const postal = addr.postcode as string | undefined;
             return {
                 name,
                 lat: Number(it.lat),
                 lng: Number(it.lon),
-                postal,
                 importance: typeof it.importance === 'number' ? it.importance : 0,
             };
         }).filter(Boolean) as Array<any>;
