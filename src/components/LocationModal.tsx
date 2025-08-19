@@ -38,15 +38,21 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     // Map zoom helper tied to radius
     function zoomForRadiusKm(r: number): number {
         if (r <= 0) return 2; // world view
-        if (r <= 2) return 13;
-        if (r <= 5) return 12;
-        if (r <= 10) return 11;
-        if (r <= 25) return 10;
-        if (r <= 50) return 9;
-        if (r <= 100) return 8;
-        if (r <= 250) return 7;
-        if (r <= 500) return 6;
-        return 5;
+        if (r <= 2) return 12;
+        if (r <= 5) return 11;
+        if (r <= 10) return 10;
+        if (r <= 25) return 9;
+        if (r <= 50) return 8;
+        if (r <= 100) return 7;
+        if (r <= 250) return 6;
+        if (r <= 500) return 5;
+        return 4;
+    }
+
+    function getCircleRadiusPx(): number {
+        const h = containerRef.current?.clientHeight ?? 280;
+        const w = containerRef.current?.clientWidth ?? 400;
+        return Math.floor(Math.min(h, w) * 0.32); // ~64% diameter, leaves padding top/bottom
     }
     // Helpers for reverse-geocoding and formatting
     const US_STATE_ABBR: Record<string, string> = {
@@ -200,15 +206,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             });
             const marker = (L as any).marker([center.lat, center.lng], { draggable: false, icon: bbIcon }).addTo(map);
             markerRef.current = marker;
-            const circle = (L as any).circle(
-                [center.lat, center.lng],
-                {
-                    radius: (radiusKm === 0 ? 100000 : Math.max(1, radiusKm)) * 1000,
-                    color: "#f97316",
-                    fillColor: "#f97316",
-                    fillOpacity: 0.15
-                }
-            ).addTo(map);
+            const circle = (L as any).circleMarker([center.lat, center.lng], { radius: getCircleRadiusPx(), color: "#f97316", fillColor: "#f97316", fillOpacity: 0.15 }).addTo(map);
             circleRef.current = circle;
             // Pin is fixed; users can change by searching/selecting
             cleanup = () => {
@@ -237,17 +235,15 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         }
     }, [open, initialCenter?.name, center?.name, lang]);
 
-    // Update circle when radius changes
+    // Update circle when radius changes (visual circle is fixed pixel size; we adjust zoom)
     React.useEffect(() => {
         if (!mapRef.current || !circleRef.current) return;
-        // Everywhere: draw a gigantic circle (~100,000 km) so the map appears fully orange
-        const meters = (radiusKm === 0 ? 100000 : radiusKm) * 1000;
-        circleRef.current.setRadius(meters);
         // Keep a subtle base tint regardless
         (mapRef.current.getPane('orangeTint') as any).style.background = 'linear-gradient(0deg, rgba(255,149,0,0.10), rgba(255,149,0,0.10))';
-        // Adjust zoom based on radius
+        // Adjust zoom based on radius and keep circle same on-screen size
         try {
             mapRef.current.setView([center.lat, center.lng], zoomForRadiusKm(radiusKm));
+            circleRef.current.setRadius(getCircleRadiusPx());
         } catch {}
     }, [radiusKm]);
 
@@ -257,8 +253,20 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             mapRef.current.setView([center.lat, center.lng], zoomForRadiusKm(radiusKm));
             markerRef.current.setLatLng([center.lat, center.lng]);
             circleRef.current.setLatLng([center.lat, center.lng]);
+            circleRef.current.setRadius(getCircleRadiusPx());
         }
     }, [center.lat, center.lng, radiusKm]);
+
+    // Recompute pixel radius on window resize
+    React.useEffect(() => {
+        function onResize() {
+            if (circleRef.current) {
+                try { circleRef.current.setRadius(getCircleRadiusPx()); } catch {}
+            }
+        }
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+    }, []);
 
     // National scope removed; radius is one of fixed values or Everywhere (0)
 
