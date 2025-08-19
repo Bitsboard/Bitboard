@@ -11,15 +11,14 @@ interface LocationAutocompleteProps {
   dark: boolean;
 }
 
-const places: Place[] = [
-  { name: "Toronto (City Center)", lat: 43.653, lng: -79.383 },
-  { name: "Downtown", lat: 43.6487, lng: -79.3817 },
-  { name: "North York", lat: 43.7615, lng: -79.4111 },
-  { name: "Etobicoke", lat: 43.6205, lng: -79.5132 },
-  { name: "Scarborough", lat: 43.7731, lng: -79.2578 },
-  { name: "Markham", lat: 43.8561, lng: -79.337 },
-  { name: "Mississauga", lat: 43.589, lng: -79.644 },
-  { name: "Vaughan", lat: 43.837, lng: -79.508 },
+// Lightweight global seed list used until remote results arrive
+const seedPlaces: Place[] = [
+  { name: "Toronto, CAN", lat: 43.6532, lng: -79.3832 },
+  { name: "Vancouver, CAN", lat: 49.2827, lng: -123.1207 },
+  { name: "New York, USA", lat: 40.7128, lng: -74.0060 },
+  { name: "Los Angeles, USA", lat: 34.0522, lng: -118.2437 },
+  { name: "London, GBR", lat: 51.5074, lng: -0.1278 },
+  { name: "Berlin, DEU", lat: 52.52, lng: 13.405 },
 ];
 
 function cn(...xs: Array<string | false | null | undefined>) {
@@ -47,7 +46,8 @@ function expandCountryToken(token: string): string {
 export function LocationAutocomplete({ value, onSelect, inputBase, dark }: LocationAutocompleteProps) {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState(value?.name || "");
-  const [filtered, setFiltered] = useState<Place[]>(places);
+  const [filtered, setFiltered] = useState<Place[]>(seedPlaces);
+  const [remote, setRemote] = useState<Place[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -67,7 +67,8 @@ export function LocationAutocomplete({ value, onSelect, inputBase, dark }: Locat
 
   function onChange(v: string) {
     setText(v);
-    const f = places.filter((p) => p.name.toLowerCase().includes(v.toLowerCase()));
+    const base = remote.length ? remote : seedPlaces;
+    const f = base.filter((p) => p.name.toLowerCase().includes(v.toLowerCase()));
     setFiltered(f);
     setOpen(true);
   }
@@ -94,6 +95,27 @@ export function LocationAutocomplete({ value, onSelect, inputBase, dark }: Locat
     return s;
   }
 
+  // Remote suggestions via Edge endpoint (Nominatim-backed)
+  useEffect(() => {
+    const q = text.trim();
+    if (!q) { setRemote([]); setFiltered(seedPlaces); return; }
+    const ctl = new AbortController();
+    const t = setTimeout(async () => {
+      try {
+        const r = await fetch(`/api/places?q=${encodeURIComponent(q)}&limit=12`, { signal: ctl.signal, headers: { 'Accept': 'application/json' } });
+        const js = (await r.json()) as { results?: Array<{ name: string; lat: number; lng: number }> };
+        const xs = (js.results || []).map(p => ({ name: p.name, lat: p.lat, lng: p.lng }));
+        setRemote(xs);
+        const base = xs.length ? xs : seedPlaces;
+        const f = base.filter((p) => p.name.toLowerCase().includes(q.toLowerCase()));
+        setFiltered(f);
+      } catch {
+        setRemote([]);
+      }
+    }, 250);
+    return () => { clearTimeout(t); ctl.abort(); };
+  }, [text]);
+
   return (
     <div className="relative" ref={dropdownRef}>
       <input
@@ -107,10 +129,10 @@ export function LocationAutocomplete({ value, onSelect, inputBase, dark }: Locat
         )}
       />
       {open && (
-        <div className={cn("absolute z-50 mt-3 w-full max-h-60 overflow-y-auto rounded-2xl border shadow-2xl", dark ? "border-neutral-700/50 bg-neutral-900" : "border-neutral-300/50 bg-white")}>
+        <div className={cn("absolute z-50 mt-3 w-full max-h-60 overflow-y-auto rounded-2xl border shadow-2xl", dark ? "border-neutral-700/50 bg-neutral-900" : "border-neutral-300/50 bg-white")}> 
           {filtered.length === 0 && (
             <div className={cn("px-4 py-3 text-sm", dark ? "text-neutral-400" : "text-neutral-600")}>
-              No matches. Try: Toronto, Downtown, North York…
+              No matches. Try searching a city, region, or country…
             </div>
           )}
           {filtered.map((p) => (

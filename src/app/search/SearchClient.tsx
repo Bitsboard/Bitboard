@@ -184,31 +184,21 @@ export default function SearchClient() {
         // Persist layout selection across filter applications
         sp.set("layout", layout);
         const savedRadius = (() => { try { const v = localStorage.getItem('userRadiusKm'); if (v) return Number(v); } catch {} return null; })();
-        if (sb === 'distance') {
-            const { lat, lng } = resolveLatLng();
-            if (lat && lng) { sp.set("lat", lat); sp.set("lng", lng); }
-            if (savedRadius && Number.isFinite(savedRadius) && savedRadius > 0) sp.set('radiusKm', String(savedRadius));
-        } else {
-            // If user set a national/global radius, include country for filtering
-            const placeName = (() => {
-                try {
-                    const raw = localStorage.getItem('userLocation');
-                    if (raw) {
-                        const p = JSON.parse(raw) as { name?: string };
-                        return p?.name || '';
-                    }
-                    return '';
-                } catch {
-                    return '';
-                }
-            })();
-            const country = deriveCountry(placeName);
-            const km = savedRadius;
-            if (country && km && km >= 1000000) sp.set('country', country);
-            if (km && km > 0) sp.set('radiusKm', String(km));
-        }
+        const effectiveRadius = Number.isFinite(radiusKm as any) && radiusKm > 0 ? radiusKm : (savedRadius || null);
+        const { lat, lng } = resolveLatLng();
+        if (lat && lng) { sp.set("lat", lat); sp.set("lng", lng); }
+        if (effectiveRadius) sp.set('radiusKm', String(effectiveRadius));
+        const placeName = (() => {
+            try {
+                const raw = localStorage.getItem('userLocation');
+                if (raw) { const p = JSON.parse(raw) as { name?: string }; return p?.name || ''; }
+                return '';
+            } catch { return ''; }
+        })();
+        const country = deriveCountry(placeName);
+        if (country && effectiveRadius && effectiveRadius >= 1000000) sp.set('country', country);
         return sp;
-    }, [inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice, unit, country, region, city, centerLat, centerLng, layout]);
+    }, [inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice, unit, country, region, city, centerLat, centerLng, layout, radiusKm]);
 
     const buildQuery = useCallback((offset: number) => {
         const sp = buildParams();
@@ -509,13 +499,20 @@ export default function SearchClient() {
                     initialCenter={{ lat: Number(centerLat || 43.6532), lng: Number(centerLng || -79.3832), name: '' }}
                     initialRadiusKm={radiusKm}
                     dark={dark}
-                    onApply={(place) => {
+                    onApply={(place, r) => {
                         setCenterLat(String(place.lat));
                         setCenterLng(String(place.lng));
-                        try { localStorage.setItem('userLocation', JSON.stringify(place)); } catch { }
+                        setRadiusKm(r);
+                        try { localStorage.setItem('userLocation', JSON.stringify(place)); localStorage.setItem('userRadiusKm', String(r)); } catch { }
                         const sp = buildParams();
                         sp.set('lat', String(place.lat));
                         sp.set('lng', String(place.lng));
+                        sp.set('radiusKm', String(r));
+                        if (r >= 1000000) {
+                            const pn = place.name || '';
+                            const c = deriveCountry(pn);
+                            if (c) sp.set('country', c);
+                        }
                         router.push(`/${lang}/search?${sp.toString()}`);
                         setShowLocationModal(false);
                     }}
