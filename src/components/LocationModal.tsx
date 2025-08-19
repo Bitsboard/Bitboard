@@ -160,12 +160,18 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             if (mapRef.current) {
                 mapRef.current.remove();
             }
-            const map = L.map(containerRef.current).setView([center.lat, center.lng], 10);
+            const map = L.map(containerRef.current, { zoomControl: false }).setView([center.lat, center.lng], 10);
             mapRef.current = map;
-            // Base tiles (light/dark)
-            const lightUrl = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
-            const darkUrl = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-            const base = L.tileLayer(dark ? darkUrl : lightUrl, { maxZoom: 19, attribution: "© OpenStreetMap © CARTO" }).addTo(map);
+            // Disable interactions
+            map.dragging.disable();
+            map.touchZoom.disable();
+            map.doubleClickZoom.disable();
+            map.scrollWheelZoom.disable();
+            map.boxZoom.disable();
+            map.keyboard.disable();
+            // Grey tiles always
+            const greyUrl = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+            const base = L.tileLayer(greyUrl, { maxZoom: 19, attribution: "© OpenStreetMap © CARTO" }).addTo(map);
             // Orange tint overlay via pane
             const pane = (map as any).createPane('orangeTint');
             (pane as any).style.mixBlendMode = 'multiply';
