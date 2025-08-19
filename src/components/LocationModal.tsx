@@ -127,15 +127,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         }
     }, [center.lat, center.lng]);
 
-    // If a country-only location is selected, auto-set radius to Nationally
-    React.useEffect(() => {
-        const n = (center?.name || initialCenter?.name || '').trim();
-        const isCountryOnly = n && n.split(',').map(s => s.trim()).filter(Boolean).length === 1;
-        if (!isCountryOnly) return;
-        if (radiusKm !== 1000000 && radiusKm !== 5000000) {
-            setRadiusKm(1000000);
-        }
-    }, [center?.name]);
+    // National scope removed; radius is one of fixed values or Everywhere (0)
 
     // Remote suggestions via our Edge endpoint (Nominatim-backed)
     React.useEffect(() => {
@@ -205,8 +197,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                             {[2, 5, 10, 25, 50, 100, 250, 500].map((n) => (
                                 <option key={n} value={n}>{n} km</option>
                             ))}
-                            <option value={1000000}>{t('nationally', lang)}</option>
-                            <option value={5000000}>{t('globally', lang)}</option>
+                            <option value={0}>{t('all_listings_globally', lang)}</option>
                         </select>
                     </div>
                 </div>

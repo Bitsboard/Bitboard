@@ -83,26 +83,6 @@ export default function HomePage() {
     return COUNTRY_EXPAND[last as keyof typeof COUNTRY_EXPAND] || last || null;
   }
 
-  function toAlpha3Country(input: string | null): string | null {
-    if (!input) return null;
-    const s = input.trim();
-    if (!s) return null;
-    const up = s.toUpperCase();
-    const NAME_TO_A3: Record<string, string> = {
-      'UNITED STATES': 'USA', 'USA': 'USA', 'US': 'USA', 'U.S.': 'USA', 'U.S.A.': 'USA', 'UNITED STATES OF AMERICA': 'USA',
-      'CANADA': 'CAN', 'CAN': 'CAN', 'CA': 'CAN',
-      'MEXICO': 'MEX', 'MEX': 'MEX', 'MX': 'MEX',
-      'UNITED KINGDOM': 'GBR', 'UK': 'GBR', 'GB': 'GBR', 'GREAT BRITAIN': 'GBR', 'GBR': 'GBR',
-      'GERMANY': 'DEU', 'DE': 'DEU', 'DEU': 'DEU',
-      'FRANCE': 'FRA', 'FR': 'FRA', 'FRA': 'FRA',
-      'SPAIN': 'ESP', 'ES': 'ESP', 'ESP': 'ESP',
-      'ITALY': 'ITA', 'IT': 'ITA', 'ITA': 'ITA',
-      'AUSTRALIA': 'AUS', 'AU': 'AUS', 'AUS': 'AUS',
-      'BRAZIL': 'BRA', 'BR': 'BRA', 'BRA': 'BRA',
-      'JAPAN': 'JPN', 'JP': 'JPN', 'JPN': 'JPN'
-    };
-    return NAME_TO_A3[up] || up;
-  }
 
   // Load saved user location on mount
   useEffect(() => {
@@ -197,11 +177,7 @@ export default function HomePage() {
           sp.set('lat', String(center.lat));
           sp.set('lng', String(center.lng));
         }
-        if (Number.isFinite(radiusKm as any) && radiusKm > 0) sp.set('radiusKm', String(radiusKm));
-        if (radiusKm >= 1000000) {
-          const c = toAlpha3Country(deriveCountry(center?.name));
-          if (c) sp.set('country', c);
-        }
+        if (Number.isFinite(radiusKm as any)) sp.set('radiusKm', String(radiusKm));
         const r = await fetch(`/api/listings?${sp.toString()}`);
         const data = (await r.json()) as { listings?: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number }>; total?: number };
         const rows = data.listings ?? [];
@@ -233,11 +209,7 @@ export default function HomePage() {
         sp.set('lat', String(center.lat));
         sp.set('lng', String(center.lng));
       }
-      if (Number.isFinite(radiusKm as any) && radiusKm > 0) sp.set('radiusKm', String(radiusKm));
-      if (radiusKm >= 1000000) {
-        const c = toAlpha3Country(deriveCountry(center?.name));
-        if (c) sp.set('country', c);
-      }
+      if (Number.isFinite(radiusKm as any)) sp.set('radiusKm', String(radiusKm));
       const r = await fetch(`/api/listings?${sp.toString()}`);
       const data = (await r.json()) as { listings?: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number }>; total?: number };
       const rows = data.listings ?? [];
@@ -399,13 +371,9 @@ export default function HomePage() {
                 <button onClick={() => setShowLocationModal(true)} className={cn("w-full md:w-[calc(100%-120px)] rounded-3xl px-6 py-5 text-left focus:outline-none", inputBase)}>
                   <div className="flex items-center justify-between gap-3">
                     <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>
-                      {radiusKm >= 5000000
-                        ? t('all_listings_globally', lang)
-                        : radiusKm >= 1000000
-                          ? t('all_listings_in_country', lang).replace('{country}', deriveCountry(center?.name) || 'your country')
-                          : (center?.name || t('choose_location', lang))}
+                      {radiusKm === 0 ? t('all_listings_globally', lang) : (center?.name || t('choose_location', lang))}
                     </div>
-                    <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm >= 1000000 ? "" : `${radiusKm} km`}</div>
+                    <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm === 0 ? "" : `${radiusKm} km`}</div>
                   </div>
                 </button>
               </div>

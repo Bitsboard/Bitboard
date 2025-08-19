@@ -184,19 +184,10 @@ export default function SearchClient() {
         // Persist layout selection across filter applications
         sp.set("layout", layout);
         const savedRadius = (() => { try { const v = localStorage.getItem('userRadiusKm'); if (v) return Number(v); } catch {} return null; })();
-        const effectiveRadius = Number.isFinite(radiusKm as any) && radiusKm > 0 ? radiusKm : (savedRadius || null);
+        const effectiveRadius = Number.isFinite(radiusKm as any) ? radiusKm : (savedRadius ?? null);
         const { lat, lng } = resolveLatLng();
         if (lat && lng) { sp.set("lat", lat); sp.set("lng", lng); }
-        if (effectiveRadius) sp.set('radiusKm', String(effectiveRadius));
-        const placeName = (() => {
-            try {
-                const raw = localStorage.getItem('userLocation');
-                if (raw) { const p = JSON.parse(raw) as { name?: string }; return p?.name || ''; }
-                return '';
-            } catch { return ''; }
-        })();
-        const country = deriveCountry(placeName);
-        if (country && effectiveRadius && effectiveRadius >= 1000000) sp.set('country', country);
+        if (effectiveRadius != null) sp.set('radiusKm', String(effectiveRadius));
         return sp;
     }, [inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice, unit, country, region, city, centerLat, centerLng, layout, radiusKm]);
 
@@ -366,7 +357,6 @@ export default function SearchClient() {
                             <option value="date:asc">{t('oldest', lang)}</option>
                             <option value="price:desc">{t('highest_price', lang)}</option>
                             <option value="price:asc">{t('lowest_price', lang)}</option>
-                            <option value="distance:asc">{t('closest', lang)}</option>
                         </select>
                     </div>
                 </div>
@@ -508,11 +498,6 @@ export default function SearchClient() {
                         sp.set('lat', String(place.lat));
                         sp.set('lng', String(place.lng));
                         sp.set('radiusKm', String(r));
-                        if (r >= 1000000) {
-                            const pn = place.name || '';
-                            const c = deriveCountry(pn);
-                            if (c) sp.set('country', c);
-                        }
                         router.push(`/${lang}/search?${sp.toString()}`);
                         setShowLocationModal(false);
                     }}

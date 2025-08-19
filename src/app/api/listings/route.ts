@@ -33,27 +33,7 @@ export async function GET(req: Request) {
     const radiusKmParam = url.searchParams.get("radiusKm");
     const radiusKm = radiusKmParam != null && radiusKmParam !== "" ? Number(radiusKmParam) : null;
     const hasRadius = radiusKm != null && Number.isFinite(radiusKm) && (radiusKm as number) > 0;
-    const countryRaw = (url.searchParams.get("country") || "").trim();
-    function toAlpha3Country(input: string): string {
-      const s = (input || '').trim();
-      if (!s) return '';
-      const up = s.toUpperCase();
-      const NAME_TO_A3: Record<string, string> = {
-        'UNITED STATES': 'USA', 'USA': 'USA', 'US': 'USA', 'U.S.': 'USA', 'U.S.A.': 'USA', 'UNITED STATES OF AMERICA': 'USA',
-        'CANADA': 'CAN', 'CAN': 'CAN', 'CA': 'CAN',
-        'MEXICO': 'MEX', 'MEX': 'MEX', 'MX': 'MEX',
-        'UNITED KINGDOM': 'GBR', 'UK': 'GBR', 'GB': 'GBR', 'GREAT BRITAIN': 'GBR', 'GBR': 'GBR',
-        'GERMANY': 'DEU', 'DE': 'DEU', 'DEU': 'DEU',
-        'FRANCE': 'FRA', 'FR': 'FRA', 'FRA': 'FRA',
-        'SPAIN': 'ESP', 'ES': 'ESP', 'ESP': 'ESP',
-        'ITALY': 'ITA', 'IT': 'ITA', 'ITA': 'ITA',
-        'AUSTRALIA': 'AUS', 'AU': 'AUS', 'AUS': 'AUS',
-        'BRAZIL': 'BRA', 'BR': 'BRA', 'BRA': 'BRA',
-        'JAPAN': 'JPN', 'JP': 'JPN', 'JPN': 'JPN'
-      };
-      return NAME_TO_A3[up] || up;
-    }
-    const countryParam = toAlpha3Country(countryRaw);
+    // No national filter; only radiusKm or everywhere
 
     // Ensure minimal schema exists so queries don't explode on fresh DBs
     try {
@@ -119,29 +99,7 @@ export async function GET(req: Request) {
       bindsRich.push(minLng, maxLng);
     }
 
-    // Country bounding boxes for common countries (alpha-3 codes)
-    if (countryParam) {
-      const COUNTRY_BBOX: Record<string, { minLat: number; maxLat: number; minLng: number; maxLng: number }> = {
-        USA: { minLat: 24.396308, maxLat: 49.384358, minLng: -124.848974, maxLng: -66.885444 },
-        CAN: { minLat: 41.676555, maxLat: 83.111771, minLng: -141.0, maxLng: -52.648099 },
-        MEX: { minLat: 14.538829, maxLat: 32.718655, minLng: -118.455, maxLng: -86.703392 },
-        GBR: { minLat: 49.959999, maxLat: 58.635, minLng: -8.649357, maxLng: 1.757763 },
-        DEU: { minLat: 47.270111, maxLat: 55.058347, minLng: 5.866342, maxLng: 15.041896 },
-        FRA: { minLat: 41.0, maxLat: 51.124199, minLng: -5.142222, maxLng: 9.560016 },
-        ESP: { minLat: 36.0, maxLat: 43.79, minLng: -9.392883, maxLng: 3.039484 },
-        ITA: { minLat: 36.619987, maxLat: 47.115393, minLng: 6.614889, maxLng: 18.513, },
-        AUS: { minLat: -43.740482, maxLat: -10.668186, minLng: 112.911057, maxLng: 153.638673 },
-        BRA: { minLat: -33.768377, maxLat: 5.271841, minLng: -73.985535, maxLng: -34.793129 },
-        JPN: { minLat: 24.249472, maxLat: 45.52314, minLng: 122.93361, maxLng: 153.986939 },
-      };
-      const bbox = COUNTRY_BBOX[countryParam];
-      if (bbox) {
-        whereRich.push("(lat BETWEEN ? AND ?)");
-        bindsRich.push(bbox.minLat, bbox.maxLat);
-        whereRich.push("(lng BETWEEN ? AND ?)");
-        bindsRich.push(bbox.minLng, bbox.maxLng);
-      }
-    }
+    // Removed country bounding box logic
 
     const whereClauseRich = whereRich.length ? `WHERE ${whereRich.join(" AND ")}` : "";
     const whereClauseMinimal = whereMinimal.length ? `WHERE ${whereMinimal.join(" AND ")}` : "";
