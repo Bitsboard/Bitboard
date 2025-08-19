@@ -35,6 +35,19 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     const [remoteResults, setRemoteResults] = React.useState<Array<{ name: string; lat: number; lng: number }>>([]);
     const [locating, setLocating] = React.useState<boolean>(false);
     const [usingMyLocation, setUsingMyLocation] = React.useState<boolean>(false);
+    // Map zoom helper tied to radius
+    function zoomForRadiusKm(r: number): number {
+        if (r <= 0) return 2; // world view
+        if (r <= 2) return 13;
+        if (r <= 5) return 12;
+        if (r <= 10) return 11;
+        if (r <= 25) return 10;
+        if (r <= 50) return 9;
+        if (r <= 100) return 8;
+        if (r <= 250) return 7;
+        if (r <= 500) return 6;
+        return 5;
+    }
     // Helpers for reverse-geocoding and formatting
     const US_STATE_ABBR: Record<string, string> = {
         'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR', 'California': 'CA', 'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE', 'Florida': 'FL', 'Georgia': 'GA', 'Hawaii': 'HI', 'Idaho': 'ID', 'Illinois': 'IL', 'Indiana': 'IN', 'Iowa': 'IA', 'Kansas': 'KS', 'Kentucky': 'KY', 'Louisiana': 'LA', 'Maine': 'ME', 'Maryland': 'MD', 'Massachusetts': 'MA', 'Michigan': 'MI', 'Minnesota': 'MN', 'Mississippi': 'MS', 'Missouri': 'MO', 'Montana': 'MT', 'Nebraska': 'NE', 'Nevada': 'NV', 'New Hampshire': 'NH', 'New Jersey': 'NJ', 'New Mexico': 'NM', 'New York': 'NY', 'North Carolina': 'NC', 'North Dakota': 'ND', 'Ohio': 'OH', 'Oklahoma': 'OK', 'Oregon': 'OR', 'Pennsylvania': 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC', 'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT', 'Vermont': 'VT', 'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV', 'Wisconsin': 'WI', 'Wyoming': 'WY', 'District of Columbia': 'DC'
@@ -160,7 +173,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             if (mapRef.current) {
                 mapRef.current.remove();
             }
-            const map = L.map(containerRef.current, { zoomControl: false }).setView([center.lat, center.lng], 10);
+            const map = L.map(containerRef.current, { zoomControl: false }).setView([center.lat, center.lng], zoomForRadiusKm(radiusKm));
             mapRef.current = map;
             // Disable interactions
             map.dragging.disable();
@@ -232,16 +245,20 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         circleRef.current.setRadius(meters);
         // Keep a subtle base tint regardless
         (mapRef.current.getPane('orangeTint') as any).style.background = 'linear-gradient(0deg, rgba(255,149,0,0.10), rgba(255,149,0,0.10))';
+        // Adjust zoom based on radius
+        try {
+            mapRef.current.setView([center.lat, center.lng], zoomForRadiusKm(radiusKm));
+        } catch {}
     }, [radiusKm]);
 
     // Update map center when center changes (from search select)
     React.useEffect(() => {
         if (mapRef.current && markerRef.current && circleRef.current) {
-            mapRef.current.setView([center.lat, center.lng]);
+            mapRef.current.setView([center.lat, center.lng], zoomForRadiusKm(radiusKm));
             markerRef.current.setLatLng([center.lat, center.lng]);
             circleRef.current.setLatLng([center.lat, center.lng]);
         }
-    }, [center.lat, center.lng]);
+    }, [center.lat, center.lng, radiusKm]);
 
     // National scope removed; radius is one of fixed values or Everywhere (0)
 
