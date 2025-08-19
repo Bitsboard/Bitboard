@@ -1,6 +1,7 @@
 export const runtime = 'edge';
 
-import { createCookie, deleteCookie, getAuthSecret, signJwtHS256 } from '@/lib/auth';
+import { createCookie, deleteCookie, getAuthSecret, signJwtHS256, uuidv4 } from '@/lib/auth';
+import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -41,6 +42,36 @@ export async function GET(req: Request) {
   if (!userRes.ok) return new Response('Failed to fetch user', { status: 400 });
   const user = await userRes.json() as any;
 
+  // Upsert user in D1 users table
+  try {
+    const { env } = getRequestContext();
+    const db = (env as any).DB as D1Database | undefined;
+    if (db) {
+      await db.prepare(`CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        email TEXT UNIQUE,
+        username TEXT UNIQUE,
+        sso TEXT,
+        verified INTEGER DEFAULT 0,
+        created_at INTEGER NOT NULL,
+        image TEXT
+      )`).run();
+      const existing = await db.prepare('SELECT id, username FROM users WHERE email = ?').bind(user.email).all();
+      let userId = existing.results?.[0]?.id as string | undefined;
+      if (!userId) {
+        userId = uuidv4();
+        await db.prepare('INSERT INTO users (id, email, username, sso, verified, created_at, image) VALUES (?, ?, NULL, ?, ?, ?, ?)')
+          .bind(userId, user.email, 'google', 1, Math.floor(Date.now() / 1000), user.picture ?? null)
+          .run();
+      } else {
+        await db.prepare('UPDATE users SET image = COALESCE(?, image), sso = ? WHERE id = ?')
+          .bind(user.picture ?? null, 'google', userId)
+          .run();
+      }
+      // Optional: ensure listings table has posted_by column; association left as future enhancement
+    }
+  } catch {}
+
   const secret = getAuthSecret();
   const expiresSec = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;
   const jwt = await signJwtHS256({
@@ -48,6 +79,7 @@ export async function GET(req: Request) {
     name: user.name,
     email: user.email,
     picture: user.picture,
+    sso: 'google',
     exp: expiresSec,
   }, secret);
 
