@@ -260,6 +260,8 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                 circleRef.current.setRadius(100000 * 1000);
                 markerRef.current?.setLatLng([0, -10]);
                 circleRef.current.setLatLng([0, -10]);
+                // Force state center coordinates to global center for consistency
+                setCenter((prev) => ({ ...prev, lat: 0, lng: -10 }));
             } else {
                 mapRef.current.setView([center.lat, center.lng], zoomForRadiusKm(radiusKm));
                 markerRef.current?.setLatLng([center.lat, center.lng]);
@@ -272,10 +274,17 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     // Update map center when center changes (from search select)
     React.useEffect(() => {
         if (mapRef.current && markerRef.current && circleRef.current) {
-            mapRef.current.setView([center.lat, center.lng], zoomForRadiusKm(radiusKm));
-            markerRef.current.setLatLng([center.lat, center.lng]);
-            circleRef.current.setLatLng([center.lat, center.lng]);
-            circleRef.current.setRadius(getCircleRadiusPx());
+            if (radiusKm === 0) {
+                mapRef.current.setView([0, -10], zoomForRadiusKm(0));
+                markerRef.current.setLatLng([0, -10]);
+                circleRef.current.setLatLng([0, -10]);
+                circleRef.current.setRadius(100000 * 1000);
+            } else {
+                mapRef.current.setView([center.lat, center.lng], zoomForRadiusKm(radiusKm));
+                markerRef.current.setLatLng([center.lat, center.lng]);
+                circleRef.current.setLatLng([center.lat, center.lng]);
+                circleRef.current.setRadius(getCircleRadiusPx());
+            }
         }
     }, [center.lat, center.lng, radiusKm]);
 
