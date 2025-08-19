@@ -254,6 +254,15 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lang]);
 
+    // When a city is explicitly selected (center changes) and we're not in "My Location" mode,
+    // mirror that selection into the input so the text box always shows the chosen city.
+    React.useEffect(() => {
+        if (!open) return;
+        if (!usingMyLocation && center?.name) {
+            setQuery(center.name);
+        }
+    }, [center.name, usingMyLocation, open]);
+
     function recreateCircle(currentRadius: number, at: { lat: number; lng: number }) {
         if (!mapRef.current || !leafletRef.current) return;
         const L = (leafletRef.current as any).default || (leafletRef.current as any);
