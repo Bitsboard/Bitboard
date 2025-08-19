@@ -34,6 +34,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     });
     const [remoteResults, setRemoteResults] = React.useState<Array<{ name: string; lat: number; lng: number }>>([]);
     const [locating, setLocating] = React.useState<boolean>(false);
+    const [usingMyLocation, setUsingMyLocation] = React.useState<boolean>(false);
     // Helpers for reverse-geocoding and formatting
     const US_STATE_ABBR: Record<string, string> = {
         'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR', 'California': 'CA', 'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE', 'Florida': 'FL', 'Georgia': 'GA', 'Hawaii': 'HI', 'Idaho': 'ID', 'Illinois': 'IL', 'Indiana': 'IN', 'Iowa': 'IA', 'Kansas': 'KS', 'Kentucky': 'KY', 'Louisiana': 'LA', 'Maine': 'ME', 'Maryland': 'MD', 'Massachusetts': 'MA', 'Michigan': 'MI', 'Minnesota': 'MN', 'Mississippi': 'MS', 'Missouri': 'MO', 'Montana': 'MT', 'Nebraska': 'NE', 'Nevada': 'NV', 'New Hampshire': 'NH', 'New Jersey': 'NJ', 'New Mexico': 'NM', 'New York': 'NY', 'North Carolina': 'NC', 'North Dakota': 'ND', 'Ohio': 'OH', 'Oklahoma': 'OK', 'Oregon': 'OR', 'Pennsylvania': 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC', 'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT', 'Vermont': 'VT', 'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV', 'Wisconsin': 'WI', 'Wyoming': 'WY', 'District of Columbia': 'DC'
@@ -233,6 +234,8 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     React.useEffect(() => {
         const q = query.trim();
         if (!open) return;
+        // When using current location, do not fetch remote suggestions
+        if (usingMyLocation) { setRemoteResults([]); return; }
         if (q.length < 1) { setRemoteResults([]); return; }
         const ctl = new AbortController();
         const t = setTimeout(async () => {
@@ -244,7 +247,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             } catch { /* ignore */ }
         }, 250);
         return () => { clearTimeout(t); ctl.abort(); };
-    }, [open, query]);
+    }, [open, query, usingMyLocation]);
 
     const suggestions = React.useMemo(() => {
         const q = query.trim().toLowerCase();
@@ -264,7 +267,12 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                     <div className="sm:col-span-2">
                         <label className={cn("text-xs mb-1 block", dark ? "text-neutral-400" : "text-neutral-500")}>{t('location', lang)}</label>
                         <div className={cn("relative rounded-xl border", dark ? "border-neutral-700 bg-neutral-800" : "border-neutral-300 bg-white")}>
-                            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('enter_city', lang)} className={cn("w-full rounded-xl px-4 py-3 text-sm bg-transparent", dark ? "text-neutral-100" : "text-neutral-900")} />
+                            <input
+                                value={usingMyLocation ? t('my_location', lang) : query}
+                                onChange={(e) => { setUsingMyLocation(false); setQuery(e.target.value); }}
+                                placeholder={t('enter_city', lang)}
+                                className={cn("w-full rounded-xl px-4 py-3 text-sm bg-transparent", dark ? "text-neutral-100" : "text-neutral-900")}
+                            />
                             {suggestions.length > 0 && (
                                 <div className={cn("absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-auto rounded-xl border shadow", dark ? "border-neutral-700 bg-neutral-900" : "border-neutral-300 bg-white")}>
                                     {suggestions.map((s, idx) => (
@@ -307,16 +315,20 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                                             const { latitude, longitude } = pos.coords;
                                             // Immediately drop a pin at the user's coordinates for instant feedback
                                             setCenter({ name: t('my_location', lang), lat: latitude, lng: longitude });
-                                            setQuery('');
+                                            setUsingMyLocation(true);
+                                            setQuery(t('my_location', lang));
                                             (async () => {
                                                 const nearest = await reverseToNearestCity(latitude, longitude);
                                                 if (nearest?.name) {
                                                     setCenter({ name: nearest.name, lat: nearest.lat, lng: nearest.lng });
-                                                    setQuery(nearest.name);
+                                                    // Keep the input labeled as "My Location" while using current location
+                                                    setUsingMyLocation(true);
+                                                    setQuery(t('my_location', lang));
                                                 } else {
                                                     const coordLabel = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
                                                     setCenter({ name: coordLabel, lat: latitude, lng: longitude });
-                                                    setQuery(coordLabel);
+                                                    setUsingMyLocation(true);
+                                                    setQuery(t('my_location', lang));
                                                 }
                                                 resolve();
                                             })();
@@ -330,7 +342,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                         }}
                         className={cn(
                             'absolute right-3 top-3 z-[1] inline-flex items-center justify-center rounded-xl shadow px-3 py-2 transition-colors',
-                            locating
+                            (locating || usingMyLocation)
                                 ? 'bg-orange-500 text-white border border-orange-500'
                                 : (dark ? 'bg-neutral-900/90 text-white border border-neutral-700' : 'bg-white/95 text-neutral-900 border border-neutral-300')
                         )}
