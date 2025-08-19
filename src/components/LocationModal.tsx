@@ -16,14 +16,8 @@ type LocationModalProps = {
     dark?: boolean;
 };
 
-// Small local sample; enhanced with remote Nominatim results
-const SAMPLE_PLACES: Array<Place & { postal?: string }> = [
-    { name: "Toronto, ON", lat: 43.6532, lng: -79.3832, postal: "M5H" },
-    { name: "Hamilton, ON", lat: 43.2557, lng: -79.8711, postal: "L8P" },
-    { name: "Kitchener, ON", lat: 43.4516, lng: -80.4925, postal: "N2G" },
-    { name: "Ottawa, ON", lat: 45.4215, lng: -75.6972, postal: "K1A" },
-    { name: "Vancouver, BC", lat: 49.2827, lng: -123.1207, postal: "V5K" },
-];
+// Local sample removed to avoid noisy labels; rely on remote results only
+const SAMPLE_PLACES: Array<Place> = [];
 
 export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 25, onApply, dark }: LocationModalProps) {
     const containerRef = React.useRef<HTMLDivElement | null>(null);
@@ -38,7 +32,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         lat: initialCenter?.lat ?? 43.6532,
         lng: initialCenter?.lng ?? -79.3832,
     });
-    const [remoteResults, setRemoteResults] = React.useState<Array<{ name: string; lat: number; lng: number; postal?: string }>>([]);
+    const [remoteResults, setRemoteResults] = React.useState<Array<{ name: string; lat: number; lng: number }>>([]);
 
     // Ensure Leaflet CSS is present
     React.useEffect(() => {
@@ -159,19 +153,9 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
 
     const suggestions = React.useMemo(() => {
         const q = query.trim().toLowerCase();
-        const local = q ? SAMPLE_PLACES.filter((p) => p.name.toLowerCase().includes(q) || (p.postal ? p.postal.toLowerCase().startsWith(q) : false)) : [];
-        // Prioritize remote results; fallback to local
-        const merged = [...remoteResults, ...local];
-        // De-dup by name
-        const seen = new Set<string>();
-        const out: typeof merged = [];
-        for (const s of merged) {
-            const key = (s.name + (s.postal || '')).toLowerCase();
-            if (seen.has(key)) continue;
-            seen.add(key);
-            out.push(s);
-        }
-        return out.slice(0, 20);
+        if (!q) return [] as typeof remoteResults;
+        // Remote results are already globally ranked and deduped by the API; filter client-side for partials
+        return remoteResults.filter((p) => p.name.toLowerCase().includes(q)).slice(0, 20);
     }, [query, remoteResults]);
 
     return (
@@ -189,8 +173,8 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                             {suggestions.length > 0 && (
                                 <div className={cn("absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-auto rounded-xl border shadow", dark ? "border-neutral-700 bg-neutral-900" : "border-neutral-300 bg-white")}>
                                     {suggestions.map((s, idx) => (
-                                        <button key={`${s.name}-${s.postal ?? ''}-${idx}`} onClick={() => { setCenter({ name: s.name, lat: s.lat, lng: s.lng }); setQuery(s.name); setRemoteResults([]); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-orange-500/10">
-                                            {s.name}{s.postal ? ` • ${s.postal}` : ""}
+                                        <button key={`${s.name}-${idx}`} onClick={() => { setCenter({ name: s.name, lat: s.lat, lng: s.lng }); setQuery(s.name); setRemoteResults([]); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-orange-500/10">
+                                            {s.name}
                                         </button>
                                     ))}
                                 </div>

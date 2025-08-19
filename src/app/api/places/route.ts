@@ -36,7 +36,8 @@ export async function GET(req: Request) {
         return new Response(JSON.stringify({ results: [] }), { headers: { 'content-type': 'application/json' } });
     }
     try {
-        const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=${limit}&q=${encodeURIComponent(q)}&email=noreply@bitsbarter.app`;
+        // Restrict to city class for cleaner results
+        const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=${limit}&q=${encodeURIComponent(q)}&class=place&type=city&email=noreply@bitsbarter.app`;
         const r = await fetch(url, {
             headers: {
                 'Accept': 'application/json',
