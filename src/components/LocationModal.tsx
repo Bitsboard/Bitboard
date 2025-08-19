@@ -368,7 +368,18 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             </ModalBody>
             <ModalFooter dark={dark}>
                 <button onClick={onClose} className={cn("rounded-xl px-4 py-2 text-sm", dark ? "bg-neutral-800 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>{t('cancel', lang)}</button>
-                <button onClick={() => onApply(center, radiusKm)} className="rounded-xl px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-red-500">{t('apply', lang)}</button>
+                <button
+                    onClick={() => {
+                        try {
+                            const isMyLoc = center?.name === t('my_location', lang) || /\d+\.\d+,\s*\d+\.\d+/.test(center?.name || '');
+                            localStorage.setItem('usingMyLocation', isMyLoc ? '1' : '0');
+                        } catch {}
+                        onApply(center, radiusKm);
+                    }}
+                    className="rounded-xl px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-red-500"
+                >
+                    {t('apply', lang)}
+                </button>
             </ModalFooter>
         </Modal>
     );
