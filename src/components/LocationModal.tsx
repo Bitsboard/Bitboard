@@ -268,7 +268,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                         <label className={cn("text-xs mb-1 block", dark ? "text-neutral-400" : "text-neutral-500")}>{t('location', lang)}</label>
                         <div className={cn("relative rounded-xl border", dark ? "border-neutral-700 bg-neutral-800" : "border-neutral-300 bg-white")}>
                             <input
-                                value={usingMyLocation ? t('my_location', lang) : query}
+                                value={query}
                                 onChange={(e) => { setUsingMyLocation(false); setQuery(e.target.value); }}
                                 placeholder={t('enter_city', lang)}
                                 className={cn("w-full rounded-xl px-4 py-3 text-sm bg-transparent", dark ? "text-neutral-100" : "text-neutral-900")}
@@ -316,19 +316,19 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                                             // Immediately drop a pin at the user's coordinates for instant feedback
                                             setCenter({ name: t('my_location', lang), lat: latitude, lng: longitude });
                                             setUsingMyLocation(true);
-                                            setQuery(t('my_location', lang));
+                                            setQuery('');
                                             (async () => {
                                                 const nearest = await reverseToNearestCity(latitude, longitude);
                                                 if (nearest?.name) {
                                                     setCenter({ name: nearest.name, lat: nearest.lat, lng: nearest.lng });
                                                     // Keep the input labeled as "My Location" while using current location
                                                     setUsingMyLocation(true);
-                                                    setQuery(t('my_location', lang));
+                                                    setQuery('');
                                                 } else {
                                                     const coordLabel = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
                                                     setCenter({ name: coordLabel, lat: latitude, lng: longitude });
                                                     setUsingMyLocation(true);
-                                                    setQuery(t('my_location', lang));
+                                                    setQuery('');
                                                 }
                                                 resolve();
                                             })();
@@ -348,9 +348,9 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                         )}
                         title={t('change', lang)}
                     >
-                        {/* Traditional navigation arrow icon (filled) */}
+                        {/* Solid navigation icon (filled) */}
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                            <path d="M21.707 2.293a1 1 0 0 0-1.06-.217l-18 7a1 1 0 0 0 .062 1.888l7.76 2.59 2.59 7.76a1 1 0 0 0 1.888.062l7-18a1 1 0 0 0-.24-1.083zM12.85 19.435l-1.87-5.6a1 1 0 0 0-.63-.63l-5.6-1.87L19.07 4.93l-6.22 14.505z"/>
+                            <path d="M12 2L3 21l9-4 9 4-9-19z"/>
                         </svg>
                     </button>
                 </div>
