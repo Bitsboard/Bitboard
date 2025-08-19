@@ -9,8 +9,9 @@ export async function GET(req: Request) {
   const [state, redirectRaw] = stateParam.split('|');
   const redirect = decodeURIComponent(redirectRaw || '/profile');
   const cookieHeader = req.headers.get('cookie') || '';
-  const oauthState = /(?:^|; )oauth_state=([^;]+)/.exec(cookieHeader)?.[1];
-  const verifier = /(?:^|; )oauth_verifier=([^;]+)/.exec(cookieHeader)?.[1];
+  const getCookie = (name: string) => new RegExp(`(?:^|; )${name}=([^;]+)`).exec(cookieHeader)?.[1];
+  const oauthState = getCookie('oauth_state');
+  const verifier = getCookie('oauth_verifier');
   if (!code || !state || !oauthState || state !== oauthState || !verifier) {
     return new Response('Invalid state', { status: 400 });
   }

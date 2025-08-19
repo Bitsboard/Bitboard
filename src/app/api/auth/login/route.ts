@@ -24,7 +24,8 @@ export async function GET(req: Request) {
   const headers = new Headers();
   headers.append('Set-Cookie', `oauth_state=${state}; Path=/; SameSite=Lax; Secure; HttpOnly; Max-Age=600`);
   headers.append('Set-Cookie', `oauth_verifier=${codeVerifier}; Path=/; SameSite=Lax; Secure; HttpOnly; Max-Age=600`);
-  return new Response(null, { status: 302, headers: new Headers({ ...headers, Location: authUrl.toString() }) as any });
+  headers.set('Location', authUrl.toString());
+  return new Response(null, { status: 302, headers });
 }
 
 
