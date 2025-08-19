@@ -195,13 +195,13 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             map.keyboard.disable();
             // Grey tiles always
             const greyUrl = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
-            const base = L.tileLayer(greyUrl, { maxZoom: 19, attribution: "© OpenStreetMap © CARTO" }).addTo(map);
-            // Orange tint overlay via pane
-            const pane = (map as any).createPane('orangeTint');
-            (pane as any).style.mixBlendMode = 'multiply';
-            (pane as any).style.background = 'linear-gradient(0deg, rgba(255,149,0,0.10), rgba(255,149,0,0.10))';
+            const base = L.tileLayer(greyUrl, { maxZoom: 19, attribution: "© OpenStreetMap © CARTO", noWrap: true }).addTo(map);
+            // Solid orange tint overlay that covers the entire map container (below markers)
+            const pane = (map as any).createPane('worldTint');
+            (pane as any).style.zIndex = 450;
+            (pane as any).style.background = 'rgba(249, 115, 22, 0.25)';
             (pane as any).style.pointerEvents = 'none';
-            (L as any).tileLayer('', { pane: 'orangeTint' }).addTo(map);
+            (L as any).tileLayer('', { pane: 'worldTint' }).addTo(map);
             const bbIcon = (L as any).icon({
                 iconUrl: "/Bitsbarterlogo.svg",
                 iconRetinaUrl: "/Bitsbarterlogo.svg",
@@ -211,10 +211,12 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             });
             const marker = (L as any).marker([center.lat, center.lng], { draggable: false, icon: bbIcon }).addTo(map);
             markerRef.current = marker;
-            const circle = radiusKm === 0
-                ? (L as any).rectangle([[-90, -180], [90, 180]], { weight: 0, stroke: false, fillColor: "#f97316", fillOpacity: 0.25, interactive: false }).addTo(map)
-                : (L as any).circleMarker([center.lat, center.lng], { radius: getCircleRadiusPx(), color: "#f97316", fillColor: "#f97316", fillOpacity: 0.15 }).addTo(map);
-            circleRef.current = circle;
+            if (radiusKm === 0) {
+                circleRef.current = null;
+            } else {
+                const circle = (L as any).circleMarker([center.lat, center.lng], { radius: getCircleRadiusPx(), color: "#f97316", fillColor: "#f97316", fillOpacity: 0.15 }).addTo(map);
+                circleRef.current = circle;
+            }
             setCircleMode(radiusKm === 0 ? 'global' : 'local');
             // Pin is fixed; users can change by searching/selecting
             cleanup = () => {
@@ -258,7 +260,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         // Remove any existing circle
         try { circleRef.current?.remove(); } catch {}
         if (currentRadius === 0) {
-            circleRef.current = (L as any).rectangle([[-90, -180], [90, 180]], { weight: 0, stroke: false, fillColor: '#f97316', fillOpacity: 0.25, interactive: false }).addTo(mapRef.current);
+            circleRef.current = null;
             setCircleMode('global');
         } else {
             circleRef.current = (L as any).circleMarker([at.lat, at.lng], { radius: getCircleRadiusPx(), color: '#f97316', fillColor: '#f97316', fillOpacity: 0.15 }).addTo(mapRef.current);
@@ -269,8 +271,9 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     // Single effect to update view and circle for both radius and center changes
     React.useEffect(() => {
         if (!mapRef.current) return;
-        // Tint
-        (mapRef.current.getPane('orangeTint') as any).style.background = 'linear-gradient(0deg, rgba(255,149,0,0.10), rgba(255,149,0,0.10))';
+        // Ensure the solid tint remains applied
+        const tint = mapRef.current.getPane('worldTint') as any;
+        if (tint) tint.style.background = 'rgba(249, 115, 22, 0.25)';
         if (radiusKm === 0) {
             mapRef.current.setView([0, 0], zoomForRadiusKm(0));
             markerRef.current?.setLatLng([center.lat, center.lng]);
