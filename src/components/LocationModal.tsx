@@ -275,6 +275,12 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         }
     }, [center.name, open, lang, usingMyLocation]);
 
+    // Ensure placeholder shows while using My Location by clearing the input value
+    React.useEffect(() => {
+        if (!open) return;
+        if (usingMyLocation) setQuery("");
+    }, [usingMyLocation, open]);
+
     function recreateCircle(currentRadius: number, at: { lat: number; lng: number }) {
         if (!mapRef.current || !leafletRef.current) return;
         const L = (leafletRef.current as any).default || (leafletRef.current as any);
