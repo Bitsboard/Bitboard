@@ -41,6 +41,8 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
   }, []);
 
   function navigateToLocale(next: 'en' | 'fr' | 'es' | 'de') {
+    // Persist the choice immediately so initial render after navigation has correct locale
+    try { setLang(next); localStorage.setItem('lang', next); } catch { setLang(next); }
     try {
       const { pathname, search, hash } = window.location;
       const parts = pathname.split('/').filter(Boolean);
@@ -51,7 +53,7 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
       const url = newPath + (search || '') + (hash || '');
       window.location.assign(url);
     } catch {
-      setLang(next);
+      // fallback SPA update
     }
   }
 
