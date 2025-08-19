@@ -435,7 +435,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                         }}
                         className={cn(
                             'absolute right-3 top-3 z-[1] inline-flex items-center justify-center rounded-xl shadow px-3 py-2 transition-colors',
-                            (locating || usingMyLocation)
+                            usingMyLocation
                                 ? 'bg-orange-500 text-white border border-orange-500'
                                 : 'bg-black text-white border border-black'
                         )}
@@ -452,10 +452,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                 <button onClick={onClose} className={cn("rounded-xl px-4 py-2 text-sm", dark ? "bg-neutral-800 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>{t('cancel', lang)}</button>
                 <button
                     onClick={() => {
-                        try {
-                            const isMyLoc = center?.name === t('my_location', lang) || /\d+\.\d+,\s*\d+\.\d+/.test(center?.name || '');
-                            localStorage.setItem('usingMyLocation', isMyLoc ? '1' : '0');
-                        } catch {}
+                        try { localStorage.setItem('usingMyLocation', usingMyLocation ? '1' : '0'); } catch {}
                         onApply(center, radiusKm);
                     }}
                     className="rounded-xl px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-red-500"
