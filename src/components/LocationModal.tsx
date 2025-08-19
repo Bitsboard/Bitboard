@@ -33,6 +33,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         lng: initialCenter?.lng ?? -79.3832,
     });
     const [remoteResults, setRemoteResults] = React.useState<Array<{ name: string; lat: number; lng: number }>>([]);
+    const [locating, setLocating] = React.useState<boolean>(false);
 
     // Ensure Leaflet CSS is present
     React.useEffect(() => {
@@ -204,6 +205,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                         aria-label="Use my location"
                         onClick={async () => {
                             try {
+                                setLocating(true);
                                 await new Promise<void>((resolve, reject) => {
                                     if (!('geolocation' in navigator)) return reject(new Error('no_geo'));
                                     navigator.geolocation.getCurrentPosition(
@@ -237,15 +239,19 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                                     );
                                 });
                             } catch { /* ignore */ }
+                            finally { setLocating(false); }
                         }}
                         className={cn(
-                            'absolute right-3 top-3 z-[1] inline-flex items-center justify-center rounded-xl shadow px-3 py-2',
-                            dark ? 'bg-neutral-900/90 text-white border border-neutral-700' : 'bg-white/95 text-neutral-900 border border-neutral-300'
+                            'absolute right-3 top-3 z-[1] inline-flex items-center justify-center rounded-xl shadow px-3 py-2 transition-colors',
+                            locating
+                                ? 'bg-orange-500 text-white border border-orange-500'
+                                : (dark ? 'bg-neutral-900/90 text-white border border-neutral-700' : 'bg-white/95 text-neutral-900 border border-neutral-300')
                         )}
                         title={t('change', lang)}
                     >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M21.707 2.293a1 1 0 0 0-1.06-.217l-18 7a1 1 0 0 0 .062 1.888l7.76 2.59 2.59 7.76a1 1 0 0 0 1.888.062l7-18a1 1 0 0 0-.24-1.083zM12.85 19.435l-1.87-5.6a1 1 0 0 0-.63-.63l-5.6-1.87L19.07 4.93l-6.22 14.505z"/>
+                        {/* Solid location arrow icon (filled) */}
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M12 2c.552 0 1 .448 1 1v3.055a7 7 0 1 1-2 0V3a1 1 0 0 1 1-1Zm0 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z"/>
                         </svg>
                     </button>
                 </div>
