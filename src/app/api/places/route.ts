@@ -51,6 +51,8 @@ export async function GET(req: Request) {
             const iso = (addr["ISO3166-2-lvl4"] as string | undefined) || (addr["ISO3166-2-lvl6"] as string | undefined) || (addr["ISO3166-2-lvl3"] as string | undefined);
             const stateAbbr = abbreviateState(cc2, addr.state as string | undefined, iso);
             const city = addr.city || addr.town || addr.village || addr.municipality || '';
+            // Only accept city-like results; skip country/state/region-only entries
+            if (!city) return null;
             let nameParts: string[] = [];
             if (city) nameParts.push(city);
             if (stateAbbr) nameParts.push(stateAbbr);
@@ -65,7 +67,7 @@ export async function GET(req: Request) {
                 postal,
                 importance: typeof it.importance === 'number' ? it.importance : 0,
             };
-        });
+        }).filter(Boolean) as Array<any>;
         // Deduplicate by name, prefer higher importance
         const uniqMap = new Map<string, any>();
         for (const m of mapped) {

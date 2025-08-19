@@ -109,7 +109,7 @@ export function LocationAutocomplete({ value, onSelect, inputBase, dark }: Locat
         value={pretty(text)}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setOpen(true)}
-        placeholder="Search city, region, or country"
+        placeholder="Search city"
         className={cn(
           "w-full bg-transparent px-4 sm:px-6 py-4 sm:py-5 text-base sm:text-lg transition-all duration-300 focus:outline-none focus-visible:outline-none focus:ring-0",
           dark ? "text-neutral-100 placeholder-neutral-400" : "text-neutral-900 placeholder-neutral-500"
