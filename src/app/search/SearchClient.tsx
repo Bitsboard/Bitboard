@@ -121,38 +121,44 @@ export default function SearchClient() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [layout]);
 
-    const mapRows = useCallback((rows: any[]): Listing[] => rows.map((row: any) => ({
-        id: String(row.id),
-        title: row.title,
-        desc: (row.description ?? "") + "\n\n" + "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ".repeat(40),
-        priceSats: Number(row.priceSat) || 0,
-        category: (row.category as any) || "Electronics",
-        location: row.location || "Toronto, ON",
-        lat: Number.isFinite(row.lat as any) ? (row.lat as number) : 43.6532,
-        lng: Number.isFinite(row.lng as any) ? (row.lng as number) : -79.3832,
-        type: (row.adType as any) === "want" ? "want" : "sell",
-        images: (() => {
-            const fallback = [
-                "https://images.unsplash.com/photo-1555617117-08d3a8fef16c?w=1200&q=80&auto=format&fit=crop",
-                "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=1200&q=80&auto=format&fit=crop",
-                "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=1200&q=80&auto=format&fit=crop",
-            ];
-            if (Array.isArray(row.imageUrl) && row.imageUrl.length > 0) return row.imageUrl as string[];
-            if (typeof row.imageUrl === 'string' && row.imageUrl.includes(',')) return (row.imageUrl as string).split(',').map((s: string) => s.trim()).filter(Boolean);
-            const base = typeof row.imageUrl === 'string' && row.imageUrl ? [row.imageUrl] : [];
-            return [...base, ...fallback].slice(0, 5);
-        })(),
-        boostedUntil: row.boostedUntil ?? null,
-        seller: (() => {
-            const name = (row.postedBy || "demo_seller").replace(/^@/, "");
-            const base = Number(row.id) % 100;
-            const score = 5 + (base % 80);
-            const deals = base % 40;
-            const verified = score >= 50;
-            return { name, score, deals, rating: 4 + ((base % 10) / 10), verifications: { email: true, phone: verified, lnurl: verified }, onTimeRelease: verified ? 0.97 : 0.9 };
-        })(),
-        createdAt: Number(row.createdAt) * 1000,
-    })), []);
+    const mapRows = useCallback((rows: any[]): Listing[] => rows.map((row: any) => {
+        const cleanLocationLabel = (raw?: string): string => {
+            const s = (raw || "").replace(/\s*[•|\-].*$/, "").replace(/\(.*?\)/g, "").trim();
+            return s.replace(/\s{2,}/g, " ").replace(/,\s*,/g, ", ").replace(/\s+,\s+/g, ", ");
+        };
+        return ({
+            id: String(row.id),
+            title: row.title,
+            desc: (row.description ?? "") + "\n\n" + "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ".repeat(40),
+            priceSats: Number(row.priceSat) || 0,
+            category: (row.category as any) || "Electronics",
+            location: cleanLocationLabel(row.location) || "Toronto, ON",
+            lat: Number.isFinite(row.lat as any) ? (row.lat as number) : 43.6532,
+            lng: Number.isFinite(row.lng as any) ? (row.lng as number) : -79.3832,
+            type: (row.adType as any) === "want" ? "want" : "sell",
+            images: (() => {
+                const fallback = [
+                    "https://images.unsplash.com/photo-1555617117-08d3a8fef16c?w=1200&q=80&auto=format&fit=crop",
+                    "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=1200&q=80&auto=format&fit=crop",
+                    "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=1200&q=80&auto=format&fit=crop",
+                ];
+                if (Array.isArray(row.imageUrl) && row.imageUrl.length > 0) return row.imageUrl as string[];
+                if (typeof row.imageUrl === 'string' && row.imageUrl.includes(',')) return (row.imageUrl as string).split(',').map((s: string) => s.trim()).filter(Boolean);
+                const base = typeof row.imageUrl === 'string' && row.imageUrl ? [row.imageUrl] : [];
+                return [...base, ...fallback].slice(0, 5);
+            })(),
+            boostedUntil: row.boostedUntil ?? null,
+            seller: (() => {
+                const name = (row.postedBy || "demo_seller").replace(/^@/, "");
+                const base = Number(row.id) % 100;
+                const score = 5 + (base % 80);
+                const deals = base % 40;
+                const verified = score >= 50;
+                return { name, score, deals, rating: 4 + ((base % 10) / 10), verifications: { email: true, phone: verified, lnurl: verified }, onTimeRelease: verified ? 0.97 : 0.9 };
+            })(),
+            createdAt: Number(row.createdAt) * 1000,
+        });
+    }), []);
 
     const satsFromUnitValue = (val: string): string | null => {
         if (!val) return null;

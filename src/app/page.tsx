@@ -125,13 +125,18 @@ export default function HomePage() {
 
   // Helper to map API rows -> Listing
   const mapRowsToListings = useCallback((rows: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string | string[]; priceSat: number; boostedUntil?: number | null; createdAt: number; postedBy?: string }>): Listing[] => {
+    function cleanLocationLabel(raw?: string): string {
+      const s = (raw || "").replace(/\s*[•|\-].*$/, "").replace(/\(.*?\)/g, "").trim();
+      // Collapse multiple spaces and commas
+      return s.replace(/\s{2,}/g, " ").replace(/,\s*,/g, ", ").replace(/\s+,\s+/g, ", ");
+    }
     return rows.map((row) => ({
       id: String(row.id),
       title: row.title,
       desc: (row.description ?? "") + "\n\n" + "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ".repeat(40),
       priceSats: Number(row.priceSat) || 0,
       category: (row.category as any) || "Electronics",
-      location: row.location || "Toronto, ON",
+      location: cleanLocationLabel(row.location) || "Toronto, ON",
       lat: Number.isFinite(row.lat as any) ? (row.lat as number) : 43.6532,
       lng: Number.isFinite(row.lng as any) ? (row.lng as number) : -79.3832,
       type: (row.adType as any) === "want" ? "want" : "sell",
