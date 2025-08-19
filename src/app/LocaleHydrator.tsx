@@ -14,6 +14,12 @@ export function LocaleHydrator() {
         setLang(first as any);
         try { localStorage.setItem('lang', first); } catch {}
         document.documentElement.lang = first;
+        // Restore persisted UI prefs (theme/layout/unit) without changing content state
+        try {
+          const theme = localStorage.getItem('theme');
+          if (theme === 'dark') document.documentElement.classList.add('dark');
+          else if (theme === 'light') document.documentElement.classList.remove('dark');
+        } catch {}
       }
     } catch {}
   }, []);

@@ -212,7 +212,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             const marker = (L as any).marker([center.lat, center.lng], { draggable: false, icon: bbIcon }).addTo(map);
             markerRef.current = marker;
             const circle = radiusKm === 0
-                ? (L as any).circle([0, -5], { radius: 100000 * 1000, color: "#f97316", fillColor: "#f97316", fillOpacity: 0.15 }).addTo(map)
+                ? (L as any).circle([0, -5], { radius: 200000 * 1000, color: "#f97316", fillColor: "#f97316", fillOpacity: 0.15 }).addTo(map)
                 : (L as any).circleMarker([center.lat, center.lng], { radius: getCircleRadiusPx(), color: "#f97316", fillColor: "#f97316", fillOpacity: 0.15 }).addTo(map);
             circleRef.current = circle;
             setCircleMode(radiusKm === 0 ? 'global' : 'local');
@@ -258,7 +258,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         // Remove any existing circle
         try { circleRef.current?.remove(); } catch {}
         if (currentRadius === 0) {
-            circleRef.current = (L as any).circle([0, -5], { radius: 100000 * 1000, color: '#f97316', fillColor: '#f97316', fillOpacity: 0.15 }).addTo(mapRef.current);
+            circleRef.current = (L as any).circle([0, -5], { radius: 200000 * 1000, color: '#f97316', fillColor: '#f97316', fillOpacity: 0.15 }).addTo(mapRef.current);
             setCircleMode('global');
         } else {
             circleRef.current = (L as any).circleMarker([at.lat, at.lng], { radius: getCircleRadiusPx(), color: '#f97316', fillColor: '#f97316', fillOpacity: 0.15 }).addTo(mapRef.current);

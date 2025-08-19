@@ -41,8 +41,14 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
   }, []);
 
   function navigateToLocale(next: 'en' | 'fr' | 'es' | 'de') {
-    // Persist the choice immediately so initial render after navigation has correct locale
-    try { setLang(next); localStorage.setItem('lang', next); } catch { setLang(next); }
+    // Persist current UI prefs before navigation
+    try {
+      localStorage.setItem('lang', next);
+      // layoutPref is already persisted elsewhere; ensure theme/unit exist as well if available
+      const theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+      localStorage.setItem('theme', theme);
+    } catch {}
+    setLang(next);
     try {
       const { pathname, search, hash } = window.location;
       const parts = pathname.split('/').filter(Boolean);
@@ -52,9 +58,7 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
       const newPath = '/' + [next, ...parts].join('/');
       const url = newPath + (search || '') + (hash || '');
       window.location.assign(url);
-    } catch {
-      // fallback SPA update
-    }
+    } catch {}
   }
 
   return (
