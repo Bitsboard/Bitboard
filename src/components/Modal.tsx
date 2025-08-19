@@ -8,8 +8,8 @@ type ModalSize = "sm" | "md" | "lg" | "xl";
 const SIZE_CLASSES: Record<ModalSize, string> = {
     sm: "max-w-md",
     md: "max-w-2xl",
-    lg: "max-w-4xl",
-    xl: "max-w-5xl",
+    lg: "max-w-5xl",
+    xl: "max-w-6xl",
 };
 
 interface ModalProps {

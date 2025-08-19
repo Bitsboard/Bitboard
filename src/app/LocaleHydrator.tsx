@@ -1,0 +1,29 @@
+"use client";
+
+import { useEffect } from "react";
+import { getLang, setLang } from "@/lib/i18n";
+
+export function LocaleHydrator() {
+  useEffect(() => {
+    try {
+      const known = ["en", "fr", "es", "de"] as const;
+      const first = window.location.pathname.split("/").filter(Boolean)[0];
+      if (first && (known as readonly string[]).includes(first)) {
+        // Always set the runtime lang to match the URL immediately
+        // @ts-ignore
+        setLang(first as any);
+        try { localStorage.setItem('lang', first); } catch {}
+        document.documentElement.lang = first;
+        // Restore persisted UI prefs (theme/layout/unit) without changing content state
+        try {
+          const theme = localStorage.getItem('theme');
+          if (theme === 'dark') document.documentElement.classList.add('dark');
+          else if (theme === 'light') document.documentElement.classList.remove('dark');
+        } catch {}
+      }
+    } catch {}
+  }, []);
+  return null;
+}
+
+

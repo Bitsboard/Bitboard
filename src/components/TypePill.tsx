@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { t, useLang } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n-client";
 
 interface TypePillProps {
   type: "sell" | "want";

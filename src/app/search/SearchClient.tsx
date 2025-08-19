@@ -5,7 +5,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { ListingCard, ListingRow, Nav, ListingModal, LocationModal } from "@/components";
 import type { Listing, AdType } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { t, useLang } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n-client";
 
 // Lightweight location catalog (sample). Replace/expand with a full open-source dataset.
 const LOCATIONS = [
@@ -67,6 +68,24 @@ export default function SearchClient() {
     const [showLocationModal, setShowLocationModal] = useState(false);
 
     useEffect(() => { setInputQuery(q); }, [q]);
+    // Sync lang from URL prefix to ensure translations show correctly when landing directly on /{lang}/search
+    useEffect(() => {
+        try {
+            const first = window.location.pathname.split('/').filter(Boolean)[0];
+            const known = ['en', 'fr', 'es', 'de'];
+            if (first && known.includes(first)) {
+                // Force document lang to match
+                document.documentElement.lang = first;
+            }
+        } catch { }
+    }, []);
+    // Persisted radius on locale change (for Worldwide state)
+    useEffect(() => {
+        try {
+            const savedRadius = Number(localStorage.getItem('userRadiusKm') || '');
+            if (Number.isFinite(savedRadius)) setRadiusKm(savedRadius);
+        } catch {}
+    }, [lang]);
     useEffect(() => { setSelCategory(category); }, [category]);
     useEffect(() => { setSelAdType(adTypeParam); }, [adTypeParam]);
     useEffect(() => { setMinPrice(minPriceParam ?? ""); }, [minPriceParam]);
@@ -89,6 +108,15 @@ export default function SearchClient() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+    // Re-translate "My Location" label on locale change
+    useEffect(() => {
+        try {
+            const using = localStorage.getItem('usingMyLocation') === '1';
+            if (using) {
+                // no input label in SearchClient, but keep for future display contexts
+            }
+        } catch { }
+    }, [lang]);
     useEffect(() => {
         if (layoutParam) setLayout(layoutParam === "list" ? "list" : "grid");
     }, [layoutParam]);
@@ -99,31 +127,54 @@ export default function SearchClient() {
 
     // Reflect layout to URL without touching data params
     useEffect(() => {
-        try { localStorage.setItem("layoutPref", layout); } catch {}
+        try { localStorage.setItem("layoutPref", layout); } catch { }
         const sp = new URLSearchParams(window.location.search);
         if (layout) sp.set("layout", layout);
-        const newUrl = `/search?${sp.toString()}`;
+        const newUrl = `/${lang}/search?${sp.toString()}`;
         if (newUrl !== window.location.pathname + window.location.search) {
             router.replace(newUrl);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [layout]);
 
-    const mapRows = useCallback((rows: any[]): Listing[] => rows.map((row: any) => ({
-        id: String(row.id),
-        title: row.title,
-        desc: row.description ?? "",
-        priceSats: Number(row.priceSat) || 0,
-        category: (row.category as any) || "Electronics",
-        location: row.location || "Toronto, ON",
-        lat: Number.isFinite(row.lat as any) ? (row.lat as number) : 43.6532,
-        lng: Number.isFinite(row.lng as any) ? (row.lng as number) : -79.3832,
-        type: (row.adType as any) === "want" ? "want" : "sell",
-        images: [row.imageUrl || "https://images.unsplash.com/photo-1555617117-08d3a8fef16c?w=1200&q=80&auto=format&fit=crop"],
-        boostedUntil: row.boostedUntil ?? null,
-        seller: { name: "demo_seller", score: 10, deals: 0, rating: 5, verifications: { email: true, phone: true, lnurl: false }, onTimeRelease: 0.98 },
-        createdAt: Number(row.createdAt) * 1000,
-    })), []);
+    const mapRows = useCallback((rows: any[]): Listing[] => rows.map((row: any) => {
+        const cleanLocationLabel = (raw?: string): string => {
+            const s = (raw || "").replace(/\s*[•|\-].*$/, "").replace(/\(.*?\)/g, "").trim();
+            return s.replace(/\s{2,}/g, " ").replace(/,\s*,/g, ", ").replace(/\s+,\s+/g, ", ");
+        };
+        return ({
+            id: String(row.id),
+            title: row.title,
+            desc: (row.description ?? "") + "\n\n" + "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ".repeat(40),
+            priceSats: Number(row.priceSat) || 0,
+            category: (row.category as any) || "Electronics",
+            location: cleanLocationLabel(row.location) || "Toronto, ON",
+            lat: Number.isFinite(row.lat as any) ? (row.lat as number) : 43.6532,
+            lng: Number.isFinite(row.lng as any) ? (row.lng as number) : -79.3832,
+            type: (row.adType as any) === "want" ? "want" : "sell",
+            images: (() => {
+                const fallback = [
+                    "https://images.unsplash.com/photo-1555617117-08d3a8fef16c?w=1200&q=80&auto=format&fit=crop",
+                    "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=1200&q=80&auto=format&fit=crop",
+                    "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=1200&q=80&auto=format&fit=crop",
+                ];
+                if (Array.isArray(row.imageUrl) && row.imageUrl.length > 0) return row.imageUrl as string[];
+                if (typeof row.imageUrl === 'string' && row.imageUrl.includes(',')) return (row.imageUrl as string).split(',').map((s: string) => s.trim()).filter(Boolean);
+                const base = typeof row.imageUrl === 'string' && row.imageUrl ? [row.imageUrl] : [];
+                return [...base, ...fallback].slice(0, 5);
+            })(),
+            boostedUntil: row.boostedUntil ?? null,
+            seller: (() => {
+                const name = (row.postedBy || "demo_seller").replace(/^@/, "");
+                const base = Number(row.id) % 100;
+                const score = 5 + (base % 80);
+                const deals = base % 40;
+                const verified = score >= 50;
+                return { name, score, deals, rating: 4 + ((base % 10) / 10), verifications: { email: true, phone: verified, lnurl: verified }, onTimeRelease: verified ? 0.97 : 0.9 };
+            })(),
+            createdAt: Number(row.createdAt) * 1000,
+        });
+    }), []);
 
     const satsFromUnitValue = (val: string): string | null => {
         if (!val) return null;
@@ -154,12 +205,13 @@ export default function SearchClient() {
         sp.set("sortOrder", sb === 'distance' ? 'asc' : so);
         // Persist layout selection across filter applications
         sp.set("layout", layout);
-        if (sb === 'distance') {
-            const { lat, lng } = resolveLatLng();
-            if (lat && lng) { sp.set("lat", lat); sp.set("lng", lng); }
-        }
+        const savedRadius = (() => { try { const v = localStorage.getItem('userRadiusKm'); if (v) return Number(v); } catch {} return null; })();
+        const effectiveRadius = Number.isFinite(radiusKm as any) ? radiusKm : (savedRadius ?? null);
+        const { lat, lng } = resolveLatLng();
+        if (lat && lng) { sp.set("lat", lat); sp.set("lng", lng); }
+        if (effectiveRadius != null) sp.set('radiusKm', String(effectiveRadius));
         return sp;
-    }, [inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice, unit, country, region, city, centerLat, centerLng, layout]);
+    }, [inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice, unit, country, region, city, centerLat, centerLng, layout, radiusKm]);
 
     const buildQuery = useCallback((offset: number) => {
         const sp = buildParams();
@@ -226,18 +278,18 @@ export default function SearchClient() {
 
     const bg = dark ? "bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950" : "bg-gradient-to-br from-neutral-50 via-white to-neutral-100";
     const inputBase = dark
-        ? "border-neutral-700/50 bg-neutral-800/50 text-neutral-100 placeholder-neutral-400 focus:border-orange-500/50 focus:bg-neutral-800/70 backdrop-blur-sm"
-        : "border-neutral-300/50 bg-white/80 text-neutral-900 placeholder-neutral-500 focus:border-orange-500/50 focus:bg-white backdrop-blur-sm";
+        ? "border border-white/30 bg-neutral-800/50 text-neutral-100 placeholder-neutral-400 backdrop-blur-sm"
+        : "border border-neutral-700/30 bg-white/80 text-neutral-900 placeholder-neutral-500 backdrop-blur-sm";
 
     const applyFilters = () => {
         const sp = buildParams();
-        router.push(`/search?${sp.toString()}`);
+        router.push(`/${lang}/search?${sp.toString()}`);
     };
 
     const clearFilters = () => {
         const sp = new URLSearchParams();
         if (inputQuery) sp.set("q", inputQuery);
-        router.push(`/search?${sp.toString()}`);
+        router.push(`/${lang}/search?${sp.toString()}`);
     };
 
     const showNoResults = initialLoaded && listings.length === 0;
@@ -246,6 +298,53 @@ export default function SearchClient() {
     const regionsForCountry = useMemo(() => LOCATIONS.filter(l => l.country === country), [country]);
     const regionsList = useMemo(() => Array.from(new Set(regionsForCountry.map(l => l.region))), [regionsForCountry]);
     const citiesList = useMemo(() => regionsForCountry.filter(l => l.region === region).map(l => l.city), [regionsForCountry, region]);
+
+    function getSavedPlaceName(): string | null {
+        try {
+            const raw = localStorage.getItem('userLocation');
+            if (!raw) return null;
+            const p = JSON.parse(raw) as { name?: string };
+            return p?.name || null;
+        } catch { return null; }
+    }
+
+    const COUNTRY_EXPAND: Record<string, string> = {
+        CA: 'Canada', CAN: 'Canada',
+        US: 'United States', USA: 'United States',
+        UK: 'United Kingdom', GB: 'United Kingdom', GBR: 'United Kingdom',
+        DE: 'Germany', DEU: 'Germany',
+        FR: 'France', FRA: 'France',
+        ES: 'Spain', ESP: 'Spain',
+        MX: 'Mexico', MEX: 'Mexico',
+        IT: 'Italy', ITA: 'Italy',
+        BR: 'Brazil', BRA: 'Brazil',
+        AU: 'Australia', AUS: 'Australia',
+        JP: 'Japan', JPN: 'Japan'
+    };
+
+    function expandSingleTokenCountry(name: string): string {
+        const token = name.trim();
+        return COUNTRY_EXPAND[token as keyof typeof COUNTRY_EXPAND] || token;
+    }
+
+    function deriveCountry(name: string | null): string | null {
+        if (!name) return null;
+        const parts = name.split(',').map(s => s.trim()).filter(Boolean);
+        if (parts.length === 0) return null;
+        if (parts.length === 1) {
+            const p = parts[0];
+            return expandSingleTokenCountry(p);
+        }
+        // Prefer the last non-abbreviation token
+        for (let i = parts.length - 1; i >= 0; i--) {
+            const token = parts[i];
+            if (token.length > 2) return token;
+            const expanded = COUNTRY_EXPAND[token as keyof typeof COUNTRY_EXPAND];
+            if (expanded) return expanded;
+        }
+        const last = parts[parts.length - 1];
+        return COUNTRY_EXPAND[last as keyof typeof COUNTRY_EXPAND] || last || null;
+    }
 
     return (
         <div className={cn("min-h-screen", bg, dark ? "dark" : "")}>
@@ -260,7 +359,7 @@ export default function SearchClient() {
                             onChange={(e) => setInputQuery(e.target.value)}
                             onKeyDown={(e) => { if (e.key === "Enter") applyFilters(); }}
                             placeholder={t('search', lang) + " bikes, ASICs, consoles…"}
-                            className={cn("w-full rounded-3xl px-6 pr-32 py-5 text-lg focus:outline-none transition-all duration-300 hover:border-orange-500/50", inputBase)}
+                            className={cn("w-full rounded-3xl px-6 pr-32 py-5 text-lg focus:outline-none transition-all duration-300", inputBase)}
                         />
                         <button
                             onClick={applyFilters}
@@ -272,7 +371,7 @@ export default function SearchClient() {
                     <div className="sm:col-span-3 flex items-center gap-2">
                         <select
                             value={sortChoice}
-                            onChange={(e) => { const v = e.target.value; setSortChoice(v); const sp = buildParams(v); router.push(`/search?${sp.toString()}`); }}
+                            onChange={(e) => { const v = e.target.value; setSortChoice(v); const sp = buildParams(v); router.push(`/${lang}/search?${sp.toString()}`); }}
                             className={cn("w-full max-w-xs rounded-3xl px-6 pr-10 py-5 text-lg appearance-none bg-no-repeat bg-right", inputBase)}
                             style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.75rem center', backgroundSize: '1.25em 1.25em' }}
                         >
@@ -280,7 +379,6 @@ export default function SearchClient() {
                             <option value="date:asc">{t('oldest', lang)}</option>
                             <option value="price:desc">{t('highest_price', lang)}</option>
                             <option value="price:asc">{t('lowest_price', lang)}</option>
-                            <option value="distance:asc">{t('closest', lang)}</option>
                         </select>
                     </div>
                 </div>
@@ -289,21 +387,31 @@ export default function SearchClient() {
                     {/* Sidebar Filters */}
                     <aside className="lg:col-span-3 space-y-4">
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
-                            <div className="grid grid-cols-2 gap-y-1 items-center">
-                                <div className="font-semibold">{t('location', lang)}</div>
-                                <div className="text-right">
+                            <div className="flex items-start justify-between">
+                                <div className={cn("font-semibold", dark ? "text-neutral-200" : "text-neutral-900")}>{t('location', lang)}</div>
+                                <div>
                                     <button onClick={() => setShowLocationModal(true)} className="rounded-xl px-3 py-1 text-xs text-white bg-gradient-to-r from-orange-500 to-red-500">{t('change', lang)}</button>
                                 </div>
-                                <div className={cn("truncate", dark ? "text-neutral-200" : "text-neutral-800")} title={(() => { try { const raw = localStorage.getItem('userLocation'); if (raw) { const p = JSON.parse(raw) as { name?: string }; if (p?.name) return p.name; } } catch { }; return undefined; })()}>{(() => {
-                                    try { const raw = localStorage.getItem('userLocation'); if (raw) { const p = JSON.parse(raw) as { name?: string }; if (p?.name) return `${p.name}`; } } catch { }
-                                    return (centerLat && centerLng) ? "Selected location" : "Set location";
-                                })()}</div>
-                                <div className={cn("text-right text-xs whitespace-nowrap", dark ? "text-neutral-400" : "text-neutral-600")}>{radiusKm} km</div>
                             </div>
+                            {radiusKm === 0 ? (
+                                <div className={cn("mt-3", dark ? "text-neutral-200" : "text-neutral-800")}>{t('all_listings_globally', lang)}</div>
+                            ) : (
+                                <>
+                                    <div className={cn("mt-3 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>
+                                        {t('within_km_of', lang).replace('{n}', String(radiusKm))}
+                                    </div>
+                                    <div className={cn("mt-1", dark ? "text-neutral-200" : "text-neutral-800")} title={(() => { try { const raw = localStorage.getItem('userLocation'); if (raw) { const p = JSON.parse(raw) as { name?: string }; if (p?.name) return p.name; } } catch { }; return undefined; })()}>
+                                        {(() => {
+                                            try { const raw = localStorage.getItem('userLocation'); if (raw) { const p = JSON.parse(raw) as { name?: string }; if (p?.name) return `${p.name}`; } } catch { }
+                                            return t('set_location', lang);
+                                        })()}
+                                    </div>
+                                </>
+                            )}
                         </div>
 
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
-                            <div className="font-semibold mb-3">{t('category', lang)}</div>
+                            <div className={cn("font-semibold mb-3", dark ? "text-neutral-200" : "text-neutral-900")}>{t('category', lang)}</div>
                             <div className="flex flex-wrap gap-2">
                                 {[
                                     { key: 'cat_all', value: '' },
@@ -328,7 +436,7 @@ export default function SearchClient() {
                         </div>
 
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
-                            <div className="font-semibold mb-3">{t('type', lang)}</div>
+                            <div className={cn("font-semibold mb-3", dark ? "text-neutral-200" : "text-neutral-900")}>{t('type', lang)}</div>
                             <div className="flex gap-2">
                                 <button onClick={() => setSelAdType('all')} className={cn("rounded-xl px-3 py-1 text-sm", selAdType === 'all' ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>{t('all_listings', lang)}</button>
                                 <button onClick={() => setSelAdType('sell')} className={cn("rounded-xl px-3 py-1 text-sm", selAdType === 'sell' ? "bg-orange-500 text-white" : (dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700"))}>{t('selling', lang)}</button>
@@ -337,7 +445,7 @@ export default function SearchClient() {
                         </div>
 
                         <div className={cn("rounded-2xl p-4", dark ? "border border-neutral-800 bg-neutral-950" : "border border-neutral-300 bg-white")}>
-                            <div className="font-semibold mb-3">{unit === 'BTC' ? t('price_btc', lang) : t('price_sats', lang)}</div>
+                            <div className={cn("font-semibold mb-3", dark ? "text-neutral-200" : "text-neutral-900")}>{unit === 'BTC' ? t('price_btc', lang) : t('price_sats', lang)}</div>
                             <div className="flex items-center gap-2">
                                 <input value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder={unit === 'BTC' ? "Min BTC" : "Min sats"} className={cn("w-1/2 rounded-xl px-3 py-2 text-sm", inputBase)} />
                                 <span className={cn(dark ? "text-neutral-400" : "text-neutral-500")}>—</span>
@@ -401,14 +509,16 @@ export default function SearchClient() {
                     initialCenter={{ lat: Number(centerLat || 43.6532), lng: Number(centerLng || -79.3832), name: '' }}
                     initialRadiusKm={radiusKm}
                     dark={dark}
-                    onApply={(place) => {
+                    onApply={(place, r) => {
                         setCenterLat(String(place.lat));
                         setCenterLng(String(place.lng));
-                        try { localStorage.setItem('userLocation', JSON.stringify(place)); } catch { }
+                        setRadiusKm(r);
+                        try { localStorage.setItem('userLocation', JSON.stringify(place)); localStorage.setItem('userRadiusKm', String(r)); } catch { }
                         const sp = buildParams();
                         sp.set('lat', String(place.lat));
                         sp.set('lng', String(place.lng));
-                        router.push(`/search?${sp.toString()}`);
+                        sp.set('radiusKm', String(r));
+                        router.push(`/${lang}/search?${sp.toString()}`);
                         setShowLocationModal(false);
                     }}
                 />

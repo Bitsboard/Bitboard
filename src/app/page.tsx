@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   Nav,
-  LocationAutocomplete,
   SafetyTipsSection,
   UnitToggle,
   TypeToggle,
@@ -20,7 +19,8 @@ import { cn } from "@/lib/utils";
 import { mockListings } from "@/lib/mockData";
 import type { Listing, User, Unit, Layout, AdType, Category, Place } from "@/lib/types";
 import { useRouter } from "next/navigation";
-import { t, useLang } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n-client";
 
 export default function HomePage() {
   // State
@@ -51,6 +51,39 @@ export default function HomePage() {
   const router = useRouter();
   const lang = useLang();
 
+  // Helper to derive a full country name from a location string
+  const COUNTRY_EXPAND: Record<string, string> = {
+    CA: "Canada", CAN: "Canada",
+    US: "United States", USA: "United States",
+    UK: "United Kingdom", GB: "United Kingdom", GBR: "United Kingdom",
+    DE: "Germany", DEU: "Germany",
+    FR: "France", FRA: "France",
+    ES: "Spain", ESP: "Spain",
+    MX: "Mexico", MEX: "Mexico",
+    IT: "Italy", ITA: "Italy",
+    BR: "Brazil", BRA: "Brazil",
+    AU: "Australia", AUS: "Australia",
+    JP: "Japan", JPN: "Japan",
+  };
+  function deriveCountry(name?: string | null): string | null {
+    if (!name) return null;
+    const parts = name.split(',').map(s => s.trim()).filter(Boolean);
+    if (parts.length === 0) return null;
+    if (parts.length === 1) {
+      const p = parts[0];
+      return COUNTRY_EXPAND[p as keyof typeof COUNTRY_EXPAND] || p;
+    }
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const token = parts[i];
+      if (token.length > 2) return token;
+      const expanded = COUNTRY_EXPAND[token as keyof typeof COUNTRY_EXPAND];
+      if (expanded) return expanded;
+    }
+    const last = parts[parts.length - 1];
+    return COUNTRY_EXPAND[last as keyof typeof COUNTRY_EXPAND] || last || null;
+  }
+
+
   // Load saved user location on mount
   useEffect(() => {
     try {
@@ -61,8 +94,26 @@ export default function HomePage() {
           setCenter(p);
         }
       }
+      const r = localStorage.getItem('userRadiusKm');
+      if (r) {
+        const n = Number(r);
+        if (Number.isFinite(n) && n > 0) setRadiusKm(n);
+      }
     } catch { }
   }, []);
+
+  // Re-translate "My Location" label when locale changes
+  useEffect(() => {
+    try {
+      const using = localStorage.getItem('usingMyLocation') === '1';
+      if (using) {
+        setCenter((prev) => ({ ...prev, name: t('my_location', lang) }));
+      }
+      const savedRadius = Number(localStorage.getItem('userRadiusKm') || '');
+      if (Number.isFinite(savedRadius)) setRadiusKm(savedRadius);
+    } catch { }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
 
   // Categories
   const categories: Category[] = [
@@ -86,27 +137,49 @@ export default function HomePage() {
   }, []);
 
   // Helper to map API rows -> Listing
-  const mapRowsToListings = useCallback((rows: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number }>): Listing[] => {
+  const mapRowsToListings = useCallback((rows: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string | string[]; priceSat: number; boostedUntil?: number | null; createdAt: number; postedBy?: string }>): Listing[] => {
+    function cleanLocationLabel(raw?: string): string {
+      const s = (raw || "").replace(/\s*[•|\-].*$/, "").replace(/\(.*?\)/g, "").trim();
+      // Collapse multiple spaces and commas
+      return s.replace(/\s{2,}/g, " ").replace(/,\s*,/g, ", ").replace(/\s+,\s+/g, ", ");
+    }
     return rows.map((row) => ({
       id: String(row.id),
       title: row.title,
-      desc: row.description ?? "",
+      desc: (row.description ?? "") + "\n\n" + "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ".repeat(40),
       priceSats: Number(row.priceSat) || 0,
       category: (row.category as any) || "Electronics",
-      location: row.location || "Toronto, ON",
+      location: cleanLocationLabel(row.location) || "Toronto, ON",
       lat: Number.isFinite(row.lat as any) ? (row.lat as number) : 43.6532,
       lng: Number.isFinite(row.lng as any) ? (row.lng as number) : -79.3832,
       type: (row.adType as any) === "want" ? "want" : "sell",
-      images: [row.imageUrl || "https://images.unsplash.com/photo-1555617117-08d3a8fef16c?w=1200&q=80&auto=format&fit=crop"],
+      images: (() => {
+        const fallback = [
+          "https://images.unsplash.com/photo-1555617117-08d3a8fef16c?w=1200&q=80&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=1200&q=80&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=1200&q=80&auto=format&fit=crop",
+        ];
+        if (Array.isArray(row.imageUrl) && row.imageUrl.length > 0) return row.imageUrl as string[];
+        if (typeof row.imageUrl === 'string' && row.imageUrl.includes(',')) return (row.imageUrl as string).split(',').map(s => s.trim()).filter(Boolean);
+        const base = typeof row.imageUrl === 'string' && row.imageUrl ? [row.imageUrl] : [];
+        return [...base, ...fallback].slice(0, 5);
+      })(),
       boostedUntil: row.boostedUntil ?? null,
-      seller: {
-        name: "demo_seller",
-        score: 10,
-        deals: 0,
-        rating: 5,
-        verifications: { email: true, phone: true, lnurl: false },
-        onTimeRelease: 0.98,
-      },
+      seller: (() => {
+        const name = (row.postedBy || "demo_seller").replace(/^@/, "");
+        const base = Number(row.id) % 100;
+        const score = 5 + (base % 80);
+        const deals = base % 40;
+        const verified = score >= 50;
+        return {
+          name,
+          score,
+          deals,
+          rating: 4 + ((base % 10) / 10),
+          verifications: { email: true, phone: verified, lnurl: verified },
+          onTimeRelease: verified ? 0.97 : 0.9,
+        };
+      })(),
       createdAt: Number(row.createdAt) * 1000,
     }));
   }, []);
@@ -117,7 +190,13 @@ export default function HomePage() {
     const load = async () => {
       try {
         isFetchingRef.current = true;
-        const r = await fetch(`/api/listings?limit=${pageSize}&offset=0`);
+        const sp = new URLSearchParams({ limit: String(pageSize), offset: "0" });
+        if (Number.isFinite(center.lat as any) && Number.isFinite(center.lng as any)) {
+          sp.set('lat', String(center.lat));
+          sp.set('lng', String(center.lng));
+        }
+        if (Number.isFinite(radiusKm as any)) sp.set('radiusKm', String(radiusKm));
+        const r = await fetch(`/api/listings?${sp.toString()}`);
         const data = (await r.json()) as { listings?: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number }>; total?: number };
         const rows = data.listings ?? [];
         const mapped = mapRowsToListings(rows);
@@ -133,7 +212,7 @@ export default function HomePage() {
     };
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDeployed]);
+  }, [isDeployed, center.lat, center.lng, radiusKm]);
 
   const loadMore = useCallback(async () => {
     if (!isDeployed) return;
@@ -143,7 +222,13 @@ export default function HomePage() {
       isFetchingRef.current = true;
       setIsLoadingMore(true);
       const offset = listings.length;
-      const r = await fetch(`/api/listings?limit=${pageSize}&offset=${offset}`);
+      const sp = new URLSearchParams({ limit: String(pageSize), offset: String(offset) });
+      if (Number.isFinite(center.lat as any) && Number.isFinite(center.lng as any)) {
+        sp.set('lat', String(center.lat));
+        sp.set('lng', String(center.lng));
+      }
+      if (Number.isFinite(radiusKm as any)) sp.set('radiusKm', String(radiusKm));
+      const r = await fetch(`/api/listings?${sp.toString()}`);
       const data = (await r.json()) as { listings?: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number }>; total?: number };
       const rows = data.listings ?? [];
       const mapped = mapRowsToListings(rows);
@@ -157,7 +242,7 @@ export default function HomePage() {
       isFetchingRef.current = false;
       setIsLoadingMore(false);
     }
-  }, [isDeployed, hasMore, listings.length, mapRowsToListings, pageSize, total]);
+  }, [isDeployed, hasMore, listings.length, mapRowsToListings, pageSize, total, center.lat, center.lng, radiusKm]);
 
   // IntersectionObserver to trigger loadMore when sentinel is visible
   useEffect(() => {
@@ -237,8 +322,8 @@ export default function HomePage() {
   const bg = dark ? "bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950" : "bg-gradient-to-br from-neutral-50 via-white to-neutral-100";
   const panel = dark ? "border-neutral-800/50 bg-neutral-900/30 backdrop-blur-sm" : "border-neutral-200/50 bg-white/80 backdrop-blur-sm";
   const inputBase = dark
-    ? "border-neutral-700/50 bg-neutral-800/50 text-neutral-100 placeholder-neutral-400 focus:border-orange-500/50 focus:bg-neutral-800/70 backdrop-blur-sm"
-    : "border-neutral-300/50 bg-white/80 text-neutral-900 placeholder-neutral-500 focus:border-orange-500/50 focus:bg-white backdrop-blur-sm";
+    ? "border border-white/30 bg-neutral-800/50 text-neutral-100 placeholder-neutral-400 backdrop-blur-sm"
+    : "border border-neutral-700/30 bg-white/80 text-neutral-900 placeholder-neutral-500 backdrop-blur-sm";
 
   const handleSearchNavigate = useCallback(() => {
     const sp = new URLSearchParams();
@@ -247,8 +332,12 @@ export default function HomePage() {
     if (adType && adType !== "all") sp.set("adType", adType);
     try { localStorage.setItem('layoutPref', layout); } catch { }
     sp.set('layout', layout);
-    router.push(`/search?${sp.toString()}`);
-  }, [adType, cat, query, layout, router]);
+    const known = ['en', 'fr', 'es', 'de'] as const;
+    const first = (typeof window !== 'undefined' ? window.location.pathname.split('/').filter(Boolean)[0] : '') as typeof known[number] | '';
+    const locale = (first && (known as readonly string[]).includes(first)) ? first : lang;
+    const prefix = `/${locale}`;
+    router.push(`${prefix}/search?${sp.toString()}`);
+  }, [adType, cat, query, layout, router, lang]);
 
   return (
     <div className={cn("min-h-screen", bg, dark ? "dark" : "")}>
@@ -278,101 +367,44 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_50%)]" />
         </div>
 
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:py-28">
-          <div className="flex flex-col items-start gap-8 md:flex-row md:items-end md:justify-between">
+        <div className="relative mx-auto max-w-7xl px-4 py-8 sm:py-10">
+          <div className="flex flex-col-reverse items-start gap-3 md:flex-row md:items-center md:justify-between">
             {/* Left Content */}
             <div className="max-w-2xl">
               <h1 className="text-5xl font-black tracking-tight sm:text-7xl">
-                <span className={cn("block leading-tight", dark ? "text-white" : "text-black")}>Find better deals,</span>
-                <span className="block bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent" style={{ lineHeight: '1.2' }}>
-                  use better money.
+                <span className={cn(lang === 'en' ? 'block' : 'inline', "leading-tight", dark ? "text-white" : "text-black")}>{t('title_hero_1', lang)}{lang !== 'en' ? ' ' : ''}</span>
+                <span className={cn(lang === 'en' ? 'block' : 'inline', "bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent")} style={{ lineHeight: '1.2' }}>
+                  {t('title_hero_2', lang)}
                 </span>
               </h1>
               <p className={cn("mt-6 text-xl leading-relaxed", dark ? "text-neutral-300" : "text-neutral-600")}>
-                The Bitcoin-native marketplace
+                {t('subheading', lang)}
               </p>
-              <div className="mt-8" />
+
             </div>
 
-            {/* Right Content removed per request */}
-            <div className="hidden md:block" />
-          </div>
-
-          {/* Search Interface */}
-          <div className="mt-16">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
-              {/* Search Input */}
-              <div className="md:col-span-7 relative">
+            {/* Right: Location above search */}
+            <div className="w-full md:w-[460px] md:self-center">
+              <div className="mb-2 md:mb-1 flex md:justify-end">
+                <button onClick={() => setShowLocationModal(true)} className={cn("w-full md:w-[calc(100%-120px)] rounded-3xl px-6 py-5 text-left focus:outline-none", inputBase)}>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>
+                      {radiusKm === 0 ? t('all_listings_globally', lang) : (center?.name || t('choose_location', lang))}
+                    </div>
+                    <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm === 0 ? t('change', lang) : `${radiusKm} km`}</div>
+                  </div>
+                </button>
+              </div>
+              <div className="relative mt-2">
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") handleSearchNavigate(); }}
                   placeholder={t('search_placeholder', lang)}
-                  className={cn("w-full rounded-3xl px-6 pr-32 py-5 text-lg focus:outline-none transition-all duration-300 hover:border-orange-500/50", inputBase)}
+                  className={cn("w-full rounded-3xl px-6 pr-32 py-5 text-lg focus:outline-none transition-all duration-300", inputBase)}
                 />
-                <button
-                  onClick={handleSearchNavigate}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2 text-sm font-semibold text-white shadow"
-                >
-                  {t('search', lang)}
-                </button>
+                <button onClick={handleSearchNavigate} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2 text-sm font-semibold text-white shadow">{t('search', lang)}</button>
               </div>
-
-              {/* Location + Radius Combined */}
-              <div className="md:col-span-3">
-                <button onClick={() => setShowLocationModal(true)} className={cn("w-full rounded-3xl border px-6 py-5 text-left", inputBase)}>
-                  <div className="flex items-center justify-between gap-3">
-                    <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>
-                      {center?.name || t('choose_location', lang)}
-                    </div>
-                    <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm} km</div>
-                  </div>
-                </button>
-              </div>
-
-              {/* Type Filter - Now Dropdown */}
-              <div className="md:col-span-2">
-                <select
-                  value={adType}
-                  onChange={(e) => setAdType(e.target.value as "all" | "sell" | "want")}
-                  className={cn("w-full rounded-3xl px-6 py-5 text-lg focus:outline-none transition-all duration-300 appearance-none bg-no-repeat bg-right pr-12", inputBase)}
-                  style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 1rem center', backgroundSize: '1.5em 1.5em' }}
-                >
-                  <option value="all">{t('all_listings', lang)}</option>
-                  <option value="sell">{t('seller_listings', lang)}</option>
-                  <option value="want">{t('buyer_listings', lang)}</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Category Tabs */}
-            <div className="mt-8 flex flex-wrap gap-3" role="tablist">
-              {categories.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setCat(c)}
-                  role="tab"
-                  aria-selected={cat === c}
-                  className={cn(
-                    "rounded-2xl px-6 py-3 text-sm font-semibold transition-all duration-300 hover:scale-105 active:scale-95",
-                    cat === c
-                      ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/25"
-                      : dark
-                        ? "border border-neutral-700/50 text-neutral-300 hover:border-neutral-500 hover:bg-neutral-800/50"
-                        : "border border-neutral-300/50 text-neutral-600 hover:border-neutral-400 hover:bg-neutral-100"
-                  )}
-                >
-                  {c === 'Featured' ? t('featured', lang) :
-                    c === 'Electronics' ? t('cat_electronics', lang) :
-                      c === 'Mining Gear' ? t('cat_mining_gear', lang) :
-                        c === 'Home & Garden' ? t('cat_home_garden', lang) :
-                          c === 'Sports & Bikes' ? t('cat_sports_bikes', lang) :
-                            c === 'Tools' ? t('cat_tools', lang) :
-                              c === 'Games & Hobbies' ? t('cat_games_hobbies', lang) :
-                                c === 'Furniture' ? t('cat_furniture', lang) :
-                                  c === 'Services' ? t('cat_services', lang) : c}
-                </button>
-              ))}
             </div>
           </div>
         </div>
@@ -398,7 +430,7 @@ export default function HomePage() {
             <div className="flex items-center gap-4">
               <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}>{t('latest', lang)}</h2>
               <span className={cn("text-sm font-medium", dark ? "text-neutral-400" : "text-neutral-500")}>
-                {goods.length} result{goods.length !== 1 ? 's' : ''}
+                {goods.length} {t('results', lang)}
               </span>
             </div>
           </div>
@@ -461,7 +493,7 @@ export default function HomePage() {
               <a className={cn("hover:text-orange-500 transition-colors font-medium", dark ? "text-neutral-300" : "text-neutral-600")} href="#tips">
                 {t('safety_tips', lang)}
               </a>
-              <a className={cn("hover:text-orange-500 transition-colors font-medium", dark ? "text-neutral-300" : "text-neutral-600")} href="/terms">
+              <a className={cn("hover:text-orange-500 transition-colors font-medium", dark ? "text-neutral-300" : "text-neutral-600")} href={`/${lang}/terms`}>
                 {t('terms', lang)}
               </a>
             </div>

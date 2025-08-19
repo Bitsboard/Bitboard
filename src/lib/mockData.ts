@@ -33,7 +33,7 @@ export const mockListings: Listing[] = [
   {
     id: 'listing1',
     title: 'Antminer S19 XP Hyd',
-    desc: 'Excellent condition mining rig, 255TH/s, only used for 6 months. Perfect for home mining setup.',
+    desc: 'Excellent condition mining rig, 255TH/s, only used for 6 months. Perfect for home mining setup. ' + 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '.repeat(60),
     priceSats: 2500000, // 0.025 BTC
     category: 'Mining Gear' as const,
     type: 'sell' as const,
@@ -58,7 +58,7 @@ export const mockListings: Listing[] = [
   {
     id: 'listing2',
     title: 'Bitcoin Node Setup Service',
-    desc: 'Professional Bitcoin node installation and configuration. I\'ll set up your full node with proper security.',
+    desc: 'Professional Bitcoin node installation and configuration. I\'ll set up your full node with proper security. ' + 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '.repeat(60),
     priceSats: 500000, // 0.005 BTC
     category: 'Services' as const,
     type: 'sell' as const,
@@ -82,7 +82,7 @@ export const mockListings: Listing[] = [
   {
     id: 'listing3',
     title: 'Looking for: Cold Storage Wallet',
-    desc: 'Want to buy a hardware wallet (Ledger, Trezor, or similar) in good condition. Must be genuine.',
+    desc: 'Want to buy a hardware wallet (Ledger, Trezor, or similar) in good condition. Must be genuine. ' + 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '.repeat(60),
     priceSats: 300000, // 0.003 BTC
     category: 'Electronics' as const,
     type: 'want' as const,
@@ -106,7 +106,7 @@ export const mockListings: Listing[] = [
   {
     id: 'listing4',
     title: 'Bitcoin Mining Books Collection',
-    desc: 'Complete set of Bitcoin and mining books. Includes "Mastering Bitcoin", "Programming Bitcoin", and more.',
+    desc: 'Complete set of Bitcoin and mining books. Includes "Mastering Bitcoin", "Programming Bitcoin", and more. ' + 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '.repeat(60),
     priceSats: 150000, // 0.0015 BTC
     category: 'Games & Hobbies' as const,
     type: 'sell' as const,
@@ -130,7 +130,7 @@ export const mockListings: Listing[] = [
   {
     id: 'listing5',
     title: 'Home Garden Bitcoin Mining Setup',
-    desc: 'Complete home mining setup with solar panels. Includes 2 Antminer S9s and solar installation.',
+    desc: 'Complete home mining setup with solar panels. Includes 2 Antminer S9s and solar installation. ' + 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '.repeat(60),
     priceSats: 8000000, // 0.08 BTC
     category: 'Home & Garden' as const,
     type: 'sell' as const,
@@ -155,7 +155,7 @@ export const mockListings: Listing[] = [
   {
     id: 'listing6',
     title: 'Bitcoin Meetup Organizer',
-    desc: 'Looking for someone to help organize monthly Bitcoin meetups in the area. Will pay in sats!',
+    desc: 'Looking for someone to help organize monthly Bitcoin meetups in the area. Will pay in sats! ' + 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '.repeat(60),
     priceSats: 100000, // 0.001 BTC
     category: 'Services' as const,
     type: 'want' as const,

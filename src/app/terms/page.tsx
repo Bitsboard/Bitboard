@@ -3,9 +3,12 @@
 import React, { useState } from "react";
 import { LogoMinimal } from "@/components";
 import { cn } from "@/lib/utils";
+import { useLang } from "@/lib/i18n-client";
 
 export default function TermsPage() {
     const [dark, setDark] = useState(true);
+    const lang = useLang();
+    const homeHref = `/${lang}`;
 
     return (
         <div className={cn("min-h-screen", dark ? "bg-neutral-950 text-neutral-100" : "bg-neutral-50 text-neutral-900")}>
@@ -23,7 +26,7 @@ export default function TermsPage() {
                             {dark ? "☀️ Light" : "🌙 Dark"}
                         </button>
                         <a
-                            href="/"
+                            href={homeHref}
                             className="rounded-xl px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-900"
                         >
                             ← Back to Home
@@ -101,7 +104,7 @@ export default function TermsPage() {
                             contact is against our guidelines.
                         </p>
                         <div className="flex items-center gap-4">
-                            <a className="hover:text-orange-600" href="/">
+                            <a className="hover:text-orange-600" href={homeHref}>
                                 Back to Home
                             </a>
                         </div>

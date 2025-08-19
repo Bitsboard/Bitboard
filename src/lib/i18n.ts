@@ -1,4 +1,4 @@
-import * as React from "react";
+// React-free i18n utilities (safe in server and client)
 
 export type Lang = "en" | "fr" | "es" | "de";
 
@@ -31,16 +31,17 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         change_location: "Change location",
         radius: "Radius",
         enter_city: "Enter a city",
-        title_hero_1: "Get better deals,",
+        title_hero_1: "Find better deals,",
         title_hero_2: "use better money.",
         how_it_works: "How it works",
         pricing: "Pricing",
         post_listing: "Post a listing",
         sign_in: "Sign in",
         // Homepage
-        subheading: "Your Bitcoin-native local marketplace.",
+        subheading: "The Bitcoin-native marketplace",
         search_placeholder: "Search bikes, ASICs, consoles…",
         choose_location: "Choose location",
+        my_location: "My Location",
         featured: "Featured",
         latest: "Latest",
         services_label: "Services",
@@ -52,6 +53,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         no_more_results: "No more results",
         selected_location: "Selected location",
         set_location: "Set location",
+        within_km_of: "Within {n} km of",
         // Footer
         prohibited_items: "Prohibited items",
         safety_tips: "Safety tips",
@@ -64,7 +66,16 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         close: "Close",
         // Listing modal
         message_seller: "Message seller",
-        listing_warning: "Keep all correspondence in-app for safety. Off-app contact is against our guidelines. When ready, attach an escrow proposal from the chat composer.",
+        send_message: "Send a Message",
+        share_listing: "Share listing",
+        listing_warning: "For safety, keep correspondence in-app.",
+        learn_more: "Learn more",
+        results: "results",
+        all_listings_globally: "Worldwide",
+        all_of_country: "All of {country}",
+        all_listings_in_country: "All Listings in {country}",
+        nationally: "Nationally",
+        globally: "Globally",
         // Categories
         cat_all: "All",
         cat_electronics: "Electronics",
@@ -82,6 +93,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         // Types (singular labels)
         selling: "Selling",
         looking_for: "Looking For",
+        verified_tooltip: "User has verified their identity",
     },
     fr: {
         search: "Rechercher",
@@ -118,9 +130,10 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         post_listing: "Publier une annonce",
         sign_in: "Se connecter",
         // Homepage
-        subheading: "Votre marché local natif Bitcoin.",
+        subheading: "Le marché natif Bitcoin",
         search_placeholder: "Rechercher vélos, ASICs, consoles…",
         choose_location: "Choisir un lieu",
+        my_location: "Ma position",
         featured: "À la une",
         latest: "Récents",
         services_label: "Services",
@@ -132,6 +145,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         no_more_results: "Plus de résultats",
         selected_location: "Lieu sélectionné",
         set_location: "Définir le lieu",
+        within_km_of: "Dans un rayon de {n} km de",
         // Footer
         prohibited_items: "Objets interdits",
         safety_tips: "Conseils de sécurité",
@@ -143,7 +157,16 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         report_listing: "Signaler l'annonce",
         // Listing modal
         message_seller: "Contacter le vendeur",
-        listing_warning: "Gardez toutes les conversations dans l'application pour votre sécurité. Le contact hors application est contraire à nos directives. Lorsque vous êtes prêt, joignez une proposition d'entiercement depuis le composeur de discussion.",
+        send_message: "Envoyer un message",
+        share_listing: "Partager l'annonce",
+        listing_warning: "Pour votre sécurité, gardez la correspondance dans l'application.",
+        learn_more: "En savoir plus",
+        results: "résultats",
+        all_listings_globally: "Mondial",
+        all_of_country: "Toutes les annonces en {country}",
+        all_listings_in_country: "Toutes les annonces en {country}",
+        nationally: "À l'échelle nationale",
+        globally: "À l'échelle mondiale",
         // Categories
         cat_all: "Tous",
         cat_electronics: "Électronique",
@@ -161,6 +184,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         // Types (singular labels)
         selling: "Vente",
         looking_for: "Recherche",
+        verified_tooltip: "L'utilisateur a vérifié son identité",
     },
     es: {
         search: "Buscar",
@@ -197,9 +221,10 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         post_listing: "Publicar anuncio",
         sign_in: "Iniciar sesión",
         // Homepage
-        subheading: "Tu mercado local nativo de Bitcoin.",
+        subheading: "El mercado nativo de Bitcoin",
         search_placeholder: "Buscar bicis, ASICs, consolas…",
         choose_location: "Elegir ubicación",
+        my_location: "Mi ubicación",
         featured: "Destacados",
         latest: "Recientes",
         services_label: "Servicios",
@@ -211,6 +236,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         no_more_results: "No hay más resultados",
         selected_location: "Ubicación seleccionada",
         set_location: "Establecer ubicación",
+        within_km_of: "A {n} km de",
         // Footer
         prohibited_items: "Artículos prohibidos",
         safety_tips: "Consejos de seguridad",
@@ -222,7 +248,16 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         report_listing: "Reportar anuncio",
         // Listing modal
         message_seller: "Enviar mensaje al vendedor",
-        listing_warning: "Mantén toda la correspondencia en la app por seguridad. El contacto fuera de la app va en contra de nuestras directrices. Cuando estés listo, adjunta una propuesta de depósito desde el compositor del chat.",
+        send_message: "Enviar mensaje",
+        share_listing: "Compartir anuncio",
+        listing_warning: "Por seguridad, mantén la correspondencia en la app.",
+        learn_more: "Más información",
+        results: "resultados",
+        all_listings_globally: "Mundial",
+        all_of_country: "Todos los anuncios en {country}",
+        all_listings_in_country: "Todos los anuncios en {country}",
+        nationally: "A nivel nacional",
+        globally: "A nivel mundial",
         // Categories
         cat_all: "Todos",
         cat_electronics: "Electrónica",
@@ -240,6 +275,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         // Types (singular labels)
         selling: "Venta",
         looking_for: "Se busca",
+        verified_tooltip: "El usuario ha verificado su identidad",
     },
     de: {
         search: "Suche",
@@ -276,9 +312,10 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         post_listing: "Anzeige einstellen",
         sign_in: "Anmelden",
         // Homepage
-        subheading: "Dein Bitcoin-nativer lokaler Marktplatz.",
+        subheading: "Der Bitcoin-native Marktplatz",
         search_placeholder: "Suche nach Fahrrädern, ASICs, Konsolen…",
         choose_location: "Ort wählen",
+        my_location: "Mein Standort",
         featured: "Empfohlen",
         latest: "Neu",
         services_label: "Dienstleistungen",
@@ -290,6 +327,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         no_more_results: "Keine weiteren Ergebnisse",
         selected_location: "Ausgewählter Ort",
         set_location: "Ort festlegen",
+        within_km_of: "Im Umkreis von {n} km von",
         // Footer
         prohibited_items: "Verbotene Artikel",
         safety_tips: "Sicherheitstipps",
@@ -301,7 +339,16 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         report_listing: "Anzeige melden",
         // Listing modal
         message_seller: "Nachricht an Verkäufer",
-        listing_warning: "Halte die gesamte Korrespondenz aus Sicherheitsgründen in der App. Kontakt außerhalb der App verstößt gegen unsere Richtlinien. Hänge eine Treuhandvorschlag aus dem Chat-Composer an, wenn du soweit bist.",
+        send_message: "Nachricht senden",
+        share_listing: "Anzeige teilen",
+        listing_warning: "Zur Sicherheit Korrespondenz in der App führen.",
+        learn_more: "Mehr erfahren",
+        results: "Ergebnisse",
+        all_listings_globally: "Weltweit",
+        all_of_country: "Alle Anzeigen in {country}",
+        all_listings_in_country: "Alle Anzeigen in {country}",
+        nationally: "Landesweit",
+        globally: "Weltweit",
         // Categories
         cat_all: "Alle",
         cat_electronics: "Elektronik",
@@ -319,6 +366,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         // Types (singular labels)
         selling: "Verkauf",
         looking_for: "Suche",
+        verified_tooltip: "Benutzer hat seine Identität verifiziert",
     },
 };
 
@@ -357,18 +405,54 @@ export function setLang(lang: Lang) {
 
 export function subscribeLang(fn: () => void) {
     listeners.add(fn);
-    return () => listeners.delete(fn);
-}
-
-export function useLang(): Lang {
-    // Use SyncExternalStore for concurrent-safe subscriptions
-    // @ts-ignore
-    return React.useSyncExternalStore(subscribeLang, getLang, getLang);
+    return () => { listeners.delete(fn); };
 }
 
 export function t(key: string, lang?: Lang): string {
     const l = lang || currentLang;
     return dictionaries[l][key] ?? dictionaries.en[key] ?? key;
+}
+
+export function formatPostedAgo(ts: number, lang?: Lang): string {
+    const l = lang || currentLang;
+    const now = Date.now();
+    const diffMs = Math.max(0, now - ts);
+    const minutes = Math.floor(diffMs / (60 * 1000));
+    const hours = Math.floor(diffMs / (60 * 60 * 1000));
+    const days = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+
+    function en(): string {
+        if (days >= 1) return `Posted ${days} day${days === 1 ? '' : 's'} ago`;
+        if (hours >= 1) return `Posted ${hours} hour${hours === 1 ? '' : 's'} ago`;
+        const m = Math.max(1, minutes);
+        return `Posted ${m} minute${m === 1 ? '' : 's'} ago`;
+    }
+
+    function fr(): string {
+        if (days >= 1) return `Publié il y a ${days} jour${days === 1 ? '' : 's'}`;
+        if (hours >= 1) return `Publié il y a ${hours} heure${hours === 1 ? '' : 's'}`;
+        const m = Math.max(1, minutes);
+        return `Publié il y a ${m} minute${m === 1 ? '' : 's'}`;
+    }
+
+    function es(): string {
+        if (days >= 1) return `Publicado hace ${days} día${days === 1 ? '' : 's'}`;
+        if (hours >= 1) return `Publicado hace ${hours} hora${hours === 1 ? '' : 's'}`;
+        const m = Math.max(1, minutes);
+        return `Publicado hace ${m} minuto${m === 1 ? '' : 's'}`;
+    }
+
+    function de(): string {
+        if (days >= 1) return `Veröffentlicht vor ${days} Tag${days === 1 ? '' : 'en'}`;
+        if (hours >= 1) return `Veröffentlicht vor ${hours} Stunde${hours === 1 ? '' : 'n'}`;
+        const m = Math.max(1, minutes);
+        return `Veröffentlicht vor ${m} Minute${m === 1 ? '' : 'n'}`;
+    }
+
+    if (l === 'fr') return fr();
+    if (l === 'es') return es();
+    if (l === 'de') return de();
+    return en();
 }
 
 // Explicit named exports for bundlers

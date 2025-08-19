@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { Modal, ModalHeader, ModalTitle, ModalBody, ModalCloseButton } from "./Modal";
+import { t } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n-client";
 
 type Category =
   | "Featured"
@@ -98,8 +100,8 @@ export function NewListingModal({ onClose, onPublish, dark }: NewListingModalPro
             </Field>
             <Field label="Ad type">
               <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as "sell" | "want" })} className={cn("w-full rounded-xl px-3 py-2 focus:outline-none", inputBase)}>
-                <option value="sell">Selling</option>
-                <option value="want">Looking For</option>
+                <option value="sell">{t('selling', useLang())}</option>
+                <option value="want">{t('looking_for', useLang())}</option>
               </select>
             </Field>
           </div>
@@ -187,7 +189,7 @@ export function NewListingModal({ onClose, onPublish, dark }: NewListingModalPro
               <ul className="mt-2 space-y-1 opacity-90">
                 <li className="flex justify-between">
                   <span>Ad type</span>
-                  <span>{form.type === "sell" ? "Selling" : "Looking For"}</span>
+                  <span>{form.type === "sell" ? t('selling', useLang()) : t('looking_for', useLang())}</span>
                 </li>
                 <li className="flex justify-between">
                   <span>Listing fee</span>
@@ -224,7 +226,7 @@ export function NewListingModal({ onClose, onPublish, dark }: NewListingModalPro
                         : ["https://images.unsplash.com/photo-1549924231-f129b911e442?q=80&w=1600&auto=format&fit=crop"],
                       boostedUntil: boost ? Date.now() + 1000 * 60 * 60 * 24 : 0,
                       seller: {
-                        name: "@you",
+                        name: "you",
                         score: 0,
                         deals: 0,
                         rating: 5.0,

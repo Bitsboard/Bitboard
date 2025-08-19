@@ -30,6 +30,12 @@ export async function GET(req: Request) {
     const centerLat = Number(url.searchParams.get("lat") ?? "");
     const centerLng = Number(url.searchParams.get("lng") ?? "");
     const hasCenter = Number.isFinite(centerLat) && Number.isFinite(centerLng);
+    const radiusKmParam = url.searchParams.get("radiusKm");
+    const rawRadius = radiusKmParam != null && radiusKmParam !== "" ? Number(radiusKmParam) : null;
+    // Treat 0 (Everywhere) as a very large radius (100,000 km)
+    const effectiveRadiusKm = rawRadius === 0 ? 100000 : rawRadius;
+    const hasRadius = effectiveRadiusKm != null && Number.isFinite(effectiveRadiusKm) && (effectiveRadiusKm as number) >= 0;
+    // No national filter; only radiusKm or everywhere
 
     // Ensure minimal schema exists so queries don't explode on fresh DBs
     try {
@@ -75,6 +81,27 @@ export async function GET(req: Request) {
       whereMinimal.push("(price_sat <= ?)");
       bindsMinimal.push(Math.round(maxPrice));
     }
+
+    // Optional geospatial radius filter via bounding box (SQLite-friendly)
+    // Skip if radius is extremely large (used for national/global) or center missing
+    if (hasCenter && hasRadius && (effectiveRadiusKm as number) < 900000) {
+      const R_KM_PER_DEG = 111.32; // Approx conversion
+      const deltaLat = (effectiveRadiusKm as number) / R_KM_PER_DEG;
+      const rad = (centerLat * Math.PI) / 180;
+      const cosLat = Math.cos(rad);
+      const safeCos = Math.max(0.01, Math.abs(cosLat));
+      const deltaLng = (effectiveRadiusKm as number) / (R_KM_PER_DEG * safeCos);
+      const minLat = centerLat - deltaLat;
+      const maxLat = centerLat + deltaLat;
+      const minLng = centerLng - deltaLng;
+      const maxLng = centerLng + deltaLng;
+      whereRich.push("(lat BETWEEN ? AND ?)");
+      bindsRich.push(minLat, maxLat);
+      whereRich.push("(lng BETWEEN ? AND ?)");
+      bindsRich.push(minLng, maxLng);
+    }
+
+    // Removed country bounding box logic
 
     const whereClauseRich = whereRich.length ? `WHERE ${whereRich.join(" AND ")}` : "";
     const whereClauseMinimal = whereMinimal.length ? `WHERE ${whereMinimal.join(" AND ")}` : "";
@@ -144,7 +171,25 @@ export async function GET(req: Request) {
     }
     const total = (totalRow.results?.[0] as any)?.c ?? 0;
 
-    return NextResponse.json({ listings: results, total });
+    // Staging/demo: diversify images and sellers if missing
+    const stock = [
+      '1518770660439-4636190af475', // robot
+      '1542751371-adc38448a05e',
+      '1518779578993-ec3579fee39f',
+      '1512496015851-a90fb38ba796',
+      '1517816743773-6e0fd518b4a6',
+      '1517245386807-bb43f82c33c4',
+      '1541532713592-79a0317b6b77',
+      '1555617117-08d3a8fef16c'
+    ];
+    const sellers = ['demo_seller', 'satoshi', 'luna', 'rob', 'mika', 'arya', 'nova', 'kai'];
+    const listings = results.map((r: any, i: number) => ({
+      ...r,
+      imageUrl: r.imageUrl && r.imageUrl.trim() ? r.imageUrl : `https://images.unsplash.com/photo-${stock[i % stock.length]}?q=80&w=1600&auto=format&fit=crop`,
+      postedBy: r.postedBy && r.postedBy.trim() ? r.postedBy : sellers[i % sellers.length],
+    }));
+
+    return NextResponse.json({ listings, total });
   } catch (err: any) {
     const message = err?.message ?? "Internal Server Error";
     return NextResponse.json({ error: message, hint: "Ensure D1 binding 'DB' is set and schema exists" }, { status: 200 });
