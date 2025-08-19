@@ -212,7 +212,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             const marker = (L as any).marker([center.lat, center.lng], { draggable: false, icon: bbIcon }).addTo(map);
             markerRef.current = marker;
             if (radiusKm === 0) {
-                const circle = (L as any).circle([0, 0], { radius: 100000 * 1000, color: '#f97316', fillColor: '#f97316', fillOpacity: 0.25, weight: 2 }).addTo(map);
+                const circle = (L as any).circle([0, 5], { radius: 250000 * 1000, color: '#f97316', fillColor: '#f97316', fillOpacity: 0.25, weight: 2 }).addTo(map);
                 circleRef.current = circle;
             } else {
                 const circle = (L as any).circleMarker([center.lat, center.lng], { radius: getCircleRadiusPx(), color: "#f97316", fillColor: "#f97316", fillOpacity: 0.15 }).addTo(map);
@@ -288,7 +288,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         // Remove any existing circle
         try { circleRef.current?.remove(); } catch {}
         if (currentRadius === 0) {
-            circleRef.current = (L as any).circle([0, 0], { radius: 100000 * 1000, color: '#f97316', fillColor: '#f97316', fillOpacity: 0.25, weight: 2 }).addTo(mapRef.current);
+            circleRef.current = (L as any).circle([0, 5], { radius: 250000 * 1000, color: '#f97316', fillColor: '#f97316', fillOpacity: 0.25, weight: 2 }).addTo(mapRef.current);
             setCircleMode('global');
         } else {
             circleRef.current = (L as any).circleMarker([at.lat, at.lng], { radius: getCircleRadiusPx(), color: '#f97316', fillColor: '#f97316', fillOpacity: 0.15 }).addTo(mapRef.current);
@@ -303,7 +303,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         const tint = mapRef.current.getPane('worldTint') as any;
         if (tint) tint.style.background = 'transparent';
         if (radiusKm === 0) {
-            mapRef.current.setView([0, 0], zoomForRadiusKm(0));
+            mapRef.current.setView([0, 5], zoomForRadiusKm(0));
             markerRef.current?.setLatLng([center.lat, center.lng]);
             recreateCircle(0, center);
         } else {
