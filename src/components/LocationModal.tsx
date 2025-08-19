@@ -344,7 +344,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                             'absolute right-3 top-3 z-[1] inline-flex items-center justify-center rounded-xl shadow px-3 py-2 transition-colors',
                             (locating || usingMyLocation)
                                 ? 'bg-orange-500 text-white border border-orange-500'
-                                : (dark ? 'bg-neutral-900/90 text-white border border-neutral-700' : 'bg-white/95 text-neutral-900 border border-neutral-300')
+                                : 'bg-black text-white border border-black'
                         )}
                         title={t('change', lang)}
                     >
