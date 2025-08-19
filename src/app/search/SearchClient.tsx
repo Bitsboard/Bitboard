@@ -371,10 +371,8 @@ export default function SearchClient() {
                                     <button onClick={() => setShowLocationModal(true)} className="rounded-xl px-3 py-1 text-xs text-white bg-gradient-to-r from-orange-500 to-red-500">{t('change', lang)}</button>
                                 </div>
                             </div>
-                            {radiusKm >= 5000000 ? (
+                            {radiusKm === 0 ? (
                                 <div className={cn("mt-3", dark ? "text-neutral-200" : "text-neutral-800")}>{t('all_listings_globally', lang)}</div>
-                            ) : radiusKm >= 1000000 ? (
-                                <div className={cn("mt-3", dark ? "text-neutral-200" : "text-neutral-800")}>{t('all_listings_in_country', lang).replace('{country}', deriveCountry(getSavedPlaceName()) || 'your country')}</div>
                             ) : (
                                 <>
                                     <div className={cn("mt-3 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>
