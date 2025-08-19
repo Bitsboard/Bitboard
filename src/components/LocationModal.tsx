@@ -86,7 +86,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                         const stateAbbr = abbreviateState(cc2, (best.admin1 || '').toString(), iso);
                         const city = (best.name || '').toString();
                         const name = [city, stateAbbr || (best.admin1 || ''), country].filter(Boolean).join(', ');
-                        return { name, lat, lng };
+                        return { name, lat: Number(best.latitude), lng: Number(best.longitude) };
                     }
                 }
             }
@@ -308,8 +308,10 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                                             (async () => {
                                                 const nearest = await reverseToNearestCity(latitude, longitude);
                                                 if (nearest?.name) {
-                                                    setCenter({ name: nearest.name, lat: latitude, lng: longitude });
+                                                    // Re-center to the resolved city coordinates for visual accuracy
+                                                    setCenter({ name: nearest.name, lat: nearest.lat, lng: nearest.lng });
                                                     setQuery(nearest.name);
+                                                    // Move marker/circle via state effect
                                                 } else {
                                                     const coordLabel = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
                                                     setCenter({ name: coordLabel, lat: latitude, lng: longitude });
