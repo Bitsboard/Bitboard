@@ -198,8 +198,8 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             const base = L.tileLayer(greyUrl, { maxZoom: 19, attribution: "© OpenStreetMap © CARTO", noWrap: true }).addTo(map);
             // Solid orange tint overlay that covers the entire map container (below markers)
             const pane = (map as any).createPane('worldTint');
-            (pane as any).style.zIndex = 450;
-            (pane as any).style.background = 'rgba(249, 115, 22, 0.25)';
+            (pane as any).style.zIndex = 350; // above tiles, below markers
+            (pane as any).style.background = 'transparent';
             (pane as any).style.pointerEvents = 'none';
             (L as any).tileLayer('', { pane: 'worldTint' }).addTo(map);
             const bbIcon = (L as any).icon({
@@ -298,9 +298,9 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     // Single effect to update view and circle for both radius and center changes
     React.useEffect(() => {
         if (!mapRef.current) return;
-        // Ensure the solid tint remains applied
+        // Toggle full-container tint only in worldwide mode
         const tint = mapRef.current.getPane('worldTint') as any;
-        if (tint) tint.style.background = 'rgba(249, 115, 22, 0.25)';
+        if (tint) tint.style.background = radiusKm === 0 ? 'rgba(249, 115, 22, 0.35)' : 'transparent';
         if (radiusKm === 0) {
             mapRef.current.setView([0, 0], zoomForRadiusKm(0));
             markerRef.current?.setLatLng([center.lat, center.lng]);
