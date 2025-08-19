@@ -34,6 +34,100 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     });
     const [remoteResults, setRemoteResults] = React.useState<Array<{ name: string; lat: number; lng: number }>>([]);
     const [locating, setLocating] = React.useState<boolean>(false);
+    // Helpers for reverse-geocoding and formatting
+    const US_STATE_ABBR: Record<string, string> = {
+        'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR', 'California': 'CA', 'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE', 'Florida': 'FL', 'Georgia': 'GA', 'Hawaii': 'HI', 'Idaho': 'ID', 'Illinois': 'IL', 'Indiana': 'IN', 'Iowa': 'IA', 'Kansas': 'KS', 'Kentucky': 'KY', 'Louisiana': 'LA', 'Maine': 'ME', 'Maryland': 'MD', 'Massachusetts': 'MA', 'Michigan': 'MI', 'Minnesota': 'MN', 'Mississippi': 'MS', 'Missouri': 'MO', 'Montana': 'MT', 'Nebraska': 'NE', 'Nevada': 'NV', 'New Hampshire': 'NH', 'New Jersey': 'NJ', 'New Mexico': 'NM', 'New York': 'NY', 'North Carolina': 'NC', 'North Dakota': 'ND', 'Ohio': 'OH', 'Oklahoma': 'OK', 'Oregon': 'OR', 'Pennsylvania': 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC', 'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT', 'Vermont': 'VT', 'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV', 'Wisconsin': 'WI', 'Wyoming': 'WY', 'District of Columbia': 'DC'
+    };
+    const CA_PROV_ABBR: Record<string, string> = {
+        'Alberta': 'AB', 'British Columbia': 'BC', 'Manitoba': 'MB', 'New Brunswick': 'NB', 'Newfoundland and Labrador': 'NL', 'Nova Scotia': 'NS', 'Ontario': 'ON', 'Prince Edward Island': 'PE', 'Quebec': 'QC', 'Saskatchewan': 'SK', 'Northwest Territories': 'NT', 'Nunavut': 'NU', 'Yukon': 'YT'
+    };
+    function countryToAlpha3(cc?: string): string | undefined {
+        if (!cc) return undefined;
+        const m: Record<string, string> = {
+            us: 'USA', ca: 'CAN', mx: 'MEX', gb: 'GBR', uk: 'GBR', de: 'DEU', fr: 'FRA', es: 'ESP', it: 'ITA', nl: 'NLD', se: 'SWE', no: 'NOR', fi: 'FIN', dk: 'DNK', au: 'AUS', nz: 'NZL', jp: 'JPN', cn: 'CHN', in: 'IND', br: 'BRA', ar: 'ARG', cl: 'CHL', co: 'COL', pe: 'PER', ru: 'RUS', ua: 'UKR', za: 'ZAF'
+        };
+        return m[cc.toLowerCase()] || cc.toUpperCase();
+    }
+    function abbreviateState(cc2?: string, state?: string, iso?: string): string | undefined {
+        if (!state) return undefined;
+        const cc = (cc2 || '').toLowerCase();
+        if (iso && iso.includes('-')) return iso.split('-')[1].toUpperCase();
+        if (cc === 'us') return US_STATE_ABBR[state] || undefined;
+        if (cc === 'ca') return CA_PROV_ABBR[state] || undefined;
+        return undefined;
+    }
+    function haversineKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+        const R = 6371;
+        const dLat = (b.lat - a.lat) * Math.PI / 180;
+        const dLng = (b.lng - a.lng) * Math.PI / 180;
+        const s1 = Math.sin(dLat / 2) ** 2;
+        const s2 = Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+        return 2 * R * Math.asin(Math.sqrt(s1 + s2));
+    }
+    async function reverseToNearestCity(lat: number, lng: number): Promise<{ name: string; lat: number; lng: number } | null> {
+        // Try Open‑Meteo reverse with multiple results, choose closest populated place
+        try {
+            const ctl = new AbortController();
+            const url = `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lng}&count=10&language=en&format=json`;
+            const r = await fetch(url, { signal: ctl.signal });
+            if (r.ok) {
+                const js = (await r.json()) as { results?: Array<any> };
+                const rows = (js?.results || []).filter((it: any) => typeof it?.feature_code === 'string' && it.feature_code.startsWith('PPL'));
+                if (rows.length > 0) {
+                    let best: any = null; let bestD = Infinity;
+                    for (const it of rows) {
+                        const d = haversineKm({ lat, lng }, { lat: Number(it.latitude), lng: Number(it.longitude) });
+                        if (d < bestD) { best = it; bestD = d; }
+                    }
+                    if (best) {
+                        const cc2 = (best.country_code || '').toString();
+                        const country = countryToAlpha3(cc2);
+                        const iso = (best.admin1_id as string | undefined) || '';
+                        const stateAbbr = abbreviateState(cc2, (best.admin1 || '').toString(), iso);
+                        const city = (best.name || '').toString();
+                        const name = [city, stateAbbr || (best.admin1 || ''), country].filter(Boolean).join(', ');
+                        return { name, lat, lng };
+                    }
+                }
+            }
+        } catch {}
+        // Fallback: GeoDB nearby cities
+        try {
+            const url = `https://geodb-free-service.wirefreethought.com/v1/geo/locations/${lat}${lng}/nearbyCities?limit=5&radius=100&minPopulation=1&sort=distance&hateoasMode=false`;
+            const r = await fetch(url);
+            if (r.ok) {
+                const js = (await r.json()) as { data?: Array<any> };
+                const first = (js?.data || [])[0];
+                if (first) {
+                    const cc2 = (first.countryCode || '').toString();
+                    const country = countryToAlpha3(cc2);
+                    const state = (first.regionCode || first.region || '').toString();
+                    const city = (first.city || '').toString();
+                    const name = [city, state, country].filter(Boolean).join(', ');
+                    if (city) return { name, lat, lng };
+                }
+            }
+        } catch {}
+        // Fallback: Nominatim reverse
+        try {
+            const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`;
+            const r = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            if (r.ok) {
+                const js = (await r.json()) as any;
+                const addr = js?.address || {};
+                const cc2 = (addr.country_code || '').toString();
+                const country = countryToAlpha3(cc2);
+                const iso = (addr["ISO3166-2-lvl4"] as string | undefined) || (addr["ISO3166-2-lvl6"] as string | undefined) || (addr["ISO3166-2-lvl3"] as string | undefined);
+                const stateAbbr = abbreviateState(cc2, (addr.state || '').toString(), iso);
+                const city = (addr.city || addr.town || addr.village || addr.municipality || '').toString();
+                if (city) {
+                    const name = [city, stateAbbr || (addr.state || ''), country].filter(Boolean).join(', ');
+                    return { name, lat, lng };
+                }
+            }
+        } catch {}
+        return null;
+    }
 
     // Ensure Leaflet CSS is present
     React.useEffect(() => {
@@ -212,24 +306,10 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                                         (pos) => {
                                             const { latitude, longitude } = pos.coords;
                                             (async () => {
-                                                try {
-                                                    const u = `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${latitude}&longitude=${longitude}&language=en&format=json`;
-                                                    const r = await fetch(u, { headers: { 'Accept': 'application/json' } });
-                                                    const js = (await r.json()) as { results?: Array<any> };
-                                                    const first = (js?.results || []).find((it: any) => typeof it?.feature_code === 'string' && it.feature_code.startsWith('PPL')) || (js?.results || [])[0];
-                                                    const city = (first?.name || '').toString();
-                                                    const admin1 = (first?.admin1 || '').toString();
-                                                    const cc2 = (first?.country_code || '').toString().toUpperCase();
-                                                    const name = [city, admin1 || undefined, cc2 || undefined].filter(Boolean).join(', ');
-                                                    const finalName = name || city || '';
-                                                    if (finalName) {
-                                                        setCenter({ name: finalName, lat: latitude, lng: longitude });
-                                                        setQuery(finalName);
-                                                    } else {
-                                                        // If reverse lookup fails to yield a city, keep existing center; do not show raw coords
-                                                    }
-                                                } catch {
-                                                    // On failure, do not replace with coordinates; keep prior selection
+                                                const nearest = await reverseToNearestCity(latitude, longitude);
+                                                if (nearest?.name) {
+                                                    setCenter({ name: nearest.name, lat: latitude, lng: longitude });
+                                                    setQuery(nearest.name);
                                                 }
                                                 resolve();
                                             })();
