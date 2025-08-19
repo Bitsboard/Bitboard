@@ -310,6 +310,10 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                                                 if (nearest?.name) {
                                                     setCenter({ name: nearest.name, lat: latitude, lng: longitude });
                                                     setQuery(nearest.name);
+                                                } else {
+                                                    const coordLabel = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+                                                    setCenter({ name: coordLabel, lat: latitude, lng: longitude });
+                                                    setQuery(coordLabel);
                                                 }
                                                 resolve();
                                             })();
@@ -329,9 +333,9 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                         )}
                         title={t('change', lang)}
                     >
-                        {/* Solid location arrow icon (filled) */}
+                        {/* Traditional navigation arrow icon (filled) */}
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                            <path d="M12 2c.552 0 1 .448 1 1v3.055a7 7 0 1 1-2 0V3a1 1 0 0 1 1-1Zm0 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z"/>
+                            <path d="M21.707 2.293a1 1 0 0 0-1.06-.217l-18 7a1 1 0 0 0 .062 1.888l7.76 2.59 2.59 7.76a1 1 0 0 0 1.888.062l7-18a1 1 0 0 0-.24-1.083zM12.85 19.435l-1.87-5.6a1 1 0 0 0-.63-.63l-5.6-1.87L19.07 4.93l-6.22 14.505z"/>
                         </svg>
                     </button>
                 </div>
