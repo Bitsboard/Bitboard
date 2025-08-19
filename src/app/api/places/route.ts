@@ -36,8 +36,8 @@ export async function GET(req: Request) {
         return new Response(JSON.stringify({ results: [] }), { headers: { 'content-type': 'application/json' } });
     }
     try {
-        // Restrict to city class for cleaner results
-        const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=${limit}&q=${encodeURIComponent(q)}&class=place&type=city&email=noreply@bitsbarter.app`;
+        // Use class=place for completeness; we'll filter allowed place types (city/town/village/etc.) client-side
+        const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=${limit}&q=${encodeURIComponent(q)}&class=place&email=noreply@bitsbarter.app`;
         const r = await fetch(url, {
             headers: {
                 'Accept': 'application/json',
@@ -47,14 +47,15 @@ export async function GET(req: Request) {
         const js = (await r.json()) as Array<any>;
         const mapped = js.map((it) => {
             const addr = it.address || {};
-            // Only accept true cities
+            // Accept core settlement types for completeness
             const typ = (it.type || '').toString();
-            if (typ !== 'city') return null;
+            const allowed = new Set(['city','town','village','municipality','locality']);
+            if (!allowed.has(typ)) return null;
             const cc2 = addr.country_code as string | undefined;
             const countryShort = countryToAlpha3(cc2);
             const iso = (addr["ISO3166-2-lvl4"] as string | undefined) || (addr["ISO3166-2-lvl6"] as string | undefined) || (addr["ISO3166-2-lvl3"] as string | undefined);
             const stateAbbr = abbreviateState(cc2, addr.state as string | undefined, iso);
-            const city = addr.city || addr.town || addr.village || addr.municipality || '';
+            const city = addr.city || addr.town || addr.village || addr.municipality || addr.locality || '';
             // Only accept city-like results; skip country/state/region-only entries
             if (!city) return null;
             const cleanCity = String(city).replace(/\s*\(.*?\)\s*/g, '').replace(/\s+-\s+.*/g, '').trim();
