@@ -202,12 +202,21 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         return () => cleanup();
     }, [open]);
 
-    // When the modal opens, seed the search box with the current selection so it's not blank
+    // When the modal opens, restore "using my location" state and seed input appropriately
     React.useEffect(() => {
         if (!open) return;
-        const currentName = center?.name || initialCenter?.name || "";
-        if (currentName && !query) setQuery(currentName);
-    }, [open]);
+        let flag = false;
+        try { flag = localStorage.getItem('usingMyLocation') === '1'; } catch { }
+        const isMyLoc = flag || ((initialCenter?.name || '') === t('my_location', lang));
+        setUsingMyLocation(isMyLoc);
+        if (isMyLoc) {
+            // Show placeholder; do not prefill text
+            setQuery("");
+        } else {
+            const currentName = center?.name || initialCenter?.name || "";
+            if (currentName && !query) setQuery(currentName);
+        }
+    }, [open, initialCenter?.name, center?.name, lang]);
 
     // Update circle when radius changes
     React.useEffect(() => {
@@ -316,6 +325,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                                             // Immediately drop a pin at the user's coordinates for instant feedback
                                             setCenter({ name: t('my_location', lang), lat: latitude, lng: longitude });
                                             setUsingMyLocation(true);
+                                            try { localStorage.setItem('usingMyLocation', '1'); } catch {}
                                             setQuery('');
                                             (async () => {
                                                 const nearest = await reverseToNearestCity(latitude, longitude);
@@ -323,11 +333,13 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                                                     setCenter({ name: nearest.name, lat: nearest.lat, lng: nearest.lng });
                                                     // Keep the input labeled as "My Location" while using current location
                                                     setUsingMyLocation(true);
+                                                    try { localStorage.setItem('usingMyLocation', '1'); } catch {}
                                                     setQuery('');
                                                 } else {
                                                     const coordLabel = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
                                                     setCenter({ name: coordLabel, lat: latitude, lng: longitude });
                                                     setUsingMyLocation(true);
+                                                    try { localStorage.setItem('usingMyLocation', '1'); } catch {}
                                                     setQuery('');
                                                 }
                                                 resolve();
