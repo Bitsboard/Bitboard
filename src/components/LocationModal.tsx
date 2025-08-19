@@ -199,6 +199,50 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
 
                 <div className="rounded-xl overflow-hidden relative z-0 bb-map" style={{ height: 280 }}>
                     <div ref={containerRef} className="w-full h-full" />
+                    <button
+                        type="button"
+                        aria-label="Use my location"
+                        onClick={async () => {
+                            try {
+                                await new Promise<void>((resolve, reject) => {
+                                    if (!('geolocation' in navigator)) return reject(new Error('no_geo'));
+                                    navigator.geolocation.getCurrentPosition(
+                                        (pos) => {
+                                            const { latitude, longitude } = pos.coords;
+                                            (async () => {
+                                                try {
+                                                    const u = `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${latitude}&longitude=${longitude}&language=en&format=json`;
+                                                    const r = await fetch(u, { headers: { 'Accept': 'application/json' } });
+                                                    const js = (await r.json()) as { results?: Array<any> };
+                                                    const first = (js?.results || []).find((it: any) => typeof it?.feature_code === 'string' && it.feature_code.startsWith('PPL')) || (js?.results || [])[0];
+                                                    const city = (first?.name || '').toString();
+                                                    const admin1 = (first?.admin1 || '').toString();
+                                                    const cc2 = (first?.country_code || '').toString().toUpperCase();
+                                                    const name = [city, admin1 || undefined, cc2 || undefined].filter(Boolean).join(', ');
+                                                    setCenter({ name: name || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`, lat: latitude, lng: longitude });
+                                                    setQuery(name || city || '');
+                                                } catch {
+                                                    setCenter({ name: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`, lat: latitude, lng: longitude });
+                                                }
+                                                resolve();
+                                            })();
+                                        },
+                                        () => reject(new Error('denied')),
+                                        { enableHighAccuracy: true, maximumAge: 10000, timeout: 10000 }
+                                    );
+                                });
+                            } catch { /* ignore */ }
+                        }}
+                        className={cn(
+                            'absolute right-3 top-3 z-[1] inline-flex items-center justify-center rounded-xl shadow px-3 py-2',
+                            dark ? 'bg-neutral-900/90 text-white border border-neutral-700' : 'bg-white/95 text-neutral-900 border border-neutral-300'
+                        )}
+                        title={t('change', lang)}
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21.707 2.293a1 1 0 0 0-1.06-.217l-18 7a1 1 0 0 0 .062 1.888l7.76 2.59 2.59 7.76a1 1 0 0 0 1.888.062l7-18a1 1 0 0 0-.24-1.083zM12.85 19.435l-1.87-5.6a1 1 0 0 0-.63-.63l-5.6-1.87L19.07 4.93l-6.22 14.505z"/>
+                        </svg>
+                    </button>
                 </div>
             </ModalBody>
             <ModalFooter dark={dark}>
