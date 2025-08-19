@@ -306,7 +306,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                                         (pos) => {
                                             const { latitude, longitude } = pos.coords;
                                             // Immediately drop a pin at the user's coordinates for instant feedback
-                                            setCenter({ name: 'Locating…', lat: latitude, lng: longitude });
+                                            setCenter({ name: t('my_location', lang), lat: latitude, lng: longitude });
                                             setQuery('');
                                             (async () => {
                                                 const nearest = await reverseToNearestCity(latitude, longitude);
