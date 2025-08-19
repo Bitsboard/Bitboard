@@ -36,7 +36,40 @@ export async function GET(req: Request) {
         return new Response(JSON.stringify({ results: [] }), { headers: { 'content-type': 'application/json' } });
     }
     try {
-        // Use class=place for completeness; we'll filter allowed place types (city/town/village/etc.) client-side
+        // Provider 1: GeoDB Cities (free, comprehensive, clean admin names)
+        try {
+            const gUrl = `https://geodb-free-service.wirefreethought.com/v1/geo/cities?namePrefix=${encodeURIComponent(q)}&limit=${limit}&sort=-population&hateoasMode=false&languageCode=en`;
+            const gr = await fetch(gUrl, { headers: { 'Accept': 'application/json' } });
+            if (gr.ok) {
+                const gj = (await gr.json()) as { data?: Array<any> };
+                const data = gj?.data ?? [];
+                const mapped = data.map((it) => {
+                    const cc2: string | undefined = typeof it.countryCode === 'string' ? it.countryCode : undefined;
+                    const countryShort = countryToAlpha3(cc2);
+                    const regionCode: string | undefined = typeof it.regionCode === 'string' ? it.regionCode : undefined;
+                    const regionName: string | undefined = typeof it.region === 'string' ? it.region : undefined;
+                    const stateToken = (regionCode || regionName || '').toString().toUpperCase();
+                    const city = (it.city || '').toString();
+                    if (!city || !countryShort) return null;
+                    const cleanCity = city.replace(/\s*\(.*?\)\s*/g, '').replace(/\s+-\s+.*/g, '').trim();
+                    const name = [cleanCity, stateToken, countryShort].filter(Boolean).join(', ');
+                    return { name, lat: Number(it.latitude), lng: Number(it.longitude), pop: Number(it.population) || 0 };
+                }).filter(Boolean) as Array<any>;
+                // Deduplicate by name, prefer higher population
+                const uniq = new Map<string, any>();
+                for (const m of mapped) {
+                    const k = m.name.toLowerCase();
+                    const prev = uniq.get(k);
+                    if (!prev || m.pop > prev.pop) uniq.set(k, m);
+                }
+                const results = Array.from(uniq.values()).slice(0, limit).map(({ pop, ...rest }) => rest);
+                if (results.length > 0) {
+                    return new Response(JSON.stringify({ results }), { headers: { 'content-type': 'application/json' } });
+                }
+            }
+        } catch {}
+
+        // Fallback: Nominatim (filtered to settlement types)
         const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=${limit}&q=${encodeURIComponent(q)}&class=place&email=noreply@bitsbarter.app`;
         const r = await fetch(url, {
             headers: {
@@ -47,7 +80,6 @@ export async function GET(req: Request) {
         const js = (await r.json()) as Array<any>;
         const mapped = js.map((it) => {
             const addr = it.address || {};
-            // Accept core settlement types for completeness
             const typ = (it.type || '').toString();
             const allowed = new Set(['city','town','village','municipality','locality']);
             if (!allowed.has(typ)) return null;
@@ -56,7 +88,6 @@ export async function GET(req: Request) {
             const iso = (addr["ISO3166-2-lvl4"] as string | undefined) || (addr["ISO3166-2-lvl6"] as string | undefined) || (addr["ISO3166-2-lvl3"] as string | undefined);
             const stateAbbr = abbreviateState(cc2, addr.state as string | undefined, iso);
             const city = addr.city || addr.town || addr.village || addr.municipality || addr.locality || '';
-            // Only accept city-like results; skip country/state/region-only entries
             if (!city) return null;
             const cleanCity = String(city).replace(/\s*\(.*?\)\s*/g, '').replace(/\s+-\s+.*/g, '').trim();
             let nameParts: string[] = [];
@@ -72,7 +103,6 @@ export async function GET(req: Request) {
                 importance: typeof it.importance === 'number' ? it.importance : 0,
             };
         }).filter(Boolean) as Array<any>;
-        // Deduplicate by name, prefer higher importance
         const uniqMap = new Map<string, any>();
         for (const m of mapped) {
             const key = m.name.toLowerCase();
