@@ -102,6 +102,17 @@ export default function HomePage() {
     } catch { }
   }, []);
 
+  // Re-translate "My Location" label when locale changes
+  useEffect(() => {
+    try {
+      const using = localStorage.getItem('usingMyLocation') === '1';
+      if (using) {
+        setCenter((prev) => ({ ...prev, name: t('my_location', lang) }));
+      }
+    } catch { }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
+
   // Categories
   const categories: Category[] = [
     "Featured",

@@ -101,6 +101,15 @@ export default function SearchClient() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+    // Re-translate "My Location" label on locale change
+    useEffect(() => {
+        try {
+            const using = localStorage.getItem('usingMyLocation') === '1';
+            if (using) {
+                // no input label in SearchClient, but keep for future display contexts
+            }
+        } catch { }
+    }, [lang]);
     useEffect(() => {
         if (layoutParam) setLayout(layoutParam === "list" ? "list" : "grid");
     }, [layoutParam]);
