@@ -180,7 +180,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                 mapRef.current.remove();
             }
             const initLat = radiusKm === 0 ? 0 : center.lat;
-            const initLng = radiusKm === 0 ? -10 : center.lng;
+            const initLng = radiusKm === 0 ? -5 : center.lng;
             const map = L.map(containerRef.current, { zoomControl: false }).setView([initLat, initLng], zoomForRadiusKm(radiusKm));
             mapRef.current = map;
             // Disable interactions
@@ -206,11 +206,11 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                 iconAnchor: [18, 34],
                 shadowUrl: undefined,
             });
-            const marker = (L as any).marker([initLat, initLng], { draggable: false, icon: bbIcon }).addTo(map);
+            const marker = (L as any).marker([center.lat, center.lng], { draggable: false, icon: bbIcon }).addTo(map);
             markerRef.current = marker;
             const circle = radiusKm === 0
-                ? (L as any).circle([initLat, initLng], { radius: 100000 * 1000, color: "#f97316", fillColor: "#f97316", fillOpacity: 0.15 }).addTo(map)
-                : (L as any).circleMarker([initLat, initLng], { radius: getCircleRadiusPx(), color: "#f97316", fillColor: "#f97316", fillOpacity: 0.15 }).addTo(map);
+                ? (L as any).circle([0, -5], { radius: 100000 * 1000, color: "#f97316", fillColor: "#f97316", fillOpacity: 0.15 }).addTo(map)
+                : (L as any).circleMarker([center.lat, center.lng], { radius: getCircleRadiusPx(), color: "#f97316", fillColor: "#f97316", fillOpacity: 0.15 }).addTo(map);
             circleRef.current = circle;
             // Pin is fixed; users can change by searching/selecting
             cleanup = () => {
@@ -256,12 +256,13 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         // Adjust zoom based on radius and keep circle same on-screen size (except global, where we draw a geodesic circle)
         try {
             if (radiusKm === 0) {
-                mapRef.current.setView([0, -10], zoomForRadiusKm(0));
+                mapRef.current.setView([0, -5], zoomForRadiusKm(0));
                 circleRef.current.setRadius(100000 * 1000);
-                markerRef.current?.setLatLng([0, -10]);
-                circleRef.current.setLatLng([0, -10]);
+                // Keep marker at user/selected location while panning map to global center
+                markerRef.current?.setLatLng([center.lat, center.lng]);
+                circleRef.current.setLatLng([0, -5]);
                 // Force state center coordinates to global center for consistency
-                setCenter((prev) => ({ ...prev, lat: 0, lng: -10 }));
+                // Do not mutate center to [0,-5] so the pin stays on selected location
             } else {
                 mapRef.current.setView([center.lat, center.lng], zoomForRadiusKm(radiusKm));
                 markerRef.current?.setLatLng([center.lat, center.lng]);
@@ -275,9 +276,10 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     React.useEffect(() => {
         if (mapRef.current && markerRef.current && circleRef.current) {
             if (radiusKm === 0) {
-                mapRef.current.setView([0, -10], zoomForRadiusKm(0));
-                markerRef.current.setLatLng([0, -10]);
-                circleRef.current.setLatLng([0, -10]);
+                mapRef.current.setView([0, -5], zoomForRadiusKm(0));
+                // Keep marker at selected location
+                markerRef.current.setLatLng([center.lat, center.lng]);
+                circleRef.current.setLatLng([0, -5]);
                 circleRef.current.setRadius(100000 * 1000);
             } else {
                 mapRef.current.setView([center.lat, center.lng], zoomForRadiusKm(radiusKm));
