@@ -70,7 +70,7 @@ export async function GET(req: Request) {
       }
       // Optional: ensure listings table has posted_by column; association left as future enhancement
     }
-  } catch {}
+  } catch { }
 
   const secret = getAuthSecret();
   const expiresSec = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;

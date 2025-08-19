@@ -6,7 +6,6 @@ import UsernamePicker from "./UsernamePicker";
 type Session = {
   user?: { name?: string; email?: string; image?: string };
   account?: {
-    uuid: string;
     sso: string;
     email: string;
     username: string | null;
@@ -67,10 +66,6 @@ export default function ProfilePage() {
           {session.account && (
             <div className="rounded-2xl border border-neutral-800 p-4">
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <div className="text-neutral-400">UUID</div>
-                  <div className="font-mono break-all">{session.account.uuid}</div>
-                </div>
                 <div>
                   <div className="text-neutral-400">SSO</div>
                   <div className="font-medium capitalize">{session.account.sso}</div>

@@ -32,9 +32,9 @@ export async function GET(req: Request) {
         try {
           const lres = await db.prepare('SELECT id, title, price_sat AS priceSat, created_at AS createdAt FROM listings WHERE posted_by = ? ORDER BY created_at DESC LIMIT 20').bind(userRow?.id ?? '').all();
           listings = lres.results ?? [];
-        } catch {}
+        } catch { }
       }
-    } catch {}
+    } catch { }
 
     const session = {
       user: {
@@ -43,7 +43,6 @@ export async function GET(req: Request) {
         image: userRow?.image ?? payload.picture,
       },
       account: userRow ? {
-        uuid: userRow.id,
         sso: userRow.sso,
         email: userRow.email,
         username: userRow.username,
