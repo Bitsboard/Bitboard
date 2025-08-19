@@ -305,13 +305,14 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                                     navigator.geolocation.getCurrentPosition(
                                         (pos) => {
                                             const { latitude, longitude } = pos.coords;
+                                            // Immediately drop a pin at the user's coordinates for instant feedback
+                                            setCenter({ name: 'Locating…', lat: latitude, lng: longitude });
+                                            setQuery('');
                                             (async () => {
                                                 const nearest = await reverseToNearestCity(latitude, longitude);
                                                 if (nearest?.name) {
-                                                    // Re-center to the resolved city coordinates for visual accuracy
                                                     setCenter({ name: nearest.name, lat: nearest.lat, lng: nearest.lng });
                                                     setQuery(nearest.name);
-                                                    // Move marker/circle via state effect
                                                 } else {
                                                     const coordLabel = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
                                                     setCenter({ name: coordLabel, lat: latitude, lng: longitude });
