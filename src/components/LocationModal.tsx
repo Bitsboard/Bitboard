@@ -237,6 +237,15 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         }
     }, [open, initialCenter?.name, center?.name, lang]);
 
+    // Keep the "My Location" label translated when locale changes
+    React.useEffect(() => {
+        const flag = (() => { try { return localStorage.getItem('usingMyLocation') === '1'; } catch { return false; } })();
+        if (usingMyLocation || flag) {
+            setCenter((prev) => ({ ...prev, name: t('my_location', lang) }));
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [lang]);
+
     // Update circle when radius changes (visual circle is fixed pixel size; we adjust zoom)
     React.useEffect(() => {
         if (!mapRef.current || !circleRef.current) return;
