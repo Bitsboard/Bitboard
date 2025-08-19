@@ -31,8 +31,10 @@ export async function GET(req: Request) {
     const centerLng = Number(url.searchParams.get("lng") ?? "");
     const hasCenter = Number.isFinite(centerLat) && Number.isFinite(centerLng);
     const radiusKmParam = url.searchParams.get("radiusKm");
-    const radiusKm = radiusKmParam != null && radiusKmParam !== "" ? Number(radiusKmParam) : null;
-    const hasRadius = radiusKm != null && Number.isFinite(radiusKm) && (radiusKm as number) > 0;
+    const rawRadius = radiusKmParam != null && radiusKmParam !== "" ? Number(radiusKmParam) : null;
+    // Treat 0 (Everywhere) as a very large radius (100,000 km)
+    const effectiveRadiusKm = rawRadius === 0 ? 100000 : rawRadius;
+    const hasRadius = effectiveRadiusKm != null && Number.isFinite(effectiveRadiusKm) && (effectiveRadiusKm as number) >= 0;
     // No national filter; only radiusKm or everywhere
 
     // Ensure minimal schema exists so queries don't explode on fresh DBs
@@ -82,13 +84,13 @@ export async function GET(req: Request) {
 
     // Optional geospatial radius filter via bounding box (SQLite-friendly)
     // Skip if radius is extremely large (used for national/global) or center missing
-    if (hasCenter && hasRadius && (radiusKm as number) < 900000) {
+    if (hasCenter && hasRadius && (effectiveRadiusKm as number) < 900000) {
       const R_KM_PER_DEG = 111.32; // Approx conversion
-      const deltaLat = (radiusKm as number) / R_KM_PER_DEG;
+      const deltaLat = (effectiveRadiusKm as number) / R_KM_PER_DEG;
       const rad = (centerLat * Math.PI) / 180;
       const cosLat = Math.cos(rad);
       const safeCos = Math.max(0.01, Math.abs(cosLat));
-      const deltaLng = (radiusKm as number) / (R_KM_PER_DEG * safeCos);
+      const deltaLng = (effectiveRadiusKm as number) / (R_KM_PER_DEG * safeCos);
       const minLat = centerLat - deltaLat;
       const maxLat = centerLat + deltaLat;
       const minLng = centerLng - deltaLng;
