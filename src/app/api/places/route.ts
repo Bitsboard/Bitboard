@@ -31,12 +31,46 @@ function abbreviateState(countryCode: string | undefined, state?: string, iso?: 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const q = (searchParams.get('q') || '').trim();
-    const limit = Math.min(30, Math.max(1, Number(searchParams.get('limit') || 15)));
+    const limit = Math.min(50, Math.max(1, Number(searchParams.get('limit') || 15)));
     if (!q || q.length < 2) {
         return new Response(JSON.stringify({ results: [] }), { headers: { 'content-type': 'application/json' } });
     }
     try {
-        // Provider 1: GeoDB Cities (free, comprehensive, clean admin names)
+        // Provider 1: Open‑Meteo Geocoding (GeoNames-backed, exhaustive, no API key)
+        try {
+            const omUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=${limit}&language=en&format=json`;
+            const omr = await fetch(omUrl, { headers: { 'Accept': 'application/json' } });
+            if (omr.ok) {
+                const om = (await omr.json()) as { results?: Array<any> };
+                const rows = om?.results ?? [];
+                const mapped = rows.map((it) => {
+                    const city = (it.name || '').toString();
+                    const admin1 = (it.admin1 || '').toString();
+                    const c2 = (it.country_code || '').toString();
+                    const feature = (it.feature_code || '').toString();
+                    // Only populated places (PPL*)
+                    if (!city || !c2 || !feature || !feature.startsWith('PPL')) return null;
+                    const countryShort = countryToAlpha3(c2);
+                    const stateToken = admin1 ? admin1 : undefined;
+                    const cleanCity = city.replace(/\s*\(.*?\)\s*/g, '').replace(/\s+-\s+.*/g, '').trim();
+                    const name = [cleanCity, stateToken, countryShort].filter(Boolean).join(', ');
+                    return { name, lat: Number(it.latitude), lng: Number(it.longitude), pop: Number(it.population) || 0 };
+                }).filter(Boolean) as Array<any>;
+                // Deduplicate by name, prefer higher population
+                const uniq = new Map<string, any>();
+                for (const m of mapped) {
+                    const k = m.name.toLowerCase();
+                    const prev = uniq.get(k);
+                    if (!prev || m.pop > prev.pop) uniq.set(k, m);
+                }
+                const results = Array.from(uniq.values()).slice(0, limit).map(({ pop, ...rest }) => rest);
+                if (results.length > 0) {
+                    return new Response(JSON.stringify({ results }), { headers: { 'content-type': 'application/json' } });
+                }
+            }
+        } catch {}
+
+        // Provider 2: GeoDB Cities (free)
         try {
             const gUrl = `https://geodb-free-service.wirefreethought.com/v1/geo/cities?namePrefix=${encodeURIComponent(q)}&limit=${limit}&sort=-population&hateoasMode=false&languageCode=en`;
             const gr = await fetch(gUrl, { headers: { 'Accept': 'application/json' } });
