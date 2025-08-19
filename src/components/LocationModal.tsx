@@ -294,12 +294,18 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     React.useEffect(() => {
         function onResize() {
             if (circleRef.current) {
-                try { circleRef.current.setRadius(getCircleRadiusPx()); } catch {}
+                try {
+                    if (radiusKm === 0) {
+                        circleRef.current.setRadius(100000 * 1000);
+                    } else {
+                        circleRef.current.setRadius(getCircleRadiusPx());
+                    }
+                } catch {}
             }
         }
         window.addEventListener('resize', onResize);
         return () => window.removeEventListener('resize', onResize);
-    }, []);
+    }, [radiusKm]);
 
     // National scope removed; radius is one of fixed values or Everywhere (0)
 

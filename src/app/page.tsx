@@ -109,6 +109,8 @@ export default function HomePage() {
       if (using) {
         setCenter((prev) => ({ ...prev, name: t('my_location', lang) }));
       }
+      const savedRadius = Number(localStorage.getItem('userRadiusKm') || '');
+      if (Number.isFinite(savedRadius)) setRadiusKm(savedRadius);
     } catch { }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);

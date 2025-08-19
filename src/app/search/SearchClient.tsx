@@ -79,6 +79,13 @@ export default function SearchClient() {
             }
         } catch { }
     }, []);
+    // Persisted radius on locale change (for Worldwide state)
+    useEffect(() => {
+        try {
+            const savedRadius = Number(localStorage.getItem('userRadiusKm') || '');
+            if (Number.isFinite(savedRadius)) setRadiusKm(savedRadius);
+        } catch {}
+    }, [lang]);
     useEffect(() => { setSelCategory(category); }, [category]);
     useEffect(() => { setSelAdType(adTypeParam); }, [adTypeParam]);
     useEffect(() => { setMinPrice(minPriceParam ?? ""); }, [minPriceParam]);
