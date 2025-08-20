@@ -1,19 +1,11 @@
 "use client";
 
-import React from "react";
+import { cn } from "@/lib/utils";
+import { useUnit } from "@/lib/settings";
 
-type Unit = "sats" | "BTC";
+export function UnitToggle() {
+  const { unit, setUnit } = useUnit();
 
-interface UnitToggleProps {
-  unit: Unit;
-  setUnit: (u: Unit) => void;
-}
-
-function cn(...xs: Array<string | false | null | undefined>) {
-  return xs.filter(Boolean).join(" ");
-}
-
-export function UnitToggle({ unit, setUnit }: UnitToggleProps) {
   return (
     <div className="relative inline-flex rounded-2xl bg-neutral-200/50 p-1 shadow-lg border border-neutral-300/50 backdrop-blur-sm">
       <div

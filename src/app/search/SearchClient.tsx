@@ -7,6 +7,7 @@ import type { Listing, AdType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
+import { useSettings } from "@/lib/settings";
 
 // Lightweight location catalog (sample). Replace/expand with a full open-source dataset.
 const LOCATIONS = [
@@ -18,22 +19,25 @@ const LOCATIONS = [
 export default function SearchClient() {
     const params = useSearchParams();
     const router = useRouter();
-    const [dark, setDark] = useState(true);
+
+    // Use centralized settings
+    const { theme, unit, layout } = useSettings();
+    const dark = theme === 'dark';
+
     const layoutParam = (params.get("layout") || "").trim();
     const initialLayout: "grid" | "list" = layoutParam === "list"
         ? "list"
         : layoutParam === "grid"
             ? "grid"
-            : (typeof window !== "undefined" && (localStorage.getItem("layoutPref") as "grid" | "list" | null)) || "grid";
-    const [layout, setLayout] = useState<"grid" | "list">(initialLayout);
-    const [unit, setUnit] = useState<"sats" | "BTC">("sats");
-    const [btcCad, setBtcCad] = useState<number | null>(null);
+            : layout;
+
     const [listings, setListings] = useState<Listing[]>([]);
     const [total, setTotal] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [initialLoaded, setInitialLoaded] = useState(false);
     const [active, setActive] = useState<Listing | null>(null);
+    const [btcCad, setBtcCad] = useState<number | null>(null);
     const isFetchingRef = useRef(false);
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
     const pageSize = 24;
@@ -68,25 +72,40 @@ export default function SearchClient() {
     const [showLocationModal, setShowLocationModal] = useState(false);
 
     useEffect(() => { setInputQuery(q); }, [q]);
+    // Initialize theme from document/localStorage
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem('theme');
+            if (saved === 'dark' || saved === 'light') {
+                document.documentElement.classList.toggle('dark', saved === 'dark');
+            } else {
+                const isDark = document.documentElement.classList.contains('dark');
+                document.documentElement.classList.toggle('dark', isDark);
+            }
+        } catch { }
+    }, []);
     // Listen to global header toggle events
     useEffect(() => {
         const onUnit = (e: Event) => {
             const d = (e as CustomEvent).detail as "sats" | "BTC" | undefined;
-            if (d === 'sats' || d === 'BTC') setUnit(d);
+            if (d === 'sats' || d === 'BTC') {
+                // This will be handled by useSettings
+            }
         };
         const onLayout = (e: Event) => {
             const d = (e as CustomEvent).detail as "grid" | "list" | undefined;
-            if (d === 'grid' || d === 'list') setLayout(d);
+            if (d === 'grid' || d === 'list') {
+                // This will be handled by useSettings
+            }
         };
         const onTheme = (e: Event) => {
             const d = (e as CustomEvent).detail as "dark" | "light" | undefined;
             try {
                 if (d) {
-                    document.documentElement.classList.toggle('dark', d === 'dark');
-                    const ev = new Event('resize');
-                    window.dispatchEvent(ev);
+                    const isDark = d === 'dark';
+                    document.documentElement.classList.toggle('dark', isDark);
                 }
-            } catch {}
+            } catch { }
         };
         window.addEventListener('bb:unit', onUnit as EventListener);
         window.addEventListener('bb:layout', onLayout as EventListener);
@@ -113,7 +132,7 @@ export default function SearchClient() {
         try {
             const savedRadius = Number(localStorage.getItem('userRadiusKm') || '');
             if (Number.isFinite(savedRadius)) setRadiusKm(savedRadius);
-        } catch {}
+        } catch { }
     }, [lang]);
     useEffect(() => { setSelCategory(category); }, [category]);
     useEffect(() => { setSelAdType(adTypeParam); }, [adTypeParam]);
@@ -147,16 +166,22 @@ export default function SearchClient() {
         } catch { }
     }, [lang]);
     useEffect(() => {
-        if (layoutParam) setLayout(layoutParam === "list" ? "list" : "grid");
+        if (layoutParam) {
+            // This will be handled by useSettings
+        }
     }, [layoutParam]);
 
     useEffect(() => {
-        fetch("/api/rate").then(r => r.json() as Promise<{ cad: number | null }>).then(d => setBtcCad(d.cad)).catch(() => { });
+        fetch("/api/rate").then(r => r.json() as Promise<{ cad: number | null }>).then(d => {
+            setBtcCad(d.cad);
+        }).catch(() => { });
     }, []);
 
     // Reflect layout to URL without touching data params
     useEffect(() => {
-        try { localStorage.setItem("layoutPref", layout); } catch { }
+        try {
+            // This will be handled by useSettings
+        } catch { }
         const sp = new URLSearchParams(window.location.search);
         if (layout) sp.set("layout", layout);
         const newUrl = `/${lang}/search?${sp.toString()}`;
@@ -234,7 +259,7 @@ export default function SearchClient() {
         sp.set("sortOrder", sb === 'distance' ? 'asc' : so);
         // Persist layout selection across filter applications
         sp.set("layout", layout);
-        const savedRadius = (() => { try { const v = localStorage.getItem('userRadiusKm'); if (v) return Number(v); } catch {} return null; })();
+        const savedRadius = (() => { try { const v = localStorage.getItem('userRadiusKm'); if (v) return Number(v); } catch { } return null; })();
         const effectiveRadius = Number.isFinite(radiusKm as any) ? radiusKm : (savedRadius ?? null);
         const { lat, lng } = resolveLatLng();
         if (lat && lng) { sp.set("lat", lat); sp.set("lng", lng); }
@@ -380,7 +405,7 @@ export default function SearchClient() {
     }
 
     return (
-        <div className={cn("min-h-screen", bg, dark ? "dark" : "")}> 
+        <div className={cn("min-h-screen", bg, dark ? "dark" : "")}>
             {/* Global header via layout */}
 
             <div className="mx-auto max-w-7xl px-4 py-8">

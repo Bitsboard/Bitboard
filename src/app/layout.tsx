@@ -6,8 +6,7 @@ import type { Metadata } from "next";
 import { getLang } from "@/lib/i18n";
 import { LocaleHydrator } from "./LocaleHydrator";
 import GlobalHeader from "./GlobalHeader";
-import ThemeHydrator from "./ThemeHydrator";
-import PrefsHydrator from "./PrefsHydrator";
+import { SettingsProvider } from "@/components/SettingsProvider";
 
 export const metadata: Metadata = {
   title: "bitsbarter - Local Classifieds in Bitcoin",
@@ -26,14 +25,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang={lang} suppressHydrationWarning>
       <body className="antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <LocaleHydrator />
-          <ThemeHydrator />
-          <PrefsHydrator />
-          {/* Global header (Nav is sticky itself) */}
-          <Suspense fallback={null}>
-            <GlobalHeader />
-          </Suspense>
-          {children}
+          <SettingsProvider>
+            <LocaleHydrator />
+            {/* Global header (Nav is sticky itself) */}
+            <Suspense fallback={null}>
+              <GlobalHeader />
+            </Suspense>
+            {children}
+          </SettingsProvider>
         </ThemeProvider>
         {/* Global footer minimal */}
         <footer className="border-t border-neutral-900 bg-neutral-950/60 mt-16">

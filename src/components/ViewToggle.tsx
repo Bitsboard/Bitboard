@@ -1,23 +1,14 @@
 "use client";
 
-import React from "react";
-import { t } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
+import { useLayout } from "@/lib/settings";
 import { useLang } from "@/lib/i18n-client";
+import { t } from "@/lib/i18n";
 
-type Layout = "grid" | "list";
-
-interface ViewToggleProps {
-  layout: Layout;
-  setLayout: (l: Layout) => void;
-  dark: boolean;
-}
-
-function cn(...xs: Array<string | false | null | undefined>) {
-  return xs.filter(Boolean).join(" ");
-}
-
-export function ViewToggle({ layout, setLayout, dark }: ViewToggleProps) {
+export function ViewToggle() {
+  const { layout, setLayout } = useLayout();
   const lang = useLang();
+
   return (
     <div className="relative inline-flex rounded-2xl bg-neutral-200/50 p-0.5 shadow-lg border border-neutral-300/50 backdrop-blur-sm">
       <div

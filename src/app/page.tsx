@@ -21,10 +21,14 @@ import type { Listing, User, Unit, Layout, AdType, Category, Place } from "@/lib
 import { useRouter } from "next/navigation";
 import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
+import { useSettings } from "@/lib/settings";
 
 export default function HomePage() {
+  // Use centralized settings
+  const { theme, unit, layout } = useSettings();
+  const dark = theme === 'dark';
+
   // State
-  const [dark, setDark] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const ENV = process.env.NEXT_PUBLIC_ENV;
   const isDeployed = ENV === "staging" || ENV === "production" || ENV === "main";
@@ -39,8 +43,6 @@ export default function HomePage() {
   const [radiusKm, setRadiusKm] = useState(25);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [adType, setAdType] = useState<AdType>("all");
-  const [layout, setLayout] = useState<Layout>("grid");
-  const [unit, setUnit] = useState<Unit>("sats");
   const [btcCad, setBtcCad] = useState<number | null>(null);
   const [total, setTotal] = useState<number>(0);
   const pageSize = 24;
@@ -114,33 +116,6 @@ export default function HomePage() {
     } catch { }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
-
-  // Listen to global header toggle events
-  useEffect(() => {
-    const onUnit = (e: Event) => { const d = (e as CustomEvent).detail as Unit; if (d) setUnit(d); };
-    const onLayout = (e: Event) => { const d = (e as CustomEvent).detail as Layout; if (d) setLayout(d); };
-    const onTheme = (e: Event) => {
-      const d = (e as CustomEvent).detail as 'dark' | 'light';
-      try {
-        document.documentElement.classList.toggle('dark', d === 'dark');
-        setDark(d === 'dark');
-        const ev = new Event('resize');
-        window.dispatchEvent(ev);
-      } catch { }
-    };
-    window.addEventListener('bb:unit', onUnit as EventListener);
-    window.addEventListener('bb:layout', onLayout as EventListener);
-    window.addEventListener('bb:theme', onTheme as EventListener);
-    // Initialize from localStorage on mount
-    try { const u = localStorage.getItem('priceUnit') as Unit | null; if (u === 'BTC' || u === 'sats') setUnit(u); } catch { }
-    try { const l = localStorage.getItem('layoutPref') as Layout | null; if (l === 'grid' || l === 'list') setLayout(l); } catch { }
-    try { const theme = localStorage.getItem('theme'); if (theme === 'dark' || theme === 'light') setDark(theme === 'dark'); } catch { }
-    return () => {
-      window.removeEventListener('bb:unit', onUnit as EventListener);
-      window.removeEventListener('bb:layout', onLayout as EventListener);
-      window.removeEventListener('bb:theme', onTheme as EventListener);
-    };
-  }, []);
 
   // Categories
   const categories: Category[] = [

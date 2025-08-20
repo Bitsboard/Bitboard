@@ -1,25 +1,18 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { UnitToggle } from "./UnitToggle";
-import { ThemeToggle } from "./ThemeToggle";
-import { ViewToggle } from "./ViewToggle";
-import { setLang, t } from "@/lib/i18n";
+import { UnitToggle, ThemeToggle, ViewToggle } from "@/components";
 import { useLang } from "@/lib/i18n-client";
+import { setLang, t } from "@/lib/i18n";
+import { useTheme } from "@/lib/settings";
 
 type User = { id: string; email: string; handle: string };
 
 interface NavProps {
   onPost: () => void;
-  onToggleTheme: () => void;
-  dark: boolean;
   user: User | null;
   onAuth: () => void;
-  unit: "sats" | "BTC";
-  setUnit: (unit: "sats" | "BTC") => void;
-  layout: "grid" | "list";
-  setLayout: (layout: "grid" | "list") => void;
   avatarUrl?: string;
 }
 
@@ -27,14 +20,16 @@ function cn(...xs: Array<string | false | null | undefined>) {
   return xs.filter(Boolean).join(" ");
 }
 
-export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, layout, setLayout, avatarUrl }: NavProps) {
+export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
+  const { theme } = useTheme();
+  const dark = theme === 'dark';
   const isStaging =
     process.env.NEXT_PUBLIC_BRANCH === "staging" ||
     process.env.NEXT_PUBLIC_ENV === "staging";
   const lang = useLang();
-  const [langOpen, setLangOpen] = React.useState(false);
+  const [langOpen, setLangOpen] = useState(false);
   const langRef = React.useRef<HTMLDivElement | null>(null);
-  const [menuOpen, setMenuOpen] = React.useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   React.useEffect(() => {
     const onDoc = (e: MouseEvent | TouchEvent) => {
       const target = e.target as Node | null;
@@ -55,7 +50,7 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
       // layoutPref is already persisted elsewhere; ensure theme/unit exist as well if available
       const theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
       localStorage.setItem('theme', theme);
-    } catch {}
+    } catch { }
     setLang(next);
     try {
       const { pathname, search, hash } = window.location;
@@ -66,33 +61,33 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
       const newPath = '/' + [next, ...parts].join('/');
       const url = newPath + (search || '') + (hash || '');
       window.location.assign(url);
-    } catch {}
+    } catch { }
   }
 
   const menuOverlay = (menuOpen && typeof window !== 'undefined')
     ? createPortal(
-        <div className="fixed inset-0 z-[9999]" onClick={() => setMenuOpen(false)}>
-          <div className="absolute right-4 top-16 w-80" onClick={(e) => e.stopPropagation()}>
-            <div className={cn("rounded-2xl border shadow-2xl overflow-hidden", dark ? "border-neutral-700/50 bg-neutral-900" : "border-neutral-300/50 bg-white")}> 
-              <div className="p-4 space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>{t('menu_display_prices_in', lang)}</span>
-                  <UnitToggle unit={unit} setUnit={setUnit} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>{t('menu_display_theme', lang)}</span>
-                  <ThemeToggle dark={dark} onToggle={onToggleTheme} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>{t('menu_layout_view', lang)}</span>
-                  <ViewToggle layout={layout} setLayout={setLayout} dark={dark} />
-                </div>
+      <div className="fixed inset-0 z-[9999]" onClick={() => setMenuOpen(false)}>
+        <div className="absolute right-4 top-16 w-80" onClick={(e) => e.stopPropagation()}>
+          <div className="rounded-2xl border shadow-2xl overflow-hidden border-neutral-300/50 bg-white dark:border-neutral-700/50 dark:bg-neutral-900">
+            <div className="p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200">{t('menu_display_prices_in', lang)}</span>
+                <UnitToggle />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200">{t('menu_display_theme', lang)}</span>
+                <ThemeToggle />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200">{t('menu_layout_view', lang)}</span>
+                <ViewToggle />
               </div>
             </div>
           </div>
-        </div>,
-        document.body
-      )
+        </div>
+      </div>,
+      document.body
+    )
     : null;
 
   return (
