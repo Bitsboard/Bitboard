@@ -1,0 +1,357 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useTheme } from "@/lib/settings";
+import { useLang } from "@/lib/i18n-client";
+import { t } from "@/lib/i18n";
+
+interface Notification {
+  id: string;
+  type: 'message' | 'update' | 'system';
+  title: string;
+  message: string;
+  timestamp: number;
+  read: boolean;
+  actionUrl?: string;
+}
+
+export default function NotificationsPage() {
+  const { theme } = useTheme();
+  const dark = theme === 'dark';
+  const lang = useLang();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [filter, setFilter] = useState<'all' | 'unread' | 'messages' | 'updates' | 'system'>('all');
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Mock notifications - in a real app, these would come from an API
+  useEffect(() => {
+    const mockNotifications: Notification[] = [
+      {
+        id: '1',
+        type: 'message',
+        title: 'New message from John',
+        message: 'Hi! I\'m interested in your Bitcoin listing. Is it still available? I can meet tomorrow if that works for you.',
+        timestamp: Date.now() - 1000 * 60 * 30, // 30 minutes ago
+        read: false,
+        actionUrl: '/chat'
+      },
+      {
+        id: '2',
+        type: 'update',
+        title: 'Escrow completed',
+        message: 'Your transaction with Sarah has been completed successfully. The Bitcoin has been released to your wallet.',
+        timestamp: Date.now() - 1000 * 60 * 60 * 2, // 2 hours ago
+        read: false,
+        actionUrl: '/profile'
+      },
+      {
+        id: '3',
+        type: 'system',
+        title: 'Welcome to bitsbarter!',
+        message: 'Your account has been verified. Start trading with Bitcoin today! We\'re excited to have you on board.',
+        timestamp: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
+        read: true
+      },
+      {
+        id: '4',
+        type: 'message',
+        title: 'Message from Alice',
+        message: 'Thanks for the quick response! I\'ll see you at the coffee shop at 2 PM.',
+        timestamp: Date.now() - 1000 * 60 * 60 * 6, // 6 hours ago
+        read: true,
+        actionUrl: '/chat'
+      },
+      {
+        id: '5',
+        type: 'update',
+        title: 'Listing expired',
+        message: 'Your listing "Bitcoin Mining Rig" has expired. You can renew it or create a new one.',
+        timestamp: Date.now() - 1000 * 60 * 60 * 24 * 2, // 2 days ago
+        read: true,
+        actionUrl: '/profile'
+      },
+      {
+        id: '6',
+        type: 'system',
+        title: 'Security update',
+        message: 'We\'ve enhanced our platform security. Your account is now protected with additional verification measures.',
+        timestamp: Date.now() - 1000 * 60 * 60 * 24 * 3, // 3 days ago
+        read: true
+      },
+      {
+        id: '7',
+        type: 'message',
+        title: 'Bob wants to trade',
+        message: 'I have a MacBook Pro that I\'d like to trade for Bitcoin. Are you interested?',
+        timestamp: Date.now() - 1000 * 60 * 60 * 24 * 4, // 4 days ago
+        read: true,
+        actionUrl: '/chat'
+      },
+      {
+        id: '8',
+        type: 'update',
+        title: 'Payment received',
+        message: 'You\'ve received 0.001 BTC from your recent sale. The funds are now in your wallet.',
+        timestamp: Date.now() - 1000 * 60 * 60 * 24 * 5, // 5 days ago
+        read: true,
+        actionUrl: '/profile'
+      }
+    ];
+    
+    setNotifications(mockNotifications);
+    setUnreadCount(mockNotifications.filter(n => !n.read).length);
+  }, []);
+
+  const filteredNotifications = notifications.filter(notification => {
+    if (filter === 'all') return true;
+    if (filter === 'unread') return !notification.read;
+    if (filter === 'messages') return notification.type === 'message';
+    if (filter === 'updates') return notification.type === 'update';
+    if (filter === 'system') return notification.type === 'system';
+    return true;
+  });
+
+  const markAsRead = (notificationId: string) => {
+    setNotifications(prev => 
+      prev.map(n => 
+        n.id === notificationId ? { ...n, read: true } : n
+      )
+    );
+    setUnreadCount(prev => Math.max(0, prev - 1));
+  };
+
+  const markAllAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setUnreadCount(0);
+  };
+
+  const deleteNotification = (notificationId: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== notificationId));
+    // Update unread count if the deleted notification was unread
+    const deletedNotification = notifications.find(n => n.id === notificationId);
+    if (deletedNotification && !deletedNotification.read) {
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    }
+  };
+
+  const getNotificationIcon = (type: Notification['type']) => {
+    switch (type) {
+      case 'message':
+        return (
+          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
+            <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          </div>
+        );
+      case 'update':
+        return (
+          <div className="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+            <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        );
+      case 'system':
+        return (
+          <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center">
+            <svg className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        );
+    }
+  };
+
+  const formatTimestamp = (timestamp: number) => {
+    const now = Date.now();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    return `${days}d ago`;
+  };
+
+  const getFilterCount = (filterType: string) => {
+    switch (filterType) {
+      case 'all': return notifications.length;
+      case 'unread': return notifications.filter(n => !n.read).length;
+      case 'messages': return notifications.filter(n => n.type === 'message').length;
+      case 'updates': return notifications.filter(n => n.type === 'update').length;
+      case 'system': return notifications.filter(n => n.type === 'system').length;
+      default: return 0;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white dark:bg-neutral-950">
+      <div className="mx-auto max-w-4xl px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">
+                Notifications
+              </h1>
+              <p className="text-neutral-600 dark:text-neutral-400">
+                Stay updated with your latest messages, updates, and system announcements
+              </p>
+            </div>
+            {unreadCount > 0 && (
+              <button
+                onClick={markAllAsRead}
+                className="px-4 py-2 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition-colors duration-200"
+              >
+                Mark all as read
+              </button>
+            )}
+          </div>
+
+          {/* Filter Tabs */}
+          <div className="flex flex-wrap gap-2 border-b border-neutral-200 dark:border-neutral-700">
+            {[
+              { key: 'all', label: 'All', count: getFilterCount('all') },
+              { key: 'unread', label: 'Unread', count: getFilterCount('unread') },
+              { key: 'messages', label: 'Messages', count: getFilterCount('messages') },
+              { key: 'updates', label: 'Updates', count: getFilterCount('updates') },
+              { key: 'system', label: 'System', count: getFilterCount('system') }
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setFilter(tab.key as any)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                  filter === tab.key
+                    ? 'bg-orange-600 text-white'
+                    : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                }`}
+              >
+                {tab.label}
+                <span className="ml-2 text-sm opacity-75">({tab.count})</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Notifications List */}
+        <div className="space-y-4">
+          {filteredNotifications.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="w-24 h-24 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-12 h-12 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">
+                No notifications found
+              </h3>
+              <p className="text-neutral-600 dark:text-neutral-400">
+                {filter === 'all' 
+                  ? 'You\'re all caught up! No notifications at the moment.'
+                  : `No ${filter} notifications found.`
+                }
+              </p>
+            </div>
+          ) : (
+            filteredNotifications.map((notification) => (
+              <div
+                key={notification.id}
+                className={`bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6 hover:shadow-md transition-all duration-200 ${
+                  !notification.read ? 'ring-2 ring-blue-500/20 bg-blue-50/50 dark:bg-blue-900/10' : ''
+                }`}
+              >
+                <div className="flex items-start gap-4">
+                  {getNotificationIcon(notification.type)}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className={`text-lg font-semibold ${
+                        !notification.read 
+                          ? 'text-neutral-900 dark:text-white' 
+                          : 'text-neutral-700 dark:text-neutral-300'
+                      }`}>
+                        {notification.title}
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        {!notification.read && (
+                          <button
+                            onClick={() => markAsRead(notification.id)}
+                            className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+                          >
+                            Mark as read
+                          </button>
+                        )}
+                        <button
+                          onClick={() => deleteNotification(notification.id)}
+                          className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-neutral-600 dark:text-neutral-400 mb-3 leading-relaxed">
+                      {notification.message}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-neutral-500 dark:text-neutral-500">
+                        {formatTimestamp(notification.timestamp)}
+                      </p>
+                      {notification.actionUrl && (
+                        <a
+                          href={notification.actionUrl}
+                          className="inline-flex items-center px-3 py-1 bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 text-sm font-medium rounded-lg hover:bg-orange-200 dark:hover:bg-orange-900/30 transition-colors duration-200"
+                        >
+                          View Details
+                          <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Summary Stats */}
+        {notifications.length > 0 && (
+          <div className="mt-12 bg-neutral-50 dark:bg-neutral-900 rounded-xl p-6">
+            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">
+              Notification Summary
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-neutral-900 dark:text-white">
+                  {notifications.length}
+                </div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400">Total</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {notifications.filter(n => n.type === 'message').length}
+                </div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400">Messages</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  {notifications.filter(n => n.type === 'update').length}
+                </div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400">Updates</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">
+                  {notifications.filter(n => n.type === 'system').length}
+                </div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400">System</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -137,7 +137,8 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
         aria-label="Notifications"
       >
         <svg className="w-6 h-6 text-neutral-600 dark:text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M9 11h.01M9 8h.01M9 5h.01M9 2h.01M12 2h.01M15 2h.01M18 2h.01M21 2h.01M21 5h.01M21 8h.01M21 11h.01M21 14h.01M21 17h.01M21 20h.01M18 20h.01M15 20h.01M12 20h.01M9 20h.01M6 20h.01M3 20h.01M3 17h.01M3 14h.01M3 11h.01M3 8h.01M3 5h.01M3 2h.01M6 2h.01" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.5 21a2.5 2.5 0 01-5 0" />
         </svg>
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
