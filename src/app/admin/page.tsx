@@ -91,7 +91,7 @@ function AdminClient() {
 
   return (
     <>
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <section className="rounded-2xl border border-neutral-800 p-4">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold">Users</h2>

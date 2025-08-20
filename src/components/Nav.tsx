@@ -137,8 +137,8 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
           )}
           {/* Settings Dropdown */}
           <div className="relative" ref={menuRef}>
-            <button onClick={() => setMenuOpen(v => !v)} className={cn("rounded-xl px-3 py-2 text-base font-bold shadow ring-1", dark ? "text-neutral-200 hover:bg-neutral-900 ring-neutral-800" : "text-neutral-800 hover:bg-neutral-100 ring-neutral-300")}>☰</button>
-            <div className={cn("absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl transition-all duration-200 z-[60] pointer-events-auto",
+            <button onMouseDown={(e) => e.stopPropagation()} onClick={() => setMenuOpen(v => !v)} aria-expanded={menuOpen} aria-haspopup="menu" className={cn("rounded-xl px-3 py-2 text-base font-bold shadow ring-1", dark ? "text-neutral-200 hover:bg-neutral-900 ring-neutral-800" : "text-neutral-800 hover:bg-neutral-100 ring-neutral-300")}>☰</button>
+            <div onMouseDown={(e) => e.stopPropagation()} className={cn("absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl transition-all duration-200 z-[9999] pointer-events-auto",
               menuOpen ? "opacity-100 visible" : "opacity-0 invisible",
               dark ? "border-neutral-700/50 bg-neutral-900" : "border-neutral-300/50 bg-white")}> 
               <div className="p-4 space-y-4">
