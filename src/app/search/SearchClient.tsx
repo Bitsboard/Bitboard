@@ -80,7 +80,13 @@ export default function SearchClient() {
         };
         const onTheme = (e: Event) => {
             const d = (e as CustomEvent).detail as "dark" | "light" | undefined;
-            try { if (d) document.documentElement.classList.toggle('dark', d === 'dark'); } catch {}
+            try {
+                if (d) {
+                    document.documentElement.classList.toggle('dark', d === 'dark');
+                    const ev = new Event('resize');
+                    window.dispatchEvent(ev);
+                }
+            } catch {}
         };
         window.addEventListener('bb:unit', onUnit as EventListener);
         window.addEventListener('bb:layout', onLayout as EventListener);

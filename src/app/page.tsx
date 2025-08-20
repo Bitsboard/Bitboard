@@ -119,7 +119,15 @@ export default function HomePage() {
   useEffect(() => {
     const onUnit = (e: Event) => { const d = (e as CustomEvent).detail as Unit; if (d) setUnit(d); };
     const onLayout = (e: Event) => { const d = (e as CustomEvent).detail as Layout; if (d) setLayout(d); };
-    const onTheme = (e: Event) => { const d = (e as CustomEvent).detail as 'dark' | 'light'; try { document.documentElement.classList.toggle('dark', d === 'dark'); setDark(d === 'dark'); } catch { } };
+    const onTheme = (e: Event) => {
+      const d = (e as CustomEvent).detail as 'dark' | 'light';
+      try {
+        document.documentElement.classList.toggle('dark', d === 'dark');
+        setDark(d === 'dark');
+        const ev = new Event('resize');
+        window.dispatchEvent(ev);
+      } catch { }
+    };
     window.addEventListener('bb:unit', onUnit as EventListener);
     window.addEventListener('bb:layout', onLayout as EventListener);
     window.addEventListener('bb:theme', onTheme as EventListener);

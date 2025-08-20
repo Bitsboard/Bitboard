@@ -7,6 +7,7 @@ import { getLang } from "@/lib/i18n";
 import { LocaleHydrator } from "./LocaleHydrator";
 import GlobalHeader from "./GlobalHeader";
 import ThemeHydrator from "./ThemeHydrator";
+import PrefsHydrator from "./PrefsHydrator";
 
 export const metadata: Metadata = {
   title: "bitsbarter - Local Classifieds in Bitcoin",
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <LocaleHydrator />
           <ThemeHydrator />
+          <PrefsHydrator />
           {/* Global header (Nav is sticky itself) */}
           <Suspense fallback={null}>
             <GlobalHeader />
