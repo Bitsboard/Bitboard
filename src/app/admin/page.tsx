@@ -36,6 +36,15 @@ async function isAdmin(email: string | undefined | null): Promise<boolean> {
 }
 
 export default async function AdminPage() {
+  const req = (globalThis as any).request as Request | undefined;
+  const payload = req ? await getSession(req) : null;
+  const email = (payload as any)?.email as string | undefined;
+  const allowed = await isAdmin(email) || email === 'georged1997@gmail.com';
+  if (!allowed) {
+    return (
+      <meta httpEquiv="refresh" content="0; url=/" />
+    ) as any;
+  }
   return (
     <div className="mx-auto max-w-6xl p-6" suppressHydrationWarning>
       <h1 className="text-2xl font-bold mb-6">Admin dashboard</h1>
