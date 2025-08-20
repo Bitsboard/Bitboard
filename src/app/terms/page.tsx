@@ -1,137 +1,198 @@
 "use client";
 
-import React from "react";
-import { cn } from "@/lib/utils";
-import { useLang } from "@/lib/i18n-client";
-import { useTheme } from "@/lib/settings";
+import { getLang } from '@/lib/i18n';
+import { t } from '@/lib/i18n';
 
 export default function TermsPage() {
-    const { theme } = useTheme();
-    const dark = theme === 'dark';
-    const lang = useLang();
-    const homeHref = `/${lang}`;
+  const lang = getLang();
 
-    const content: Record<string, any> = {
-        en: {
-            title: "Terms & Conditions",
-            sections: [
-                { h: "1. General Terms", p: "By using bitsbarter, you agree to keep all correspondence in-app for safety. Off-app contact may limit our ability to help in disputes." },
-                { h: "2. User Responsibilities", p: "Listings must comply with local laws. You are responsible for ensuring legality and authenticity of items and services." },
-                { h: "3. Escrow & Payments", p: "Escrow is provided via Lightning hold invoices. Funds are released only when both parties confirm, or a mediator decides in good faith based on in-app evidence." },
-                { h: "4. Prohibited Items", p: "Prohibited items include: weapons, illicit drugs, stolen goods, counterfeit items, recalled/unsafe goods, and anything illegal in your jurisdiction." },
-                { h: "5. Platform Role", p: "We are a venue: transactions are between users. bitsbarter is not a bank and does not custody fiat. Bitcoin price estimates are informational only." },
-                { h: "6. Enforcement", p: "Violations of these terms can result in deletion of content and/or account suspension." },
-                {
-                    h: "7. Safety Guidelines", list: [
-                        "Meet in a very public place: malls, cafés, or police e-commerce zones.",
-                        "Bring a friend or tell someone your meeting place and time.",
-                        "Keep all correspondence in-app; off-app contact is against our guidelines.",
-                        "Inspect items in person; test devices and verify serial numbers.",
-                        "Prefer Lightning escrow over cash; confirm release only when satisfied.",
-                        "Trust your instincts — if something feels off, walk away and report the listing.",
-                    ]
-                },
-                { h: "8. Contact", p: "For questions about these terms, please contact us through the app. Keep all correspondence in-app for safety and record-keeping." },
-            ]
-        },
-        fr: {
-            title: "Conditions générales",
-            sections: [
-                { h: "1. Conditions générales", p: "En utilisant bitsbarter, vous acceptez de conserver toute correspondance dans l’application pour votre sécurité. Le contact hors application peut limiter notre capacité à vous aider en cas de litige." },
-                { h: "2. Responsabilités de l’utilisateur", p: "Les annonces doivent respecter les lois locales. Vous êtes responsable de la légalité et de l’authenticité des biens et services proposés." },
-                { h: "3. Séquestre & paiements", p: "Le séquestre est assuré via des factures Lightning en attente. Les fonds sont libérés lorsque les deux parties confirment, ou lorsqu’un médiateur décide de bonne foi sur la base des preuves in‑app." },
-                { h: "4. Objets interdits", p: "Objets interdits : armes, drogues illicites, biens volés, contrefaçons, produits rappelés/dangereux, et tout élément illégal dans votre juridiction." },
-                { h: "5. Rôle de la plateforme", p: "Nous fournissons un lieu de mise en relation : les transactions ont lieu entre utilisateurs. bitsbarter n’est pas une banque et ne conserve pas de fiat. Les estimations de prix du Bitcoin sont uniquement informatives." },
-                { h: "6. Application", p: "Le non‑respect de ces conditions peut entraîner la suppression de contenu et/ou la suspension du compte." },
-                {
-                    h: "7. Conseils de sécurité", list: [
-                        "Rencontrez‑vous dans un lieu très public : centres commerciaux, cafés ou zones e‑commerce de la police.",
-                        "Venez accompagné ou informez un proche du lieu et de l’heure du rendez‑vous.",
-                        "Conservez toute la correspondance dans l’application ; le contact hors application est contraire à nos directives.",
-                        "Examinez les articles en personne ; testez les appareils et vérifiez les numéros de série.",
-                        "Privilégiez le séquestre Lightning plutôt que l’espèce ; confirmez la libération uniquement lorsque vous êtes satisfait.",
-                        "Fiez‑vous à votre instinct — si quelque chose vous paraît suspect, partez et signalez l’annonce.",
-                    ]
-                },
-                { h: "8. Contact", p: "Pour toute question concernant ces conditions, contactez‑nous via l’application. Conservez la correspondance dans l’application pour votre sécurité et la traçabilité." },
-            ]
-        },
-        es: {
-            title: "Términos y Condiciones",
-            sections: [
-                { h: "1. Términos generales", p: "Al usar bitsbarter, aceptas mantener toda la correspondencia dentro de la aplicación por seguridad. El contacto fuera de la app puede limitar nuestra capacidad para ayudar en disputas." },
-                { h: "2. Responsabilidades del usuario", p: "Los anuncios deben cumplir con las leyes locales. Eres responsable de la legalidad y autenticidad de los artículos y servicios." },
-                { h: "3. Depósito en garantía y pagos", p: "El escrow se realiza mediante facturas Lightning en espera. Los fondos se liberan cuando ambas partes confirman, o cuando un mediador decide de buena fe basándose en la evidencia de la app." },
-                { h: "4. Artículos prohibidos", p: "Artículos prohibidos: armas, drogas ilícitas, bienes robados, productos falsificados, artículos retirados/inseguros y cualquier cosa ilegal en tu jurisdicción." },
-                { h: "5. Rol de la plataforma", p: "Somos un punto de encuentro: las transacciones son entre usuarios. bitsbarter no es un banco y no custodia fiat. Las estimaciones del precio de Bitcoin son solo informativas." },
-                { h: "6. Aplicación", p: "Las infracciones de estos términos pueden dar lugar a la eliminación de contenido y/o la suspensión de la cuenta." },
-                {
-                    h: "7. Directrices de seguridad", list: [
-                        "Reúnete en un lugar muy público: centros comerciales, cafés o zonas e‑commerce de la policía.",
-                        "Ve con un acompañante o avisa a alguien del lugar y hora de tu cita.",
-                        "Mantén toda la correspondencia en la app; el contacto fuera de la app va en contra de nuestras directrices.",
-                        "Inspecciona los artículos en persona; prueba los dispositivos y verifica números de serie.",
-                        "Prefiere el escrow Lightning en lugar de efectivo; confirma la liberación solo cuando estés satisfecho.",
-                        "Confía en tu instinto: si algo no te cuadra, aléjate y reporta el anuncio.",
-                    ]
-                },
-                { h: "8. Contacto", p: "Para preguntas sobre estos términos, contáctanos desde la app. Mantén la correspondencia en la app por seguridad y registro." },
-            ]
-        },
-        de: {
-            title: "Allgemeine Geschäftsbedingungen",
-            sections: [
-                { h: "1. Allgemeine Bedingungen", p: "Durch die Nutzung von bitsbarter verpflichten Sie sich, die gesamte Korrespondenz aus Sicherheitsgründen in der App zu führen. Kontakt außerhalb der App kann unsere Unterstützung bei Streitfällen einschränken." },
-                { h: "2. Pflichten der Nutzer", p: "Anzeigen müssen den lokalen Gesetzen entsprechen. Sie sind für die Rechtmäßigkeit und Echtheit der angebotenen Waren und Dienstleistungen verantwortlich." },
-                { h: "3. Treuhand & Zahlungen", p: "Die Treuhand erfolgt über Lightning‑Hold‑Rechnungen. Gelder werden freigegeben, wenn beide Parteien bestätigen, oder wenn ein Vermittler nach Treu und Glauben auf Grundlage von In‑App‑Belegen entscheidet." },
-                { h: "4. Verbotene Artikel", p: "Verbotene Artikel sind u. a.: Waffen, illegale Drogen, Diebesgut, Fälschungen, zurückgerufene/unsichere Produkte und alles, was in Ihrer Jurisdiktion illegal ist." },
-                { h: "5. Rolle der Plattform", p: "Wir sind ein Marktplatz: Transaktionen erfolgen zwischen Nutzern. bitsbarter ist keine Bank und verwahrt kein Fiat. Bitcoin‑Preisschätzungen dienen nur zur Information." },
-                { h: "6. Durchsetzung", p: "Verstöße gegen diese Bedingungen können zur Löschung von Inhalten und/oder zur Sperrung des Kontos führen." },
-                {
-                    h: "7. Sicherheitshinweise", list: [
-                        "Treffen Sie sich an sehr öffentlichen Orten: Einkaufszentren, Cafés oder behördliche E‑Commerce‑Zonen.",
-                        "Kommen Sie mit Begleitung oder informieren Sie jemanden über Ort und Zeit.",
-                        "Führen Sie die gesamte Korrespondenz in der App; Kontakt außerhalb der App verstößt gegen unsere Richtlinien.",
-                        "Prüfen Sie Artikel vor Ort; testen Sie Geräte und verifizieren Sie Seriennummern.",
-                        "Bevorzugen Sie Lightning‑Treuhand statt Bargeld; bestätigen Sie die Freigabe erst bei Zufriedenheit.",
-                        "Vertrauen Sie Ihrem Gefühl — wirkt etwas unseriös, brechen Sie ab und melden Sie die Anzeige.",
-                    ]
-                },
-                { h: "8. Kontakt", p: "Bei Fragen zu diesen Bedingungen kontaktieren Sie uns bitte über die App. Führen Sie die Korrespondenz zu Ihrer Sicherheit und Nachvollziehbarkeit in der App." },
-            ]
-        }
-    };
-    const C = content[lang] || content.en;
-
-    return (
-        <div className={cn("min-h-screen", dark ? "bg-neutral-950 text-neutral-100" : "bg-neutral-50 text-neutral-900")}>
-            {/* Header via layout */}
-
-            <main className="mx-auto max-w-4xl px-4 py-12">
-                <div className="prose prose-lg max-w-none">
-                    <h1 className="text-4xl font-black mb-8">{C.title}</h1>
-
-                    <div className={cn("rounded-2xl border p-8", dark ? "border-neutral-800 bg-neutral-900" : "border-neutral-300 bg-white")}>
-                        <div className="space-y-6 text-base">
-                            {C.sections.map((s: any, i: number) => (
-                                <section key={i}>
-                                    <h2 className="text-2xl font-bold mb-4">{s.h}</h2>
-                                    {s.p && <p>{s.p}</p>}
-                                    {s.list && (
-                                        <ul className="list-disc pl-6 space-y-2">
-                                            {s.list.map((li: string, idx: number) => (
-                                                <li key={idx}>{li}</li>
-                                            ))}
-                                        </ul>
-                                    )}
-                                </section>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </main>
-
-            {/* Footer via layout */}
+  return (
+    <div className="min-h-screen bg-white dark:bg-neutral-950">
+      <div className="mx-auto max-w-4xl px-4 py-16">
+        <div className="text-center mb-16">
+          <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-4">
+            Terms and Conditions of Service
+          </h1>
+          <p className="text-lg text-neutral-600 dark:text-neutral-400">
+            Effective Date: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
         </div>
-    );
+
+        <div className="prose prose-lg dark:prose-invert max-w-none">
+          <div className="bg-neutral-50 dark:bg-neutral-900 rounded-lg p-8 mb-8">
+            <p className="text-sm text-neutral-600 dark:text-neutral-400">
+              <strong>IMPORTANT:</strong> Please read these Terms and Conditions of Service ("Terms") carefully before using the bitsbarter platform. By accessing or using our services, you agree to be bound by these Terms. If you do not agree to these Terms, you must not use our services.
+            </p>
+          </div>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">1. DEFINITIONS</h2>
+            <div className="space-y-3 text-neutral-700 dark:text-neutral-300">
+              <p><strong>"Platform"</strong> refers to the bitsbarter website, mobile applications, and related services operated by bitsbarter.</p>
+              <p><strong>"User"</strong> refers to any individual or entity that accesses or uses the Platform.</p>
+              <p><strong>"Service"</strong> refers to the local classifieds marketplace and Lightning Network escrow services provided through the Platform.</p>
+              <p><strong>"Content"</strong> refers to any information, data, text, images, or other materials posted, uploaded, or transmitted through the Platform.</p>
+              <p><strong>"Transaction"</strong> refers to any purchase, sale, or exchange facilitated through the Platform.</p>
+            </div>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">2. ACCEPTANCE OF TERMS</h2>
+            <div className="space-y-3 text-neutral-700 dark:text-neutral-300">
+              <p>2.1. By accessing or using the Platform, you acknowledge that you have read, understood, and agree to be bound by these Terms.</p>
+              <p>2.2. These Terms constitute a legally binding agreement between you and bitsbarter.</p>
+              <p>2.3. bitsbarter reserves the right to modify these Terms at any time. Continued use of the Platform after such modifications constitutes acceptance of the updated Terms.</p>
+              <p>2.4. You must be at least 18 years old to use the Platform. By using the Platform, you represent and warrant that you meet this age requirement.</p>
+            </div>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">3. DESCRIPTION OF SERVICES</h2>
+            <div className="space-y-3 text-neutral-700 dark:text-neutral-300">
+              <p>3.1. The Platform provides a local classifieds marketplace where users can buy, sell, and exchange goods and services using Bitcoin through the Lightning Network.</p>
+              <p>3.2. The Platform includes an integrated Lightning Network escrow service designed to facilitate secure transactions between buyers and sellers.</p>
+              <p>3.3. The Platform provides communication tools, including in-app messaging, to facilitate negotiations and coordination between users.</p>
+              <p>3.4. bitsbarter acts as an intermediary platform and is not a party to any transactions between users.</p>
+            </div>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">4. USER ACCOUNTS AND REGISTRATION</h2>
+            <div className="space-y-3 text-neutral-700 dark:text-neutral-300">
+              <p>4.1. To access certain features of the Platform, you must create an account and provide accurate, current, and complete information.</p>
+              <p>4.2. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.</p>
+              <p>4.3. You must immediately notify bitsbarter of any unauthorized use of your account or any other breach of security.</p>
+              <p>4.4. bitsbarter reserves the right to suspend or terminate your account at any time for violation of these Terms or for any other reason at our sole discretion.</p>
+            </div>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">5. USER CONDUCT AND PROHIBITED ACTIVITIES</h2>
+            <div className="space-y-3 text-neutral-700 dark:text-neutral-300">
+              <p>5.1. You agree to use the Platform only for lawful purposes and in accordance with these Terms.</p>
+              <p>5.2. You are strictly prohibited from:</p>
+              <ul className="list-disc pl-6 space-y-2 mt-2">
+                <li>Posting false, misleading, or fraudulent information</li>
+                <li>Engaging in any form of harassment, discrimination, or abusive behavior</li>
+                <li>Attempting to circumvent the Platform's security measures</li>
+                <li>Using the Platform for any illegal activities or to facilitate illegal transactions</li>
+                <li>Interfering with the proper functioning of the Platform</li>
+                <li>Attempting to gain unauthorized access to other users' accounts or information</li>
+                <li>Using the Platform to distribute malware, viruses, or other harmful code</li>
+              </ul>
+              <p>5.3. Violation of these provisions may result in immediate account termination and legal action.</p>
+            </div>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">6. LIGHTNING NETWORK ESCROW SERVICE</h2>
+            <div className="space-y-3 text-neutral-700 dark:text-neutral-300">
+              <p>6.1. The Lightning Network escrow service is designed to provide secure transactions by holding funds until both parties confirm completion.</p>
+              <p>6.2. Users acknowledge that Lightning Network transactions are irreversible and subject to the inherent risks of cryptocurrency transactions.</p>
+              <p>6.3. bitsbarter charges a fee for escrow services, which is clearly disclosed before each transaction.</p>
+              <p>6.4. In the event of disputes, bitsbarter may mediate based on evidence provided by both parties, but final resolution is the responsibility of the users.</p>
+              <p>6.5. Users acknowledge that Lightning Network transactions may be subject to network congestion and other technical limitations.</p>
+            </div>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">7. INTELLECTUAL PROPERTY RIGHTS</h2>
+            <div className="space-y-3 text-neutral-700 dark:text-neutral-300">
+              <p>7.1. The Platform and its original content, features, and functionality are owned by bitsbarter and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.</p>
+              <p>7.2. You retain ownership of any content you post on the Platform, but you grant bitsbarter a worldwide, non-exclusive, royalty-free license to use, reproduce, modify, and distribute such content.</p>
+              <p>7.3. You may not use bitsbarter's trademarks, service marks, or logos without prior written consent.</p>
+            </div>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">8. PRIVACY AND DATA PROTECTION</h2>
+            <div className="space-y-3 text-neutral-700 dark:text-neutral-300">
+              <p>8.1. Your privacy is important to us. Please review our Privacy Policy, which also governs your use of the Platform.</p>
+              <p>8.2. By using the Platform, you consent to the collection, use, and disclosure of your information as described in our Privacy Policy.</p>
+              <p>8.3. bitsbarter implements appropriate technical and organizational measures to protect your personal data.</p>
+            </div>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">9. DISCLAIMER OF WARRANTIES</h2>
+            <div className="space-y-3 text-neutral-700 dark:text-neutral-300">
+              <p>9.1. THE PLATFORM IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED.</p>
+              <p>9.2. bitsbarter disclaims all warranties, including but not limited to:</p>
+              <ul className="list-disc pl-6 space-y-2 mt-2">
+                <li>Warranties of merchantability and fitness for a particular purpose</li>
+                <li>Warranties that the Platform will be uninterrupted or error-free</li>
+                <li>Warranties regarding the accuracy, reliability, or completeness of any information</li>
+                <li>Warranties that defects will be corrected</li>
+              </ul>
+              <p>9.3. bitsbarter does not warrant that the Platform will meet your specific requirements or that the Platform will be secure or free from viruses or other harmful components.</p>
+            </div>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">10. LIMITATION OF LIABILITY</h2>
+            <div className="space-y-3 text-neutral-700 dark:text-neutral-300">
+              <p>10.1. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, bitsbarter SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES.</p>
+              <p>10.2. bitsbarter's total liability to you for any claims arising from or relating to these Terms or your use of the Platform shall not exceed the amount you paid to bitsbarter in the twelve (12) months preceding the claim.</p>
+              <p>10.3. The limitations of liability set forth in this section shall apply even if bitsbarter has been advised of the possibility of such damages.</p>
+            </div>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">11. INDEMNIFICATION</h2>
+            <div className="space-y-3 text-neutral-700 dark:text-neutral-300">
+              <p>11.1. You agree to indemnify, defend, and hold harmless bitsbarter and its officers, directors, employees, agents, and affiliates from and against any claims, damages, losses, costs, and expenses arising from:</p>
+              <ul className="list-disc pl-6 space-y-2 mt-2">
+                <li>Your use of the Platform</li>
+                <li>Your violation of these Terms</li>
+                <li>Your violation of any applicable laws or regulations</li>
+                <li>Your content posted on the Platform</li>
+              </ul>
+            </div>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">12. GOVERNING LAW AND JURISDICTION</h2>
+            <div className="space-y-3 text-neutral-700 dark:text-neutral-300">
+              <p>12.1. These Terms shall be governed by and construed in accordance with the laws of the Province of Ontario, Canada.</p>
+              <p>12.2. Any disputes arising from or relating to these Terms or your use of the Platform shall be subject to the exclusive jurisdiction of the courts of the Province of Ontario, Canada.</p>
+              <p>12.3. You agree to submit to the personal jurisdiction of such courts and waive any objections to venue or forum non conveniens.</p>
+            </div>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">13. SEVERABILITY</h2>
+            <div className="space-y-3 text-neutral-700 dark:text-neutral-300">
+              <p>13.1. If any provision of these Terms is found to be unenforceable or invalid, that provision will be limited or eliminated to the minimum extent necessary so that these Terms will otherwise remain in full force and effect.</p>
+              <p>13.2. The failure of bitsbarter to enforce any right or provision of these Terms will not be deemed a waiver of such right or provision.</p>
+            </div>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">14. ENTIRE AGREEMENT</h2>
+            <div className="space-y-3 text-neutral-700 dark:text-neutral-300">
+              <p>14.1. These Terms, together with our Privacy Policy and any other agreements referenced herein, constitute the entire agreement between you and bitsbarter regarding the Platform.</p>
+              <p>14.2. These Terms supersede all prior or contemporaneous communications, whether electronic, oral, or written, between you and bitsbarter.</p>
+            </div>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">15. CONTACT INFORMATION</h2>
+            <div className="space-y-3 text-neutral-700 dark:text-neutral-300">
+              <p>If you have any questions about these Terms, please contact us at:</p>
+              <div className="bg-neutral-50 dark:bg-neutral-900 rounded-lg p-4 mt-4">
+                <p><strong>Email:</strong> legal@bitsbarter.com</p>
+                <p><strong>Address:</strong> bitsbarter Legal Department, Toronto, Ontario, Canada</p>
+              </div>
+            </div>
+          </section>
+
+          <div className="bg-neutral-50 dark:bg-neutral-900 rounded-lg p-6 mt-8">
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 text-center">
+              <strong>Last Updated:</strong> {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
