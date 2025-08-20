@@ -1,5 +1,4 @@
 import "./../styles/globals.css";
-import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 import { Suspense } from "react";
 import type { Metadata } from "next";
@@ -24,16 +23,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang={lang} suppressHydrationWarning>
       <body className="antialiased">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <SettingsProvider>
-            <LocaleHydrator />
-            {/* Global header (Nav is sticky itself) */}
-            <Suspense fallback={null}>
-              <GlobalHeader />
-            </Suspense>
-            {children}
-          </SettingsProvider>
-        </ThemeProvider>
+        <SettingsProvider>
+          <LocaleHydrator />
+          {/* Global header (Nav is sticky itself) */}
+          <Suspense fallback={null}>
+            <GlobalHeader />
+          </Suspense>
+          {children}
+        </SettingsProvider>
         {/* Global footer minimal */}
         <footer className="border-t border-neutral-900 bg-neutral-950/60 mt-16">
           <div className="mx-auto max-w-7xl px-4 py-10 text-sm">

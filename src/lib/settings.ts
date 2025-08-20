@@ -55,7 +55,8 @@ function getInitialSettings(): UserSettings {
 export const useSettings = create<SettingsStore>()(
     persist(
         (set, get) => ({
-            ...getInitialSettings(),
+            // Start with defaults, don't call getInitialSettings during store creation
+            ...DEFAULT_SETTINGS,
 
             setTheme: (theme: Theme) => {
                 set({ theme });
@@ -114,15 +115,15 @@ export const useSettings = create<SettingsStore>()(
 
             applyTheme: () => {
                 if (typeof window === 'undefined') return;
-
+                
                 try {
                     const { theme } = get();
                     const isDark = theme === 'dark';
-
+                    
                     // Safely manipulate DOM
                     if (document && document.documentElement) {
                         document.documentElement.classList.toggle('dark', isDark);
-
+                        
                         // Trigger resize event for any components that depend on it
                         window.dispatchEvent(new Event('resize'));
                     }
