@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   Nav,
-  SafetyTipsSection,
   UnitToggle,
   TypeToggle,
   ListingCard,
@@ -464,9 +463,6 @@ export default function HomePage() {
         </section>
 
         {/* Services Section removed per request */}
-
-        {/* Safety Tips */}
-        <SafetyTipsSection dark={dark} />
       </main>
 
       {/* Global footer is rendered via layout */}

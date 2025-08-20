@@ -4,36 +4,7 @@ import { t } from '@/lib/i18n';
 export default function CareersPage() {
   const lang = getLang();
 
-  const openPositions = [
-    {
-      title: "Senior Full-Stack Developer",
-      type: "Full-time",
-      location: "Remote (Canada)",
-      department: "Engineering",
-      description: "Join our core team building the future of Bitcoin commerce. We're looking for experienced developers who are passionate about Bitcoin, Lightning Network, and creating secure, scalable applications."
-    },
-    {
-      title: "Bitcoin/Lightning Network Specialist",
-      type: "Full-time",
-      location: "Remote (Canada)",
-      department: "Engineering",
-      description: "Deep expertise in Bitcoin and Lightning Network protocols. Help us build the most secure and efficient escrow system in the Bitcoin ecosystem."
-    },
-    {
-      title: "Product Manager",
-      type: "Full-time",
-      location: "Remote (Canada)",
-      department: "Product",
-      description: "Lead product strategy and development for our Bitcoin marketplace. Experience with fintech, marketplaces, or Bitcoin products preferred."
-    },
-    {
-      title: "Community Manager",
-      type: "Full-time",
-      location: "Remote (Canada)",
-      department: "Marketing",
-      description: "Build and nurture our Bitcoin community. Experience with Bitcoin communities, social media, and event organization required."
-    }
-  ];
+  // Currently no open positions, but we're always looking for talent
 
   const benefits = [
     {
@@ -83,47 +54,51 @@ export default function CareersPage() {
           </p>
         </div>
 
-        {/* Open Positions */}
+                {/* Open Positions */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-neutral-900 dark:text-white mb-8 text-center">
-            Open Positions
+            Join Our Team
           </h2>
           
-          <div className="space-y-6">
-            {openPositions.map((position, index) => (
-              <div
-                key={index}
-                className="bg-neutral-50 dark:bg-neutral-900 rounded-lg p-6 border border-neutral-200 dark:border-neutral-800"
-              >
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                  <div>
-                    <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">
-                      {position.title}
-                    </h3>
-                    <div className="flex flex-wrap gap-4 text-sm text-neutral-600 dark:text-neutral-400">
-                      <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                        {position.type}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                        {position.location}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                        {position.department}
-                      </span>
-                    </div>
-                  </div>
-                  <button className="mt-4 md:mt-0 px-6 py-2 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition-colors duration-200">
-                    Apply Now
-                  </button>
-                </div>
-                <p className="text-neutral-700 dark:text-neutral-300">
-                  {position.description}
-                </p>
+          <div className="bg-neutral-50 dark:bg-neutral-900 rounded-lg p-12 border border-neutral-200 dark:border-neutral-800 text-center">
+            <div className="text-6xl mb-6">🚀</div>
+            <h3 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">
+              No Current Open Positions
+            </h3>
+            <p className="text-lg text-neutral-700 dark:text-neutral-300 mb-6 max-w-2xl mx-auto">
+              While we don't have any specific roles open at the moment, we're always looking for forward-thinking talent 
+              who are passionate about Bitcoin and building the future of decentralized commerce.
+            </p>
+            <p className="text-neutral-600 dark:text-neutral-400 mb-8">
+              If you believe you could contribute to our mission, we encourage you to send us your resume. 
+              We're particularly interested in individuals with experience in:
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto mb-8">
+              <div className="text-left">
+                <ul className="space-y-2 text-neutral-700 dark:text-neutral-300">
+                  <li>• Bitcoin & Lightning Network</li>
+                  <li>• Full-stack development</li>
+                  <li>• Product management</li>
+                  <li>• Community building</li>
+                </ul>
               </div>
-            ))}
+              <div className="text-left">
+                <ul className="space-y-2 text-neutral-700 dark:text-neutral-300">
+                  <li>• Fintech & marketplaces</li>
+                  <li>• Security & cryptography</li>
+                  <li>• UX/UI design</li>
+                  <li>• Marketing & growth</li>
+                </ul>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a
+                href="mailto:careers@bitsbarter.com"
+                className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-orange-600 hover:bg-orange-700 transition-colors duration-200"
+              >
+                Send Your Resume
+              </a>
+            </div>
           </div>
         </div>
 

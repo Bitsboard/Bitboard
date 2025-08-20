@@ -11,7 +11,7 @@ export default function Footer() {
         legal: [
             { key: 'privacy', href: `/${lang}/privacy` },
             { key: 'terms', href: `/${lang}/terms` },
-            { key: 'safety', href: `/${lang}/safety` },
+            { key: 'Safety', href: `/${lang}/safety` },
         ],
         services: [
             { key: 'escrow', href: `/${lang}/escrow` },
