@@ -36,13 +36,18 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
   const [menuOpen, setMenuOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement | null>(null);
   React.useEffect(() => {
-    function onDoc(e: MouseEvent) {
-      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false);
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
-    }
-    document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
-  }, []);
+    const onDoc = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node | null;
+      if (langOpen && langRef.current && target && !langRef.current.contains(target)) setLangOpen(false);
+      if (menuOpen && menuRef.current && target && !menuRef.current.contains(target)) setMenuOpen(false);
+    };
+    document.addEventListener('click', onDoc, true);
+    document.addEventListener('touchstart', onDoc, true);
+    return () => {
+      document.removeEventListener('click', onDoc, true);
+      document.removeEventListener('touchstart', onDoc, true);
+    };
+  }, [langOpen, menuOpen]);
 
   function navigateToLocale(next: 'en' | 'fr' | 'es' | 'de') {
     // Persist current UI prefs before navigation
@@ -138,8 +143,8 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
           {/* Settings Dropdown */}
           <div className="relative" ref={menuRef}>
             <button onMouseDown={(e) => e.stopPropagation()} onClick={() => setMenuOpen(v => !v)} aria-expanded={menuOpen} aria-haspopup="menu" className={cn("rounded-xl px-3 py-2 text-base font-bold shadow ring-1", dark ? "text-neutral-200 hover:bg-neutral-900 ring-neutral-800" : "text-neutral-800 hover:bg-neutral-100 ring-neutral-300")}>☰</button>
-            <div onMouseDown={(e) => e.stopPropagation()} className={cn("absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl transition-all duration-200 z-[9999] pointer-events-auto",
-              menuOpen ? "opacity-100 visible" : "opacity-0 invisible",
+            <div onMouseDown={(e) => e.stopPropagation()} className={cn("absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl transition-opacity duration-200 z-[9999]",
+              menuOpen ? "opacity-100 block" : "opacity-0 hidden",
               dark ? "border-neutral-700/50 bg-neutral-900" : "border-neutral-300/50 bg-white")}> 
               <div className="p-4 space-y-4">
                 <div className="flex items-center justify-between">
