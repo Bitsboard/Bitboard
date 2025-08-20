@@ -130,10 +130,10 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
             </button>
             {langOpen && (
               <div className={cn("absolute right-0 mt-2 w-44 rounded-xl border shadow-2xl z-50", dark ? "border-neutral-700/50 bg-neutral-900/95" : "border-neutral-300/50 bg-white/95")}>
-                <button onClick={() => { navigateToLocale('en'); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇺🇸 English</button>
-                <button onClick={() => { navigateToLocale('fr'); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇫🇷 Français</button>
-                <button onClick={() => { navigateToLocale('es'); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇪🇸 Español</button>
-                <button onClick={() => { navigateToLocale('de'); setLangOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800/40">🇩🇪 Deutsch</button>
+                <button onClick={() => { navigateToLocale('en'); setLangOpen(false); }} className={cn("w-full text-left px-3 py-2 text-sm", dark ? "text-white hover:bg-neutral-800/40" : "text-neutral-900 hover:bg-neutral-100")}>🇺🇸 English</button>
+                <button onClick={() => { navigateToLocale('fr'); setLangOpen(false); }} className={cn("w-full text-left px-3 py-2 text-sm", dark ? "text-white hover:bg-neutral-800/40" : "text-neutral-900 hover:bg-neutral-100")}>🇫🇷 Français</button>
+                <button onClick={() => { navigateToLocale('es'); setLangOpen(false); }} className={cn("w-full text-left px-3 py-2 text-sm", dark ? "text-white hover:bg-neutral-800/40" : "text-neutral-900 hover:bg-neutral-100")}>🇪🇸 Español</button>
+                <button onClick={() => { navigateToLocale('de'); setLangOpen(false); }} className={cn("w-full text-left px-3 py-2 text-sm", dark ? "text-white hover:bg-neutral-800/40" : "text-neutral-900 hover:bg-neutral-100")}>🇩🇪 Deutsch</button>
               </div>
             )}
           </div>

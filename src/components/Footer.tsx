@@ -27,17 +27,16 @@ export default function Footer() {
     return (
         <footer className="border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950">
             <div className="mx-auto max-w-7xl px-4 py-12">
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Brand section - matches header styling */}
-                    <div className="lg:col-span-2">
+                    <div>
                         <div className="flex items-center gap-2 mb-4">
-                            <img src="/Bitsbarterlogo.svg" alt="Bitsbarter" className="h-8 w-8" />
                             <span className="text-2xl tracking-tight leading-none">
                                 <span className="font-bold text-orange-500">bits</span>
                                 <span className="font-bold text-neutral-900 dark:text-white">barter</span>
                             </span>
                         </div>
-                        <p className="text-lg text-neutral-600 dark:text-neutral-400 mb-4">
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">
                             The Bitcoin-native Marketplace.
                         </p>
                         <div className="space-y-2 text-sm text-neutral-500 dark:text-neutral-400">

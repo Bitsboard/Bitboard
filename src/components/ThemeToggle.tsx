@@ -17,28 +17,28 @@ export function ThemeToggle() {
                 style={{ width: 'calc(50% - 4px)' }}
             />
             <button
-                onClick={() => !dark && toggleTheme()}
-                className={cn(
-                    "relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105",
-                    !dark
-                        ? "text-yellow-500 font-extrabold"
-                        : "text-neutral-600 hover:text-neutral-800"
-                )}
-                title="Switch to dark mode"
-            >
-                ☀️
-            </button>
-            <button
                 onClick={() => dark && toggleTheme()}
                 className={cn(
                     "relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105",
-                    dark
-                        ? "text-blue-400 font-extrabold"
+                    !dark
+                        ? "text-blue-600 font-extrabold"
                         : "text-neutral-200 hover:text-neutral-50"
+                )}
+                title="Switch to dark mode"
+            >
+                🌙
+            </button>
+            <button
+                onClick={() => !dark && toggleTheme()}
+                className={cn(
+                    "relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105",
+                    dark
+                        ? "text-yellow-400 font-extrabold"
+                        : "text-neutral-600 hover:text-neutral-800"
                 )}
                 title="Switch to light mode"
             >
-                🌙
+                ☀️
             </button>
         </div>
     );
