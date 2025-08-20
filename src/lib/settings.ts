@@ -33,21 +33,23 @@ const DEFAULT_SETTINGS: UserSettings = {
 
 // Helper to safely get initial values from localStorage
 function getInitialSettings(): UserSettings {
-    if (typeof window === 'undefined') return DEFAULT_SETTINGS;
-
-    try {
-        const theme = localStorage.getItem('theme') as Theme;
-        const unit = localStorage.getItem('priceUnit') as Unit;
-        const layout = localStorage.getItem('layoutPref') as Layout;
-
-        return {
-            theme: (theme === 'light' || theme === 'dark') ? theme : DEFAULT_SETTINGS.theme,
-            unit: (unit === 'sats' || unit === 'BTC') ? unit : DEFAULT_SETTINGS.unit,
-            layout: (layout === 'grid' || layout === 'list') ? layout : DEFAULT_SETTINGS.layout,
-        };
-    } catch {
-        return DEFAULT_SETTINGS;
-    }
+  if (typeof window === 'undefined') return DEFAULT_SETTINGS;
+  
+  try {
+    const theme = localStorage.getItem('theme') as Theme;
+    const unit = localStorage.getItem('priceUnit') as Unit;
+    const layout = localStorage.getItem('layoutPref') as Layout;
+    
+    // Validate and return settings, fall back to defaults if invalid
+    return {
+      theme: (theme === 'light' || theme === 'dark') ? theme : DEFAULT_SETTINGS.theme,
+      unit: (unit === 'sats' || unit === 'BTC') ? unit : DEFAULT_SETTINGS.unit,
+      layout: (layout === 'grid' || layout === 'list') ? layout : DEFAULT_SETTINGS.layout,
+    };
+  } catch (error) {
+    console.warn('Failed to read settings from localStorage:', error);
+    return DEFAULT_SETTINGS;
+  }
 }
 
 export const useSettings = create<SettingsStore>()(
@@ -96,9 +98,18 @@ export const useSettings = create<SettingsStore>()(
             },
 
             initialize: () => {
-                const settings = getInitialSettings();
-                set(settings);
-                get().applyTheme();
+                try {
+                    const settings = getInitialSettings();
+                    set(settings);
+                    // Only apply theme in browser environment
+                    if (typeof window !== 'undefined') {
+                        get().applyTheme();
+                    }
+                } catch (error) {
+                    console.warn('Settings initialization failed:', error);
+                    // Fall back to defaults if initialization fails
+                    set(DEFAULT_SETTINGS);
+                }
             },
 
             applyTheme: () => {
@@ -107,11 +118,18 @@ export const useSettings = create<SettingsStore>()(
                 try {
                     const { theme } = get();
                     const isDark = theme === 'dark';
-                    document.documentElement.classList.toggle('dark', isDark);
 
-                    // Trigger resize event for any components that depend on it
-                    window.dispatchEvent(new Event('resize'));
-                } catch { }
+                    // Safely manipulate DOM
+                    if (document && document.documentElement) {
+                        document.documentElement.classList.toggle('dark', isDark);
+
+                        // Trigger resize event for any components that depend on it
+                        window.dispatchEvent(new Event('resize'));
+                    }
+                } catch (error) {
+                    console.warn('Theme application failed:', error);
+                    // Don't crash if theme application fails
+                }
             },
         }),
         {
@@ -125,7 +143,5 @@ export const useTheme = () => useSettings((state) => ({ theme: state.theme, setT
 export const useUnit = () => useSettings((state) => ({ unit: state.unit, setUnit: state.setUnit }));
 export const useLayout = () => useSettings((state) => ({ layout: state.layout, setLayout: state.setLayout }));
 
-// Initialize settings on import
-if (typeof window !== 'undefined') {
-    useSettings.getState().initialize();
-}
+// Don't auto-initialize on import - let the SettingsProvider handle it
+// This prevents issues in SSR and edge runtime environments
