@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import UsernamePicker from "./UsernamePicker";
 
 type Session = {
-  user?: { name?: string; email?: string; image?: string };
+  user?: { username?: string | null; image?: string | null };
   account?: {
     sso: string;
     email: string;
@@ -55,8 +55,8 @@ export default function ProfilePage() {
               <img src={session.user.image} alt="avatar" className="h-12 w-12 rounded-full" />
             )}
             <div>
-              <p className="font-medium">{session.user?.name ?? session.user?.email}</p>
-              <p className="text-sm text-neutral-500">{session.user?.email}</p>
+              <p className="font-medium">{session.account?.username ?? 'New user'}</p>
+              <p className="text-sm text-neutral-500">User since {session.account ? new Date(session.account.registeredAt * 1000).toLocaleString(undefined, { month: 'long', year: 'numeric' }) : ''}</p>
             </div>
           </div>
           {/* Onboarding: pick username if missing */}
@@ -67,8 +67,8 @@ export default function ProfilePage() {
             <div className="rounded-2xl border border-neutral-800 p-4">
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <div className="text-neutral-400">SSO</div>
-                  <div className="font-medium capitalize">{session.account.sso}</div>
+                  <div className="text-neutral-400">Username</div>
+                  <div className="font-medium">{session.account.username ?? '-'}</div>
                 </div>
                 <div>
                   <div className="text-neutral-400">Verified</div>
@@ -76,7 +76,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <div className="text-neutral-400">Registered</div>
-                  <div>{new Date(session.account.registeredAt * 1000).toLocaleString()}</div>
+                  <div>{new Date(session.account.registeredAt * 1000).toLocaleString(undefined, { month: 'long', year: 'numeric' })}</div>
                 </div>
               </div>
             </div>

@@ -38,13 +38,10 @@ export async function GET(req: Request) {
 
     const session = {
       user: {
-        name: userRow?.username ?? payload.name,
-        email: payload.email,
-        image: userRow?.image ?? payload.picture,
+        username: userRow?.username ?? null,
+        image: userRow?.image ?? payload.picture ?? null,
       },
       account: userRow ? {
-        sso: userRow.sso,
-        email: userRow.email,
         username: userRow.username,
         verified: Boolean(userRow.verified),
         registeredAt: userRow.createdAt,
