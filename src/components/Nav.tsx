@@ -68,8 +68,8 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
   return (
     <nav
       className={cn(
-        "sticky top-0 z-40 backdrop-blur relative",
-        dark ? "border-b border-neutral-900 bg-neutral-950/80" : "border-b border-neutral-200 bg-white/80"
+        "sticky top-0 z-50 relative",
+        dark ? "border-b border-neutral-900 bg-neutral-950" : "border-b border-neutral-200 bg-white"
       )}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
@@ -138,9 +138,9 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
           {/* Settings Dropdown */}
           <div className="relative" ref={menuRef}>
             <button onClick={() => setMenuOpen(v => !v)} className={cn("rounded-xl px-3 py-2 text-base font-bold shadow ring-1", dark ? "text-neutral-200 hover:bg-neutral-900 ring-neutral-800" : "text-neutral-800 hover:bg-neutral-100 ring-neutral-300")}>☰</button>
-            <div className={cn("absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl backdrop-blur-sm transition-all duration-200 z-50",
+            <div className={cn("absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl transition-all duration-200 z-[60] pointer-events-auto",
               menuOpen ? "opacity-100 visible" : "opacity-0 invisible",
-              dark ? "border-neutral-700/50 bg-neutral-900/90" : "border-neutral-300/50 bg-white/95")}> 
+              dark ? "border-neutral-700/50 bg-neutral-900" : "border-neutral-300/50 bg-white")}> 
               <div className="p-4 space-y-4">
                 <div className="flex items-center justify-between">
                   <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>{t('menu_display_prices_in', lang)}</span>

@@ -25,12 +25,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <LocaleHydrator />
-          {/* Global header */}
-          <div className="sticky top-0 z-40">
-            <Suspense fallback={null}>
-              <GlobalHeader />
-            </Suspense>
-          </div>
+          {/* Global header (Nav is sticky itself) */}
+          <Suspense fallback={null}>
+            <GlobalHeader />
+          </Suspense>
           {children}
         </ThemeProvider>
         {/* Global footer minimal */}
