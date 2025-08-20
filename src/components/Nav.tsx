@@ -33,9 +33,12 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
   const lang = useLang();
   const [langOpen, setLangOpen] = React.useState(false);
   const langRef = React.useRef<HTMLDivElement | null>(null);
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const menuRef = React.useRef<HTMLDivElement | null>(null);
   React.useEffect(() => {
     function onDoc(e: MouseEvent) {
       if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false);
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
     }
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
@@ -113,7 +116,7 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
           {user && (
             <button
               onClick={onPost}
-              className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow shadow-orange-500/30 transition hover:bg-orange-400"
+              className="rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-sm font-semibold text-white shadow shadow-orange-500/30 transition hover:from-orange-400 hover:to-red-400"
             >
               {t('post_listing', lang)}
             </button>
@@ -133,9 +136,11 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
             </button>
           )}
           {/* Settings Dropdown */}
-          <div className="relative group">
-            <button className={cn("rounded-xl px-3 py-2 text-base font-bold shadow ring-1", dark ? "text-neutral-200 hover:bg-neutral-900 ring-neutral-800" : "text-neutral-800 hover:bg-neutral-100 ring-neutral-300")}>☰</button>
-            <div className={cn("absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl backdrop-blur-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200", dark ? "border-neutral-700/50 bg-neutral-900/90" : "border-neutral-300/50 bg-white/95")}>
+          <div className="relative" ref={menuRef}>
+            <button onClick={() => setMenuOpen(v => !v)} className={cn("rounded-xl px-3 py-2 text-base font-bold shadow ring-1", dark ? "text-neutral-200 hover:bg-neutral-900 ring-neutral-800" : "text-neutral-800 hover:bg-neutral-100 ring-neutral-300")}>☰</button>
+            <div className={cn("absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl backdrop-blur-sm transition-all duration-200 z-50",
+              menuOpen ? "opacity-100 visible" : "opacity-0 invisible",
+              dark ? "border-neutral-700/50 bg-neutral-900/90" : "border-neutral-300/50 bg-white/95")}> 
               <div className="p-4 space-y-4">
                 <div className="flex items-center justify-between">
                   <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>{t('menu_display_prices_in', lang)}</span>
