@@ -135,6 +135,36 @@ export const useSettings = create<SettingsStore>()(
         }),
         {
             name: 'bitsbarter-settings',
+            // Custom storage to handle SSR properly
+            storage: {
+                getItem: (name: string) => {
+                    if (typeof window === 'undefined') return null;
+                    try {
+                        const value = localStorage.getItem(name);
+                        return value ? JSON.parse(value) : null;
+                    } catch {
+                        return null;
+                    }
+                },
+                setItem: (name: string, value: any) => {
+                    if (typeof window === 'undefined') return;
+                    try {
+                        localStorage.setItem(name, JSON.stringify(value));
+                    } catch {
+                        // Ignore errors
+                    }
+                },
+                removeItem: (name: string) => {
+                    if (typeof window === 'undefined') return;
+                    try {
+                        localStorage.removeItem(name);
+                    } catch {
+                        // Ignore errors
+                    }
+                },
+            },
+            // Skip hydration during SSR
+            skipHydration: true,
         }
     )
 );
