@@ -203,6 +203,35 @@ export async function POST(req: Request) {
   }
   const db = mod.getRequestContext().env.DB as D1Database;
   try {
+    // Attach current user if signed in
+    let currentUserId: string | null = null;
+    try {
+      const cookieHeader = req.headers.get('cookie') || '';
+      const token = /(?:^|; )session=([^;]+)/.exec(cookieHeader)?.[1] || '';
+      if (token) {
+        const { getAuthSecret, verifyJwtHS256 } = await import('@/lib/auth');
+        const payload = await verifyJwtHS256(token, getAuthSecret());
+        const email = (payload as any)?.email || '';
+        if (email) {
+          await db.prepare(`CREATE TABLE IF NOT EXISTS users (
+            id TEXT PRIMARY KEY,
+            email TEXT UNIQUE,
+            username TEXT UNIQUE,
+            sso TEXT,
+            verified INTEGER DEFAULT 0,
+            is_admin INTEGER DEFAULT 0,
+            banned INTEGER DEFAULT 0,
+            created_at INTEGER NOT NULL,
+            image TEXT
+          )`).run();
+          const u = await db.prepare('SELECT id FROM users WHERE email = ?').bind(email).all();
+          currentUserId = (u.results?.[0] as any)?.id ?? null;
+        }
+      }
+    } catch {}
+
+    // Ensure extended columns exist for association
+    try { await db.prepare('ALTER TABLE listings ADD COLUMN posted_by TEXT').run(); } catch {}
     const body = (await req.json()) as {
       title?: unknown;
       description?: unknown;
@@ -230,7 +259,7 @@ export async function POST(req: Request) {
     const lat = Number(body?.lat ?? 0);
     const lng = Number(body?.lng ?? 0);
     const imageUrl = (body?.image_url ?? body?.imageUrl ?? "").toString();
-    const postedBy = (body?.posted_by ?? body?.postedBy ?? "").toString();
+    const postedBy = (body?.posted_by ?? body?.postedBy ?? "").toString() || currentUserId || "";
     const boostedUntil = body?.boosted_until ?? body?.boostedUntil;
 
     if (!title || !Number.isFinite(priceSat) || priceSat < 0) {

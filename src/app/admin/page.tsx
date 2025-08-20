@@ -52,12 +52,14 @@ function AdminClient() {
   const [lTotal, setLTotal] = React.useState(0);
   const [uPage, setUPage] = React.useState(0);
   const [lPage, setLPage] = React.useState(0);
+  const [uQuery, setUQuery] = React.useState('');
+  const [lQuery, setLQuery] = React.useState('');
   const limit = 20;
 
   async function load() {
     const [ur, lr] = await Promise.all([
-      fetch(`/api/admin/users/list?limit=${limit}&offset=${uPage * limit}`),
-      fetch(`/api/admin/listings/list?limit=${limit}&offset=${lPage * limit}`),
+      fetch(`/api/admin/users/list?limit=${limit}&offset=${uPage * limit}` + (uQuery ? `&q=${encodeURIComponent(uQuery)}` : '')),
+      fetch(`/api/admin/listings/list?limit=${limit}&offset=${lPage * limit}` + (lQuery ? `&q=${encodeURIComponent(lQuery)}` : '')),
     ]);
     if (ur.ok) {
       const j = (await ur.json()) as { users?: any[]; total?: number };
@@ -71,7 +73,7 @@ function AdminClient() {
     }
   }
 
-  React.useEffect(() => { load(); }, [uPage, lPage]);
+  React.useEffect(() => { load(); }, [uPage, lPage, uQuery, lQuery]);
 
   function toast(msg: string) {
     // Simple inline toast
@@ -84,6 +86,9 @@ function AdminClient() {
         <section className="rounded-2xl border border-neutral-800 p-4">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold">Users</h2>
+          </div>
+          <div className="flex items-center justify-between mb-2">
+            <input value={uQuery} onChange={(e) => { setUQuery(e.target.value); setUPage(0); }} placeholder="Search users (email/username)" className="w-64 rounded-md border border-neutral-800 bg-neutral-950 px-2 py-1 text-sm" />
           </div>
           <div className="overflow-auto">
             <table className="w-full text-sm">
@@ -141,6 +146,9 @@ function AdminClient() {
         <section className="rounded-2xl border border-neutral-800 p-4">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold">Listings</h2>
+          </div>
+          <div className="flex items-center justify-between mb-2">
+            <input value={lQuery} onChange={(e) => { setLQuery(e.target.value); setLPage(0); }} placeholder="Search listings (title)" className="w-64 rounded-md border border-neutral-800 bg-neutral-950 px-2 py-1 text-sm" />
           </div>
           <div className="overflow-auto">
             <table className="w-full text-sm">

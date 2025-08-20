@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { getLang } from "@/lib/i18n";
 import { LocaleHydrator } from "./LocaleHydrator";
+import GlobalHeader from "./GlobalHeader";
 
 export const metadata: Metadata = {
   title: "bitsbarter - Local Classifieds in Bitcoin",
@@ -23,8 +24,24 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <LocaleHydrator />
+          {/* Global header */}
+          <div className="sticky top-0 z-40">
+            <GlobalHeader />
+          </div>
           {children}
         </ThemeProvider>
+        {/* Global footer minimal */}
+        <footer className="border-t border-neutral-900 bg-neutral-950/60 mt-16">
+          <div className="mx-auto max-w-7xl px-4 py-10 text-sm">
+            <div className="flex items-center justify-between">
+              <p>⚡ bitsbarter — in-app chat + Lightning escrow.</p>
+              <div className="flex items-center gap-4">
+                <a className="hover:text-orange-600" href="/en/terms">Terms</a>
+                <a className="hover:text-orange-600" href="/en/privacy">Privacy</a>
+              </div>
+            </div>
+          </div>
+        </footer>
       </body>
     </html>
   );
