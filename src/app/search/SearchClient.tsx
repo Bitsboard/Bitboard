@@ -277,6 +277,10 @@ export default function SearchClient() {
     }, [loadMore]);
 
     const bg = dark ? "bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950" : "bg-gradient-to-br from-neutral-50 via-white to-neutral-100";
+    const [authed, setAuthed] = useState(false);
+    useEffect(() => {
+        fetch('/api/auth/session', { cache: 'no-store' }).then(r => r.json()).then((d: any) => setAuthed(Boolean(d?.session))).catch(() => setAuthed(false));
+    }, []);
     const inputBase = dark
         ? "border border-white/30 bg-neutral-800/50 text-neutral-100 placeholder-neutral-400 backdrop-blur-sm"
         : "border border-neutral-700/30 bg-white/80 text-neutral-900 placeholder-neutral-500 backdrop-blur-sm";
@@ -351,6 +355,12 @@ export default function SearchClient() {
             {/* Global header via layout */}
 
             <div className="mx-auto max-w-7xl px-4 py-8">
+                {/* Top actions */}
+                <div className="mb-4 flex items-center justify-end">
+                    {authed && (
+                        <button onClick={() => { /* open listing modal via route */ window.location.assign('/#post'); }} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-neutral-950 shadow hover:bg-orange-400">Post listing</button>
+                    )}
+                </div>
                 {/* Search bar */}
                 <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-12">
                     <div className="sm:col-span-9 relative">

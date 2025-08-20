@@ -375,6 +375,9 @@ export default function HomePage() {
             {/* Right: Location above search */}
             <div className="w-full md:w-[460px] md:self-center">
               <div className="mb-2 md:mb-1 flex md:justify-end">
+                <button onClick={() => requireAuth(() => setShowNew(true))} className="hidden md:inline rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-neutral-950 shadow hover:bg-orange-400">Post listing</button>
+              </div>
+              <div className="mb-2 md:mb-1 flex md:justify-end">
                 <button onClick={() => setShowLocationModal(true)} className={cn("w-full md:w-[calc(100%-120px)] rounded-3xl px-6 py-5 text-left focus:outline-none", inputBase)}>
                   <div className="flex items-center justify-between gap-3">
                     <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>
