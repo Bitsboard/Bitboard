@@ -68,6 +68,29 @@ export default function SearchClient() {
     const [showLocationModal, setShowLocationModal] = useState(false);
 
     useEffect(() => { setInputQuery(q); }, [q]);
+    // Listen to global header toggle events
+    useEffect(() => {
+        const onUnit = (e: Event) => {
+            const d = (e as CustomEvent).detail as "sats" | "BTC" | undefined;
+            if (d === 'sats' || d === 'BTC') setUnit(d);
+        };
+        const onLayout = (e: Event) => {
+            const d = (e as CustomEvent).detail as "grid" | "list" | undefined;
+            if (d === 'grid' || d === 'list') setLayout(d);
+        };
+        const onTheme = (e: Event) => {
+            const d = (e as CustomEvent).detail as "dark" | "light" | undefined;
+            try { if (d) document.documentElement.classList.toggle('dark', d === 'dark'); } catch {}
+        };
+        window.addEventListener('bb:unit', onUnit as EventListener);
+        window.addEventListener('bb:layout', onLayout as EventListener);
+        window.addEventListener('bb:theme', onTheme as EventListener);
+        return () => {
+            window.removeEventListener('bb:unit', onUnit as EventListener);
+            window.removeEventListener('bb:layout', onLayout as EventListener);
+            window.removeEventListener('bb:theme', onTheme as EventListener);
+        };
+    }, []);
     // Sync lang from URL prefix to ensure translations show correctly when landing directly on /{lang}/search
     useEffect(() => {
         try {

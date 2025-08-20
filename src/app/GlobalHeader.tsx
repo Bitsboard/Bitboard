@@ -61,7 +61,9 @@ export default function GlobalHeader() {
       const el = document.documentElement;
       el.classList.toggle('dark');
       localStorage.setItem('theme', el.classList.contains('dark') ? 'dark' : 'light');
-      setDark(el.classList.contains('dark'));
+      const nowDark = el.classList.contains('dark');
+      setDark(nowDark);
+      try { window.dispatchEvent(new CustomEvent('bb:theme', { detail: nowDark ? 'dark' : 'light' })); } catch {}
     } catch {}
   }
   function onAuth() { setShowAuth(true); }
@@ -74,9 +76,9 @@ export default function GlobalHeader() {
         user={authed ? { id: 'me', email: '', handle: '' } : null}
         onAuth={onAuth}
         unit={unit}
-        setUnit={(u) => { try { localStorage.setItem('priceUnit', u); } catch {}; setUnit(u); }}
+        setUnit={(u) => { try { localStorage.setItem('priceUnit', u); } catch {}; setUnit(u); try { window.dispatchEvent(new CustomEvent('bb:unit', { detail: u })); } catch {} }}
         layout={layout}
-        setLayout={(l) => { try { localStorage.setItem('layoutPref', l); } catch {}; setLayout(l); }}
+        setLayout={(l) => { try { localStorage.setItem('layoutPref', l); } catch {}; setLayout(l); try { window.dispatchEvent(new CustomEvent('bb:layout', { detail: l })); } catch {} }}
         avatarUrl={avatar}
       />
       {showNew && (
