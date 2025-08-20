@@ -2,8 +2,19 @@
 
 import React from "react";
 import { Nav } from "@/components";
+import { useEffect, useState } from "react";
 
 export default function GlobalHeader() {
+  const [authed, setAuthed] = useState(false);
+  useEffect(() => {
+    fetch('/api/auth/session', { cache: 'no-store' })
+      .then(r => r.json() as Promise<{ session?: any }>)
+      .then((d) => {
+        setAuthed(Boolean(d && d.session));
+      })
+      .catch(() => setAuthed(false));
+  }, []);
+
   function onPost() { window.location.assign("/#post"); }
   function onToggleTheme() {
     try {
@@ -18,7 +29,7 @@ export default function GlobalHeader() {
       onPost={onPost}
       onToggleTheme={onToggleTheme}
       dark={true}
-      user={null}
+      user={authed ? { id: 'me', email: '', handle: '' } : null}
       onAuth={onAuth}
       unit={"sats"}
       setUnit={() => {}}

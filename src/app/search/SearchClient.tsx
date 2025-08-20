@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ListingCard, ListingRow, Nav, ListingModal, LocationModal } from "@/components";
+import { ListingCard, ListingRow, ListingModal, LocationModal } from "@/components";
 import type { Listing, AdType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
@@ -347,8 +347,8 @@ export default function SearchClient() {
     }
 
     return (
-        <div className={cn("min-h-screen", bg, dark ? "dark" : "")}>
-            <Nav onPost={() => { }} onToggleTheme={() => setDark((d) => !d)} dark={dark} user={null} onAuth={() => { }} unit={unit} setUnit={setUnit} layout={layout} setLayout={setLayout} />
+        <div className={cn("min-h-screen", bg, dark ? "dark" : "")}> 
+            {/* Global header via layout */}
 
             <div className="mx-auto max-w-7xl px-4 py-8">
                 {/* Search bar */}
