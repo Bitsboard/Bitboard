@@ -110,6 +110,14 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
             )}
           </div>
           {/* Removed how it works / pricing per request */}
+          {user && (
+            <button
+              onClick={onPost}
+              className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow shadow-orange-500/30 transition hover:bg-orange-400"
+            >
+              {t('post_listing', lang)}
+            </button>
+          )}
           {user ? (
             <a href={`/${lang}/profile`} className="inline-flex items-center gap-2 rounded-full px-2 py-1 text-sm font-semibold text-white hover:opacity-90">
               {avatarUrl ? (
