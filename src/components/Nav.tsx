@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { UnitToggle, ThemeToggle, ViewToggle } from "@/components";
+import { UnitToggle, ThemeToggle, ViewToggle, NotificationMenu } from "@/components";
 import { useLang } from "@/lib/i18n-client";
 import { setLang, t } from "@/lib/i18n";
 import { useTheme } from "@/lib/settings";
@@ -145,6 +145,9 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
             >
               {t('post_listing', lang)}
             </button>
+          )}
+          {user && (
+            <NotificationMenu dark={dark} />
           )}
           {user ? (
             <a href={`/${lang}/profile`} className="inline-flex items-center gap-2 rounded-full px-2 py-1 text-sm font-semibold text-white hover:opacity-90">

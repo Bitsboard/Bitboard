@@ -19,3 +19,4 @@ export { Carousel } from "./Carousel";
 export { ItemsCarousel } from "./ItemsCarousel";
 export { LocationModal } from "./LocationModal";
 export { default as Footer } from "./Footer";
+export { NotificationMenu } from "./NotificationMenu";
