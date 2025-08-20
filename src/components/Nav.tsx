@@ -146,19 +146,21 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
               <div className="fixed inset-0 z-[9999]" onClick={() => setMenuOpen(false)}>
                 <div className="absolute right-4 top-16 w-80 rounded-2xl border shadow-2xl" onClick={(e) => e.stopPropagation()}>
                   <div className={cn("rounded-2xl overflow-hidden", dark ? "border border-neutral-700/50 bg-neutral-900" : "border border-neutral-300/50 bg-white")}> 
-                    <div className="p-4 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>{t('menu_display_prices_in', lang)}</span>
-                        <UnitToggle unit={unit} setUnit={setUnit} />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>{t('menu_display_theme', lang)}</span>
-                        <ThemeToggle dark={dark} onToggle={onToggleTheme} />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>{t('menu_layout_view', lang)}</span>
-                        <ViewToggle layout={layout} setLayout={setLayout} dark={dark} />
-                      </div>
+                    <div className="p-2">
+                      <button onClick={() => setUnit(unit === 'sats' ? 'BTC' : 'sats')} className={cn("flex w-full items-center justify-between rounded-xl px-3 py-2 text-left hover:bg-neutral-800/40", dark ? "text-neutral-200" : "text-neutral-700")}
+                      >
+                        <span className="text-sm font-medium">{t('menu_display_prices_in', lang)}</span>
+                        <span className="text-xs opacity-70">{unit}</span>
+                      </button>
+                      <button onClick={onToggleTheme} className={cn("mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-left hover:bg-neutral-800/40", dark ? "text-neutral-200" : "text-neutral-700")}>
+                        <span className="text-sm font-medium">{t('menu_display_theme', lang)}</span>
+                        <span className="text-xs opacity-70">{dark ? 'dark' : 'light'}</span>
+                      </button>
+                      <button onClick={() => setLayout(layout === 'grid' ? 'list' : 'grid')} className={cn("mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-left hover:bg-neutral-800/40", dark ? "text-neutral-200" : "text-neutral-700")}
+                      >
+                        <span className="text-sm font-medium">{t('menu_layout_view', lang)}</span>
+                        <span className="text-xs opacity-70">{layout}</span>
+                      </button>
                     </div>
                   </div>
                 </div>
