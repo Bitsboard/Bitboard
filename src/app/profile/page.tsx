@@ -36,14 +36,7 @@ export default function ProfilePage() {
   }, []);
 
   return (
-    <div>
-      <header className="sticky top-0 z-30 backdrop-blur border-b border-neutral-900 bg-neutral-950/80">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-          <a href="/en" className="font-bold">bitsbarter</a>
-          <a href="/" className="text-sm text-neutral-300 hover:underline">Home</a>
-        </div>
-      </header>
-      <main className="mx-auto max-w-3xl p-6">
+    <div className="mx-auto max-w-3xl p-6">
         <h1 className="text-2xl font-bold mb-4">Your Profile</h1>
         {loading && <p>Loading...</p>}
         {!loading && !session && (
@@ -115,18 +108,6 @@ export default function ProfilePage() {
             </form>
           </div>
         )}
-      </main>
-      <footer className="border-t border-neutral-900 bg-neutral-950/60">
-        <div className="mx-auto max-w-7xl px-4 py-10 text-sm">
-          <div className="flex items-center justify-between">
-            <p>⚡ bitsbarter — in-app chat + Lightning escrow.</p>
-            <div className="flex items-center gap-4">
-              <a className="hover:text-orange-600" href="/en/terms">Terms</a>
-              <a className="hover:text-orange-600" href="/en/privacy">Privacy</a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

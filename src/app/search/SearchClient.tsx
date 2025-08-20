@@ -358,7 +358,7 @@ export default function SearchClient() {
                 {/* Top actions */}
                 <div className="mb-4 flex items-center justify-end">
                     {authed && (
-                        <button onClick={() => { /* open listing modal via route */ window.location.assign('/#post'); }} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-neutral-950 shadow hover:bg-orange-400">Post listing</button>
+                        <button onClick={() => { window.location.assign('/#post'); }} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-orange-400">Post listing</button>
                     )}
                 </div>
                 {/* Search bar */}
