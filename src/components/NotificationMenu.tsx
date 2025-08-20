@@ -29,6 +29,20 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
 
   // Mock notifications - in a real app, these would come from an API
   useEffect(() => {
+    // Try to load notifications from localStorage first
+    try {
+      const savedNotifications = localStorage.getItem('notifications');
+      if (savedNotifications) {
+        const parsed = JSON.parse(savedNotifications);
+        setNotifications(parsed);
+        setUnreadCount(parsed.filter((n: Notification) => !n.read).length);
+        return;
+      }
+    } catch (error) {
+      console.warn('Failed to load notifications from localStorage:', error);
+    }
+
+    // Fallback to mock notifications if none saved
     const mockNotifications: Notification[] = [
       {
         id: '1',
@@ -74,16 +88,32 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
   }, []);
 
   const markAsRead = (notificationId: string) => {
-    setNotifications(prev => 
-      prev.map(n => 
+    setNotifications(prev => {
+      const updated = prev.map(n => 
         n.id === notificationId ? { ...n, read: true } : n
-      )
-    );
+      );
+      // Persist to localStorage
+      try {
+        localStorage.setItem('notifications', JSON.stringify(updated));
+      } catch (error) {
+        console.warn('Failed to save notifications to localStorage:', error);
+      }
+      return updated;
+    });
     setUnreadCount(prev => Math.max(0, prev - 1));
   };
 
   const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setNotifications(prev => {
+      const updated = prev.map(n => ({ ...n, read: true }));
+      // Persist to localStorage
+      try {
+        localStorage.setItem('notifications', JSON.stringify(updated));
+      } catch (error) {
+        console.warn('Failed to save notifications to localStorage:', error);
+      }
+      return updated;
+    });
     setUnreadCount(0);
   };
 
@@ -151,17 +181,17 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
         <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-xl z-50">
           <div className="p-4 border-b border-neutral-200 dark:border-neutral-700">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
-                Notifications
-              </h3>
-              {unreadCount > 0 && (
-                <button
-                  onClick={markAllAsRead}
-                  className="text-sm text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium"
-                >
-                  Mark all as read
-                </button>
-              )}
+                          <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
+              {t('notifications', lang)}
+            </h3>
+            {unreadCount > 0 && (
+              <button
+                onClick={markAllAsRead}
+                className="text-sm text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium"
+              >
+                {t('mark_all_as_read', lang)}
+              </button>
+            )}
             </div>
           </div>
 
@@ -173,7 +203,7 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                   </svg>
                 </div>
-                <p className="text-neutral-500 dark:text-neutral-400">No notifications yet</p>
+                <p className="text-neutral-500 dark:text-neutral-400">{t('no_notifications', lang)}</p>
               </div>
             ) : (
               <div className="divide-y divide-neutral-200 dark:divide-neutral-700">
@@ -228,7 +258,7 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
                 href="/notifications"
                 className="block text-center text-sm text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium"
               >
-                View all notifications
+                {t('view_all_notifications', lang)}
               </a>
             </div>
           )}

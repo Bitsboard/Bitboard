@@ -25,6 +25,20 @@ export default function NotificationsPage() {
 
   // Mock notifications - in a real app, these would come from an API
   useEffect(() => {
+    // Try to load notifications from localStorage first
+    try {
+      const savedNotifications = localStorage.getItem('notifications');
+      if (savedNotifications) {
+        const parsed = JSON.parse(savedNotifications);
+        setNotifications(parsed);
+        setUnreadCount(parsed.filter((n: Notification) => !n.read).length);
+        return;
+      }
+    } catch (error) {
+      console.warn('Failed to load notifications from localStorage:', error);
+    }
+
+    // Fallback to mock notifications if none saved
     const mockNotifications: Notification[] = [
       {
         id: '1',
@@ -112,21 +126,46 @@ export default function NotificationsPage() {
   });
 
   const markAsRead = (notificationId: string) => {
-    setNotifications(prev => 
-      prev.map(n => 
+    setNotifications(prev => {
+      const updated = prev.map(n => 
         n.id === notificationId ? { ...n, read: true } : n
-      )
-    );
+      );
+      // Persist to localStorage
+      try {
+        localStorage.setItem('notifications', JSON.stringify(updated));
+      } catch (error) {
+        console.warn('Failed to save notifications to localStorage:', error);
+      }
+      return updated;
+    });
     setUnreadCount(prev => Math.max(0, prev - 1));
   };
 
   const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setNotifications(prev => {
+      const updated = prev.map(n => ({ ...n, read: true }));
+      // Persist to localStorage
+      try {
+        localStorage.setItem('notifications', JSON.stringify(updated));
+      } catch (error) {
+        console.warn('Failed to save notifications to localStorage:', error);
+      }
+      return updated;
+    });
     setUnreadCount(0);
   };
 
   const deleteNotification = (notificationId: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== notificationId));
+    setNotifications(prev => {
+      const updated = prev.filter(n => n.id !== notificationId);
+      // Persist to localStorage
+      try {
+        localStorage.setItem('notifications', JSON.stringify(updated));
+      } catch (error) {
+        console.warn('Failed to save notifications to localStorage:', error);
+      }
+      return updated;
+    });
     // Update unread count if the deleted notification was unread
     const deletedNotification = notifications.find(n => n.id === notificationId);
     if (deletedNotification && !deletedNotification.read) {
@@ -195,10 +234,10 @@ export default function NotificationsPage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">
-                Notifications
+                {t('notifications', lang)}
               </h1>
               <p className="text-neutral-600 dark:text-neutral-400">
-                Stay updated with your latest messages, updates, and system announcements
+                {t('stay_updated', lang)}
               </p>
             </div>
             {unreadCount > 0 && (
@@ -206,7 +245,7 @@ export default function NotificationsPage() {
                 onClick={markAllAsRead}
                 className="px-4 py-2 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition-colors duration-200"
               >
-                Mark all as read
+                {t('mark_all_as_read', lang)}
               </button>
             )}
           </div>
@@ -214,11 +253,11 @@ export default function NotificationsPage() {
           {/* Filter Tabs */}
           <div className="flex flex-wrap gap-2 border-b border-neutral-200 dark:border-neutral-700">
             {[
-              { key: 'all', label: 'All', count: getFilterCount('all') },
-              { key: 'unread', label: 'Unread', count: getFilterCount('unread') },
-              { key: 'messages', label: 'Messages', count: getFilterCount('messages') },
-              { key: 'updates', label: 'Updates', count: getFilterCount('updates') },
-              { key: 'system', label: 'System', count: getFilterCount('system') }
+              { key: 'all', label: t('all', lang), count: getFilterCount('all') },
+              { key: 'unread', label: t('unread', lang), count: getFilterCount('unread') },
+              { key: 'messages', label: t('messages', lang), count: getFilterCount('messages') },
+              { key: 'updates', label: t('updates', lang), count: getFilterCount('updates') },
+              { key: 'system', label: t('system', lang), count: getFilterCount('system') }
             ].map((tab) => (
               <button
                 key={tab.key}
@@ -246,12 +285,12 @@ export default function NotificationsPage() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">
-                No notifications found
+                {t('no_notifications_found', lang)}
               </h3>
               <p className="text-neutral-600 dark:text-neutral-400">
                 {filter === 'all' 
-                  ? 'You\'re all caught up! No notifications at the moment.'
-                  : `No ${filter} notifications found.`
+                  ? t('you_are_caught_up', lang)
+                  : t('no_filter_notifications', lang).replace('{filter}', filter)
                 }
               </p>
             </div>
@@ -280,14 +319,14 @@ export default function NotificationsPage() {
                             onClick={() => markAsRead(notification.id)}
                             className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
                           >
-                            Mark as read
+                            {t('mark_as_read', lang)}
                           </button>
                         )}
                         <button
                           onClick={() => deleteNotification(notification.id)}
                           className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium"
                         >
-                          Delete
+                          {t('delete', lang)}
                         </button>
                       </div>
                     </div>
@@ -303,7 +342,7 @@ export default function NotificationsPage() {
                           href={notification.actionUrl}
                           className="inline-flex items-center px-3 py-1 bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 text-sm font-medium rounded-lg hover:bg-orange-200 dark:hover:bg-orange-900/30 transition-colors duration-200"
                         >
-                          View Details
+                          {t('view_details', lang)}
                           <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
@@ -321,32 +360,32 @@ export default function NotificationsPage() {
         {notifications.length > 0 && (
           <div className="mt-12 bg-neutral-50 dark:bg-neutral-900 rounded-xl p-6">
             <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">
-              Notification Summary
+              {t('notification_summary', lang)}
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-neutral-900 dark:text-white">
                   {notifications.length}
                 </div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400">Total</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400">{t('total', lang)}</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600">
                   {notifications.filter(n => n.type === 'message').length}
                 </div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400">Messages</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400">{t('messages', lang)}</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600">
                   {notifications.filter(n => n.type === 'update').length}
                 </div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400">Updates</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400">{t('updates', lang)}</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-purple-600">
                   {notifications.filter(n => n.type === 'system').length}
                 </div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400">System</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400">{t('system', lang)}</div>
               </div>
             </div>
           </div>
