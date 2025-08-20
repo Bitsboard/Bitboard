@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import { getLang } from "@/lib/i18n";
 import { LocaleHydrator } from "./LocaleHydrator";
 import GlobalHeader from "./GlobalHeader";
-import { SettingsProvider } from "@/components/SettingsProvider";
+import { SettingsProvider } from "@/lib/settings";
 
 export const metadata: Metadata = {
   title: "bitsbarter - Local Classifieds in Bitcoin",
