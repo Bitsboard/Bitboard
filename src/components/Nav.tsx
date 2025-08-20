@@ -109,18 +109,7 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
               </div>
             )}
           </div>
-          <a
-            href={`/${lang}#how`}
-            className={cn("rounded-xl px-3 py-2 text-sm font-semibold", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}
-          >
-            {t('how_it_works', lang)}
-          </a>
-          <a
-            href={`/${lang}#pricing`}
-            className={cn("rounded-xl px-3 py-2 text-sm font-semibold", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}
-          >
-            {t('pricing', lang)}
-          </a>
+          {/* Removed how it works / pricing per request */}
           {user ? (
             <a href={`/${lang}/profile`} className="inline-flex items-center gap-2 rounded-full px-2 py-1 text-sm font-semibold text-white hover:opacity-90">
               {avatarUrl ? (
