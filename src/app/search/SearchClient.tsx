@@ -356,11 +356,7 @@ export default function SearchClient() {
 
             <div className="mx-auto max-w-7xl px-4 py-8">
                 {/* Top actions */}
-                <div className="mb-4 flex items-center justify-end">
-                    {authed && (
-                        <button onClick={() => { window.location.assign('/#post'); }} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-orange-400">Post listing</button>
-                    )}
-                </div>
+                {/* Removed page-level Post listing CTA; header shows it when authed */}
                 {/* Search bar */}
                 <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-12">
                     <div className="sm:col-span-9 relative">

@@ -62,11 +62,7 @@ export default function ProfilePage() {
             {session.account && !session.account.username && (
               <UsernamePicker />
             )}
-            {session && (
-              <div>
-                <button onClick={() => { window.location.assign('/#post'); }} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-neutral-950 shadow hover:bg-orange-400">Post listing</button>
-              </div>
-            )}
+            {/* Removed page-level Post listing CTA; header shows it when authed */}
             {session.account && (
               <div className="rounded-2xl border border-neutral-800 p-4">
                 <div className="grid grid-cols-2 gap-3 text-sm">
