@@ -228,10 +228,10 @@ export async function POST(req: Request) {
           currentUserId = (u.results?.[0] as any)?.id ?? null;
         }
       }
-    } catch {}
+    } catch { }
 
     // Ensure extended columns exist for association
-    try { await db.prepare('ALTER TABLE listings ADD COLUMN posted_by TEXT').run(); } catch {}
+    try { await db.prepare('ALTER TABLE listings ADD COLUMN posted_by TEXT').run(); } catch { }
     const body = (await req.json()) as {
       title?: unknown;
       description?: unknown;

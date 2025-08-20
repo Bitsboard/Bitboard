@@ -341,18 +341,7 @@ export default function HomePage() {
 
   return (
     <div className={cn("min-h-screen", bg, dark ? "dark" : "")}>
-      {/* staging deploy trigger */}
-      <Nav
-        onPost={() => requireAuth(() => setShowNew(true))}
-        onToggleTheme={() => setDark((d) => !d)}
-        dark={dark}
-        user={user}
-        onAuth={() => setShowAuth(true)}
-        unit={unit}
-        setUnit={setUnit}
-        layout={layout}
-        setLayout={setLayout}
-      />
+      {/* Global header is rendered via layout */}
 
       {/* Hero Section */}
       <header className="relative overflow-hidden">
@@ -477,32 +466,7 @@ export default function HomePage() {
         <SafetyTipsSection dark={dark} />
       </main>
 
-      {/* Footer */}
-      <footer className={cn("border-t", dark ? "border-neutral-800/50 bg-neutral-900/30" : "border-neutral-200/50 bg-white/50")}>
-        <div className="mx-auto max-w-7xl px-4 py-16">
-          <div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
-            <div className="max-w-md">
-              <p className={cn("text-lg font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>
-                {t('footer_tagline', lang)}
-              </p>
-            </div>
-            <div className="flex items-center gap-6">
-              <a className={cn("hover:text-orange-500 transition-colors font-medium", dark ? "text-neutral-300" : "text-neutral-600")} href="#policy">
-                {t('prohibited_items', lang)}
-              </a>
-              <a className={cn("hover:text-orange-500 transition-colors font-medium", dark ? "text-neutral-300" : "text-neutral-600")} href="#tips">
-                {t('safety_tips', lang)}
-              </a>
-              <a className={cn("hover:text-orange-500 transition-colors font-medium", dark ? "text-neutral-300" : "text-neutral-600")} href={`/${lang}/terms`}>
-                {t('terms', lang)}
-              </a>
-              <a className={cn("hover:text-orange-500 transition-colors font-medium", dark ? "text-neutral-300" : "text-neutral-600")} href={`/${lang}/privacy`}>
-                {t('privacy', lang)}
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      {/* Global footer is rendered via layout */}
 
       {/* Modals */}
       {showLocationModal && (
