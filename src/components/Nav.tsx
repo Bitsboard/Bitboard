@@ -19,13 +19,14 @@ interface NavProps {
   setUnit: (unit: "sats" | "BTC") => void;
   layout: "grid" | "list";
   setLayout: (layout: "grid" | "list") => void;
+  avatarUrl?: string;
 }
 
 function cn(...xs: Array<string | false | null | undefined>) {
   return xs.filter(Boolean).join(" ");
 }
 
-export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, layout, setLayout }: NavProps) {
+export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, layout, setLayout, avatarUrl }: NavProps) {
   const isStaging =
     process.env.NEXT_PUBLIC_BRANCH === "staging" ||
     process.env.NEXT_PUBLIC_ENV === "staging";
@@ -121,8 +122,13 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
             {t('pricing', lang)}
           </a>
           {user ? (
-            <a href={`/${lang}/profile`} className="rounded-xl px-4 py-2 text-sm font-semibold text-white bg-neutral-800 hover:bg-neutral-700">
-              My Profile
+            <a href={`/${lang}/profile`} className="inline-flex items-center gap-2 rounded-full px-2 py-1 text-sm font-semibold text-white hover:opacity-90">
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatarUrl} alt="avatar" className="h-8 w-8 rounded-full border border-neutral-700" />
+              ) : (
+                <span className="rounded-full bg-neutral-800 px-3 py-1">My Profile</span>
+              )}
             </a>
           ) : (
             <button onClick={onAuth} className="rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-sm font-semibold text-white shadow shadow-orange-500/30 transition hover:from-orange-400 hover:to-red-400">

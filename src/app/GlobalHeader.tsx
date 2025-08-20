@@ -6,11 +6,14 @@ import { useEffect, useState } from "react";
 
 export default function GlobalHeader() {
   const [authed, setAuthed] = useState(false);
+  const [avatar, setAvatar] = useState<string | undefined>(undefined);
   useEffect(() => {
     fetch('/api/auth/session', { cache: 'no-store' })
       .then(r => r.json() as Promise<{ session?: any }>)
       .then((d) => {
-        setAuthed(Boolean(d && d.session));
+        const s = d?.session;
+        setAuthed(Boolean(s));
+        setAvatar(s?.user?.image || s?.account?.profilePhoto || undefined);
       })
       .catch(() => setAuthed(false));
   }, []);
@@ -35,6 +38,7 @@ export default function GlobalHeader() {
       setUnit={() => {}}
       layout={"grid"}
       setLayout={() => {}}
+      avatarUrl={avatar}
     />
   );
 }
