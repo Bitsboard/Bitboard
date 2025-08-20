@@ -30,6 +30,14 @@ export async function POST(req: Request) {
       created_at INTEGER NOT NULL,
       image TEXT
     )`).run();
+        try { await db.prepare('ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0').run(); } catch {}
+        try { await db.prepare('ALTER TABLE users ADD COLUMN banned INTEGER DEFAULT 0').run(); } catch {}
+        // One-time change rule: only allow update if current username is default pattern
+        const current = await db.prepare('SELECT username FROM users WHERE email = ?').bind(payload.email).all();
+        const cur = current.results?.[0]?.username as string | undefined;
+        if (cur && !/^User[0-9a-z]{8}$/i.test(cur)) {
+            return new Response(JSON.stringify({ error: 'username_locked' }), { status: 409 });
+        }
         // Ensure unique username
         const exists = await db.prepare('SELECT 1 FROM users WHERE username = ?').bind(handle).all();
         if ((exists.results ?? []).length) {

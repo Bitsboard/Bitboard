@@ -60,8 +60,9 @@ export async function GET(req: Request) {
       let userId = existing.results?.[0]?.id as string | undefined;
       if (!userId) {
         userId = uuidv4();
-        await db.prepare('INSERT INTO users (id, email, username, sso, verified, created_at, image) VALUES (?, ?, NULL, ?, ?, ?, ?)')
-          .bind(userId, user.email, 'google', 1, Math.floor(Date.now() / 1000), user.picture ?? null)
+        const defaultUsername = `User${Math.random().toString(36).slice(2, 10)}`;
+        await db.prepare('INSERT INTO users (id, email, username, sso, verified, created_at, image) VALUES (?, ?, ?, ?, ?, ?, ?)')
+          .bind(userId, user.email, defaultUsername, 'google', 1, Math.floor(Date.now() / 1000), user.picture ?? null)
           .run();
       } else {
         await db.prepare('UPDATE users SET image = COALESCE(?, image), sso = ? WHERE id = ?')

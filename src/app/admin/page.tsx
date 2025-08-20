@@ -36,37 +36,51 @@ async function isAdmin(email: string | undefined | null): Promise<boolean> {
 }
 
 export default async function AdminPage() {
-  // Using dynamic rendering to read cookies
-  const req = (globalThis as any).request as Request | undefined;
-  const payload = req ? await getSession(req) : null;
-  const allowed = await isAdmin((payload as any)?.email ?? null);
-  if (!allowed) {
-    return (
-      <div className="mx-auto max-w-5xl p-6">
-        <h1 className="text-2xl font-bold mb-2">Admin</h1>
-        <p className="text-neutral-500">You do not have access.</p>
-      </div>
-    );
+  return (
+    <div className="mx-auto max-w-6xl p-6" suppressHydrationWarning>
+      <h1 className="text-2xl font-bold mb-6">Admin dashboard</h1>
+      <AdminClient />
+    </div>
+  );
+}
+
+function AdminClient() {
+  'use client';
+  const [users, setUsers] = React.useState<any[]>([]);
+  const [listings, setListings] = React.useState<any[]>([]);
+  const [uTotal, setUTotal] = React.useState(0);
+  const [lTotal, setLTotal] = React.useState(0);
+  const [uPage, setUPage] = React.useState(0);
+  const [lPage, setLPage] = React.useState(0);
+  const limit = 20;
+
+  async function load() {
+    const [ur, lr] = await Promise.all([
+      fetch(`/api/admin/users/list?limit=${limit}&offset=${uPage * limit}`),
+      fetch(`/api/admin/listings/list?limit=${limit}&offset=${lPage * limit}`),
+    ]);
+    if (ur.ok) {
+      const j = (await ur.json()) as { users?: any[]; total?: number };
+      setUsers(j.users || []);
+      setUTotal(j.total || 0);
+    }
+    if (lr.ok) {
+      const j = (await lr.json()) as { listings?: any[]; total?: number };
+      setListings(j.listings || []);
+      setLTotal(j.total || 0);
+    }
   }
 
-  // Fetch sample tables
-  let users: any[] = [];
-  let listings: any[] = [];
-  try {
-    const { env } = getRequestContext();
-    const db = (env as any).DB as D1Database | undefined;
-    if (db) {
-      const u = await db.prepare('SELECT id, email, username, verified, is_admin AS isAdmin, created_at AS createdAt FROM users ORDER BY created_at DESC LIMIT 50').all();
-      users = u.results ?? [];
-      const l = await db.prepare('SELECT id, title, price_sat AS priceSat, posted_by AS postedBy, created_at AS createdAt FROM listings ORDER BY created_at DESC LIMIT 50').all();
-      listings = l.results ?? [];
-    }
-  } catch {}
+  React.useEffect(() => { load(); }, [uPage, lPage]);
+
+  function toast(msg: string) {
+    // Simple inline toast
+    alert(msg);
+  }
 
   return (
-    <div className="mx-auto max-w-6xl p-6">
-      <h1 className="text-2xl font-bold mb-6">Admin dashboard</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <section className="rounded-2xl border border-neutral-800 p-4">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold">Users</h2>
@@ -92,25 +106,36 @@ export default async function AdminPage() {
                     <td className="p-2">{u.isAdmin ? 'Yes' : 'No'}</td>
                     <td className="p-2">{new Date((u.createdAt || 0) * 1000).toLocaleString()}</td>
                     <td className="p-2">
-                      <form action="/api/admin/users/verify" method="post" className="inline">
-                        <input type="hidden" name="userId" value={u.id} />
-                        <input type="hidden" name="verified" value={u.verified ? 'false' : 'true'} />
-                        <button className="rounded-md border border-neutral-700 px-2 py-1 text-xs hover:bg-neutral-900">
-                          {u.verified ? 'Unverify' : 'Verify'}
-                        </button>
-                      </form>
-                      <form action="/api/admin/users/ban" method="post" className="inline ml-2">
-                        <input type="hidden" name="userId" value={u.id} />
-                        <input type="hidden" name="banned" value={u.banned ? 'false' : 'true'} />
-                        <button className="rounded-md border border-red-700 text-red-300 px-2 py-1 text-xs hover:bg-red-900/30">
-                          {u.banned ? 'Unban' : 'Ban'}
-                        </button>
-                      </form>
+                      <button
+                        onClick={async () => {
+                          if (!confirm(`${u.verified ? 'Unverify' : 'Verify'} this user?`)) return;
+                          const res = await fetch('/api/admin/users/verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ userId: u.id, verified: !u.verified }) });
+                          if (res.ok) { toast('Updated'); load(); } else toast('Failed');
+                        }}
+                        className="rounded-md border border-neutral-700 px-2 py-1 text-xs hover:bg-neutral-900"
+                      >
+                        {u.verified ? 'Unverify' : 'Verify'}
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!confirm(`${u.banned ? 'Unban' : 'Ban'} this user?`)) return;
+                          const res = await fetch('/api/admin/users/ban', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ userId: u.id, banned: !u.banned }) });
+                          if (res.ok) { toast('Updated'); load(); } else toast('Failed');
+                        }}
+                        className="ml-2 rounded-md border border-red-700 text-red-300 px-2 py-1 text-xs hover:bg-red-900/30"
+                      >
+                        {u.banned ? 'Unban' : 'Ban'}
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            <div className="flex items-center justify-between mt-3 text-xs">
+              <button disabled={uPage === 0} onClick={() => setUPage((p) => Math.max(0, p - 1))} className="rounded-md border border-neutral-700 px-2 py-1 disabled:opacity-50">Prev</button>
+              <div>Page {uPage + 1} of {Math.max(1, Math.ceil(uTotal / limit))}</div>
+              <button disabled={(uPage + 1) * limit >= uTotal} onClick={() => setUPage((p) => p + 1)} className="rounded-md border border-neutral-700 px-2 py-1 disabled:opacity-50">Next</button>
+            </div>
           </div>
         </section>
         <section className="rounded-2xl border border-neutral-800 p-4">
@@ -136,20 +161,31 @@ export default async function AdminPage() {
                     <td className="p-2">{l.postedBy ?? '-'}</td>
                     <td className="p-2">{new Date((l.createdAt || 0) * 1000).toLocaleString()}</td>
                     <td className="p-2">
-                      <form action="/api/admin/listings/delete" method="post" onSubmit={(e) => { if (!confirm('Delete listing?')) e.preventDefault(); }}>
-                        <input type="hidden" name="id" value={l.id} />
-                        <button className="rounded-md border border-red-700 text-red-300 px-2 py-1 text-xs hover:bg-red-900/30">Delete</button>
-                      </form>
+                      <button
+                        onClick={async () => {
+                          if (!confirm('Delete listing?')) return;
+                          const res = await fetch('/api/admin/listings/delete', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: l.id }) });
+                          if (res.ok) { toast('Deleted'); load(); } else toast('Failed');
+                        }}
+                        className="rounded-md border border-red-700 text-red-300 px-2 py-1 text-xs hover:bg-red-900/30"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            <div className="flex items-center justify-between mt-3 text-xs">
+              <button disabled={lPage === 0} onClick={() => setLPage((p) => Math.max(0, p - 1))} className="rounded-md border border-neutral-700 px-2 py-1 disabled:opacity-50">Prev</button>
+              <div>Page {lPage + 1} of {Math.max(1, Math.ceil(lTotal / limit))}</div>
+              <button disabled={(lPage + 1) * limit >= lTotal} onClick={() => setLPage((p) => p + 1)} className="rounded-md border border-neutral-700 px-2 py-1 disabled:opacity-50">Next</button>
+            </div>
           </div>
         </section>
       </div>
       <p className="text-xs text-neutral-500 mt-6">Search engines: noindex</p>
-    </div>
+    </>
   );
 }
 
