@@ -115,6 +115,25 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
 
+  // Listen to global header toggle events
+  useEffect(() => {
+    const onUnit = (e: Event) => { const d = (e as CustomEvent).detail as Unit; if (d) setUnit(d); };
+    const onLayout = (e: Event) => { const d = (e as CustomEvent).detail as Layout; if (d) setLayout(d); };
+    const onTheme = (e: Event) => { const d = (e as CustomEvent).detail as 'dark' | 'light'; try { document.documentElement.classList.toggle('dark', d === 'dark'); setDark(d === 'dark'); } catch { } };
+    window.addEventListener('bb:unit', onUnit as EventListener);
+    window.addEventListener('bb:layout', onLayout as EventListener);
+    window.addEventListener('bb:theme', onTheme as EventListener);
+    // Initialize from localStorage on mount
+    try { const u = localStorage.getItem('priceUnit') as Unit | null; if (u === 'BTC' || u === 'sats') setUnit(u); } catch { }
+    try { const l = localStorage.getItem('layoutPref') as Layout | null; if (l === 'grid' || l === 'list') setLayout(l); } catch { }
+    try { const theme = localStorage.getItem('theme'); if (theme === 'dark' || theme === 'light') setDark(theme === 'dark'); } catch { }
+    return () => {
+      window.removeEventListener('bb:unit', onUnit as EventListener);
+      window.removeEventListener('bb:layout', onLayout as EventListener);
+      window.removeEventListener('bb:theme', onTheme as EventListener);
+    };
+  }, []);
+
   // Categories
   const categories: Category[] = [
     "Featured",
