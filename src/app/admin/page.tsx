@@ -80,6 +80,7 @@ export default async function AdminPage() {
                   <th className="p-2">Verified</th>
                   <th className="p-2">Admin</th>
                   <th className="p-2">Registered</th>
+                  <th className="p-2">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-800">
@@ -90,6 +91,22 @@ export default async function AdminPage() {
                     <td className="p-2">{u.verified ? 'Yes' : 'No'}</td>
                     <td className="p-2">{u.isAdmin ? 'Yes' : 'No'}</td>
                     <td className="p-2">{new Date((u.createdAt || 0) * 1000).toLocaleString()}</td>
+                    <td className="p-2">
+                      <form action="/api/admin/users/verify" method="post" className="inline">
+                        <input type="hidden" name="userId" value={u.id} />
+                        <input type="hidden" name="verified" value={u.verified ? 'false' : 'true'} />
+                        <button className="rounded-md border border-neutral-700 px-2 py-1 text-xs hover:bg-neutral-900">
+                          {u.verified ? 'Unverify' : 'Verify'}
+                        </button>
+                      </form>
+                      <form action="/api/admin/users/ban" method="post" className="inline ml-2">
+                        <input type="hidden" name="userId" value={u.id} />
+                        <input type="hidden" name="banned" value={u.banned ? 'false' : 'true'} />
+                        <button className="rounded-md border border-red-700 text-red-300 px-2 py-1 text-xs hover:bg-red-900/30">
+                          {u.banned ? 'Unban' : 'Ban'}
+                        </button>
+                      </form>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -108,6 +125,7 @@ export default async function AdminPage() {
                   <th className="p-2">Price (sats)</th>
                   <th className="p-2">Posted By</th>
                   <th className="p-2">Created</th>
+                  <th className="p-2">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-800">
@@ -117,6 +135,12 @@ export default async function AdminPage() {
                     <td className="p-2">{l.priceSat}</td>
                     <td className="p-2">{l.postedBy ?? '-'}</td>
                     <td className="p-2">{new Date((l.createdAt || 0) * 1000).toLocaleString()}</td>
+                    <td className="p-2">
+                      <form action="/api/admin/listings/delete" method="post" onSubmit={(e) => { if (!confirm('Delete listing?')) e.preventDefault(); }}>
+                        <input type="hidden" name="id" value={l.id} />
+                        <button className="rounded-md border border-red-700 text-red-300 px-2 py-1 text-xs hover:bg-red-900/30">Delete</button>
+                      </form>
+                    </td>
                   </tr>
                 ))}
               </tbody>
