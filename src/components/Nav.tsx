@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import { UnitToggle } from "./UnitToggle";
 import { ThemeToggle } from "./ThemeToggle";
 import { ViewToggle } from "./ViewToggle";
@@ -34,12 +35,10 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
   const [langOpen, setLangOpen] = React.useState(false);
   const langRef = React.useRef<HTMLDivElement | null>(null);
   const [menuOpen, setMenuOpen] = React.useState(false);
-  const menuRef = React.useRef<HTMLDivElement | null>(null);
   React.useEffect(() => {
     const onDoc = (e: MouseEvent | TouchEvent) => {
       const target = e.target as Node | null;
       if (langOpen && langRef.current && target && !langRef.current.contains(target)) setLangOpen(false);
-      if (menuOpen && menuRef.current && target && !menuRef.current.contains(target)) setMenuOpen(false);
     };
     document.addEventListener('click', onDoc, true);
     document.addEventListener('touchstart', onDoc, true);
@@ -47,7 +46,7 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
       document.removeEventListener('click', onDoc, true);
       document.removeEventListener('touchstart', onDoc, true);
     };
-  }, [langOpen, menuOpen]);
+  }, [langOpen]);
 
   function navigateToLocale(next: 'en' | 'fr' | 'es' | 'de') {
     // Persist current UI prefs before navigation
@@ -141,26 +140,30 @@ export function Nav({ onPost, onToggleTheme, dark, user, onAuth, unit, setUnit, 
             </button>
           )}
           {/* Settings Dropdown */}
-          <div className="relative" ref={menuRef}>
-            <button onMouseDown={(e) => e.stopPropagation()} onClick={() => setMenuOpen(v => !v)} aria-expanded={menuOpen} aria-haspopup="menu" className={cn("rounded-xl px-3 py-2 text-base font-bold shadow ring-1", dark ? "text-neutral-200 hover:bg-neutral-900 ring-neutral-800" : "text-neutral-800 hover:bg-neutral-100 ring-neutral-300")}>☰</button>
-            <div onMouseDown={(e) => e.stopPropagation()} className={cn("absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl transition-opacity duration-200 z-[9999]",
-              menuOpen ? "opacity-100 block" : "opacity-0 hidden",
-              dark ? "border-neutral-700/50 bg-neutral-900" : "border-neutral-300/50 bg-white")}> 
-              <div className="p-4 space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>{t('menu_display_prices_in', lang)}</span>
-                  <UnitToggle unit={unit} setUnit={setUnit} />
+          <div className="relative">
+            <button onClick={() => setMenuOpen(v => !v)} aria-expanded={menuOpen} aria-haspopup="menu" className={cn("rounded-xl px-3 py-2 text-base font-bold shadow ring-1", dark ? "text-neutral-200 hover:bg-neutral-900 ring-neutral-800" : "text-neutral-800 hover:bg-neutral-100 ring-neutral-300")}>☰</button>
+            {menuOpen && typeof window !== 'undefined' && createPortal(
+              <div className="fixed inset-0 z-[9999]" onClick={() => setMenuOpen(false)}>
+                <div className="absolute right-4 top-16 w-80 rounded-2xl border shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                  <div className={cn("rounded-2xl overflow-hidden", dark ? "border border-neutral-700/50 bg-neutral-900" : "border border-neutral-300/50 bg-white")}> 
+                    <div className="p-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>{t('menu_display_prices_in', lang)}</span>
+                        <UnitToggle unit={unit} setUnit={setUnit} />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>{t('menu_display_theme', lang)}</span>
+                        <ThemeToggle dark={dark} onToggle={onToggleTheme} />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>{t('menu_layout_view', lang)}</span>
+                        <ViewToggle layout={layout} setLayout={setLayout} dark={dark} />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>{t('menu_display_theme', lang)}</span>
-                  <ThemeToggle dark={dark} onToggle={onToggleTheme} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className={cn("text-sm font-medium", dark ? "text-neutral-200" : "text-neutral-700")}>{t('menu_layout_view', lang)}</span>
-                  <ViewToggle layout={layout} setLayout={setLayout} dark={dark} />
-                </div>
-              </div>
-            </div>
+              </div>, document.body)
+            }
           </div>
         </div>
       </div>
