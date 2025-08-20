@@ -1,6 +1,7 @@
 import "./../styles/globals.css";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { getLang } from "@/lib/i18n";
 import { LocaleHydrator } from "./LocaleHydrator";
@@ -26,7 +27,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <LocaleHydrator />
           {/* Global header */}
           <div className="sticky top-0 z-40">
-            <GlobalHeader />
+            <Suspense fallback={null}>
+              <GlobalHeader />
+            </Suspense>
           </div>
           {children}
         </ThemeProvider>
