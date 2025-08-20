@@ -3,15 +3,11 @@
 import React from "react";
 import { Nav, NewListingModal } from "@/components";
 import { useEffect, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export default function GlobalHeader() {
   const [authed, setAuthed] = useState(false);
   const [avatar, setAvatar] = useState<string | undefined>(undefined);
   const [showNew, setShowNew] = useState(false);
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   useEffect(() => {
     fetch('/api/auth/session', { cache: 'no-store' })
       .then(r => r.json() as Promise<{ session?: any }>)
@@ -23,21 +19,22 @@ export default function GlobalHeader() {
       .catch(() => setAuthed(false));
   }, []);
 
+  // Initialize modal open state from URL on mount
   useEffect(() => {
-    const isNew = searchParams?.get("new") === "1";
-    setShowNew(isNew);
-  }, [searchParams]);
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      setShowNew(sp.get('new') === '1');
+    } catch {}
+  }, []);
 
   function setQueryOpen(isOpen: boolean) {
     try {
-      const params = new URLSearchParams(searchParams?.toString() || "");
-      if (isOpen) params.set("new", "1");
-      else params.delete("new");
-      const qs = params.toString();
-      router.replace(qs ? `${pathname}?${qs}` : pathname);
-    } catch {
-      // no-op
-    }
+      const url = new URL(window.location.href);
+      if (isOpen) url.searchParams.set('new', '1');
+      else url.searchParams.delete('new');
+      window.history.replaceState(null, "", url.toString());
+      setShowNew(isOpen);
+    } catch {}
   }
 
   function onPost() {
