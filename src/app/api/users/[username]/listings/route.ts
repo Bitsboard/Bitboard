@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
-// Edge runtime for production, standard for local development
-// export const runtime = "edge";
+export const runtime = "edge";
 
 export async function GET(
   req: Request,
