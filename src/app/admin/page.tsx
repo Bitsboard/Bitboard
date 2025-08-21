@@ -1,216 +1,272 @@
-export const runtime = 'edge';
+"use client";
 
-import React from 'react';
-import { getAuthSecret, verifyJwtHS256 } from '@/lib/auth';
-import { getRequestContext } from '@cloudflare/next-on-pages';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useLang } from "@/lib/i18n-client";
+import { t } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import type { Session } from "@/lib/types";
 
-async function getSession(req: Request) {
-  const cookieHeader = (req.headers as any).get?.('cookie') || '';
-  const token = /(?:^|; )session=([^;]+)/.exec(cookieHeader)?.[1];
-  if (!token) return null as any;
-  const payload = await verifyJwtHS256(token, getAuthSecret());
-  return payload;
-}
+export default function AdminPage() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const router = useRouter();
+  const lang = useLang();
 
-async function isAdmin(email: string | undefined | null): Promise<boolean> {
-  if (!email) return false;
-  try {
-    const { env } = getRequestContext();
-    const db = (env as any).DB as D1Database | undefined;
-    if (!db) return false;
-    await db.prepare(`CREATE TABLE IF NOT EXISTS users (
-      id TEXT PRIMARY KEY,
-      email TEXT UNIQUE,
-      username TEXT UNIQUE,
-      sso TEXT,
-      verified INTEGER DEFAULT 0,
-      is_admin INTEGER DEFAULT 0,
-      created_at INTEGER NOT NULL,
-      image TEXT
-    )`).run();
-    const res = await db.prepare('SELECT is_admin FROM users WHERE email = ?').bind(email).all();
-    return Boolean(res.results?.[0]?.is_admin);
-  } catch {
-    return false;
-  }
-}
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/session');
+        if (response.ok) {
+          const data = await response.json();
+          const userSession = data?.session;
+          setSession(userSession);
 
-export default async function AdminPage() {
-  const req = (globalThis as any).request as Request | undefined;
-  const payload = req ? await getSession(req) : null;
-  const email = (payload as any)?.email as string | undefined;
-  const allowed = await isAdmin(email) || email === 'georged1997@gmail.com';
-  if (!allowed) {
+          if (userSession?.user?.email) {
+            // Check if user is admin
+            const adminResponse = await fetch('/api/admin/check', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: userSession.user.email })
+            });
+
+            if (adminResponse.ok) {
+              const adminData = await adminResponse.json();
+              setIsAdmin(adminData.isAdmin);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to check authentication:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    if (!loading && !session) {
+      router.push('/');
+    }
+  }, [loading, session, router]);
+
+  useEffect(() => {
+    if (!loading && session && !isAdmin) {
+      router.push('/');
+    }
+  }, [loading, session, isAdmin, router]);
+
+  if (loading) {
     return (
-      <meta httpEquiv="refresh" content="0; url=/" />
-    ) as any;
-  }
-  return (
-    <div className="mx-auto max-w-6xl p-6" suppressHydrationWarning>
-      <h1 className="text-2xl font-bold mb-6">Admin dashboard</h1>
-      <AdminClient />
-    </div>
-  );
-}
-
-function AdminClient() {
-  'use client';
-  const [users, setUsers] = React.useState<any[]>([]);
-  const [listings, setListings] = React.useState<any[]>([]);
-  const [uTotal, setUTotal] = React.useState(0);
-  const [lTotal, setLTotal] = React.useState(0);
-  const [uPage, setUPage] = React.useState(0);
-  const [lPage, setLPage] = React.useState(0);
-  const [uQuery, setUQuery] = React.useState('');
-  const [lQuery, setLQuery] = React.useState('');
-  const limit = 20;
-
-  async function load() {
-    const [ur, lr] = await Promise.all([
-      fetch(`/api/admin/users/list?limit=${limit}&offset=${uPage * limit}` + (uQuery ? `&q=${encodeURIComponent(uQuery)}` : '')),
-      fetch(`/api/admin/listings/list?limit=${limit}&offset=${lPage * limit}` + (lQuery ? `&q=${encodeURIComponent(lQuery)}` : '')),
-    ]);
-    if (ur.ok) {
-      const j = (await ur.json()) as { users?: any[]; total?: number };
-      setUsers(j.users || []);
-      setUTotal(j.total || 0);
-    }
-    if (lr.ok) {
-      const j = (await lr.json()) as { listings?: any[]; total?: number };
-      setListings(j.listings || []);
-      setLTotal(j.total || 0);
-    }
-  }
-
-  React.useEffect(() => { load(); }, [uPage, lPage, uQuery, lQuery]);
-
-  function toast(msg: string) {
-    // Simple inline toast
-    alert(msg);
-  }
-
-  return (
-    <>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <section className="rounded-2xl border border-neutral-800 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">Users</h2>
-          </div>
-          <div className="flex items-center justify-between mb-2">
-            <input value={uQuery} onChange={(e) => { setUQuery(e.target.value); setUPage(0); }} placeholder="Search users (email/username)" className="w-64 rounded-md border border-neutral-800 bg-neutral-950 px-2 py-1 text-sm" />
-          </div>
-          <div className="overflow-auto">
-            <table className="w-full text-sm">
-              <thead className="text-left text-neutral-400">
-                <tr>
-                  <th className="p-2">Email</th>
-                  <th className="p-2">Username</th>
-                  <th className="p-2">Verified</th>
-                  <th className="p-2">Admin</th>
-                  <th className="p-2">Registered</th>
-                  <th className="p-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-800">
-                {users.map((u) => (
-                  <tr key={u.id}>
-                    <td className="p-2">{u.email}</td>
-                    <td className="p-2">{u.username ?? '-'}</td>
-                    <td className="p-2">{u.verified ? 'Yes' : 'No'}</td>
-                    <td className="p-2">{u.isAdmin ? 'Yes' : 'No'}</td>
-                    <td className="p-2">{new Date((u.createdAt || 0) * 1000).toLocaleString()}</td>
-                    <td className="p-2">
-                      <button
-                        onClick={async () => {
-                          if (!confirm(`${u.verified ? 'Unverify' : 'Verify'} this user?`)) return;
-                          const res = await fetch('/api/admin/users/verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ userId: u.id, verified: !u.verified }) });
-                          if (res.ok) { toast('Updated'); load(); } else toast('Failed');
-                        }}
-                        className="rounded-md border border-neutral-700 px-2 py-1 text-xs hover:bg-neutral-900"
-                      >
-                        {u.verified ? 'Unverify' : 'Verify'}
-                      </button>
-                      <button
-                        onClick={async () => {
-                          if (!confirm(`${u.banned ? 'Unban' : 'Ban'} this user?`)) return;
-                          const res = await fetch('/api/admin/users/ban', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ userId: u.id, banned: !u.banned }) });
-                          if (res.ok) { toast('Updated'); load(); } else toast('Failed');
-                        }}
-                        className="ml-2 rounded-md border border-red-700 text-red-300 px-2 py-1 text-xs hover:bg-red-900/30"
-                      >
-                        {u.banned ? 'Unban' : 'Ban'}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <div className="flex items-center justify-between mt-3 text-xs">
-              <button disabled={uPage === 0} onClick={() => setUPage((p) => Math.max(0, p - 1))} className="rounded-md border border-neutral-700 px-2 py-1 disabled:opacity-50">Prev</button>
-              <div>Page {uPage + 1} of {Math.max(1, Math.ceil(uTotal / limit))}</div>
-              <button disabled={(uPage + 1) * limit >= uTotal} onClick={() => setUPage((p) => p + 1)} className="rounded-md border border-neutral-700 px-2 py-1 disabled:opacity-50">Next</button>
-            </div>
-          </div>
-        </section>
-        <section className="rounded-2xl border border-neutral-800 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">Listings</h2>
-          </div>
-          <div className="flex items-center justify-between mb-2">
-            <input value={lQuery} onChange={(e) => { setLQuery(e.target.value); setLPage(0); }} placeholder="Search listings (title)" className="w-64 rounded-md border border-neutral-800 bg-neutral-950 px-2 py-1 text-sm" />
-          </div>
-          <div className="overflow-auto">
-            <table className="w-full text-sm">
-              <thead className="text-left text-neutral-400">
-                <tr>
-                  <th className="p-2">Title</th>
-                  <th className="p-2">Price (sats)</th>
-                  <th className="p-2">Posted By</th>
-                  <th className="p-2">Created</th>
-                  <th className="p-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-800">
-                {listings.map((l) => (
-                  <tr key={l.id}>
-                    <td className="p-2">{l.title}</td>
-                    <td className="p-2">{l.priceSat}</td>
-                    <td className="p-2">{l.postedBy ?? '-'}</td>
-                    <td className="p-2">{new Date((l.createdAt || 0) * 1000).toLocaleString()}</td>
-                    <td className="p-2">
-                      <button
-                        onClick={async () => {
-                          if (!confirm('Delete listing?')) return;
-                          const res = await fetch('/api/admin/listings/delete', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: l.id }) });
-                          if (res.ok) { toast('Deleted'); load(); } else toast('Failed');
-                        }}
-                        className="rounded-md border border-red-700 text-red-300 px-2 py-1 text-xs hover:bg-red-900/30"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <div className="flex items-center justify-between mt-3 text-xs">
-              <button disabled={lPage === 0} onClick={() => setLPage((p) => Math.max(0, p - 1))} className="rounded-md border border-neutral-700 px-2 py-1 disabled:opacity-50">Prev</button>
-              <div>Page {lPage + 1} of {Math.max(1, Math.ceil(lTotal / limit))}</div>
-              <button disabled={(lPage + 1) * limit >= lTotal} onClick={() => setLPage((p) => p + 1)} className="rounded-md border border-neutral-700 px-2 py-1 disabled:opacity-50">Next</button>
-            </div>
-          </div>
-        </section>
+      <div className="min-h-screen bg-white dark:bg-neutral-950 flex items-center justify-center">
+        <div className="text-neutral-600 dark:text-neutral-400">Loading...</div>
       </div>
-      <p className="text-xs text-neutral-500 mt-6">Search engines: noindex</p>
-    </>
+    );
+  }
+
+  if (!session || !isAdmin) {
+    return null;
+  }
+
+  return (
+    <ErrorBoundary>
+      <div className="min-h-screen bg-white dark:bg-neutral-950">
+        <div className="mx-auto max-w-7xl px-4 py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-4">
+              Admin Dashboard
+            </h1>
+            <p className="text-lg text-neutral-600 dark:text-neutral-400">
+              Welcome back, {session.user?.username || session.user?.email}
+            </p>
+          </div>
+
+          {/* Admin Actions Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* User Management */}
+            <div className={cn(
+              "p-6 rounded-2xl border transition-all duration-200 hover:shadow-lg",
+              "bg-white dark:bg-neutral-900",
+              "border-neutral-200 dark:border-neutral-800",
+              "hover:border-orange-300 dark:hover:border-orange-600"
+            )}>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">User Management</h3>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">Manage user accounts and permissions</p>
+                </div>
+              </div>
+              <button className="w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200">
+                Manage Users
+              </button>
+            </div>
+
+            {/* Listing Management */}
+            <div className={cn(
+              "p-6 rounded-2xl border transition-all duration-200 hover:shadow-lg",
+              "bg-white dark:bg-neutral-900",
+              "border-neutral-200 dark:border-neutral-800",
+              "hover:border-orange-300 dark:hover:border-orange-600"
+            )}>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Listing Management</h3>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">Review and moderate listings</p>
+                </div>
+              </div>
+              <button className="w-full px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200">
+                Manage Listings
+              </button>
+            </div>
+
+            {/* System Analytics */}
+            <div className={cn(
+              "p-6 rounded-2xl border transition-all duration-200 hover:shadow-lg",
+              "bg-white dark:bg-neutral-900",
+              "border-neutral-200 dark:border-neutral-800",
+              "hover:border-orange-300 dark:hover:border-orange-600"
+            )}>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Analytics</h3>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">View system statistics and reports</p>
+                </div>
+              </div>
+              <button className="w-full px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200">
+                View Analytics
+              </button>
+            </div>
+
+            {/* Content Moderation */}
+            <div className={cn(
+              "p-6 rounded-2xl border transition-all duration-200 hover:shadow-lg",
+              "bg-white dark:bg-neutral-900",
+              "border-neutral-200 dark:border-neutral-800",
+              "hover:border-orange-300 dark:hover:border-orange-600"
+            )}>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Content Moderation</h3>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">Review reported content and users</p>
+                </div>
+              </div>
+              <button className="w-full px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200">
+                Review Reports
+              </button>
+            </div>
+
+            {/* System Settings */}
+            <div className={cn(
+              "p-6 rounded-2xl border transition-all duration-200 hover:shadow-lg",
+              "bg-white dark:bg-neutral-900",
+              "border-neutral-200 dark:border-neutral-800",
+              "hover:border-orange-300 dark:hover:border-orange-600"
+            )}>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">System Settings</h3>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">Configure system parameters</p>
+                </div>
+              </div>
+              <button className="w-full px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200">
+                Configure System
+              </button>
+            </div>
+
+            {/* Database Management */}
+            <div className={cn(
+              "p-6 rounded-2xl border transition-all duration-200 hover:shadow-lg",
+              "bg-white dark:bg-neutral-900",
+              "border-neutral-200 dark:border-neutral-800",
+              "hover:border-orange-300 dark:hover:border-orange-600"
+            )}>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Database</h3>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">Manage database and backups</p>
+                </div>
+              </div>
+              <button className="w-full px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-lg hover:from-indigo-600 hover:to-indigo-700 transition-all duration-200">
+                Database Tools
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Stats */}
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className={cn(
+              "p-6 rounded-2xl border",
+              "bg-white dark:bg-neutral-900",
+              "border-neutral-200 dark:border-neutral-800"
+            )}>
+              <div className="text-2xl font-bold text-neutral-900 dark:text-white">1,234</div>
+              <div className="text-sm text-neutral-600 dark:text-neutral-400">Total Users</div>
+            </div>
+            <div className={cn(
+              "p-6 rounded-2xl border",
+              "bg-white dark:bg-neutral-900",
+              "border-neutral-200 dark:border-neutral-800"
+            )}>
+              <div className="text-2xl font-bold text-neutral-900 dark:text-white">567</div>
+              <div className="text-sm text-neutral-600 dark:text-neutral-400">Active Listings</div>
+            </div>
+            <div className={cn(
+              "p-6 rounded-2xl border",
+              "bg-white dark:bg-neutral-900",
+              "border-neutral-200 dark:border-neutral-800"
+            )}>
+              <div className="text-2xl font-bold text-neutral-900 dark:text-white">89</div>
+              <div className="text-sm text-neutral-600 dark:text-neutral-400">Pending Reviews</div>
+            </div>
+            <div className={cn(
+              "p-6 rounded-2xl border",
+              "bg-white dark:bg-neutral-900",
+              "border-neutral-200 dark:border-neutral-800"
+            )}>
+              <div className="text-2xl font-bold text-neutral-900 dark:text-white">99.9%</div>
+              <div className="text-sm text-neutral-600 dark:text-neutral-400">Uptime</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ErrorBoundary>
   );
 }
-
-export const metadata = {
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
 
 

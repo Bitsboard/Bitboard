@@ -15,12 +15,13 @@ import {
 } from "@/components";
 import { ItemsCarousel } from "@/components/ItemsCarousel";
 import { cn } from "@/lib/utils";
-import { mockListings } from "@/lib/mockData";
-import type { Listing, User, Unit, Layout, AdType, Category, Place } from "@/lib/types";
+import { dataService, CONFIG } from "@/lib/dataService";
+import type { Listing, User, AdType, Category, Place } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
 import { useSettings } from "@/lib/settings";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export default function HomePage() {
   // Use centralized settings
@@ -31,21 +32,20 @@ export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
   const ENV = process.env.NEXT_PUBLIC_ENV;
   const isDeployed = ENV === "staging" || ENV === "production" || ENV === "main";
-  const [listings, setListings] = useState<Listing[]>(isDeployed ? [] : mockListings);
+  const [listings, setListings] = useState<Listing[]>([]);
   const [active, setActive] = useState<Listing | null>(null);
   const [chatFor, setChatFor] = useState<Listing | null>(null);
   const [showNew, setShowNew] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Category>("Featured");
-  const [center, setCenter] = useState<Place>({ name: "Toronto (City Center)", lat: 43.653, lng: -79.383 });
-  const [radiusKm, setRadiusKm] = useState(25);
+  const [center, setCenter] = useState<Place>(CONFIG.DEFAULT_CENTER);
+  const [radiusKm, setRadiusKm] = useState<number>(CONFIG.DEFAULT_RADIUS_KM);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [adType, setAdType] = useState<AdType>("all");
   const [btcCad, setBtcCad] = useState<number | null>(null);
   const [total, setTotal] = useState<number>(0);
-  const pageSize = 24;
-  const isFetchingRef = useRef(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
@@ -66,6 +66,7 @@ export default function HomePage() {
     AU: "Australia", AUS: "Australia",
     JP: "Japan", JPN: "Japan",
   };
+
   function deriveCountry(name?: string | null): string | null {
     if (!name) return null;
     const parts = name.split(',').map(s => s.trim()).filter(Boolean);
@@ -84,23 +85,22 @@ export default function HomePage() {
     return COUNTRY_EXPAND[last as keyof typeof COUNTRY_EXPAND] || last || null;
   }
 
-
   // Load saved user location on mount
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("userLocation");
-      if (raw) {
-        const p = JSON.parse(raw) as Place;
-        if (p && typeof p.lat === 'number' && typeof p.lng === 'number' && p.name) {
-          setCenter(p);
+    const loadUserLocation = async () => {
+      try {
+        const savedLocation = await dataService.getUserLocation();
+        if (savedLocation) {
+          setCenter(savedLocation);
         }
+        const savedRadius = await dataService.getUserRadius();
+        setRadiusKm(savedRadius);
+      } catch (error) {
+        console.warn('Failed to load user location:', error);
       }
-      const r = localStorage.getItem('userRadiusKm');
-      if (r) {
-        const n = Number(r);
-        if (Number.isFinite(n) && n > 0) setRadiusKm(n);
-      }
-    } catch { }
+    };
+
+    loadUserLocation();
   }, []);
 
   // Re-translate "My Location" label when locale changes
@@ -110,10 +110,9 @@ export default function HomePage() {
       if (using) {
         setCenter((prev) => ({ ...prev, name: t('my_location', lang) }));
       }
-      const savedRadius = Number(localStorage.getItem('userRadiusKm') || '');
-      if (Number.isFinite(savedRadius)) setRadiusKm(savedRadius);
-    } catch { }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    } catch (error) {
+      console.warn('Failed to update location label:', error);
+    }
   }, [lang]);
 
   // Categories
@@ -131,125 +130,76 @@ export default function HomePage() {
 
   // Fetch BTC rate
   useEffect(() => {
-    fetch("/api/rate")
-      .then((r) => r.json() as Promise<{ cad: number | null }>)
-      .then((data) => setBtcCad(data.cad))
-      .catch(() => { });
-  }, []);
-
-  // Helper to map API rows -> Listing
-  const mapRowsToListings = useCallback((rows: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string | string[]; priceSat: number; boostedUntil?: number | null; createdAt: number; postedBy?: string }>): Listing[] => {
-    function cleanLocationLabel(raw?: string): string {
-      const s = (raw || "").replace(/\s*[•|\-].*$/, "").replace(/\(.*?\)/g, "").trim();
-      // Collapse multiple spaces and commas
-      return s.replace(/\s{2,}/g, " ").replace(/,\s*,/g, ", ").replace(/\s+,\s+/g, ", ");
-    }
-    return rows.map((row) => ({
-      id: String(row.id),
-      title: row.title,
-      desc: (row.description ?? "") + "\n\n" + "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ".repeat(40),
-      priceSats: Number(row.priceSat) || 0,
-      category: (row.category as any) || "Electronics",
-      location: cleanLocationLabel(row.location) || "Toronto, ON",
-      lat: Number.isFinite(row.lat as any) ? (row.lat as number) : 43.6532,
-      lng: Number.isFinite(row.lng as any) ? (row.lng as number) : -79.3832,
-      type: (row.adType as any) === "want" ? "want" : "sell",
-      images: (() => {
-        const fallback = [
-          "https://images.unsplash.com/photo-1555617117-08d3a8fef16c?w=1200&q=80&auto=format&fit=crop",
-          "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=1200&q=80&auto=format&fit=crop",
-          "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=1200&q=80&auto=format&fit=crop",
-        ];
-        if (Array.isArray(row.imageUrl) && row.imageUrl.length > 0) return row.imageUrl as string[];
-        if (typeof row.imageUrl === 'string' && row.imageUrl.includes(',')) return (row.imageUrl as string).split(',').map(s => s.trim()).filter(Boolean);
-        const base = typeof row.imageUrl === 'string' && row.imageUrl ? [row.imageUrl] : [];
-        return [...base, ...fallback].slice(0, 5);
-      })(),
-      boostedUntil: row.boostedUntil ?? null,
-      seller: (() => {
-        const name = (row.postedBy || "demo_seller").replace(/^@/, "");
-        const base = Number(row.id) % 100;
-        const score = 5 + (base % 80);
-        const deals = base % 40;
-        const verified = score >= 50;
-        return {
-          name,
-          score,
-          deals,
-          rating: 4 + ((base % 10) / 10),
-          verifications: { email: true, phone: verified, lnurl: verified },
-          onTimeRelease: verified ? 0.97 : 0.9,
-        };
-      })(),
-      createdAt: Number(row.createdAt) * 1000,
-    }));
-  }, []);
-
-  // Initial page load (deployed envs only)
-  useEffect(() => {
-    if (!isDeployed) return;
-    const load = async () => {
+    const loadBtcRate = async () => {
       try {
-        isFetchingRef.current = true;
-        const sp = new URLSearchParams({ limit: String(pageSize), offset: "0" });
-        if (Number.isFinite(center.lat as any) && Number.isFinite(center.lng as any)) {
-          sp.set('lat', String(center.lat));
-          sp.set('lng', String(center.lng));
-        }
-        if (Number.isFinite(radiusKm as any)) sp.set('radiusKm', String(radiusKm));
-        const r = await fetch(`/api/listings?${sp.toString()}`);
-        const data = (await r.json()) as { listings?: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number }>; total?: number };
-        const rows = data.listings ?? [];
-        const mapped = mapRowsToListings(rows);
-        setListings(mapped);
-        const t = Number(data.total ?? 0);
-        setTotal(t);
-        setHasMore(mapped.length < t);
-      } catch {
-        // ignore
-      } finally {
-        isFetchingRef.current = false;
+        const rate = await dataService.getBtcRate();
+        setBtcCad(rate);
+      } catch (error) {
+        console.warn('Failed to load BTC rate:', error);
       }
     };
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    loadBtcRate();
+  }, []);
+
+  // Initial page load
+  useEffect(() => {
+    const loadInitialListings = async () => {
+      if (!isDeployed) return;
+
+      try {
+        setIsLoading(true);
+        const response = await dataService.getListings({
+          limit: CONFIG.PAGE_SIZE,
+          offset: 0,
+          lat: center.lat,
+          lng: center.lng,
+          radiusKm,
+        });
+
+        setListings(response.listings);
+        setTotal(response.total);
+        setHasMore(response.listings.length < response.total);
+      } catch (error) {
+        console.error('Failed to load initial listings:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadInitialListings();
   }, [isDeployed, center.lat, center.lng, radiusKm]);
 
   const loadMore = useCallback(async () => {
-    if (!isDeployed) return;
-    if (isFetchingRef.current) return;
-    if (!hasMore) return;
+    if (!isDeployed || isLoading || isLoadingMore || !hasMore) return;
+
     try {
-      isFetchingRef.current = true;
       setIsLoadingMore(true);
-      const offset = listings.length;
-      const sp = new URLSearchParams({ limit: String(pageSize), offset: String(offset) });
-      if (Number.isFinite(center.lat as any) && Number.isFinite(center.lng as any)) {
-        sp.set('lat', String(center.lat));
-        sp.set('lng', String(center.lng));
-      }
-      if (Number.isFinite(radiusKm as any)) sp.set('radiusKm', String(radiusKm));
-      const r = await fetch(`/api/listings?${sp.toString()}`);
-      const data = (await r.json()) as { listings?: Array<{ id: number; title: string; description?: string; category?: string; adType?: string; location?: string; lat?: number; lng?: number; imageUrl?: string; priceSat: number; boostedUntil?: number | null; createdAt: number }>; total?: number };
-      const rows = data.listings ?? [];
-      const mapped = mapRowsToListings(rows);
-      setListings((prev) => [...prev, ...mapped]);
-      const t = Number(data.total ?? total);
-      setTotal(t);
-      setHasMore(prev => prev && (offset + mapped.length) < t);
-    } catch {
-      // ignore
+      const response = await dataService.getListings({
+        limit: CONFIG.PAGE_SIZE,
+        offset: listings.length,
+        lat: center.lat,
+        lng: center.lng,
+        radiusKm,
+      });
+
+      setListings((prev) => [...prev, ...response.listings]);
+      setTotal(response.total);
+      setHasMore(response.listings.length < response.total);
+    } catch (error) {
+      console.error('Failed to load more listings:', error);
     } finally {
-      isFetchingRef.current = false;
       setIsLoadingMore(false);
     }
-  }, [isDeployed, hasMore, listings.length, mapRowsToListings, pageSize, total, center.lat, center.lng, radiusKm]);
+  }, [isDeployed, isLoading, isLoadingMore, hasMore, listings.length, center.lat, center.lng, radiusKm]);
 
   // IntersectionObserver to trigger loadMore when sentinel is visible
   useEffect(() => {
     if (!isDeployed) return;
+
     const el = loadMoreRef.current;
     if (!el) return;
+
     const obs = new IntersectionObserver((entries) => {
       for (const e of entries) {
         if (e.isIntersecting) {
@@ -258,6 +208,7 @@ export default function HomePage() {
         }
       }
     }, { rootMargin: "1000px 0px" });
+
     obs.observe(el);
     return () => obs.disconnect();
   }, [isDeployed, loadMore]);
@@ -272,6 +223,7 @@ export default function HomePage() {
         setShowAuth(false);
       }
     };
+
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, []);
@@ -340,186 +292,186 @@ export default function HomePage() {
     router.push(`${prefix}/search?${sp.toString()}`);
   }, [adType, cat, query, layout, router, lang]);
 
+  const handleLocationUpdate = useCallback(async (place: Place, radius: number) => {
+    setCenter(place);
+    setRadiusKm(radius);
+    try {
+      await dataService.saveUserLocation(place, radius);
+    } catch (error) {
+      console.warn('Failed to save location:', error);
+    }
+    setShowLocationModal(false);
+  }, []);
+
   return (
-    <div className={cn("min-h-screen", bg, dark ? "dark" : "")}>
-      {/* Global header is rendered via layout */}
+    <ErrorBoundary>
+      <div className={cn("min-h-screen", bg, dark ? "dark" : "")}>
+        {/* Global header is rendered via layout */}
 
-      {/* Hero Section */}
-      <header className="relative overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute inset-0">
-          <div className={cn(
-            "absolute inset-0 blur-3xl opacity-30",
-            dark
-              ? "bg-gradient-to-br from-orange-500/20 via-amber-500/10 to-transparent"
-              : "bg-gradient-to-br from-orange-300/30 via-amber-200/20 to-transparent"
-          )} />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_50%)]" />
-        </div>
+        {/* Hero Section */}
+        <header className="relative overflow-hidden">
+          {/* Background Effects */}
+          <div className="absolute inset-0">
+            <div className={cn(
+              "absolute inset-0 blur-3xl opacity-30",
+              dark
+                ? "bg-gradient-to-br from-orange-500/20 via-amber-500/10 to-transparent"
+                : "bg-gradient-to-br from-orange-300/30 via-amber-200/20 to-transparent"
+            )} />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_50%)]" />
+          </div>
 
-        <div className="relative mx-auto max-w-7xl px-4 py-8 sm:py-10">
-          <div className="flex flex-col-reverse items-start gap-3 md:flex-row md:items-center md:justify-between">
-            {/* Left Content */}
-            <div className="max-w-2xl">
-              <h1 className="text-5xl font-black tracking-tight sm:text-7xl">
-                <span className={cn(lang === 'en' ? 'block' : 'inline', "leading-tight", dark ? "text-white" : "text-black")}>{t('title_hero_1', lang)}{lang !== 'en' ? ' ' : ''}</span>
-                <span className={cn(lang === 'en' ? 'block' : 'inline', "bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent")} style={{ lineHeight: '1.2' }}>
-                  {t('title_hero_2', lang)}
-                </span>
-              </h1>
-              <p className={cn("mt-6 text-xl leading-relaxed", dark ? "text-neutral-300" : "text-neutral-600")}>
-                {t('subheading', lang)}
-              </p>
+          <div className="relative mx-auto max-w-7xl px-4 py-8 sm:py-10">
+            <div className="flex flex-col-reverse items-start gap-3 md:flex-row md:items-center md:justify-between">
+              {/* Left Content */}
+              <div className="max-w-2xl">
+                <h1 className="text-5xl font-black tracking-tight sm:text-7xl">
+                  <span className={cn(lang === 'en' ? 'block' : 'inline', "leading-tight", dark ? "text-white" : "text-black")}>{t('title_hero_1', lang)}{lang !== 'en' ? ' ' : ''}</span>
+                  <span className={cn(lang === 'en' ? 'block' : 'inline', "bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent")} style={{ lineHeight: '1.2' }}>
+                    {t('title_hero_2', lang)}
+                  </span>
+                </h1>
+                <p className={cn("mt-6 text-xl leading-relaxed", dark ? "text-neutral-300" : "text-neutral-600")}>
+                  {t('subheading', lang)}
+                </p>
+              </div>
 
-            </div>
-
-            {/* Right: Location above search */}
-            <div className="w-full md:w-[460px] md:self-center">
-              {/* Removed page-level Post listing CTA; header shows it when authed */}
-              <div className="mb-2 md:mb-1 flex md:justify-end">
-                <button onClick={() => setShowLocationModal(true)} className={cn("w-full md:w-[calc(100%-120px)] rounded-3xl px-6 py-5 text-left focus:outline-none", inputBase)}>
-                  <div className="flex items-center justify-between gap-3">
-                    <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>
-                      {radiusKm === 0 ? t('all_listings_globally', lang) : (center?.name || t('choose_location', lang))}
+              {/* Right: Location above search */}
+              <div className="w-full md:w-[460px] md:self-center">
+                <div className="mb-2 md:mb-1 flex md:justify-end">
+                  <button onClick={() => setShowLocationModal(true)} className={cn("w-full md:w-[calc(100%-120px)] rounded-3xl px-6 py-5 text-left focus:outline-none", inputBase)}>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>
+                        {radiusKm === 0 ? t('all_listings_globally', lang) : (center?.name || t('choose_location', lang))}
+                      </div>
+                      <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm === 0 ? t('change', lang) : `${radiusKm} km`}</div>
                     </div>
-                    <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm === 0 ? t('change', lang) : `${radiusKm} km`}</div>
-                  </div>
-                </button>
-              </div>
-              <div className="relative mt-2">
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") handleSearchNavigate(); }}
-                  placeholder={t('search_placeholder', lang)}
-                  className={cn("w-full rounded-3xl px-6 pr-32 py-5 text-lg focus:outline-none transition-all duration-300", inputBase)}
-                />
-                <button onClick={handleSearchNavigate} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2 text-sm font-semibold text-white shadow">{t('search', lang)}</button>
+                  </button>
+                </div>
+                <div className="relative mt-2">
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleSearchNavigate(); }}
+                    placeholder={t('search_placeholder', lang)}
+                    className={cn("w-full rounded-3xl px-6 pr-32 py-5 text-lg focus:outline-none transition-all duration-300", inputBase)}
+                  />
+                  <button onClick={handleSearchNavigate} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2 text-sm font-semibold text-white shadow">{t('search', lang)}</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Main Content */}
-      <main id="browse" className="mx-auto max-w-7xl px-4 pb-24">
-        {/* Featured Row */}
-        {featured.length > 0 && (
-          <section className="mt-6">
-            <div className="mb-6 flex items-baseline justify-between">
-              <div className="flex items-center gap-3">
-                <h2 className={cn("text-3xl font-bold", dark ? "text-white" : "text-neutral-900")}>{t('featured', lang)}</h2>
+        {/* Main Content */}
+        <main id="browse" className="mx-auto max-w-7xl px-4 pb-24">
+          {/* Featured Row */}
+          {featured.length > 0 && (
+            <section className="mt-6">
+              <div className="mb-6 flex items-baseline justify-between">
+                <div className="flex items-center gap-3">
+                  <h2 className={cn("text-3xl font-bold", dark ? "text-white" : "text-neutral-900")}>{t('featured', lang)}</h2>
+                </div>
               </div>
-            </div>
-            <ItemsCarousel listings={featured} unit={unit} btcCad={btcCad} dark={dark} onOpen={(l) => setActive(l)} />
-          </section>
-        )}
-
-        {/* Goods Section */}
-        <section className="mt-16">
-          <div className="mb-6 flex items-baseline justify-between">
-            <div className="flex items-center gap-4">
-              <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}>{t('latest', lang)}</h2>
-              <span className={cn("text-sm font-medium", dark ? "text-neutral-400" : "text-neutral-500")}>
-                {goods.length} {t('results', lang)}
-              </span>
-            </div>
-          </div>
-
-          {layout === "grid" ? (
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {goods.map((l) => (
-                <ListingCard key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
-              ))}
-              {goods.length === 0 && (
-                <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
-                  <div className="text-4xl mb-4">🔍</div>
-                  <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>{t('no_goods_match', lang)}</p>
-                  <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>{t('try_widen_radius', lang)}</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-4 max-w-5xl mx-auto w-full">
-              {goods.map((l) => (
-                <ListingRow key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
-              ))}
-              {goods.length === 0 && (
-                <div className={cn("rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
-                  <div className="text-4xl mb-4">🔍</div>
-                  <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>{t('no_goods_match', lang)}</p>
-                  <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>{t('try_widen_radius', lang)}</p>
-                </div>
-              )}
-              {isDeployed && (
-                <div ref={loadMoreRef} className="pt-4">
-                  <div className={cn("text-center text-sm", dark ? "text-neutral-400" : "text-neutral-600")}>
-                    {isLoadingMore ? t('loading_more', lang) : (hasMore ? "" : t('no_more_results', lang))}
-                  </div>
-                </div>
-              )}
-            </div>
+              <ItemsCarousel listings={featured} unit={unit} btcCad={btcCad} dark={dark} onOpen={(l) => setActive(l)} />
+            </section>
           )}
-        </section>
 
-        {/* Services Section removed per request */}
-      </main>
+          {/* Goods Section */}
+          <section className="mt-16">
+            <div className="mb-6 flex items-baseline justify-between">
+              <div className="flex items-center gap-4">
+                <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}>{t('latest', lang)}</h2>
+                <span className={cn("text-sm font-medium", dark ? "text-neutral-400" : "text-neutral-500")}>
+                  {goods.length} {t('results', lang)}
+                </span>
+              </div>
+            </div>
 
-      {/* Global footer is rendered via layout */}
+            {layout === "grid" ? (
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {goods.map((l) => (
+                  <ListingCard key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
+                ))}
+                {goods.length === 0 && !isLoading && (
+                  <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
+                    <div className="text-4xl mb-4">🔍</div>
+                    <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>{t('no_goods_match', lang)}</p>
+                    <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>{t('try_widen_radius', lang)}</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4 max-w-5xl mx-auto w-full">
+                {goods.map((l) => (
+                  <ListingRow key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
+                ))}
+                {goods.length === 0 && !isLoading && (
+                  <div className={cn("rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
+                    <div className="text-4xl mb-4">🔍</div>
+                    <p className={cn("text-lg font-medium", dark ? "text-neutral-300" : "text-neutral-700")}>{t('no_goods_match', lang)}</p>
+                    <p className={cn("text-sm mt-2", dark ? "text-neutral-400" : "text-neutral-600")}>{t('try_widen_radius', lang)}</p>
+                  </div>
+                )}
+                {isDeployed && (
+                  <div ref={loadMoreRef} className="pt-4">
+                    <div className={cn("text-center text-sm", dark ? "text-neutral-400" : "text-neutral-600")}>
+                      {isLoadingMore ? t('loading_more', lang) : (hasMore ? "" : t('no_more_results', lang))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+        </main>
 
-      {/* Modals */}
-      {showLocationModal && (
-        <LocationModal
-          open={showLocationModal}
-          onClose={() => setShowLocationModal(false)}
-          initialCenter={{ lat: center.lat, lng: center.lng, name: center.name }}
-          initialRadiusKm={radiusKm}
-          dark={dark}
-          onApply={(place, r) => {
-            setCenter(place);
-            setRadiusKm(r);
-            try { localStorage.setItem('userLocation', JSON.stringify(place)); localStorage.setItem('userRadiusKm', String(r)); } catch { }
-            setShowLocationModal(false);
-          }}
-        />
-      )}
-      {active && (
-        <ListingModal
-          listing={active}
-          onClose={() => setActive(null)}
-          unit={unit}
-          btcCad={btcCad}
-          dark={dark}
-          onChat={() => requireAuth(() => setChatFor(active))}
-        />
-      )}
-      {chatFor && (
-        <ChatModal listing={chatFor} onClose={() => setChatFor(null)} dark={dark} btcCad={btcCad} unit={unit} />
-      )}
-      {showNew && (
-        <NewListingModal
-          dark={dark}
-          onClose={() => setShowNew(false)}
-          onPublish={(item: Listing) => {
-            setListings((prev) => [{ ...item, id: `l${prev.length + 1}` }, ...prev]);
-            setShowNew(false);
-          }}
-        />
-      )}
-      {showAuth && (
-        <AuthModal
-          dark={dark}
-          onClose={() => setShowAuth(false)}
-          onAuthed={(u: User) => {
-            setUser(u);
-            setShowAuth(false);
-          }}
-        />
-      )}
-    </div>
+        {/* Global footer is rendered via layout */}
+
+        {/* Modals */}
+        {showLocationModal && (
+          <LocationModal
+            open={showLocationModal}
+            onClose={() => setShowLocationModal(false)}
+            initialCenter={{ lat: center.lat, lng: center.lng, name: center.name }}
+            initialRadiusKm={radiusKm}
+            dark={dark}
+            onApply={handleLocationUpdate}
+          />
+        )}
+        {active && (
+          <ListingModal
+            listing={active}
+            onClose={() => setActive(null)}
+            unit={unit}
+            btcCad={btcCad}
+            dark={dark}
+            onChat={() => requireAuth(() => setChatFor(active))}
+          />
+        )}
+        {chatFor && (
+          <ChatModal listing={chatFor} onClose={() => setChatFor(null)} dark={dark} btcCad={btcCad} unit={unit} />
+        )}
+        {showNew && (
+          <NewListingModal
+            dark={dark}
+            onClose={() => setShowNew(false)}
+            onPublish={(item: Listing) => {
+              setListings((prev) => [{ ...item, id: `l${prev.length + 1}` }, ...prev]);
+              setShowNew(false);
+            }}
+          />
+        )}
+        {showAuth && (
+          <AuthModal
+            dark={dark}
+            onClose={() => setShowAuth(false)}
+            onAuthed={(u: User) => {
+              setUser(u);
+              setShowAuth(false);
+            }}
+          />
+        )}
+      </div>
+    </ErrorBoundary>
   );
-}
-
-function formatFiat(n: number, currency = "CAD") {
-  return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 2 }).format(n);
 }

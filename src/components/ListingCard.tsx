@@ -7,55 +7,15 @@ import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
 import { TypePill } from "./TypePill";
 import { Carousel } from "./Carousel";
-
-type Category =
-  | "Featured"
-  | "Electronics"
-  | "Mining Gear"
-  | "Home & Garden"
-  | "Sports & Bikes"
-  | "Tools"
-  | "Games & Hobbies"
-  | "Furniture"
-  | "Services";
-
-type Unit = "sats" | "BTC";
-
-type Seller = {
-  name: string;
-  score: number;
-  deals: number;
-  rating: number;
-  verifications: { email?: boolean; phone?: boolean; lnurl?: boolean };
-  onTimeRelease: number;
-};
-
-type Listing = {
-  id: string;
-  title: string;
-  desc: string;
-  priceSats: number;
-  category: Category | Exclude<string, never>;
-  location: string;
-  lat: number;
-  lng: number;
-  type: "sell" | "want";
-  images: string[];
-  boostedUntil: number | null;
-  seller: Seller;
-  createdAt: number;
-};
+import { cn } from "@/lib/utils";
+import type { Listing } from "@/lib/types";
 
 interface ListingCardProps {
   listing: Listing;
-  unit: Unit;
+  unit: "sats" | "BTC";
   btcCad: number | null;
   dark: boolean;
   onOpen: () => void;
-}
-
-function cn(...xs: Array<string | false | null | undefined>) {
-  return xs.filter(Boolean).join(" ");
 }
 
 function accent(listing: Listing) {
@@ -115,7 +75,7 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
         </div>
         {/* Seller info at bottom (one line, left) */}
         <div className="mt-4 text-left text-sm">
-          <div className={cn("inline-flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}> 
+          <div className={cn("inline-flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}>
             {listing.seller.score >= 50 && (
               <span
                 className={cn(
@@ -128,7 +88,7 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
                 ✓
               </span>
             )}
-            <Link 
+            <Link
               href={`/en/${listing.seller.name}`}
               className="truncate max-w-[8rem] sm:max-w-[10rem] hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-200"
               onClick={(e) => e.stopPropagation()}

@@ -2,6 +2,7 @@
 export type Unit = "sats" | "BTC";
 export type Layout = "grid" | "list";
 export type AdType = "all" | "sell" | "want";
+export type Theme = "light" | "dark";
 
 export type Category =
   | "Featured"
@@ -159,7 +160,7 @@ export type ListingFilters = {
   radiusKm?: number;
   minPrice?: number;
   maxPrice?: number;
-  sortBy?: "price" | "date" | "rating" | "boosted";
+  sortBy?: "price" | "date" | "rating" | "boosted" | "distance";
   sortOrder?: "asc" | "desc";
 };
 
@@ -228,4 +229,67 @@ export type ListingAnalytics = {
   messages: number;
   escrowProposals: number;
   conversionRate: number;
+};
+
+// Settings Types
+export type UserSettings = {
+  theme: Theme;
+  unit: Unit;
+  layout: Layout;
+};
+
+// Session Types
+export type Session = {
+  user?: {
+    username?: string | null;
+    image?: string | null;
+    email?: string;
+  };
+  account?: {
+    sso: string;
+    email: string;
+    username: string | null;
+    verified: boolean;
+    registeredAt: number;
+    profilePhoto?: string | null;
+    listings: Array<{
+      id: number;
+      title: string;
+      priceSat: number;
+      createdAt: number;
+      type: string
+    }>;
+  } | null;
+} | null;
+
+// Profile Types
+export type ProfileData = {
+  sso: string;
+  email: string;
+  username: string | null;
+  verified: boolean;
+  registeredAt: number;
+  profilePhoto?: string | null;
+  listings: Array<{
+    id: number;
+    title: string;
+    priceSat: number;
+    createdAt: number;
+    type: string
+  }>;
+} | null;
+
+// Sort Types
+export type SortOptionProfile = 'alphabetical' | 'newest' | 'oldest';
+
+// Country Expansion Types
+export type CountryExpansion = Record<string, string>;
+
+// Location Types
+export type LocationData = {
+  country: string;
+  region: string;
+  city: string;
+  lat: number;
+  lng: number;
 };

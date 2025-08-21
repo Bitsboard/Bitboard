@@ -6,18 +6,14 @@ import { UnitToggle, ThemeToggle, ViewToggle, NotificationMenu } from "@/compone
 import { useLang } from "@/lib/i18n-client";
 import { setLang, t } from "@/lib/i18n";
 import { useTheme } from "@/lib/settings";
-
-type User = { id: string; email: string; handle: string };
+import { cn } from "@/lib/utils";
+import type { User } from "@/lib/types";
 
 interface NavProps {
   onPost: () => void;
   user: User | null;
   onAuth: () => void;
   avatarUrl?: string;
-}
-
-function cn(...xs: Array<string | false | null | undefined>) {
-  return xs.filter(Boolean).join(" ");
 }
 
 export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
@@ -30,6 +26,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
   const [langOpen, setLangOpen] = useState(false);
   const langRef = React.useRef<HTMLDivElement | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+
   React.useEffect(() => {
     const onDoc = (e: MouseEvent | TouchEvent) => {
       const target = e.target as Node | null;

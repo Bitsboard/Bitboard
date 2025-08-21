@@ -1,48 +1,36 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { useLayout } from "@/lib/settings";
-import { useLang } from "@/lib/i18n-client";
-import { t } from "@/lib/i18n";
 
 export function ViewToggle() {
   const { layout, setLayout } = useLayout();
-  const lang = useLang();
 
   return (
-    <div className="relative inline-flex rounded-2xl bg-neutral-200/50 p-0.5 shadow-lg border border-neutral-300/50 backdrop-blur-sm">
+    <div className="relative inline-flex rounded-2xl p-1 shadow-lg border border-neutral-300/50 backdrop-blur-sm bg-white/70 dark:bg-neutral-800/60">
       <div
-        className={cn(
-          "absolute inset-1 rounded-xl bg-white shadow-md transition-all duration-300 ease-out",
-          layout === "grid" ? "translate-x-0" : "translate-x-full"
-        )}
+        className={`absolute inset-1 rounded-xl bg-white shadow-md transition-all duration-300 ease-out ${layout === 'list' ? 'translate-x-full' : 'translate-x-0'
+          }`}
         style={{ width: 'calc(50% - 4px)' }}
       />
       <button
-        onClick={() => setLayout("grid")}
-        className={cn(
-          "relative z-10 px-4 py-1 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105",
-          layout === "grid"
-            ? "text-orange-700 font-extrabold"
-            : "text-neutral-600 hover:text-neutral-700"
-        )}
-        title="Grid View"
+        onClick={() => setLayout('grid')}
+        className={`relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105 ${layout === 'grid'
+            ? 'text-blue-600 font-extrabold'
+            : 'text-neutral-600 hover:text-neutral-800 dark:text-neutral-200 dark:hover:text-neutral-50'
+          }`}
+        title="Grid view"
       >
-        <span className="text-lg">⊞</span>
-        <span>{t('grid', lang)}</span>
+        Grid
       </button>
       <button
-        onClick={() => setLayout("list")}
-        className={cn(
-          "relative z-10 px-4 py-1 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105",
-          layout === "list"
-            ? "text-orange-700 font-extrabold"
-            : "text-neutral-600 hover:text-neutral-700"
-        )}
-        title="List View"
+        onClick={() => setLayout('list')}
+        className={`relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105 ${layout === 'list'
+            ? 'text-blue-600 font-extrabold'
+            : 'text-neutral-600 hover:text-neutral-800 dark:text-neutral-200 dark:hover:text-neutral-50'
+          }`}
+        title="List view"
       >
-        <span className="text-lg">☰</span>
-        <span>{t('list', lang)}</span>
+        List
       </button>
     </div>
   );

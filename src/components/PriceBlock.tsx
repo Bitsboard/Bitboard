@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-
-type Unit = "sats" | "BTC";
+import { formatNumber, formatBTCFromSats, formatCurrency, satsToFiat } from "@/lib/utils";
+import type { Unit } from "@/lib/types";
 
 interface PriceBlockProps {
   sats: number;
@@ -13,37 +13,16 @@ interface PriceBlockProps {
   compactFiat?: boolean;
 }
 
-function cn(...xs: Array<string | false | null | undefined>) {
-  return xs.filter(Boolean).join(" ");
-}
-
-function formatSats(n: number) {
-  return new Intl.NumberFormat(undefined).format(n);
-}
-
-function satsToFiat(sats: number, btcFiat: number) {
-  return (sats / 1e8) * btcFiat;
-}
-
-function formatFiat(n: number, currency = "CAD") {
-  return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 2 }).format(n);
-}
-
-function formatBTCFromSats(sats: number) {
-  const btc = sats / 1e8;
-  return btc.toLocaleString(undefined, { maximumFractionDigits: 8 });
-}
-
 export function PriceBlock({ sats, unit, btcCad, dark, size = "sm", compactFiat = false }: PriceBlockProps) {
-  const primary = unit === "sats" ? `${formatSats(sats)} sats` : `₿ ${formatBTCFromSats(sats)}`;
-  const cad = btcCad ? formatFiat(satsToFiat(sats, btcCad), "CAD") : null;
+  const primary = unit === "sats" ? `${formatNumber(sats)} sats` : `₿ ${formatBTCFromSats(sats)}`;
+  const cad = btcCad ? formatCurrency(satsToFiat(sats, btcCad), "CAD") : null;
   const mainSize = size === "lg" ? "text-2xl" : size === "md" ? "text-xl" : "text-base";
   const subSize = compactFiat ? "text-xs" : (size === "lg" ? "text-base" : size === "md" ? "text-sm" : "text-xs");
 
   return (
     <div className="flex flex-col items-start">
-      <span className={cn("font-bold text-orange-500", mainSize)}>{primary}</span>
-      {cad && <span className={cn(subSize, dark ? "text-neutral-400" : "text-neutral-600")}>~{cad}</span>}
+      <span className={`font-bold text-orange-500 ${mainSize}`}>{primary}</span>
+      {cad && <span className={`${subSize} ${dark ? "text-neutral-400" : "text-neutral-600"}`}>~{cad}</span>}
     </div>
   );
 }

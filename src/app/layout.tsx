@@ -1,39 +1,72 @@
-import "./../styles/globals.css";
-import type { ReactNode } from "react";
-import { Suspense } from "react";
 import type { Metadata } from "next";
-import { getLang } from "@/lib/i18n";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { GlobalHeader } from "./GlobalHeader";
 import { LocaleHydrator } from "./LocaleHydrator";
-import GlobalHeader from "./GlobalHeader";
-import { Footer } from "@/components";
-import { SettingsProvider } from "@/lib/settings";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "bitsbarter - Local Classifieds in Bitcoin",
-  description: "Local classifieds in sats or BTC. Built-in chat and Lightning escrow for safer meetups.",
-  keywords: ["bitcoin", "classifieds", "local", "escrow", "lightning"],
-  icons: {
-    icon: "/Bitsbarterlogo.svg",
-    shortcut: "/Bitsbarterlogo.svg",
-    apple: "/Bitsbarterlogo.svg",
+  title: "bitsbarter - Bitcoin-native Marketplace",
+  description: "The Bitcoin-native marketplace for buying, selling, and trading goods and services.",
+  keywords: ["Bitcoin", "marketplace", "trading", "buy", "sell", "crypto"],
+  authors: [{ name: "bitsbarter" }],
+  creator: "bitsbarter",
+  publisher: "bitsbarter",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL("https://bitsbarter.com"),
+  openGraph: {
+    title: "bitsbarter - Bitcoin-native Marketplace",
+    description: "The Bitcoin-native marketplace for buying, selling, and trading goods and services.",
+    url: "https://bitsbarter.com",
+    siteName: "bitsbarter",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "bitsbarter - Bitcoin-native Marketplace",
+    description: "The Bitcoin-native marketplace for buying, selling, and trading goods and services.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    google: "your-google-verification-code",
   },
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
-  const lang = getLang();
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang={lang} suppressHydrationWarning>
-      <body className="antialiased">
-        <SettingsProvider>
-          <LocaleHydrator />
-          {/* Global header (Nav is sticky itself) */}
-          <Suspense fallback={null}>
-            <GlobalHeader />
-          </Suspense>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#f97316" />
+        <link rel="icon" href="/icon.svg" />
+        <link rel="apple-touch-icon" href="/icon.svg" />
+        <link rel="manifest" href="/manifest.json" />
+      </head>
+      <body className={inter.className}>
+        <LocaleHydrator>
+          <GlobalHeader />
           {children}
-        </SettingsProvider>
-        {/* Global footer */}
-        <Footer />
+        </LocaleHydrator>
       </body>
     </html>
   );

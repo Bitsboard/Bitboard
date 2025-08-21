@@ -9,6 +9,25 @@ export type JwtPayload = {
   uid?: string;
   username?: string | null;
   sso?: string;
+  verified?: boolean;
+  isAdmin?: boolean;
+};
+
+export type Session = {
+  user: {
+    id: string;
+    email: string;
+    username?: string | null;
+    image?: string | null;
+    verified?: boolean;
+    isAdmin?: boolean;
+  };
+  account?: {
+    sso: string;
+    verified: boolean;
+    registeredAt: number;
+  };
+  expires: number;
 };
 
 function base64urlEncode(data: ArrayBuffer | Uint8Array | string): string {
@@ -114,6 +133,71 @@ export function uuidv4(): string {
   bytes[8] = (bytes[8] & 0x3f) | 0x80;
   const hex = Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+// Session management utilities
+export async function getSessionFromRequest(req: Request): Promise<Session | null> {
+  try {
+    const cookieHeader = req.headers.get('cookie') || '';
+    const token = /(?:^|; )session=([^;]+)/.exec(cookieHeader)?.[1];
+    if (!token) return null;
+
+    const payload = await verifyJwtHS256(token, getAuthSecret());
+    if (!payload) return null;
+
+    return {
+      user: {
+        id: payload.sub,
+        email: payload.email || '',
+        username: payload.username,
+        image: payload.picture,
+        verified: payload.verified || false,
+        isAdmin: payload.isAdmin || false,
+      },
+      account: {
+        sso: payload.sso || 'unknown',
+        verified: payload.verified || false,
+        registeredAt: Math.floor(Date.now() / 1000),
+      },
+      expires: payload.exp,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function isAdmin(email: string | undefined | null): Promise<boolean> {
+  if (!email) return false;
+
+  try {
+    // For now, hardcode admin emails - should be moved to environment variables
+    const adminEmails = ['georged1997@gmail.com'];
+    if (adminEmails.includes(email)) return true;
+
+    // TODO: Check database for admin status
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+export async function createSessionToken(user: {
+  id: string;
+  email: string;
+  username?: string | null;
+  verified?: boolean;
+  isAdmin?: boolean;
+}): Promise<string> {
+  const payload: JwtPayload = {
+    sub: user.id,
+    email: user.email,
+    username: user.username,
+    verified: user.verified || false,
+    isAdmin: user.isAdmin || false,
+    exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60), // 7 days
+  };
+
+  return signJwtHS256(payload, getAuthSecret());
 }
 
 

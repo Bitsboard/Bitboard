@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { PriceBlock } from "./PriceBlock";
 import { Carousel } from "./Carousel";
 import { Modal, ModalHeader, ModalTitle, ModalCloseButton } from "./Modal";
@@ -131,7 +132,13 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
                   {listing.seller.score >= 50 && (
                     <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-extrabold shadow-[0_0_8px_rgba(56,189,248,0.8)]", dark ? "bg-sky-500" : "bg-sky-500")} aria-label="Verified" title={t('verified_tooltip', lang)}>✓</span>
                   )}
-                  <span>{listing.seller.name}</span>
+                  <Link
+                    href={`/en/${listing.seller.name}`}
+                    className="hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-200"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {listing.seller.name}
+                  </Link>
                   <span className="opacity-80">+{listing.seller.score} 👍</span>
                 </div>
                 {/* Row 1, Col 2: button */}

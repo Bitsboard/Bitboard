@@ -38,7 +38,7 @@ export default function Footer() {
                             </span>
                         </div>
                         <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">
-                            The Bitcoin-native Marketplace.
+                            {t('subheading', lang)}
                         </p>
                         <div className="space-y-1 text-sm text-neutral-500 dark:text-neutral-400">
                             <p>© {new Date().getFullYear()} bitsbarter</p>
@@ -49,7 +49,7 @@ export default function Footer() {
                     {/* Legal Links */}
                     <div>
                         <h3 className="text-sm font-semibold text-neutral-900 dark:text-white mb-3 uppercase tracking-wide">
-                            Legal
+                            {t('legal', lang)}
                         </h3>
                         <ul className="space-y-2">
                             {footerLinks.legal.map((link) => (
@@ -68,7 +68,7 @@ export default function Footer() {
                     {/* Services Links */}
                     <div>
                         <h3 className="text-sm font-semibold text-neutral-900 dark:text-white mb-3 uppercase tracking-wide">
-                            Services
+                            {t('services', lang)}
                         </h3>
                         <ul className="space-y-2">
                             {footerLinks.services.map((link) => (
@@ -87,7 +87,7 @@ export default function Footer() {
                     {/* Company Links */}
                     <div>
                         <h3 className="text-sm font-semibold text-neutral-900 dark:text-white mb-3 uppercase tracking-wide">
-                            Company
+                            {t('company', lang)}
                         </h3>
                         <ul className="space-y-2">
                             {footerLinks.company.map((link) => (

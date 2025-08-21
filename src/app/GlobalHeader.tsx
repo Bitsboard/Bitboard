@@ -1,76 +1,52 @@
 "use client";
 
-import React from "react";
-import { Nav, NewListingModal, AuthModal } from "@/components";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { Nav } from "@/components";
+import { useLang } from "@/lib/i18n-client";
 import { useSettings } from "@/lib/settings";
+import type { User } from "@/lib/types";
 
 export default function GlobalHeader() {
-  const [authed, setAuthed] = useState(false);
-  const [avatar, setAvatar] = useState<string | undefined>(undefined);
-  const [showNew, setShowNew] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [showAuth, setShowAuth] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const lang = useLang();
+  const { theme } = useSettings();
 
-  // Use centralized settings
-  const { theme, unit, layout, setUnit, setLayout, toggleTheme } = useSettings();
-
+  // Initialize theme on mount
   useEffect(() => {
-    fetch('/api/auth/session', { cache: 'no-store' })
-      .then(r => r.json() as Promise<{ session?: any }>)
-      .then((d) => {
-        const s = d?.session;
-        setAuthed(Boolean(s));
-        setAvatar(s?.user?.image || s?.account?.profilePhoto || undefined);
-      })
-      .catch(() => setAuthed(false));
-  }, []);
+    if (typeof window !== 'undefined') {
+      const isDark = theme === 'dark';
+      document.documentElement.classList.toggle('dark', isDark);
+    }
+  }, [theme]);
 
-  // Initialize modal open state from URL on mount
-  useEffect(() => {
-    try {
-      const sp = new URLSearchParams(window.location.search);
-      setShowNew(sp.get('new') === '1');
-    } catch { }
-  }, []);
+  const handlePost = () => {
+    if (user) {
+      setShowNew(true);
+    } else {
+      setShowAuth(true);
+    }
+  };
 
-  function setQueryOpen(isOpen: boolean) {
-    try {
-      const url = new URL(window.location.href);
-      if (isOpen) url.searchParams.set('new', '1');
-      else url.searchParams.delete('new');
-      window.history.replaceState(null, "", url.toString());
-      setShowNew(isOpen);
-    } catch { }
-  }
+  const handleAuth = () => {
+    setShowAuth(true);
+  };
 
-  function onPost() {
-    setQueryOpen(true);
-  }
-
-  function onToggleTheme() {
-    toggleTheme();
-  }
-
-  function onAuth() { setShowAuth(true); }
+  const handleAuthed = (u: User) => {
+    setUser(u);
+    setShowAuth(false);
+  };
 
   return (
     <>
       <Nav
-        onPost={onPost}
-        user={authed ? { id: 'me', email: '', handle: '' } : null}
-        onAuth={onAuth}
-        avatarUrl={avatar}
+        onPost={handlePost}
+        user={user}
+        onAuth={handleAuth}
+        avatarUrl={user?.image}
       />
-      {showNew && (
-        <NewListingModal
-          dark={theme === 'dark'}
-          onClose={() => setQueryOpen(false)}
-          onPublish={() => setQueryOpen(false)}
-        />
-      )}
-      {showAuth && (
-        <AuthModal dark={theme === 'dark'} onClose={() => setShowAuth(false)} onAuthed={() => setShowAuth(false)} />
-      )}
+      {/* Modals would be rendered here if needed */}
     </>
   );
 }

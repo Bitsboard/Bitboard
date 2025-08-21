@@ -1,43 +1,56 @@
 "use client";
 
-import React from "react";
-import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
-
-type AdType = "all" | "sell" | "want";
+import { t } from "@/lib/i18n";
+import type { AdType } from "@/lib/types";
 
 interface TypeToggleProps {
-  adType: AdType;
-  setAdType: (t: AdType) => void;
+  value: AdType;
+  onChange: (value: AdType) => void;
   dark: boolean;
 }
 
-function cn(...xs: Array<string | false | null | undefined>) {
-  return xs.filter(Boolean).join(" ");
-}
-
-export function TypeToggle({ adType, setAdType, dark }: TypeToggleProps) {
+export function TypeToggle({ value, onChange, dark }: TypeToggleProps) {
   const lang = useLang();
+
   return (
-    <div className={cn("flex rounded-2xl border backdrop-blur-sm", dark ? "border-neutral-700/50 bg-neutral-900/30" : "border-neutral-300/50 bg-white/80")}>
+    <div className={`relative inline-flex rounded-2xl p-1 shadow-lg border backdrop-blur-sm ${dark
+        ? 'border-neutral-700/50 bg-neutral-800/60'
+        : 'border-neutral-300/50 bg-white/70'
+      }`}>
+      <div
+        className={`absolute inset-1 rounded-xl transition-all duration-300 ease-out ${dark ? 'bg-neutral-700 shadow-md' : 'bg-white shadow-md'
+          } ${value === 'want' ? 'translate-x-full' : value === 'sell' ? 'translate-x-0' : 'translate-x-[50%]'
+          }`}
+        style={{ width: 'calc(33.333% - 4px)' }}
+      />
       <button
-        onClick={() => setAdType("all")}
-        className={cn("px-4 py-3 text-sm border-r transition-all duration-200 hover:scale-105", dark ? "border-neutral-700/50" : "border-neutral-300/50", adType === "all" ? "text-orange-500 font-bold" : "opacity-70 hover:opacity-100")}
-        title="All Types"
+        onClick={() => onChange('all')}
+        className={`relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105 ${value === 'all'
+            ? 'text-blue-600 font-extrabold'
+            : dark ? 'text-neutral-200 hover:text-neutral-50' : 'text-neutral-600 hover:text-neutral-800'
+          }`}
+        title={t('all_listings', lang)}
       >
         {t('all_listings', lang)}
       </button>
       <button
-        onClick={() => setAdType("sell")}
-        className={cn("px-4 py-3 text-sm border-r transition-all duration-200 hover:scale-105", dark ? "border-neutral-700/50" : "border-neutral-300/50", adType === "sell" ? "text-emerald-500 font-bold" : "opacity-70 hover:opacity-100")}
-        title="Selling Only"
+        onClick={() => onChange('sell')}
+        className={`relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105 ${value === 'sell'
+            ? 'text-blue-600 font-extrabold'
+            : dark ? 'text-neutral-200 hover:text-neutral-50' : 'text-neutral-600 hover:text-neutral-800'
+          }`}
+        title={t('selling', lang)}
       >
         {t('selling', lang)}
       </button>
       <button
-        onClick={() => setAdType("want")}
-        className={cn("px-4 py-3 text-sm transition-all duration-200 hover:scale-105", adType === "want" ? "text-fuchsia-500 font-bold" : "opacity-70 hover:opacity-100")}
-        title="Looking For Only"
+        onClick={() => onChange('want')}
+        className={`relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105 ${value === 'want'
+            ? 'text-blue-600 font-extrabold'
+            : dark ? 'text-neutral-200 hover:text-neutral-50' : 'text-neutral-600 hover:text-neutral-800'
+          }`}
+        title={t('looking_for', lang)}
       >
         {t('looking_for', lang)}
       </button>

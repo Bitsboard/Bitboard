@@ -1,45 +1,24 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { useTheme } from "@/lib/settings";
 
 export function ThemeToggle() {
     const { theme, toggleTheme } = useTheme();
-    const dark = theme === 'dark';
+    const isDark = theme === 'dark';
 
     return (
-        <div className="relative inline-flex rounded-2xl p-1 shadow-lg border border-neutral-300/50 backdrop-blur-sm bg-white/70 dark:bg-neutral-800/60">
-            <div
-                className={cn(
-                    "absolute inset-1 rounded-xl bg-white shadow-md transition-all duration-300 ease-out",
-                    dark ? "translate-x-full" : "translate-x-0"
-                )}
-                style={{ width: 'calc(50% - 4px)' }}
+        <button
+            onClick={toggleTheme}
+            className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900"
+            style={{
+                backgroundColor: isDark ? '#3b82f6' : '#e5e7eb'
+            }}
+            aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+        >
+            <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isDark ? 'translate-x-6' : 'translate-x-1'
+                    }`}
             />
-            <button
-                onClick={() => dark && toggleTheme()}
-                className={cn(
-                    "relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105",
-                    !dark
-                        ? "text-blue-600 font-extrabold"
-                        : "text-neutral-200 hover:text-neutral-50"
-                )}
-                title="Switch to dark mode"
-            >
-                🌙
-            </button>
-            <button
-                onClick={() => !dark && toggleTheme()}
-                className={cn(
-                    "relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105",
-                    dark
-                        ? "text-yellow-400 font-extrabold"
-                        : "text-neutral-600 hover:text-neutral-800"
-                )}
-                title="Switch to light mode"
-            >
-                ☀️
-            </button>
-        </div>
+        </button>
     );
 }
