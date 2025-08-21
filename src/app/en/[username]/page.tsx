@@ -75,6 +75,30 @@ export default function PublicProfilePage() {
         
         const profileData = await profileResponse.json() as any;
         
+        // Check if database is not available (local development)
+        if (profileData.error === 'no_db_binding') {
+          // Fallback to mock data for local development
+          // Create consistent mock data based on username
+          const mockProfileData = {
+            sso: 'google',
+            email: `${username.replace('@', '')}@example.com`,
+            username: username,
+            verified: username.includes('satoshi') || username.includes('luna') || username.includes('mika') || username.includes('nova') || username.includes('zen') || username.includes('noah'),
+            registeredAt: Math.floor(Date.now() / 1000) - (Math.random() * 365 * 24 * 60 * 60), // Random date within last year
+            profilePhoto: null,
+            listings: Array.from({ length: Math.floor(Math.random() * 5) + 3 }, (_, i) => ({
+              id: i + 1,
+              title: `Sample Listing ${i + 1} by ${username}`,
+              priceSat: Math.floor(Math.random() * 1000000) + 100000,
+              createdAt: Math.floor(Date.now() / 1000) - (Math.random() * 30 * 24 * 60 * 60), // Random date within last month
+              type: Math.random() > 0.5 ? 'selling' : 'looking for'
+            }))
+          };
+          setProfileData(mockProfileData);
+          setLoading(false);
+          return;
+        }
+        
         // Get user listings
         const listingsResponse = await fetch(`/api/users/${username}/listings`);
         if (!listingsResponse.ok) {

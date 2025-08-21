@@ -1,30 +1,86 @@
 import { Listing, User, Category, AdType } from './types';
 
-// Mock users
+// Mock users - using same usernames as database for consistency
 export const mockUsers: User[] = [
   {
     id: 'user1',
-    email: 'alice@example.com',
-    handle: 'alice_crypto',
+    email: 'satoshi@example.com',
+    handle: '@satoshi',
     image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
     rating: 4.8,
     deals: 12
   },
   {
     id: 'user2',
-    email: 'bob@example.com',
-    handle: 'bob_miner',
+    email: 'luna@example.com',
+    handle: '@luna',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
     rating: 4.9,
     deals: 8
   },
   {
     id: 'user3',
-    email: 'carol@example.com',
-    handle: 'carol_trader',
+    email: 'rob@example.com',
+    handle: '@rob',
     image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
     rating: 4.7,
     deals: 15
+  },
+  {
+    id: 'user4',
+    email: 'mika@example.com',
+    handle: '@mika',
+    image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+    rating: 4.6,
+    deals: 9
+  },
+  {
+    id: 'user5',
+    email: 'arya@example.com',
+    handle: '@arya',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+    rating: 4.5,
+    deals: 6
+  },
+  {
+    id: 'user6',
+    email: 'nova@example.com',
+    handle: '@nova',
+    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
+    rating: 4.4,
+    deals: 11
+  },
+  {
+    id: 'user7',
+    email: 'kai@example.com',
+    handle: '@kai',
+    image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+    rating: 4.3,
+    deals: 7
+  },
+  {
+    id: 'user8',
+    email: 'zen@example.com',
+    handle: '@zen',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+    rating: 4.2,
+    deals: 13
+  },
+  {
+    id: 'user9',
+    email: 'olivia@example.com',
+    handle: '@olivia',
+    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
+    rating: 4.1,
+    deals: 5
+  },
+  {
+    id: 'user10',
+    email: 'noah@example.com',
+    handle: '@noah',
+    image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+    rating: 4.0,
+    deals: 8
   }
 ];
 
@@ -47,7 +103,7 @@ export const mockListings: Listing[] = [
     boostedUntil: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days from now
     createdAt: Date.now() - 7 * 24 * 60 * 60 * 1000, // 7 days ago
     seller: {
-      name: mockUsers[0].handle,
+      name: mockUsers[0].handle, // @satoshi
       score: 28,
       deals: mockUsers[0].deals || 0,
       rating: mockUsers[0].rating || 5,

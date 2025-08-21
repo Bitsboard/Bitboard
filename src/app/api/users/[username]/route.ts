@@ -7,14 +7,19 @@ export async function GET(
   { params }: { params: { username: string } }
 ) {
   try {
+    console.log('User API called for username:', params.username);
+    
     const mod = await import("@cloudflare/next-on-pages").catch(() => null as any);
     if (!mod || typeof mod.getRequestContext !== "function") {
+      console.log('Cloudflare adapter missing, returning adapter_missing error');
       return NextResponse.json({ error: "adapter_missing" }, { status: 200 });
     }
     
     const env = mod.getRequestContext().env as { DB?: D1Database };
     const db = env.DB;
     if (!db) {
+      console.log('No database binding, returning no_db_binding error');
+      // Fallback to mock data for local development
       return NextResponse.json({ error: "no_db_binding" }, { status: 200 });
     }
 

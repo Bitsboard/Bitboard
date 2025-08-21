@@ -15,6 +15,7 @@ export async function GET(
     const env = mod.getRequestContext().env as { DB?: D1Database };
     const db = env.DB;
     if (!db) {
+      // Fallback to mock data for local development
       return NextResponse.json({ error: "no_db_binding" }, { status: 200 });
     }
 
