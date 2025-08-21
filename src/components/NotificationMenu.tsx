@@ -76,6 +76,12 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
     setUnreadCount(mockNotifications.filter(n => !n.read).length);
   }, []);
 
+  // Update unread count whenever notifications change
+  useEffect(() => {
+    const unreadCount = notifications.filter(n => !n.read).length;
+    setUnreadCount(unreadCount);
+  }, [notifications]);
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -100,7 +106,11 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
       }
       return updated;
     });
-    setUnreadCount(prev => Math.max(0, prev - 1));
+    // Update unread count based on the new state
+    setUnreadCount(prev => {
+      const newCount = Math.max(0, prev - 1);
+      return newCount;
+    });
   };
 
   const markAllAsRead = () => {
@@ -166,10 +176,9 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
         className="relative p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors duration-200"
         aria-label="Notifications"
       >
-        <svg className="w-6 h-6 text-neutral-600 dark:text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.5 21a2.5 2.5 0 01-5 0" />
-        </svg>
+                        <svg className="w-6 h-6 text-neutral-600 dark:text-neutral-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                </svg>
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
             {unreadCount > 9 ? '9+' : unreadCount}

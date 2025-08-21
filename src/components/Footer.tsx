@@ -27,20 +27,20 @@ export default function Footer() {
 
     return (
         <footer className="border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950">
-            <div className="mx-auto max-w-7xl px-4 py-12">
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="mx-auto max-w-7xl px-4 py-8">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                     {/* Brand section */}
                     <div>
-                        <div className="flex items-center gap-2 mb-4">
+                        <div className="flex items-center gap-2 mb-3">
                             <span className="text-2xl tracking-tight leading-none">
                                 <span className="font-bold text-orange-500">bits</span>
                                 <span className="font-bold text-neutral-900 dark:text-white">barter</span>
                             </span>
                         </div>
-                        <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">
                             The Bitcoin-native Marketplace.
                         </p>
-                        <div className="space-y-2 text-sm text-neutral-500 dark:text-neutral-400">
+                        <div className="space-y-1 text-sm text-neutral-500 dark:text-neutral-400">
                             <p>© {new Date().getFullYear()} bitsbarter</p>
                             <p>{t('made_with_love', lang)}</p>
                         </div>
@@ -48,10 +48,10 @@ export default function Footer() {
 
                     {/* Legal Links */}
                     <div>
-                        <h3 className="text-sm font-semibold text-neutral-900 dark:text-white mb-4 uppercase tracking-wide">
+                        <h3 className="text-sm font-semibold text-neutral-900 dark:text-white mb-3 uppercase tracking-wide">
                             Legal
                         </h3>
-                        <ul className="space-y-3">
+                        <ul className="space-y-2">
                             {footerLinks.legal.map((link) => (
                                 <li key={link.key}>
                                     <Link
@@ -67,10 +67,10 @@ export default function Footer() {
 
                     {/* Services Links */}
                     <div>
-                        <h3 className="text-sm font-semibold text-neutral-900 dark:text-white mb-4 uppercase tracking-wide">
+                        <h3 className="text-sm font-semibold text-neutral-900 dark:text-white mb-3 uppercase tracking-wide">
                             Services
                         </h3>
-                        <ul className="space-y-3">
+                        <ul className="space-y-2">
                             {footerLinks.services.map((link) => (
                                 <li key={link.key}>
                                     <Link
@@ -86,10 +86,10 @@ export default function Footer() {
 
                     {/* Company Links */}
                     <div>
-                        <h3 className="text-sm font-semibold text-neutral-900 dark:text-white mb-4 uppercase tracking-wide">
+                        <h3 className="text-sm font-semibold text-neutral-900 dark:text-white mb-3 uppercase tracking-wide">
                             Company
                         </h3>
-                        <ul className="space-y-3">
+                        <ul className="space-y-2">
                             {footerLinks.company.map((link) => (
                                 <li key={link.key}>
                                     <Link
