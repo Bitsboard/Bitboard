@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { PriceBlock } from "./PriceBlock";
 import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
@@ -127,7 +128,13 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
                 ✓
               </span>
             )}
-            <span className="truncate max-w-[8rem] sm:max-w-[10rem]">{listing.seller.name}</span>
+            <Link 
+              href={`/en/${listing.seller.name}`}
+              className="truncate max-w-[8rem] sm:max-w-[10rem] hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {listing.seller.name}
+            </Link>
             <span className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍</span>
           </div>
         </div>
