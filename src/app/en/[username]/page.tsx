@@ -62,26 +62,42 @@ export default function PublicProfilePage() {
     // Load profile data for the username
     const loadProfileData = async () => {
       try {
-        // In a real app, this would be an API call to get user profile by username
-        // For now, we'll simulate it with mock data
-        const mockProfileData = {
-          sso: 'google',
-          email: 'user@example.com',
-          username: username,
-          verified: Math.random() > 0.5, // Random verification status
-          registeredAt: Math.floor(Date.now() / 1000) - (Math.random() * 365 * 24 * 60 * 60), // Random date within last year
-          profilePhoto: null,
-          listings: Array.from({ length: Math.floor(Math.random() * 10) }, (_, i) => ({
-            id: i + 1,
-            title: `Sample Listing ${i + 1}`,
-            priceSat: Math.floor(Math.random() * 1000000) + 100000,
-            createdAt: Math.floor(Date.now() / 1000) - (Math.random() * 30 * 24 * 60 * 60), // Random date within last month
-            type: Math.random() > 0.5 ? 'selling' : 'looking for'
-          }))
+        // Get user profile
+        const profileResponse = await fetch(`/api/users/${username}`);
+        if (!profileResponse.ok) {
+          if (profileResponse.status === 404) {
+            setProfileData(null); // User not found
+            setLoading(false);
+            return;
+          }
+          throw new Error(`Profile API error: ${profileResponse.status}`);
+        }
+        
+        const profileData = await profileResponse.json() as any;
+        
+        // Get user listings
+        const listingsResponse = await fetch(`/api/users/${username}/listings`);
+        if (!listingsResponse.ok) {
+          throw new Error(`Listings API error: ${listingsResponse.status}`);
+        }
+        
+        const listingsData = await listingsResponse.json() as any;
+        
+        // Combine profile and listings data
+        const combinedProfileData = {
+          sso: profileData.user?.sso || 'google',
+          email: profileData.user?.email || 'user@example.com',
+          username: profileData.user?.username || username,
+          verified: profileData.user?.verified || false,
+          registeredAt: profileData.user?.registeredAt || Math.floor(Date.now() / 1000),
+          profilePhoto: profileData.user?.profilePhoto || null,
+          listings: listingsData.listings || []
         };
-        setProfileData(mockProfileData);
+        
+        setProfileData(combinedProfileData);
       } catch (error) {
         console.error('Failed to load profile data:', error);
+        setProfileData(null);
       } finally {
         setLoading(false);
       }

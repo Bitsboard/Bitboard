@@ -20,5 +20,26 @@ CREATE TABLE IF NOT EXISTS listings (
 );
 
 CREATE INDEX IF NOT EXISTS idx_listings_created_at ON listings(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_listings_posted_by ON listings(posted_by);
+CREATE INDEX IF NOT EXISTS idx_listings_category ON listings(category);
+CREATE INDEX IF NOT EXISTS idx_listings_ad_type ON listings(ad_type);
+CREATE INDEX IF NOT EXISTS idx_listings_price ON listings(price_sat);
+
+-- Users table for authentication and profiles
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  email TEXT UNIQUE,
+  username TEXT UNIQUE,
+  sso TEXT,
+  verified INTEGER DEFAULT 0,
+  is_admin INTEGER DEFAULT 0,
+  banned INTEGER DEFAULT 0,
+  created_at INTEGER NOT NULL,
+  image TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_verified ON users(verified);
 
 
