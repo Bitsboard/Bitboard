@@ -356,40 +356,7 @@ export default function NotificationsPage() {
           )}
         </div>
 
-        {/* Summary Stats */}
-        {notifications.length > 0 && (
-          <div className="mt-12 bg-neutral-50 dark:bg-neutral-900 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">
-              {t('notification_summary', lang)}
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-neutral-900 dark:text-white">
-                  {notifications.length}
-                </div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400">{t('total', lang)}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {notifications.filter(n => n.type === 'message').length}
-                </div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400">{t('messages', lang)}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  {notifications.filter(n => n.type === 'update').length}
-                </div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400">{t('updates', lang)}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">
-                  {notifications.filter(n => n.type === 'system').length}
-                </div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400">{t('system', lang)}</div>
-              </div>
-            </div>
-          </div>
-        )}
+
       </div>
     </div>
   );
