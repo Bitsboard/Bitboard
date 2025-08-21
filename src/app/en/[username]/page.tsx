@@ -81,7 +81,7 @@ export default function PublicProfilePage() {
           // Create consistent mock data based on username
           const mockProfileData = {
             sso: 'google',
-            email: `${username.replace('@', '')}@example.com`,
+            email: `${username}@example.com`,
             username: username,
             verified: username.includes('satoshi') || username.includes('luna') || username.includes('mika') || username.includes('nova') || username.includes('zen') || username.includes('noah'),
             registeredAt: Math.floor(Date.now() / 1000) - (Math.random() * 365 * 24 * 60 * 60), // Random date within last year

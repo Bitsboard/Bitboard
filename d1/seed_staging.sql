@@ -2,18 +2,18 @@
 DELETE FROM listings;
 DELETE FROM users;
 
--- Create users first
+-- Create users first - Production-ready usernames without @ symbols
 INSERT INTO users (id, email, username, sso, verified, created_at, image) VALUES
-  ('user_satoshi', 'satoshi@example.com', '@satoshi', 'google', 1, strftime('%s','now') - 365*24*60*60, 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'),
-  ('user_luna', 'luna@example.com', '@luna', 'google', 1, strftime('%s','now') - 300*24*60*60, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'),
-  ('user_rob', 'rob@example.com', '@rob', 'google', 0, strftime('%s','now') - 250*24*60*60, 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face'),
-  ('user_mika', 'mika@example.com', '@mika', 'google', 1, strftime('%s','now') - 200*24*60*60, 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'),
-  ('user_arya', 'arya@example.com', '@arya', 'google', 0, strftime('%s','now') - 180*24*60*60, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'),
-  ('user_nova', 'nova@example.com', '@nova', 'google', 1, strftime('%s','now') - 150*24*60*60, 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face'),
-  ('user_kai', 'kai@example.com', '@kai', 'google', 0, strftime('%s','now') - 120*24*60*60, 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'),
-  ('user_zen', 'zen@example.com', '@zen', 'google', 1, strftime('%s','now') - 100*24*60*60, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'),
-  ('user_olivia', 'olivia@example.com', '@olivia', 'google', 0, strftime('%s','now') - 80*24*60*60, 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face'),
-  ('user_noah', 'noah@example.com', '@noah', 'google', 1, strftime('%s','now') - 60*24*60*60, 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face');
+  ('user_satoshi', 'satoshi@example.com', 'satoshi', 'google', 1, strftime('%s','now') - 365*24*60*60, 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'),
+  ('user_luna', 'luna@example.com', 'luna', 'google', 1, strftime('%s','now') - 300*24*60*60, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'),
+  ('user_rob', 'rob@example.com', 'rob', 'google', 0, strftime('%s','now') - 250*24*60*60, 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face'),
+  ('user_mika', 'mika@example.com', 'mika', 'google', 1, strftime('%s','now') - 200*24*60*60, 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'),
+  ('user_arya', 'arya@example.com', 'arya', 'google', 0, strftime('%s','now') - 180*24*60*60, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'),
+  ('user_nova', 'nova@example.com', 'nova', 'google', 1, strftime('%s','now') - 150*24*60*60, 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face'),
+  ('user_kai', 'kai@example.com', 'kai', 'google', 0, strftime('%s','now') - 120*24*60*60, 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'),
+  ('user_zen', 'zen@example.com', 'zen', 'google', 1, strftime('%s','now') - 100*24*60*60, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'),
+  ('user_olivia', 'olivia@example.com', 'olivia', 'google', 0, strftime('%s','now') - 80*24*60*60, 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face'),
+  ('user_noah', 'noah@example.com', 'noah', 'google', 1, strftime('%s','now') - 60*24*60*60, 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face');
 
 -- Insert listings with proper user relationships
 INSERT INTO listings (

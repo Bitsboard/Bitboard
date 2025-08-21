@@ -1,11 +1,11 @@
 import { Listing, User, Category, AdType } from './types';
 
-// Mock users - using same usernames as database for consistency
+// Mock users - Production-ready usernames without @ symbols
 export const mockUsers: User[] = [
   {
     id: 'user1',
     email: 'satoshi@example.com',
-    handle: '@satoshi',
+    handle: 'satoshi',
     image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
     rating: 4.8,
     deals: 12
@@ -13,7 +13,7 @@ export const mockUsers: User[] = [
   {
     id: 'user2',
     email: 'luna@example.com',
-    handle: '@luna',
+    handle: 'luna',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
     rating: 4.9,
     deals: 8
@@ -21,7 +21,7 @@ export const mockUsers: User[] = [
   {
     id: 'user3',
     email: 'rob@example.com',
-    handle: '@rob',
+    handle: 'rob',
     image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
     rating: 4.7,
     deals: 15
@@ -29,7 +29,7 @@ export const mockUsers: User[] = [
   {
     id: 'user4',
     email: 'mika@example.com',
-    handle: '@mika',
+    handle: 'mika',
     image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
     rating: 4.6,
     deals: 9
@@ -37,7 +37,7 @@ export const mockUsers: User[] = [
   {
     id: 'user5',
     email: 'arya@example.com',
-    handle: '@arya',
+    handle: 'arya',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
     rating: 4.5,
     deals: 6
@@ -45,7 +45,7 @@ export const mockUsers: User[] = [
   {
     id: 'user6',
     email: 'nova@example.com',
-    handle: '@nova',
+    handle: 'nova',
     image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
     rating: 4.4,
     deals: 11
@@ -53,7 +53,7 @@ export const mockUsers: User[] = [
   {
     id: 'user7',
     email: 'kai@example.com',
-    handle: '@kai',
+    handle: 'kai',
     image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
     rating: 4.3,
     deals: 7
@@ -61,7 +61,7 @@ export const mockUsers: User[] = [
   {
     id: 'user8',
     email: 'zen@example.com',
-    handle: '@zen',
+    handle: 'zen',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
     rating: 4.2,
     deals: 13
@@ -69,7 +69,7 @@ export const mockUsers: User[] = [
   {
     id: 'user9',
     email: 'olivia@example.com',
-    handle: '@olivia',
+    handle: 'olivia',
     image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
     rating: 4.1,
     deals: 5
@@ -77,7 +77,7 @@ export const mockUsers: User[] = [
   {
     id: 'user10',
     email: 'noah@example.com',
-    handle: '@noah',
+    handle: 'noah',
     image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
     rating: 4.0,
     deals: 8
