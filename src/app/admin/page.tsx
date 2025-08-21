@@ -20,21 +20,23 @@ export default function AdminPage() {
       try {
         const response = await fetch('/api/auth/session');
         if (response.ok) {
-          const data = await response.json();
+          const data = await response.json() as { session?: Session | null };
           const userSession = data?.session;
-          setSession(userSession);
+          if (userSession) {
+            setSession(userSession);
 
-          if (userSession?.user?.email) {
-            // Check if user is admin
-            const adminResponse = await fetch('/api/admin/check', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: userSession.user.email })
-            });
+            if (userSession.user?.email) {
+              // Check if user is admin
+              const adminResponse = await fetch('/api/admin/check', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: userSession.user.email })
+              });
 
-            if (adminResponse.ok) {
-              const adminData = await adminResponse.json();
-              setIsAdmin(adminData.isAdmin);
+              if (adminResponse.ok) {
+                const adminData = await adminResponse.json() as { isAdmin: boolean };
+                setIsAdmin(adminData.isAdmin);
+              }
             }
           }
         }

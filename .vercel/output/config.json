@@ -202,7 +202,7 @@
       "handle": "hit"
     },
     {
-      "src": "/_next/static/(?:[^/]+/pages|pages|chunks|runtime|css|image|media|Y23sDXsgfNyGBo4_js8Eq)/.+",
+      "src": "/_next/static/(?:[^/]+/pages|pages|chunks|runtime|css|image|media|5lbeOfDgSgre5e3ke_3y1)/.+",
       "headers": {
         "cache-control": "public,max-age=31536000,immutable"
       },

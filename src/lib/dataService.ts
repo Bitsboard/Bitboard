@@ -83,7 +83,7 @@ export class DataService {
             const response = await fetch(`/api/listings?${searchParams.toString()}`);
             if (!response.ok) throw new Error('Failed to fetch listings');
 
-            const data = await response.json();
+            const data = await response.json() as { listings?: any[]; total?: number };
             return {
                 listings: this.mapApiRowsToListings(data.listings || []),
                 total: data.total || 0,
@@ -107,7 +107,7 @@ export class DataService {
             const response = await fetch('/api/auth/session', { cache: 'no-store' });
             if (!response.ok) return null;
 
-            const data = await response.json();
+            const data = await response.json() as { session?: any };
             return data?.session || null;
         } catch (error) {
             console.warn('Failed to fetch user session:', error);

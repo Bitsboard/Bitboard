@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { getLang, setLang } from "@/lib/i18n";
 
-export function LocaleHydrator() {
+export function LocaleHydrator({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const known = ["en", "fr", "es", "de"] as const;
@@ -23,7 +23,7 @@ export function LocaleHydrator() {
       }
     } catch {}
   }, []);
-  return null;
+  return <>{children}</>;
 }
 
 
