@@ -135,10 +135,10 @@ export default function ProfilePage() {
           {isOwnProfile && (
             <div className="absolute top-6 right-6 z-20">
               <form action="/api/auth/logout" method="post">
-                <button 
-                  type="submit" 
-                  className="inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-neutral-600 to-neutral-700 text-white font-medium rounded-lg hover:from-neutral-700 hover:to-neutral-800 transition-all duration-200 shadow-sm hover:shadow-md border border-neutral-500/30 hover:border-neutral-400/50"
-                >
+                                         <button 
+                           type="submit" 
+                           className="inline-flex items-center justify-center px-4 py-3 bg-white dark:bg-gradient-to-r dark:from-neutral-600 dark:to-neutral-700 text-neutral-900 dark:text-white font-medium rounded-lg hover:bg-neutral-50 dark:hover:from-neutral-700 dark:hover:to-neutral-800 transition-all duration-200 shadow-sm hover:shadow-md border border-neutral-300 dark:border-neutral-500/30 hover:border-neutral-400 dark:hover:border-neutral-400/50"
+                         >
                   <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
@@ -165,7 +165,7 @@ export default function ProfilePage() {
                 </div>
               )}
               {session.account?.verified && (
-                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full p-2 shadow-lg ring-2 ring-white/50 animate-bounce">
+                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full p-2 shadow-lg ring-2 ring-white/50 animate-pulse">
                   <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
@@ -180,7 +180,7 @@ export default function ProfilePage() {
                   {session.account?.username || 'New User'}
                 </h1>
                 {session.account?.verified && (
-                  <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-cyan-400 to-blue-500 text-white border border-cyan-300/40 shadow-lg animate-bounce">
+                  <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-cyan-400 to-blue-500 text-white border border-cyan-300/40 shadow-lg">
                     <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
@@ -417,31 +417,26 @@ export default function ProfilePage() {
             )}
           </div>
         ) : (
-          <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-12 text-center">
-            <div className="text-6xl mb-6">📝</div>
-            <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">
-              {t('no_listings_yet', lang)}
-            </h3>
-            <p className="text-neutral-600 dark:text-neutral-400 mb-6">
-              {isOwnProfile 
-                ? t('no_listings_owner', lang)
-                : t('no_listings_visitor', lang)
-              }
-            </p>
-            {isOwnProfile && (
-              <div className="flex flex-col items-center gap-4">
-                <button className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-lg font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
-                  <svg className="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  + {t('create_listing', lang)}
-                </button>
-                <p className="text-sm text-neutral-500 dark:text-neutral-400 text-center max-w-md">
-                  Start your trading journey by creating your first listing. It only takes a few minutes!
-                </p>
-              </div>
-            )}
-          </div>
+                                 <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-12 text-center">
+                         <div className="text-6xl mb-6">✏️</div>
+                         <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">
+                           {t('no_listings_yet', lang)}
+                         </h3>
+                         <p className="text-neutral-600 dark:text-neutral-400 mb-6">
+                           {isOwnProfile 
+                             ? t('no_listings_owner', lang)
+                             : t('no_listings_visitor', lang)
+                           }
+                         </p>
+                         {isOwnProfile && (
+                           <button className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-medium rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-200 shadow-sm hover:shadow-md">
+                             <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                             </svg>
+                             + {t('create_listing', lang)}
+                           </button>
+                         )}
+                       </div>
         )}
 
 
