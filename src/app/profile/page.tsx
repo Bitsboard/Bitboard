@@ -125,26 +125,31 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-white dark:bg-neutral-950">
       <div className="mx-auto max-w-6xl px-4 py-8">
         {/* Top Bar - Profile Info */}
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl p-8 mb-8 text-white">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
+        <div className="relative overflow-hidden bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 rounded-3xl p-8 mb-8 text-white shadow-2xl">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/10"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-white/5 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-black/5 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
+          
+          <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center gap-8">
             {/* Profile Picture */}
             <div className="relative">
               {session.user?.image ? (
                 <img 
                   src={session.user.image} 
                   alt="Profile" 
-                  className="h-24 w-24 rounded-full border-4 border-white/20 shadow-lg" 
+                  className="h-28 w-28 rounded-full border-4 border-white/30 shadow-2xl ring-4 ring-white/20" 
                 />
               ) : (
-                <div className="h-24 w-24 rounded-full bg-white/20 border-4 border-white/20 flex items-center justify-center">
-                  <svg className="h-12 w-12 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="h-28 w-28 rounded-full bg-gradient-to-br from-white/30 to-white/20 border-4 border-white/30 flex items-center justify-center shadow-2xl ring-4 ring-white/20">
+                  <svg className="h-14 w-14 text-white/90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
               )}
               {session.account?.verified && (
-                <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1">
-                  <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-green-400 to-green-500 rounded-full p-2 shadow-lg ring-2 ring-white/50">
+                  <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
@@ -153,13 +158,13 @@ export default function ProfilePage() {
 
             {/* Profile Details */}
             <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-3 mb-3">
-                <h1 className="text-3xl font-bold">
+              <div className="flex flex-wrap items-center gap-4 mb-6">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-orange-100 bg-clip-text text-transparent">
                   {session.account?.username || 'New User'}
                 </h1>
                 {session.account?.verified && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-500/20 text-green-100 border border-green-400/30">
-                    <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-green-400/30 to-green-500/30 text-green-100 border border-green-300/40 backdrop-blur-sm shadow-lg">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     Verified
@@ -167,31 +172,48 @@ export default function ProfilePage() {
                 )}
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-orange-200" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-orange-100">Reputation: Excellent</span>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400/30 to-orange-500/30 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-orange-200" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs text-orange-200/80 uppercase tracking-wide font-medium">Reputation</p>
+                    <p className="text-orange-100 font-semibold">Excellent</p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-orange-200" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span className="text-orange-100">
-                    Member since {session.account ? new Date(session.account.registeredAt * 1000).toLocaleDateString(undefined, { 
-                      month: 'long', 
-                      year: 'numeric' 
-                    }) : ''}
-                  </span>
+                
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400/30 to-orange-500/30 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-orange-200" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs text-orange-200/80 uppercase tracking-wide font-medium">Member Since</p>
+                    <p className="text-orange-100 font-semibold">
+                      {session.account ? new Date(session.account.registeredAt * 1000).toLocaleDateString(undefined, { 
+                        month: 'long', 
+                        year: 'numeric' 
+                      }) : ''}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-orange-200" fill="currentColor" viewBox="0 0 20 20">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                  <span className="text-orange-100">
-                    {session.account?.listings?.length || 0} active listings
-                  </span>
+                
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400/30 to-orange-500/30 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-orange-200" fill="currentColor" viewBox="0 0 20 20">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs text-orange-200/80 uppercase tracking-wide font-medium">Active Listings</p>
+                    <p className="text-orange-100 font-semibold">
+                      {session.account?.listings?.length || 0}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -222,10 +244,10 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* Post New Listing Button (only for profile owner) */}
-        {isOwnProfile && (
+        {/* Post New Listing Button (only for profile owner with listings) */}
+        {isOwnProfile && session.account?.listings && session.account.listings.length > 0 && (
           <div className="mb-8">
-            <button className="inline-flex items-center justify-center px-6 py-3 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition-colors duration-200 shadow-sm hover:shadow-md">
+            <button className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-sm hover:shadow-md">
               <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
@@ -390,11 +412,11 @@ export default function ProfilePage() {
               }
             </p>
             {isOwnProfile && (
-              <button className="inline-flex items-center justify-center px-6 py-3 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition-colors duration-200">
+              <button className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-sm hover:shadow-md">
                 <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Create Your First Listing
+                Create a Listing
               </button>
             )}
           </div>
