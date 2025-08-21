@@ -39,7 +39,8 @@
   "overrides": {
     "esbuild": "0.15.18",
     "esbuild-*": "0.15.18",
-    "@esbuild/*": "0.15.18"
+    "@esbuild/*": "0.15.18",
+    "@cloudflare/workerd-*": "1.20250816.0"
   },
   "browser": {
     "async_hooks": "./async_hooks/index.js"
