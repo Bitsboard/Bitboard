@@ -192,20 +192,20 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400/30 to-orange-500/30 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-orange-200" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    <svg className="w-5 h-5 text-orange-200" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" />
                     </svg>
                   </div>
                   <div>
                     <p className="text-xs text-orange-200/80 uppercase tracking-wide font-medium">{t('reputation', lang)}</p>
-                    <p className="text-orange-100 font-semibold">{t('excellent', lang)}</p>
+                    <p className="text-orange-100 font-semibold">+{Math.floor(Math.random() * 50) + 50}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400/30 to-orange-500/30 flex items-center justify-center">
                     <svg className="w-5 h-5 text-orange-200" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
                   <div>
@@ -268,7 +268,7 @@ export default function ProfilePage() {
               <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-              Post New Listing
+              + Post New Listing
             </button>
           </div>
         )}
@@ -433,7 +433,7 @@ export default function ProfilePage() {
                 <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                {t('create_listing', lang)}
+                + {t('create_listing', lang)}
               </button>
             )}
           </div>
