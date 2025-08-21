@@ -131,6 +131,23 @@ export default function ProfilePage() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-white/5 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-black/5 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
           
+          {/* Sign Out Button - Top Right */}
+          {isOwnProfile && (
+            <div className="absolute top-6 right-6 z-20">
+              <form action="/api/auth/logout" method="post">
+                <button 
+                  type="submit" 
+                  className="inline-flex items-center justify-center px-4 py-2 bg-white/20 backdrop-blur-sm text-white font-medium rounded-lg hover:bg-white/30 transition-all duration-200 border border-white/30 hover:border-white/40 shadow-lg hover:shadow-xl"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  {t('sign_out', lang)}
+                </button>
+              </form>
+            </div>
+          )}
+          
           <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center gap-8">
             {/* Profile Picture */}
             <div className="relative">
@@ -167,7 +184,7 @@ export default function ProfilePage() {
                     <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                    Verified
+                    {t('verified', lang)}
                   </span>
                 )}
               </div>
@@ -180,19 +197,19 @@ export default function ProfilePage() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-xs text-orange-200/80 uppercase tracking-wide font-medium">Reputation</p>
-                    <p className="text-orange-100 font-semibold">Excellent</p>
+                    <p className="text-xs text-orange-200/80 uppercase tracking-wide font-medium">{t('reputation', lang)}</p>
+                    <p className="text-orange-100 font-semibold">{t('excellent', lang)}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400/30 to-orange-500/30 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-orange-200" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <svg className="w-5 h-5 text-orange-200" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div>
-                    <p className="text-xs text-orange-200/80 uppercase tracking-wide font-medium">Member Since</p>
+                    <p className="text-xs text-orange-200/80 uppercase tracking-wide font-medium">{t('member_since', lang)}</p>
                     <p className="text-orange-100 font-semibold">
                       {session.account ? new Date(session.account.registeredAt * 1000).toLocaleDateString(undefined, { 
                         month: 'long', 
@@ -204,12 +221,12 @@ export default function ProfilePage() {
                 
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400/30 to-orange-500/30 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-orange-200" fill="currentColor" viewBox="0 0 20 20">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    <svg className="w-5 h-5 text-orange-200" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
                   </div>
                   <div>
-                    <p className="text-xs text-orange-200/80 uppercase tracking-wide font-medium">Active Listings</p>
+                    <p className="text-xs text-orange-200/80 uppercase tracking-wide font-medium">{t('active_listings', lang)}</p>
                     <p className="text-orange-100 font-semibold">
                       {session.account?.listings?.length || 0}
                     </p>
@@ -403,12 +420,12 @@ export default function ProfilePage() {
           <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-12 text-center">
             <div className="text-6xl mb-6">📝</div>
             <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">
-              No Listings Yet
+              {t('no_listings_yet', lang)}
             </h3>
             <p className="text-neutral-600 dark:text-neutral-400 mb-6">
               {isOwnProfile 
-                ? "You haven't created any listings yet. Start trading by posting your first item!"
-                : "This user hasn't posted any listings yet."
+                ? t('no_listings_owner', lang)
+                : t('no_listings_visitor', lang)
               }
             </p>
             {isOwnProfile && (
@@ -416,31 +433,13 @@ export default function ProfilePage() {
                 <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Create a Listing
+                {t('create_listing', lang)}
               </button>
             )}
           </div>
         )}
 
-        {/* Account Actions (only for profile owner) */}
-        {isOwnProfile && (
-          <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 shadow-sm mt-8">
-            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">
-              Account Actions
-            </h3>
-            <form action="/api/auth/logout" method="post">
-              <button 
-                type="submit" 
-                className="inline-flex items-center justify-center px-6 py-3 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 font-medium rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors duration-200"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                Sign Out
-              </button>
-            </form>
-          </div>
-        )}
+
       </div>
     </div>
   );
