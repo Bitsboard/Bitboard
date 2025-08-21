@@ -7,6 +7,8 @@ import { useLang } from '@/lib/i18n-client';
 import { t } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
+export const runtime = 'edge';
+
 type Session = {
   user?: { username?: string | null; image?: string | null };
   account?: {
