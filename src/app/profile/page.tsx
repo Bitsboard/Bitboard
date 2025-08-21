@@ -137,7 +137,7 @@ export default function ProfilePage() {
               <form action="/api/auth/logout" method="post">
                 <button 
                   type="submit" 
-                  className="inline-flex items-center justify-center px-4 py-2 bg-white/20 backdrop-blur-sm text-white font-medium rounded-lg hover:bg-white/30 transition-all duration-200 border border-white/30 hover:border-white/40 shadow-lg hover:shadow-xl"
+                  className="inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-neutral-600 to-neutral-700 text-white font-medium rounded-lg hover:from-neutral-700 hover:to-neutral-800 transition-all duration-200 shadow-sm hover:shadow-md border border-neutral-500/30 hover:border-neutral-400/50"
                 >
                   <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -165,7 +165,7 @@ export default function ProfilePage() {
                 </div>
               )}
               {session.account?.verified && (
-                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-green-400 to-green-500 rounded-full p-2 shadow-lg ring-2 ring-white/50">
+                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full p-2 shadow-lg ring-2 ring-white/50 animate-pulse">
                   <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
@@ -180,7 +180,7 @@ export default function ProfilePage() {
                   {session.account?.username || 'New User'}
                 </h1>
                 {session.account?.verified && (
-                  <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-green-400/30 to-green-500/30 text-green-100 border border-green-300/40 backdrop-blur-sm shadow-lg">
+                  <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-blue-400/30 to-blue-500/30 text-blue-100 border border-blue-300/40 backdrop-blur-sm shadow-lg animate-pulse">
                     <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
