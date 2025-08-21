@@ -165,7 +165,7 @@ export default function ProfilePage() {
                 </div>
               )}
               {session.account?.verified && (
-                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full p-2 shadow-lg ring-2 ring-white/50 animate-pulse">
+                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full p-2 shadow-lg ring-2 ring-white/50 animate-bounce">
                   <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
@@ -180,7 +180,7 @@ export default function ProfilePage() {
                   {session.account?.username || 'New User'}
                 </h1>
                 {session.account?.verified && (
-                  <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-blue-400/30 to-blue-500/30 text-blue-100 border border-blue-300/40 backdrop-blur-sm shadow-lg animate-pulse">
+                  <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-cyan-400 to-blue-500 text-white border border-cyan-300/40 shadow-lg animate-bounce">
                     <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
@@ -429,12 +429,17 @@ export default function ProfilePage() {
               }
             </p>
             {isOwnProfile && (
-              <button className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-sm hover:shadow-md">
-                <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                + {t('create_listing', lang)}
-              </button>
+              <div className="flex flex-col items-center gap-4">
+                <button className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-lg font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                  <svg className="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  + {t('create_listing', lang)}
+                </button>
+                <p className="text-sm text-neutral-500 dark:text-neutral-400 text-center max-w-md">
+                  Start your trading journey by creating your first listing. It only takes a few minutes!
+                </p>
+              </div>
             )}
           </div>
         )}
