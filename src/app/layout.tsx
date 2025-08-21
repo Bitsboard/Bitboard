@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
+import "../styles/globals.css";
 import { GlobalHeader } from "./GlobalHeader";
 import { LocaleHydrator } from "./LocaleHydrator";
 
