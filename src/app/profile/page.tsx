@@ -165,7 +165,7 @@ export default function ProfilePage() {
                 </div>
               )}
               {session.account?.verified && (
-                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full p-2 shadow-lg ring-2 ring-white/50 animate-pulse">
+                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 rounded-full p-2 shadow-lg ring-2 ring-white/50 bg-[length:200%_200%] animate-gradient-x">
                   <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
@@ -433,7 +433,7 @@ export default function ProfilePage() {
                              <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                              </svg>
-                             + {t('create_listing', lang)}
+                             {t('create_listing', lang)}
                            </button>
                          )}
                        </div>
