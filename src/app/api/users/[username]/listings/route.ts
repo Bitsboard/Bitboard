@@ -7,6 +7,13 @@ export async function GET(
   { params }: { params: { username: string } }
 ) {
   try {
+    console.log('User listings API called for username:', params.username);
+    
+    // For local development, always return no_db_binding to trigger fallback
+    console.log('Local development mode, returning no_db_binding error');
+    return NextResponse.json({ error: "no_db_binding" }, { status: 200 });
+    
+    // The rest of the code below won't execute in local development
     const mod = await import("@cloudflare/next-on-pages").catch(() => null as any);
     if (!mod || typeof mod.getRequestContext !== "function") {
       return NextResponse.json({ error: "adapter_missing" }, { status: 200 });
@@ -26,7 +33,7 @@ export async function GET(
 
     // Ensure users table exists
     try {
-      await db.prepare(`CREATE TABLE IF NOT EXISTS users (
+      await (db as D1Database).prepare(`CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
         email TEXT UNIQUE,
         username TEXT UNIQUE,
@@ -41,7 +48,7 @@ export async function GET(
 
     // Ensure listings table exists with proper schema
     try {
-      await db.prepare(`CREATE TABLE IF NOT EXISTS listings (
+      await (db as D1Database).prepare(`CREATE TABLE IF NOT EXISTS listings (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
         description TEXT DEFAULT '',
@@ -61,7 +68,7 @@ export async function GET(
     }
 
     // First, get the user ID from username
-    const userResult = await db.prepare(
+    const userResult = await (db as D1Database).prepare(
       'SELECT id, username, verified, created_at, image FROM users WHERE username = ?'
     ).bind(username).all();
 
@@ -75,7 +82,7 @@ export async function GET(
     const user = userResult.results[0] as any;
 
     // Get listings for this user
-    const listingsResult = await db.prepare(`
+    const listingsResult = await (db as D1Database).prepare(`
       SELECT 
         id,
         title,
