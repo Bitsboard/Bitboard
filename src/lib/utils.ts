@@ -199,8 +199,24 @@ export async function retry<T>(
  */
 export function generateProfilePicture(username: string, seed?: string): string {
   const avatarSeed = seed || username;
-  // Using Dicebear's "adventurer" style - a fun, colorful avatar style
-  return `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(avatarSeed)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
+  // Using Dicebear's "bottts" style - abstract, geometric, on-brand
+  // Colors: orange, red, yellow, and complementary colors
+  const colors = [
+    'ff6b35', // Orange
+    'f7931e', // Yellow
+    'ff4757', // Red
+    'ff3838', // Bright Red
+    'ffa502', // Dark Orange
+    'ff6348', // Tomato Red
+    'ff7f50', // Coral
+    'ff8c00', // Dark Orange
+    'ffa500', // Orange
+    'ff4500'  // Orange Red
+  ];
+  
+  const backgroundColor = colors[Math.abs(avatarSeed.charCodeAt(0)) % colors.length];
+  
+  return `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(avatarSeed)}&backgroundColor=${backgroundColor}&mouth=smile01,smile02,smile03&style=circle&radius=50`;
 }
 
 /**

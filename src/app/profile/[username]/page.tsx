@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { mockListings } from '@/lib/mockData';
 import { useThemeContext } from '@/lib/contexts/ThemeContext';
-import { ListingCard, ListingsSection, ListingModal } from '@/components';
+import { ListingCard, ListingRow, ListingsSection, ListingModal } from '@/components';
 import { useBtcRate } from '@/lib/hooks/useBtcRate';
 import { generateProfilePicture, getInitials } from '@/lib/utils';
 import type { Listing } from '@/lib/types';
@@ -22,9 +22,20 @@ export default function PublicProfilePage() {
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [profileImageError, setProfileImageError] = useState(false);
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'alphabetical' | 'mostExpensive' | 'leastExpensive'>('newest');
+  const [layout, setLayout] = useState<'grid' | 'list'>('grid');
   
   useEffect(() => {
     setMounted(true);
+    // Try to get user's layout preference from localStorage
+    try {
+      const savedLayout = localStorage.getItem('layoutPref');
+      if (savedLayout === 'list' || savedLayout === 'grid') {
+        setLayout(savedLayout);
+      }
+    } catch (error) {
+      // Ignore localStorage errors
+    }
   }, []);
 
   // Directly find user listings without complex state
@@ -56,8 +67,27 @@ export default function PublicProfilePage() {
     year: 'numeric' 
   });
 
-  // Sort listings (default to newest)
-  const sortedListings = [...userListings].sort((a, b) => b.createdAt - a.createdAt);
+  // Sort listings based on selected sort option
+  const getSortedListings = () => {
+    const listings = [...userListings];
+    
+    switch (sortBy) {
+      case 'newest':
+        return listings.sort((a, b) => b.createdAt - a.createdAt);
+      case 'oldest':
+        return listings.sort((a, b) => a.createdAt - b.createdAt);
+      case 'alphabetical':
+        return listings.sort((a, b) => a.title.localeCompare(b.title));
+      case 'mostExpensive':
+        return listings.sort((a, b) => b.priceSats - a.priceSats);
+      case 'leastExpensive':
+        return listings.sort((a, b) => a.priceSats - b.priceSats);
+      default:
+        return listings.sort((a, b) => b.createdAt - a.createdAt);
+    }
+  };
+
+  const sortedListings = getSortedListings();
 
   const handleListingClick = (listing: Listing) => {
     setSelectedListing(listing);
@@ -71,6 +101,20 @@ export default function PublicProfilePage() {
 
   const handleProfileImageError = () => {
     setProfileImageError(true);
+  };
+
+  const handleSortChange = (newSort: typeof sortBy) => {
+    setSortBy(newSort);
+  };
+
+  const handleLayoutChange = (newLayout: 'grid' | 'list') => {
+    setLayout(newLayout);
+    // Save to localStorage
+    try {
+      localStorage.setItem('layoutPref', newLayout);
+    } catch (error) {
+      // Ignore localStorage errors
+    }
   };
 
   return (
@@ -200,34 +244,67 @@ export default function PublicProfilePage() {
                 Listings ({sortedListings.length})
               </h2>
               
-              {/* Sort Options */}
-              <div className="flex items-center gap-2">
-                <span className={`text-sm ${dark ? "text-neutral-400" : "text-neutral-600"}`}>Sort by:</span>
-                <select
-                  value="newest" // Default to newest
-                  onChange={(e) => {
-                    // No sorting options implemented yet, so this is a placeholder
-                  }}
-                  className={`px-3 py-2 rounded-lg border text-sm ${
-                    dark 
-                      ? "bg-neutral-800 border-neutral-700 text-white" 
-                      : "bg-white border-neutral-300 text-neutral-900"
-                  }`}
-                >
-                  <option value="newest">Newest First</option>
-                  <option value="oldest">Oldest First</option>
-                  <option value="alphabetical">Alphabetical</option>
-                  <option value="mostExpensive">Most Expensive</option>
-                  <option value="leastExpensive">Least Expensive</option>
-                </select>
+              {/* Controls: Layout Toggle and Sort Options */}
+              <div className="flex items-center gap-4">
+                {/* Layout Toggle */}
+                <div className="flex items-center gap-2">
+                  <span className={`text-sm ${dark ? "text-neutral-400" : "text-neutral-600"}`}>View:</span>
+                  <div className="flex rounded-lg border overflow-hidden">
+                    <button
+                      onClick={() => handleLayoutChange('grid')}
+                      className={`px-3 py-2 text-sm transition-colors ${
+                        layout === 'grid'
+                          ? 'bg-orange-500 text-white'
+                          : dark
+                            ? 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+                            : 'bg-white text-neutral-700 hover:bg-neutral-50'
+                      }`}
+                    >
+                      Grid
+                    </button>
+                    <button
+                      onClick={() => handleLayoutChange('list')}
+                      className={`px-3 py-2 text-sm transition-colors ${
+                        layout === 'list'
+                          ? 'bg-orange-500 text-white'
+                          : dark
+                            ? 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+                            : 'bg-white text-neutral-700 hover:bg-neutral-50'
+                      }`}
+                    >
+                      List
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Sort Options */}
+                <div className="flex items-center gap-2">
+                  <span className={`text-sm ${dark ? "text-neutral-400" : "text-neutral-600"}`}>Sort by:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
+                    className={`px-3 py-2 rounded-lg border text-sm ${
+                      dark 
+                        ? "bg-neutral-800 border-neutral-700 text-white" 
+                        : "bg-white border-neutral-300 text-neutral-900"
+                    }`}
+                  >
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="alphabetical">Alphabetical</option>
+                    <option value="mostExpensive">Most Expensive</option>
+                    <option value="leastExpensive">Least Expensive</option>
+                  </select>
+                </div>
               </div>
             </div>
             
-              {/* Listings Grid using ListingCard component */}
+            {/* Listings Display */}
+            {layout === 'grid' ? (
+              /* Grid View using ListingCard component */
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {sortedListings.map((listing: any) => (
                   <div key={listing.id} onClick={() => handleListingClick(listing)} className="cursor-pointer">
-
                     <ListingCard
                       listing={listing}
                       unit="sats"
@@ -238,6 +315,22 @@ export default function PublicProfilePage() {
                   </div>
                 ))}
               </div>
+            ) : (
+              /* List View using ListingRow component */
+              <div className="space-y-4">
+                {sortedListings.map((listing: any) => (
+                  <div key={listing.id} onClick={() => handleListingClick(listing)} className="cursor-pointer">
+                    <ListingRow
+                      listing={listing}
+                      unit="sats"
+                      dark={dark}
+                      btcCad={effectiveBtcCad}
+                      onOpen={() => handleListingClick(listing)}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
