@@ -65,7 +65,7 @@ export function ListingsSection({
                 <section className="mt-6">
                     <div className="mb-6 flex items-baseline justify-between">
                         <div className="flex items-center gap-3">
-                            <h2 className={cn("text-3xl font-bold", dark ? "text-white" : "text-neutral-900")}>{t('featured', lang)}</h2>
+                            <h2 className={cn("text-3xl font-bold", dark ? "text-white" : "text-neutral-900")} style={{ fontFamily: 'Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>{t('featured', lang)}</h2>
                         </div>
                     </div>
                     <ItemsCarousel listings={featured} unit={unit} btcCad={btcCad} dark={dark} onOpen={onOpen} />
@@ -76,7 +76,7 @@ export function ListingsSection({
             <section className="mt-16">
                 <div className="mb-6 flex items-baseline justify-between">
                     <div className="flex items-center gap-4">
-                        <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")}>{t('latest', lang)}</h2>
+                        <h2 className={cn("text-3xl font-bold flex items-center gap-3", dark ? "text-white" : "text-neutral-900")} style={{ fontFamily: 'Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>{t('latest', lang)}</h2>
                         <span className={cn("text-sm font-medium", dark ? "text-neutral-400" : "text-neutral-500")}>
                             {goods.length} {t('results', lang)}
                         </span>

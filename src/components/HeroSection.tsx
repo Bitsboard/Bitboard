@@ -47,7 +47,7 @@ export function HeroSection({
                 <div className="flex flex-col-reverse items-start gap-3 md:flex-row md:items-center md:justify-between">
                     {/* Left Content */}
                     <div className="max-w-2xl">
-                        <h1 className="text-5xl font-black tracking-tight sm:text-7xl">
+                        <h1 className="text-5xl font-black tracking-tight sm:text-7xl" style={{ fontFamily: 'Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>
                             <span className={cn(lang === 'en' ? 'block' : 'inline', "leading-tight", dark ? "text-white" : "text-black")}>{t('title_hero_1', lang)}{lang !== 'en' ? ' ' : ''}</span>
                             <span className={cn(lang === 'en' ? 'block' : 'inline', "bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent")} style={{ lineHeight: '1.2' }}>
                                 {t('title_hero_2', lang)}

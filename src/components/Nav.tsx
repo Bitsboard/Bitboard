@@ -90,7 +90,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
   return (
     <nav
       className={cn(
-        "sticky top-0 z-50 relative",
+        "sticky top-0 z-50",
         dark ? "border-b border-neutral-900 bg-neutral-950" : "border-b border-neutral-200 bg-white"
       )}
     >
