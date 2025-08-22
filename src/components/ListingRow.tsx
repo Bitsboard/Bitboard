@@ -91,7 +91,7 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
             <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="lg" />
           </div>
           <div className="text-right text-base">
-            <div className={cn("inline-flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}>
+            <div className="flex items-center gap-2">
               {/* Seller Profile Picture */}
               <div className="flex-shrink-0">
                 {!sellerImageError ? (
@@ -108,13 +108,21 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
                 )}
               </div>
               
+              <Link
+                href={`/profile/${listing.seller.name}`}
+                className="truncate max-w-[8rem] hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-200"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {listing.seller.name}
+              </Link>
+              
               {listing.seller.score >= 50 && (
                 <span
                   className={cn(
                     "verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-bold shadow-md"
                   )}
                   style={{
-                    background: 'linear-gradient(135deg, #f97316, #dc2626)'
+                    background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
                   }}
                   aria-label="Verified"
                   title="User has verified their identity"
@@ -124,15 +132,9 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
                   </svg>
                 </span>
               )}
-              <Link
-                href={`/profile/${listing.seller.name}`}
-                className="truncate max-w-[12rem] sm:max-w-[16rem] md:max-w-[20rem] hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-200"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {listing.seller.name}
-              </Link>
+              
+              <span className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍</span>
             </div>
-            <div className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍 reputation</div>
           </div>
         </div>
       </div>

@@ -7,19 +7,37 @@ export function ThemeToggle() {
     const isDark = theme === 'dark';
 
     return (
-        <button
-            onClick={toggleTheme}
-            className="relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 shadow-lg"
-            style={{
-                background: isDark 
-                    ? 'linear-gradient(135deg, #f97316, #dc2626)' 
-                    : 'linear-gradient(135deg, #fbbf24, #f59e0b)'
-            }}
-            aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
-        >
-            <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-md transition-all duration-300 ${isDark ? 'translate-x-6' : 'translate-x-1'}`}
+        <div className="relative inline-flex rounded-2xl p-1 shadow-lg border backdrop-blur-sm bg-white/70 dark:bg-neutral-800/60 dark:border-neutral-700/50">
+            <div
+                className={`absolute inset-1 rounded-xl transition-all duration-300 ease-out ${
+                    isDark 
+                        ? 'translate-x-full bg-gradient-to-r from-orange-500 to-red-500 shadow-lg' 
+                        : 'translate-x-0 bg-gradient-to-r from-orange-400 to-orange-500 shadow-lg'
+                }`}
+                style={{ width: 'calc(50% - 4px)' }}
             />
-        </button>
+            <button
+                onClick={toggleTheme}
+                className={`relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105 ${
+                    !isDark
+                        ? 'text-white font-extrabold drop-shadow-sm'
+                        : 'text-neutral-600 hover:text-neutral-800 dark:text-neutral-200 dark:hover:text-neutral-50'
+                }`}
+                title="Light mode"
+            >
+                Light
+            </button>
+            <button
+                onClick={toggleTheme}
+                className={`relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105 ${
+                    isDark
+                        ? 'text-white font-extrabold drop-shadow-sm'
+                        : 'text-neutral-600 hover:text-neutral-800 dark:text-neutral-200 dark:hover:text-neutral-50'
+                }`}
+                title="Dark mode"
+            >
+                Dark
+            </button>
+        </div>
     );
 }

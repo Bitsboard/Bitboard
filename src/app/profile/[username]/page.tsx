@@ -228,7 +228,7 @@ export default function PublicProfilePage() {
                     <span 
                       className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white font-bold shadow-lg border-2 border-white"
                       style={{
-                        background: 'linear-gradient(135deg, #f97316, #dc2626)'
+                        background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
                       }}
                       aria-label="Verified"
                       title="User has verified their identity"

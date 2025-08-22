@@ -93,13 +93,21 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
               )}
             </div>
             
+            <Link
+              href={`/profile/${listing.seller.name}`}
+              className="truncate max-w-[8rem] sm:max-w-[10rem] hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {listing.seller.name}
+            </Link>
+            
             {listing.seller.score >= 50 && (
               <span
                 className={cn(
                   "verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-bold shadow-md"
                 )}
                 style={{
-                  background: 'linear-gradient(135deg, #f97316, #dc2626)'
+                  background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
                 }}
                 aria-label="Verified"
                 title="User has verified their identity"
@@ -109,13 +117,7 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
                 </svg>
               </span>
             )}
-            <Link
-              href={`/profile/${listing.seller.name}`}
-              className="truncate max-w-[8rem] sm:max-w-[10rem] hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-200"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {listing.seller.name}
-            </Link>
+            
             <span className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍</span>
           </div>
         </div>
