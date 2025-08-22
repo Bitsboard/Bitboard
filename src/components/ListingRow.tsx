@@ -7,6 +7,7 @@ import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
 import { TypePill } from "./TypePill";
 import { Carousel } from "./Carousel";
+import { generateProfilePicture, getInitials } from "@/lib/utils";
 import type { Listing, Category, Unit, Seller } from "@/lib/types";
 
 
@@ -39,6 +40,8 @@ function accent(listing: Listing) {
 export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowProps) {
   const boosted = listing.boostedUntil && listing.boostedUntil > Date.now();
   const a = accent(listing);
+  const [sellerImageError, setSellerImageError] = React.useState(false);
+  
   function stars(rating: number) {
     const full = Math.floor(rating);
     const half = rating - full >= 0.5;
@@ -89,13 +92,29 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
           </div>
           <div className="text-right text-base">
             <div className={cn("inline-flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}>
+              {/* Seller Profile Picture */}
+              <div className="flex-shrink-0">
+                {!sellerImageError ? (
+                  <img
+                    src={generateProfilePicture(listing.seller.name)}
+                    alt={`${listing.seller.name}'s profile picture`}
+                    className="w-5 h-5 rounded-full object-cover"
+                    onError={() => setSellerImageError(true)}
+                  />
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
+                    {getInitials(listing.seller.name)}
+                  </div>
+                )}
+              </div>
+              
               {listing.seller.score >= 50 && (
                 <span
                   className={cn(
                     "verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-bold bg-blue-500 shadow-md"
                   )}
                   aria-label="Verified"
-                  title={t('verified_tooltip', useLang())}
+                  title="User has verified their identity"
                 >
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

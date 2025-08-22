@@ -8,6 +8,7 @@ import { mockListings } from '@/lib/mockData';
 import { useThemeContext } from '@/lib/contexts/ThemeContext';
 import { ListingCard, ListingsSection, ListingModal } from '@/components';
 import { useBtcRate } from '@/lib/hooks/useBtcRate';
+import { generateProfilePicture, getInitials } from '@/lib/utils';
 import type { Listing } from '@/lib/types';
 
 export default function PublicProfilePage() {
@@ -20,6 +21,7 @@ export default function PublicProfilePage() {
   const [mounted, setMounted] = useState(false);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [profileImageError, setProfileImageError] = useState(false);
   
   useEffect(() => {
     setMounted(true);
@@ -67,6 +69,10 @@ export default function PublicProfilePage() {
     setSelectedListing(null);
   };
 
+  const handleProfileImageError = () => {
+    setProfileImageError(true);
+  };
+
   return (
     <div className="min-h-screen bg-white dark:bg-neutral-950">
       {/* Modern Profile Header */}
@@ -91,9 +97,20 @@ export default function PublicProfilePage() {
               {/* Avatar Section */}
               <div className="flex-shrink-0">
                 <div className="relative">
-                  <div className="w-28 h-28 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-4xl font-bold text-white shadow-xl border-4 border-white/30">
-                    {username.charAt(0).toUpperCase()}
-                  </div>
+                  {!profileImageError ? (
+                    <img
+                      src={generateProfilePicture(username)}
+                      alt={`${username}'s profile picture`}
+                      className="w-28 h-28 rounded-full object-cover shadow-xl border-4 border-white/30"
+                      onError={handleProfileImageError}
+                    />
+                  ) : (
+                    <div className="w-28 h-28 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-4xl font-bold text-white shadow-xl border-4 border-white/30 leading-none">
+                      <span className="flex items-center justify-center w-full h-full" style={{ fontFamily: 'Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>
+                        {getInitials(username)}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -107,7 +124,7 @@ export default function PublicProfilePage() {
                     <span 
                       className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white font-bold bg-blue-500 shadow-lg border-2 border-white"
                       aria-label="Verified"
-                      title="Verified user"
+                      title="User has verified their identity"
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

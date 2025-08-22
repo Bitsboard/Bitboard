@@ -7,6 +7,7 @@ import { Carousel } from "./Carousel";
 import { Modal, ModalHeader, ModalTitle, ModalCloseButton } from "./Modal";
 import { t, formatPostedAgo } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
+import { generateProfilePicture, getInitials } from "@/lib/utils";
 import type { Listing, Category, Unit, Seller } from "@/lib/types";
 
 interface ListingModalProps {
@@ -40,6 +41,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
   const boosted = listing.boostedUntil && listing.boostedUntil > Date.now();
   const lang = useLang();
   const a = accent(listing);
+  const [sellerImageError, setSellerImageError] = React.useState(false);
 
   function sanitizeTitle(raw: string, type: "sell" | "want"): string {
     if (type !== "want") return raw;
@@ -93,8 +95,24 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 items-center">
                 {/* Row 1, Col 1: seller info */}
                 <div className={cn("text-sm flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}>
+                  {/* Seller Profile Picture */}
+                  <div className="flex-shrink-0">
+                    {!sellerImageError ? (
+                      <img
+                        src={generateProfilePicture(listing.seller.name)}
+                        alt={`${listing.seller.name}'s profile picture`}
+                        className="w-6 h-6 rounded-full object-cover"
+                        onError={() => setSellerImageError(true)}
+                      />
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
+                        {getInitials(listing.seller.name)}
+                      </div>
+                    )}
+                  </div>
+                  
                   {listing.seller.score >= 50 && (
-                    <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-bold bg-blue-500 shadow-md")} aria-label="Verified" title={t('verified_tooltip', lang)}>
+                    <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-bold bg-blue-500 shadow-md")} aria-label="Verified" title="User has verified their identity">
                       <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>

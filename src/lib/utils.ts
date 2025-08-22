@@ -190,3 +190,31 @@ export async function retry<T>(
 
   throw lastError!;
 }
+
+/**
+ * Generate a profile picture URL using Dicebear's open-source avatar service
+ * @param username - The username to generate avatar for
+ * @param seed - Optional seed for consistent avatar generation
+ * @returns URL to the generated avatar
+ */
+export function generateProfilePicture(username: string, seed?: string): string {
+  const avatarSeed = seed || username;
+  // Using Dicebear's "adventurer" style - a fun, colorful avatar style
+  return `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(avatarSeed)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
+}
+
+/**
+ * Get initials from a username or full name
+ * @param name - The name to extract initials from
+ * @returns The initials (first letter of each word, up to 2 characters)
+ */
+export function getInitials(name: string): string {
+  if (!name) return '?';
+  
+  const words = name.trim().split(/\s+/);
+  if (words.length === 1) {
+    return name.charAt(0).toUpperCase();
+  }
+  
+  return words.slice(0, 2).map(word => word.charAt(0).toUpperCase()).join('');
+}
