@@ -4,17 +4,21 @@
 
 /* Prefer Ubuntu for brand wordmark */
 @font-face {
-  font-family: 'Ubuntu';
+  font-family: "Ubuntu";
   font-style: normal;
   font-weight: 400 800;
   font-display: swap;
-  src: local('Ubuntu');
+  src: local("Ubuntu");
 }
 
 :root {
   --bb-orange-start: #fbbf24;
   --bb-orange-end: #f97316;
-  --bb-orange-gradient: linear-gradient(90deg, var(--bb-orange-start), var(--bb-orange-end));
+  --bb-orange-gradient: linear-gradient(
+    90deg,
+    var(--bb-orange-start),
+    var(--bb-orange-end)
+  );
 }
 
 .gradient-text {
@@ -95,27 +99,19 @@
 }
 
 .animate-rotate-gradient {
-  background: linear-gradient(90deg, #f97316, #fbbf24, #f97316, #fbbf24, #f97316);
+  background: linear-gradient(
+    90deg,
+    #f97316,
+    #fbbf24,
+    #f97316,
+    #fbbf24,
+    #f97316
+  );
   background-size: 200% 200%;
   animation: left-gradient 6s linear infinite;
 }
 
-/* Cyan/blue pulsing gradient for verified badge */
-@keyframes verified-pulse {
-  0% {
-    background: #3b82f6;
-  }
-  50% {
-    background: #06b6d4;
-  }
-  100% {
-    background: #3b82f6;
-  }
-}
-
-.verified-badge {
-  animation: verified-pulse 2s ease-in-out infinite;
-}
+/* Moving gradient for verified badge - REMOVED - now using solid blue like Twitter */
 
 /* Ensure gradient text has proper spacing */
 .gradient-text-safe {
@@ -141,12 +137,18 @@ a {
   overscroll-behavior-y: contain;
 }
 
-button:focus, button:focus-visible,
-[role="button"]:focus, [role="button"]:focus-visible,
-input:focus, input:focus-visible,
-select:focus, select:focus-visible,
-textarea:focus, textarea:focus-visible,
-a:focus, a:focus-visible {
+button:focus,
+button:focus-visible,
+[role="button"]:focus,
+[role="button"]:focus-visible,
+input:focus,
+input:focus-visible,
+select:focus,
+select:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+a:focus,
+a:focus-visible {
   outline: none;
   box-shadow: none;
 }

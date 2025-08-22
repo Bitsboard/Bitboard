@@ -92,12 +92,14 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
               {listing.seller.score >= 50 && (
                 <span
                   className={cn(
-                    "verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-sky-600 font-extrabold shadow-[0_0_8px_rgba(56,189,248,0.6)] bg-white"
+                    "verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-bold bg-blue-500 shadow-md"
                   )}
                   aria-label="Verified"
                   title={t('verified_tooltip', useLang())}
                 >
-                  ✓
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
                 </span>
               )}
               <Link

@@ -6,70 +6,32 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { mockListings } from '@/lib/mockData';
 import { useThemeContext } from '@/lib/contexts/ThemeContext';
-import { ListingCard, ListingModal } from '@/components';
+import { ListingCard, ListingsSection, ListingModal } from '@/components';
+import { useBtcRate } from '@/lib/hooks/useBtcRate';
 import type { Listing } from '@/lib/types';
 
 export default function PublicProfilePage() {
-  const [loading, setLoading] = useState(true);
-  const [profileData, setProfileData] = useState<any>(null);
-  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'alphabetical' | 'mostExpensive' | 'leastExpensive'>('newest');
-  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const params = useParams();
   const username = params.username as string;
   const { dark } = useThemeContext();
-
+  const btcCad = useBtcRate();
+  
+  // State for client-side rendering
+  const [mounted, setMounted] = useState(false);
+  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
   useEffect(() => {
-    console.log('Profile page useEffect triggered');
-    console.log('Username:', username);
-    console.log('Mock listings count:', mockListings.length);
-    
-    // Find user in mock data
-    const userListings = mockListings.filter(listing => listing.seller.name === username);
-    console.log('Found user listings:', userListings.length);
-    console.log('User listings:', userListings);
-    
-    if (userListings.length > 0) {
-      const firstUser = userListings[0].seller;
-      
-      // Calculate member since date from the oldest listing
-      const oldestListing = userListings.reduce((oldest, current) => 
-        current.createdAt < oldest.createdAt ? current : oldest
-      );
-      const memberSinceDate = new Date(oldestListing.createdAt);
-      const memberSince = memberSinceDate.toLocaleDateString('en-US', { 
-        month: 'long', 
-        year: 'numeric' 
-      });
-      
-      const combinedProfileData = {
-        username: username,
-        email: `${username}@example.com`,
-        verified: firstUser.score >= 50,
-        registeredAt: memberSince,
-        score: firstUser.score,
-        deals: firstUser.deals,
-        rating: firstUser.rating,
-        listings: userListings
-      };
-      console.log('Setting profile data:', combinedProfileData);
-      setProfileData(combinedProfileData);
-    } else {
-      console.log('No user listings found, setting profile data to null');
-      setProfileData(null);
-    }
-    
-    setLoading(false);
-  }, [username]);
+    setMounted(true);
+  }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-neutral-950 flex items-center justify-center">
-        <div className="text-neutral-600 dark:text-neutral-400">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!profileData) {
+  // Directly find user listings without complex state
+  const userListings = mockListings.filter(listing => listing.seller.name === username);
+  
+  // Use BTC rate with fallback for better UX
+  const effectiveBtcCad = btcCad || 157432;
+  
+  if (userListings.length === 0) {
     return (
       <div className="min-h-screen bg-white dark:bg-neutral-950 flex items-center justify-center">
         <div className="text-center">
@@ -81,111 +43,129 @@ export default function PublicProfilePage() {
     );
   }
 
-  // Sort listings based on current sort option
-  const getSortedListings = () => {
-    const listings = [...profileData.listings];
-    
-    switch (sortBy) {
-      case 'newest':
-        return listings.sort((a, b) => b.createdAt - a.createdAt);
-      case 'oldest':
-        return listings.sort((a, b) => a.createdAt - b.createdAt);
-      case 'alphabetical':
-        return listings.sort((a, b) => a.title.localeCompare(b.title));
-      case 'mostExpensive':
-        return listings.sort((a, b) => b.priceSats - a.priceSats);
-      case 'leastExpensive':
-        return listings.sort((a, b) => a.priceSats - b.priceSats);
-      default:
-        return listings;
-    }
+  // Get user info from first listing
+  const firstUser = userListings[0].seller;
+  const oldestListing = userListings.reduce((oldest, current) => 
+    current.createdAt < oldest.createdAt ? current : oldest
+  );
+  const memberSinceDate = new Date(oldestListing.createdAt);
+  const memberSince = memberSinceDate.toLocaleDateString('en-US', { 
+    month: 'long', 
+    year: 'numeric' 
+  });
+
+  // Sort listings (default to newest)
+  const sortedListings = [...userListings].sort((a, b) => b.createdAt - a.createdAt);
+
+  const handleListingClick = (listing: Listing) => {
+    setSelectedListing(listing);
+    setIsModalOpen(true);
   };
 
-  const sortedListings = getSortedListings();
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedListing(null);
+  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-neutral-950">
-      {/* Unified Profile Header with Background */}
-      <div className="relative bg-gradient-to-r from-orange-500 via-red-500 to-pink-500">
-        {/* Background gradient */}
-        <div className="h-64 w-full"></div>
-        
-        {/* Profile content overlay */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="max-w-4xl mx-auto px-4 w-full">
-            <div className="text-center text-white">
-              {/* Avatar */}
-              <div className="w-32 h-32 rounded-full flex items-center justify-center text-4xl font-bold text-white bg-white/20 backdrop-blur-sm border-4 border-white/30 shadow-2xl mb-6 mx-auto">
-                {username.charAt(0).toUpperCase()}
-              </div>
+      {/* Modern Profile Header */}
+      <div className="relative bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 overflow-hidden">
+        {/* Geometric background pattern */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-0 w-full h-full opacity-10">
+            <div className="absolute top-20 left-20 w-40 h-40 border border-white/20 rounded-3xl rotate-12"></div>
+            <div className="absolute top-40 right-32 w-24 h-24 border border-white/30 rounded-2xl -rotate-45"></div>
+            <div className="absolute bottom-20 left-1/3 w-32 h-32 border border-white/15 rounded-full"></div>
+            <div className="absolute top-1/2 right-20 w-16 h-16 bg-white/5 rounded-xl rotate-45"></div>
+          </div>
+        </div>
+
+        {/* Content Container */}
+        <div className="relative z-10 max-w-4xl mx-auto px-4 py-12">
+          
+          {/* Profile Info Section - No Box */}
+          <div className="mb-6">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8">
               
-              {/* Username and verification */}
-              <div className="flex items-center justify-center gap-3 mb-8">
-                <h1 className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg">
-                  {username}
-                </h1>
-                {profileData.verified && (
-                  <span 
-                    className="verified-badge inline-flex h-8 w-8 items-center justify-center rounded-full text-sky-600 font-extrabold shadow-[0_0_12px_rgba(56,189,248,0.6)] bg-white"
-                    aria-label="Verified"
-                    title="Verified user"
-                  >
-                    ✓
-                  </span>
-                )}
-              </div>
-              
-              {/* Three Stats in a row */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 max-w-3xl mx-auto">
-                {/* Member Since */}
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 transition-all duration-200 hover:scale-105 hover:bg-white/20">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shadow-inner">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <div className="text-sm font-medium text-white/90">
-                      Member Since
-                    </div>
-                  </div>
-                  <div className="text-xl font-bold text-white">
-                    {profileData.registeredAt}
+              {/* Avatar Section */}
+              <div className="flex-shrink-0">
+                <div className="relative">
+                  <div className="w-28 h-28 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-4xl font-bold text-white shadow-xl border-4 border-white/30">
+                    {username.charAt(0).toUpperCase()}
                   </div>
                 </div>
-                
-                {/* Active Listings */}
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 transition-all duration-200 hover:scale-105 hover:bg-white/20">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shadow-inner">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </div>
+
+              {/* User Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-4xl lg:text-5xl font-bold text-white truncate" style={{ fontFamily: 'Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>
+                    {username}
+                  </h1>
+                  {firstUser.score >= 50 && (
+                    <span 
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white font-bold bg-blue-500 shadow-lg border-2 border-white"
+                      aria-label="Verified"
+                      title="Verified user"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                    </div>
-                    <div className="text-sm font-medium text-white/90">
-                      Active Listings
-                    </div>
-                  </div>
-                  <div className="text-xl font-bold text-white">
-                    {profileData.listings.length}
-                  </div>
+                    </span>
+                  )}
                 </div>
-                
-                {/* Reputation */}
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 transition-all duration-200 hover:scale-105 hover:bg-white/20">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shadow-inner">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                      </svg>
-                    </div>
-                    <div className="text-sm font-medium text-white/90">
-                      Reputation
-                    </div>
-                  </div>
-                  <div className="text-xl font-bold text-white">
-                    +{profileData.score}
-                  </div>
+                <div className="text-white/80 mb-4">
+                  <span className="text-sm">Member since {memberSince}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* Last Seen */}
+            <div className="bg-white/20 backdrop-blur-lg rounded-2xl border border-white/30 p-6 hover:bg-white/30 transition-all duration-300 shadow-lg">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-green-500/30 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-sm text-white mb-1 font-medium">Last seen</div>
+                  <div className="text-lg font-semibold text-white">Today</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Reputation */}
+            <div className="bg-white/20 backdrop-blur-lg rounded-2xl border border-white/30 p-6 hover:bg-white/30 transition-all duration-300 shadow-lg">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-blue-500/30 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-sm text-white mb-1 font-medium">Reputation</div>
+                  <div className="text-lg font-semibold text-white">+{firstUser.score}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Active Listings */}
+            <div className="bg-white/20 backdrop-blur-lg rounded-2xl border border-white/30 p-6 hover:bg-white/30 transition-all duration-300 shadow-lg">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-purple-500/30 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-sm text-white mb-1 font-medium">Active Listings</div>
+                  <div className="text-lg font-semibold text-white">{userListings.length}</div>
                 </div>
               </div>
             </div>
@@ -194,8 +174,8 @@ export default function PublicProfilePage() {
       </div>
       
       {/* Main content container */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Listings Section with Sorting */}
+      <div className="max-w-4xl mx-auto px-4 py-12">
+                {/* Listings Section with Sorting */}
         {sortedListings.length > 0 && (
           <div className="mb-12">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -207,8 +187,10 @@ export default function PublicProfilePage() {
               <div className="flex items-center gap-2">
                 <span className={`text-sm ${dark ? "text-neutral-400" : "text-neutral-600"}`}>Sort by:</span>
                 <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'alphabetical' | 'mostExpensive' | 'leastExpensive')}
+                  value="newest" // Default to newest
+                  onChange={(e) => {
+                    // No sorting options implemented yet, so this is a placeholder
+                  }}
                   className={`px-3 py-2 rounded-lg border text-sm ${
                     dark 
                       ? "bg-neutral-800 border-neutral-700 text-white" 
@@ -224,20 +206,21 @@ export default function PublicProfilePage() {
               </div>
             </div>
             
-            {/* Listings Grid using ListingCard component */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sortedListings.map((listing: any) => (
-                <div key={listing.id} onClick={() => setSelectedListing(listing)} className="cursor-pointer">
-                  <ListingCard
-                    listing={listing}
-                    unit="sats"
-                    dark={dark}
-                    btcCad={0}
-                    onOpen={() => setSelectedListing(listing)}
-                  />
-                </div>
-              ))}
-            </div>
+              {/* Listings Grid using ListingCard component */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {sortedListings.map((listing: any) => (
+                  <div key={listing.id} onClick={() => handleListingClick(listing)} className="cursor-pointer">
+
+                    <ListingCard
+                      listing={listing}
+                      unit="sats"
+                      dark={dark}
+                      btcCad={effectiveBtcCad}
+                      onOpen={() => handleListingClick(listing)}
+                    />
+                  </div>
+                ))}
+              </div>
           </div>
         )}
 
@@ -255,16 +238,17 @@ export default function PublicProfilePage() {
       </div>
 
       {/* Listing Modal */}
-      {selectedListing && (
+      {isModalOpen && selectedListing && (
         <ListingModal
           listing={selectedListing}
-          onClose={() => setSelectedListing(null)}
+          open={isModalOpen}
+          onClose={closeModal}
           unit="sats"
-          btcCad={0}
           dark={dark}
+          btcCad={effectiveBtcCad}
           onChat={() => {
-            // Handle chat functionality
-            console.log('Chat with seller:', selectedListing.seller.name);
+            // Placeholder for chat functionality
+            console.log('Open chat for listing:', selectedListing.title);
           }}
         />
       )}

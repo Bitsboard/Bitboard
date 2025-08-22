@@ -16,6 +16,7 @@ interface ListingModalProps {
   btcCad: number | null;
   dark: boolean;
   onChat: () => void;
+  open: boolean;
 }
 
 function cn(...xs: Array<string | false | null | undefined>) {
@@ -35,7 +36,7 @@ function accent(listing: Listing) {
   return { stripe: "from-fuchsia-500 to-violet-500", chip: "from-fuchsia-500 to-violet-500" };
 }
 
-export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: ListingModalProps) {
+export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, open }: ListingModalProps) {
   const boosted = listing.boostedUntil && listing.boostedUntil > Date.now();
   const lang = useLang();
   const a = accent(listing);
@@ -51,7 +52,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
   }
 
   return (
-    <Modal open={true} onClose={onClose} dark={dark} size="lg" ariaLabel={listing.title}>
+    <Modal open={open} onClose={onClose} dark={dark} size="lg" ariaLabel={listing.title}>
       <ModalHeader dark={dark}>
         <div className="flex items-center gap-2">
           <span className={cn("flex-shrink-0 rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>
@@ -93,7 +94,11 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
                 {/* Row 1, Col 1: seller info */}
                 <div className={cn("text-sm flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}>
                   {listing.seller.score >= 50 && (
-                    <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-sky-600 font-extrabold shadow-[0_0_8px_rgba(56,189,248,0.6)] bg-white")} aria-label="Verified" title={t('verified_tooltip', lang)}>✓</span>
+                    <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-bold bg-blue-500 shadow-md")} aria-label="Verified" title={t('verified_tooltip', lang)}>
+                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </span>
                   )}
                   <Link
                     href={`/profile/${listing.seller.name}`}
