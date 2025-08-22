@@ -2,7 +2,7 @@ import type { Listing, Place, RateResponse, ListingsResponse } from './types';
 
 // Configuration constants
 export const CONFIG = {
-    PAGE_SIZE: 24,
+    PAGE_SIZE: 50,
     DEFAULT_RADIUS_KM: 25,
     DEFAULT_CENTER: { name: "Toronto (City Center)", lat: 43.653, lng: -79.383 },
     BTC_RATE_CACHE_DURATION: 5 * 60 * 1000, // 5 minutes

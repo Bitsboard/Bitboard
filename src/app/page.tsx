@@ -30,11 +30,7 @@ export default function HomePage() {
   const ENV = process.env.NEXT_PUBLIC_ENV || process.env.NEXT_PUBLIC_BRANCH || 'development';
   const isDeployed = ENV === "production" || ENV === "staging" || ENV === "main"; // Include staging and main
   
-  // Debug logging
-  console.log('Environment:', ENV);
-  console.log('Is Deployed:', isDeployed);
-  console.log('NEXT_PUBLIC_ENV:', process.env.NEXT_PUBLIC_ENV);
-  console.log('NEXT_PUBLIC_BRANCH:', process.env.NEXT_PUBLIC_BRANCH);
+
   
   const router = useRouter();
   const lang = useLang();
@@ -50,26 +46,9 @@ export default function HomePage() {
   const forceDatabase = typeof window !== 'undefined' && window.location.hostname.includes('pages.dev');
   const finalIsDeployed = isDeployed || forceDatabase;
   
-  // Debug logging for listings
-  console.log('Listings from hook:', listings);
-  console.log('Total from hook:', total);
-  console.log('Is loading:', isLoading);
-  console.log('Force database:', forceDatabase);
-  console.log('Final isDeployed:', finalIsDeployed);
+
   
-  // Test API call directly
-  useEffect(() => {
-    if (finalIsDeployed) {
-      fetch('/api/listings?limit=5')
-        .then(res => res.json())
-        .then(data => {
-          console.log('Direct API response:', data);
-        })
-        .catch(err => {
-          console.error('Direct API error:', err);
-        });
-    }
-  }, [finalIsDeployed]);
+
   
   const { query, setQuery, cat, setCat, adType, setAdType, goods, services, featured } = useSearchFilters(listings);
   
@@ -127,10 +106,7 @@ export default function HomePage() {
   return (
     <ErrorBoundary>
       <div className={cn("min-h-screen", bg, dark ? "dark" : "")}>
-        {/* Simple test - just add text to see if deployment works */}
-        <div className="fixed top-0 left-0 z-50 bg-yellow-400 text-black p-2 text-sm font-bold">
-          TEST: If you see this, deployment is working!
-        </div>
+
         
         {/* Global header is rendered via layout */}
 
