@@ -96,7 +96,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
                     <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-extrabold shadow-[0_0_8px_rgba(56,189,248,0.8)]", dark ? "bg-sky-500" : "bg-sky-500")} aria-label="Verified" title={t('verified_tooltip', lang)}>✓</span>
                   )}
                   <Link
-                    href={`/en/${listing.seller.name}`}
+                    href={`/profile/${listing.seller.name}`}
                     className="hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-200"
                     onClick={(e) => e.stopPropagation()}
                   >

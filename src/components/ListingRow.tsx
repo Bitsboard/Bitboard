@@ -102,7 +102,7 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
                 </span>
               )}
               <Link
-                href={`/en/${listing.seller.name}`}
+                href={`/profile/${listing.seller.name}`}
                 className="truncate max-w-[12rem] sm:max-w-[16rem] md:max-w-[20rem] hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-200"
                 onClick={(e) => e.stopPropagation()}
               >

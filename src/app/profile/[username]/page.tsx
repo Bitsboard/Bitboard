@@ -1,46 +1,26 @@
 'use client';
 
-export const runtime = 'edge';
-
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { ListingCard } from '@/components/ListingCard';
-import { PriceBlock } from '@/components/PriceBlock';
-import { cn } from '@/lib/utils';
 import { mockListings } from '@/lib/mockData';
-import { useSettings } from '@/lib/settings';
 import { useThemeContext } from '@/lib/contexts/ThemeContext';
-import { useBtcRate } from '@/lib/hooks';
-import type { Listing } from '@/lib/types';
-
-interface ProfileData {
-  username: string;
-  email: string;
-  verified: boolean;
-  registeredAt: string;
-  score: number;
-  deals: number;
-  rating: number;
-  listings: Listing[];
-  stats: {
-    totalSelling: number;
-    totalWanted: number;
-    totalValue: number;
-  };
-}
 
 export default function PublicProfilePage() {
   const [loading, setLoading] = useState(true);
-  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [profileData, setProfileData] = useState<any>(null);
   const params = useParams();
   const username = params.username as string;
-  const { unit } = useSettings();
   const { dark } = useThemeContext();
-  const btcCad = useBtcRate();
 
   useEffect(() => {
+    console.log('Profile page useEffect triggered');
+    console.log('Username:', username);
+    console.log('Mock listings count:', mockListings.length);
+    
     // Find user in mock data
     const userListings = mockListings.filter(listing => listing.seller.name === username);
+    console.log('Found user listings:', userListings.length);
+    console.log('User listings:', userListings);
     
     if (userListings.length > 0) {
       const firstUser = userListings[0].seller;
@@ -48,7 +28,7 @@ export default function PublicProfilePage() {
       const wanted = userListings.filter(l => l.type === 'want');
       const totalValue = userListings.reduce((sum, l) => sum + l.priceSats, 0);
       
-      const combinedProfileData: ProfileData = {
+      const combinedProfileData = {
         username: username,
         email: `${username}@example.com`,
         verified: firstUser.score >= 50,
@@ -63,8 +43,10 @@ export default function PublicProfilePage() {
           totalValue: totalValue
         }
       };
+      console.log('Setting profile data:', combinedProfileData);
       setProfileData(combinedProfileData);
     } else {
+      console.log('No user listings found, setting profile data to null');
       setProfileData(null);
     }
     
@@ -92,32 +74,28 @@ export default function PublicProfilePage() {
   }
 
   const { listings } = profileData;
-  const sellingListings = listings.filter(l => l.type === 'sell');
-  const wantedListings = listings.filter(l => l.type === 'want');
+  const sellingListings = listings.filter((l: any) => l.type === 'sell');
+  const wantedListings = listings.filter((l: any) => l.type === 'want');
 
   return (
     <div className="min-h-screen bg-white dark:bg-neutral-950">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Profile Header */}
-        <div className={cn(
-          "rounded-2xl p-8 mb-8 border",
+        <div className={`rounded-2xl p-8 mb-8 border ${
           dark 
             ? "bg-neutral-900 border-neutral-800" 
             : "bg-white border-neutral-200 shadow-sm"
-        )}>
+        }`}>
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
             {/* Avatar */}
-            <div className={cn(
-              "w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold text-white",
-              "bg-gradient-to-br from-orange-500 to-red-500"
-            )}>
+            <div className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold text-white bg-gradient-to-br from-orange-500 to-red-500">
               {username.charAt(0).toUpperCase()}
             </div>
             
             {/* Profile Info */}
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <h1 className={cn("text-3xl font-bold", dark ? "text-white" : "text-neutral-900")}>
+                <h1 className={`text-3xl font-bold ${dark ? "text-white" : "text-neutral-900"}`}>
                   {username}
                 </h1>
                 {profileData.verified && (
@@ -131,7 +109,7 @@ export default function PublicProfilePage() {
                 )}
               </div>
               
-              <div className={cn("flex flex-wrap items-center gap-4 text-sm", dark ? "text-neutral-400" : "text-neutral-600")}>
+              <div className={`flex flex-wrap items-center gap-4 text-sm ${dark ? "text-neutral-400" : "text-neutral-600"}`}>
                 <span>+{profileData.score} 👍 reputation</span>
                 <span>•</span>
                 <span>{profileData.deals} completed deals</span>
@@ -143,11 +121,7 @@ export default function PublicProfilePage() {
             </div>
             
             {/* Contact Button */}
-            <button className={cn(
-              "px-6 py-3 rounded-xl font-semibold transition-colors",
-              "bg-gradient-to-r from-orange-500 to-red-500 text-white",
-              "hover:from-orange-400 hover:to-red-400 shadow-lg"
-            )}>
+            <button className="px-6 py-3 rounded-xl font-semibold transition-colors bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-400 hover:to-red-400 shadow-lg">
               Send Message
             </button>
           </div>
@@ -155,50 +129,41 @@ export default function PublicProfilePage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className={cn(
-            "rounded-xl p-6 border",
+          <div className={`rounded-xl p-6 border ${
             dark 
               ? "bg-neutral-900 border-neutral-800" 
               : "bg-white border-neutral-200 shadow-sm"
-          )}>
-            <div className={cn("text-2xl font-bold mb-1", dark ? "text-white" : "text-neutral-900")}>
+          }`}>
+            <div className={`text-2xl font-bold mb-1 ${dark ? "text-white" : "text-neutral-900"}`}>
               {profileData.stats.totalSelling}
             </div>
-            <div className={cn("text-sm", dark ? "text-neutral-400" : "text-neutral-600")}>
+            <div className={`text-sm ${dark ? "text-neutral-400" : "text-neutral-600"}`}>
               Items for sale
             </div>
           </div>
           
-          <div className={cn(
-            "rounded-xl p-6 border",
+          <div className={`rounded-xl p-6 border ${
             dark 
               ? "bg-neutral-900 border-neutral-800" 
               : "bg-white border-neutral-200 shadow-sm"
-          )}>
-            <div className={cn("text-2xl font-bold mb-1", dark ? "text-white" : "text-neutral-900")}>
+          }`}>
+            <div className={`text-2xl font-bold mb-1 ${dark ? "text-white" : "text-neutral-900"}`}>
               {profileData.stats.totalWanted}
             </div>
-            <div className={cn("text-sm", dark ? "text-neutral-400" : "text-neutral-600")}>
+            <div className={`text-sm ${dark ? "text-neutral-400" : "text-neutral-600"}`}>
               Items wanted
             </div>
           </div>
           
-          <div className={cn(
-            "rounded-xl p-6 border",
+          <div className={`rounded-xl p-6 border ${
             dark 
               ? "bg-neutral-900 border-neutral-800" 
               : "bg-white border-neutral-200 shadow-sm"
-          )}>
-            <div className="mb-1">
-              <PriceBlock 
-                sats={profileData.stats.totalValue} 
-                unit={unit} 
-                btcCad={btcCad} 
-                dark={dark} 
-                size="lg" 
-              />
+          }`}>
+            <div className={`text-2xl font-bold mb-1 ${dark ? "text-white" : "text-neutral-900"}`}>
+              {profileData.stats.totalValue.toLocaleString()} sats
             </div>
-            <div className={cn("text-sm", dark ? "text-neutral-400" : "text-neutral-600")}>
+            <div className={`text-sm ${dark ? "text-neutral-400" : "text-neutral-600"}`}>
               Total listing value
             </div>
           </div>
@@ -207,22 +172,26 @@ export default function PublicProfilePage() {
         {/* Listings Sections */}
         {sellingListings.length > 0 && (
           <div className="mb-12">
-            <h2 className={cn("text-2xl font-bold mb-6", dark ? "text-white" : "text-neutral-900")}>
+            <h2 className={`text-2xl font-bold mb-6 ${dark ? "text-white" : "text-neutral-900"}`}>
               For Sale ({sellingListings.length})
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {sellingListings.map((listing) => (
-                <ListingCard
-                  key={listing.id}
-                  listing={listing}
-                  unit={unit}
-                  btcCad={btcCad}
-                  dark={dark}
-                  onOpen={() => {
-                    // Handle listing open - could open modal or navigate
-                    console.log('Open listing:', listing.id);
-                  }}
-                />
+              {sellingListings.map((listing: any) => (
+                <div key={listing.id} className={`rounded-lg border p-4 ${
+                  dark 
+                    ? "bg-neutral-900 border-neutral-800" 
+                    : "bg-white border-neutral-200 shadow-sm"
+                }`}>
+                  <h3 className={`font-semibold mb-2 ${dark ? "text-white" : "text-neutral-900"}`}>
+                    {listing.title}
+                  </h3>
+                  <p className={`text-sm mb-2 ${dark ? "text-neutral-400" : "text-neutral-600"}`}>
+                    {listing.description}
+                  </p>
+                  <div className={`text-lg font-bold ${dark ? "text-orange-400" : "text-orange-600"}`}>
+                    {listing.priceSats.toLocaleString()} sats
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -230,22 +199,26 @@ export default function PublicProfilePage() {
 
         {wantedListings.length > 0 && (
           <div className="mb-12">
-            <h2 className={cn("text-2xl font-bold mb-6", dark ? "text-white" : "text-neutral-900")}>
+            <h2 className={`text-2xl font-bold mb-6 ${dark ? "text-white" : "text-neutral-900"}`}>
               Looking For ({wantedListings.length})
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {wantedListings.map((listing) => (
-                <ListingCard
-                  key={listing.id}
-                  listing={listing}
-                  unit={unit}
-                  btcCad={btcCad}
-                  dark={dark}
-                  onOpen={() => {
-                    // Handle listing open - could open modal or navigate
-                    console.log('Open listing:', listing.id);
-                  }}
-                />
+              {wantedListings.map((listing: any) => (
+                <div key={listing.id} className={`rounded-lg border p-4 ${
+                  dark 
+                    ? "bg-neutral-900 border-neutral-800" 
+                    : "bg-white border-neutral-200 shadow-sm"
+                }`}>
+                  <h3 className={`font-semibold mb-2 ${dark ? "text-white" : "text-neutral-900"}`}>
+                    {listing.title}
+                  </h3>
+                  <p className={`text-sm mb-2 ${dark ? "text-neutral-400" : "text-neutral-600"}`}>
+                    {listing.description}
+                  </p>
+                  <div className={`text-lg font-bold ${dark ? "text-purple-400" : "text-purple-600"}`}>
+                    {listing.priceSats.toLocaleString()} sats
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -254,10 +227,10 @@ export default function PublicProfilePage() {
         {listings.length === 0 && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📝</div>
-            <h3 className={cn("text-xl font-semibold mb-2", dark ? "text-white" : "text-neutral-900")}>
+            <h3 className={`text-xl font-semibold mb-2 ${dark ? "text-white" : "text-neutral-900"}`}>
               No listings yet
             </h3>
-            <p className={cn("text-neutral-600 dark:text-neutral-400")}>
+            <p className={`text-neutral-600 dark:text-neutral-400`}>
               {username} hasn't posted any listings yet.
             </p>
           </div>

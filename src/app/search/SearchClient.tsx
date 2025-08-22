@@ -10,6 +10,7 @@ import { useLang } from "@/lib/i18n-client";
 import { useSettings } from "@/lib/settings";
 import { dataService, CONFIG } from "@/lib/dataService";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { mockListings } from '@/lib/mockData';
 
 export default function SearchClient() {
     const params = useSearchParams();
@@ -205,6 +206,73 @@ export default function SearchClient() {
         return `/api/listings?${sp.toString()}`;
     }, [buildParams]);
 
+    // Filter mock data based on search parameters
+    const filterMockData = useCallback(() => {
+        let filtered = [...mockListings];
+
+        // Filter by query
+        if (inputQuery) {
+            const queryLower = inputQuery.toLowerCase();
+            filtered = filtered.filter(listing => 
+                listing.title.toLowerCase().includes(queryLower) ||
+                listing.description.toLowerCase().includes(queryLower) ||
+                listing.category.toLowerCase().includes(queryLower)
+            );
+        }
+
+        // Filter by category
+        if (selCategory && selCategory !== "Featured") {
+            filtered = filtered.filter(listing => listing.category === selCategory);
+        }
+
+        // Filter by ad type
+        if (selAdType && selAdType !== "all") {
+            filtered = filtered.filter(listing => listing.type === selAdType);
+        }
+
+        // Filter by price
+        if (minPrice) {
+            const minSats = satsFromUnitValue(minPrice);
+            if (minSats) {
+                filtered = filtered.filter(listing => listing.priceSats >= Number(minSats));
+            }
+        }
+
+        if (maxPrice) {
+            const maxSats = satsFromUnitValue(maxPrice);
+            if (maxSats) {
+                filtered = filtered.filter(listing => listing.priceSats <= Number(maxSats));
+            }
+        }
+
+        // Sort
+        const [sortBy, sortOrder] = sortChoice.split(':');
+        filtered.sort((a, b) => {
+            let comparison = 0;
+            
+            switch (sortBy) {
+                case 'date':
+                    comparison = b.createdAt - a.createdAt;
+                    break;
+                case 'price':
+                    comparison = a.priceSats - b.priceSats;
+                    break;
+                case 'rating':
+                    comparison = (b.seller.rating || 0) - (a.seller.rating || 0);
+                    break;
+                case 'score':
+                    comparison = (b.seller.score || 0) - (a.seller.score || 0);
+                    break;
+                default:
+                    comparison = b.createdAt - a.createdAt;
+            }
+
+            return sortOrder === 'asc' ? -comparison : comparison;
+        });
+
+        return filtered;
+    }, [inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice]);
+
     // Initial load and when params change
     useEffect(() => {
         const load = async () => {
@@ -213,24 +281,13 @@ export default function SearchClient() {
                 setIsLoading(true);
                 setInitialLoaded(false);
 
-                const response = await dataService.getListings({
-                    limit: CONFIG.PAGE_SIZE,
-                    offset: 0,
-                    lat: Number(centerLat) || undefined,
-                    lng: Number(centerLng) || undefined,
-                    radiusKm,
-                    query: inputQuery || undefined,
-                    category: selCategory || undefined,
-                    adType: selAdType || undefined,
-                    minPrice: satsFromUnitValue(minPrice) ? Number(satsFromUnitValue(minPrice)) : undefined,
-                    maxPrice: satsFromUnitValue(maxPrice) ? Number(satsFromUnitValue(maxPrice)) : undefined,
-                    sortBy: sortChoice.split(':')[0],
-                    sortOrder: sortChoice.split(':')[1] as 'asc' | 'desc',
-                });
+                // Use mock data for development
+                const filteredData = filterMockData();
+                const paginatedData = filteredData.slice(0, CONFIG.PAGE_SIZE);
 
-                setListings(response.listings);
-                setTotal(response.total);
-                setHasMore(response.listings.length < response.total);
+                setListings(paginatedData);
+                setTotal(filteredData.length);
+                setHasMore(paginatedData.length < filteredData.length);
             } catch (error) {
                 console.error('Failed to load listings:', error);
             } finally {
@@ -241,7 +298,7 @@ export default function SearchClient() {
         };
 
         load();
-    }, [buildQuery, centerLat, centerLng, radiusKm, inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice]);
+    }, [filterMockData]);
 
     const loadMore = useCallback(async () => {
         if (isFetchingRef.current || !hasMore || isLoadingMore) return;
@@ -250,31 +307,20 @@ export default function SearchClient() {
             isFetchingRef.current = true;
             setIsLoadingMore(true);
 
-            const response = await dataService.getListings({
-                limit: CONFIG.PAGE_SIZE,
-                offset: listings.length,
-                lat: Number(centerLat) || undefined,
-                lng: Number(centerLng) || undefined,
-                radiusKm,
-                query: inputQuery || undefined,
-                category: selCategory || undefined,
-                adType: selAdType || undefined,
-                minPrice: satsFromUnitValue(minPrice) ? Number(satsFromUnitValue(minPrice)) : undefined,
-                maxPrice: satsFromUnitValue(maxPrice) ? Number(satsFromUnitValue(maxPrice)) : undefined,
-                sortBy: sortChoice.split(':')[0],
-                sortOrder: sortChoice.split(':')[1] as 'asc' | 'desc',
-            });
+            // Use mock data for development
+            const filteredData = filterMockData();
+            const paginatedData = filteredData.slice(listings.length, listings.length + CONFIG.PAGE_SIZE);
 
-            setListings(prev => [...prev, ...response.listings]);
-            setTotal(response.total);
-            setHasMore(listings.length + response.listings.length < response.total);
+            setListings(prev => [...prev, ...paginatedData]);
+            setTotal(filteredData.length);
+            setHasMore(listings.length + paginatedData.length < filteredData.length);
         } catch (error) {
             console.error('Failed to load more listings:', error);
         } finally {
             isFetchingRef.current = false;
             setIsLoadingMore(false);
         }
-    }, [buildQuery, hasMore, listings.length, isLoadingMore, centerLat, centerLng, radiusKm, inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice]);
+    }, [filterMockData, hasMore, listings.length, isLoadingMore]);
 
     useEffect(() => {
         const el = loadMoreRef.current;
