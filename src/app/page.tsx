@@ -146,6 +146,7 @@ export default function HomePage() {
         {active && (
           <ListingModal
             listing={active}
+            open={!!active}
             onClose={() => setActive(null)}
             unit={unit}
             btcCad={btcCad}

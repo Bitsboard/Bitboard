@@ -583,7 +583,7 @@ export default function SearchClient() {
                 </div>
 
                 {active && (
-                    <ListingModal listing={active} onClose={() => setActive(null)} unit={unit} btcCad={btcCad} dark={dark} onChat={() => { }} />
+                    <ListingModal listing={active} open={!!active} onClose={() => setActive(null)} unit={unit} btcCad={btcCad} dark={dark} onChat={() => { }} />
                 )}
                 {showLocationModal && (
                     <LocationModal
