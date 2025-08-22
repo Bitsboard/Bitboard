@@ -226,7 +226,10 @@ export default function PublicProfilePage() {
                   </h1>
                   {firstUser.score >= 50 && (
                     <span 
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white font-bold bg-blue-500 shadow-lg border-2 border-white"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white font-bold shadow-lg border-2 border-white"
+                      style={{
+                        background: 'linear-gradient(135deg, #f97316, #dc2626)'
+                      }}
                       aria-label="Verified"
                       title="User has verified their identity"
                     >

@@ -19,37 +19,44 @@ export function TypeToggle({ value, onChange, dark }: TypeToggleProps) {
         : 'border-neutral-300/50 bg-white/70'
       }`}>
       <div
-        className={`absolute inset-1 rounded-xl transition-all duration-300 ease-out ${dark ? 'bg-neutral-700 shadow-md' : 'bg-white shadow-md'
-          } ${value === 'want' ? 'translate-x-full' : value === 'sell' ? 'translate-x-0' : 'translate-x-[50%]'
-          }`}
+        className={`absolute inset-1 rounded-xl transition-all duration-300 ease-out ${
+          value === 'want' 
+            ? 'translate-x-full bg-gradient-to-r from-orange-500 to-red-500 shadow-lg' 
+            : value === 'sell' 
+            ? 'translate-x-0 bg-gradient-to-r from-orange-400 to-orange-500 shadow-lg'
+            : 'translate-x-[50%] bg-gradient-to-r from-orange-400 to-orange-500 shadow-lg'
+        }`}
         style={{ width: 'calc(33.333% - 4px)' }}
       />
       <button
         onClick={() => onChange('all')}
-        className={`relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105 ${value === 'all'
-            ? 'text-blue-600 font-extrabold'
+        className={`relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105 ${
+          value === 'all'
+            ? 'text-white font-extrabold drop-shadow-sm'
             : dark ? 'text-neutral-200 hover:text-neutral-50' : 'text-neutral-600 hover:text-neutral-800'
-          }`}
+        }`}
         title={t('all_listings', lang)}
       >
         {t('all_listings', lang)}
       </button>
       <button
         onClick={() => onChange('sell')}
-        className={`relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105 ${value === 'sell'
-            ? 'text-blue-600 font-extrabold'
+        className={`relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105 ${
+          value === 'sell'
+            ? 'text-white font-extrabold drop-shadow-sm'
             : dark ? 'text-neutral-200 hover:text-neutral-50' : 'text-neutral-600 hover:text-neutral-800'
-          }`}
+        }`}
         title={t('selling', lang)}
       >
         {t('selling', lang)}
       </button>
       <button
         onClick={() => onChange('want')}
-        className={`relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105 ${value === 'want'
-            ? 'text-blue-600 font-extrabold'
+        className={`relative z-10 px-4 py-2 text-xs font-bold transition-all duration-300 rounded-xl hover:scale-105 ${
+          value === 'want'
+            ? 'text-white font-extrabold drop-shadow-sm'
             : dark ? 'text-neutral-200 hover:text-neutral-50' : 'text-neutral-600 hover:text-neutral-800'
-          }`}
+        }`}
         title={t('looking_for', lang)}
       >
         {t('looking_for', lang)}

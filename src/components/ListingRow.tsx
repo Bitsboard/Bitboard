@@ -111,8 +111,11 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
               {listing.seller.score >= 50 && (
                 <span
                   className={cn(
-                    "verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-bold bg-blue-500 shadow-md"
+                    "verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-bold shadow-md"
                   )}
+                  style={{
+                    background: 'linear-gradient(135deg, #f97316, #dc2626)'
+                  }}
                   aria-label="Verified"
                   title="User has verified their identity"
                 >

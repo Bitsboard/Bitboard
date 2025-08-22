@@ -112,8 +112,17 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                   </div>
                   
                   {listing.seller.score >= 50 && (
-                    <span className={cn("verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-bold bg-blue-500 shadow-md")} aria-label="Verified" title="User has verified their identity">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                    <span
+                      className={cn(
+                        "verified-badge inline-flex h-6 w-6 items-center justify-center rounded-full text-white font-bold shadow-md"
+                      )}
+                      style={{
+                        background: 'linear-gradient(135deg, #f97316, #dc2626)'
+                      }}
+                      aria-label="Verified"
+                      title="User has verified their identity"
+                    >
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </span>
