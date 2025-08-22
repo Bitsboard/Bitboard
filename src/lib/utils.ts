@@ -199,9 +199,9 @@ export async function retry<T>(
  */
 export function generateProfilePicture(username: string, seed?: string): string {
   const avatarSeed = seed || username;
-  // Using Dicebear's "bottts" style - abstract, geometric, on-brand
-  // Colors: orange, red, yellow, and complementary colors
-  const colors = [
+  // Using Dicebear's "thumbs" style with "gradientlinear" - abstract, on-brand
+  // Brand colors: orange, red, yellow palette
+  const brandColors = [
     'ff6b35', // Orange
     'f7931e', // Yellow
     'ff4757', // Red
@@ -211,12 +211,22 @@ export function generateProfilePicture(username: string, seed?: string): string 
     'ff7f50', // Coral
     'ff8c00', // Dark Orange
     'ffa500', // Orange
-    'ff4500'  // Orange Red
+    'ff4500', // Orange Red
+    'ff6b6b', // Light Red
+    'ff8e53', // Light Orange
+    'ffb347', // Light Yellow
+    'ffcc02', // Bright Yellow
+    'ffdd59'  // Pale Yellow
   ];
   
-  const backgroundColor = colors[Math.abs(avatarSeed.charCodeAt(0)) % colors.length];
+  // Select two colors for the gradient based on username
+  const colorIndex1 = Math.abs(avatarSeed.charCodeAt(0)) % brandColors.length;
+  const colorIndex2 = Math.abs(avatarSeed.charCodeAt(1)) % brandColors.length;
   
-  return `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(avatarSeed)}&backgroundColor=${backgroundColor}`;
+  const color1 = brandColors[colorIndex1];
+  const color2 = brandColors[colorIndex2];
+  
+  return `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(avatarSeed)}&style=gradientlinear&backgroundColor=${color1},${color2}`;
 }
 
 /**
