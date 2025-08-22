@@ -11,9 +11,13 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
 
     // Initial page load
     useEffect(() => {
-        const loadInitialListings = async () => {
-            if (!isDeployed) return;
+        if (!isDeployed) {
+            // Use mock data for development
+            return;
+        }
 
+        // API logic for production
+        const loadFromAPI = async () => {
             try {
                 setIsLoading(true);
                 const response = await dataService.getListings({
@@ -34,7 +38,7 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
             }
         };
 
-        loadInitialListings();
+        loadFromAPI();
     }, [isDeployed, center.lat, center.lng, radiusKm]);
 
     const loadMore = useCallback(async () => {

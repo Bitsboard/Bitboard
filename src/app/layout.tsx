@@ -4,6 +4,7 @@ import "../styles/globals.css";
 import GlobalHeader from "./GlobalHeader";
 import { LocaleHydrator } from "./LocaleHydrator";
 import { ThemeProvider } from "@/lib/contexts/ThemeContext";
+import Footer from "@/components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -68,6 +69,7 @@ export default function RootLayout({
           <ThemeProvider>
             <GlobalHeader />
             {children}
+            <Footer />
           </ThemeProvider>
         </LocaleHydrator>
       </body>

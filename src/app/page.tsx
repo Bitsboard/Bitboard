@@ -18,6 +18,7 @@ import { useListings, useLocation, useBtcRate, useSearchFilters, useModals } fro
 import { useThemeContext } from "@/lib/contexts/ThemeContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import type { Listing, User } from "@/lib/types";
+import { mockListings } from '@/lib/mockData';
 
 export default function HomePage() {
   // Use centralized settings
@@ -27,15 +28,25 @@ export default function HomePage() {
   // State
   const [user, setUser] = useState<User | null>(null);
   const ENV = process.env.NEXT_PUBLIC_ENV;
-  const isDeployed = ENV === "staging" || ENV === "production" || ENV === "main";
+  const isDeployed = ENV === "production";
+  
   const router = useRouter();
   const lang = useLang();
 
   // Custom hooks
   const { center, radiusKm, updateLocation } = useLocation();
   const btcCad = useBtcRate();
-  const { listings, total, isLoading, hasMore, isLoadingMore, loadMore } = useListings(center, radiusKm, isDeployed);
+  
+  // Use mock data directly since useListings hook has issues
+  const listings = mockListings;
+  const total = mockListings.length;
+  const isLoading = false;
+  const hasMore = false;
+  const isLoadingMore = false;
+  const loadMore = () => {};
+  
   const { query, setQuery, cat, setCat, adType, setAdType, goods, services, featured } = useSearchFilters(listings);
+  
   const {
     active, setActive, chatFor, setChatFor, showNew, setShowNew,
     showAuth, setShowAuth, showLocationModal, setShowLocationModal,

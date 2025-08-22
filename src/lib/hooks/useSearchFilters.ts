@@ -42,7 +42,9 @@ export function useSearchFilters(listings: Listing[]) {
         return [];
     }, [filteredBase, cat]);
 
-    const featured = useMemo(() => listings.filter(l => l.category !== "Services").slice(0, 12), [listings]);
+    const featured = useMemo(() => {
+        return listings.filter(l => l.category !== "Services").slice(0, 12);
+    }, [listings]);
 
     return {
         query,
