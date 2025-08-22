@@ -172,7 +172,7 @@ export class DataService {
         return rows.map((row) => ({
             id: String(row.id),
             title: row.title,
-            desc: row.description || "No description available",
+            description: row.description || "No description available",
             priceSats: Number(row.priceSat) || 0,
             category: (row.category as any) || "Electronics",
             location: this.cleanLocationLabel(row.location) || "Toronto, ON",

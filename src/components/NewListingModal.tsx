@@ -4,42 +4,7 @@ import React, { useState } from "react";
 import { Modal, ModalHeader, ModalTitle, ModalBody, ModalCloseButton } from "./Modal";
 import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
-
-type Category =
-  | "Featured"
-  | "Electronics"
-  | "Mining Gear"
-  | "Home & Garden"
-  | "Sports & Bikes"
-  | "Tools"
-  | "Games & Hobbies"
-  | "Furniture"
-  | "Services";
-
-type Seller = {
-  name: string;
-  score: number;
-  deals: number;
-  rating: number;
-  verifications: { email?: boolean; phone?: boolean; lnurl?: boolean };
-  onTimeRelease: number;
-};
-
-type Listing = {
-  id: string;
-  title: string;
-  desc: string;
-  priceSats: number;
-  category: Category | Exclude<string, never>;
-  location: string;
-  lat: number;
-  lng: number;
-  type: "sell" | "want";
-  images: string[];
-  boostedUntil: number | null;
-  seller: Seller;
-  createdAt: number;
-};
+import type { Listing, Category, Seller } from "@/lib/types";
 
 interface NewListingModalProps {
   onClose: () => void;
@@ -69,7 +34,7 @@ export function NewListingModal({ onClose, onPublish, dark }: NewListingModalPro
   const [boost, setBoost] = useState(false);
   const [form, setForm] = useState({
     title: "",
-    desc: "",
+    description: "",
     priceSats: 0,
     category: "Electronics" as Category,
     location: "Toronto, ON",
@@ -106,7 +71,7 @@ export function NewListingModal({ onClose, onPublish, dark }: NewListingModalPro
             </Field>
           </div>
           <Field label="Description">
-            <textarea value={form.desc} onChange={(e) => setForm({ ...form, desc: e.target.value })} rows={4} className={cn("w-full rounded-xl px-3 py-2 focus:outline-none", inputBase)} placeholder="Condition, accessories, pickup preferences, etc." />
+            <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} className={cn("w-full rounded-xl px-3 py-2 focus:outline-none", inputBase)} placeholder="Condition, accessories, pickup preferences, etc." />
           </Field>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Category">
@@ -215,7 +180,7 @@ export function NewListingModal({ onClose, onPublish, dark }: NewListingModalPro
                     const newItem: Listing = {
                       id: "temp",
                       title: form.title.trim(),
-                      desc: form.desc.trim(),
+                      description: form.description.trim(),
                       priceSats: Number(form.priceSats) || 0,
                       category: form.category,
                       location: form.location.trim() || "Toronto, ON",

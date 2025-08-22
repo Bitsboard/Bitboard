@@ -11,11 +11,36 @@ const DEFAULT_SETTINGS: UserSettings = {
 };
 
 interface SettingsStore extends UserSettings {
+    // Settings
     setTheme: (theme: Theme) => void;
     setUnit: (unit: Unit) => void;
     setLayout: (layout: Layout) => void;
     toggleTheme: () => void;
     reset: () => void;
+
+    // User state
+    user: any | null;
+    setUser: (user: any | null) => void;
+
+    // Modal states
+    modals: {
+        active: any | null;
+        chatFor: any | null;
+        showNew: boolean;
+        showAuth: boolean;
+        showLocationModal: boolean;
+    };
+    setModal: (key: keyof SettingsStore['modals'], value: any) => void;
+    closeAllModals: () => void;
+
+    // Search state
+    search: {
+        query: string;
+        category: string;
+        adType: string;
+    };
+    setSearch: (key: keyof SettingsStore['search'], value: string) => void;
+    resetSearch: () => void;
 }
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -23,7 +48,50 @@ export const useSettingsStore = create<SettingsStore>()(
         (set, get) => ({
             ...DEFAULT_SETTINGS,
 
-            setTheme: (theme: Theme) => {
+            // User state
+            user: null,
+            setUser: (user) => set({ user }),
+
+            // Modal states
+            modals: {
+                active: null,
+                chatFor: null,
+                showNew: false,
+                showAuth: false,
+                showLocationModal: false,
+            },
+            setModal: (key, value) => set((state) => ({
+                modals: { ...state.modals, [key]: value }
+            })),
+            closeAllModals: () => set((state) => ({
+                modals: {
+                    active: null,
+                    chatFor: null,
+                    showNew: false,
+                    showAuth: false,
+                    showLocationModal: false,
+                }
+            })),
+
+            // Search state
+            search: {
+                query: "",
+                category: "Featured",
+                adType: "all",
+            },
+            setSearch: (key, value) => set((state) => ({
+                search: { ...state.search, [key]: value }
+            })),
+            resetSearch: () => set((state) => ({
+                search: {
+                    query: "",
+                    category: "Featured",
+                    adType: "all",
+                }
+            })),
+
+            // Settings methods
+            setTheme: (theme) => {
                 set({ theme });
                 // Apply theme to document
                 if (typeof window !== 'undefined') {
@@ -34,11 +102,11 @@ export const useSettingsStore = create<SettingsStore>()(
                 }
             },
 
-            setUnit: (unit: Unit) => {
+            setUnit: (unit) => {
                 set({ unit });
             },
 
-            setLayout: (layout: Layout) => {
+            setLayout: (layout) => {
                 set({ layout });
             },
 
@@ -61,6 +129,7 @@ export const useSettingsStore = create<SettingsStore>()(
                 theme: state.theme,
                 unit: state.unit,
                 layout: state.layout,
+                search: state.search,
             }),
             onRehydrateStorage: () => (state) => {
                 // Apply theme on rehydration
@@ -93,6 +162,21 @@ export const useUnit = () => {
 export const useLayout = () => {
     const { layout, setLayout } = useSettingsStore();
     return { layout, setLayout };
+};
+
+export const useUser = () => {
+    const { user, setUser } = useSettingsStore();
+    return { user, setUser };
+};
+
+export const useModals = () => {
+    const { modals, setModal, closeAllModals } = useSettingsStore();
+    return { modals, setModal, closeAllModals };
+};
+
+export const useSearch = () => {
+    const { search, setSearch, resetSearch } = useSettingsStore();
+    return { search, setSearch, resetSearch };
 };
 
 // Legacy compatibility - remove after migration

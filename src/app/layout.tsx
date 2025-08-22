@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "../styles/globals.css";
 import GlobalHeader from "./GlobalHeader";
 import { LocaleHydrator } from "./LocaleHydrator";
+import { ThemeProvider } from "@/lib/contexts/ThemeContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -64,8 +65,10 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <LocaleHydrator>
-          <GlobalHeader />
-          {children}
+          <ThemeProvider>
+            <GlobalHeader />
+            {children}
+          </ThemeProvider>
         </LocaleHydrator>
       </body>
     </html>

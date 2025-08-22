@@ -6,6 +6,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// Re-export performance utilities
+export * from './utils/performance';
+
 // Format currency with proper locale support
 export function formatCurrency(amount: number, currency = "CAD", locale?: string): string {
   return new Intl.NumberFormat(locale, {

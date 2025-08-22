@@ -1,41 +1,25 @@
 import '../../../shims/async_hooks';
-import { NextResponse } from "next/server";
-// Avoid hard crashes if the adapter is missing in some envs
+import { NextRequest, NextResponse } from "next/server";
+import { listingsQuerySchema, listingCreateSchema } from "@/lib/validation/listings";
+import { handleApiError, createValidationError, createNotFoundError } from "@/lib/api/errors";
 
 export const runtime = "edge";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     const mod = await import("@cloudflare/next-on-pages").catch(() => null as any);
     if (!mod || typeof mod.getRequestContext !== "function") {
       return NextResponse.json({ error: "adapter_missing" }, { status: 200 });
     }
+
     const env = mod.getRequestContext().env as { DB?: D1Database };
     const db = env.DB;
     if (!db) return NextResponse.json({ error: "no_db_binding" }, { status: 200 });
 
+    // Validate query parameters
     const url = new URL(req.url);
-    const limit = Math.min(100, parseInt(url.searchParams.get("limit") ?? "50", 10) || 50);
-    const offset = Math.max(0, parseInt(url.searchParams.get("offset") ?? "0", 10) || 0);
-    const q = (url.searchParams.get("q") || "").trim();
-    const category = (url.searchParams.get("category") || "").trim();
-    const adTypeParam = (url.searchParams.get("adType") || "").trim().toLowerCase();
-    const adType = adTypeParam === "sell" || adTypeParam === "want" ? adTypeParam : "";
-    const minPriceRaw = url.searchParams.get("minPrice");
-    const maxPriceRaw = url.searchParams.get("maxPrice");
-    const minPrice = minPriceRaw != null && minPriceRaw !== "" ? Number(minPriceRaw) : null;
-    const maxPrice = maxPriceRaw != null && maxPriceRaw !== "" ? Number(maxPriceRaw) : null;
-    const sortByParam = (url.searchParams.get("sortBy") || "date").trim(); // 'date' | 'price' | 'distance'
-    const sortOrderParam = (url.searchParams.get("sortOrder") || "desc").trim().toLowerCase(); // 'asc' | 'desc'
-    const centerLat = Number(url.searchParams.get("lat") ?? "");
-    const centerLng = Number(url.searchParams.get("lng") ?? "");
-    const hasCenter = Number.isFinite(centerLat) && Number.isFinite(centerLng);
-    const radiusKmParam = url.searchParams.get("radiusKm");
-    const rawRadius = radiusKmParam != null && radiusKmParam !== "" ? Number(radiusKmParam) : null;
-    // Treat 0 (Everywhere) as a very large radius (100,000 km)
-    const effectiveRadiusKm = rawRadius === 0 ? 100000 : rawRadius;
-    const hasRadius = effectiveRadiusKm != null && Number.isFinite(effectiveRadiusKm) && (effectiveRadiusKm as number) >= 0;
-    // No national filter; only radiusKm or everywhere
+    const queryParams = Object.fromEntries(url.searchParams.entries());
+    const validatedQuery = listingsQuerySchema.parse(queryParams);
 
     // Ensure minimal schema exists so queries don't explode on fresh DBs
     try {
@@ -49,76 +33,68 @@ export async function GET(req: Request) {
         .run();
     } catch { }
 
-    // Build optional filters (rich schema vs minimal fallback)
-    const whereRich: string[] = [];
-    const bindsRich: any[] = [];
-    const whereMinimal: string[] = [];
-    const bindsMinimal: any[] = [];
+    // Build optional filters
+    const whereClause: string[] = [];
+    const binds: any[] = [];
 
-    if (q) {
-      whereRich.push("(title LIKE ? OR description LIKE ?)");
-      bindsRich.push(`%${q}%`, `%${q}%`);
-      whereMinimal.push("(title LIKE ?)");
-      bindsMinimal.push(`%${q}%`);
-    }
-    if (category && category.toLowerCase() !== "featured") {
-      whereRich.push("(category = ?)");
-      bindsRich.push(category);
-    }
-    if (adType) {
-      whereRich.push("(ad_type = ?)");
-      bindsRich.push(adType);
-    }
-    if (minPrice !== null && Number.isFinite(minPrice)) {
-      whereRich.push("(price_sat >= ?)");
-      bindsRich.push(Math.round(minPrice));
-      whereMinimal.push("(price_sat >= ?)");
-      bindsMinimal.push(Math.round(minPrice));
-    }
-    if (maxPrice !== null && Number.isFinite(maxPrice)) {
-      whereRich.push("(price_sat <= ?)");
-      bindsRich.push(Math.round(maxPrice));
-      whereMinimal.push("(price_sat <= ?)");
-      bindsMinimal.push(Math.round(maxPrice));
+    if (validatedQuery.q) {
+      whereClause.push("(title LIKE ? OR description LIKE ?)");
+      binds.push(`%${validatedQuery.q}%`, `%${validatedQuery.q}%`);
     }
 
-    // Optional geospatial radius filter via bounding box (SQLite-friendly)
-    // Skip if radius is extremely large (used for national/global) or center missing
-    if (hasCenter && hasRadius && (effectiveRadiusKm as number) < 900000) {
-      const R_KM_PER_DEG = 111.32; // Approx conversion
-      const deltaLat = (effectiveRadiusKm as number) / R_KM_PER_DEG;
-      const rad = (centerLat * Math.PI) / 180;
-      const cosLat = Math.cos(rad);
-      const safeCos = Math.max(0.01, Math.abs(cosLat));
-      const deltaLng = (effectiveRadiusKm as number) / (R_KM_PER_DEG * safeCos);
-      const minLat = centerLat - deltaLat;
-      const maxLat = centerLat + deltaLat;
-      const minLng = centerLng - deltaLng;
-      const maxLng = centerLng + deltaLng;
-      whereRich.push("(lat BETWEEN ? AND ?)");
-      bindsRich.push(minLat, maxLat);
-      whereRich.push("(lng BETWEEN ? AND ?)");
-      bindsRich.push(minLng, maxLng);
+    if (validatedQuery.category && validatedQuery.category.toLowerCase() !== "featured") {
+      whereClause.push("(category = ?)");
+      binds.push(validatedQuery.category);
     }
 
-    // Removed country bounding box logic
+    if (validatedQuery.adType) {
+      whereClause.push("(ad_type = ?)");
+      binds.push(validatedQuery.adType);
+    }
 
-    const whereClauseRich = whereRich.length ? `WHERE ${whereRich.join(" AND ")}` : "";
-    const whereClauseMinimal = whereMinimal.length ? `WHERE ${whereMinimal.join(" AND ")}` : "";
+    if (validatedQuery.minPrice !== undefined) {
+      whereClause.push("(price_sat >= ?)");
+      binds.push(Math.round(validatedQuery.minPrice));
+    }
 
-    // ORDER BY whitelist (rich schema can sort by distance)
-    const sortField = sortByParam === 'price' ? 'price_sat' : 'created_at';
-    const sortOrder = sortOrderParam === 'asc' ? 'ASC' : 'DESC';
-    let orderClause = `ORDER BY ${sortField} ${sortOrder}`;
+    if (validatedQuery.maxPrice !== undefined) {
+      whereClause.push("(price_sat <= ?)");
+      binds.push(Math.round(validatedQuery.maxPrice));
+    }
+
+    // Geospatial radius filter
+    if (validatedQuery.lat !== undefined && validatedQuery.lng !== undefined && validatedQuery.radiusKm !== undefined) {
+      const effectiveRadiusKm = validatedQuery.radiusKm === 0 ? 100000 : validatedQuery.radiusKm;
+
+      if (effectiveRadiusKm < 900000) {
+        const R_KM_PER_DEG = 111.32;
+        const deltaLat = effectiveRadiusKm / R_KM_PER_DEG;
+        const rad = (validatedQuery.lat * Math.PI) / 180;
+        const cosLat = Math.cos(rad);
+        const safeCos = Math.max(0.01, Math.abs(cosLat));
+        const deltaLng = effectiveRadiusKm / (R_KM_PER_DEG * safeCos);
+
+        whereClause.push("(lat BETWEEN ? AND ?)");
+        binds.push(validatedQuery.lat - deltaLat, validatedQuery.lat + deltaLat);
+        whereClause.push("(lng BETWEEN ? AND ?)");
+        binds.push(validatedQuery.lng - deltaLng, validatedQuery.lng + deltaLng);
+      }
+    }
+
+    const whereClauseStr = whereClause.length ? `WHERE ${whereClause.join(" AND ")}` : "";
+
+    // Build ORDER BY clause
+    let orderClause = `ORDER BY ${validatedQuery.sortBy === 'price' ? 'price_sat' : 'created_at'} ${validatedQuery.sortOrder}`;
     let orderBinds: any[] = [];
-    if (sortByParam === 'distance' && hasCenter) {
+
+    if (validatedQuery.sortBy === 'distance' && validatedQuery.lat !== undefined && validatedQuery.lng !== undefined) {
       orderClause = `ORDER BY ((lat - ?)*(lat - ?)+(lng - ?)*(lng - ?)) ASC`;
-      orderBinds = [centerLat, centerLat, centerLng, centerLng];
+      orderBinds = [validatedQuery.lat, validatedQuery.lat, validatedQuery.lng, validatedQuery.lng];
     }
 
+    // Execute query
     let results: any[] = [];
     try {
-      // Try rich schema first
       const rich = await db
         .prepare(`SELECT id,
                          title,
@@ -134,76 +110,91 @@ export async function GET(req: Request) {
                          boosted_until AS boostedUntil,
                          created_at AS createdAt
                   FROM listings
-                  ${whereClauseRich}
+                  ${whereClauseStr}
                   ${orderClause}
                   LIMIT ? OFFSET ?`)
-        .bind(...bindsRich, ...orderBinds, limit, offset)
+        .bind(...binds, ...orderBinds, validatedQuery.limit, validatedQuery.offset)
         .all();
       results = rich.results ?? [];
     } catch {
-      // Fallback to legacy minimal schema (no lat/lng -> ignore distance sort)
+      // Fallback to minimal schema
       const minimal = await db
         .prepare(`SELECT id,
                          title,
                          price_sat AS priceSat,
                          created_at AS createdAt
                   FROM listings
-                  ${whereClauseMinimal}
-                  ORDER BY ${sortField} ${sortOrder}
+                  ${whereClauseStr}
+                  ORDER BY ${validatedQuery.sortBy === 'price' ? 'price_sat' : 'created_at'} ${validatedQuery.sortOrder}
                   LIMIT ? OFFSET ?`)
-        .bind(...bindsMinimal, limit, offset)
+        .bind(...binds, validatedQuery.limit, validatedQuery.offset)
         .all();
       results = minimal.results ?? [];
     }
 
-    // Compute total with same filters
+    // Get total count
     let totalRow: any;
     try {
       totalRow = await db
-        .prepare(`SELECT COUNT(*) AS c FROM listings ${whereClauseRich}`)
-        .bind(...bindsRich)
+        .prepare(`SELECT COUNT(*) AS c FROM listings ${whereClauseStr}`)
+        .bind(...binds)
         .all();
     } catch {
       totalRow = await db
-        .prepare(`SELECT COUNT(*) AS c FROM listings ${whereClauseMinimal}`)
-        .bind(...bindsMinimal)
+        .prepare(`SELECT COUNT(*) AS c FROM listings ${whereClauseStr}`)
+        .bind(...binds)
         .all();
     }
     const total = (totalRow.results?.[0] as any)?.c ?? 0;
 
     // Staging/demo: diversify images and sellers if missing
     const stock = [
-      '1518770660439-4636190af475', // robot
-      '1542751371-adc38448a05e',
-      '1518779578993-ec3579fee39f',
-      '1512496015851-a90fb38ba796',
-      '1517816743773-6e0fd518b4a6',
-      '1517245386807-bb43f82c33c4',
-      '1541532713592-79a0317b6b77',
-      '1555617117-08d3a8fef16c'
+      '1518770660439-4636190af475', '1542751371-adc38448a05e',
+      '1518779578993-ec3579fee39f', '1512496015851-a90fb38ba796',
+      '1517816743773-6e0fd518b4a6', '1517245386807-bb43f82c33c4',
+      '1541532713592-79a0317b6b77', '1555617117-08d3a8fef16c'
     ];
     const sellers = ['demo_seller', 'satoshi', 'luna', 'rob', 'mika', 'arya', 'nova', 'kai'];
+
     const listings = results.map((r: any, i: number) => ({
       ...r,
-      imageUrl: r.imageUrl && r.imageUrl.trim() ? r.imageUrl : `https://images.unsplash.com/photo-${stock[i % stock.length]}?q=80&w=1600&auto=format&fit=crop`,
+      imageUrl: r.imageUrl && r.imageUrl.trim() ? r.imageUrl :
+        `https://images.unsplash.com/photo-${stock[i % stock.length]}?q=80&w=1600&auto=format&fit=crop`,
       postedBy: r.postedBy && r.postedBy.trim() ? r.postedBy : sellers[i % sellers.length],
     }));
 
-    return NextResponse.json({ listings, total });
-  } catch (err: any) {
-    const message = err?.message ?? "Internal Server Error";
-    return NextResponse.json({ error: message, hint: "Ensure D1 binding 'DB' is set and schema exists" }, { status: 200 });
+    return NextResponse.json({
+      success: true,
+      data: { listings, total },
+      pagination: {
+        page: Math.floor(validatedQuery.offset / validatedQuery.limit) + 1,
+        limit: validatedQuery.limit,
+        total,
+        totalPages: Math.ceil(total / validatedQuery.limit)
+      }
+    });
+
+  } catch (error) {
+    return handleApiError(error);
   }
 }
 
-export async function POST(req: Request) {
-  const mod = await import("@cloudflare/next-on-pages").catch(() => null as any);
-  if (!mod || typeof mod.getRequestContext !== "function") {
-    return NextResponse.json({ error: "adapter_missing" }, { status: 200 });
-  }
-  const db = mod.getRequestContext().env.DB as D1Database;
+export async function POST(req: NextRequest) {
   try {
-    // Attach current user if signed in
+    const mod = await import("@cloudflare/next-on-pages").catch(() => null as any);
+    if (!mod || typeof mod.getRequestContext !== "function") {
+      return NextResponse.json({ error: "adapter_missing" }, { status: 200 });
+    }
+
+    const env = mod.getRequestContext().env as { DB?: D1Database };
+    const db = env.DB;
+    if (!db) return NextResponse.json({ error: "no_db_binding" }, { status: 200 });
+
+    // Validate request body
+    const body = await req.json();
+    const validatedData = listingCreateSchema.parse(body);
+
+    // Get current user if signed in
     let currentUserId: string | null = null;
     try {
       const cookieHeader = req.headers.get('cookie') || '';
@@ -230,72 +221,45 @@ export async function POST(req: Request) {
       }
     } catch { }
 
-    // Ensure extended columns exist for association
-    try { await db.prepare('ALTER TABLE listings ADD COLUMN posted_by TEXT').run(); } catch { }
-    const body = (await req.json()) as {
-      title?: unknown;
-      description?: unknown;
-      category?: unknown;
-      ad_type?: unknown;
-      adType?: unknown;
-      location?: unknown;
-      lat?: unknown;
-      lng?: unknown;
-      image_url?: unknown;
-      imageUrl?: unknown;
-      price_sat?: unknown;
-      priceSat?: unknown;
-      posted_by?: unknown;
-      postedBy?: unknown;
-      boosted_until?: unknown;
-      boostedUntil?: unknown;
-    };
-    const title = (body?.title ?? "").toString().trim();
-    const priceSat = Number(body?.price_sat ?? body?.priceSat);
-    const description = (body?.description ?? "").toString();
-    const category = (body?.category ?? "Misc").toString();
-    const adType = (body?.ad_type ?? body?.adType ?? "sell").toString();
-    const location = (body?.location ?? "").toString();
-    const lat = Number(body?.lat ?? 0);
-    const lng = Number(body?.lng ?? 0);
-    const imageUrl = (body?.image_url ?? body?.imageUrl ?? "").toString();
-    const postedBy = (body?.posted_by ?? body?.postedBy ?? "").toString() || currentUserId || "";
-    const boostedUntil = body?.boosted_until ?? body?.boostedUntil;
+    // Ensure extended columns exist
+    try {
+      await db.prepare('ALTER TABLE listings ADD COLUMN posted_by TEXT').run();
+    } catch { }
 
-    if (!title || !Number.isFinite(priceSat) || priceSat < 0) {
-      return NextResponse.json({ error: "title (string) and price_sat (number) required" }, { status: 400 });
-    }
-
-    // Try extended schema insert; fall back to legacy minimal schema
+    // Insert listing
     let res: any;
     try {
       res = await db
         .prepare(`INSERT INTO listings (
-          title, description, category, ad_type, location, lat, lng, image_url, price_sat, posted_by, boosted_until
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+          title, description, category, ad_type, location, lat, lng, image_url, price_sat, posted_by
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
         .bind(
-          title.slice(0, 120),
-          description,
-          category,
-          adType,
-          location,
-          Number.isFinite(lat) ? lat : 0,
-          Number.isFinite(lng) ? lng : 0,
-          imageUrl,
-          Math.round(priceSat),
-          postedBy,
-          (boostedUntil as any) ?? null
+          validatedData.title.slice(0, 120),
+          validatedData.description || "",
+          validatedData.category,
+          validatedData.adType,
+          validatedData.location,
+          validatedData.lat,
+          validatedData.lng,
+          validatedData.imageUrl || "",
+          Math.round(validatedData.priceSat),
+          currentUserId || ""
         )
         .run();
     } catch {
+      // Fallback to minimal schema
       res = await db
         .prepare("INSERT INTO listings (title, price_sat) VALUES (?, ?)")
-        .bind(title.slice(0, 120), Math.round(priceSat))
+        .bind(validatedData.title.slice(0, 120), Math.round(validatedData.priceSat))
         .run();
     }
 
     const id = (res as any).meta?.last_row_id ?? null;
+    if (!id) {
+      throw createValidationError("Failed to create listing");
+    }
 
+    // Fetch created listing
     const row = await db
       .prepare(`SELECT id,
                        title,
@@ -315,8 +279,17 @@ export async function POST(req: Request) {
       .all();
 
     const listing = row.results?.[0] ?? null;
-    return NextResponse.json({ listing, ok: true });
-  } catch {
-    return NextResponse.json({ error: "invalid JSON body" }, { status: 400 });
+    if (!listing) {
+      throw createNotFoundError("Created listing not found");
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: { listing },
+      message: "Listing created successfully"
+    });
+
+  } catch (error) {
+    return handleApiError(error);
   }
 }

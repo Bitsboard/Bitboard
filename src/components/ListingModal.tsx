@@ -7,44 +7,7 @@ import { Carousel } from "./Carousel";
 import { Modal, ModalHeader, ModalTitle, ModalCloseButton } from "./Modal";
 import { t, formatPostedAgo } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
-
-type Category =
-  | "Featured"
-  | "Electronics"
-  | "Mining Gear"
-  | "Home & Garden"
-  | "Sports & Bikes"
-  | "Tools"
-  | "Games & Hobbies"
-  | "Furniture"
-  | "Services";
-
-type Unit = "sats" | "BTC";
-
-type Seller = {
-  name: string;
-  score: number;
-  deals: number;
-  rating: number;
-  verifications: { email?: boolean; phone?: boolean; lnurl?: boolean };
-  onTimeRelease: number;
-};
-
-type Listing = {
-  id: string;
-  title: string;
-  desc: string;
-  priceSats: number;
-  category: Category | Exclude<string, never>;
-  location: string;
-  lat: number;
-  lng: number;
-  type: "sell" | "want";
-  images: string[];
-  boostedUntil: number | null;
-  seller: Seller;
-  createdAt: number;
-};
+import type { Listing, Category, Unit, Seller } from "@/lib/types";
 
 interface ListingModalProps {
   listing: Listing;
@@ -180,7 +143,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat }: L
             </div>
             <div className="flex-1 overflow-y-auto overscroll-contain scroll-bounce p-3 pr-10 mr-2 md:mr-3">
               <div className={cn("prose prose-sm max-w-none", dark ? "prose-invert" : "")}>
-                <p className={cn("whitespace-pre-wrap", dark ? "text-neutral-300" : "text-neutral-800")}>{listing.desc}</p>
+                <p className={cn("whitespace-pre-wrap", dark ? "text-neutral-300" : "text-neutral-800")}>{listing.description}</p>
               </div>
             </div>
           </div>

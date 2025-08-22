@@ -7,44 +7,9 @@ import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
 import { TypePill } from "./TypePill";
 import { Carousel } from "./Carousel";
+import type { Listing, Category, Unit, Seller } from "@/lib/types";
 
-type Category =
-  | "Featured"
-  | "Electronics"
-  | "Mining Gear"
-  | "Home & Garden"
-  | "Sports & Bikes"
-  | "Tools"
-  | "Games & Hobbies"
-  | "Furniture"
-  | "Services";
 
-type Unit = "sats" | "BTC";
-
-type Seller = {
-  name: string;
-  score: number;
-  deals: number;
-  rating: number;
-  verifications: { email?: boolean; phone?: boolean; lnurl?: boolean };
-  onTimeRelease: number;
-};
-
-type Listing = {
-  id: string;
-  title: string;
-  desc: string;
-  priceSats: number;
-  category: Category | Exclude<string, never>;
-  location: string;
-  lat: number;
-  lng: number;
-  type: "sell" | "want";
-  images: string[];
-  boostedUntil: number | null;
-  seller: Seller;
-  createdAt: number;
-};
 
 interface ListingRowProps {
   listing: Listing;

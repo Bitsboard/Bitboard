@@ -37,7 +37,7 @@ export type Seller = {
 export type Listing = {
   id: string;
   title: string;
-  desc: string;
+  description: string; // Standardized to description
   priceSats: number;
   category: Category | Exclude<string, never>;
   location: string;
@@ -136,7 +136,7 @@ export type ListingsResponse = {
 // Form Types
 export type ListingForm = {
   title: string;
-  desc: string;
+  description: string; // Standardized to description
   priceSats: number;
   category: Category;
   location: string;
@@ -184,11 +184,6 @@ export type Pagination = {
   totalPages: number;
 };
 
-export type SortOption = {
-  field: string;
-  order: "asc" | "desc";
-};
-
 // Component Props Types
 export type BaseComponentProps = {
   className?: string;
@@ -222,15 +217,6 @@ export type SearchResult = {
   suggestions?: string[];
 };
 
-// Analytics Types
-export type ListingAnalytics = {
-  views: number;
-  clicks: number;
-  messages: number;
-  escrowProposals: number;
-  conversionRate: number;
-};
-
 // Settings Types
 export type UserSettings = {
   theme: Theme;
@@ -238,12 +224,15 @@ export type UserSettings = {
   layout: Layout;
 };
 
-// Session Types
+// Session Types - Consolidated
 export type Session = {
   user?: {
     username?: string | null;
     image?: string | null;
-    email?: string;
+    email: string;
+    id: string;
+    verified?: boolean;
+    isAdmin?: boolean;
   };
   account?: {
     sso: string;
@@ -257,12 +246,12 @@ export type Session = {
       title: string;
       priceSat: number;
       createdAt: number;
-      type: string
+      type: string;
     }>;
   } | null;
 } | null;
 
-// Profile Types
+// Profile Types - Consolidated with Session
 export type ProfileData = {
   sso: string;
   email: string;
@@ -275,7 +264,7 @@ export type ProfileData = {
     title: string;
     priceSat: number;
     createdAt: number;
-    type: string
+    type: string;
   }>;
 } | null;
 

@@ -21,3 +21,5 @@ export { LocationModal } from "./LocationModal";
 export { default as Footer } from "./Footer";
 export { NotificationMenu } from "./NotificationMenu";
 export { ErrorBoundary } from "./ErrorBoundary";
+export { HeroSection } from "./HeroSection";
+export { ListingsSection } from "./ListingsSection";
