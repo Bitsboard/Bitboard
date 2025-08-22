@@ -192,15 +192,15 @@ export async function retry<T>(
 }
 
 /**
- * Generate a profile picture URL using Dicebear's open-source avatar service
+ * Generate a profile picture URL using Identicon library
  * @param username - The username to generate avatar for
  * @param seed - Optional seed for consistent avatar generation
  * @returns URL to the generated avatar
  */
 export function generateProfilePicture(username: string, seed?: string): string {
   const avatarSeed = seed || username;
-  // Using Dicebear's "thumbs" style with "gradientlinear" - abstract, on-brand
-  // Brand colors: orange, red, yellow palette
+  // Using Identicon with gradientLinear backgrounds - abstract, on-brand
+  // Brand colors: orange, red, purple, yellow palette
   const brandColors = [
     'ff6b35', // Orange
     'f7931e', // Yellow
@@ -216,7 +216,17 @@ export function generateProfilePicture(username: string, seed?: string): string 
     'ff8e53', // Light Orange
     'ffb347', // Light Yellow
     'ffcc02', // Bright Yellow
-    'ffdd59'  // Pale Yellow
+    'ffdd59', // Pale Yellow
+    '8b5cf6', // Purple
+    'a855f7', // Medium Purple
+    'c084fc', // Light Purple
+    'd946ef', // Pink Purple
+    'ec4899', // Pink
+    'f97316', // Orange
+    'fb923c', // Light Orange
+    'fbbf24', // Amber
+    'fcd34d', // Light Amber
+    'fef3c7'  // Very Light Yellow
   ];
   
   // Select two colors for the gradient based on username
@@ -226,7 +236,7 @@ export function generateProfilePicture(username: string, seed?: string): string 
   const color1 = brandColors[colorIndex1];
   const color2 = brandColors[colorIndex2];
   
-  return `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(avatarSeed)}&style=gradientlinear&backgroundColor=${color1},${color2}`;
+  return `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(avatarSeed)}&backgroundColor=${color1},${color2}&backgroundType=gradientLinear`;
 }
 
 /**
