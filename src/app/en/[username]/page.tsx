@@ -10,8 +10,6 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import type { Session, ProfileData, SortOptionProfile } from '@/lib/types';
 import { mockListings } from '@/lib/mockData';
 
-export const runtime = 'edge';
-
 export default function PublicProfilePage() {
   const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState<ProfileData>(null);

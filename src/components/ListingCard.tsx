@@ -89,7 +89,7 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
               </span>
             )}
             <Link
-              href={`/en/${listing.seller.name}`}
+              href={`/profile/${listing.seller.name}`}
               className="truncate max-w-[8rem] sm:max-w-[10rem] hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-200"
               onClick={(e) => e.stopPropagation()}
             >
