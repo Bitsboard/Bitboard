@@ -83,7 +83,7 @@ export class DataService {
             const response = await fetch(`/api/listings?${searchParams.toString()}`);
             if (!response.ok) throw new Error('Failed to fetch listings');
 
-            const responseData = await response.json();
+            const responseData = await response.json() as any;
             const data = responseData.data || responseData; // Handle both nested and direct formats
             return {
                 listings: this.mapApiRowsToListings(data.listings || []),
