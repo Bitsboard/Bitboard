@@ -246,11 +246,29 @@ export function generateProfilePicture(username: string, seed?: string): string 
  */
 export function getInitials(name: string): string {
   if (!name) return '?';
-  
   const words = name.trim().split(/\s+/);
   if (words.length === 1) {
     return name.charAt(0).toUpperCase();
   }
-  
   return words.slice(0, 2).map(word => word.charAt(0).toUpperCase()).join('');
+}
+
+export function formatPostAge(timestamp: number): string {
+  const now = Date.now();
+  const diff = now - timestamp;
+  
+  const minutes = Math.floor(diff / (1000 * 60));
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const months = Math.floor(days / 30);
+  
+  if (minutes < 60) {
+    return `${minutes}m`;
+  } else if (hours < 24) {
+    return `${hours}h`;
+  } else if (days < 30) {
+    return `${days}d`;
+  } else {
+    return `${months}mo`;
+  }
 }

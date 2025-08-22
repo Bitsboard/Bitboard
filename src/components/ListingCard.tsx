@@ -7,7 +7,7 @@ import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
 import { TypePill } from "./TypePill";
 import { Carousel } from "./Carousel";
-import { cn, generateProfilePicture, getInitials } from "@/lib/utils";
+import { cn, generateProfilePicture, getInitials, formatPostAge } from "@/lib/utils";
 import type { Listing } from "@/lib/types";
 
 interface ListingCardProps {
@@ -55,6 +55,17 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
       <div className="relative">
         <Carousel images={listing.images?.[0] ? [listing.images[0]] : []} alt={listing.title} dark={dark} className="aspect-[5/4]" rounded="rounded-t-2xl" showDots={false} showArrows={false} />
         <div className={cn("pointer-events-none absolute left-0 right-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r", a.stripe)} />
+        
+        {/* Age tag - top right of image */}
+        <div className="absolute top-2 right-2">
+          <span className={cn(
+            "inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold text-white shadow-lg",
+            dark ? "bg-neutral-900/80 backdrop-blur-sm" : "bg-white/90 backdrop-blur-sm"
+          )}>
+            {formatPostAge(listing.createdAt)}
+          </span>
+        </div>
+        
         {/* Overlay: type bottom-left, location bottom-right */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">
           <div className="flex items-end justify-between gap-2">

@@ -5,9 +5,9 @@ import Link from "next/link";
 import { PriceBlock } from "./PriceBlock";
 import { Carousel } from "./Carousel";
 import { Modal, ModalHeader, ModalTitle, ModalCloseButton } from "./Modal";
-import { t, formatPostedAgo } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
-import { generateProfilePicture, getInitials } from "@/lib/utils";
+import { generateProfilePicture, getInitials, formatPostAge } from "@/lib/utils";
 import type { Listing, Category, Unit, Seller } from "@/lib/types";
 
 interface ListingModalProps {
@@ -47,10 +47,6 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
     if (type !== "want") return raw;
     const cleaned = raw.replace(/^\s*(looking\s*for\s*:?-?\s*)/i, "");
     return cleaned.trim();
-  }
-
-  function postedAgo(ts: number): string {
-    return formatPostedAgo(ts, lang);
   }
 
   return (
@@ -169,7 +165,14 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                 </div>
                 <div className="text-right">
                   <span className={cn("rounded-full px-3 py-1 text-[11px] inline-block", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
-                  <div className={cn("mt-1 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>{postedAgo(listing.createdAt)}</div>
+                  <div className="mt-1">
+                    <span className={cn(
+                      "inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold text-white shadow-sm",
+                      dark ? "bg-neutral-800/80 backdrop-blur-sm" : "bg-neutral-200/80 backdrop-blur-sm"
+                    )}>
+                      {formatPostAge(listing.createdAt)}
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className={cn("mt-2 h-px", dark ? "bg-neutral-900" : "bg-neutral-200")} />
