@@ -81,16 +81,19 @@ export default function PublicProfilePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-neutral-950">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Orange Bar at Top */}
+      <div className="bg-gradient-to-r from-orange-500 to-red-500 h-32 w-full"></div>
+      
+      <div className="max-w-7xl mx-auto px-4 -mt-16 pb-8">
         {/* Profile Header */}
         <div className={`rounded-2xl p-8 mb-8 border ${
           dark 
             ? "bg-neutral-900 border-neutral-800" 
-            : "bg-white border-neutral-200 shadow-sm"
+            : "bg-white border-neutral-200 shadow-lg"
         }`}>
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
             {/* Avatar */}
-            <div className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold text-white bg-gradient-to-br from-orange-500 to-red-500">
+            <div className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold text-white bg-gradient-to-br from-orange-500 to-red-500 border-4 border-white shadow-lg">
               {username.charAt(0).toUpperCase()}
             </div>
             
@@ -129,7 +132,70 @@ export default function PublicProfilePage() {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Three Main Stats - Member Since, Active Listings, Reputation */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className={`rounded-xl p-6 border ${
+            dark 
+              ? "bg-neutral-900 border-neutral-800" 
+              : "bg-white border-neutral-200 shadow-lg"
+          }`}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div className={`text-sm font-medium ${dark ? "text-neutral-400" : "text-neutral-600"}`}>
+                Member Since
+              </div>
+            </div>
+            <div className={`text-2xl font-bold ${dark ? "text-white" : "text-neutral-900"}`}>
+              {profileData.registeredAt}
+            </div>
+          </div>
+          
+          <div className={`rounded-xl p-6 border ${
+            dark 
+              ? "bg-neutral-900 border-neutral-800" 
+              : "bg-white border-neutral-200 shadow-lg"
+          }`}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <div className={`text-sm font-medium ${dark ? "text-neutral-400" : "text-neutral-600"}`}>
+                Active Listings
+              </div>
+            </div>
+            <div className={`text-2xl font-bold ${dark ? "text-white" : "text-neutral-900"}`}>
+              {profileData.stats.totalSelling + profileData.stats.totalWanted}
+            </div>
+          </div>
+          
+          <div className={`rounded-xl p-6 border ${
+            dark 
+              ? "bg-neutral-900 border-neutral-800" 
+              : "bg-white border-neutral-200 shadow-lg"
+          }`}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
+                <svg className="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+              </div>
+              <div className={`text-sm font-medium ${dark ? "text-neutral-400" : "text-neutral-600"}`}>
+                Reputation
+              </div>
+            </div>
+            <div className={`text-2xl font-bold ${dark ? "text-white" : "text-neutral-900"}`}>
+              +{profileData.score}
+            </div>
+          </div>
+        </div>
+
+        {/* Additional Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className={`rounded-xl p-6 border ${
             dark 
