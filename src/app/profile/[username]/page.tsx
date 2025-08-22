@@ -6,10 +6,12 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { mockListings } from '@/lib/mockData';
 import { useThemeContext } from '@/lib/contexts/ThemeContext';
+import { ListingCard } from '@/components';
 
 export default function PublicProfilePage() {
   const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState<any>(null);
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'alphabetical'>('newest');
   const params = useParams();
   const username = params.username as string;
   const { dark } = useThemeContext();
@@ -26,9 +28,6 @@ export default function PublicProfilePage() {
     
     if (userListings.length > 0) {
       const firstUser = userListings[0].seller;
-      const selling = userListings.filter(l => l.type === 'sell');
-      const wanted = userListings.filter(l => l.type === 'want');
-      const totalValue = userListings.reduce((sum, l) => sum + l.priceSats, 0);
       
       const combinedProfileData = {
         username: username,
@@ -38,12 +37,7 @@ export default function PublicProfilePage() {
         score: firstUser.score,
         deals: firstUser.deals,
         rating: firstUser.rating,
-        listings: userListings,
-        stats: {
-          totalSelling: selling.length,
-          totalWanted: wanted.length,
-          totalValue: totalValue
-        }
+        listings: userListings
       };
       console.log('Setting profile data:', combinedProfileData);
       setProfileData(combinedProfileData);
@@ -75,16 +69,30 @@ export default function PublicProfilePage() {
     );
   }
 
-  const { listings } = profileData;
-  const sellingListings = listings.filter((l: any) => l.type === 'sell');
-  const wantedListings = listings.filter((l: any) => l.type === 'want');
+  // Sort listings based on current sort option
+  const getSortedListings = () => {
+    const listings = [...profileData.listings];
+    
+    switch (sortBy) {
+      case 'newest':
+        return listings.sort((a, b) => b.createdAt - a.createdAt);
+      case 'oldest':
+        return listings.sort((a, b) => a.createdAt - b.createdAt);
+      case 'alphabetical':
+        return listings.sort((a, b) => a.title.localeCompare(b.title));
+      default:
+        return listings;
+    }
+  };
+
+  const sortedListings = getSortedListings();
 
   return (
     <div className="min-h-screen bg-white dark:bg-neutral-950">
       {/* Orange Bar at Top */}
       <div className="bg-gradient-to-r from-orange-500 to-red-500 h-32 w-full"></div>
       
-      <div className="max-w-7xl mx-auto px-4 -mt-16 pb-8">
+      <div className="max-w-4xl mx-auto px-4 -mt-16 pb-8">
         {/* Profile Header */}
         <div className={`rounded-2xl p-8 mb-8 border ${
           dark 
@@ -170,7 +178,7 @@ export default function PublicProfilePage() {
               </div>
             </div>
             <div className={`text-2xl font-bold ${dark ? "text-white" : "text-neutral-900"}`}>
-              {profileData.stats.totalSelling + profileData.stats.totalWanted}
+              {profileData.listings.length}
             </div>
           </div>
           
@@ -195,104 +203,50 @@ export default function PublicProfilePage() {
           </div>
         </div>
 
-        {/* Additional Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className={`rounded-xl p-6 border ${
-            dark 
-              ? "bg-neutral-900 border-neutral-800" 
-              : "bg-white border-neutral-200 shadow-sm"
-          }`}>
-            <div className={`text-2xl font-bold mb-1 ${dark ? "text-white" : "text-neutral-900"}`}>
-              {profileData.stats.totalSelling}
-            </div>
-            <div className={`text-sm ${dark ? "text-neutral-400" : "text-neutral-600"}`}>
-              Items for sale
-            </div>
-          </div>
-          
-          <div className={`rounded-xl p-6 border ${
-            dark 
-              ? "bg-neutral-900 border-neutral-800" 
-              : "bg-white border-neutral-200 shadow-sm"
-          }`}>
-            <div className={`text-2xl font-bold mb-1 ${dark ? "text-white" : "text-neutral-900"}`}>
-              {profileData.stats.totalWanted}
-            </div>
-            <div className={`text-sm ${dark ? "text-neutral-400" : "text-neutral-600"}`}>
-              Items wanted
-            </div>
-          </div>
-          
-          <div className={`rounded-xl p-6 border ${
-            dark 
-              ? "bg-neutral-900 border-neutral-800" 
-              : "bg-white border-neutral-200 shadow-sm"
-          }`}>
-            <div className={`text-2xl font-bold mb-1 ${dark ? "text-white" : "text-neutral-900"}`}>
-              {profileData.stats.totalValue.toLocaleString()} sats
-            </div>
-            <div className={`text-sm ${dark ? "text-neutral-400" : "text-neutral-600"}`}>
-              Total listing value
-            </div>
-          </div>
-        </div>
-
-        {/* Listings Sections */}
-        {sellingListings.length > 0 && (
+        {/* Listings Section with Sorting */}
+        {sortedListings.length > 0 && (
           <div className="mb-12">
-            <h2 className={`text-2xl font-bold mb-6 ${dark ? "text-white" : "text-neutral-900"}`}>
-              For Sale ({sellingListings.length})
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {sellingListings.map((listing: any) => (
-                <div key={listing.id} className={`rounded-lg border p-4 ${
-                  dark 
-                    ? "bg-neutral-900 border-neutral-800" 
-                    : "bg-white border-neutral-200 shadow-sm"
-                }`}>
-                  <h3 className={`font-semibold mb-2 ${dark ? "text-white" : "text-neutral-900"}`}>
-                    {listing.title}
-                  </h3>
-                  <p className={`text-sm mb-2 ${dark ? "text-neutral-400" : "text-neutral-600"}`}>
-                    {listing.description}
-                  </p>
-                  <div className={`text-lg font-bold ${dark ? "text-orange-400" : "text-orange-600"}`}>
-                    {listing.priceSats.toLocaleString()} sats
-                  </div>
-                </div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <h2 className={`text-2xl font-bold ${dark ? "text-white" : "text-neutral-900"}`}>
+                Listings ({sortedListings.length})
+              </h2>
+              
+              {/* Sort Options */}
+              <div className="flex items-center gap-2">
+                <span className={`text-sm ${dark ? "text-neutral-400" : "text-neutral-600"}`}>Sort by:</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'alphabetical')}
+                  className={`px-3 py-2 rounded-lg border text-sm ${
+                    dark 
+                      ? "bg-neutral-800 border-neutral-700 text-white" 
+                      : "bg-white border-neutral-300 text-neutral-900"
+                  }`}
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="alphabetical">Alphabetical</option>
+                </select>
+              </div>
+            </div>
+            
+            {/* Listings Grid using ListingCard component */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {sortedListings.map((listing: any) => (
+                <ListingCard
+                  key={listing.id}
+                  listing={listing}
+                  unit="sats"
+                  dark={dark}
+                  btcCad={0} // Placeholder value since we don't have BTC rate in profile context
+                  onOpen={() => {}} // We could add a modal here if needed
+                />
               ))}
             </div>
           </div>
         )}
 
-        {wantedListings.length > 0 && (
-          <div className="mb-12">
-            <h2 className={`text-2xl font-bold mb-6 ${dark ? "text-white" : "text-neutral-900"}`}>
-              Looking For ({wantedListings.length})
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {wantedListings.map((listing: any) => (
-                <div key={listing.id} className={`rounded-lg border p-4 ${
-                  dark 
-                    ? "bg-neutral-900 border-neutral-800" 
-                    : "bg-white border-neutral-200 shadow-sm"
-                }`}>
-                  <h3 className={`font-semibold mb-2 ${dark ? "text-white" : "text-neutral-900"}`}>
-                    {listing.title}
-                  </h3>
-                  <p className={`text-sm mb-2 ${dark ? "text-neutral-400" : "text-neutral-600"}`}>
-                    {listing.description}
-                  </p>
-                  <div className={`text-lg font-bold ${dark ? "text-purple-400" : "text-purple-600"}`}>
-                    {listing.priceSats.toLocaleString()} sats
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {listings.length === 0 && (
+        {sortedListings.length === 0 && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📝</div>
             <h3 className={`text-xl font-semibold mb-2 ${dark ? "text-white" : "text-neutral-900"}`}>
