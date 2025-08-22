@@ -216,7 +216,7 @@ export function generateProfilePicture(username: string, seed?: string): string 
   
   const backgroundColor = colors[Math.abs(avatarSeed.charCodeAt(0)) % colors.length];
   
-  return `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(avatarSeed)}&backgroundColor=${backgroundColor}&mouth=smile01,smile02,smile03&style=circle&radius=50`;
+  return `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(avatarSeed)}&backgroundColor=${backgroundColor}`;
 }
 
 /**

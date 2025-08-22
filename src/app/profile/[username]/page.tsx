@@ -27,7 +27,7 @@ export default function PublicProfilePage() {
   
   useEffect(() => {
     setMounted(true);
-    // Try to get user's layout preference from localStorage
+    // Get layout preference from localStorage
     try {
       const savedLayout = localStorage.getItem('layoutPref');
       if (savedLayout === 'list' || savedLayout === 'grid') {
@@ -36,7 +36,23 @@ export default function PublicProfilePage() {
     } catch (error) {
       // Ignore localStorage errors
     }
-  }, []);
+
+    // Listen for global layout changes
+    const handleLayoutChange = (event: CustomEvent) => {
+      if (event.detail === 'list' || event.detail === 'grid') {
+        setLayout(event.detail);
+      }
+    };
+
+    window.addEventListener('bb:layout', handleLayoutChange as EventListener);
+    
+    // Debug: Log the generated profile picture URL
+    console.log('Generated profile picture URL for', username, ':', generateProfilePicture(username));
+    
+    return () => {
+      window.removeEventListener('bb:layout', handleLayoutChange as EventListener);
+    };
+  }, [username]);
 
   // Directly find user listings without complex state
   const userListings = mockListings.filter(listing => listing.seller.name === username);
@@ -100,21 +116,13 @@ export default function PublicProfilePage() {
   };
 
   const handleProfileImageError = () => {
+    console.log('Profile image failed to load for:', username);
+    console.log('Generated URL:', generateProfilePicture(username));
     setProfileImageError(true);
   };
 
   const handleSortChange = (newSort: typeof sortBy) => {
     setSortBy(newSort);
-  };
-
-  const handleLayoutChange = (newLayout: 'grid' | 'list') => {
-    setLayout(newLayout);
-    // Save to localStorage
-    try {
-      localStorage.setItem('layoutPref', newLayout);
-    } catch (error) {
-      // Ignore localStorage errors
-    }
   };
 
   return (
@@ -147,10 +155,12 @@ export default function PublicProfilePage() {
                       alt={`${username}'s profile picture`}
                       className="w-28 h-28 rounded-full object-cover shadow-xl border-4 border-white/30"
                       onError={handleProfileImageError}
+                      onLoad={() => console.log('Profile image loaded successfully for:', username)}
+                      style={{ minWidth: '112px', minHeight: '112px' }}
                     />
                   ) : (
-                    <div className="w-28 h-28 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-4xl font-bold text-white shadow-xl border-4 border-white/30 leading-none">
-                      <span className="flex items-center justify-center w-full h-full" style={{ fontFamily: 'Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>
+                    <div className="w-28 h-32 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-4xl font-bold text-white shadow-xl border-4 border-white/30">
+                      <span className="flex items-center justify-center w-full h-full leading-none" style={{ fontFamily: 'Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>
                         {getInitials(username)}
                       </span>
                     </div>
@@ -246,37 +256,6 @@ export default function PublicProfilePage() {
               
               {/* Controls: Layout Toggle and Sort Options */}
               <div className="flex items-center gap-4">
-                {/* Layout Toggle */}
-                <div className="flex items-center gap-2">
-                  <span className={`text-sm ${dark ? "text-neutral-400" : "text-neutral-600"}`}>View:</span>
-                  <div className="flex rounded-lg border overflow-hidden">
-                    <button
-                      onClick={() => handleLayoutChange('grid')}
-                      className={`px-3 py-2 text-sm transition-colors ${
-                        layout === 'grid'
-                          ? 'bg-orange-500 text-white'
-                          : dark
-                            ? 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-                            : 'bg-white text-neutral-700 hover:bg-neutral-50'
-                      }`}
-                    >
-                      Grid
-                    </button>
-                    <button
-                      onClick={() => handleLayoutChange('list')}
-                      className={`px-3 py-2 text-sm transition-colors ${
-                        layout === 'list'
-                          ? 'bg-orange-500 text-white'
-                          : dark
-                            ? 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-                            : 'bg-white text-neutral-700 hover:bg-neutral-50'
-                      }`}
-                    >
-                      List
-                    </button>
-                  </div>
-                </div>
-                
                 {/* Sort Options */}
                 <div className="flex items-center gap-2">
                   <span className={`text-sm ${dark ? "text-neutral-400" : "text-neutral-600"}`}>Sort by:</span>
