@@ -13,7 +13,7 @@ import type { Listing } from '@/lib/types';
 
 export default function PublicProfilePage() {
   const params = useParams();
-  const username = params.username as string;
+  const username = params?.username as string;
   const { dark } = useThemeContext();
   const btcCad = useBtcRate();
   
@@ -24,6 +24,19 @@ export default function PublicProfilePage() {
   const [profileImageError, setProfileImageError] = useState(false);
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'alphabetical' | 'mostExpensive' | 'leastExpensive'>('newest');
   const [layout, setLayout] = useState<'grid' | 'list'>('grid');
+  
+  // Early return if username is not available yet
+  if (!username) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-neutral-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">⏳</div>
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">Loading...</h1>
+          <p className="text-neutral-600 dark:text-neutral-400">Please wait while we load the profile.</p>
+        </div>
+      </div>
+    );
+  }
   
   useEffect(() => {
     setMounted(true);
@@ -78,51 +91,88 @@ export default function PublicProfilePage() {
     current.createdAt < oldest.createdAt ? current : oldest
   );
   const memberSinceDate = new Date(oldestListing.createdAt);
-  const memberSince = memberSinceDate.toLocaleDateString('en-US', { 
-    month: 'long', 
-    year: 'numeric' 
-  });
+  
+  // Use locale-aware date formatting with fallback
+  const memberSince = (() => {
+    try {
+      // Try to get the current locale from the browser
+      const currentLocale = navigator.language || 'en-US';
+      return memberSinceDate.toLocaleDateString(currentLocale, { 
+        month: 'long', 
+        year: 'numeric' 
+      });
+    } catch (error) {
+      // Fallback to English if locale formatting fails
+      return memberSinceDate.toLocaleDateString('en-US', { 
+        month: 'long', 
+        year: 'numeric' 
+      });
+    }
+  })();
 
   // Sort listings based on selected sort option
   const getSortedListings = () => {
-    const listings = [...userListings];
-    
-    switch (sortBy) {
-      case 'newest':
-        return listings.sort((a, b) => b.createdAt - a.createdAt);
-      case 'oldest':
-        return listings.sort((a, b) => a.createdAt - b.createdAt);
-      case 'alphabetical':
-        return listings.sort((a, b) => a.title.localeCompare(b.title));
-      case 'mostExpensive':
-        return listings.sort((a, b) => b.priceSats - a.priceSats);
-      case 'leastExpensive':
-        return listings.sort((a, b) => a.priceSats - b.priceSats);
-      default:
-        return listings.sort((a, b) => b.createdAt - a.createdAt);
+    try {
+      const listings = [...userListings];
+      
+      switch (sortBy) {
+        case 'newest':
+          return listings.sort((a, b) => b.createdAt - a.createdAt);
+        case 'oldest':
+          return listings.sort((a, b) => a.createdAt - b.createdAt);
+        case 'alphabetical':
+          return listings.sort((a, b) => a.title.localeCompare(b.title));
+        case 'mostExpensive':
+          return listings.sort((a, b) => b.priceSats - a.priceSats);
+        case 'leastExpensive':
+          return listings.sort((a, b) => a.priceSats - b.priceSats);
+        default:
+          return listings.sort((a, b) => b.createdAt - a.createdAt);
+      }
+    } catch (error) {
+      console.error('Error sorting listings:', error);
+      // Return original order if sorting fails
+      return userListings;
     }
   };
 
   const sortedListings = getSortedListings();
 
   const handleListingClick = (listing: Listing) => {
-    setSelectedListing(listing);
-    setIsModalOpen(true);
+    try {
+      setSelectedListing(listing);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('Error opening listing:', error);
+    }
   };
 
   const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedListing(null);
+    try {
+      setIsModalOpen(false);
+      setSelectedListing(null);
+    } catch (error) {
+      console.error('Error closing modal:', error);
+    }
   };
 
   const handleProfileImageError = () => {
-    console.log('Profile image failed to load for:', username);
-    console.log('Generated URL:', generateProfilePicture(username));
-    setProfileImageError(true);
+    try {
+      console.log('Profile image failed to load for:', username);
+      console.log('Generated URL:', generateProfilePicture(username));
+      setProfileImageError(true);
+    } catch (error) {
+      console.error('Error handling profile image error:', error);
+      setProfileImageError(true);
+    }
   };
 
   const handleSortChange = (newSort: typeof sortBy) => {
-    setSortBy(newSort);
+    try {
+      setSortBy(newSort);
+    } catch (error) {
+      console.error('Error changing sort:', error);
+    }
   };
 
   return (
@@ -246,7 +296,7 @@ export default function PublicProfilePage() {
       
       {/* Main content container */}
       <div className="max-w-4xl mx-auto px-4 py-12">
-                {/* Listings Section with Sorting */}
+        {/* Listings Section with Sorting */}
         {sortedListings.length > 0 && (
           <div className="mb-12">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -254,27 +304,24 @@ export default function PublicProfilePage() {
                 Listings ({sortedListings.length})
               </h2>
               
-              {/* Controls: Layout Toggle and Sort Options */}
-              <div className="flex items-center gap-4">
-                {/* Sort Options */}
-                <div className="flex items-center gap-2">
-                  <span className={`text-sm ${dark ? "text-neutral-400" : "text-neutral-600"}`}>Sort by:</span>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
-                    className={`px-3 py-2 rounded-lg border text-sm ${
-                      dark 
-                        ? "bg-neutral-800 border-neutral-700 text-white" 
-                        : "bg-white border-neutral-300 text-neutral-900"
-                    }`}
-                  >
-                    <option value="newest">Newest First</option>
-                    <option value="oldest">Oldest First</option>
-                    <option value="alphabetical">Alphabetical</option>
-                    <option value="mostExpensive">Most Expensive</option>
-                    <option value="leastExpensive">Least Expensive</option>
-                  </select>
-                </div>
+              {/* Sort Options */}
+              <div className="flex items-center gap-2">
+                <span className={`text-sm ${dark ? "text-neutral-400" : "text-neutral-600"}`}>Sort by:</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
+                  className={`px-3 py-2 rounded-lg border text-sm ${
+                    dark 
+                      ? "bg-neutral-800 border-neutral-700 text-white" 
+                      : "bg-white border-neutral-300 text-neutral-900"
+                  }`}
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="alphabetical">Alphabetical</option>
+                  <option value="mostExpensive">Most Expensive</option>
+                  <option value="leastExpensive">Least Expensive</option>
+                </select>
               </div>
             </div>
             
