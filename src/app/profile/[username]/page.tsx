@@ -45,9 +45,13 @@ export default function PublicProfilePage() {
       const savedLayout = localStorage.getItem('layoutPref');
       if (savedLayout === 'list' || savedLayout === 'grid') {
         setLayout(savedLayout);
+      } else {
+        // Default to grid if no preference is set
+        setLayout('grid');
       }
     } catch (error) {
-      // Ignore localStorage errors
+      console.error('Profile page: Error reading layoutPref from localStorage:', error);
+      setLayout('grid');
     }
 
     // Listen for global layout changes

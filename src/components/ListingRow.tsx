@@ -110,7 +110,10 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
               
               <Link
                 href={`/profile/${listing.seller.name}`}
-                className="truncate max-w-[8rem] hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-200"
+                className={cn(
+                  "truncate max-w-[8rem] hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-200",
+                  dark ? "text-white" : "text-neutral-700"
+                )}
                 onClick={(e) => e.stopPropagation()}
               >
                 {listing.seller.name}

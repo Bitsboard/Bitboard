@@ -108,6 +108,10 @@ export const useSettingsStore = create<SettingsStore>()(
 
             setLayout: (layout) => {
                 set({ layout });
+                // Dispatch custom event for components that need to sync with layout changes
+                if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('bb:layout', { detail: layout }));
+                }
             },
 
             toggleTheme: () => {
