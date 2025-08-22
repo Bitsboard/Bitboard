@@ -168,7 +168,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                   <div className="mt-1">
                     <span className={cn(
                       "inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold text-white shadow-sm",
-                      dark ? "bg-neutral-800/80 backdrop-blur-sm" : "bg-neutral-200/80 backdrop-blur-sm"
+                      dark ? "bg-neutral-800/80 backdrop-blur-sm" : "bg-neutral-700 text-white"
                     )}>
                       {formatPostAge(listing.createdAt)}
                     </span>

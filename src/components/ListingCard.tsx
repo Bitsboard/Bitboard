@@ -60,7 +60,7 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
         <div className="absolute top-2 right-2">
           <span className={cn(
             "inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold text-white shadow-lg",
-            dark ? "bg-neutral-900/80 backdrop-blur-sm" : "bg-white/90 backdrop-blur-sm"
+            dark ? "bg-neutral-900/80 backdrop-blur-sm" : "bg-neutral-700/90 backdrop-blur-sm"
           )}>
             {formatPostAge(listing.createdAt)}
           </span>

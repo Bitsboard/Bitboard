@@ -84,13 +84,13 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
           <div className="flex items-center gap-2">
             {/* Age tag */}
             <span className={cn(
-              "rounded-full px-2 py-1 text-[11px] font-semibold text-white shadow-sm",
-              dark ? "bg-neutral-800/80 backdrop-blur-sm" : "bg-neutral-200/80 backdrop-blur-sm"
+              "rounded-full px-2 py-1 text-[11px] font-semibold shadow-sm",
+              dark ? "bg-neutral-800/80 backdrop-blur-sm text-white" : "bg-neutral-700 text-white"
             )}>
               {formatPostAge(listing.createdAt)}
             </span>
             {/* Location tag */}
-            <span className={cn("truncate rounded-full px-3 py-1 text-[11px] max-w-[40%]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
+            <span className={cn("rounded-full px-3 py-1 text-[11px]", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>📍 {listing.location}</span>
           </div>
         </div>
         {/* Title */}
