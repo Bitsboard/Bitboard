@@ -4,7 +4,7 @@ export const runtime = 'edge';
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { useTheme } from '@/lib/settings';
+import { useTheme } from '@/lib/contexts/ThemeContext';
 import { useLang } from '@/lib/i18n-client';
 import { t } from '@/lib/i18n';
 import { cn } from '@/lib/utils';

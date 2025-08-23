@@ -4,14 +4,15 @@ import { useState, useEffect } from "react";
 import { Nav, AuthModal } from "@/components";
 import { useLang } from "@/lib/i18n-client";
 import { useSettings, useUser, useModals } from "@/lib/settings";
+import { useTheme } from "@/lib/contexts/ThemeContext";
 
 import type { User } from "@/lib/types";
 
 export default function GlobalHeader() {
   const lang = useLang();
-  const { theme } = useSettings();
   const { user, setUser } = useUser();
   const { modals, setModal } = useModals();
+  const { theme } = useTheme();
   const dark = theme === 'dark';
 
   // Check for existing session on mount

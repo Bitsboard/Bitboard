@@ -2,10 +2,12 @@
 
 import React from "react";
 import { useSettings } from "@/lib/settings";
+import { useTheme } from "@/lib/contexts/ThemeContext";
 import { UnitToggle, ThemeToggle, ViewToggle } from "@/components";
 
 export default function TestSettingsPage() {
-    const { theme, unit, layout } = useSettings();
+    const { unit, layout } = useSettings();
+    const { theme } = useTheme();
 
     return (
         <div className="min-h-screen bg-white dark:bg-neutral-950 p-8">

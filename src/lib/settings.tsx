@@ -96,11 +96,7 @@ export const useSettingsStore = create<SettingsStore>()(
             // Settings methods
             setTheme: (theme) => {
                 set({ theme });
-                // Theme application is now handled by the unified theme manager
-                // Dispatch resize event for components that depend on it
-                if (typeof window !== 'undefined') {
-                    window.dispatchEvent(new Event('resize'));
-                }
+                // Theme is now handled by the unified ThemeContext
             },
 
             setUnit: (unit) => {
@@ -116,14 +112,13 @@ export const useSettingsStore = create<SettingsStore>()(
             },
 
             toggleTheme: () => {
-                const currentTheme = get().theme;
-                const newTheme: Theme = currentTheme === 'dark' ? 'light' : 'dark';
-                get().setTheme(newTheme);
+                // Theme toggle is now handled by the unified ThemeContext
+                // This is kept for compatibility but doesn't actually toggle
             },
 
             reset: () => {
                 set(DEFAULT_SETTINGS);
-                // Theme application is now handled by our dedicated theme system
+                // Theme is now handled by the unified ThemeContext
             },
         }),
         {
@@ -136,8 +131,7 @@ export const useSettingsStore = create<SettingsStore>()(
                 user: state.user,
             }),
             onRehydrateStorage: () => (state) => {
-                // Theme is now handled by our dedicated theme system
-                // No need to apply theme here to avoid conflicts
+                // Theme is now handled by the unified ThemeContext
             },
         }
     )
@@ -150,10 +144,7 @@ export function useSettings() {
 }
 
 // Individual hooks for convenience
-export const useTheme = () => {
-    const { theme, setTheme, toggleTheme } = useSettingsStore();
-    return { theme, setTheme, toggleTheme };
-};
+// Note: useTheme is now provided by ThemeContext, not settings
 
 // Re-export the new unified theme hook
 

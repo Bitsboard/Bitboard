@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
 import { useSettings, useModals, useUser } from "@/lib/settings";
+import { useTheme } from "@/lib/contexts/ThemeContext";
 import { dataService, CONFIG } from "@/lib/dataService";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { mockListings } from '@/lib/mockData';
@@ -17,9 +18,10 @@ export default function SearchClient() {
     const router = useRouter();
 
     // Use centralized settings
-    const { theme, unit, layout } = useSettings();
+    const { unit, layout } = useSettings();
     const { modals, setModal } = useModals();
     const { user } = useUser();
+    const { theme } = useTheme();
     const dark = theme === 'dark';
 
     const layoutParam = (params.get("layout") || "").trim();
