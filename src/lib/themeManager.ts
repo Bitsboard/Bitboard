@@ -23,9 +23,16 @@ class ThemeManager {
     if (this.isInitialized) return;
     
     try {
-      // Get theme from localStorage or default to dark
-      const savedTheme = localStorage.getItem('theme') as Theme;
-      this.currentTheme = savedTheme === 'light' ? 'light' : 'dark';
+      // Get theme from localStorage
+      const savedTheme = localStorage.getItem('theme');
+      
+      // Only use saved theme if it's actually 'light' or 'dark'
+      if (savedTheme === 'light' || savedTheme === 'dark') {
+        this.currentTheme = savedTheme;
+      } else {
+        // No saved theme, default to dark but don't save it yet
+        this.currentTheme = 'dark';
+      }
       
       // Apply theme immediately to prevent flash
       this.applyTheme(this.currentTheme);
