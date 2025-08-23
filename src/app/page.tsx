@@ -46,10 +46,7 @@ export default function HomePage() {
   const forceDatabase = typeof window !== 'undefined' && window.location.hostname.includes('pages.dev');
   const finalIsDeployed = isDeployed || forceDatabase;
   
-
-  
-
-  
+  // Use actual listings from database instead of mock data
   const { query, setQuery, cat, setCat, adType, setAdType, goods, services, featured } = useSearchFilters(listings);
   
   const { modals, setModal, closeAllModals } = useSettings();
@@ -86,11 +83,14 @@ export default function HomePage() {
     setModal('showLocationModal', false);
   };
 
-  const bg = dark ? "bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950" : "bg-gradient-to-br from-neutral-50 via-white to-neutral-100";
-
   return (
     <ErrorBoundary>
-      <div className={cn("min-h-screen", bg, dark ? "dark" : "")}>
+      <div className={cn(
+        "min-h-screen",
+        dark 
+          ? "bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 dark" 
+          : "bg-gradient-to-br from-neutral-50 via-white to-neutral-100"
+      )}>
 
         
         {/* Global header is rendered via layout */}
