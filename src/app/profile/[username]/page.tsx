@@ -7,7 +7,7 @@ import { useParams } from 'next/navigation';
 import { ListingCard, ListingRow, ListingModal } from '@/components';
 import { useBtcRate } from '@/lib/hooks/useBtcRate';
 import { generateProfilePicture, getInitials } from '@/lib/utils';
-import { useLayout, useTheme, useUnit } from '@/lib/settings';
+import { useLayout, useTheme, useUnit, useModals, useUser } from '@/lib/settings';
 import type { Listing } from '@/lib/types';
 
 export default function PublicProfilePage() {
@@ -23,8 +23,7 @@ export default function PublicProfilePage() {
   // State for client-side rendering and theme hydration
   const [mounted, setMounted] = useState(false);
   const [themeHydrated, setThemeHydrated] = useState(false);
-  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [profileImageError, setProfileImageError] = useState(false);
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'alphabetical' | 'mostExpensive' | 'leastExpensive'>('newest');
   
@@ -36,6 +35,9 @@ export default function PublicProfilePage() {
   
   // Use global layout from settings
   const { layout } = useLayout();
+  const { modals, setModal } = useModals();
+  const { user } = useUser();
+  const { active } = modals;
   
   // All useEffect hooks must be called before any conditional returns
   useEffect(() => {
@@ -217,8 +219,7 @@ export default function PublicProfilePage() {
 
   const handleListingClick = (listing: Listing) => {
     try {
-      setSelectedListing(listing);
-      setIsModalOpen(true);
+      setModal('active', listing);
     } catch (error) {
       console.error('Error opening listing:', error);
     }
@@ -226,8 +227,7 @@ export default function PublicProfilePage() {
 
   const closeModal = () => {
     try {
-      setIsModalOpen(false);
-      setSelectedListing(null);
+      setModal('active', null);
     } catch (error) {
       console.error('Error closing modal:', error);
     }
@@ -454,17 +454,20 @@ export default function PublicProfilePage() {
       </div>
 
       {/* Listing Modal */}
-      {isModalOpen && selectedListing && (
+      {active && (
         <ListingModal
-          listing={selectedListing}
-          open={isModalOpen}
+          listing={active}
+          open={!!active}
           onClose={closeModal}
           unit={unit}
           dark={dark}
           btcCad={effectiveBtcCad}
           onChat={() => {
-            // Placeholder for chat functionality
-            console.log('Open chat for listing:', selectedListing.title);
+            if (!user) {
+              setModal('showAuth', true);
+            } else {
+              setModal('chatFor', active);
+            }
           }}
         />
       )}

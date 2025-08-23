@@ -7,7 +7,7 @@ import type { Listing, AdType, Place } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
-import { useSettings } from "@/lib/settings";
+import { useSettings, useModals, useUser } from "@/lib/settings";
 import { dataService, CONFIG } from "@/lib/dataService";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { mockListings } from '@/lib/mockData';
@@ -18,6 +18,8 @@ export default function SearchClient() {
 
     // Use centralized settings
     const { theme, unit, layout } = useSettings();
+    const { modals, setModal } = useModals();
+    const { user } = useUser();
     const dark = theme === 'dark';
 
     const layoutParam = (params.get("layout") || "").trim();
@@ -33,11 +35,11 @@ export default function SearchClient() {
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [initialLoaded, setInitialLoaded] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [active, setActive] = useState<Listing | null>(null);
     const [btcCad, setBtcCad] = useState<number | null>(null);
     const isFetchingRef = useRef(false);
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
     const lang = useLang();
+    const { active, showLocationModal } = modals;
 
     const q = (params.get("q") || "").trim();
     const category = (params.get("category") || "").trim();
@@ -68,7 +70,7 @@ export default function SearchClient() {
         } catch { }
         return CONFIG.DEFAULT_RADIUS_KM;
     });
-    const [showLocationModal, setShowLocationModal] = useState(false);
+
 
     useEffect(() => { setInputQuery(q); }, [q]);
 
@@ -476,7 +478,7 @@ export default function SearchClient() {
                                 <div className="flex items-start justify-between">
                                     <div className={cn("font-semibold", dark ? "text-neutral-200" : "text-neutral-900")}>{t('location', lang)}</div>
                                     <div>
-                                        <button onClick={() => setShowLocationModal(true)} className="rounded-xl px-3 py-1 text-xs text-white bg-gradient-to-r from-orange-500 to-red-500">{t('change', lang)}</button>
+                                        <button onClick={() => setModal('showLocationModal', true)} className="rounded-xl px-3 py-1 text-xs text-white bg-gradient-to-r from-orange-500 to-red-500">{t('change', lang)}</button>
                                     </div>
                                 </div>
                                 {radiusKm === 0 ? (
@@ -547,7 +549,7 @@ export default function SearchClient() {
                             {layout === "grid" ? (
                                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
                                     {listings.map((l) => (
-                                        <ListingCard key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
+                                        <ListingCard key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setModal('active', l)} />
                                     ))}
                                     {showNoResults && (
                                         <div className={cn("col-span-full rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
@@ -560,7 +562,7 @@ export default function SearchClient() {
                             ) : (
                                 <div className="space-y-4">
                                     {listings.map((l) => (
-                                        <ListingRow key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setActive(l)} />
+                                        <ListingRow key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setModal('active', l)} />
                                     ))}
                                     {showNoResults && (
                                         <div className={cn("rounded-3xl p-16 text-center border-2 border-dashed", dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500")}>
@@ -583,12 +585,18 @@ export default function SearchClient() {
                 </div>
 
                 {active && (
-                    <ListingModal listing={active} open={!!active} onClose={() => setActive(null)} unit={unit} btcCad={btcCad} dark={dark} onChat={() => { }} />
+                    <ListingModal listing={active} open={!!active} onClose={() => setModal('active', null)} unit={unit} btcCad={btcCad} dark={dark} onChat={() => {
+                        if (!user) {
+                            setModal('showAuth', true);
+                        } else {
+                            setModal('chatFor', active);
+                        }
+                    }} />
                 )}
                 {showLocationModal && (
                     <LocationModal
                         open={showLocationModal}
-                        onClose={() => setShowLocationModal(false)}
+                        onClose={() => setModal('showLocationModal', false)}
                         initialCenter={{ lat: Number(centerLat || 43.6532), lng: Number(centerLng || -79.3832), name: '' }}
                         initialRadiusKm={radiusKm}
                         dark={dark}
@@ -606,7 +614,7 @@ export default function SearchClient() {
                             sp.set('lng', String(place.lng));
                             sp.set('radiusKm', String(r));
                             router.push(`/${lang}/search?${sp.toString()}`);
-                            setShowLocationModal(false);
+                            setModal('showLocationModal', false);
                         }}
                     />
                 )}

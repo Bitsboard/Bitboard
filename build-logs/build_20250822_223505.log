@@ -1,0 +1,543 @@
+[0;34m[INFO] === SYSTEM INFORMATION ===[0m
+[0;34m[INFO] Node.js version: v24.5.0[0m
+[0;34m[INFO] npm version: 11.5.1[0m
+[0;34m[INFO] Git branch: staging[0m
+[0;34m[INFO] Git commit: 475efe6[0m
+[0;34m[INFO] Working directory: /Users/georgedanayan/Bitboard[0m
+[0;34m[INFO] Available memory: [0m
+[1;33m[WARNING] Uncommitted changes detected - this may affect build reproducibility[0m
+ M .vercel/output/builds.json
+ M .vercel/output/config.json
+ M .vercel/output/diagnostics/cli_traces.json
+ D .vercel/output/diagnostics/trace
+ D .vercel/output/functions/_not-found.func/.vc-config.json
+ D .vercel/output/functions/_not-found.func/___next_launcher.cjs
+ D .vercel/output/functions/_not-found.rsc.func
+ D .vercel/output/functions/about.func
+ D .vercel/output/functions/about.prerender-config.json
+ D .vercel/output/functions/about.prerender-fallback.html
+ D .vercel/output/functions/about.rsc.prerender-config.json
+ D .vercel/output/functions/about.rsc.prerender-fallback.rsc
+ D .vercel/output/functions/api/admin/listings/delete.func/.vc-config.json
+ D .vercel/output/functions/api/admin/listings/delete.func/index.js
+ D .vercel/output/functions/api/admin/listings/delete.func/index.js.map
+ D .vercel/output/functions/api/admin/listings/delete.rsc.func
+ D .vercel/output/functions/api/admin/listings/list.func/.vc-config.json
+ D .vercel/output/functions/api/admin/listings/list.func/index.js
+ D .vercel/output/functions/api/admin/listings/list.func/index.js.map
+ D .vercel/output/functions/api/admin/listings/list.rsc.func
+ D .vercel/output/functions/api/admin/users/ban.func/.vc-config.json
+ D .vercel/output/functions/api/admin/users/ban.func/index.js
+ D .vercel/output/functions/api/admin/users/ban.func/index.js.map
+ D .vercel/output/functions/api/admin/users/ban.rsc.func
+ D .vercel/output/functions/api/admin/users/list.func/.vc-config.json
+ D .vercel/output/functions/api/admin/users/list.func/index.js
+ D .vercel/output/functions/api/admin/users/list.func/index.js.map
+ D .vercel/output/functions/api/admin/users/list.rsc.func
+ D .vercel/output/functions/api/admin/users/verify.func/.vc-config.json
+ D .vercel/output/functions/api/admin/users/verify.func/index.js
+ D .vercel/output/functions/api/admin/users/verify.func/index.js.map
+ D .vercel/output/functions/api/admin/users/verify.rsc.func
+ D .vercel/output/functions/api/auth/callback.func/.vc-config.json
+ D .vercel/output/functions/api/auth/callback.func/index.js
+ D .vercel/output/functions/api/auth/callback.func/index.js.map
+ D .vercel/output/functions/api/auth/callback.rsc.func
+ D .vercel/output/functions/api/auth/login.func/.vc-config.json
+ D .vercel/output/functions/api/auth/login.func/index.js
+ D .vercel/output/functions/api/auth/login.func/index.js.map
+ D .vercel/output/functions/api/auth/login.rsc.func
+ D .vercel/output/functions/api/auth/logout.func/.vc-config.json
+ D .vercel/output/functions/api/auth/logout.func/index.js
+ D .vercel/output/functions/api/auth/logout.func/index.js.map
+ D .vercel/output/functions/api/auth/logout.rsc.func
+ D .vercel/output/functions/api/auth/session.func/.vc-config.json
+ D .vercel/output/functions/api/auth/session.func/index.js
+ D .vercel/output/functions/api/auth/session.func/index.js.map
+ D .vercel/output/functions/api/auth/session.rsc.func
+ D .vercel/output/functions/api/auth/username.func/.vc-config.json
+ D .vercel/output/functions/api/auth/username.func/index.js
+ D .vercel/output/functions/api/auth/username.func/index.js.map
+ D .vercel/output/functions/api/auth/username.rsc.func
+ D .vercel/output/functions/api/chat/list.func/.vc-config.json
+ D .vercel/output/functions/api/chat/list.func/index.js
+ D .vercel/output/functions/api/chat/list.func/index.js.map
+ D .vercel/output/functions/api/chat/list.rsc.func
+ D .vercel/output/functions/api/chat/send.func/.vc-config.json
+ D .vercel/output/functions/api/chat/send.func/index.js
+ D .vercel/output/functions/api/chat/send.func/index.js.map
+ D .vercel/output/functions/api/chat/send.rsc.func
+ D .vercel/output/functions/api/escrow/propose.func/.vc-config.json
+ D .vercel/output/functions/api/escrow/propose.func/index.js
+ D .vercel/output/functions/api/escrow/propose.func/index.js.map
+ D .vercel/output/functions/api/escrow/propose.rsc.func
+ D .vercel/output/functions/api/health.func/.vc-config.json
+ D .vercel/output/functions/api/health.func/index.js
+ D .vercel/output/functions/api/health.func/index.js.map
+ D .vercel/output/functions/api/health.rsc.func
+ D .vercel/output/functions/api/listings.func/.vc-config.json
+ D .vercel/output/functions/api/listings.func/index.js
+ D .vercel/output/functions/api/listings.func/index.js.map
+ D .vercel/output/functions/api/listings.rsc.func
+ D .vercel/output/functions/api/listings/[id].func/.vc-config.json
+ D .vercel/output/functions/api/listings/[id].func/index.js
+ D .vercel/output/functions/api/listings/[id].func/index.js.map
+ D .vercel/output/functions/api/listings/[id].rsc.func
+ D .vercel/output/functions/api/ping.func/.vc-config.json
+ D .vercel/output/functions/api/ping.func/index.js
+ D .vercel/output/functions/api/ping.func/index.js.map
+ D .vercel/output/functions/api/ping.rsc.func
+ D .vercel/output/functions/api/places.func/.vc-config.json
+ D .vercel/output/functions/api/places.func/index.js
+ D .vercel/output/functions/api/places.func/index.js.map
+ D .vercel/output/functions/api/places.rsc.func
+ D .vercel/output/functions/api/rate.func/.vc-config.json
+ D .vercel/output/functions/api/rate.func/index.js
+ D .vercel/output/functions/api/rate.func/index.js.map
+ D .vercel/output/functions/api/rate.rsc.func
+ D .vercel/output/functions/api/users/[username].func/.vc-config.json
+ D .vercel/output/functions/api/users/[username].func/index.js
+ D .vercel/output/functions/api/users/[username].func/index.js.map
+ D .vercel/output/functions/api/users/[username].rsc.func
+ D .vercel/output/functions/api/users/[username]/listings.func/.vc-config.json
+ D .vercel/output/functions/api/users/[username]/listings.func/index.js
+ D .vercel/output/functions/api/users/[username]/listings.func/index.js.map
+ D .vercel/output/functions/api/users/[username]/listings.rsc.func
+ D .vercel/output/functions/careers.func
+ D .vercel/output/functions/careers.prerender-config.json
+ D .vercel/output/functions/careers.prerender-fallback.html
+ D .vercel/output/functions/careers.rsc.func
+ D .vercel/output/functions/careers.rsc.prerender-config.json
+ D .vercel/output/functions/careers.rsc.prerender-fallback.rsc
+ D .vercel/output/functions/contact.func
+ D .vercel/output/functions/contact.prerender-config.json
+ D .vercel/output/functions/contact.prerender-fallback.html
+ D .vercel/output/functions/contact.rsc.func
+ D .vercel/output/functions/contact.rsc.prerender-config.json
+ D .vercel/output/functions/contact.rsc.prerender-fallback.rsc
+ D .vercel/output/functions/en/[username].func/.vc-config.json
+ D .vercel/output/functions/en/[username].func/index.js
+ D .vercel/output/functions/en/[username].func/index.js.map
+ D .vercel/output/functions/en/[username].rsc.func
+ D .vercel/output/functions/escrow.func
+ D .vercel/output/functions/escrow.prerender-config.json
+ D .vercel/output/functions/escrow.prerender-fallback.html
+ D .vercel/output/functions/escrow.rsc.func
+ D .vercel/output/functions/escrow.rsc.prerender-config.json
+ D .vercel/output/functions/escrow.rsc.prerender-fallback.rsc
+ D .vercel/output/functions/faq.func
+ D .vercel/output/functions/faq.prerender-config.json
+ D .vercel/output/functions/faq.prerender-fallback.html
+ D .vercel/output/functions/faq.rsc.func
+ D .vercel/output/functions/faq.rsc.prerender-config.json
+ D .vercel/output/functions/faq.rsc.prerender-fallback.rsc
+ D .vercel/output/functions/help.func
+ D .vercel/output/functions/help.prerender-config.json
+ D .vercel/output/functions/help.prerender-fallback.html
+ D .vercel/output/functions/help.rsc.func
+ D .vercel/output/functions/help.rsc.prerender-config.json
+ D .vercel/output/functions/help.rsc.prerender-fallback.rsc
+ D .vercel/output/functions/icon.svg.func
+ D .vercel/output/functions/icon.svg.prerender-config.json
+ D .vercel/output/functions/icon.svg.prerender-fallback.body
+ D .vercel/output/functions/icon.svg.rsc.func/.vc-config.json
+ D .vercel/output/functions/icon.svg.rsc.func/___next_launcher.cjs
+ D .vercel/output/functions/index.func
+ D .vercel/output/functions/index.prerender-config.json
+ D .vercel/output/functions/index.prerender-fallback.html
+ D .vercel/output/functions/index.rsc.func
+ D .vercel/output/functions/index.rsc.prerender-config.json
+ D .vercel/output/functions/index.rsc.prerender-fallback.rsc
+ D .vercel/output/functions/notifications.func
+ D .vercel/output/functions/notifications.prerender-config.json
+ D .vercel/output/functions/notifications.prerender-fallback.html
+ D .vercel/output/functions/notifications.rsc.func
+ D .vercel/output/functions/notifications.rsc.prerender-config.json
+ D .vercel/output/functions/notifications.rsc.prerender-fallback.rsc
+ D .vercel/output/functions/privacy.func
+ D .vercel/output/functions/privacy.prerender-config.json
+ D .vercel/output/functions/privacy.prerender-fallback.html
+ D .vercel/output/functions/privacy.rsc.func
+ D .vercel/output/functions/privacy.rsc.prerender-config.json
+ D .vercel/output/functions/privacy.rsc.prerender-fallback.rsc
+ D .vercel/output/functions/profile.func
+ D .vercel/output/functions/profile.prerender-config.json
+ D .vercel/output/functions/profile.prerender-fallback.html
+ D .vercel/output/functions/profile.rsc.func
+ D .vercel/output/functions/profile.rsc.prerender-config.json
+ D .vercel/output/functions/profile.rsc.prerender-fallback.rsc
+ D .vercel/output/functions/safety.func
+ D .vercel/output/functions/safety.prerender-config.json
+ D .vercel/output/functions/safety.prerender-fallback.html
+ D .vercel/output/functions/safety.rsc.func
+ D .vercel/output/functions/safety.rsc.prerender-config.json
+ D .vercel/output/functions/safety.rsc.prerender-fallback.rsc
+ D .vercel/output/functions/search.func/.vc-config.json
+ D .vercel/output/functions/search.func/index.js
+ D .vercel/output/functions/search.func/index.js.map
+ D .vercel/output/functions/search.rsc.func
+ D .vercel/output/functions/support.func
+ D .vercel/output/functions/support.prerender-config.json
+ D .vercel/output/functions/support.prerender-fallback.html
+ D .vercel/output/functions/support.rsc.func
+ D .vercel/output/functions/support.rsc.prerender-config.json
+ D .vercel/output/functions/support.rsc.prerender-fallback.rsc
+ D .vercel/output/functions/terms.func
+ D .vercel/output/functions/terms.prerender-config.json
+ D .vercel/output/functions/terms.prerender-fallback.html
+ D .vercel/output/functions/terms.rsc.func
+ D .vercel/output/functions/terms.rsc.prerender-config.json
+ D .vercel/output/functions/terms.rsc.prerender-fallback.rsc
+ D .vercel/output/functions/test-settings.func
+ D .vercel/output/functions/test-settings.prerender-config.json
+ D .vercel/output/functions/test-settings.prerender-fallback.html
+ D .vercel/output/functions/test-settings.rsc.func
+ D .vercel/output/functions/test-settings.rsc.prerender-config.json
+ D .vercel/output/functions/test-settings.rsc.prerender-fallback.rsc
+ D .vercel/output/static/404.html
+ D .vercel/output/static/404.rsc.json
+ D .vercel/output/static/Bitsbarterlogo.svg
+ D .vercel/output/static/_app.rsc.json
+ D .vercel/output/static/_document.rsc.json
+ D .vercel/output/static/_error.rsc.json
+ D .vercel/output/static/_headers
+ D .vercel/output/static/_next/static/chunks/868-7010c8f017bac1fc.js
+ D .vercel/output/static/_next/static/chunks/d0deef33.afff9b3bf7059c8b.js
+ D .vercel/output/static/_next/static/chunks/framework-f66176bb897dc684.js
+ D .vercel/output/static/_next/static/chunks/main-app-370dd055ca3b4148.js
+ D .vercel/output/static/_next/static/chunks/pages/_app-6a626577ffa902a4.js
+ D .vercel/output/static/_next/static/chunks/pages/_error-1be831200e60c5c0.js
+ D .vercel/output/static/_next/static/chunks/polyfills-78c92fac7aa8fdd8.js
+ D .vercel/output/static/_next/static/not-found.txt
+ D .vercel/output/static/_routes.json
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/cache/adaptor.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/cache/cache-api.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/cache/kv.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/admin/listings/delete.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/admin/listings/list.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/admin/users/ban.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/admin/users/list.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/admin/users/verify.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/auth/callback.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/auth/login.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/auth/logout.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/auth/session.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/auth/username.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/chat/list.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/chat/send.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/escrow/propose.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/health.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/listings.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/listings/[id].func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/ping.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/places.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/rate.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/users/[username].func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/users/[username]/listings.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/en/[username].func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/search.func.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/manifest/27d10e462fba646daaa29468a0656e12.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/manifest/__RSC_SERVER_MANIFEST.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/webpack/0406212c5b03d4d7d56d829c11dc80f8.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/webpack/0db62fc21f400f4ff93662ca787c3a50.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/webpack/1813.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/webpack/65350c40fb927cd816847882c65007ef.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/webpack/7889.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/webpack/8080.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/webpack/8084.js
+ D .vercel/output/static/_worker.js/__next-on-pages-dist__/webpack/d146f456c84ad77aa2bdb7f4ffff385c.js
+ D .vercel/output/static/_worker.js/index.js
+ D .vercel/output/static/_worker.js/nop-build-log.json
+ D .vercel/output/static/about.html
+ D .vercel/output/static/about.rsc
+ D .vercel/output/static/careers.html
+ D .vercel/output/static/careers.rsc
+ D .vercel/output/static/cdn-cgi/errors/no-nodejs_compat.html
+ D .vercel/output/static/contact.html
+ D .vercel/output/static/contact.rsc
+ D .vercel/output/static/de/500.html
+ D .vercel/output/static/de/500.rsc.json
+ D .vercel/output/static/en/500.html
+ D .vercel/output/static/en/500.rsc.json
+ D .vercel/output/static/es/500.html
+ D .vercel/output/static/es/500.rsc.json
+ D .vercel/output/static/escrow.html
+ D .vercel/output/static/escrow.rsc
+ D .vercel/output/static/faq.html
+ D .vercel/output/static/faq.rsc
+ D .vercel/output/static/fr/500.html
+ D .vercel/output/static/fr/500.rsc.json
+ D .vercel/output/static/help.html
+ D .vercel/output/static/help.rsc
+ D .vercel/output/static/icon.svg
+ D .vercel/output/static/index.html
+ D .vercel/output/static/index.rsc
+ D .vercel/output/static/notifications.html
+ D .vercel/output/static/notifications.rsc
+ D .vercel/output/static/privacy.html
+ D .vercel/output/static/privacy.rsc
+ D .vercel/output/static/profile.html
+ D .vercel/output/static/profile.rsc
+ D .vercel/output/static/safety.html
+ D .vercel/output/static/safety.rsc
+ D .vercel/output/static/support.html
+ D .vercel/output/static/support.rsc
+ D .vercel/output/static/terms.html
+ D .vercel/output/static/terms.rsc
+ D .vercel/output/static/test-settings.html
+ D .vercel/output/static/test-settings.rsc
+ M .vscode/launch.json
+ D d1/0001_init.sql
+ D d1/0002_add_missing_columns.sql
+ M d1/seed_staging.sql
+ M next.config.mjs
+ M package.json
+ M src/app/api/listings/route.ts
+ M src/app/page.tsx
+ M src/lib/dataService.ts
+ M src/lib/hooks/useLocation.ts
+ M wrangler.jsonc
+?? .eslintrc.json
+?? BUILD_LOGGING_README.md
+?? DATABASE_SEED_AUDIT_REPORT.md
+?? build-logs/
+?? d1/migrations/
+?? d1/seed_staging_clean.sql
+?? d1/seed_staging_fixed.sql
+?? scripts/
+[0;34m[INFO] === CLEANING PREVIOUS BUILDS ===[0m
+[0;34m[INFO] Removing .vercel directory[0m
+[0;34m[INFO] === CHECKING DEPENDENCIES ===[0m
+[0;34m[INFO] Dependencies already installed[0m
+[0;34m[INFO] === RUNNING LINTING ===[0m
+
+> lint
+> next lint
+
+
+./src/app/api/listings/[id]/route.ts
+1:1  Error: Definition for rule '@typescript-eslint/ban-ts-comment' was not found.  @typescript-eslint/ban-ts-comment
+
+./src/app/careers/page.tsx
+46:30  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+48:19  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+51:89  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+69:27  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+69:76  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+74:17  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+170:16  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+173:15  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+174:40  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/app/en/[username]/page.tsx
+187:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/app/escrow/page.tsx
+18:62  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/app/privacy/page.tsx
+24:89  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:93  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:95  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:100  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:105  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:108  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+180:101  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/app/profile/[username]/page.tsx
+41:3  Error: React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render.  react-hooks/rules-of-hooks
+86:80  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+86:96  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+207:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+377:30  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/app/profile/page.tsx
+102:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/app/search/SearchClient.tsx
+200:8  Warning: React Hook useCallback has missing dependencies: 'resolveLatLng' and 'satsFromUnitValue'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+274:8  Warning: React Hook useCallback has a missing dependency: 'satsFromUnitValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/terms/page.tsx
+24:94  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:100  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+31:26  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+31:35  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+32:26  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+32:31  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+33:26  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+33:34  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+34:26  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+34:34  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+35:26  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+35:38  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+77:58  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+80:74  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+103:49  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+119:48  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+119:54  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+119:60  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+119:73  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+135:34  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/components/AuthModal.tsx
+31:93  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/components/Carousel.tsx
+86:29  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+155:33  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/ChatModal.tsx
+139:14  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/components/ListingCard.tsx
+73:59  Error: React Hook "useLang" is called conditionally. React Hooks must be called in the exact same order in every component render.  react-hooks/rules-of-hooks
+73:85  Error: React Hook "useLang" is called conditionally. React Hooks must be called in the exact same order in every component render.  react-hooks/rules-of-hooks
+94:17  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/ListingModal.tsx
+97:23  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/ListingRow.tsx
+83:178  Error: React Hook "useLang" is called conditionally. React Hooks must be called in the exact same order in every component render.  react-hooks/rules-of-hooks
+83:204  Error: React Hook "useLang" is called conditionally. React Hooks must be called in the exact same order in every component render.  react-hooks/rules-of-hooks
+108:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/LocationAutocomplete.tsx
+122:54  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+122:60  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+122:63  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+122:67  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+122:70  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+122:77  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./src/components/LocationModal.tsx
+237:8  Warning: React Hook React.useEffect has missing dependencies: 'center.lat', 'center.lng', and 'radiusKm'. Either include them or remove the dependency array. You can also replace multiple useState variables with useReducer if 'setCircleMode' needs the current value of 'radiusKm'.  react-hooks/exhaustive-deps
+253:8  Warning: React Hook React.useEffect has a missing dependency: 'query'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+320:8  Warning: React Hook React.useEffect has missing dependencies: 'center' and 'recreateCircle'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/Nav.tsx
+101:15  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/NewListingModal.tsx
+68:52  Error: React Hook "useLang" is called conditionally. React Hooks must be called in the exact same order in every component render.  react-hooks/rules-of-hooks
+69:56  Error: React Hook "useLang" is called conditionally. React Hooks must be called in the exact same order in every component render.  react-hooks/rules-of-hooks
+157:62  Error: React Hook "useLang" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+157:92  Error: React Hook "useLang" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+208:20  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/components/SavedSearchesBar.tsx
+50:56  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+50:68  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./src/lib/cf.ts
+1:1  Error: Definition for rule '@typescript-eslint/ban-ts-comment' was not found.  @typescript-eslint/ban-ts-comment
+
+./src/lib/hooks/usePerformance.ts
+50:9  Warning: React Hook useMemo has a missing dependency: 'factory'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+53:12  Warning: React Hook useMemo has a missing dependency: 'memoizedFactory'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/shims/async_hooks.ts
+22:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+[0;32m[SUCCESS] Linting passed[0m
+[0;34m[INFO] === RUNNING TESTS ===[0m
+
+> test
+> jest
+
+PASS src/lib/__tests__/utils.test.ts
+  Utility Functions
+    cn
+      ✓ should combine class names correctly (4 ms)
+      ✓ should handle Tailwind CSS classes correctly (1 ms)
+    debounce
+      ✓ should debounce function calls (2 ms)
+    throttle
+      ✓ should throttle function calls (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        0.456 s, estimated 1 s
+Ran all test suites.
+[0;32m[SUCCESS] Tests passed[0m
+[0;34m[INFO] === BUILDING NEXT.JS ===[0m
+
+> build
+> next build
+
+  ▲ Next.js 14.2.5
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+
+> Build error occurred
+ReferenceError: require is not defined
+    at Object.webpack (file:///Users/georgedanayan/Bitboard/next.config.mjs:28:20)
+    at getBaseWebpackConfig (/Users/georgedanayan/Bitboard/node_modules/next/dist/build/webpack-config.js:1825:32)
+    at async Promise.all (index 1)
+    at async Span.traceAsyncFn (/Users/georgedanayan/Bitboard/node_modules/next/dist/trace/trace.js:154:20)
+    at async webpackBuildImpl (/Users/georgedanayan/Bitboard/node_modules/next/dist/build/webpack-build/impl.js:136:21)
+    at async /Users/georgedanayan/Bitboard/node_modules/next/dist/build/index.js:1003:111
+    at async Span.traceAsyncFn (/Users/georgedanayan/Bitboard/node_modules/next/dist/trace/trace.js:154:20)
+    at async build (/Users/georgedanayan/Bitboard/node_modules/next/dist/build/index.js:366:9)
+[0;32m[SUCCESS] Next.js build completed[0m
+[0;34m[INFO] === BUILDING FOR CLOUDFLARE PAGES ===[0m
+[0;34m[INFO] Starting Cloudflare Pages build with verbose logging...[0m
+
+> build:cf:verbose
+> npx @cloudflare/next-on-pages@^1.13.12
+
+⚡️ @cloudflare/next-on-pages CLI v.1.13.14
+⚡️ Detected Package Manager: npm (11.5.1)
+⚡️ Preparing project...
+⚡️ Project is ready
+⚡️ Building project...
+▲  Vercel CLI 46.0.2
+▲  2025-08-23T02:35:15.465Z proxy-agent Creating new ProxyAgent instance: { keepAlive: true }
+▲  WARN! Build not running on Vercel. System environment variables will not be available.
+▲  Warning: Detected "engines": { "node": ">=20" } in your `package.json` that will automatically upgrade when a new major Node.js Version is released. Learn More: http://vercel.link/node-version
+▲  Installing dependencies...
+▲  npm warn Unknown cli config "--unsafe-perm". This will stop working in the next major version of npm.
+▲  up to date in 847ms
+▲  
+▲  209 packages are looking for funding
+▲  run `npm fund` for details
+▲  Detected Next.js version: 14.2.5
+▲  Running "npm run build"
+▲  > build
+▲  > next build
+▲  Attention: Next.js now collects completely anonymous telemetry regarding usage.
+▲  This information is used to shape Next.js' roadmap and prioritize features.
+▲  You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+▲  https://nextjs.org/telemetry
+▲  ▲ Next.js 14.2.5
+▲  - Environments: .env.local
+▲  Creating an optimized production build ...
+▲  2025-08-23T02:35:18.064Z next:build:webpack-build building all compilers in same process
+▲  2025-08-23T02:35:18.500Z next:jsconfig-paths-plugin tsconfig.json or jsconfig.json paths: { '@/*': [ '*' ] }
+▲  2025-08-23T02:35:18.500Z next:jsconfig-paths-plugin resolved baseUrl: { baseUrl: '/Users/georgedanayan/Bitboard/src', isImplicit: false }
+▲  2025-08-23T02:35:18.502Z next:jsconfig-paths-plugin tsconfig.json or jsconfig.json paths: { '@/*': [ '*' ] }
+▲  2025-08-23T02:35:18.502Z next:jsconfig-paths-plugin resolved baseUrl: { baseUrl: '/Users/georgedanayan/Bitboard/src', isImplicit: false }
+▲  2025-08-23T02:35:18.529Z next:jsconfig-paths-plugin tsconfig.json or jsconfig.json paths: { '@/*': [ '*' ] }
+▲  2025-08-23T02:35:18.529Z next:jsconfig-paths-plugin resolved baseUrl: { baseUrl: '/Users/georgedanayan/Bitboard/src', isImplicit: false }
+▲  
+▲  > Build error occurred
+▲  ReferenceError: require is not defined
+▲  at Object.webpack (file:///Users/georgedanayan/Bitboard/next.config.mjs:28:20)
+▲  at getBaseWebpackConfig (/Users/georgedanayan/Bitboard/node_modules/next/dist/build/webpack-config.js:1825:32)
+▲  at async Promise.all (index 1)
+▲  at async Span.traceAsyncFn (/Users/georgedanayan/Bitboard/node_modules/next/dist/trace/trace.js:154:20)
+▲  at async webpackBuildImpl (/Users/georgedanayan/Bitboard/node_modules/next/dist/build/webpack-build/impl.js:136:21)
+▲  at async /Users/georgedanayan/Bitboard/node_modules/next/dist/build/index.js:1003:111
+▲  at async Span.traceAsyncFn (/Users/georgedanayan/Bitboard/node_modules/next/dist/trace/trace.js:154:20)
+▲  at async build (/Users/georgedanayan/Bitboard/node_modules/next/dist/build/index.js:366:9)
+▲  Error: Command "npm run build" exited with 1
+
+⚡️ The Vercel build (`npx vercel build`) command failed. For more details see the Vercel logs above.
+⚡️ If you need help solving the issue, refer to the Vercel or Next.js documentation or their repositories.
+
+[0;32m[SUCCESS] Cloudflare Pages build completed[0m
+[0;34m[INFO] === VERIFYING BUILD OUTPUT ===[0m
+[0;31m[ERROR] Build output directory not found[0m

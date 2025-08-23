@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Nav } from "@/components";
+import { Nav, AuthModal } from "@/components";
 import { useLang } from "@/lib/i18n-client";
 import { useSettings, useUser, useModals } from "@/lib/settings";
 
@@ -39,6 +39,13 @@ export default function GlobalHeader() {
         onAuth={handleAuth}
         avatarUrl={user?.image}
       />
+      {modals.showAuth && (
+        <AuthModal
+          dark={dark}
+          onClose={() => setModal('showAuth', false)}
+          onAuthed={handleAuthed}
+        />
+      )}
     </>
   );
 }

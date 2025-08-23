@@ -5,7 +5,6 @@ import {
   ListingModal,
   ChatModal,
   NewListingModal,
-  AuthModal,
   LocationModal,
   HeroSection,
   ListingsSection,
@@ -14,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useLang } from "@/lib/i18n-client";
 import { useSettings } from "@/lib/settings";
-import { useListings, useLocation, useBtcRate, useSearchFilters, useModals } from "@/lib/hooks";
+import { useListings, useLocation, useBtcRate, useSearchFilters } from "@/lib/hooks";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import type { Listing, User } from "@/lib/types";
@@ -53,11 +52,8 @@ export default function HomePage() {
   
   const { query, setQuery, cat, setCat, adType, setAdType, goods, services, featured } = useSearchFilters(listings);
   
-  const {
-    active, setActive, chatFor, setChatFor, showNew, setShowNew,
-    showAuth, setShowAuth, showLocationModal, setShowLocationModal,
-    closeAllModals, requireAuth
-  } = useModals();
+  const { modals, setModal, closeAllModals } = useSettings();
+  const { active, chatFor, showNew, showAuth, showLocationModal } = modals;
 
   // ESC key handler
   useEffect(() => {
@@ -87,7 +83,7 @@ export default function HomePage() {
 
   const handleLocationUpdate = async (place: any, radius: number) => {
     await updateLocation(place, radius);
-    setShowLocationModal(false);
+    setModal('showLocationModal', false);
   };
 
   const bg = dark ? "bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950" : "bg-gradient-to-br from-neutral-50 via-white to-neutral-100";
@@ -105,7 +101,7 @@ export default function HomePage() {
           radiusKm={radiusKm}
           query={query}
           setQuery={setQuery}
-          onLocationClick={() => setShowLocationModal(true)}
+          onLocationClick={() => setModal('showLocationModal', true)}
           onSearch={handleSearchNavigate}
           dark={dark}
         />
@@ -122,7 +118,7 @@ export default function HomePage() {
           isLoading={isLoading}
           isLoadingMore={isLoadingMore}
           hasMore={hasMore}
-          onOpen={setActive}
+          onOpen={(listing) => setModal('active', listing)}
           onLoadMore={loadMore}
         />
 
@@ -132,7 +128,7 @@ export default function HomePage() {
         {showLocationModal && (
           <LocationModal
             open={showLocationModal}
-            onClose={() => setShowLocationModal(false)}
+            onClose={() => setModal('showLocationModal', false)}
             initialCenter={{ lat: center.lat, lng: center.lng, name: center.name }}
             initialRadiusKm={radiusKm}
             dark={dark}
@@ -143,36 +139,33 @@ export default function HomePage() {
           <ListingModal
             listing={active}
             open={!!active}
-            onClose={() => setActive(null)}
+            onClose={() => setModal('active', null)}
             unit={unit}
             btcCad={btcCad}
             dark={dark}
-            onChat={() => requireAuth(() => setChatFor(active))}
+            onChat={() => {
+              if (!user) {
+                setModal('showAuth', true);
+              } else {
+                setModal('chatFor', active);
+              }
+            }}
           />
         )}
         {chatFor && (
-          <ChatModal listing={chatFor} onClose={() => setChatFor(null)} dark={dark} btcCad={btcCad} unit={unit} />
+          <ChatModal listing={chatFor} onClose={() => setModal('chatFor', null)} dark={dark} btcCad={btcCad} unit={unit} />
         )}
         {showNew && (
           <NewListingModal
             dark={dark}
-            onClose={() => setShowNew(false)}
+            onClose={() => setModal('showNew', false)}
             onPublish={(item: Listing) => {
               // This would need to be handled properly with the listings state
-              setShowNew(false);
+              setModal('showNew', false);
             }}
           />
         )}
-        {showAuth && (
-          <AuthModal
-            dark={dark}
-            onClose={() => setShowAuth(false)}
-            onAuthed={(u: User) => {
-              setUser(u);
-              setShowAuth(false);
-            }}
-          />
-        )}
+
       </div>
     </ErrorBoundary>
   );
