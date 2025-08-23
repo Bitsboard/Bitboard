@@ -145,12 +145,17 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
             <NotificationMenu dark={dark} />
           )}
           {user ? (
-            <a href={`/profile/${user.handle}`} className="inline-flex items-center gap-2 rounded-full px-2 py-1 text-sm font-semibold text-white hover:opacity-90">
+            <a href={`/profile/${user.handle}`} className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-white hover:opacity-90 transition-all duration-200">
               {avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatarUrl} alt="avatar" className="h-8 w-8 rounded-full border border-neutral-700" />
+                <img src={avatarUrl} alt="avatar" className="h-8 w-8 rounded-full border-2 border-white/30 shadow-lg" />
               ) : (
-                <span className="rounded-full bg-neutral-800 px-3 py-1">My Profile</span>
+                <span className="rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 shadow-lg hover:shadow-xl transition-all duration-200">
+                  <svg className="w-4 h-4 mr-2 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  My Profile
+                </span>
               )}
             </a>
           ) : (
