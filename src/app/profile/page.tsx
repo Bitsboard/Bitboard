@@ -6,6 +6,8 @@ import { useLang } from "@/lib/i18n-client";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { useSettings } from "@/lib/settings";
+import { ViewToggle } from "@/components";
 import type { Session, ProfileData, SortOptionProfile } from "@/lib/types";
 
 export default function ProfilePage() {
@@ -14,6 +16,10 @@ export default function ProfilePage() {
   const [sortBy, setSortBy] = useState<SortOptionProfile>('newest');
   const router = useRouter();
   const lang = useLang();
+  
+  // Use global settings
+  const { theme, unit, layout } = useSettings();
+  const dark = theme === 'dark';
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -41,8 +47,8 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-neutral-950 flex items-center justify-center">
-        <div className="text-neutral-600 dark:text-neutral-400">Loading...</div>
+      <div className={cn("min-h-screen flex items-center justify-center", dark ? "bg-neutral-950" : "bg-white")}>
+        <div className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>Loading...</div>
       </div>
     );
   }
@@ -71,7 +77,7 @@ export default function ProfilePage() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-white dark:bg-neutral-950">
+      <div className={cn("min-h-screen", dark ? "bg-neutral-950" : "bg-white")}>
         <div className="mx-auto max-w-6xl px-4 py-8">
           {/* Top Bar - Profile Info */}
           <div className="relative overflow-hidden bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 rounded-3xl p-8 mb-8 text-white shadow-2xl">
@@ -196,24 +202,32 @@ export default function ProfilePage() {
 
           {/* Listings Section */}
           {session.account?.listings && session.account.listings.length > 0 ? (
-            <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 shadow-sm">
+            <div className={cn("rounded-2xl border p-6 shadow-sm", dark ? "bg-neutral-900 border-neutral-800" : "bg-white border-neutral-200")}>
               {/* Listings Header with Controls */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                 <div>
-                  <h2 className="text-xl font-semibold text-neutral-900 dark:text-white">
+                  <h2 className={cn("text-xl font-semibold", dark ? "text-white" : "text-neutral-900")}>
                     Your Listings
                   </h2>
-                  <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                  <p className={cn("text-sm mt-1", dark ? "text-neutral-400" : "text-neutral-500")}>
                     {sortedListings.length} {sortedListings.length !== 1 ? t('items', lang) : t('item', lang)}
                   </p>
                 </div>
 
                 <div className="flex items-center gap-4">
+                  {/* Layout Toggle */}
+                  <div className="flex items-center gap-2">
+                    <span className={cn("text-sm", dark ? "text-neutral-400" : "text-neutral-600")}>View:</span>
+                    <ViewToggle />
+                  </div>
+                  
                   {/* Sort Dropdown */}
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as SortOptionProfile)}
-                    className="px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className={cn("px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent", 
+                      dark ? "border-neutral-600 bg-neutral-800 text-white" : "border-neutral-300 bg-white text-neutral-900"
+                    )}
                   >
                     <option value="newest">{t('newest_first', lang)}</option>
                     <option value="oldest">{t('oldest_first', lang)}</option>
@@ -223,34 +237,46 @@ export default function ProfilePage() {
               </div>
 
               {/* Listings Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className={cn("gap-6", 
+                layout === 'list' 
+                  ? "space-y-4" 
+                  : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+              )}>
                 {sortedListings.map((listing) => (
                   <div
                     key={listing.id}
-                    className="bg-neutral-50 dark:bg-neutral-800/50 rounded-xl border border-neutral-200 dark:border-neutral-700 p-4 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors duration-200"
+                    className={cn("border transition-colors duration-200", 
+                      layout === 'list' 
+                        ? "rounded-lg p-4 flex items-center justify-between"
+                        : "rounded-xl p-4",
+                      dark 
+                        ? "bg-neutral-800/50 border-neutral-700 hover:bg-neutral-800" 
+                        : "bg-neutral-50 border-neutral-200 hover:bg-neutral-100"
+                    )}
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${listing.type === 'selling'
-                        ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300'
-                        : 'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300'
-                        }`}>
+                      <span className={cn("inline-flex items-center px-2 py-1 rounded-full text-xs font-medium", 
+                        listing.type === 'selling'
+                          ? dark ? "bg-green-900/20 text-green-300" : "bg-green-100 text-green-800"
+                          : dark ? "bg-blue-900/20 text-blue-300" : "bg-blue-100 text-blue-800"
+                      )}>
                         {listing.type === 'selling' ? t('selling', lang) : t('looking_for', lang)}
                       </span>
-                      <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                      <span className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-500")}>
                         {new Date(listing.createdAt * 1000).toLocaleDateString(undefined, {
                           month: 'short',
                           day: 'numeric'
                         })}
                       </span>
                     </div>
-                    <h3 className="font-medium text-neutral-900 dark:text-white mb-3 line-clamp-2">
+                    <h3 className={cn("font-medium mb-3 line-clamp-2", dark ? "text-white" : "text-neutral-900")}>
                       {listing.title}
                     </h3>
                     <div className="text-right">
-                      <div className="text-lg font-semibold text-orange-600 dark:text-orange-400">
-                        {listing.priceSat.toLocaleString()} sats
+                      <div className={cn("text-lg font-semibold", dark ? "text-orange-400" : "text-orange-600")}>
+                        {listing.priceSat.toLocaleString()} {unit === 'BTC' ? 'BTC' : 'sats'}
                       </div>
-                      <div className="text-xs text-neutral-500 dark:text-neutral-400">
+                      <div className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-500")}>
                         ~${(listing.priceSat / 100000000 * 45000).toFixed(2)} CAD
                       </div>
                     </div>
@@ -259,12 +285,12 @@ export default function ProfilePage() {
               </div>
             </div>
           ) : (
-            <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-12 text-center">
+            <div className={cn("rounded-2xl border p-12 text-center", dark ? "bg-neutral-900 border-neutral-800" : "bg-white border-neutral-200")}>
               <div className="text-6xl mb-6">✏️</div>
-              <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">
+              <h3 className={cn("text-xl font-semibold mb-2", dark ? "text-white" : "text-neutral-900")}>
                 {t('no_listings_yet', lang)}
               </h3>
-              <p className="text-neutral-600 dark:text-neutral-400 mb-6">
+              <p className={cn("mb-6", dark ? "text-neutral-400" : "text-neutral-600")}>
                 {t('no_listings_owner', lang)}
               </p>
               <button className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-medium rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-200 shadow-sm hover:shadow-md">
