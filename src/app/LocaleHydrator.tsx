@@ -28,7 +28,23 @@ export function LocaleHydrator({ children }: { children: React.ReactNode }) {
         document.documentElement.setAttribute('data-theme', theme);
         document.body.setAttribute('data-theme', theme);
         
-        // Apply theme immediately without forcing reflow
+        // Apply theme immediately and set up lightweight persistence
+        // Check theme persistence a few times during initial load
+        const checkThemePersistence = () => {
+          const currentTheme = document.documentElement.className;
+          if (currentTheme !== theme && (currentTheme === 'dark' || currentTheme === 'light')) {
+            document.documentElement.className = theme;
+            document.body.className = theme;
+            document.documentElement.setAttribute('data-theme', theme);
+            document.body.setAttribute('data-theme', theme);
+          }
+        };
+        
+        // Check theme persistence a few times during initial load (not continuously)
+        const initialChecks = [100, 500, 1000, 2000]; // Check at 100ms, 500ms, 1s, 2s
+        initialChecks.forEach(delay => {
+          setTimeout(checkThemePersistence, delay);
+        });
       } catch {}
     } catch {}
   }, []);
