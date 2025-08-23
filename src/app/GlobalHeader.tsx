@@ -14,6 +14,28 @@ export default function GlobalHeader() {
   const { modals, setModal } = useModals();
   const dark = theme === 'dark';
 
+  // Check for existing session on mount
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await fetch('/api/auth/session');
+        const data = await response.json() as any;
+        if (data.session?.user && !user) {
+          // User is authenticated but not in state, restore user
+          setUser({
+            id: data.session.user.username || 'unknown',
+            email: data.session.user.email || 'unknown',
+            handle: data.session.user.username || 'unknown'
+          });
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+      }
+    };
+
+    checkSession();
+  }, [user, setUser]);
+
   const handlePost = () => {
     if (user) {
       setModal('showNew', true);

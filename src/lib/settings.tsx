@@ -134,6 +134,7 @@ export const useSettingsStore = create<SettingsStore>()(
                 unit: state.unit,
                 layout: state.layout,
                 search: state.search,
+                user: state.user,
             }),
             onRehydrateStorage: () => (state) => {
                 // Apply theme on rehydration
