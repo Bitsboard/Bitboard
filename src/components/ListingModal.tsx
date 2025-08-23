@@ -96,27 +96,11 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 items-center">
                 {/* Row 1, Col 1: seller info */}
                 <div className={cn("text-sm flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}>
-                  {/* Seller Profile Picture */}
-                  <div className="flex-shrink-0">
-                    {!sellerImageError ? (
-                      <img
-                        src={generateProfilePicture(listing.seller.name)}
-                        alt={`${listing.seller.name}'s profile picture`}
-                        className="w-6 h-6 rounded-full object-cover"
-                        onError={() => setSellerImageError(true)}
-                      />
-                    ) : (
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
-                        {getInitials(listing.seller.name)}
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Username as clickable pill/tag */}
+                  {/* Username as clickable pill/tag - encapsulates both icon and name */}
                   <Link
                     href={`/profile/${listing.seller.name}`}
                     className={cn(
-                      "inline-flex items-center px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer",
+                      "inline-flex items-center gap-2 px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer",
                       "bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50",
                       "border border-white/20 dark:border-neutral-700/50",
                       "hover:scale-105 hover:shadow-md"
@@ -126,6 +110,23 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                       onClose(); // Close the modal when clicking username
                     }}
                   >
+                    {/* Profile Icon - Left side of pill */}
+                    <div className="flex-shrink-0">
+                      {!sellerImageError ? (
+                        <img
+                          src={generateProfilePicture(listing.seller.name)}
+                          alt={`${listing.seller.name}'s profile picture`}
+                          className="w-5 h-5 rounded-full object-cover"
+                          onError={() => setSellerImageError(true)}
+                        />
+                      ) : (
+                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
+                          {getInitials(listing.seller.name)}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Username - Right side of pill */}
                     <span className="text-sm">{listing.seller.name}</span>
                   </Link>
                   
