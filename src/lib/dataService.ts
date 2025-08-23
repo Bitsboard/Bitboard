@@ -120,14 +120,18 @@ export class DataService {
     async getUserLocation(): Promise<Place | null> {
         try {
             const raw = localStorage.getItem("userLocation");
+            console.log('dataService: getUserLocation raw:', raw);
             if (!raw) return null;
 
             const place = JSON.parse(raw) as Place;
             if (place && typeof place.lat === 'number' && typeof place.lng === 'number' && place.name) {
+                console.log('dataService: getUserLocation parsed:', place);
                 return place;
             }
+            console.log('dataService: getUserLocation invalid data:', place);
             return null;
-        } catch {
+        } catch (error) {
+            console.warn('dataService: getUserLocation error:', error);
             return null;
         }
     }
@@ -135,22 +139,30 @@ export class DataService {
     async getUserRadius(): Promise<number> {
         try {
             const radius = localStorage.getItem('userRadiusKm');
+            console.log('dataService: getUserRadius raw:', radius);
             if (radius) {
                 const num = Number(radius);
-                if (Number.isFinite(num) && num > 0) return num;
+                if (Number.isFinite(num) && num > 0) {
+                    console.log('dataService: getUserRadius parsed:', num);
+                    return num;
+                }
             }
+            console.log('dataService: getUserRadius using default:', CONFIG.DEFAULT_RADIUS_KM);
             return CONFIG.DEFAULT_RADIUS_KM;
-        } catch {
+        } catch (error) {
+            console.warn('dataService: getUserRadius error:', error);
             return CONFIG.DEFAULT_RADIUS_KM;
         }
     }
 
     async saveUserLocation(place: Place, radiusKm: number): Promise<void> {
         try {
+            console.log('dataService: saveUserLocation saving:', place, radiusKm);
             localStorage.setItem('userLocation', JSON.stringify(place));
             localStorage.setItem('userRadiusKm', String(radiusKm));
+            console.log('dataService: saveUserLocation saved successfully');
         } catch (error) {
-            console.warn('Failed to save user location:', error);
+            console.warn('dataService: saveUserLocation error:', error);
         }
     }
 
@@ -214,7 +226,16 @@ export class DataService {
     }
 
     private createSellerFromRow(row: any): any {
-        const name = (row.postedBy || "demo_seller").replace(/^@/, "");
+        // postedBy should always be present from the API JOIN
+        if (!row.postedBy) {
+            console.warn('dataService: Missing postedBy field for listing:', row.id);
+            // Fallback to a generic seller name based on listing ID
+            const fallbackName = `seller_${row.id}`;
+            console.warn('dataService: Using fallback seller name:', fallbackName);
+            row.postedBy = fallbackName;
+        }
+        
+        const name = row.postedBy.replace(/^@/, "");
         const base = Number(row.id) % 100;
         const score = 5 + (base % 80);
         const deals = base % 40;

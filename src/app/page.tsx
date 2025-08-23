@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import { useLang } from "@/lib/i18n-client";
 import { useSettings } from "@/lib/settings";
 import { useListings, useLocation, useBtcRate, useSearchFilters, useModals } from "@/lib/hooks";
-import { useThemeContext } from "@/lib/contexts/ThemeContext";
+
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import type { Listing, User } from "@/lib/types";
 import { mockListings } from '@/lib/mockData';
@@ -23,7 +23,8 @@ import { mockListings } from '@/lib/mockData';
 export default function HomePage() {
   // Use centralized settings
   const { unit, layout } = useSettings();
-  const { dark } = useThemeContext();
+  const { theme } = useSettings();
+  const dark = theme === 'dark';
 
   // State
   const [user, setUser] = useState<User | null>(null);
@@ -57,18 +58,6 @@ export default function HomePage() {
     showAuth, setShowAuth, showLocationModal, setShowLocationModal,
     closeAllModals, requireAuth
   } = useModals();
-
-  // Re-translate "My Location" label when locale changes
-  useEffect(() => {
-    try {
-      const using = localStorage.getItem('usingMyLocation') === '1';
-      if (using) {
-        // This would need to be handled in the useLocation hook
-      }
-    } catch (error) {
-      console.warn('Failed to update location label:', error);
-    }
-  }, [lang]);
 
   // ESC key handler
   useEffect(() => {

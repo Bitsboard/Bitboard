@@ -4,29 +4,101 @@ export const runtime = 'edge';
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { mockListings } from '@/lib/mockData';
-import { useThemeContext } from '@/lib/contexts/ThemeContext';
-import { ListingCard, ListingRow, ListingsSection, ListingModal } from '@/components';
+import { ListingCard, ListingRow, ListingModal } from '@/components';
 import { useBtcRate } from '@/lib/hooks/useBtcRate';
 import { generateProfilePicture, getInitials } from '@/lib/utils';
+import { useLayout, useTheme, useUnit } from '@/lib/settings';
 import type { Listing } from '@/lib/types';
 
 export default function PublicProfilePage() {
   const params = useParams();
   const username = params?.username as string;
-  const { dark } = useThemeContext();
+  const { theme } = useTheme();
+  const { unit } = useUnit();
   const btcCad = useBtcRate();
   
-  // State for client-side rendering
+  // Convert theme to dark boolean for compatibility
+  const dark = theme === 'dark';
+  
+  // State for client-side rendering and theme hydration
   const [mounted, setMounted] = useState(false);
+  const [themeHydrated, setThemeHydrated] = useState(false);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [profileImageError, setProfileImageError] = useState(false);
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'alphabetical' | 'mostExpensive' | 'leastExpensive'>('newest');
-  const [layout, setLayout] = useState<'grid' | 'list'>('grid');
   
-  // Early return if username is not available yet
-  if (!username) {
+  // State for user data
+  const [userListings, setUserListings] = useState<Listing[]>([]);
+  const [userProfile, setUserProfile] = useState<{ username: string; verified: boolean; registeredAt: number; profilePhoto: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Use global layout from settings
+  const { layout } = useLayout();
+  
+  // All useEffect hooks must be called before any conditional returns
+  useEffect(() => {
+    setMounted(true);
+    
+    // Debug: Log the generated profile picture URL
+    console.log('Generated profile picture URL for', username, ':', generateProfilePicture(username));
+  }, [username]);
+
+  // Wait for theme to be properly hydrated before rendering
+  useEffect(() => {
+    if (mounted && theme) {
+      // Small delay to ensure theme is fully applied to DOM
+      const timer = setTimeout(() => {
+        setThemeHydrated(true);
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [mounted, theme]);
+
+  // Fetch user listings from API
+  useEffect(() => {
+    if (!username) return;
+    
+    console.log('Profile page: Starting to fetch listings for username:', username);
+    
+    const fetchUserListings = async () => {
+      try {
+        console.log('Profile page: Setting loading to true');
+        setIsLoading(true);
+        
+        console.log('Profile page: Fetching from API:', `/api/users/${username}/listings`);
+        const response = await fetch(`/api/users/${username}/listings`);
+        
+        console.log('Profile page: API response status:', response.status);
+        
+        if (response.ok) {
+          const data = await response.json() as { user: any; listings: Listing[] };
+          console.log('Profile page: API data received:', data);
+          console.log('Profile page: Number of listings:', data.listings?.length || 0);
+          
+          setUserProfile(data.user);
+          setUserListings(data.listings || []);
+        } else if (response.status === 404) {
+          // User not found - set specific error
+          setError('user_not_found');
+        } else {
+          console.error('Profile page: API response not ok:', response.status, response.statusText);
+          setError(`Failed to load profile: ${response.status} ${response.statusText}`);
+        }
+      } catch (error) {
+        console.error('Profile page: Error fetching user listings:', error);
+      } finally {
+        console.log('Profile page: Setting loading to false');
+        setIsLoading(false);
+      }
+    };
+    
+    fetchUserListings();
+  }, [username]);
+  
+  // Early return if username is not available yet or theme not hydrated
+  if (!username || !themeHydrated) {
     return (
       <div className="min-h-screen bg-white dark:bg-neutral-950 flex items-center justify-center">
         <div className="text-center">
@@ -38,63 +110,64 @@ export default function PublicProfilePage() {
     );
   }
   
-  useEffect(() => {
-    setMounted(true);
-    // Get layout preference from localStorage
-    try {
-      const savedLayout = localStorage.getItem('layoutPref');
-      if (savedLayout === 'list' || savedLayout === 'grid') {
-        setLayout(savedLayout);
-      } else {
-        // Default to grid if no preference is set
-        setLayout('grid');
-      }
-    } catch (error) {
-      console.error('Profile page: Error reading layoutPref from localStorage:', error);
-      setLayout('grid');
-    }
-
-    // Listen for global layout changes
-    const handleLayoutChange = (event: CustomEvent) => {
-      if (event.detail === 'list' || event.detail === 'grid') {
-        setLayout(event.detail);
-      }
-    };
-
-    window.addEventListener('bb:layout', handleLayoutChange as EventListener);
-    
-    // Debug: Log the generated profile picture URL
-    console.log('Generated profile picture URL for', username, ':', generateProfilePicture(username));
-    
-    return () => {
-      window.removeEventListener('bb:layout', handleLayoutChange as EventListener);
-    };
-  }, [username]);
-
-  // Directly find user listings without complex state
-  const userListings = mockListings.filter(listing => listing.seller.name === username);
-  
-  // Use BTC rate with fallback for better UX
-  const effectiveBtcCad = btcCad || 157432;
-  
-  if (userListings.length === 0) {
+  // Show loading state while fetching data
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-neutral-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-6xl mb-4">😕</div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">Profile not found</h1>
-          <p className="text-neutral-600 dark:text-neutral-400">This user doesn't exist or hasn't set up their profile yet.</p>
+          <div className="text-6xl mb-4">⏳</div>
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">Loading Profile...</h1>
+          <p className="text-neutral-600 dark:text-neutral-400">Fetching {username}'s listings...</p>
         </div>
       </div>
     );
   }
+  
+  // Show error state if something went wrong
+  if (error) {
+    if (error === 'user_not_found') {
+      return (
+        <div className="min-h-screen bg-white dark:bg-neutral-950 flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-6xl mb-4">👤</div>
+            <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">User Not Found</h1>
+            <p className="text-neutral-600 dark:text-neutral-400">
+              The user <span className="font-semibold text-neutral-800 dark:text-neutral-200">@{username}</span> does not exist.
+            </p>
+            <div className="mt-6">
+              <a 
+                href="/" 
+                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-lg hover:from-orange-400 hover:to-red-400 transition-all duration-200"
+              >
+                ← Back to Home
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="min-h-screen bg-white dark:bg-neutral-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">❌</div>
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">Error Loading Profile</h1>
+          <p className="text-neutral-600 dark:text-neutral-400">{error}</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // Use BTC rate with fallback for better UX
+  const effectiveBtcCad = btcCad || 157432;
 
-  // Get user info from first listing
-  const firstUser = userListings[0].seller;
-  const oldestListing = userListings.reduce((oldest, current) => 
+  // Get user info from API response or fallback to default values
+  const userVerified = userProfile?.verified || false;
+  const userScore = 75; // Default score since API doesn't provide this yet
+  const oldestListing = userListings.length > 0 ? userListings.reduce((oldest, current) => 
     current.createdAt < oldest.createdAt ? current : oldest
-  );
-  const memberSinceDate = new Date(oldestListing.createdAt);
+  ) : null;
+  const memberSinceDate = oldestListing ? new Date(oldestListing.createdAt) : new Date();
   
   // Use locale-aware date formatting with fallback
   const memberSince = (() => {
@@ -228,7 +301,7 @@ export default function PublicProfilePage() {
                   <h1 className="text-4xl lg:text-5xl font-bold text-white truncate" style={{ fontFamily: 'Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>
                     {username}
                   </h1>
-                  {firstUser.score >= 50 && (
+                  {userVerified && (
                     <span 
                       className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white font-bold shadow-lg border-2 border-white"
                       style={{
@@ -278,7 +351,7 @@ export default function PublicProfilePage() {
                 </div>
                 <div>
                   <div className="text-sm text-white mb-1 font-medium">Reputation</div>
-                  <div className="text-lg font-semibold text-white">+{firstUser.score}</div>
+                  <div className="text-lg font-semibold text-white">+{userScore}</div>
                 </div>
               </div>
             </div>
@@ -340,7 +413,7 @@ export default function PublicProfilePage() {
                   <div key={listing.id} onClick={() => handleListingClick(listing)} className="cursor-pointer">
                     <ListingCard
                       listing={listing}
-                      unit="sats"
+                      unit={unit}
                       dark={dark}
                       btcCad={effectiveBtcCad}
                       onOpen={() => handleListingClick(listing)}
@@ -355,7 +428,7 @@ export default function PublicProfilePage() {
                   <div key={listing.id} onClick={() => handleListingClick(listing)} className="cursor-pointer">
                     <ListingRow
                       listing={listing}
-                      unit="sats"
+                      unit={unit}
                       dark={dark}
                       btcCad={effectiveBtcCad}
                       onOpen={() => handleListingClick(listing)}
@@ -367,7 +440,7 @@ export default function PublicProfilePage() {
           </div>
         )}
 
-        {sortedListings.length === 0 && (
+        {sortedListings.length === 0 && !isLoading && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📝</div>
             <h3 className={`text-xl font-semibold mb-2 ${dark ? "text-white" : "text-neutral-900"}`}>
@@ -386,7 +459,7 @@ export default function PublicProfilePage() {
           listing={selectedListing}
           open={isModalOpen}
           onClose={closeModal}
-          unit="sats"
+          unit={unit}
           dark={dark}
           btcCad={effectiveBtcCad}
           onChat={() => {

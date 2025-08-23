@@ -38,27 +38,27 @@ export async function GET(req: NextRequest) {
     const binds: any[] = [];
 
     if (validatedQuery.q) {
-      whereClause.push("(title LIKE ? OR description LIKE ?)");
+      whereClause.push("(l.title LIKE ? OR l.description LIKE ?)");
       binds.push(`%${validatedQuery.q}%`, `%${validatedQuery.q}%`);
     }
 
     if (validatedQuery.category && validatedQuery.category.toLowerCase() !== "featured") {
-      whereClause.push("(category = ?)");
+      whereClause.push("(l.category = ?)");
       binds.push(validatedQuery.category);
     }
 
     if (validatedQuery.adType) {
-      whereClause.push("(ad_type = ?)");
+      whereClause.push("(l.ad_type = ?)");
       binds.push(validatedQuery.adType);
     }
 
     if (validatedQuery.minPrice !== undefined) {
-      whereClause.push("(price_sat >= ?)");
+      whereClause.push("(l.price_sat >= ?)");
       binds.push(Math.round(validatedQuery.minPrice));
     }
 
     if (validatedQuery.maxPrice !== undefined) {
-      whereClause.push("(price_sat <= ?)");
+      whereClause.push("(l.price_sat <= ?)");
       binds.push(Math.round(validatedQuery.maxPrice));
     }
 
@@ -74,9 +74,9 @@ export async function GET(req: NextRequest) {
         const safeCos = Math.max(0.01, Math.abs(cosLat));
         const deltaLng = effectiveRadiusKm / (R_KM_PER_DEG * safeCos);
 
-        whereClause.push("(lat BETWEEN ? AND ?)");
+        whereClause.push("(l.lat BETWEEN ? AND ?)");
         binds.push(validatedQuery.lat - deltaLat, validatedQuery.lat + deltaLat);
-        whereClause.push("(lng BETWEEN ? AND ?)");
+        whereClause.push("(l.lng BETWEEN ? AND ?)");
         binds.push(validatedQuery.lng - deltaLng, validatedQuery.lng + deltaLng);
       }
     }
@@ -84,11 +84,11 @@ export async function GET(req: NextRequest) {
     const whereClauseStr = whereClause.length ? `WHERE ${whereClause.join(" AND ")}` : "";
 
     // Build ORDER BY clause
-    let orderClause = `ORDER BY ${validatedQuery.sortBy === 'price' ? 'price_sat' : 'created_at'} ${validatedQuery.sortOrder}`;
+    let orderClause = `ORDER BY ${validatedQuery.sortBy === 'price' ? 'l.price_sat' : 'l.created_at'} ${validatedQuery.sortOrder}`;
     let orderBinds: any[] = [];
 
     if (validatedQuery.sortBy === 'distance' && validatedQuery.lat !== undefined && validatedQuery.lng !== undefined) {
-      orderClause = `ORDER BY ((lat - ?)*(lat - ?)+(lng - ?)*(lng - ?)) ASC`;
+      orderClause = `ORDER BY ((l.lat - ?)*(l.lat - ?)+(l.lng - ?)*(l.lng - ?)) ASC`;
       orderBinds = [validatedQuery.lat, validatedQuery.lat, validatedQuery.lng, validatedQuery.lng];
     }
 
@@ -96,20 +96,21 @@ export async function GET(req: NextRequest) {
     let results: any[] = [];
     try {
       const rich = await db
-        .prepare(`SELECT id,
-                         title,
-                         description,
-                         category,
-                         ad_type AS adType,
-                         location,
-                         lat,
-                         lng,
-                         image_url AS imageUrl,
-                         price_sat AS priceSat,
-                         posted_by AS postedBy,
-                         boosted_until AS boostedUntil,
-                         created_at AS createdAt
-                  FROM listings
+        .prepare(`SELECT l.id,
+                         l.title,
+                         l.description,
+                         l.category,
+                         l.ad_type AS adType,
+                         l.location,
+                         l.lat,
+                         l.lng,
+                         l.image_url AS imageUrl,
+                         l.price_sat AS priceSat,
+                         u.username AS postedBy,
+                         l.boosted_until AS boostedUntil,
+                         l.created_at AS createdAt
+                  FROM listings l
+                  JOIN users u ON l.posted_by = u.id
                   ${whereClauseStr}
                   ${orderClause}
                   LIMIT ? OFFSET ?`)
@@ -119,13 +120,13 @@ export async function GET(req: NextRequest) {
     } catch {
       // Fallback to minimal schema
       const minimal = await db
-        .prepare(`SELECT id,
-                         title,
-                         price_sat AS priceSat,
-                         created_at AS createdAt
-                  FROM listings
+        .prepare(`SELECT l.id,
+                         l.title,
+                         l.price_sat AS priceSat,
+                         l.created_at AS createdAt
+                  FROM listings l
                   ${whereClauseStr}
-                  ORDER BY ${validatedQuery.sortBy === 'price' ? 'price_sat' : 'created_at'} ${validatedQuery.sortOrder}
+                  ORDER BY ${validatedQuery.sortBy === 'price' ? 'l.price_sat' : 'l.created_at'} ${validatedQuery.sortOrder}
                   LIMIT ? OFFSET ?`)
         .bind(...binds, validatedQuery.limit, validatedQuery.offset)
         .all();
@@ -136,31 +137,29 @@ export async function GET(req: NextRequest) {
     let totalRow: any;
     try {
       totalRow = await db
-        .prepare(`SELECT COUNT(*) AS c FROM listings ${whereClauseStr}`)
+        .prepare(`SELECT COUNT(*) AS c FROM listings l JOIN users u ON l.posted_by = u.id ${whereClauseStr}`)
         .bind(...binds)
         .all();
     } catch {
       totalRow = await db
-        .prepare(`SELECT COUNT(*) AS c FROM listings ${whereClauseStr}`)
+        .prepare(`SELECT COUNT(*) AS c FROM listings l JOIN users u ON l.posted_by = u.id ${whereClauseStr}`)
         .bind(...binds)
         .all();
     }
     const total = (totalRow.results?.[0] as any)?.c ?? 0;
 
-    // Staging/demo: diversify images and sellers if missing
+    // Staging/demo: diversify images if missing
     const stock = [
       '1518770660439-4636190af475', '1542751371-adc38448a05e',
       '1518779578993-ec3579fee39f', '1512496015851-a90fb38ba796',
       '1517816743773-6e0fd518b4a6', '1517245386807-bb43f82c33c4',
       '1541532713592-79a0317b6b77', '1555617117-08d3a8fef16c'
     ];
-    const sellers = ['demo_seller', 'satoshi', 'luna', 'rob', 'mika', 'arya', 'nova', 'kai'];
 
     const listings = results.map((r: any, i: number) => ({
       ...r,
       imageUrl: r.imageUrl && r.imageUrl.trim() ? r.imageUrl :
         `https://images.unsplash.com/photo-${stock[i % stock.length]}?q=80&w=1600&auto=format&fit=crop`,
-      postedBy: r.postedBy && r.postedBy.trim() ? r.postedBy : sellers[i % sellers.length],
     }));
 
     return NextResponse.json({

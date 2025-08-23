@@ -46,45 +46,86 @@ export async function GET(
 
     const user = userResult.results[0];
 
-    // Get listings for this user (only active ones)
+    // Get listings for this user (only active ones) with seller info
     const listingsResult = await db.prepare(`
       SELECT 
-        id,
-        title,
-        description,
-        price_sat as priceSat,
-        ad_type as type,
-        created_at as createdAt,
-        category,
-        location,
-        lat,
-        lng,
-        image_url as imageUrl,
-        boosted_until as boostedUntil,
-        status
-      FROM listings 
-      WHERE posted_by = ? AND status = 'active'
-      ORDER BY created_at DESC
+        l.id,
+        l.title,
+        l.description,
+        l.price_sat as priceSats,
+        l.ad_type as type,
+        l.created_at as createdAt,
+        l.category,
+        l.location,
+        l.lat,
+        l.lng,
+        l.image_url as imageUrl,
+        l.boosted_until as boostedUntil,
+        l.status,
+        u.username as sellerName,
+        u.verified as sellerVerified
+      FROM listings l
+      JOIN users u ON l.posted_by = u.id
+      WHERE l.posted_by = ? AND l.status = 'active'
+      ORDER BY l.created_at DESC
     `).bind(user.id).all();
 
     const listings = listingsResult.results || [];
 
+    // Stock images for creating galleries when listings only have one image
+    const stockImages = [
+      'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1600&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1600&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=1600&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1600&auto=format&fit=crop'
+    ];
+
     // Transform listings to match expected format
-    const transformedListings = listings.map((listing: any) => ({
-      id: listing.id,
-      title: listing.title,
-      priceSat: listing.priceSat,
-      createdAt: listing.createdAt,
-      type: listing.type || 'selling',
-      description: listing.description || '',
-      category: listing.category || 'Misc',
-      location: listing.location || '',
-      lat: listing.lat || 0,
-      lng: listing.lng || 0,
-      imageUrl: listing.imageUrl || '',
-      boostedUntil: listing.boostedUntil,
-      status: listing.status || 'active'
-    }));
+    const transformedListings = listings.map((listing: any, index: number) => {
+      // Create a gallery with the main image + stock images
+      let images = [];
+      if (listing.imageUrl && listing.imageUrl.trim()) {
+        // Start with the main listing image
+        images.push(listing.imageUrl);
+        // Add 2-3 stock images to create a gallery
+        const stockStart = (index * 2) % stockImages.length;
+        images.push(stockImages[stockStart]);
+        images.push(stockImages[(stockStart + 1) % stockImages.length]);
+      } else {
+        // If no main image, use stock images
+        const stockStart = (index * 2) % stockImages.length;
+        images = stockImages.slice(stockStart, stockStart + 3);
+      }
+
+      return {
+        id: listing.id,
+        title: listing.title,
+        priceSats: listing.priceSats,
+        createdAt: listing.createdAt * 1000, // Convert seconds to milliseconds for formatPostAge
+        type: listing.type === 'want' ? 'want' : 'sell', // Convert 'selling' to 'sell'
+        description: listing.description || '',
+        category: listing.category || 'Misc',
+        location: listing.location || '',
+        lat: listing.lat || 0,
+        lng: listing.lng || 0,
+        images: images, // Now we have a proper gallery array
+        boostedUntil: listing.boostedUntil,
+        status: listing.status || 'active',
+        seller: {
+          name: listing.sellerName,
+          verified: Boolean(listing.sellerVerified),
+          score: 75, // Default score since we don't have this in the DB yet
+          deals: 0, // Default deals count
+          rating: 4.5, // Default rating
+          verifications: {
+            email: Boolean(listing.sellerVerified),
+            phone: false,
+            lnurl: false
+          },
+          onTimeRelease: 100 // Default on-time release percentage
+        }
+      };
+    });
 
     return NextResponse.json({
       user: {

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Nav } from "@/components";
 import { useLang } from "@/lib/i18n-client";
 import { useSettings, useUser, useModals } from "@/lib/settings";
-import { useThemeContext } from "@/lib/contexts/ThemeContext";
+
 import type { User } from "@/lib/types";
 
 export default function GlobalHeader() {
@@ -12,7 +12,7 @@ export default function GlobalHeader() {
   const { theme } = useSettings();
   const { user, setUser } = useUser();
   const { modals, setModal } = useModals();
-  const { dark } = useThemeContext();
+  const dark = theme === 'dark';
 
   const handlePost = () => {
     if (user) {
