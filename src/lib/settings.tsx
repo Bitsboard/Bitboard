@@ -93,11 +93,9 @@ export const useSettingsStore = create<SettingsStore>()(
             // Settings methods
             setTheme: (theme) => {
                 set({ theme });
-                // Apply theme to document
+                // Theme application is now handled by our dedicated theme system
+                // Dispatch resize event for components that depend on it
                 if (typeof window !== 'undefined') {
-                    const isDark = theme === 'dark';
-                    document.documentElement.classList.toggle('dark', isDark);
-                    // Trigger resize event for components that depend on it
                     window.dispatchEvent(new Event('resize'));
                 }
             },
@@ -122,9 +120,7 @@ export const useSettingsStore = create<SettingsStore>()(
 
             reset: () => {
                 set(DEFAULT_SETTINGS);
-                if (typeof window !== 'undefined') {
-                    document.documentElement.classList.toggle('dark', DEFAULT_SETTINGS.theme === 'dark');
-                }
+                // Theme application is now handled by our dedicated theme system
             },
         }),
         {
@@ -137,14 +133,8 @@ export const useSettingsStore = create<SettingsStore>()(
                 user: state.user,
             }),
             onRehydrateStorage: () => (state) => {
-                // Apply theme on rehydration, but only if it's different from current
-                if (state && typeof window !== 'undefined') {
-                    const isDark = state.theme === 'dark';
-                    const currentlyDark = document.documentElement.classList.contains('dark');
-                    if (isDark !== currentlyDark) {
-                        document.documentElement.classList.toggle('dark', isDark);
-                    }
-                }
+                // Theme is now handled by our dedicated theme system
+                // No need to apply theme here to avoid conflicts
             },
         }
     )

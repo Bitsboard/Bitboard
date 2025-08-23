@@ -44,9 +44,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
     // Persist current UI prefs before navigation
     try {
       localStorage.setItem('lang', next);
-      // layoutPref is already persisted elsewhere; ensure theme/unit exist as well if available
-      const theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-      localStorage.setItem('theme', theme);
+      // Theme is now handled by our dedicated theme system, no need to read from DOM
     } catch { }
     setLang(next);
     try {
