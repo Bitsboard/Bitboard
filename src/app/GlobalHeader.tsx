@@ -26,7 +26,8 @@ export default function GlobalHeader() {
           setUser({
             id: data.session.user.username || 'unknown',
             email: data.session.user.email || 'unknown',
-            handle: data.session.user.username || 'unknown'
+            handle: data.session.user.username || 'unknown',
+            image: data.session.user.image || undefined
           });
         }
       } catch (error) {
@@ -50,7 +51,22 @@ export default function GlobalHeader() {
   };
 
   const handleAuthed = (u: User) => {
-    setUser(u);
+    // Ensure the user object includes the image from the session
+    if (u && !u.image) {
+      // Try to get image from current session
+      fetch('/api/auth/session')
+        .then(response => response.json())
+        .then((data: any) => {
+          if (data.session?.user?.image) {
+            setUser({ ...u, image: data.session.user.image });
+          } else {
+            setUser(u);
+          }
+        })
+        .catch(() => setUser(u));
+    } else {
+      setUser(u);
+    }
     setModal('showAuth', false);
   };
 

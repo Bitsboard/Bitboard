@@ -155,11 +155,11 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                   e.preventDefault();
                   window.location.href = `/profile/${user.handle}`;
                 }}
-                className="inline-flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50 transition-all duration-200 group border border-white/20 dark:border-neutral-700/50"
+                className="inline-flex items-center gap-3 px-4 py-2.5 rounded-xl bg-neutral-100/80 dark:bg-neutral-800/50 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/50 transition-all duration-200 group border border-neutral-300/50 dark:border-neutral-700/50"
               >
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatarUrl} alt="avatar" className="h-7 w-7 rounded-full border-2 border-white/30 shadow-sm" />
+                  <img src={avatarUrl} alt="avatar" className={cn("h-7 w-7 rounded-full border-2 shadow-sm", dark ? "border-white/30" : "border-neutral-300/50")} />
                 ) : (
                   <div className="h-7 w-7 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center shadow-sm">
                     <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
