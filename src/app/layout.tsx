@@ -69,29 +69,24 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  // Prevent any light mode from showing by setting dark immediately
-                  document.documentElement.className = 'dark';
-                  document.body.className = 'dark';
-                  document.documentElement.setAttribute('data-theme', 'dark');
-                  document.body.setAttribute('data-theme', 'dark');
-                  
-                  // Then apply the actual theme from localStorage
+                  // Initialize theme immediately to prevent flash
                   var theme = localStorage.getItem('theme') || 'dark';
                   document.documentElement.className = theme;
                   document.body.className = theme;
                   document.documentElement.setAttribute('data-theme', theme);
                   document.body.setAttribute('data-theme', theme);
                   
-                  // Force immediate application
-                  document.documentElement.style.display = 'none';
-                  document.documentElement.offsetHeight;
-                  document.documentElement.style.display = '';
+                  // Also set classList for Tailwind compatibility
+                  document.documentElement.classList.remove('light', 'dark');
+                  document.documentElement.classList.add(theme);
+                  document.body.classList.remove('light', 'dark');
+                  document.body.classList.add(theme);
                 } catch (e) {
-                  // Always fallback to dark mode
+                  // Fallback to dark mode
                   document.documentElement.className = 'dark';
                   document.body.className = 'dark';
-                  document.documentElement.setAttribute('data-theme', 'dark');
-                  document.body.setAttribute('data-theme', 'dark');
+                  document.documentElement.classList.add('dark');
+                  document.body.classList.add('dark');
                 }
               })();
             `,

@@ -93,7 +93,7 @@ export const useSettingsStore = create<SettingsStore>()(
             // Settings methods
             setTheme: (theme) => {
                 set({ theme });
-                // Theme application is now handled by our dedicated theme system
+                // Theme application is now handled by the unified theme manager
                 // Dispatch resize event for components that depend on it
                 if (typeof window !== 'undefined') {
                     window.dispatchEvent(new Event('resize'));
@@ -151,6 +151,9 @@ export const useTheme = () => {
     const { theme, setTheme, toggleTheme } = useSettingsStore();
     return { theme, setTheme, toggleTheme };
 };
+
+// Re-export the new unified theme hook
+export { useTheme as useUnifiedTheme } from './hooks/useTheme';
 
 export const useUnit = () => {
     const { unit, setUnit } = useSettingsStore();

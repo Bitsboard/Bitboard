@@ -7,7 +7,7 @@ import { useParams } from 'next/navigation';
 import { ListingCard, ListingRow, ListingModal } from '@/components';
 import { useBtcRate } from '@/lib/hooks/useBtcRate';
 import { generateProfilePicture, getInitials } from '@/lib/utils';
-import { useSettings } from '@/lib/settings';
+import { useSettings, useUnifiedTheme } from '@/lib/settings';
 import type { Listing } from '@/lib/types';
 
 export default function PublicProfilePage() {
@@ -16,7 +16,8 @@ export default function PublicProfilePage() {
   const btcCad = useBtcRate();
   
   // Use unified settings hook
-  const { theme, unit, layout, modals, setModal, user, setUser, closeAllModals } = useSettings();
+  const { unit, layout, modals, setModal, user, setUser, closeAllModals } = useSettings();
+  const { theme } = useUnifiedTheme();
   const dark = theme === 'dark';
   const { active } = modals;
   
