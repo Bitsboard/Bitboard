@@ -249,6 +249,38 @@ export default function PublicProfilePage() {
         {/* Content Container */}
         <div className="relative z-10 max-w-4xl mx-auto px-4 py-12">
           
+          {/* Header with Sign Out Button (only for own profile) */}
+          {isOwnProfile && (
+            <div className="absolute top-4 right-4">
+              <button
+                onClick={async () => {
+                  try {
+                    // Clear user state first
+                    setUser(null);
+                    // Close any open modals
+                    closeAllModals();
+                    // Call logout API
+                    const response = await fetch('/api/auth/logout', { method: 'POST' });
+                    // Redirect to home regardless of API response
+                    window.location.href = '/';
+                  } catch (error) {
+                    console.error('Logout failed:', error);
+                    // Clear user state and redirect anyway
+                    setUser(null);
+                    closeAllModals();
+                    window.location.href = '/';
+                  }
+                }}
+                className="inline-flex items-center justify-center px-4 py-2 bg-white/20 backdrop-blur-lg text-white font-medium rounded-xl hover:bg-white/30 transition-all duration-200 shadow-lg hover:shadow-xl border border-white/30"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Sign Out
+              </button>
+            </div>
+          )}
+          
           {/* Profile Info Section - No Box */}
           <div className="mb-6">
             <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8">
@@ -352,49 +384,7 @@ export default function PublicProfilePage() {
             </div>
           </div>
 
-          {/* Action Buttons - Only show for user's own profile */}
-          {isOwnProfile && (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-8">
-              {/* Post New Listing Button */}
-              <button 
-                onClick={() => setModal('showNew', true)}
-                className="inline-flex items-center justify-center px-6 py-3 bg-white/20 backdrop-blur-lg text-white font-medium rounded-xl hover:bg-white/30 transition-all duration-200 shadow-lg hover:shadow-xl border border-white/30"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                Post New Listing
-              </button>
 
-              {/* Sign Out Button */}
-              <button
-                onClick={async () => {
-                  try {
-                    // Clear user state first
-                    setUser(null);
-                    // Close any open modals
-                    closeAllModals();
-                    // Call logout API
-                    const response = await fetch('/api/auth/logout', { method: 'POST' });
-                    // Redirect to home regardless of API response
-                    window.location.href = '/';
-                  } catch (error) {
-                    console.error('Logout failed:', error);
-                    // Clear user state and redirect anyway
-                    setUser(null);
-                    closeAllModals();
-                    window.location.href = '/';
-                  }
-                }}
-                className="inline-flex items-center justify-center px-6 py-3 bg-white/20 backdrop-blur-lg text-white font-medium rounded-xl hover:bg-white/30 transition-all duration-200 shadow-lg hover:shadow-xl border border-white/30"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                Sign Out
-              </button>
-            </div>
-          )}
         </div>
       </div>
       
@@ -404,9 +394,24 @@ export default function PublicProfilePage() {
         {sortedListings.length > 0 && (
           <div className="mb-12">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <h2 className={`text-2xl font-bold ${dark ? "text-white" : "text-neutral-900"}`} style={{ fontFamily: 'Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>
-                {isOwnProfile ? 'Your Listings' : 'Listings'} ({sortedListings.length})
-              </h2>
+              <div className="flex items-center gap-4">
+                <h2 className={`text-2xl font-bold ${dark ? "text-white" : "text-neutral-900"}`} style={{ fontFamily: 'Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>
+                  {isOwnProfile ? 'Your Listings' : 'Listings'} ({sortedListings.length})
+                </h2>
+                
+                {/* Post New Listing Button - Only show for user's own profile when they have listings */}
+                {isOwnProfile && (
+                  <button 
+                    onClick={() => setModal('showNew', true)}
+                    className="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white font-medium rounded-xl hover:from-orange-600 hover:to-red-600 transition-all duration-200 shadow-lg hover:shadow-xl border border-white/30"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Post New Listing
+                  </button>
+                )}
+              </div>
               
               {/* Sort Options */}
               <div className="flex items-center gap-2">
@@ -468,11 +473,24 @@ export default function PublicProfilePage() {
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📝</div>
             <h3 className={`text-xl font-semibold mb-2 ${dark ? "text-white" : "text-neutral-900"}`}>
-              No listings yet
+              {isOwnProfile ? 'No active listings' : 'No listings yet'}
             </h3>
-            <p className={`text-neutral-600 dark:text-neutral-400`}>
+            <p className={`text-neutral-600 dark:text-neutral-400 mb-6`}>
               {isOwnProfile ? "You haven't posted any listings yet." : `${username} hasn't posted any listings yet.`}
             </p>
+            
+            {/* Create Listing Button - Only show for user's own profile */}
+            {isOwnProfile && (
+              <button 
+                onClick={() => setModal('showNew', true)}
+                className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-medium rounded-xl hover:from-orange-600 hover:to-red-600 transition-all duration-200 shadow-lg hover:shadow-xl border border-white/30"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Create Your First Listing
+              </button>
+            )}
           </div>
         )}
       </div>
