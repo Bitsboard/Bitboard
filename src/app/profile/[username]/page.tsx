@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { ListingCard, ListingRow, ListingModal } from '@/components';
 import { useBtcRate } from '@/lib/hooks/useBtcRate';
-import { generateProfilePicture, getInitials } from '@/lib/utils';
+import { generateProfilePicture, getInitials, isDefaultUsername } from '@/lib/utils';
 import { useSettings, useUnifiedTheme } from '@/lib/settings';
 import type { Listing } from '@/lib/types';
 
@@ -331,6 +331,33 @@ export default function PublicProfilePage() {
                 <div className="text-white/80 mb-4">
                   <span className="text-sm">Member since {memberSince}</span>
                 </div>
+                
+                {/* Username Change Section - Only show for user's own profile if they have a default username */}
+                {isOwnProfile && isDefaultUsername(username) && (
+                  <div className="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 p-4 mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-yellow-500/30 flex items-center justify-center">
+                        <svg className="w-4 h-4 text-yellow-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-white/90 text-sm font-medium mb-1">
+                          Claim your custom username
+                        </p>
+                        <p className="text-white/70 text-xs">
+                          You can change your username once to something more personal
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setModal('showUsernameChange', true)}
+                        className="px-4 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 font-medium rounded-lg transition-all duration-200 border border-yellow-500/30 hover:border-yellow-500/50"
+                      >
+                        Change Username
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -475,9 +502,6 @@ export default function PublicProfilePage() {
             <h3 className={`text-xl font-semibold mb-2 ${dark ? "text-white" : "text-neutral-900"}`}>
               {isOwnProfile ? 'No active listings' : 'No listings yet'}
             </h3>
-            <p className={`text-neutral-600 dark:text-neutral-400 mb-6`}>
-              {isOwnProfile ? "You haven't posted any listings yet." : `${username} hasn't posted any listings yet.`}
-            </p>
             
             {/* Create Listing Button - Only show for user's own profile */}
             {isOwnProfile && (
@@ -512,6 +536,68 @@ export default function PublicProfilePage() {
             }
           }}
         />
+      )}
+
+      {/* Username Change Modal */}
+      {modals.showUsernameChange && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className={`bg-white dark:bg-neutral-800 rounded-2xl p-6 max-w-md w-full shadow-2xl border ${dark ? 'border-neutral-700' : 'border-neutral-200'}`}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-yellow-500/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className={`text-xl font-semibold ${dark ? 'text-white' : 'text-neutral-900'}`}>
+                Change Username
+              </h3>
+            </div>
+            
+            <p className={`text-neutral-600 dark:text-neutral-400 mb-6`}>
+              You can change your username once to something more personal. Choose carefully!
+            </p>
+            
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="newUsername" className={`block text-sm font-medium mb-2 ${dark ? 'text-white' : 'text-neutral-700'}`}>
+                  New Username
+                </label>
+                <input
+                  type="text"
+                  id="newUsername"
+                  placeholder="Enter your new username"
+                  className={`w-full px-4 py-3 rounded-xl border text-sm ${
+                    dark 
+                      ? 'bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400' 
+                      : 'bg-white border-neutral-300 text-neutral-900 placeholder-neutral-500'
+                  } focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500`}
+                />
+              </div>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setModal('showUsernameChange', false)}
+                  className={`flex-1 px-4 py-3 rounded-xl border font-medium transition-all duration-200 ${
+                    dark 
+                      ? 'bg-neutral-700 border-neutral-600 text-white hover:bg-neutral-600' 
+                      : 'bg-white border-neutral-300 text-neutral-900 hover:bg-neutral-50'
+                  }`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    // TODO: Implement username change API call
+                    setModal('showUsernameChange', false);
+                  }}
+                  className="flex-1 px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-xl transition-all duration-200"
+                >
+                  Change Username
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

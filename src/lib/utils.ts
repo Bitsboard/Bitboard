@@ -272,3 +272,22 @@ export function formatPostAge(timestamp: number): string {
     return `${months}mo`;
   }
 }
+
+/**
+ * Generates a default username in the format "User" + 9 random numbers
+ * @returns A default username string
+ */
+export function generateDefaultUsername(): string {
+  const randomNumbers = Math.floor(Math.random() * 1000000000).toString().padStart(9, '0');
+  return `User${randomNumbers}`;
+}
+
+/**
+ * Checks if a username is a default username (starts with "User" followed by 9 digits)
+ * @param username The username to check
+ * @returns True if it's a default username, false otherwise
+ */
+export function isDefaultUsername(username: string): boolean {
+  const defaultUsernamePattern = /^User\d{9}$/;
+  return defaultUsernamePattern.test(username);
+}

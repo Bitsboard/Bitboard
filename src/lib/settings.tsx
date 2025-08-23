@@ -29,6 +29,7 @@ interface SettingsStore extends UserSettings {
         showNew: boolean;
         showAuth: boolean;
         showLocationModal: boolean;
+        showUsernameChange: boolean;
     };
     setModal: (key: keyof SettingsStore['modals'], value: any) => void;
     closeAllModals: () => void;
@@ -59,6 +60,7 @@ export const useSettingsStore = create<SettingsStore>()(
                 showNew: false,
                 showAuth: false,
                 showLocationModal: false,
+                showUsernameChange: false,
             },
             setModal: (key, value) => set((state) => ({
                 modals: { ...state.modals, [key]: value }
@@ -70,6 +72,7 @@ export const useSettingsStore = create<SettingsStore>()(
                     showNew: false,
                     showAuth: false,
                     showLocationModal: false,
+                    showUsernameChange: false,
                 }
             })),
 
