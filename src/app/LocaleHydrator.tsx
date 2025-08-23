@@ -28,8 +28,7 @@ export function LocaleHydrator({ children }: { children: React.ReactNode }) {
         document.documentElement.setAttribute('data-theme', theme);
         document.body.setAttribute('data-theme', theme);
         
-        // Apply theme immediately and set up lightweight persistence
-        // Check theme persistence a few times during initial load
+        // Apply theme immediately and set up aggressive persistence
         const checkThemePersistence = () => {
           const currentTheme = document.documentElement.className;
           if (currentTheme !== theme && (currentTheme === 'dark' || currentTheme === 'light')) {
@@ -40,11 +39,15 @@ export function LocaleHydrator({ children }: { children: React.ReactNode }) {
           }
         };
         
-        // Check theme persistence a few times during initial load (not continuously)
-        const initialChecks = [100, 500, 1000, 2000]; // Check at 100ms, 500ms, 1s, 2s
+        // Check theme persistence aggressively during initial load
+        const initialChecks = [50, 100, 200, 500, 1000, 2000, 3000, 5000]; // More frequent checks
         initialChecks.forEach(delay => {
           setTimeout(checkThemePersistence, delay);
         });
+        
+        // Also check every 200ms for the first 5 seconds
+        const themeCheckInterval = setInterval(checkThemePersistence, 200);
+        setTimeout(() => clearInterval(themeCheckInterval), 5000);
       } catch {}
     } catch {}
   }, []);

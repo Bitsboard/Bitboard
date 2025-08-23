@@ -26,13 +26,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     applyTheme(theme);
   }, [theme, applyTheme]);
 
-  // Apply theme on mount and set up lightweight persistence
+  // Apply theme on mount and set up aggressive persistence
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // Apply the current theme
       applyTheme(theme);
       
-      // Set up a simple theme persistence check that runs only when needed
+      // Set up aggressive theme persistence that runs frequently but efficiently
       const checkThemePersistence = () => {
         const currentTheme = document.documentElement.className;
         if (currentTheme !== theme && (currentTheme === 'dark' || currentTheme === 'light')) {
@@ -41,27 +41,32 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         }
       };
       
-      // Check theme persistence on focus (when user returns to tab)
-      const handleFocus = () => {
-        // Small delay to ensure DOM is ready
-        setTimeout(checkThemePersistence, 100);
-      };
+      // Check theme persistence every 500ms for the first 10 seconds
+      const themeCheckInterval = setInterval(checkThemePersistence, 500);
       
-      // Check theme persistence on visibility change
+      // Stop checking after 10 seconds to avoid performance impact
+      setTimeout(() => {
+        clearInterval(themeCheckInterval);
+      }, 10000);
+      
+      // Also check on various events
+      const handleFocus = () => checkThemePersistence();
       const handleVisibilityChange = () => {
-        if (!document.hidden) {
-          setTimeout(checkThemePersistence, 100);
-        }
+        if (!document.hidden) checkThemePersistence();
       };
+      const handleScroll = () => checkThemePersistence();
       
-      // Add event listeners for theme persistence
+      // Add event listeners
       window.addEventListener('focus', handleFocus);
       document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('scroll', handleScroll, { passive: true });
       
-      // Cleanup event listeners
+      // Cleanup
       return () => {
+        clearInterval(themeCheckInterval);
         window.removeEventListener('focus', handleFocus);
         document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('scroll', handleScroll);
       };
     }
   }, [theme, applyTheme]);
