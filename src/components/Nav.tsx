@@ -147,9 +147,6 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
           {/* User Profile Section - Unified button design */}
           {user ? (
             <div className="flex items-center gap-2">
-              {/* Notifications */}
-              <NotificationMenu dark={dark} />
-              
               {/* Unified Profile Button */}
               <a 
                 href={`/profile/${user.handle}`}
@@ -177,6 +174,9 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </a>
+              
+              {/* Notifications - Now grouped with profile */}
+              <NotificationMenu dark={dark} />
             </div>
           ) : (
             <button onClick={onAuth} className="rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-500/30 transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:shadow-xl hover:scale-105">
