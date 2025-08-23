@@ -67,7 +67,7 @@ export default function SearchClient() {
     const [centerLng, setCenterLng] = useState<string>(lngParam ?? "");
     const [radiusKm, setRadiusKm] = useState<number>(() => {
         try {
-            const v = localStorage.getItem('userRadiusKm');
+            const v = localStorage.getItem('userRadius');
             if (v) return Number(v);
         } catch { }
         return CONFIG.DEFAULT_RADIUS_KM;
@@ -93,7 +93,7 @@ export default function SearchClient() {
     // Persisted radius on locale change (for Worldwide state)
     useEffect(() => {
         try {
-            const savedRadius = Number(localStorage.getItem('userRadiusKm') || '');
+            const savedRadius = Number(localStorage.getItem('userRadius') || '');
             if (Number.isFinite(savedRadius)) setRadiusKm(savedRadius);
         } catch { }
     }, [lang]);
@@ -180,7 +180,7 @@ export default function SearchClient() {
         sp.set("layout", layout);
         const savedRadius = (() => {
             try {
-                const v = localStorage.getItem('userRadiusKm');
+                const v = localStorage.getItem('userRadius');
                 if (v) return Number(v);
             } catch { }
             return null;

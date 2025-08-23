@@ -33,22 +33,28 @@ export function useLocation() {
                 }
                 
                 // Then try to load from database for long-term persistence
+                // Only if localStorage doesn't have values
                 const loadFromDatabase = async () => {
                     try {
-                        const savedLocation = await dataService.getUserLocation();
-                        if (savedLocation) {
-                            console.log('useLocation: Found saved location in database:', savedLocation);
-                            setCenter(savedLocation);
-                            // Update localStorage with database value
-                            localStorage.setItem('userLocation', JSON.stringify(savedLocation));
+                        // Only load from database if we don't have localStorage values
+                        if (!savedLocationStr) {
+                            const savedLocation = await dataService.getUserLocation();
+                            if (savedLocation) {
+                                console.log('useLocation: Found saved location in database:', savedLocation);
+                                setCenter(savedLocation);
+                                // Update localStorage with database value
+                                localStorage.setItem('userLocation', JSON.stringify(savedLocation));
+                            }
                         }
                         
-                        const savedRadius = await dataService.getUserRadius();
-                        if (savedRadius && savedRadius > 0) {
-                            console.log('useLocation: Loaded radius from database:', savedRadius);
-                            setRadiusKm(savedRadius);
-                            // Update localStorage with database value
-                            localStorage.setItem('userRadius', savedRadius.toString());
+                        if (!savedRadiusStr) {
+                            const savedRadius = await dataService.getUserRadius();
+                            if (savedRadius && savedRadius > 0) {
+                                console.log('useLocation: Loaded radius from database:', savedRadius);
+                                setRadiusKm(savedRadius);
+                                // Update localStorage with database value
+                                localStorage.setItem('userRadius', savedRadius.toString());
+                            }
                         }
                     } catch (error) {
                         console.warn('useLocation: Failed to load from database:', error);
