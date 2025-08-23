@@ -8,19 +8,55 @@ export function useLocation() {
 
     // Load saved user location on mount
     useEffect(() => {
-        const loadUserLocation = async () => {
+        const loadUserLocation = () => {
             try {
-                console.log('useLocation: Loading saved location...');
-                const savedLocation = await dataService.getUserLocation();
-                if (savedLocation) {
-                    console.log('useLocation: Found saved location:', savedLocation);
-                    setCenter(savedLocation);
-                } else {
-                    console.log('useLocation: No saved location found, using default:', CONFIG.DEFAULT_CENTER);
+                // First try to load from localStorage for immediate persistence
+                const savedLocationStr = localStorage.getItem('userLocation');
+                const savedRadiusStr = localStorage.getItem('userRadius');
+                
+                if (savedLocationStr) {
+                    try {
+                        const savedLocation = JSON.parse(savedLocationStr) as Place;
+                        console.log('useLocation: Loaded from localStorage:', savedLocation);
+                        setCenter(savedLocation);
+                    } catch (e) {
+                        console.warn('useLocation: Failed to parse saved location:', e);
+                    }
                 }
-                const savedRadius = await dataService.getUserRadius();
-                console.log('useLocation: Loaded radius:', savedRadius);
-                setRadiusKm(savedRadius);
+                
+                if (savedRadiusStr) {
+                    const savedRadius = parseInt(savedRadiusStr, 10);
+                    if (!isNaN(savedRadius) && savedRadius > 0) {
+                        console.log('useLocation: Loaded radius from localStorage:', savedRadius);
+                        setRadiusKm(savedRadius);
+                    }
+                }
+                
+                // Then try to load from database for long-term persistence
+                const loadFromDatabase = async () => {
+                    try {
+                        const savedLocation = await dataService.getUserLocation();
+                        if (savedLocation) {
+                            console.log('useLocation: Found saved location in database:', savedLocation);
+                            setCenter(savedLocation);
+                            // Update localStorage with database value
+                            localStorage.setItem('userLocation', JSON.stringify(savedLocation));
+                        }
+                        
+                        const savedRadius = await dataService.getUserRadius();
+                        if (savedRadius && savedRadius > 0) {
+                            console.log('useLocation: Loaded radius from database:', savedRadius);
+                            setRadiusKm(savedRadius);
+                            // Update localStorage with database value
+                            localStorage.setItem('userRadius', savedRadius.toString());
+                        }
+                    } catch (error) {
+                        console.warn('useLocation: Failed to load from database:', error);
+                    }
+                };
+                
+                loadFromDatabase();
+                
             } catch (error) {
                 console.warn('useLocation: Failed to load user location:', error);
             }
@@ -31,13 +67,26 @@ export function useLocation() {
 
     const updateLocation = useCallback(async (place: Place, radius: number) => {
         console.log('useLocation: Updating location to:', place, 'radius:', radius);
+        
+        // Update state immediately
         setCenter(place);
         setRadiusKm(radius);
+        
+        // Save to localStorage for immediate persistence
+        try {
+            localStorage.setItem('userLocation', JSON.stringify(place));
+            localStorage.setItem('userRadius', radius.toString());
+            console.log('useLocation: Location saved to localStorage');
+        } catch (error) {
+            console.warn('useLocation: Failed to save to localStorage:', error);
+        }
+        
+        // Save to database for long-term persistence
         try {
             await dataService.saveUserLocation(place, radius);
-            console.log('useLocation: Location saved successfully');
+            console.log('useLocation: Location saved to database');
         } catch (error) {
-            console.warn('useLocation: Failed to save location:', error);
+            console.warn('useLocation: Failed to save to database:', error);
         }
     }, []);
 
