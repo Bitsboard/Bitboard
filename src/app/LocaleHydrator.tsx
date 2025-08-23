@@ -18,17 +18,22 @@ export function LocaleHydrator({ children }: { children: React.ReactNode }) {
       
       // Always restore persisted UI prefs (theme/layout/unit) regardless of locale
       try {
+        // First, ensure dark mode is set to prevent light mode flash
+        document.documentElement.className = 'dark';
+        document.body.className = 'dark';
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.body.setAttribute('data-theme', 'dark');
+        
+        // Then get the actual theme from localStorage
         const theme = localStorage.getItem('theme') || 'dark'; // Default to dark
         
-        // Apply theme immediately using className for immediate effect
+        // Apply the actual theme immediately
         document.documentElement.className = theme;
         document.body.className = theme;
-        
-        // Also set as data attribute
         document.documentElement.setAttribute('data-theme', theme);
         document.body.setAttribute('data-theme', theme);
         
-        // Apply theme immediately and set up aggressive persistence
+        // Set up aggressive theme persistence
         const checkThemePersistence = () => {
           const currentTheme = document.documentElement.className;
           if (currentTheme !== theme && (currentTheme === 'dark' || currentTheme === 'light')) {
@@ -40,13 +45,13 @@ export function LocaleHydrator({ children }: { children: React.ReactNode }) {
         };
         
         // Check theme persistence aggressively during initial load
-        const initialChecks = [50, 100, 200, 500, 1000, 2000, 3000, 5000]; // More frequent checks
+        const initialChecks = [10, 25, 50, 100, 200, 500, 1000, 2000, 3000, 5000]; // Even more frequent
         initialChecks.forEach(delay => {
           setTimeout(checkThemePersistence, delay);
         });
         
-        // Also check every 200ms for the first 5 seconds
-        const themeCheckInterval = setInterval(checkThemePersistence, 200);
+        // Also check every 100ms for the first 5 seconds (more aggressive)
+        const themeCheckInterval = setInterval(checkThemePersistence, 100);
         setTimeout(() => clearInterval(themeCheckInterval), 5000);
       } catch {}
     } catch {}
