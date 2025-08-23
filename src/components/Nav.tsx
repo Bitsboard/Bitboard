@@ -117,10 +117,11 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
             </div>
           </a>
         </div>
-        <div className="flex items-center gap-2">
-          <div ref={langRef} className="relative hidden sm:block mr-2">
+        <div className="flex items-center gap-3">
+          {/* Language Selector - Left side */}
+          <div ref={langRef} className="relative hidden sm:block">
             <button onClick={() => setLangOpen((v) => !v)} aria-label="Language"
-              className={cn("px-2 py-1 rounded-md text-sm", dark ? "text-neutral-300 hover:bg-neutral-900" : "text-neutral-700 hover:bg-neutral-100")}>
+              className={cn("px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200", dark ? "text-neutral-300 hover:bg-neutral-800 hover:text-white" : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900")}>
               {lang === 'fr' ? '🇫🇷' : lang === 'es' ? '🇪🇸' : lang === 'de' ? '🇩🇪' : '🇺🇸'}
             </button>
             {langOpen && (
@@ -132,41 +133,47 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
               </div>
             )}
           </div>
-          {/* Removed how it works / pricing per request */}
+
+          {/* User Actions - Center */}
           {user && (
-            <button
-              onClick={onPost}
-              className="rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-sm font-semibold text-white shadow shadow-orange-500/30 transition hover:from-orange-400 hover:to-red-400"
-            >
-              {t('post_listing', lang)}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onPost}
+                className="rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-orange-500/30 transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:shadow-xl"
+              >
+                {t('post_listing', lang)}
+              </button>
+              <NotificationMenu dark={dark} />
+            </div>
           )}
-          {user && (
-            <NotificationMenu dark={dark} />
-          )}
-          {user ? (
-            <a href={`/profile/${user.handle}`} className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-white hover:opacity-90 transition-all duration-200">
-              {avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatarUrl} alt="avatar" className="h-8 w-8 rounded-full border-2 border-white/30 shadow-lg" />
-              ) : (
-                <span className="rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 shadow-lg hover:shadow-xl transition-all duration-200">
-                  <svg className="w-4 h-4 mr-2 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  My Profile
-                </span>
-              )}
-            </a>
-          ) : (
-            <button onClick={onAuth} className="rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-sm font-semibold text-white shadow shadow-orange-500/30 transition hover:from-orange-400 hover:to-red-400">
-              {t('sign_in', lang)}
-            </button>
-          )}
-          {/* Settings Dropdown */}
-          <div className="relative">
-            <button onClick={() => setMenuOpen(v => !v)} aria-expanded={menuOpen} aria-haspopup="menu" className={cn("rounded-xl px-3 py-2 text-base font-bold shadow ring-1", dark ? "text-neutral-200 hover:bg-neutral-900 ring-neutral-800" : "text-neutral-800 hover:bg-neutral-100 ring-neutral-300")}>☰</button>
-            {menuOverlay}
+
+          {/* Profile & Settings - Right side */}
+          <div className="flex items-center gap-2">
+            {user ? (
+              <a href={`/profile/${user.handle}`} className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-white hover:opacity-90 transition-all duration-200">
+                {avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatarUrl} alt="avatar" className="h-8 w-8 rounded-full border-2 border-white/30 shadow-lg" />
+                ) : (
+                  <span className="rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 shadow-lg hover:shadow-xl transition-all duration-200">
+                    <svg className="w-4 h-4 mr-2 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    My Profile
+                  </span>
+                )}
+              </a>
+            ) : (
+              <button onClick={onAuth} className="rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-orange-500/30 transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:shadow-xl">
+                {t('sign_in', lang)}
+              </button>
+            )}
+            
+            {/* Settings Dropdown */}
+            <div className="relative">
+              <button onClick={() => setMenuOpen(v => !v)} aria-expanded={menuOpen} aria-haspopup="menu" className={cn("rounded-xl px-3 py-2 text-base font-bold shadow-lg ring-1 transition-all duration-200", dark ? "text-neutral-200 hover:bg-neutral-800 ring-neutral-700" : "text-neutral-800 hover:bg-neutral-100 ring-neutral-300")}>☰</button>
+              {menuOverlay}
+            </div>
           </div>
         </div>
       </div>
