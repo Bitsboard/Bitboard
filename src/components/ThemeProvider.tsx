@@ -7,47 +7,28 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { theme } = useSettingsStore();
 
   useEffect(() => {
-    // Ensure theme is applied to document as soon as possible
     if (typeof window !== 'undefined') {
+      // Apply theme immediately
       const isDark = theme === 'dark';
       
-      // Remove both classes first to ensure clean state
-      document.documentElement.classList.remove('dark', 'light');
+      // Set classes on both html and body
+      document.documentElement.className = isDark ? 'dark' : 'light';
+      document.body.className = isDark ? 'dark' : 'light';
       
-      // Add the correct class
-      if (isDark) {
-        document.documentElement.classList.add('dark');
-        // Also set body class for additional safety
-        document.body.classList.add('dark');
-        document.body.classList.remove('light');
-      } else {
-        document.documentElement.classList.add('light');
-        // Also set body class for additional safety
-        document.body.classList.add('light');
-        document.body.classList.remove('dark');
-      }
-      
-      // Force a repaint to ensure theme is applied
-      document.documentElement.style.display = 'none';
-      document.documentElement.offsetHeight; // Trigger reflow
-      document.documentElement.style.display = '';
+      // Also set as data attribute for additional CSS targeting
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
     }
   }, [theme]);
 
-  // Also apply theme on mount
+  // Apply theme on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const isDark = theme === 'dark';
-      document.documentElement.classList.remove('dark', 'light');
-      if (isDark) {
-        document.documentElement.classList.add('dark');
-        document.body.classList.add('dark');
-        document.body.classList.remove('light');
-      } else {
-        document.documentElement.classList.add('light');
-        document.body.classList.add('light');
-        document.body.classList.remove('dark');
-      }
+      document.documentElement.className = isDark ? 'dark' : 'light';
+      document.body.className = isDark ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
     }
   }, []);
 

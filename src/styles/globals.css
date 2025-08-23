@@ -2,6 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Force dark mode by default to prevent white flash */
+html {
+  @apply bg-neutral-950 text-white;
+}
+
+html.dark {
+  @apply bg-neutral-950 text-white;
+}
+
+html.light {
+  @apply bg-white text-neutral-900;
+}
+
+/* Ensure body also gets theme classes */
+body {
+  @apply bg-neutral-950 text-white;
+}
+
+body.dark {
+  @apply bg-neutral-950 text-white;
+}
+
+body.light {
+  @apply bg-white text-neutral-900;
+}
+
 /* Prefer Ubuntu for brand wordmark */
 @font-face {
   font-family: "Ubuntu";

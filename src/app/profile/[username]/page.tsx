@@ -16,7 +16,7 @@ export default function PublicProfilePage() {
   const btcCad = useBtcRate();
   
   // Use unified settings hook
-  const { theme, unit, layout, modals, setModal, user } = useSettings();
+  const { theme, unit, layout, modals, setModal, user, setUser, closeAllModals } = useSettings();
   const dark = theme === 'dark';
   const { active } = modals;
   
@@ -369,15 +369,19 @@ export default function PublicProfilePage() {
               <button
                 onClick={async () => {
                   try {
+                    // Clear user state first
+                    setUser(null);
+                    // Close any open modals
+                    closeAllModals();
                     // Call logout API
                     const response = await fetch('/api/auth/logout', { method: 'POST' });
-                    if (response.ok) {
-                      // Clear user state and redirect to home
-                      window.location.href = '/';
-                    }
+                    // Redirect to home regardless of API response
+                    window.location.href = '/';
                   } catch (error) {
                     console.error('Logout failed:', error);
-                    // Fallback: redirect anyway
+                    // Clear user state and redirect anyway
+                    setUser(null);
+                    closeAllModals();
                     window.location.href = '/';
                   }
                 }}
