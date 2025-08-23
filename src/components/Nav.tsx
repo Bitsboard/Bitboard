@@ -144,19 +144,27 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
             </button>
           )}
 
-          {/* User Profile Section - Clean and prominent */}
+          {/* User Profile Section - Unified button design */}
           {user ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {/* Notifications */}
               <NotificationMenu dark={dark} />
               
-              {/* Profile Link */}
-              <a href={`/profile/${user.handle}`} className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 dark:hover:bg-neutral-800/50 transition-all duration-200 group">
+              {/* Unified Profile Button */}
+              <a 
+                href={`/profile/${user.handle}`}
+                onClick={(e) => {
+                  // Prevent the flash by ensuring user state persists during navigation
+                  e.preventDefault();
+                  window.location.href = `/profile/${user.handle}`;
+                }}
+                className="inline-flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50 transition-all duration-200 group border border-white/20 dark:border-neutral-700/50"
+              >
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatarUrl} alt="avatar" className="h-8 w-8 rounded-full border-2 border-white/20 shadow-lg group-hover:border-white/40 transition-all duration-200" />
+                  <img src={avatarUrl} alt="avatar" className="h-7 w-7 rounded-full border-2 border-white/30 shadow-sm" />
                 ) : (
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-200">
+                  <div className="h-7 w-7 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center shadow-sm">
                     <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
@@ -165,6 +173,9 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                 <span className={cn("text-sm font-medium hidden md:block", dark ? "text-neutral-200" : "text-neutral-700")}>
                   {user.handle}
                 </span>
+                <svg className="w-4 h-4 text-neutral-400 group-hover:text-neutral-300 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </a>
             </div>
           ) : (
