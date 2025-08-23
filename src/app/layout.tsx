@@ -64,6 +64,25 @@ export default function RootLayout({
         <link rel="icon" href="/icon.svg" />
         <link rel="apple-touch-icon" href="/icon.svg" />
         <link rel="manifest" href="/manifest.json" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme') || 'dark';
+                  document.documentElement.className = theme;
+                  document.body.className = theme;
+                  document.documentElement.setAttribute('data-theme', theme);
+                  document.body.setAttribute('data-theme', theme);
+                } catch (e) {
+                  // Fallback to dark mode
+                  document.documentElement.className = 'dark';
+                  document.body.className = 'dark';
+                }
+              })();
+            `,
+          }}
+        />
       </head>
       <body className={inter.className}>
         <LocaleHydrator>

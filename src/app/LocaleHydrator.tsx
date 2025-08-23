@@ -27,6 +27,31 @@ export function LocaleHydrator({ children }: { children: React.ReactNode }) {
         // Also set as data attribute
         document.documentElement.setAttribute('data-theme', theme);
         document.body.setAttribute('data-theme', theme);
+        
+        // Force immediate application with multiple methods
+        document.documentElement.style.display = 'none';
+        document.documentElement.offsetHeight; // Trigger reflow
+        document.documentElement.style.display = '';
+        
+        // Also force body reflow
+        document.body.style.display = 'none';
+        document.body.offsetHeight; // Trigger reflow
+        document.body.style.display = '';
+        
+        // Set up a periodic check to ensure theme persists
+        const themeCheckInterval = setInterval(() => {
+          const currentTheme = document.documentElement.className;
+          if (currentTheme !== theme && (currentTheme === 'dark' || currentTheme === 'light')) {
+            console.log('Theme check: reapplying', theme, 'over', currentTheme);
+            document.documentElement.className = theme;
+            document.body.className = theme;
+            document.documentElement.setAttribute('data-theme', theme);
+            document.body.setAttribute('data-theme', theme);
+          }
+        }, 100); // Check every 100ms
+        
+        // Cleanup interval after 5 seconds
+        setTimeout(() => clearInterval(themeCheckInterval), 5000);
       } catch {}
     } catch {}
   }, []);
