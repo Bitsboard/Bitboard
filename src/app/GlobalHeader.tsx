@@ -22,14 +22,23 @@ export default function GlobalHeader() {
         const response = await fetch('/api/auth/session');
         const data = await response.json() as any;
         if (data.session?.user && !user) {
-          // User is authenticated but not in state, restore user
-          setUser({
-            id: data.session.user.username || 'unknown',
-            email: data.session.user.email || 'unknown',
-            handle: data.session.user.username || 'unknown',
-            hasChosenUsername: true, // Assume existing users have chosen usernames
-            image: data.session.user.image || undefined
-          });
+          // Only restore user if they actually exist in the database
+          if (data.session.account) {
+            // User exists in database, restore user
+            setUser({
+              id: data.session.user.id || 'unknown',
+              email: data.session.user.email || 'unknown',
+              handle: data.session.user.username || null,
+              hasChosenUsername: data.session.user.hasChosenUsername || false,
+              image: data.session.user.image || undefined
+            });
+          } else {
+            // Session exists but user not in database, clear the invalid session
+            console.log('Session exists but user not found in database, clearing session');
+            await fetch('/api/auth/logout', { method: 'POST' });
+            // Force page reload to clear any cached state
+            window.location.reload();
+          }
         }
       } catch (error) {
         console.error('Error checking session:', error);

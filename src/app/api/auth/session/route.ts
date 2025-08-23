@@ -25,9 +25,15 @@ export async function GET(req: Request) {
           sso TEXT,
           verified INTEGER DEFAULT 0,
           created_at INTEGER NOT NULL,
-          image TEXT
+          image TEXT,
+          is_admin INTEGER DEFAULT 0,
+          banned INTEGER DEFAULT 0,
+          rating REAL DEFAULT 5.0,
+          deals INTEGER DEFAULT 0,
+          last_active INTEGER DEFAULT 0,
+          has_chosen_username INTEGER DEFAULT 0
         )`).run();
-        const res = await db.prepare('SELECT id, email, username, sso, verified, created_at AS createdAt, image FROM users WHERE email = ?').bind(payload.email ?? '').all();
+        const res = await db.prepare('SELECT id, email, username, sso, verified, created_at AS createdAt, image, has_chosen_username FROM users WHERE email = ?').bind(payload.email ?? '').all();
         userRow = res.results?.[0] ?? null;
         try {
           const lres = await db.prepare('SELECT id, title, price_sat AS priceSat, created_at AS createdAt FROM listings WHERE posted_by = ? ORDER BY created_at DESC LIMIT 20').bind(userRow?.id ?? '').all();
@@ -42,12 +48,14 @@ export async function GET(req: Request) {
         email: payload.email ?? null,
         username: userRow?.username ?? null,
         image: userRow?.image ?? payload.picture ?? null,
+        hasChosenUsername: Boolean(userRow?.has_chosen_username),
       },
       account: userRow ? {
         username: userRow.username,
         verified: Boolean(userRow.verified),
         registeredAt: userRow.createdAt,
         profilePhoto: userRow.image,
+        hasChosenUsername: Boolean(userRow.has_chosen_username),
         listings,
       } : null,
     };
