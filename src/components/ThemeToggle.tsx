@@ -1,9 +1,9 @@
 "use client";
 
-import { useUnifiedTheme } from "@/lib/settings";
+import { useTheme } from "@/lib/contexts/ThemeContext";
 
 export function ThemeToggle() {
-    const { theme, toggleTheme } = useUnifiedTheme();
+    const { theme, toggleTheme } = useTheme();
     const isDark = theme === 'dark';
 
     return (

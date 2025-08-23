@@ -156,7 +156,7 @@ export const useTheme = () => {
 };
 
 // Re-export the new unified theme hook
-export { useTheme as useUnifiedTheme } from './hooks/useTheme';
+
 
 export const useUnit = () => {
     const { unit, setUnit } = useSettingsStore();

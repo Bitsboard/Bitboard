@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useUnifiedTheme } from "@/lib/settings";
+import { useTheme } from "@/lib/contexts/ThemeContext";
 import { useLang } from "@/lib/i18n-client";
 import { t } from "@/lib/i18n";
 
@@ -24,7 +24,7 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { theme } = useUnifiedTheme();
+  const { theme } = useTheme();
   const lang = useLang();
 
   // Mock notifications - in a real app, these would come from an API

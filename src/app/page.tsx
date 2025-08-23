@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useLang } from "@/lib/i18n-client";
 import { useSettings } from "@/lib/settings";
-import { useUnifiedTheme } from "@/lib/settings";
+import { useTheme } from "@/lib/contexts/ThemeContext";
 import { useListings, useLocation, useBtcRate, useSearchFilters } from "@/lib/hooks";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -23,8 +23,8 @@ import { mockListings } from '@/lib/mockData';
 export default function HomePage() {
   // Use centralized settings
   const { unit, layout } = useSettings();
-  const { theme } = useUnifiedTheme();
-  const dark = theme === 'dark';
+  const { theme, isDark } = useTheme();
+  const dark = isDark;
 
   // State
   const [user, setUser] = useState<User | null>(null);

@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "../styles/globals.css";
 import GlobalHeader from "./GlobalHeader";
 import { LocaleHydrator } from "./LocaleHydrator";
-import { ThemeProvider } from "@/components/ThemeProvider";
+import { ThemeProvider } from "@/lib/contexts/ThemeContext";
 
 import Footer from "@/components/Footer";
 

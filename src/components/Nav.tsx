@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { UnitToggle, ThemeToggle, ViewToggle, NotificationMenu } from "@/components";
 import { useLang } from "@/lib/i18n-client";
 import { setLang, t } from "@/lib/i18n";
-import { useUnifiedTheme } from "@/lib/settings";
+import { useTheme } from "@/lib/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
 import type { User } from "@/lib/types";
 
@@ -17,7 +17,7 @@ interface NavProps {
 }
 
 export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
-  const { theme } = useUnifiedTheme();
+  const { theme } = useTheme();
   const dark = theme === 'dark';
   const isStaging =
     process.env.NEXT_PUBLIC_BRANCH === "staging" ||
