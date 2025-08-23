@@ -38,6 +38,8 @@ export async function GET(req: Request) {
 
     const session = {
       user: {
+        id: userRow?.id ?? payload.sub ?? null,
+        email: payload.email ?? null,
         username: userRow?.username ?? null,
         image: userRow?.image ?? payload.picture ?? null,
       },

@@ -23,6 +23,7 @@ interface ModalProps {
     closeOnOverlay?: boolean;
     ariaLabel?: string;
     maxHeightVh?: number;
+    zIndex?: number;
     children: React.ReactNode;
 }
 
@@ -37,6 +38,7 @@ export function Modal({
     closeOnOverlay = true,
     ariaLabel,
     maxHeightVh = 90,
+    zIndex = 50,
     children,
 }: ModalProps) {
     const overlayRef = React.useRef<HTMLDivElement | null>(null);
@@ -57,10 +59,11 @@ export function Modal({
         <div
             ref={overlayRef}
             className={cn(
-                "fixed inset-0 z-50 flex items-center justify-center p-4",
+                "fixed inset-0 flex items-center justify-center p-4",
                 "bg-black/60",
                 overlayClassName
             )}
+            style={{ zIndex }}
             role="dialog"
             aria-modal="true"
             aria-label={ariaLabel}
