@@ -2,24 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Theme system - prevent flash of light mode */
-html, body {
-  /* Force dark mode by default to prevent light mode flash */
-  background-color: #0a0a0a !important;
-  color: #ffffff !important;
-}
-
-/* Only show light mode when explicitly set */
-html.light, body.light {
-  background-color: #ffffff !important;
-  color: #000000 !important;
-}
-
-/* Ensure dark mode is always applied by default */
-html:not(.light), body:not(.light) {
-  background-color: #0a0a0a !important;
-  color: #ffffff !important;
-}
+/* Theme system - let JavaScript handle theme switching */
 
 /* Prefer Ubuntu for brand wordmark */
 @font-face {

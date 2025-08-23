@@ -331,8 +331,8 @@ export default function PublicProfilePage() {
                         sessionStorage.clear();
                       }
                       
-                      // Redirect to home with cache-busting
-                      window.location.href = '/?logout=' + Date.now();
+                                  // Redirect to home
+            window.location.href = '/';
                     } catch (error) {
                       console.error('Logout failed:', error);
                       // Clear user state and redirect anyway
@@ -344,7 +344,7 @@ export default function PublicProfilePage() {
                         sessionStorage.clear();
                       }
                       
-                      window.location.href = '/?logout=' + Date.now();
+                      window.location.href = '/';
                     }
                   }}
                   className="inline-flex items-center justify-center px-4 py-2 bg-white/20 backdrop-blur-lg text-white font-medium rounded-xl hover:bg-white/30 transition-all duration-200 shadow-lg hover:shadow-xl border border-white/30"
