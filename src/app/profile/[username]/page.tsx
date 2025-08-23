@@ -39,6 +39,9 @@ export default function PublicProfilePage() {
   const { user } = useUser();
   const { active } = modals;
   
+  // Check if user is viewing their own profile
+  const isOwnProfile = user?.handle === username;
+  
   // All useEffect hooks must be called before any conditional returns
   useEffect(() => {
     setMounted(true);
@@ -371,6 +374,35 @@ export default function PublicProfilePage() {
               </div>
             </div>
           </div>
+
+          {/* Action Buttons - Only show for user's own profile */}
+          {isOwnProfile && (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-8">
+              {/* Post New Listing Button */}
+              <button 
+                onClick={() => setModal('showNew', true)}
+                className="inline-flex items-center justify-center px-6 py-3 bg-white/20 backdrop-blur-lg text-white font-medium rounded-xl hover:bg-white/30 transition-all duration-200 shadow-lg hover:shadow-xl border border-white/30"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Post New Listing
+              </button>
+
+              {/* Sign Out Button */}
+              <form action="/api/auth/logout" method="post">
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center px-6 py-3 bg-white/20 backdrop-blur-lg text-white font-medium rounded-xl hover:bg-white/30 transition-all duration-200 shadow-lg hover:shadow-xl border border-white/30"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Sign Out
+                </button>
+              </form>
+            </div>
+          )}
         </div>
       </div>
       
@@ -381,7 +413,7 @@ export default function PublicProfilePage() {
           <div className="mb-12">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
               <h2 className={`text-2xl font-bold ${dark ? "text-white" : "text-neutral-900"}`} style={{ fontFamily: 'Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>
-                Listings ({sortedListings.length})
+                {isOwnProfile ? 'Your Listings' : 'Listings'} ({sortedListings.length})
               </h2>
               
               {/* Sort Options */}
@@ -447,7 +479,7 @@ export default function PublicProfilePage() {
               No listings yet
             </h3>
             <p className={`text-neutral-600 dark:text-neutral-400`}>
-              {username} hasn't posted any listings yet.
+              {isOwnProfile ? "You haven't posted any listings yet." : `${username} hasn't posted any listings yet.`}
             </p>
           </div>
         )}

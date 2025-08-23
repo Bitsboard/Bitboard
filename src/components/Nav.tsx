@@ -147,7 +147,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
             <NotificationMenu dark={dark} />
           )}
           {user ? (
-            <a href={`/${lang}/profile`} className="inline-flex items-center gap-2 rounded-full px-2 py-1 text-sm font-semibold text-white hover:opacity-90">
+            <a href={`/${lang}/${user.handle}`} className="inline-flex items-center gap-2 rounded-full px-2 py-1 text-sm font-semibold text-white hover:opacity-90">
               {avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={avatarUrl} alt="avatar" className="h-8 w-8 rounded-full border border-neutral-700" />
