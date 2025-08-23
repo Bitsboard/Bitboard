@@ -366,17 +366,28 @@ export default function PublicProfilePage() {
               </button>
 
               {/* Sign Out Button */}
-              <form action="/api/auth/logout" method="post">
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center px-6 py-3 bg-white/20 backdrop-blur-lg text-white font-medium rounded-xl hover:bg-white/30 transition-all duration-200 shadow-lg hover:shadow-xl border border-white/30"
-                >
-                  <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  Sign Out
-                </button>
-              </form>
+              <button
+                onClick={async () => {
+                  try {
+                    // Call logout API
+                    const response = await fetch('/api/auth/logout', { method: 'POST' });
+                    if (response.ok) {
+                      // Clear user state and redirect to home
+                      window.location.href = '/';
+                    }
+                  } catch (error) {
+                    console.error('Logout failed:', error);
+                    // Fallback: redirect anyway
+                    window.location.href = '/';
+                  }
+                }}
+                className="inline-flex items-center justify-center px-6 py-3 bg-white/20 backdrop-blur-lg text-white font-medium rounded-xl hover:bg-white/30 transition-all duration-200 shadow-lg hover:shadow-xl border border-white/30"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Sign Out
+              </button>
             </div>
           )}
         </div>

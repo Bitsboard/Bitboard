@@ -19,14 +19,27 @@ export function LocaleHydrator({ children }: { children: React.ReactNode }) {
       // Always restore persisted UI prefs (theme/layout/unit) regardless of locale
       try {
         const theme = localStorage.getItem('theme');
+        
+        // Remove any existing theme classes first
+        document.documentElement.classList.remove('dark', 'light');
+        document.body.classList.remove('dark', 'light');
+        
         if (theme === 'dark') {
           document.documentElement.classList.add('dark');
+          document.body.classList.add('dark');
         } else if (theme === 'light') {
-          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+          document.body.classList.add('light');
         } else {
           // If no theme is saved, default to dark mode
           document.documentElement.classList.add('dark');
+          document.body.classList.add('dark');
         }
+        
+        // Force immediate application
+        document.documentElement.style.display = 'none';
+        document.documentElement.offsetHeight; // Trigger reflow
+        document.documentElement.style.display = '';
       } catch {}
     } catch {}
   }, []);
