@@ -7,19 +7,23 @@ import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useSettings } from "@/lib/settings";
-import { ViewToggle } from "@/components";
-import type { Session, ProfileData, SortOptionProfile } from "@/lib/types";
+import { ListingCard, ListingRow, ListingModal } from "@/components";
+import { generateProfilePicture, getInitials } from "@/lib/utils";
+import type { Session, Listing } from "@/lib/types";
 
 export default function ProfilePage() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState<SortOptionProfile>('newest');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'alphabetical' | 'mostExpensive' | 'leastExpensive'>('newest');
+  const [profileImageError, setProfileImageError] = useState(false);
   const router = useRouter();
   const lang = useLang();
   
   // Use global settings
   const { theme, unit, layout } = useSettings();
+  const { modals, setModal } = useSettings();
   const dark = theme === 'dark';
+  const { active } = modals;
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -45,6 +49,22 @@ export default function ProfilePage() {
     }
   }, [loading, session, router]);
 
+  const handleListingClick = (listing: Listing) => {
+    setModal('active', listing);
+  };
+
+  const closeModal = () => {
+    setModal('active', null);
+  };
+
+  const handleProfileImageError = () => {
+    setProfileImageError(true);
+  };
+
+  const handleSortChange = (newSort: typeof sortBy) => {
+    setSortBy(newSort);
+  };
+
   if (loading) {
     return (
       <div className={cn("min-h-screen flex items-center justify-center", dark ? "bg-neutral-950" : "bg-white")}>
@@ -68,12 +88,24 @@ export default function ProfilePage() {
         return sorted.sort((a, b) => b.createdAt - a.createdAt);
       case 'oldest':
         return sorted.sort((a, b) => a.createdAt - b.createdAt);
+      case 'mostExpensive':
+        return sorted.sort((a, b) => b.priceSat - a.priceSat);
+      case 'leastExpensive':
+        return sorted.sort((a, b) => a.priceSat - b.priceSat);
       default:
         return sorted;
     }
   };
 
   const sortedListings = getSortedListings();
+  const username = session.user?.username || 'User';
+  const listings = session.account?.listings || [];
+  const memberSince = session.account?.registeredAt 
+    ? new Date(session.account.registeredAt * 1000).toLocaleDateString(undefined, { 
+        year: 'numeric', 
+        month: 'long' 
+      })
+    : 'Recently';
 
   return (
     <ErrorBoundary>
@@ -192,7 +224,10 @@ export default function ProfilePage() {
 
           {/* Post New Listing Button */}
           <div className="mb-8">
-            <button className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-sm hover:shadow-md">
+            <button 
+              onClick={() => setModal('showNew', true)}
+              className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-sm hover:shadow-md"
+            >
               <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
@@ -215,23 +250,19 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  {/* Layout Toggle */}
-                  <div className="flex items-center gap-2">
-                    <span className={cn("text-sm", dark ? "text-neutral-400" : "text-neutral-600")}>View:</span>
-                    <ViewToggle />
-                  </div>
-                  
                   {/* Sort Dropdown */}
                   <select
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as SortOptionProfile)}
+                    onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
                     className={cn("px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent", 
                       dark ? "border-neutral-600 bg-neutral-800 text-white" : "border-neutral-300 bg-white text-neutral-900"
                     )}
                   >
-                    <option value="newest">{t('newest_first', lang)}</option>
-                    <option value="oldest">{t('oldest_first', lang)}</option>
-                    <option value="alphabetical">{t('alphabetical', lang)}</option>
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="alphabetical">Alphabetical</option>
+                    <option value="mostExpensive">Most Expensive</option>
+                    <option value="leastExpensive">Least Expensive</option>
                   </select>
                 </div>
               </div>
