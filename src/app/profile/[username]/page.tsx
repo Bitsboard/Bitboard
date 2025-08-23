@@ -7,22 +7,21 @@ import { useParams } from 'next/navigation';
 import { ListingCard, ListingRow, ListingModal } from '@/components';
 import { useBtcRate } from '@/lib/hooks/useBtcRate';
 import { generateProfilePicture, getInitials } from '@/lib/utils';
-import { useLayout, useTheme, useUnit, useModals, useUser } from '@/lib/settings';
+import { useSettings } from '@/lib/settings';
 import type { Listing } from '@/lib/types';
 
 export default function PublicProfilePage() {
   const params = useParams();
   const username = params?.username as string;
-  const { theme } = useTheme();
-  const { unit } = useUnit();
   const btcCad = useBtcRate();
   
-  // Convert theme to dark boolean for compatibility
+  // Use unified settings hook
+  const { theme, unit, layout, modals, setModal, user } = useSettings();
   const dark = theme === 'dark';
+  const { active } = modals;
   
-  // State for client-side rendering and theme hydration
-  const [mounted, setMounted] = useState(false);
-  const [themeHydrated, setThemeHydrated] = useState(false);
+  // Check if user is viewing their own profile
+  const isOwnProfile = user?.handle === username;
 
   const [profileImageError, setProfileImageError] = useState(false);
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'alphabetical' | 'mostExpensive' | 'leastExpensive'>('newest');
@@ -33,33 +32,10 @@ export default function PublicProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Use global layout from settings
-  const { layout } = useLayout();
-  const { modals, setModal } = useModals();
-  const { user } = useUser();
-  const { active } = modals;
-  
-  // Check if user is viewing their own profile
-  const isOwnProfile = user?.handle === username;
-  
-  // All useEffect hooks must be called before any conditional returns
+  // Debug: Log the generated profile picture URL
   useEffect(() => {
-    setMounted(true);
-    
-    // Debug: Log the generated profile picture URL
     console.log('Generated profile picture URL for', username, ':', generateProfilePicture(username));
   }, [username]);
-
-  // Wait for theme to be properly hydrated before rendering
-  useEffect(() => {
-    if (mounted && theme) {
-      // Small delay to ensure theme is fully applied to DOM
-      const timer = setTimeout(() => {
-        setThemeHydrated(true);
-      }, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [mounted, theme]);
 
   // Fetch user listings from API
   useEffect(() => {
@@ -102,8 +78,8 @@ export default function PublicProfilePage() {
     fetchUserListings();
   }, [username]);
   
-  // Early return if username is not available yet or theme not hydrated
-  if (!username || !themeHydrated) {
+  // Early return if username is not available yet
+  if (!username) {
     return (
       <div className="min-h-screen bg-white dark:bg-neutral-950 flex items-center justify-center">
         <div className="text-center">

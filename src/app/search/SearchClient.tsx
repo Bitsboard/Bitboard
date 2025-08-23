@@ -74,18 +74,7 @@ export default function SearchClient() {
 
     useEffect(() => { setInputQuery(q); }, [q]);
 
-    // Initialize theme from document/localStorage
-    useEffect(() => {
-        try {
-            const saved = localStorage.getItem('theme');
-            if (saved === 'dark' || saved === 'light') {
-                document.documentElement.classList.toggle('dark', saved === 'dark');
-            } else {
-                const isDark = document.documentElement.classList.contains('dark');
-                document.documentElement.classList.toggle('dark', isDark);
-            }
-        } catch { }
-    }, []);
+
 
     // Sync lang from URL prefix to ensure translations show correctly when landing directly on /{lang}/search
     useEffect(() => {

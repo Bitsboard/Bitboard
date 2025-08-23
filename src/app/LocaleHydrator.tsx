@@ -14,13 +14,14 @@ export function LocaleHydrator({ children }: { children: React.ReactNode }) {
         setLang(first as any);
         try { localStorage.setItem('lang', first); } catch {}
         document.documentElement.lang = first;
-        // Restore persisted UI prefs (theme/layout/unit) without changing content state
-        try {
-          const theme = localStorage.getItem('theme');
-          if (theme === 'dark') document.documentElement.classList.add('dark');
-          else if (theme === 'light') document.documentElement.classList.remove('dark');
-        } catch {}
       }
+      
+      // Always restore persisted UI prefs (theme/layout/unit) regardless of locale
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'dark') document.documentElement.classList.add('dark');
+        else if (theme === 'light') document.documentElement.classList.remove('dark');
+      } catch {}
     } catch {}
   }, []);
   return <>{children}</>;
