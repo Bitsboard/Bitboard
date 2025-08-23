@@ -29,9 +29,15 @@ export default function PublicProfilePage() {
   
   // State for user data
   const [userListings, setUserListings] = useState<Listing[]>([]);
+  const [allUserListings, setAllUserListings] = useState<Listing[]>([]); // Store all loaded listings for sorting
   const [userProfile, setUserProfile] = useState<{ username: string; verified: boolean; registeredAt: number; profilePhoto: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  
+  const ITEMS_PER_PAGE = 24;
   
   // Debug: Log the generated profile picture URL
   useEffect(() => {
@@ -60,7 +66,14 @@ export default function PublicProfilePage() {
           console.log('Profile page: Number of listings:', data.listings?.length || 0);
           
           setUserProfile(data.user);
-          setUserListings(data.listings || []);
+          const allListings = data.listings || [];
+          setAllUserListings(allListings);
+          
+          // Show first page of listings
+          const firstPageListings = allListings.slice(0, ITEMS_PER_PAGE);
+          setUserListings(firstPageListings);
+          setHasMore(allListings.length > ITEMS_PER_PAGE);
+          setCurrentPage(0);
         } else if (response.status === 404) {
           // User not found - set specific error
           setError('user_not_found');
@@ -78,6 +91,39 @@ export default function PublicProfilePage() {
     
     fetchUserListings();
   }, [username]);
+
+  // Sort all listings when sortBy changes
+  useEffect(() => {
+    if (allUserListings.length === 0) return;
+    
+    let sortedListings = [...allUserListings];
+    
+    switch (sortBy) {
+      case 'newest':
+        sortedListings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        break;
+      case 'oldest':
+        sortedListings.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        break;
+      case 'alphabetical':
+        sortedListings.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case 'mostExpensive':
+        sortedListings.sort((a, b) => b.priceSats - a.priceSats);
+        break;
+      case 'leastExpensive':
+        sortedListings.sort((a, b) => a.priceSats - b.priceSats);
+        break;
+    }
+    
+    setAllUserListings(sortedListings);
+    
+    // Reset to first page after sorting
+    const firstPageListings = sortedListings.slice(0, ITEMS_PER_PAGE);
+    setUserListings(firstPageListings);
+    setCurrentPage(0);
+    setHasMore(sortedListings.length > ITEMS_PER_PAGE);
+  }, [sortBy, allUserListings.length]);
   
   // Early return if username is not available yet
   if (!username) {
@@ -232,6 +278,23 @@ export default function PublicProfilePage() {
     }
   };
 
+  const loadMoreListings = () => {
+    if (!hasMore || isLoadingMore) return;
+    
+    setIsLoadingMore(true);
+    const nextPage = currentPage + 1;
+    const startIndex = nextPage * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    
+    const nextPageListings = allUserListings.slice(startIndex, endIndex);
+    setUserListings(prev => [...prev, ...nextPageListings]);
+    setCurrentPage(nextPage);
+    setHasMore(endIndex < allUserListings.length);
+    setIsLoadingMore(false);
+  };
+
+
+
   return (
     <div className="min-h-screen bg-white dark:bg-neutral-950">
       {/* Modern Profile Header */}
@@ -252,27 +315,40 @@ export default function PublicProfilePage() {
           {/* Header with Sign Out Button (only for own profile) */}
           {isOwnProfile && (
             <div className="absolute top-12 right-4">
-              <button
-                onClick={async () => {
-                  try {
-                    // Clear user state first
-                    setUser(null);
-                    // Close any open modals
-                    closeAllModals();
-                    // Call logout API
-                    const response = await fetch('/api/auth/logout', { method: 'POST' });
-                    // Redirect to home regardless of API response
-                    window.location.href = '/';
-                  } catch (error) {
-                    console.error('Logout failed:', error);
-                    // Clear user state and redirect anyway
-                    setUser(null);
-                    closeAllModals();
-                    window.location.href = '/';
-                  }
-                }}
-                className="inline-flex items-center justify-center px-4 py-2 bg-white/20 backdrop-blur-lg text-white font-medium rounded-xl hover:bg-white/30 transition-all duration-200 shadow-lg hover:shadow-xl border border-white/30"
-              >
+                              <button
+                  onClick={async () => {
+                    try {
+                      // Call logout API first
+                      const response = await fetch('/api/auth/logout', { method: 'POST' });
+                      
+                      // Clear user state and close modals
+                      setUser(null);
+                      closeAllModals();
+                      
+                      // Force clear any stored auth data
+                      if (typeof window !== 'undefined') {
+                        localStorage.removeItem('user');
+                        sessionStorage.clear();
+                      }
+                      
+                      // Redirect to home with cache-busting
+                      window.location.href = '/?logout=' + Date.now();
+                    } catch (error) {
+                      console.error('Logout failed:', error);
+                      // Clear user state and redirect anyway
+                      setUser(null);
+                      closeAllModals();
+                      
+                      if (typeof window !== 'undefined') {
+                        localStorage.removeItem('user');
+                        sessionStorage.clear();
+                      }
+                      
+                      window.location.href = '/?logout=' + Date.now();
+                    }
+                  }}
+                  className="inline-flex items-center justify-center px-4 py-2 bg-white/20 backdrop-blur-lg text-white font-medium rounded-xl hover:bg-white/30 transition-all duration-200 shadow-lg hover:shadow-xl border border-white/30"
+                >
                 <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
@@ -491,6 +567,38 @@ export default function PublicProfilePage() {
                     />
                   </div>
                 ))}
+              </div>
+            )}
+            
+            {/* Load More Button */}
+            {hasMore && (
+              <div className="flex justify-center mt-8">
+                <button
+                  onClick={loadMoreListings}
+                  disabled={isLoadingMore}
+                  className={`inline-flex items-center justify-center px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl ${
+                    isLoadingMore
+                      ? 'bg-neutral-400 text-white cursor-not-allowed'
+                      : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600'
+                  }`}
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                      </svg>
+                      Load More ({userListings.length} of {allUserListings.length})
+                    </>
+                  )}
+                </button>
               </div>
             )}
           </div>

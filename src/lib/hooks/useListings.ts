@@ -8,6 +8,8 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [hasMore, setHasMore] = useState<boolean>(true);
     const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+    const [currentPage, setCurrentPage] = useState<number>(0);
+    const [allListings, setAllListings] = useState<Listing[]>([]); // Store all loaded listings for sorting
 
     // Initial page load
     useEffect(() => {
@@ -20,6 +22,7 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
         const loadFromAPI = async () => {
             try {
                 setIsLoading(true);
+                setCurrentPage(0);
                 const response = await dataService.getListings({
                     limit: CONFIG.PAGE_SIZE,
                     offset: 0,
@@ -29,6 +32,7 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
                 });
 
                 setListings(response.listings);
+                setAllListings(response.listings);
                 setTotal(response.total);
                 setHasMore(response.listings.length < response.total);
             } catch (error) {
@@ -46,23 +50,32 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
 
         try {
             setIsLoadingMore(true);
+            const nextPage = currentPage + 1;
             const response = await dataService.getListings({
                 limit: CONFIG.PAGE_SIZE,
-                offset: listings.length,
+                offset: nextPage * CONFIG.PAGE_SIZE,
                 lat: center.lat,
                 lng: center.lng,
                 radiusKm,
             });
 
-            setListings((prev) => [...prev, ...response.listings]);
+            const newListings = [...allListings, ...response.listings];
+            setAllListings(newListings);
+            setListings(newListings);
+            setCurrentPage(nextPage);
             setTotal(response.total);
-            setHasMore(response.listings.length < response.total);
+            setHasMore(newListings.length < response.total);
         } catch (error) {
             console.error('Failed to load more listings:', error);
         } finally {
             setIsLoadingMore(false);
         }
-    }, [isDeployed, isLoading, isLoadingMore, hasMore, listings.length, center.lat, center.lng, radiusKm]);
+    }, [isDeployed, isLoading, isLoadingMore, hasMore, currentPage, center.lat, center.lng, radiusKm, allListings.length]);
+
+    // Function to update displayed listings (for sorting)
+    const updateDisplayedListings = useCallback((newListings: Listing[]) => {
+        setListings(newListings);
+    }, []);
 
     return {
         listings,
@@ -71,5 +84,8 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
         hasMore,
         isLoadingMore,
         loadMore,
+        currentPage,
+        allListings,
+        updateDisplayedListings,
     };
 }
