@@ -3,8 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Modal, ModalHeader, ModalTitle, ModalBody, ModalCloseButton } from "./Modal";
-
-type User = { id: string; email: string; handle: string };
+import type { User } from "@/lib/types";
 
 interface AuthModalProps {
   onClose: () => void;
@@ -33,7 +32,8 @@ export function AuthModal({ onClose, onAuthed, dark }: AuthModalProps) {
           onAuthed({
             id: data.session.user.username || 'unknown',
             email: data.session.user.email || 'unknown',
-            handle: data.session.user.username || 'unknown'
+            handle: data.session.user.username || 'unknown',
+            hasChosenUsername: true // Assume existing users have chosen usernames
           });
         }
       } catch (error) {

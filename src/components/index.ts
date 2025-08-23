@@ -14,6 +14,7 @@ export { ThemeToggle } from "./ThemeToggle";
 export { TypePill } from "./TypePill";
 export { TypeToggle } from "./TypeToggle";
 export { UnitToggle } from "./UnitToggle";
+export { UsernameSelectionModal } from "./UsernameSelectionModal";
 export { ViewToggle } from "./ViewToggle";
 export { Carousel } from "./Carousel";
 export { ItemsCarousel } from "./ItemsCarousel";

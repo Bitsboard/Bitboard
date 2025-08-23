@@ -148,32 +148,46 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
           {user ? (
             <div className="flex items-center gap-2">
               {/* Unified Profile Button */}
-              <a 
-                href={`/profile/${user.handle}`}
-                onClick={(e) => {
-                  // Prevent the flash by ensuring user state persists during navigation
-                  e.preventDefault();
-                  window.location.href = `/profile/${user.handle}`;
-                }}
-                className="inline-flex items-center gap-3 px-4 py-2.5 rounded-xl bg-neutral-100/80 dark:bg-neutral-800/50 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/50 transition-all duration-200 group border border-neutral-300/50 dark:border-neutral-700/50"
-              >
-                {avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatarUrl} alt="avatar" className={cn("h-7 w-7 rounded-full border-2 shadow-sm", dark ? "border-white/30" : "border-neutral-300/50")} />
-                ) : (
-                  <div className="h-7 w-7 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center shadow-sm">
+              {user.handle ? (
+                <a 
+                  href={`/profile/${user.handle}`}
+                  onClick={(e) => {
+                    // Prevent the flash by ensuring user state persists during navigation
+                    e.preventDefault();
+                    window.location.href = `/profile/${user.handle}`;
+                  }}
+                  className="inline-flex items-center gap-3 px-4 py-2.5 rounded-xl bg-neutral-100/80 dark:bg-neutral-800/50 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/50 transition-all duration-200 group border border-neutral-300/50 dark:border-neutral-700/50"
+                >
+                  {avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={avatarUrl} alt="avatar" className={cn("h-7 w-7 rounded-full border-2 shadow-sm", dark ? "border-white/30" : "border-neutral-300/50")} />
+                  ) : (
+                    <div className="h-7 w-7 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center shadow-sm">
+                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                  )}
+                  <span className={cn("text-sm font-medium hidden md:block", dark ? "text-neutral-200" : "text-neutral-700")}>
+                    {user.handle}
+                  </span>
+                  <svg className="w-4 h-4 text-neutral-400 group-hover:text-neutral-300 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
+              ) : (
+                // Show username selection prompt if user hasn't chosen a username
+                <div className="inline-flex items-center gap-3 px-4 py-2.5 rounded-xl bg-yellow-100/80 dark:bg-yellow-900/50 border border-yellow-300/50 dark:border-yellow-700/50">
+                  <div className="h-7 w-7 rounded-full bg-yellow-500 flex items-center justify-center shadow-sm">
                     <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
                   </div>
-                )}
-                <span className={cn("text-sm font-medium hidden md:block", dark ? "text-neutral-200" : "text-neutral-700")}>
-                  {user.handle}
-                </span>
-                <svg className="w-4 h-4 text-neutral-400 group-hover:text-neutral-300 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
+                  <span className={cn("text-sm font-medium hidden md:block", dark ? "text-yellow-200" : "text-yellow-700")}>
+                    Choose Username
+                  </span>
+                </div>
+              )}
               
               {/* Notifications - Now grouped with profile */}
               <NotificationMenu dark={dark} />

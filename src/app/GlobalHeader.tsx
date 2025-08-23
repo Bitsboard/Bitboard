@@ -27,6 +27,7 @@ export default function GlobalHeader() {
             id: data.session.user.username || 'unknown',
             email: data.session.user.email || 'unknown',
             handle: data.session.user.username || 'unknown',
+            hasChosenUsername: true, // Assume existing users have chosen usernames
             image: data.session.user.image || undefined
           });
         }

@@ -291,3 +291,49 @@ export function isDefaultUsername(username: string): boolean {
   const defaultUsernamePattern = /^User\d{9}$/;
   return defaultUsernamePattern.test(username);
 }
+
+// Profanity filter - master list of banned words
+const PROFANITY_LIST = [
+  // Common profanities and offensive terms
+  'fuck', 'shit', 'bitch', 'ass', 'dick', 'cock', 'pussy', 'cunt',
+  'bastard', 'whore', 'slut', 'nigger', 'faggot', 'dyke', 'retard',
+  'idiot', 'stupid', 'dumb', 'moron', 'retarded', 'gay', 'lesbian',
+  'homo', 'queer', 'tranny', 'shemale', 'fag', 'dyke', 'whore',
+  // Add more as needed
+];
+
+// Check if username contains profanity
+export function containsProfanity(username: string): boolean {
+  const lowerUsername = username.toLowerCase();
+  return PROFANITY_LIST.some(word => lowerUsername.includes(word));
+}
+
+// Validate username format and content
+export function validateUsername(username: string): { isValid: boolean; error?: string } {
+  // Check length
+  if (username.length < 3) {
+    return { isValid: false, error: 'Username must be at least 3 characters long' };
+  }
+  
+  if (username.length > 12) {
+    return { isValid: false, error: 'Username must be 12 characters or less' };
+  }
+  
+  // Check format (only A-Z, 0-9, hyphens, underscores)
+  if (!/^[A-Za-z0-9_-]+$/.test(username)) {
+    return { isValid: false, error: 'Username can only contain letters, numbers, hyphens, and underscores' };
+  }
+  
+  // Check for profanity
+  if (containsProfanity(username)) {
+    return { isValid: false, error: 'Username contains inappropriate content. Please choose a different username.' };
+  }
+  
+  // Check for common reserved words
+  const reservedWords = ['admin', 'administrator', 'mod', 'moderator', 'support', 'help', 'info', 'contact', 'about', 'terms', 'privacy'];
+  if (reservedWords.includes(username.toLowerCase())) {
+    return { isValid: false, error: 'Username is reserved. Please choose a different username.' };
+  }
+  
+  return { isValid: true };
+}

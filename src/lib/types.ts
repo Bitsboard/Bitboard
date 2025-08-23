@@ -67,7 +67,8 @@ export type SavedSearch = {
 export type User = {
   id: string;
   email: string;
-  handle: string;
+  handle?: string | null;
+  hasChosenUsername: boolean;
   image?: string;
   rating?: number;
   deals?: number;
@@ -148,7 +149,7 @@ export type ListingForm = {
 
 export type AuthForm = {
   email: string;
-  handle: string;
+  handle?: string;
 };
 
 // Filter Types
