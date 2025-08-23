@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "../styles/globals.css";
 import GlobalHeader from "./GlobalHeader";
 import { LocaleHydrator } from "./LocaleHydrator";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 import Footer from "@/components/Footer";
 
@@ -66,9 +67,11 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <LocaleHydrator>
-          <GlobalHeader />
-          {children}
-          <Footer />
+          <ThemeProvider>
+            <GlobalHeader />
+            {children}
+            <Footer />
+          </ThemeProvider>
         </LocaleHydrator>
       </body>
     </html>

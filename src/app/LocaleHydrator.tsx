@@ -19,8 +19,14 @@ export function LocaleHydrator({ children }: { children: React.ReactNode }) {
       // Always restore persisted UI prefs (theme/layout/unit) regardless of locale
       try {
         const theme = localStorage.getItem('theme');
-        if (theme === 'dark') document.documentElement.classList.add('dark');
-        else if (theme === 'light') document.documentElement.classList.remove('dark');
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else if (theme === 'light') {
+          document.documentElement.classList.remove('dark');
+        } else {
+          // If no theme is saved, default to dark mode
+          document.documentElement.classList.add('dark');
+        }
       } catch {}
     } catch {}
   }, []);

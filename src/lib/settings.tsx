@@ -137,10 +137,13 @@ export const useSettingsStore = create<SettingsStore>()(
                 user: state.user,
             }),
             onRehydrateStorage: () => (state) => {
-                // Apply theme on rehydration
+                // Apply theme on rehydration, but only if it's different from current
                 if (state && typeof window !== 'undefined') {
                     const isDark = state.theme === 'dark';
-                    document.documentElement.classList.toggle('dark', isDark);
+                    const currentlyDark = document.documentElement.classList.contains('dark');
+                    if (isDark !== currentlyDark) {
+                        document.documentElement.classList.toggle('dark', isDark);
+                    }
                 }
             },
         }

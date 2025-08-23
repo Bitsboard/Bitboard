@@ -144,7 +144,7 @@ export default function PublicProfilePage() {
 
   // Get user info from API response or fallback to default values
   const userVerified = userProfile?.verified || false;
-  const userScore = 75; // Default score since API doesn't provide this yet
+  const userScore = 0; // Start with 0 reputation for new users
   const oldestListing = userListings.length > 0 ? userListings.reduce((oldest, current) => 
     current.createdAt < oldest.createdAt ? current : oldest
   ) : null;
