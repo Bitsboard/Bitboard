@@ -113,47 +113,24 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                 <button
                   onClick={() => {
                     if (confirm('Click to wipe georged1997@gmail.com from the database. This will allow you to re-sign up and test the username selection flow. Continue?')) {
-                      console.log('1. Confirmation accepted, starting wipe process...');
+                      console.log('Starting wipe process...');
                       
-                      // Use a simple function call instead of async/await to avoid potential issues
-                      const wipeAccount = () => {
-                        console.log('2. About to make fetch request to /api/test/wipe-account...');
-                        
-                        fetch('/api/test/wipe-account', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' }
-                        })
-                        .then(response => {
-                          console.log('3. Fetch request completed, response received');
-                          console.log('4. Response status:', response.status);
-                          
-                          if (response.ok) {
-                            console.log('5. Response is OK, parsing JSON...');
-                            return response.json();
-                          } else {
-                            console.log('5. Response is NOT OK, parsing error JSON...');
-                            return response.json().then((errorData: any) => {
-                              throw new Error(`HTTP ${response.status}: ${errorData.error || 'Unknown error'}`);
-                            });
-                          }
-                        })
-                        .then(result => {
-                          console.log('6. JSON parsed successfully:', result);
+                      // Very simple fetch - no complex logic
+                      fetch('/api/test/wipe-account', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                      })
+                      .then(response => {
+                        if (response.ok) {
                           alert('Account wiped successfully! You can now re-sign up with georged1997@gmail.com');
-                          console.log('7. About to reload page...');
                           window.location.reload();
-                        })
-                        .catch(error => {
-                          console.log('EXCEPTION CAUGHT in wipe process');
-                          console.error('Error during wipe:', error);
-                          alert(`Failed to wipe account: ${error.message}`);
-                        });
-                      };
-                      
-                      // Call the function
-                      wipeAccount();
-                    } else {
-                      console.log('User cancelled the wipe operation');
+                        } else {
+                          alert('Failed to wipe account. Please try again.');
+                        }
+                      })
+                      .catch(() => {
+                        alert('Failed to wipe account. Please try again.');
+                      });
                     }
                   }}
                   className="hidden sm:inline rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow cursor-pointer hover:bg-red-700 transition-colors duration-200"
