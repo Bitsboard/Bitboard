@@ -26,10 +26,6 @@ export function useUsernameSelection(externalUser?: User | null) {
     // This hook just manages the modal state
   };
 
-  const refreshUserStatus = () => {
-    checkUserStatus();
-  };
-
   return {
     showUsernameModal,
     handleUsernameSelected
