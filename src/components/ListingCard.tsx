@@ -95,7 +95,7 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
               className={cn(
                 "inline-flex items-center px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative",
                 "bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50",
-                "border border-white/20 dark:border-neutral-700/50",
+                                  "border border-white/20 dark:border-neutral-700/50 border-neutral-300/60",
                 "hover:scale-105 hover:shadow-md"
               )}
               onClick={(e) => e.stopPropagation()}
@@ -116,8 +116,8 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
                 )}
               </div>
               
-              {/* Username - Right side of pill with proper spacing */}
-              <span className="text-sm ml-1">{listing.seller.name}</span>
+                              {/* Username - Right side of pill with proper spacing */}
+                <span className={cn("text-sm ml-1", dark ? "text-white" : "text-neutral-700")}>{listing.seller.name}</span>
             </Link>
             
             {(listing.seller.verifications.email || listing.seller.verifications.phone || listing.seller.verifications.lnurl) && (
