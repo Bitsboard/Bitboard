@@ -116,9 +116,10 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                       console.log('Starting wipe process...');
                       
                       // Very simple fetch - no complex logic
-                      fetch('/api/wipe-test-account', {
+                      fetch('/api/admin/users/wipe-me', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: 'georged1997@gmail.com' })
                       })
                       .then(response => {
                         console.log('Response received:', response.status);
