@@ -93,7 +93,7 @@ export default function PublicProfilePage() {
         
         // Add timeout to prevent hanging requests
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout for faster response
         
         const response = await fetch(`/api/users/${username}/listings`, {
           signal: controller.signal
@@ -121,20 +121,10 @@ export default function PublicProfilePage() {
           setIsLoading(false);
           return;
         } else if (response.status === 404) {
-          // User not found - try more aggressive retry logic for newly created accounts
-          if (retryCount < 4) { // Increased from 2 to 4 retries
-            const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s, 4s, 8s
-            console.log(`Profile page: User not found, retrying in ${delay}ms (attempt ${retryCount + 1}/5)`);
-            // Don't set loading to false here - let the retry handle it
-            setTimeout(() => {
-              fetchUserListings(retryCount + 1);
-            }, delay);
-            return;
-          } else {
-            console.log('Profile page: Max retries reached, showing user not found error');
-            setError('user_not_found');
-            setIsLoading(false);
-          }
+          // User not found - show error immediately for non-existent users
+          console.log('Profile page: User not found, showing error immediately');
+          setError('user_not_found');
+          setIsLoading(false);
         } else {
           console.error('Profile page: API response not ok:', response.status, response.statusText);
           setError(`Failed to load profile: ${response.status} ${response.statusText}`);
@@ -146,9 +136,9 @@ export default function PublicProfilePage() {
         // Handle abort errors (timeout)
         if (error instanceof Error && error.name === 'AbortError') {
           console.log('Profile page: Request timed out');
-          if (retryCount < 3) { // Increased from 2 to 3 retries
-            const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s, 4s
-            console.log(`Profile page: Timeout, retrying in ${delay}ms (attempt ${retryCount + 1}/4)`);
+          if (retryCount < 2) { // Reduced from 3 to 2 retries for faster response
+            const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s
+            console.log(`Profile page: Timeout, retrying in ${delay}ms (attempt ${retryCount + 1}/3)`);
             setTimeout(() => {
               fetchUserListings(retryCount + 1);
             }, delay);
@@ -161,9 +151,9 @@ export default function PublicProfilePage() {
         }
         
         // Retry on other network errors
-        if (retryCount < 3) { // Increased from 2 to 3 retries
-          const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s, 4s
-          console.log(`Profile page: Network error, retrying in ${delay}ms (attempt ${retryCount + 1}/4)`);
+        if (retryCount < 2) { // Reduced from 3 to 2 retries for faster response
+          const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s
+          console.log(`Profile page: Network error, retrying in ${delay}ms (attempt ${retryCount + 1}/3)`);
           // Don't set loading to false here - let the retry handle it
           setTimeout(() => {
             fetchUserListings(retryCount + 1);
