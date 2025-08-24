@@ -26,7 +26,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     const markerRef = React.useRef<any>(null);
     const leafletRef = React.useRef<any>(null);
     const lang = useLang();
-    const [query, setQuery] = React.useState<string>("");
+    const [query, setQuery] = React.useState<string>(initialCenter?.name || "");
     const [radiusKm, setRadiusKm] = React.useState<number>(initialRadiusKm);
     const [center, setCenter] = React.useState<Place>({
         name: initialCenter?.name || "",
@@ -37,6 +37,20 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     const [locating, setLocating] = React.useState<boolean>(false);
     const [usingMyLocation, setUsingMyLocation] = React.useState<boolean>(false);
     const [circleMode, setCircleMode] = React.useState<'global' | 'local'>(initialRadiusKm === 0 ? 'global' : 'local');
+
+    // Update query and center when initialCenter changes (e.g., when modal opens with different location)
+    React.useEffect(() => {
+        if (initialCenter?.lat && initialCenter?.lng) {
+            setCenter({
+                name: initialCenter.name || "",
+                lat: initialCenter.lat,
+                lng: initialCenter.lng,
+            });
+        }
+        if (initialCenter?.name) {
+            setQuery(initialCenter.name);
+        }
+    }, [initialCenter, open]);
     // Map zoom helper tied to radius
     function zoomForRadiusKm(r: number): number {
         if (r <= 0) return 1; // world view, show all continents
@@ -247,7 +261,8 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             // Show placeholder; do not prefill text
             setQuery("");
         } else {
-            const currentName = center?.name || initialCenter?.name || "";
+            // Use initialCenter directly since center state might not be updated yet
+            const currentName = initialCenter?.name || center?.name || "";
             if (currentName && !query) setQuery(currentName);
         }
     }, [open, initialCenter?.name, center?.name, lang]);

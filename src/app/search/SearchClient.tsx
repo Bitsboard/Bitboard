@@ -589,7 +589,11 @@ export default function SearchClient() {
                     <LocationModal
                         open={showLocationModal}
                         onClose={() => setModal('showLocationModal', false)}
-                        initialCenter={{ lat: Number(centerLat || 43.6532), lng: Number(centerLng || -79.3832), name: '' }}
+                        initialCenter={{ 
+                            lat: Number(centerLat || savedCenter?.lat || 43.6532), 
+                            lng: Number(centerLng || savedCenter?.lng || -79.3832), 
+                            name: savedCenter?.name || '' 
+                        }}
                         initialRadiusKm={radiusKm}
                         dark={dark}
                         onApply={async (place, r) => {
