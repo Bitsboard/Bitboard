@@ -54,22 +54,16 @@ export async function GET(req: Request) {
         sso TEXT,
         verified INTEGER DEFAULT 0,
         created_at INTEGER NOT NULL,
-        image TEXT
+        image TEXT,
+        has_chosen_username INTEGER DEFAULT 0 CHECK (has_chosen_username IN (0, 1))
       )`).run();
       const existing = await db.prepare('SELECT id, username FROM users WHERE email = ?').bind(user.email).all();
       let userId = existing.results?.[0]?.id as string | undefined;
       if (!userId) {
         userId = uuidv4();
-        // Generate collision-free default username: User + 8-char base36
-        let defaultUsername = '';
-        for (let attempts = 0; attempts < 10; attempts++) {
-          const candidate = `User${Math.random().toString(36).slice(2, 10)}`;
-          const taken = await db.prepare('SELECT 1 FROM users WHERE username = ?').bind(candidate.toLowerCase()).all();
-          if ((taken.results ?? []).length === 0) { defaultUsername = candidate; break; }
-        }
-        if (!defaultUsername) defaultUsername = `User${Date.now().toString(36).slice(-8)}`;
-        await db.prepare('INSERT INTO users (id, email, username, sso, verified, created_at, image) VALUES (?, ?, ?, ?, ?, ?, ?)')
-          .bind(userId, user.email, defaultUsername, 'google', 1, Math.floor(Date.now() / 1000), user.picture ?? null)
+        // Don't generate a default username - user must choose one
+        await db.prepare('INSERT INTO users (id, email, username, sso, verified, created_at, image, has_chosen_username) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+          .bind(userId, user.email, null, 'google', 1, Math.floor(Date.now() / 1000), user.picture ?? null, 0)
           .run();
       } else {
         await db.prepare('UPDATE users SET image = COALESCE(?, image), sso = ? WHERE id = ?')

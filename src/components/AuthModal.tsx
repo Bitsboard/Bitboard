@@ -32,8 +32,8 @@ export function AuthModal({ onClose, onAuthed, dark }: AuthModalProps) {
           onAuthed({
             id: data.session.user.username || 'unknown',
             email: data.session.user.email || 'unknown',
-            handle: data.session.user.username || 'unknown',
-            hasChosenUsername: true // Assume existing users have chosen usernames
+            handle: data.session.user.username || null,
+            hasChosenUsername: data.session.user.hasChosenUsername || false
           });
         }
       } catch (error) {

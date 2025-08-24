@@ -8,14 +8,13 @@ import {
   LocationModal,
   HeroSection,
   ListingsSection,
-  UsernameSelectionModal,
 } from "@/components";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useLang } from "@/lib/i18n-client";
 import { useSettings } from "@/lib/settings";
 import { useTheme } from "@/lib/contexts/ThemeContext";
-import { useListings, useLocation, useBtcRate, useSearchFilters, useUsernameSelection } from "@/lib/hooks";
+import { useListings, useLocation, useBtcRate, useSearchFilters } from "@/lib/hooks";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import type { Listing, User } from "@/lib/types";
@@ -27,8 +26,7 @@ export default function HomePage() {
   const { theme, isDark } = useTheme();
   const dark = isDark;
 
-  // Username selection hook
-  const { user, isLoading: userLoading, showUsernameModal, handleUsernameSelected } = useUsernameSelection();
+
   
   const ENV = process.env.NEXT_PUBLIC_ENV || process.env.NEXT_PUBLIC_BRANCH || 'development';
   const isDeployed = ENV === "production" || ENV === "staging" || ENV === "main"; // Include staging and main
@@ -86,20 +84,7 @@ export default function HomePage() {
     setModal('showLocationModal', false);
   };
 
-  // Don't render the main content if user is still loading or needs to choose username
-  if (userLoading) {
-    return (
-      <div className={cn(
-        "min-h-screen flex items-center justify-center",
-        dark ? "bg-neutral-950" : "bg-white"
-      )}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className={dark ? "text-gray-300" : "text-gray-600"}>Loading...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <ErrorBoundary>
@@ -142,13 +127,7 @@ export default function HomePage() {
 
         {/* Global footer is rendered via layout */}
 
-        {/* Username Selection Modal - Unclosable until username is chosen */}
-        {showUsernameModal && (
-          <UsernameSelectionModal
-            dark={dark}
-            onUsernameSelected={handleUsernameSelected}
-          />
-        )}
+
 
         {/* Modals */}
         {showLocationModal && (
@@ -170,11 +149,7 @@ export default function HomePage() {
             btcCad={btcCad}
             dark={dark}
             onChat={() => {
-              if (!user) {
-                setModal('showAuth', true);
-              } else {
-                setModal('chatFor', active);
-              }
+              setModal('chatFor', active);
             }}
           />
         )}

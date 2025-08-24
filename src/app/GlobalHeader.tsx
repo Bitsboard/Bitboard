@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Nav, AuthModal } from "@/components";
+import { Nav, AuthModal, UsernameSelectionModal } from "@/components";
 import { useLang } from "@/lib/i18n-client";
 import { useSettings, useUser, useModals } from "@/lib/settings";
 import { useTheme } from "@/lib/contexts/ThemeContext";
+import { useUsernameSelection } from "@/lib/hooks";
 
 import type { User } from "@/lib/types";
 
@@ -14,6 +15,9 @@ export default function GlobalHeader() {
   const { modals, setModal } = useModals();
   const { theme } = useTheme();
   const dark = theme === 'dark';
+  
+  // Username selection hook
+  const { showUsernameModal, handleUsernameSelected: closeUsernameModal } = useUsernameSelection(user);
 
   // Check for existing session on mount
   useEffect(() => {
@@ -80,6 +84,33 @@ export default function GlobalHeader() {
     setModal('showAuth', false);
   };
 
+  const handleUsernameSelected = async (username: string) => {
+    if (user) {
+      try {
+        // Call the API to set the username
+        const response = await fetch('/api/users/set-username', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username }),
+        });
+
+        if (response.ok) {
+          // Update the local user state
+          const updatedUser = {
+            ...user,
+            handle: username,
+            hasChosenUsername: true
+          };
+          setUser(updatedUser);
+        } else {
+          console.error('Failed to set username');
+        }
+      } catch (error) {
+        console.error('Error setting username:', error);
+      }
+    }
+  };
+
   return (
     <>
       <Nav
@@ -93,6 +124,14 @@ export default function GlobalHeader() {
           dark={dark}
           onClose={() => setModal('showAuth', false)}
           onAuthed={handleAuthed}
+        />
+      )}
+      
+      {/* Username selection modal - shows on every page if user hasn't chosen username */}
+      {showUsernameModal && (
+        <UsernameSelectionModal
+          dark={dark}
+          onUsernameSelected={handleUsernameSelected}
         />
       )}
     </>
