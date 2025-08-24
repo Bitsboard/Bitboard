@@ -51,7 +51,12 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         // Handle worldwide mode (radius = 0)
         if (initialRadiusKm === 0) {
             setQuery(t('all_listings_globally', lang));
-            setCenter(prev => ({ ...prev, name: t('all_listings_globally', lang) }));
+            // For worldwide mode, use a special place with valid coordinates but worldwide name
+            setCenter({
+                name: t('all_listings_globally', lang),
+                lat: 0, // Use 0,0 for worldwide (valid coordinates)
+                lng: 0
+            });
         } else if (initialCenter?.name) {
             setQuery(initialCenter.name);
         }
@@ -61,7 +66,12 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     React.useEffect(() => {
         if (radiusKm === 0) {
             setQuery(t('all_listings_globally', lang));
-            setCenter(prev => ({ ...prev, name: t('all_listings_globally', lang) }));
+            // For worldwide mode, use a special place with valid coordinates but worldwide name
+            setCenter({
+                name: t('all_listings_globally', lang),
+                lat: 0, // Use 0,0 for worldwide (valid coordinates)
+                lng: 0
+            });
         }
     }, [radiusKm, lang]);
 

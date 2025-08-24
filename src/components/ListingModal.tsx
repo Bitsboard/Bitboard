@@ -111,7 +111,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                     }}
                   >
                     {/* Profile Icon - Positioned so its center aligns with the left edge radius */}
-                    <div className="flex-shrink-0 -ml-2.5">
+                    <div className="flex-shrink-0 -ml-1.5">
                       {!sellerImageError ? (
                         <img
                           src={generateProfilePicture(listing.seller.name)}

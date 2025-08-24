@@ -150,7 +150,7 @@ export class LocationService {
         return (
             typeof radius === 'number' &&
             Number.isFinite(radius) &&
-            radius > 0 &&
+            radius >= 0 &&
             radius <= 1000
         );
     }
