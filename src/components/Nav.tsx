@@ -110,9 +110,36 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                 BETA
               </span>
               {isStaging && (
-                <span className="hidden sm:inline rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow">
+                <button
+                  onClick={async () => {
+                    if (confirm('Click to wipe georged1997@gmail.com from the database. This will allow you to re-sign up and test the username selection flow. Continue?')) {
+                      try {
+                        const response = await fetch('/api/admin/users/wipe-me', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ email: 'georged1997@gmail.com' })
+                        });
+                        
+                        if (response.ok) {
+                          alert('Account wiped successfully! You can now re-sign up with georged1997@gmail.com');
+                          // Force page reload to clear any cached state
+                          window.location.reload();
+                        } else {
+                          const errorData = await response.json() as { error?: string };
+                          alert(`Failed to wipe account: ${errorData.error || 'Unknown error'}`);
+                        }
+                      } catch (error: unknown) {
+                        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                        alert('Failed to wipe account. Please try again.');
+                        console.error('Error wiping account:', errorMessage);
+                      }
+                    }
+                  }}
+                  className="hidden sm:inline rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow cursor-pointer hover:bg-red-700 transition-colors duration-200"
+                  title="Click to wipe georged1997@gmail.com from database for testing"
+                >
                   STAGING
-                </span>
+                </button>
               )}
             </div>
           </a>

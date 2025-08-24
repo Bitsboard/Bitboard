@@ -69,25 +69,10 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
         {/* Overlay: type bottom-left, location bottom-right */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">
           <div className="flex items-end justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className={cn("rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>
-                {listing.type === 'want' ? t('looking_for', useLang()) : t('selling', useLang())}
-              </span>
-              {/* Username tag */}
-              <Link
-                href={`/profile/${listing.seller.name}`}
-                className={cn(
-                  "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium transition-all duration-200 cursor-pointer",
-                  "bg-white/20 dark:bg-neutral-800/80 hover:bg-white/30 dark:hover:bg-neutral-700/80",
-                  "border border-white/30 dark:border-neutral-700/50",
-                  "hover:scale-105 hover:shadow-sm"
-                )}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <span className="text-white">@{listing.seller.name}</span>
-              </Link>
-            </div>
-            <span className={cn("truncate max-w-[40%] rounded-full px-3 py-1 text-[11px] backdrop-blur-sm", dark ? "bg-neutral-900/80 text-neutral-200" : "bg-white/80 text-neutral-700")}>📍 {listing.location}</span>
+            <span className={cn("rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>
+              {listing.type === 'want' ? t('looking_for', useLang()) : t('selling', useLang())}
+            </span>
+            <span className={cn("truncate max-w-[60%] rounded-full px-3 py-1 text-[11px] backdrop-blur-sm", dark ? "bg-neutral-900/80 text-neutral-200" : "bg-white/80 text-neutral-700")}>📍 {listing.location}</span>
           </div>
         </div>
       </div>
@@ -121,7 +106,7 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
             
             <Link
               href={`/profile/${listing.seller.name}`}
-              className="truncate max-w-[8rem] sm:max-w-[10rem] hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-200"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-100/80 dark:bg-neutral-800/50 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/50 border border-neutral-300/50 dark:border-neutral-700/50 transition-all duration-200 hover:scale-105"
               onClick={(e) => e.stopPropagation()}
             >
               {listing.seller.name}
