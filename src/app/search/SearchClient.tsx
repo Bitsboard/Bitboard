@@ -9,6 +9,7 @@ import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
 import { useSettings, useModals, useUser } from "@/lib/settings";
 import { useTheme } from "@/lib/contexts/ThemeContext";
+import { useLocation } from "@/lib/contexts/LocationContext";
 import { dataService, CONFIG } from "@/lib/dataService";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { mockListings } from '@/lib/mockData';
@@ -22,6 +23,7 @@ export default function SearchClient() {
     const { modals, setModal } = useModals();
     const { user } = useUser();
     const { theme } = useTheme();
+    const { center: savedCenter, radiusKm: savedRadiusKm, updateLocation } = useLocation();
     const dark = theme === 'dark';
 
     const layoutParam = (params.get("layout") || "").trim();
@@ -65,13 +67,7 @@ export default function SearchClient() {
     const [city, setCity] = useState<string>("");
     const [centerLat, setCenterLat] = useState<string>(latParam ?? "");
     const [centerLng, setCenterLng] = useState<string>(lngParam ?? "");
-    const [radiusKm, setRadiusKm] = useState<number>(() => {
-        try {
-            const v = localStorage.getItem('userRadius');
-            if (v) return Number(v);
-        } catch { }
-        return CONFIG.DEFAULT_RADIUS_KM;
-    });
+    const [radiusKm, setRadiusKm] = useState<number>(CONFIG.DEFAULT_RADIUS_KM);
 
 
     useEffect(() => { setInputQuery(q); }, [q]);
@@ -92,11 +88,10 @@ export default function SearchClient() {
 
     // Persisted radius on locale change (for Worldwide state)
     useEffect(() => {
-        try {
-            const savedRadius = Number(localStorage.getItem('userRadius') || '');
-            if (Number.isFinite(savedRadius)) setRadiusKm(savedRadius);
-        } catch { }
-    }, [lang]);
+        if (Number.isFinite(savedRadiusKm)) {
+            setRadiusKm(savedRadiusKm);
+        }
+    }, [lang, savedRadiusKm]);
 
     useEffect(() => { setSelCategory(category); }, [category]);
     useEffect(() => { setSelAdType(adTypeParam); }, [adTypeParam]);
@@ -105,24 +100,24 @@ export default function SearchClient() {
     useEffect(() => { setSortChoice(`${sortByParam}:${sortOrderParam}`); }, [sortByParam, sortOrderParam]);
     useEffect(() => { setCenterLat(latParam ?? ""); setCenterLng(lngParam ?? ""); }, [latParam, lngParam]);
 
-    // If no lat/lng in URL, attempt to seed from saved location
-    useEffect(() => {
-        if (!latParam || !lngParam) {
-            const loadSavedLocation = async () => {
-                try {
-                    const savedLocation = await dataService.getUserLocation();
-                    if (savedLocation?.lat && savedLocation?.lng) {
-                        setCenterLat(String(savedLocation.lat));
-                        setCenterLng(String(savedLocation.lng));
-                    }
-                } catch (error) {
-                    console.warn('Failed to load saved location:', error);
-                }
-            };
 
-            loadSavedLocation();
+
+    // Sync with location context
+    useEffect(() => {
+        if (Number.isFinite(savedRadiusKm)) {
+            console.log('SearchClient: Syncing radius with context:', savedRadiusKm);
+            setRadiusKm(savedRadiusKm);
         }
-    }, [latParam, lngParam]);
+    }, [savedRadiusKm]);
+
+    // Sync center coordinates with context when no URL params
+    useEffect(() => {
+        if (!latParam && !lngParam && savedCenter?.lat && savedCenter?.lng) {
+            console.log('SearchClient: Syncing center with context:', savedCenter);
+            setCenterLat(String(savedCenter.lat));
+            setCenterLng(String(savedCenter.lng));
+        }
+    }, [latParam, lngParam, savedCenter]);
 
     useEffect(() => {
         const loadBtcRate = async () => {
@@ -178,13 +173,7 @@ export default function SearchClient() {
         sp.set("sortOrder", sb === 'distance' ? 'asc' : so);
         // Persist layout selection across filter applications
         sp.set("layout", layout);
-        const savedRadius = (() => {
-            try {
-                const v = localStorage.getItem('userRadius');
-                if (v) return Number(v);
-            } catch { }
-            return null;
-        })();
+        const savedRadius = savedRadiusKm;
         const effectiveRadius = Number.isFinite(radiusKm as any) ? radiusKm : (savedRadius ?? null);
         const { lat, lng } = resolveLatLng();
         if (lat && lng) { sp.set("lat", lat); sp.set("lng", lng); }
@@ -357,12 +346,7 @@ export default function SearchClient() {
     const citiesList = useMemo(() => regionsForCountry.filter(l => l.region === region).map(l => l.city), [regionsForCountry, region]);
 
     function getSavedPlaceName(): string | null {
-        try {
-            const raw = localStorage.getItem('userLocation');
-            if (!raw) return null;
-            const p = JSON.parse(raw) as { name?: string };
-            return p?.name || null;
-        } catch { return null; }
+        return savedCenter?.name || null;
     }
 
     const COUNTRY_EXPAND: Record<string, string> = {
@@ -609,14 +593,15 @@ export default function SearchClient() {
                         initialRadiusKm={radiusKm}
                         dark={dark}
                         onApply={async (place, r) => {
+                            console.log('SearchClient: Location modal applied:', { place, radius: r });
                             setCenterLat(String(place.lat));
                             setCenterLng(String(place.lng));
                             setRadiusKm(r);
-                            try {
-                                await dataService.saveUserLocation(place, r);
-                            } catch (error) {
-                                console.warn('Failed to save location:', error);
-                            }
+                            
+                            // Save to unified location context
+                            updateLocation(place, r);
+                            
+                            // Update URL with new location parameters
                             const sp = buildParams();
                             sp.set('lat', String(place.lat));
                             sp.set('lng', String(place.lng));

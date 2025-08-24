@@ -14,7 +14,8 @@ import { useRouter } from "next/navigation";
 import { useLang } from "@/lib/i18n-client";
 import { useSettings } from "@/lib/settings";
 import { useTheme } from "@/lib/contexts/ThemeContext";
-import { useListings, useLocation, useBtcRate, useSearchFilters } from "@/lib/hooks";
+import { useListings, useBtcRate, useSearchFilters } from "@/lib/hooks";
+import { useLocation } from "@/lib/contexts/LocationContext";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import type { Listing, User } from "@/lib/types";
@@ -80,7 +81,9 @@ export default function HomePage() {
   };
 
   const handleLocationUpdate = async (place: any, radius: number) => {
+    console.log('HomePage: Location update requested:', { place, radius });
     await updateLocation(place, radius);
+    console.log('HomePage: Location updated via unified service');
     setModal('showLocationModal', false);
   };
 

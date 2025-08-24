@@ -52,6 +52,7 @@ export function useLocation() {
         
         // Save to unified location service
         locationService.saveUserLocation(place, radius);
+        console.log('useLocation: Location saved to unified service');
     }, []);
 
     return {

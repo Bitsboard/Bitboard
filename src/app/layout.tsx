@@ -4,6 +4,7 @@ import "../styles/globals.css";
 import GlobalHeader from "./GlobalHeader";
 import { LocaleHydrator } from "./LocaleHydrator";
 import { ThemeProvider } from "@/lib/contexts/ThemeContext";
+import { LocationProvider } from "@/lib/contexts/LocationContext";
 
 import Footer from "@/components/Footer";
 
@@ -69,9 +70,11 @@ export default function RootLayout({
       <body className={inter.className}>
         <LocaleHydrator>
           <ThemeProvider>
-            <GlobalHeader />
-            {children}
-            <Footer />
+            <LocationProvider>
+              <GlobalHeader />
+              {children}
+              <Footer />
+            </LocationProvider>
           </ThemeProvider>
         </LocaleHydrator>
       </body>
