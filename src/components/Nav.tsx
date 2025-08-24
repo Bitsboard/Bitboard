@@ -127,15 +127,34 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                           try {
                             localStorage.removeItem('userLocation');
                             localStorage.removeItem('userRadius');
+                            localStorage.removeItem('bitsbarter_userLocation');
+                            localStorage.removeItem('bitsbarter_userRadius');
+                            localStorage.removeItem('bitsbarter_locationLastUpdated');
                             sessionStorage.clear();
+                            
+                            // Clear all cookies
+                            document.cookie.split(";").forEach(function(c) { 
+                              document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                            });
+                            
+                            console.log('All stored data and cookies cleared');
                           } catch (e) {
-                            console.log('Cleared stored data');
+                            console.log('Error clearing data:', e);
                           }
                           
                           alert('Account wiped successfully! You can now re-sign up with georged1997@gmail.com');
                           
-                          // Force a complete page reload to clear all state
-                          window.location.href = window.location.origin;
+                          // Call logout endpoint to clear server-side session
+                          fetch('/api/auth/logout', { method: 'POST' })
+                            .then(() => {
+                              console.log('Server session cleared, now redirecting...');
+                              // Force a complete page reset to clear all state
+                              window.location.href = window.location.origin;
+                            })
+                            .catch(() => {
+                              console.log('Logout failed, redirecting anyway...');
+                              window.location.href = window.location.origin;
+                            });
                         } else {
                           alert('Failed to wipe account. Please try again.');
                         }
