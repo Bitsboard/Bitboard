@@ -2,6 +2,10 @@ export const runtime = 'edge';
 
 import { getRequestContext } from '@cloudflare/next-on-pages';
 
+interface WipeMeRequest {
+  email: string;
+}
+
 export async function POST(req: Request) {
   try {
     const { env } = getRequestContext();
@@ -15,7 +19,7 @@ export async function POST(req: Request) {
     }
 
     // Get the email from the request body
-    const { email } = await req.json();
+    const { email } = await req.json() as WipeMeRequest;
     
     if (!email) {
       return new Response(JSON.stringify({ error: 'Email is required' }), { 
