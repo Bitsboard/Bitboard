@@ -95,13 +95,14 @@ export default function PublicProfilePage() {
           setIsLoading(false);
           return;
         } else if (response.status === 404) {
-          // User not found - try retry logic for newly created accounts
-          if (retryCount < 2) {
-            console.log(`Profile page: User not found, retrying in ${(retryCount + 1) * 1000}ms (attempt ${retryCount + 1}/3)`);
+          // User not found - try more aggressive retry logic for newly created accounts
+          if (retryCount < 4) { // Increased from 2 to 4 retries
+            const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s, 4s, 8s
+            console.log(`Profile page: User not found, retrying in ${delay}ms (attempt ${retryCount + 1}/5)`);
             // Don't set loading to false here - let the retry handle it
             setTimeout(() => {
               fetchUserListings(retryCount + 1);
-            }, (retryCount + 1) * 1000);
+            }, delay);
             return;
           } else {
             console.log('Profile page: Max retries reached, showing user not found error');
@@ -119,11 +120,12 @@ export default function PublicProfilePage() {
         // Handle abort errors (timeout)
         if (error instanceof Error && error.name === 'AbortError') {
           console.log('Profile page: Request timed out');
-          if (retryCount < 2) {
-            console.log(`Profile page: Timeout, retrying in ${(retryCount + 1) * 1000}ms (attempt ${retryCount + 1}/3)`);
+          if (retryCount < 3) { // Increased from 2 to 3 retries
+            const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s, 4s
+            console.log(`Profile page: Timeout, retrying in ${delay}ms (attempt ${retryCount + 1}/4)`);
             setTimeout(() => {
               fetchUserListings(retryCount + 1);
-            }, (retryCount + 1) * 1000);
+            }, delay);
             return;
           } else {
             setError('Request timed out. Please try again.');
@@ -133,12 +135,13 @@ export default function PublicProfilePage() {
         }
         
         // Retry on other network errors
-        if (retryCount < 2) {
-          console.log(`Profile page: Network error, retrying in ${(retryCount + 1) * 1000}ms (attempt ${retryCount + 1}/3)`);
+        if (retryCount < 3) { // Increased from 2 to 3 retries
+          const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s, 4s
+          console.log(`Profile page: Network error, retrying in ${delay}ms (attempt ${retryCount + 1}/4)`);
           // Don't set loading to false here - let the retry handle it
           setTimeout(() => {
             fetchUserListings(retryCount + 1);
-          }, (retryCount + 1) * 1000);
+          }, delay);
           return;
         } else {
           setError('Failed to load profile due to network error');
@@ -204,6 +207,9 @@ export default function PublicProfilePage() {
           <div className="text-6xl mb-4">⏳</div>
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">Loading Profile...</h1>
           <p className="text-neutral-600 dark:text-neutral-400">Fetching {username}&apos;s listings...</p>
+          <p className="text-neutral-500 dark:text-neutral-500 text-sm mt-2">
+            If this is a newly created account, please wait a moment for the database to update...
+          </p>
         </div>
       </div>
     );
