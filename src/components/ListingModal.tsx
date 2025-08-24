@@ -100,7 +100,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                   <Link
                     href={`/profile/${listing.seller.name}`}
                     className={cn(
-                      "inline-flex items-center gap-2 px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer",
+                      "inline-flex items-center px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative",
                       "bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50",
                       "border border-white/20 dark:border-neutral-700/50",
                       "hover:scale-105 hover:shadow-md"
@@ -110,8 +110,8 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                       onClose(); // Close the modal when clicking username
                     }}
                   >
-                    {/* Profile Icon - Left side of pill */}
-                    <div className="flex-shrink-0">
+                    {/* Profile Icon - Positioned so its center aligns with the left edge radius */}
+                    <div className="flex-shrink-0 -ml-2.5">
                       {!sellerImageError ? (
                         <img
                           src={generateProfilePicture(listing.seller.name)}
@@ -126,8 +126,8 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                       )}
                     </div>
                     
-                    {/* Username - Right side of pill */}
-                    <span className="text-sm">{listing.seller.name}</span>
+                    {/* Username - Right side of pill with proper spacing */}
+                    <span className="text-sm ml-1">{listing.seller.name}</span>
                   </Link>
                   
                   {listing.seller.score >= 50 && (
