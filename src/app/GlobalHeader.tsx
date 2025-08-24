@@ -144,6 +144,11 @@ export default function GlobalHeader() {
               };
               console.log('Updating user state with:', updatedUser);
               setUser(updatedUser);
+              
+              // Add a small delay to ensure database propagation before allowing profile navigation
+              console.log('Waiting 1 second for database propagation...');
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              console.log('Database propagation delay completed');
             }
           } else {
             console.log('Session refresh failed, using fallback update');
@@ -154,6 +159,11 @@ export default function GlobalHeader() {
               hasChosenUsername: true
             };
             setUser(updatedUser);
+            
+            // Add delay for fallback case too
+            console.log('Waiting 1 second for database propagation (fallback)...');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            console.log('Database propagation delay completed (fallback)');
           }
         } else {
           console.error('Failed to set username');

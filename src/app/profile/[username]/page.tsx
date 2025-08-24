@@ -45,16 +45,17 @@ export default function PublicProfilePage() {
     console.log('Generated profile picture URL for', username, ':', generateProfilePicture(username));
   }, [username]);
 
-  // Fetch user listings from API
+  // Fetch user listings from API with retry logic
   useEffect(() => {
     if (!username) return;
     
     console.log('Profile page: Starting to fetch listings for username:', username);
     
-    const fetchUserListings = async () => {
+    const fetchUserListings = async (retryCount = 0) => {
       try {
         console.log('Profile page: Setting loading to true');
         setIsLoading(true);
+        setError(null); // Clear any previous errors
         
         console.log('Profile page: Fetching from API:', `/api/users/${username}/listings`);
         const response = await fetch(`/api/users/${username}/listings`);
@@ -76,17 +77,39 @@ export default function PublicProfilePage() {
           setHasMore(allListings.length > ITEMS_PER_PAGE);
           setCurrentPage(0);
         } else if (response.status === 404) {
-          // User not found - set specific error
-          setError('user_not_found');
+          // User not found - try retry logic for newly created accounts
+          if (retryCount < 2) {
+            console.log(`Profile page: User not found, retrying in ${(retryCount + 1) * 1000}ms (attempt ${retryCount + 1}/3)`);
+            setTimeout(() => {
+              fetchUserListings(retryCount + 1);
+            }, (retryCount + 1) * 1000);
+            return;
+          } else {
+            console.log('Profile page: Max retries reached, showing user not found error');
+            setError('user_not_found');
+          }
         } else {
           console.error('Profile page: API response not ok:', response.status, response.statusText);
           setError(`Failed to load profile: ${response.status} ${response.statusText}`);
         }
       } catch (error) {
         console.error('Profile page: Error fetching user listings:', error);
+        // Retry on network errors too
+        if (retryCount < 2) {
+          console.log(`Profile page: Network error, retrying in ${(retryCount + 1) * 1000}ms (attempt ${retryCount + 1}/3)`);
+          setTimeout(() => {
+            fetchUserListings(retryCount + 1);
+          }, (retryCount + 1) * 1000);
+          return;
+        } else {
+          setError('Failed to load profile due to network error');
+        }
       } finally {
-        console.log('Profile page: Setting loading to false');
-        setIsLoading(false);
+        if (retryCount >= 2) {
+          console.log('Profile page: Setting loading to false (final attempt)');
+          setIsLoading(false);
+        }
+        // Don't set loading to false on retries to keep the loading state
       }
     };
     
@@ -146,7 +169,7 @@ export default function PublicProfilePage() {
         <div className="text-center">
           <div className="text-6xl mb-4">⏳</div>
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">Loading Profile...</h1>
-          <p className="text-neutral-600 dark:text-neutral-400">Fetching {username}'s listings...</p>
+          <p className="text-neutral-600 dark:text-neutral-400">Fetching {username}&apos;s listings...</p>
         </div>
       </div>
     );
@@ -162,6 +185,9 @@ export default function PublicProfilePage() {
             <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">User Not Found</h1>
             <p className="text-neutral-600 dark:text-neutral-400">
               The user <span className="font-semibold text-neutral-800 dark:text-neutral-200">@{username}</span> does not exist.
+            </p>
+            <p className="text-neutral-500 dark:text-neutral-500 text-sm mt-2">
+              If you just created this account, please wait a moment and try again.
             </p>
             <div className="mt-6">
               <a 
