@@ -50,7 +50,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         
         // Handle worldwide mode (radius = 0)
         if (initialRadiusKm === 0) {
-            setQuery(t('all_listings_globally', lang));
+            setQuery(""); // Keep search bar empty for worldwide mode
             // For worldwide mode, use a special place with valid coordinates but worldwide name
             setCenter({
                 name: t('all_listings_globally', lang),
@@ -65,7 +65,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     // Handle radius changes to worldwide mode
     React.useEffect(() => {
         if (radiusKm === 0) {
-            setQuery(t('all_listings_globally', lang));
+            setQuery(""); // Keep search bar empty for worldwide mode
             // For worldwide mode, use a special place with valid coordinates but worldwide name
             setCenter({
                 name: t('all_listings_globally', lang),
