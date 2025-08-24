@@ -41,6 +41,7 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
   const boosted = listing.boostedUntil && listing.boostedUntil > Date.now();
   const a = accent(listing);
   const [sellerImageError, setSellerImageError] = React.useState(false);
+  const lang = useLang();
 
   return (
     <article
@@ -70,7 +71,7 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
         <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">
           <div className="flex items-end justify-between gap-2">
             <span className={cn("rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>
-              {listing.type === 'want' ? t('looking_for', useLang()) : t('selling', useLang())}
+              {listing.type === 'want' ? t('looking_for', lang) : t('selling', lang)}
             </span>
             <span className={cn("truncate max-w-[60%] rounded-full px-3 py-1 text-[11px] backdrop-blur-sm", dark ? "bg-neutral-900/80 text-neutral-200" : "bg-white/80 text-neutral-700")}>📍 {listing.location}</span>
           </div>
@@ -88,28 +89,35 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
         {/* Seller info at bottom (one line, left) */}
         <div className="mt-4 text-left text-sm">
           <div className={cn("inline-flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}>
-            {/* Seller Profile Picture */}
-            <div className="flex-shrink-0">
-              {!sellerImageError ? (
-                <img
-                  src={generateProfilePicture(listing.seller.name)}
-                  alt={`${listing.seller.name}'s profile picture`}
-                  className="w-5 h-5 rounded-full object-cover"
-                  onError={() => setSellerImageError(true)}
-                />
-              ) : (
-                <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
-                  {getInitials(listing.seller.name)}
-                </div>
-              )}
-            </div>
-            
+            {/* Username as clickable pill/tag - encapsulates both icon and name */}
             <Link
               href={`/profile/${listing.seller.name}`}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-100/80 dark:bg-neutral-800/50 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/50 border border-neutral-300/50 dark:border-neutral-700/50 transition-all duration-200 hover:scale-105"
+              className={cn(
+                "inline-flex items-center px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative",
+                "bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50",
+                "border border-white/20 dark:border-neutral-700/50",
+                "hover:scale-105 hover:shadow-md"
+              )}
               onClick={(e) => e.stopPropagation()}
             >
-              {listing.seller.name}
+              {/* Profile Icon - Positioned so its center aligns with the left edge radius */}
+              <div className="flex-shrink-0 -ml-1.5">
+                {!sellerImageError ? (
+                  <img
+                    src={generateProfilePicture(listing.seller.name)}
+                    alt={`${listing.seller.name}'s profile picture`}
+                    className="w-5 h-5 rounded-full object-cover"
+                    onError={() => setSellerImageError(true)}
+                  />
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
+                    {getInitials(listing.seller.name)}
+                  </div>
+                )}
+              </div>
+              
+              {/* Username - Right side of pill with proper spacing */}
+              <span className="text-sm ml-1">{listing.seller.name}</span>
             </Link>
             
             {listing.seller.score >= 50 && (
