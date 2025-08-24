@@ -45,6 +45,11 @@ export default function PublicProfilePage() {
     console.log('Generated profile picture URL for', username, ':', generateProfilePicture(username));
   }, [username]);
 
+  // Debug: Monitor loading state changes
+  useEffect(() => {
+    console.log('Profile page: Loading state changed to:', isLoading);
+  }, [isLoading]);
+
   // Fetch user listings from API with retry logic
   useEffect(() => {
     if (!username) return;
@@ -53,12 +58,21 @@ export default function PublicProfilePage() {
     
     const fetchUserListings = async (retryCount = 0) => {
       try {
+        console.log(`Profile page: Fetch attempt ${retryCount + 1}/3`);
         console.log('Profile page: Setting loading to true');
         setIsLoading(true);
         setError(null); // Clear any previous errors
         
         console.log('Profile page: Fetching from API:', `/api/users/${username}/listings`);
-        const response = await fetch(`/api/users/${username}/listings`);
+        
+        // Add timeout to prevent hanging requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
+        const response = await fetch(`/api/users/${username}/listings`, {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
         
         console.log('Profile page: API response status:', response.status);
         
@@ -76,10 +90,15 @@ export default function PublicProfilePage() {
           setUserListings(firstPageListings);
           setHasMore(allListings.length > ITEMS_PER_PAGE);
           setCurrentPage(0);
+          
+          // Success - always set loading to false
+          setIsLoading(false);
+          return;
         } else if (response.status === 404) {
           // User not found - try retry logic for newly created accounts
           if (retryCount < 2) {
             console.log(`Profile page: User not found, retrying in ${(retryCount + 1) * 1000}ms (attempt ${retryCount + 1}/3)`);
+            // Don't set loading to false here - let the retry handle it
             setTimeout(() => {
               fetchUserListings(retryCount + 1);
             }, (retryCount + 1) * 1000);
@@ -87,29 +106,44 @@ export default function PublicProfilePage() {
           } else {
             console.log('Profile page: Max retries reached, showing user not found error');
             setError('user_not_found');
+            setIsLoading(false);
           }
         } else {
           console.error('Profile page: API response not ok:', response.status, response.statusText);
           setError(`Failed to load profile: ${response.status} ${response.statusText}`);
+          setIsLoading(false);
         }
       } catch (error) {
         console.error('Profile page: Error fetching user listings:', error);
-        // Retry on network errors too
+        
+        // Handle abort errors (timeout)
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.log('Profile page: Request timed out');
+          if (retryCount < 2) {
+            console.log(`Profile page: Timeout, retrying in ${(retryCount + 1) * 1000}ms (attempt ${retryCount + 1}/3)`);
+            setTimeout(() => {
+              fetchUserListings(retryCount + 1);
+            }, (retryCount + 1) * 1000);
+            return;
+          } else {
+            setError('Request timed out. Please try again.');
+            setIsLoading(false);
+          }
+          return;
+        }
+        
+        // Retry on other network errors
         if (retryCount < 2) {
           console.log(`Profile page: Network error, retrying in ${(retryCount + 1) * 1000}ms (attempt ${retryCount + 1}/3)`);
+          // Don't set loading to false here - let the retry handle it
           setTimeout(() => {
             fetchUserListings(retryCount + 1);
           }, (retryCount + 1) * 1000);
           return;
         } else {
           setError('Failed to load profile due to network error');
-        }
-      } finally {
-        if (retryCount >= 2) {
-          console.log('Profile page: Setting loading to false (final attempt)');
           setIsLoading(false);
         }
-        // Don't set loading to false on retries to keep the loading state
       }
     };
     
