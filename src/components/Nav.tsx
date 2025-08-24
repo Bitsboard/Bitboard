@@ -115,10 +115,9 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                     if (confirm('Click to wipe georged1997@gmail.com from the database. This will allow you to re-sign up and test the username selection flow. Continue?')) {
                       try {
                         console.log('Attempting to wipe account...');
-                        const response = await fetch('/api/admin/users/wipe-me', {
+                        const response = await fetch('/api/test/wipe-account', {
                           method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ email: 'georged1997@gmail.com' })
+                          headers: { 'Content-Type': 'application/json' }
                         });
                         
                         console.log('Response status:', response.status);
