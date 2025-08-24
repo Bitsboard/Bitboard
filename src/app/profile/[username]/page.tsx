@@ -62,6 +62,24 @@ export default function PublicProfilePage() {
       return;
     }
     
+    // Check if this is the current user's own profile and they have a username
+    if (user && user.handle === username && user.hasChosenUsername) {
+      console.log('Profile page: This is the current user\'s profile, using local state');
+      // Use local user state instead of making API call
+      setUserProfile({
+        username: user.handle,
+        verified: false, // Default for new users
+        registeredAt: Math.floor(Date.now() / 1000), // Current time as fallback
+        profilePhoto: user.image || null
+      });
+      setUserListings([]); // New users won't have listings yet
+      setAllUserListings([]);
+      setHasMore(false);
+      setCurrentPage(0);
+      setIsLoading(false);
+      return;
+    }
+    
     console.log('Profile page: Starting to fetch listings for username:', username);
     
     const fetchUserListings = async (retryCount = 0) => {
