@@ -47,10 +47,24 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                 lng: initialCenter.lng,
             });
         }
-        if (initialCenter?.name) {
+        
+        // Handle worldwide mode (radius = 0)
+        if (initialRadiusKm === 0) {
+            setQuery(t('all_listings_globally', lang));
+            setCenter(prev => ({ ...prev, name: t('all_listings_globally', lang) }));
+        } else if (initialCenter?.name) {
             setQuery(initialCenter.name);
         }
-    }, [initialCenter, open]);
+    }, [initialCenter, initialRadiusKm, open, lang]);
+
+    // Handle radius changes to worldwide mode
+    React.useEffect(() => {
+        if (radiusKm === 0) {
+            setQuery(t('all_listings_globally', lang));
+            setCenter(prev => ({ ...prev, name: t('all_listings_globally', lang) }));
+        }
+    }, [radiusKm, lang]);
+
     // Map zoom helper tied to radius
     function zoomForRadiusKm(r: number): number {
         if (r <= 0) return 1; // world view, show all continents
@@ -388,14 +402,30 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                         <div className={cn("relative rounded-xl border", dark ? "border-neutral-700 bg-neutral-800" : "border-neutral-300 bg-white")}>
                             <input
                                 value={query}
-                                onChange={(e) => { setQuery(e.target.value); }}
+                                onChange={(e) => { 
+                                    setQuery(e.target.value); 
+                                    // Exit worldwide mode when user starts typing
+                                    if (radiusKm === 0) {
+                                        setRadiusKm(25);
+                                    }
+                                }}
                                 placeholder={t('enter_city', lang)}
                                 className={cn("w-full rounded-xl px-4 py-3 text-sm bg-transparent", dark ? "text-neutral-100" : "text-neutral-900")}
                             />
                             {suggestions.length > 0 && (
                                 <div className={cn("absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-auto rounded-xl border shadow", dark ? "border-neutral-700 bg-neutral-900" : "border-neutral-300 bg-white")}>
                                     {suggestions.map((s, idx) => (
-                                        <button key={`${s.name}-${idx}`} onClick={() => { setCenter({ name: s.name, lat: s.lat, lng: s.lng }); setUsingMyLocation(false); try { localStorage.setItem('usingMyLocation', '0'); } catch {}; setQuery(s.name); setRemoteResults([]); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-orange-500/10">
+                                        <button key={`${s.name}-${idx}`} onClick={() => { 
+                                            setCenter({ name: s.name, lat: s.lat, lng: s.lng }); 
+                                            setUsingMyLocation(false); 
+                                            try { localStorage.setItem('usingMyLocation', '0'); } catch {} 
+                                            setQuery(s.name); 
+                                            setRemoteResults([]); 
+                                            // Reset radius to default when selecting a city (exit worldwide mode)
+                                            if (radiusKm === 0) {
+                                                setRadiusKm(25);
+                                            }
+                                        }} className="block w-full text-left px-4 py-2 text-sm hover:bg-orange-500/10">
                                             {s.name}
                                         </button>
                                     ))}
