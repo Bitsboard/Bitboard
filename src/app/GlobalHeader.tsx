@@ -17,7 +17,15 @@ export default function GlobalHeader() {
   const dark = theme === 'dark';
   
   // Username selection hook
-  const { showUsernameModal, closeModal } = useUsernameSelection(user);
+  const { showUsernameModal, closeModal, hideModal, resetModalClosedFlag } = useUsernameSelection(user);
+
+  // Handle modal being closed by user (not by successful username selection)
+  const handleModalClosedByUser = () => {
+    console.log('Modal closed by user, resetting user state to show Sign in button');
+    // Reset user state to show the Sign in button
+    setUser(null);
+    hideModal();
+  };
 
   // Check for existing session on mount
   useEffect(() => {
@@ -98,7 +106,9 @@ export default function GlobalHeader() {
 
         if (response.ok) {
           console.log('Username set successfully, closing modal...');
-          // Close the modal first
+          // Reset the modal closed flag since this is a successful selection
+          resetModalClosedFlag();
+          // Close the modal
           closeModal();
           
           console.log('Refreshing user session...');
@@ -161,6 +171,7 @@ export default function GlobalHeader() {
         <UsernameSelectionModal
           dark={dark}
           onUsernameSelected={handleUsernameSelected}
+          onClose={handleModalClosedByUser}
         />
       )}
     </>

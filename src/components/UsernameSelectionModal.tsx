@@ -1,16 +1,17 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Modal, ModalHeader, ModalTitle, ModalBody } from "./Modal";
+import { Modal, ModalHeader, ModalTitle, ModalBody, ModalCloseButton } from "./Modal";
 import { validateUsername } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 interface UsernameSelectionModalProps {
   dark: boolean;
   onUsernameSelected: (username: string) => void;
+  onClose: () => void;
 }
 
-export function UsernameSelectionModal({ dark, onUsernameSelected }: UsernameSelectionModalProps) {
+export function UsernameSelectionModal({ dark, onUsernameSelected, onClose }: UsernameSelectionModalProps) {
   const [username, setUsername] = useState("");
   const [isChecking, setIsChecking] = useState(false);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
@@ -96,7 +97,7 @@ export function UsernameSelectionModal({ dark, onUsernameSelected }: UsernameSel
   return (
     <Modal 
       open={true} 
-      onClose={() => {}} // No close button - modal is unclosable
+      onClose={onClose}
       dark={dark} 
       size="md" 
       ariaLabel="Choose your username"
@@ -104,6 +105,7 @@ export function UsernameSelectionModal({ dark, onUsernameSelected }: UsernameSel
     >
       <ModalHeader dark={dark}>
         <ModalTitle>Welcome to Bitsbarter!</ModalTitle>
+        <ModalCloseButton onClose={onClose} dark={dark} />
       </ModalHeader>
       <ModalBody className="space-y-6">
         <div className="text-center space-y-4">
