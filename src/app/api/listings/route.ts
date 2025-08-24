@@ -123,8 +123,10 @@ export async function GET(req: NextRequest) {
         .prepare(`SELECT l.id,
                          l.title,
                          l.price_sat AS priceSat,
-                         l.created_at AS createdAt
+                         l.created_at AS createdAt,
+                         u.username AS postedBy
                   FROM listings l
+                  JOIN users u ON l.posted_by = u.id
                   ${whereClauseStr}
                   ORDER BY ${validatedQuery.sortBy === 'price' ? 'l.price_sat' : 'l.created_at'} ${validatedQuery.sortOrder}
                   LIMIT ? OFFSET ?`)
@@ -141,8 +143,9 @@ export async function GET(req: NextRequest) {
         .bind(...binds)
         .all();
     } catch {
+      // Fallback count query
       totalRow = await db
-        .prepare(`SELECT COUNT(*) AS c FROM listings l JOIN users u ON l.posted_by = u.id ${whereClauseStr}`)
+        .prepare(`SELECT COUNT(*) AS c FROM listings l ${whereClauseStr}`)
         .bind(...binds)
         .all();
     }
