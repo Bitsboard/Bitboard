@@ -114,22 +114,30 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                   onClick={async () => {
                     if (confirm('Click to wipe georged1997@gmail.com from the database. This will allow you to re-sign up and test the username selection flow. Continue?')) {
                       try {
+                        console.log('Attempting to wipe account...');
                         const response = await fetch('/api/admin/users/wipe-me', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({ email: 'georged1997@gmail.com' })
                         });
                         
+                        console.log('Response status:', response.status);
+                        console.log('Response headers:', response.headers);
+                        
                         if (response.ok) {
+                          const result = await response.json();
+                          console.log('Wipe successful:', result);
                           alert('Account wiped successfully! You can now re-sign up with georged1997@gmail.com');
                           // Force page reload to clear any cached state
                           window.location.reload();
                         } else {
                           const errorData = await response.json() as { error?: string };
-                          alert(`Failed to wipe account: ${errorData.error || 'Unknown error'}`);
+                          console.error('Wipe failed with status:', response.status, 'Error:', errorData);
+                          alert(`Failed to wipe account: ${errorData.error || 'Unknown error'} (Status: ${response.status})`);
                         }
                       } catch (error: unknown) {
                         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                        console.error('Exception during wipe:', error);
                         alert('Failed to wipe account. Please try again.');
                         console.error('Error wiping account:', errorMessage);
                       }
