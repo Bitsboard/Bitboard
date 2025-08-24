@@ -52,7 +52,7 @@ export class LocationService {
             if (!raw) return LOCATION_CONFIG.DEFAULT_RADIUS_KM;
 
             const radius = Number(raw);
-            if (Number.isFinite(radius) && radius > 0 && radius <= 1000) {
+            if (Number.isFinite(radius) && radius >= 0 && radius <= 1000) {
                 console.log('LocationService: Loaded radius from localStorage:', radius);
                 return radius;
             }
