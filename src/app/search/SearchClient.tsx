@@ -25,6 +25,10 @@ export default function SearchClient() {
     const { theme } = useTheme();
     const { center: savedCenter, radiusKm: savedRadiusKm, updateLocation } = useLocation();
     const dark = theme === 'dark';
+    
+    // Check if we're deployed (same logic as homepage)
+    const ENV = process.env.NEXT_PUBLIC_ENV || process.env.NEXT_PUBLIC_BRANCH || 'development';
+    const isDeployed = ENV === "production" || ENV === "staging" || ENV === "main";
 
     const layoutParam = (params.get("layout") || "").trim();
     const initialLayout: "grid" | "list" = layoutParam === "list"
@@ -280,7 +284,7 @@ export default function SearchClient() {
         };
 
         load();
-    }, [filterMockData]);
+    }, [isDeployed, centerLat, centerLng, savedCenter, radiusKm, inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice, filterMockData]);
 
     const loadMore = useCallback(async () => {
         if (isFetchingRef.current || !hasMore || isLoadingMore) return;
@@ -289,20 +293,42 @@ export default function SearchClient() {
             isFetchingRef.current = true;
             setIsLoadingMore(true);
 
-            // Use mock data for development
-            const filteredData = filterMockData();
-            const paginatedData = filteredData.slice(listings.length, listings.length + CONFIG.PAGE_SIZE);
+            if (isDeployed) {
+                // Use real API for production/staging
+                const response = await dataService.getListings({
+                    limit: CONFIG.PAGE_SIZE,
+                    offset: listings.length,
+                    lat: Number(centerLat) || savedCenter?.lat,
+                    lng: Number(centerLng) || savedCenter?.lng,
+                    radiusKm: radiusKm,
+                    query: inputQuery,
+                    category: selCategory !== "Featured" ? selCategory : undefined,
+                    adType: selAdType !== "all" ? selAdType : undefined,
+                    minPrice: minPrice ? Number(minPrice) : undefined,
+                    maxPrice: maxPrice ? Number(maxPrice) : undefined,
+                    sortBy: sortChoice.split(':')[0],
+                    sortOrder: sortChoice.split(':')[1] || 'desc'
+                });
 
-            setListings(prev => [...prev, ...paginatedData]);
-            setTotal(filteredData.length);
-            setHasMore(listings.length + paginatedData.length < filteredData.length);
+                setListings(prev => [...prev, ...response.listings]);
+                setTotal(response.total);
+                setHasMore(listings.length + response.listings.length < response.total);
+            } else {
+                // Use mock data for development
+                const filteredData = filterMockData();
+                const paginatedData = filteredData.slice(listings.length, listings.length + CONFIG.PAGE_SIZE);
+
+                setListings(prev => [...prev, ...paginatedData]);
+                setTotal(filteredData.length);
+                setHasMore(listings.length + paginatedData.length < filteredData.length);
+            }
         } catch (error) {
             console.error('Failed to load more listings:', error);
         } finally {
             isFetchingRef.current = false;
             setIsLoadingMore(false);
         }
-    }, [filterMockData, hasMore, listings.length, isLoadingMore]);
+    }, [isDeployed, centerLat, centerLng, savedCenter, radiusKm, inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice, filterMockData, listings.length, hasMore, isLoadingMore]);
 
     // Remove IntersectionObserver - using Load More button instead
 
