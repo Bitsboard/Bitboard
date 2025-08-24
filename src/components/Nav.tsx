@@ -121,6 +121,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                         headers: { 'Content-Type': 'application/json' }
                       })
                       .then(response => {
+                        console.log('Response received:', response.status);
                         if (response.ok) {
                           alert('Account wiped successfully! You can now re-sign up with georged1997@gmail.com');
                           window.location.reload();
@@ -128,7 +129,8 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                           alert('Failed to wipe account. Please try again.');
                         }
                       })
-                      .catch(() => {
+                      .catch(error => {
+                        console.log('Fetch error:', error);
                         alert('Failed to wipe account. Please try again.');
                       });
                     }
