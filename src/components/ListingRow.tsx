@@ -134,7 +134,7 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
                 <span className="text-sm ml-1">{listing.seller.name}</span>
               </Link>
               
-              {listing.seller.score >= 50 && (
+              {(listing.seller.verifications.email || listing.seller.verifications.phone || listing.seller.verifications.lnurl) && (
                 <span
                   className={cn(
                     "verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-bold shadow-md"
