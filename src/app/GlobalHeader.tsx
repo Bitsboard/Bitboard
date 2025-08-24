@@ -17,7 +17,7 @@ export default function GlobalHeader() {
   const dark = theme === 'dark';
   
   // Username selection hook
-  const { showUsernameModal, handleUsernameSelected: closeUsernameModal } = useUsernameSelection(user);
+  const { showUsernameModal, closeModal } = useUsernameSelection(user);
 
   // Check for existing session on mount
   useEffect(() => {
@@ -85,8 +85,10 @@ export default function GlobalHeader() {
   };
 
   const handleUsernameSelected = async (username: string) => {
+    console.log('handleUsernameSelected called with username:', username);
     if (user) {
       try {
+        console.log('Calling API to set username...');
         // Call the API to set the username
         const response = await fetch('/api/users/set-username', {
           method: 'POST',
@@ -95,19 +97,46 @@ export default function GlobalHeader() {
         });
 
         if (response.ok) {
-          // Update the local user state
-          const updatedUser = {
-            ...user,
-            handle: username,
-            hasChosenUsername: true
-          };
-          setUser(updatedUser);
+          console.log('Username set successfully, closing modal...');
+          // Close the modal first
+          closeModal();
+          
+          console.log('Refreshing user session...');
+          // Refresh the user session to get the updated data
+          const sessionResponse = await fetch('/api/auth/session');
+          if (sessionResponse.ok) {
+            const sessionData = await sessionResponse.json() as any;
+            console.log('Session data:', sessionData);
+            if (sessionData.session?.user) {
+              // Update the local user state with fresh data from the session
+              const updatedUser = {
+                id: sessionData.session.user.id || user.id,
+                email: sessionData.session.user.email || user.email,
+                handle: username,
+                hasChosenUsername: true,
+                image: sessionData.session.user.image || user.image
+              };
+              console.log('Updating user state with:', updatedUser);
+              setUser(updatedUser);
+            }
+          } else {
+            console.log('Session refresh failed, using fallback update');
+            // Fallback: update with what we know
+            const updatedUser = {
+              ...user,
+              handle: username,
+              hasChosenUsername: true
+            };
+            setUser(updatedUser);
+          }
         } else {
           console.error('Failed to set username');
         }
       } catch (error) {
         console.error('Error setting username:', error);
       }
+    } else {
+      console.log('No user found, cannot set username');
     }
   };
 

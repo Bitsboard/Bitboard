@@ -71,19 +71,8 @@ export function UsernameSelectionModal({ dark, onUsernameSelected }: UsernameSel
 
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/users/set-username", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username }),
-      });
-
-      const data = await response.json() as { success?: boolean; error?: string };
-      
-      if (response.ok) {
-        onUsernameSelected(username);
-      } else {
-        setError(data.error || "Failed to set username");
-      }
+      // Just call the callback - let the parent handle the API call
+      onUsernameSelected(username);
     } catch (err) {
       setError("Network error. Please try again.");
     } finally {
