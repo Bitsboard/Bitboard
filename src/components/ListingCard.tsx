@@ -95,7 +95,7 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
               className={cn(
                 "inline-flex items-center px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative",
                 "bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50",
-                                  "border border-white/20 dark:border-neutral-700/50 border-neutral-300/60",
+                                  "border border-neutral-300/60 dark:border-neutral-700/50",
                 "hover:scale-105 hover:shadow-md"
               )}
               onClick={(e) => e.stopPropagation()}
