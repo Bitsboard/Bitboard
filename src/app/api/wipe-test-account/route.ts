@@ -20,11 +20,11 @@ export async function POST() {
 
     return NextResponse.json({ 
       success: true, 
-      message: `Test account ${email} has been wiped from the database` 
+      message: `User ${email} and all associated data have been wiped from the database` 
     });
 
   } catch (error) {
-    console.error('Error wiping test account:', error);
-    return NextResponse.json({ error: 'Failed to wipe test account' }, { status: 500 });
+    console.error('Error wiping user:', error);
+    return NextResponse.json({ error: 'Failed to wipe user' }, { status: 500 });
   }
 }

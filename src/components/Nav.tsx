@@ -112,83 +112,77 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
               {isStaging && (
                 <button
                   onClick={() => {
-                    console.log('Starting ultra-aggressive wipe process...');
+                    console.log('Starting real database wipe process...');
                     
-                    // Ultra-aggressive client-side wipe
-                    try {
-                      // Clear all localStorage
-                      localStorage.clear();
-                      
-                      // Clear all sessionStorage  
-                      sessionStorage.clear();
-                      
-                      // Clear all cookies more aggressively
-                      document.cookie.split(";").forEach(function(c) { 
-                        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-                      });
-                      
-                      // Clear specific known cookies with multiple domain attempts
-                      const cookiesToClear = [
-                        'session',
-                        'next-auth.session-token',
-                        'next-auth.csrf-token', 
-                        'next-auth.callback-url',
-                        'next-auth.state',
-                        '__Secure-next-auth.session-token',
-                        '__Host-next-auth.csrf-token'
-                      ];
-                      
-                      cookiesToClear.forEach(cookieName => {
-                        // Multiple domain and path combinations
-                        const domains = ['', '.bitsbarter.com', 'bitsbarter.com'];
-                        const paths = ['/', '/api', '/en'];
+                    if (confirm('This will PERMANENTLY delete your georged1997@gmail.com account from the database. You will need to re-sign up and choose a new username. Continue?')) {
+                      // First clear all client-side state
+                      try {
+                        // Clear all localStorage
+                        localStorage.clear();
                         
-                        domains.forEach(domain => {
-                          paths.forEach(path => {
-                            document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path};`;
-                            if (domain) {
-                              document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path}; domain=${domain};`;
-                            }
+                        // Clear all sessionStorage  
+                        sessionStorage.clear();
+                        
+                        // Clear all cookies more aggressively
+                        document.cookie.split(";").forEach(function(c) { 
+                          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                        });
+                        
+                        // Clear specific known cookies with multiple domain attempts
+                        const cookiesToClear = [
+                          'session',
+                          'next-auth.session-token',
+                          'next-auth.csrf-token', 
+                          'next-auth.callback-url',
+                          'next-auth.state',
+                          '__Secure-next-auth.session-token',
+                          '__Host-next-auth.csrf-token'
+                        ];
+                        
+                        cookiesToClear.forEach(cookieName => {
+                          // Multiple domain and path combinations
+                          const domains = ['', '.bitsbarter.com', 'bitsbarter.com'];
+                          const paths = ['/', '/api', '/en'];
+                          
+                          domains.forEach(domain => {
+                            paths.forEach(path => {
+                              document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path};`;
+                              if (domain) {
+                                document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path}; domain=${domain};`;
+                              }
+                            });
                           });
                         });
-                      });
-                      
-                      console.log('All client-side data cleared, attempting server logout...');
-                      
-                      // Try to call logout endpoint to clear server-side session
-                      fetch('/api/auth/logout', { 
-                        method: 'POST',
-                        credentials: 'include'
-                      })
-                      .then(() => {
-                        console.log('Server logout successful, starting redirect sequence...');
-                        // Multiple redirects to ensure complete state reset
-                        setTimeout(() => {
-                          window.location.href = '/?wipe=' + Date.now();
-                        }, 100);
-                      })
-                      .catch(() => {
-                        console.log('Server logout failed, starting redirect sequence anyway...');
-                        // Multiple redirects to ensure complete state reset
-                        setTimeout(() => {
-                          window.location.href = '/?wipe=' + Date.now();
-                        }, 100);
-                      });
-                      
-                      // Nuclear option: if redirect doesn't work, force hard refresh
-                      setTimeout(() => {
-                        if (window.location.pathname !== '/' || !window.location.search.includes('wipe')) {
-                          console.log('Redirect failed, forcing hard refresh...');
-                          window.location.reload();
-                        }
-                      }, 2000);
-                      
-                    } catch (error) {
-                      console.error('Error during wipe:', error);
-                      // Fallback: just reload the page with cache busting
-                      setTimeout(() => {
-                        window.location.href = '/?wipe=' + Date.now();
-                      }, 100);
+                        
+                        console.log('Client-side data cleared, now deleting from database...');
+                        
+                        // Now actually delete the account from the database
+                        fetch('/api/wipe-test-account', { 
+                          method: 'POST',
+                          credentials: 'include'
+                        })
+                        .then(response => response.json())
+                        .then((data: unknown) => {
+                          const responseData = data as { success?: boolean; message?: string; error?: string };
+                          if (responseData.success) {
+                            console.log('Database wipe successful:', responseData.message);
+                            alert('Account wiped successfully! You can now re-sign up and choose a new username.');
+                            // Redirect to homepage
+                            window.location.href = '/?wiped=' + Date.now();
+                          } else {
+                            console.error('Database wipe failed:', responseData.error);
+                            alert('Failed to wipe account from database: ' + responseData.error);
+                          }
+                        })
+                        .catch(error => {
+                          console.error('Database wipe error:', error);
+                          alert('Failed to wipe account from database. Please try again.');
+                        });
+                        
+                      } catch (error) {
+                        console.error('Error during wipe:', error);
+                        alert('Error during wipe process. Please try again.');
+                      }
                     }
                   }}
                   className="hidden sm:inline rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow cursor-pointer hover:bg-red-700 transition-colors duration-200"
