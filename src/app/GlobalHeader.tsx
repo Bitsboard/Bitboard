@@ -170,9 +170,10 @@ export default function GlobalHeader() {
     <>
       <Nav
         onPost={handlePost}
-        user={user}
+        // When username modal is open, show background as if user is not signed in
+        user={showUsernameModal ? null : user}
         onAuth={handleAuth}
-        avatarUrl={user?.image}
+        avatarUrl={showUsernameModal ? undefined : user?.image}
       />
       {modals.showAuth && (
         <AuthModal

@@ -115,9 +115,20 @@ export function ModalFooter({ children, dark }: { children: React.ReactNode; dar
     );
 }
 
-export function ModalCloseButton({ onClose, dark, label }: { onClose: () => void; dark?: boolean; label?: string }) {
+export function ModalCloseButton({ onClose, dark, label = "✕" }: { onClose: () => void; dark?: boolean; label?: string }) {
     return (
-        <button onClick={onClose} className={cn("rounded-lg px-3 py-1", dark ? "text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200" : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-800")}>{label}</button>
+        <button 
+            onClick={onClose} 
+            className={cn(
+                "rounded-lg px-3 py-1 text-lg font-bold transition-colors",
+                dark 
+                    ? "text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200" 
+                    : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-800"
+            )}
+            aria-label="Close modal"
+        >
+            {label}
+        </button>
     );
 }
 
