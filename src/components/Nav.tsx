@@ -114,32 +114,43 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                   onClick={async () => {
                     if (confirm('Click to wipe georged1997@gmail.com from the database. This will allow you to re-sign up and test the username selection flow. Continue?')) {
                       try {
-                        console.log('Attempting to wipe account...');
+                        console.log('1. Confirmation accepted, starting wipe process...');
+                        console.log('2. About to make fetch request to /api/test/wipe-account...');
+                        
                         const response = await fetch('/api/test/wipe-account', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' }
                         });
                         
-                        console.log('Response status:', response.status);
-                        console.log('Response headers:', response.headers);
+                        console.log('3. Fetch request completed, response received');
+                        console.log('4. Response status:', response.status);
+                        console.log('5. Response headers:', response.headers);
                         
                         if (response.ok) {
+                          console.log('6. Response is OK, parsing JSON...');
                           const result = await response.json();
-                          console.log('Wipe successful:', result);
+                          console.log('7. JSON parsed successfully:', result);
                           alert('Account wiped successfully! You can now re-sign up with georged1997@gmail.com');
+                          console.log('8. About to reload page...');
                           // Force page reload to clear any cached state
                           window.location.reload();
                         } else {
+                          console.log('6. Response is NOT OK, parsing error JSON...');
                           const errorData = await response.json() as { error?: string };
-                          console.error('Wipe failed with status:', response.status, 'Error:', errorData);
+                          console.error('7. Error data parsed:', errorData);
                           alert(`Failed to wipe account: ${errorData.error || 'Unknown error'} (Status: ${response.status})`);
                         }
                       } catch (error: unknown) {
+                        console.log('EXCEPTION CAUGHT in wipe process');
                         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
                         console.error('Exception during wipe:', error);
+                        console.error('Error type:', typeof error);
+                        console.error('Error constructor:', error?.constructor?.name);
                         alert('Failed to wipe account. Please try again.');
                         console.error('Error wiping account:', errorMessage);
                       }
+                    } else {
+                      console.log('User cancelled the wipe operation');
                     }
                   }}
                   className="hidden sm:inline rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow cursor-pointer hover:bg-red-700 transition-colors duration-200"
