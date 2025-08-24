@@ -240,10 +240,7 @@ export default function PublicProfilePage() {
             <div className="text-6xl mb-4">👤</div>
             <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">User Not Found</h1>
             <p className="text-neutral-600 dark:text-neutral-400">
-              The user <span className="font-semibold text-neutral-800 dark:text-neutral-200">@{username}</span> does not exist.
-            </p>
-            <p className="text-neutral-500 dark:text-neutral-500 text-sm mt-2">
-              If you just created this account, please wait a moment and try again.
+              The user <span className="font-semibold text-neutral-800 dark:text-neutral-200">{username}</span> does not exist.
             </p>
             <div className="mt-6">
               <a 
