@@ -121,50 +121,23 @@ export default function GlobalHeader() {
         });
 
         if (response.ok) {
-          console.log('Username set successfully, closing modal...');
+          console.log('Username set successfully, updating user state immediately...');
+          
+          // IMMEDIATELY update the local user state with the new username
+          const updatedUser = {
+            ...user,
+            handle: username,
+            hasChosenUsername: true
+          };
+          console.log('Updating user state immediately with:', updatedUser);
+          setUser(updatedUser);
+          
           // Reset the modal closed flag since this is a successful selection
           resetModalClosedFlag();
           // Close the modal
           closeModal();
           
-          console.log('Refreshing user session...');
-          // Refresh the user session to get the updated data
-          const sessionResponse = await fetch('/api/auth/session');
-          if (sessionResponse.ok) {
-            const sessionData = await sessionResponse.json() as any;
-            console.log('Session data:', sessionData);
-            if (sessionData.session?.user) {
-              // Update the local user state with fresh data from the session
-              const updatedUser = {
-                id: sessionData.session.user.id || user.id,
-                email: sessionData.session.user.email || user.email,
-                handle: username,
-                hasChosenUsername: true,
-                image: sessionData.session.user.image || user.image
-              };
-              console.log('Updating user state with:', updatedUser);
-              setUser(updatedUser);
-              
-              // Add a small delay to ensure database propagation before allowing profile navigation
-              console.log('Waiting 1 second for database propagation...');
-              await new Promise(resolve => setTimeout(resolve, 1000));
-              console.log('Database propagation delay completed');
-            }
-          } else {
-            console.log('Session refresh failed, using fallback update');
-            // Fallback: update with what we know
-            const updatedUser = {
-              ...user,
-              handle: username,
-              hasChosenUsername: true
-            };
-            setUser(updatedUser);
-            
-            // Add delay for fallback case too
-            console.log('Waiting 1 second for database propagation (fallback)...');
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('Database propagation delay completed (fallback)');
-          }
+          console.log('Username confirmed and user state updated. Profile should now work immediately.');
         } else {
           console.error('Failed to set username');
         }
