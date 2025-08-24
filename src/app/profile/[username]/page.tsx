@@ -16,6 +16,10 @@ export default function PublicProfilePage() {
   const username = params?.username as string;
   const btcCad = useBtcRate();
   
+  // Debug: Log username parameter changes
+  console.log('Profile page: Username param changed to:', username);
+  console.log('Profile page: Params object:', params);
+  
   // Use unified settings hook
   const { unit, layout, modals, setModal, user, setUser, closeAllModals } = useSettings();
   const { theme } = useTheme();
@@ -52,7 +56,11 @@ export default function PublicProfilePage() {
 
   // Fetch user listings from API with retry logic
   useEffect(() => {
-    if (!username) return;
+    console.log('Profile page: useEffect triggered with username:', username);
+    if (!username) {
+      console.log('Profile page: No username, returning early');
+      return;
+    }
     
     console.log('Profile page: Starting to fetch listings for username:', username);
     

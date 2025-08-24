@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
+import { useRouter } from "next/navigation";
 import { UnitToggle, ThemeToggle, ViewToggle, NotificationMenu } from "@/components";
 import { useLang } from "@/lib/i18n-client";
 import { setLang, t } from "@/lib/i18n";
@@ -17,6 +18,7 @@ interface NavProps {
 }
 
 export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
+  const router = useRouter();
   const { theme } = useTheme();
   const dark = theme === 'dark';
   const isStaging =
@@ -229,9 +231,9 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                 <a 
                   href={`/profile/${user.handle}`}
                   onClick={(e) => {
-                    // Prevent the flash by ensuring user state persists during navigation
+                    // Use Next.js router for proper navigation
                     e.preventDefault();
-                    window.location.href = `/profile/${user.handle}`;
+                    router.push(`/profile/${user.handle}`);
                   }}
                   className="inline-flex items-center gap-3 px-4 py-2.5 rounded-xl bg-neutral-100/80 dark:bg-neutral-800/50 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/50 transition-all duration-200 group border border-neutral-300/50 dark:border-neutral-700/50"
                 >
