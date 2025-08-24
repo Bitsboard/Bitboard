@@ -20,11 +20,27 @@ export default function GlobalHeader() {
   const { showUsernameModal, closeModal, hideModal, resetModalClosedFlag } = useUsernameSelection(user);
 
   // Handle modal being closed by user (not by successful username selection)
-  const handleModalClosedByUser = () => {
-    console.log('Modal closed by user, resetting user state to show Sign in button');
-    // Reset user state to show the Sign in button
-    setUser(null);
-    hideModal();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  
+  const handleModalClosedByUser = async () => {
+    if (isLoggingOut) return; // Prevent multiple clicks
+    
+    console.log('Modal closed by user, logging out user to show Sign in button');
+    setIsLoggingOut(true);
+    
+    try {
+      // Actually log out the user to clear the session
+      await fetch('/api/auth/logout', { method: 'POST' });
+      console.log('User logged out successfully');
+      
+      // Reset user state to show the Sign in button
+      setUser(null);
+      hideModal();
+    } catch (error) {
+      console.error('Error logging out user:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   // Check for existing session on mount
@@ -172,6 +188,7 @@ export default function GlobalHeader() {
           dark={dark}
           onUsernameSelected={handleUsernameSelected}
           onClose={handleModalClosedByUser}
+          isClosing={isLoggingOut}
         />
       )}
     </>

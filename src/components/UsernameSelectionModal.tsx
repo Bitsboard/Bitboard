@@ -9,9 +9,10 @@ interface UsernameSelectionModalProps {
   dark: boolean;
   onUsernameSelected: (username: string) => void;
   onClose: () => void;
+  isClosing?: boolean;
 }
 
-export function UsernameSelectionModal({ dark, onUsernameSelected, onClose }: UsernameSelectionModalProps) {
+export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isClosing = false }: UsernameSelectionModalProps) {
   const [username, setUsername] = useState("");
   const [isChecking, setIsChecking] = useState(false);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
@@ -109,6 +110,11 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose }: Us
       </ModalHeader>
       <ModalBody className="space-y-6">
         <div className="text-center space-y-4">
+          {isClosing && (
+            <div className="text-sm text-blue-600 dark:text-blue-400 mb-4">
+              Logging out...
+            </div>
+          )}
           <p className={cn(
             "text-lg",
             dark ? "text-gray-200" : "text-gray-700"
