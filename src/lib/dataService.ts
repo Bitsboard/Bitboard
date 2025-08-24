@@ -1,10 +1,11 @@
 import type { Listing, Place, RateResponse, ListingsResponse } from './types';
+import { locationService, LOCATION_CONFIG } from './locationService';
 
 // Configuration constants
 export const CONFIG = {
     PAGE_SIZE: 24,
-    DEFAULT_RADIUS_KM: 25,
-    DEFAULT_CENTER: { name: "Toronto (City Center)", lat: 43.653, lng: -79.383 },
+    DEFAULT_RADIUS_KM: LOCATION_CONFIG.DEFAULT_RADIUS_KM,
+    DEFAULT_CENTER: LOCATION_CONFIG.DEFAULT_CENTER,
     BTC_RATE_CACHE_DURATION: 5 * 60 * 1000, // 5 minutes
 } as const;
 
@@ -118,52 +119,15 @@ export class DataService {
 
     // Location Management
     async getUserLocation(): Promise<Place | null> {
-        try {
-            const raw = localStorage.getItem("userLocation");
-            console.log('dataService: getUserLocation raw:', raw);
-            if (!raw) return null;
-
-            const place = JSON.parse(raw) as Place;
-            if (place && typeof place.lat === 'number' && typeof place.lng === 'number' && place.name) {
-                console.log('dataService: getUserLocation parsed:', place);
-                return place;
-            }
-            console.log('dataService: getUserLocation invalid data:', place);
-            return null;
-        } catch (error) {
-            console.warn('dataService: getUserLocation error:', error);
-            return null;
-        }
+        return locationService.getUserLocation();
     }
 
     async getUserRadius(): Promise<number> {
-        try {
-            const radius = localStorage.getItem('userRadiusKm');
-            console.log('dataService: getUserRadius raw:', radius);
-            if (radius) {
-                const num = Number(radius);
-                if (Number.isFinite(num) && num > 0) {
-                    console.log('dataService: getUserRadius parsed:', num);
-                    return num;
-                }
-            }
-            console.log('dataService: getUserRadius using default:', CONFIG.DEFAULT_RADIUS_KM);
-            return CONFIG.DEFAULT_RADIUS_KM;
-        } catch (error) {
-            console.warn('dataService: getUserRadius error:', error);
-            return CONFIG.DEFAULT_RADIUS_KM;
-        }
+        return locationService.getUserRadius();
     }
 
     async saveUserLocation(place: Place, radiusKm: number): Promise<void> {
-        try {
-            console.log('dataService: saveUserLocation saving:', place, radiusKm);
-            localStorage.setItem('userLocation', JSON.stringify(place));
-            localStorage.setItem('userRadiusKm', String(radiusKm));
-            console.log('dataService: saveUserLocation saved successfully');
-        } catch (error) {
-            console.warn('dataService: saveUserLocation error:', error);
-        }
+        locationService.saveUserLocation(place, radiusKm);
     }
 
     // Data Transformation

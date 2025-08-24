@@ -228,6 +228,56 @@ export default function AdminPage() {
                 Database Tools
               </button>
             </div>
+
+            {/* Testing Tools */}
+            <div className={cn(
+              "p-6 rounded-2xl border transition-all duration-200 hover:shadow-lg",
+              "bg-white dark:bg-neutral-900",
+              "border-neutral-200 dark:border-neutral-800",
+              "hover:border-red-300 dark:hover:border-red-600"
+            )}>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Testing Tools</h3>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">Development and testing utilities</p>
+                </div>
+              </div>
+              <button 
+                onClick={async () => {
+                  if (confirm('Are you sure you want to wipe your account from the database? This action cannot be undone.')) {
+                    try {
+                      const response = await fetch('/api/admin/users/wipe-me', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: session.user?.email })
+                      });
+                      
+                      if (response.ok) {
+                        alert('Account wiped successfully! You will be redirected to the home page.');
+                        // Clear session and redirect
+                        setSession(null);
+                        router.push('/');
+                      } else {
+                        const errorData = await response.json() as { error?: string };
+                        alert(`Failed to wipe account: ${errorData.error || 'Unknown error'}`);
+                      }
+                    } catch (error: unknown) {
+                      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                      alert('Failed to wipe account. Please try again.');
+                      console.error('Error wiping account:', errorMessage);
+                    }
+                  }
+                }}
+                className="w-full px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200"
+              >
+                Wipe My Account
+              </button>
+            </div>
           </div>
 
           {/* Quick Stats */}

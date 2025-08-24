@@ -80,7 +80,22 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
       <div className="col-span-9 flex flex-col pl-2 sm:pl-4 md:pl-6">
         {/* Tag row */}
         <div className="flex items-center justify-between mb-1 gap-2 min-w-0">
-          <span className={cn("flex-shrink-0 rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>{listing.type === 'want' ? t('looking_for', useLang()) : t('selling', useLang())}</span>
+          <div className="flex items-center gap-2">
+            <span className={cn("flex-shrink-0 rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>{listing.type === 'want' ? t('looking_for', useLang()) : t('selling', useLang())}</span>
+            {/* Username tag */}
+            <Link
+              href={`/profile/${listing.seller.name}`}
+              className={cn(
+                "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium transition-all duration-200 cursor-pointer",
+                "bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700",
+                "border border-neutral-300 dark:border-neutral-600",
+                "hover:scale-105 hover:shadow-sm"
+              )}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span className={dark ? "text-neutral-200" : "text-neutral-700"}>@{listing.seller.name}</span>
+            </Link>
+          </div>
           <div className="flex items-center gap-2">
             {/* Age tag */}
             <span className={cn(
