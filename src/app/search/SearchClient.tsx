@@ -267,13 +267,35 @@ export default function SearchClient() {
                 setIsLoading(true);
                 setInitialLoaded(false);
 
-                // Use mock data for development
-                const filteredData = filterMockData();
-                const paginatedData = filteredData.slice(0, CONFIG.PAGE_SIZE);
+                if (isDeployed) {
+                    // Use real API for production/staging
+                    const response = await dataService.getListings({
+                        limit: CONFIG.PAGE_SIZE,
+                        offset: 0,
+                        lat: Number(centerLat) || savedCenter?.lat,
+                        lng: Number(centerLng) || savedCenter?.lng,
+                        radiusKm: radiusKm,
+                        query: inputQuery,
+                        category: selCategory !== "Featured" ? selCategory : undefined,
+                        adType: selAdType !== "all" ? selAdType : undefined,
+                        minPrice: minPrice ? Number(minPrice) : undefined,
+                        maxPrice: maxPrice ? Number(maxPrice) : undefined,
+                        sortBy: sortChoice.split(':')[0],
+                        sortOrder: sortChoice.split(':')[1] || 'desc'
+                    });
 
-                setListings(paginatedData);
-                setTotal(filteredData.length);
-                setHasMore(paginatedData.length < filteredData.length);
+                    setListings(response.listings);
+                    setTotal(response.total);
+                    setHasMore(response.listings.length < response.total);
+                } else {
+                    // Use mock data for development
+                    const filteredData = filterMockData();
+                    const paginatedData = filteredData.slice(0, CONFIG.PAGE_SIZE);
+
+                    setListings(paginatedData);
+                    setTotal(filteredData.length);
+                    setHasMore(paginatedData.length < filteredData.length);
+                }
             } catch (error) {
                 console.error('Failed to load listings:', error);
             } finally {
@@ -284,7 +306,7 @@ export default function SearchClient() {
         };
 
         load();
-    }, [isDeployed, centerLat, centerLng, savedCenter, radiusKm, inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice, filterMockData]);
+    }, [isDeployed, centerLat, centerLng, savedCenter, radiusKm, inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice]);
 
     const loadMore = useCallback(async () => {
         if (isFetchingRef.current || !hasMore || isLoadingMore) return;
