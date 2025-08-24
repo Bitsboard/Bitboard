@@ -123,8 +123,19 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                       .then(response => {
                         console.log('Response received:', response.status);
                         if (response.ok) {
+                          // Clear any stored user data
+                          try {
+                            localStorage.removeItem('userLocation');
+                            localStorage.removeItem('userRadius');
+                            sessionStorage.clear();
+                          } catch (e) {
+                            console.log('Cleared stored data');
+                          }
+                          
                           alert('Account wiped successfully! You can now re-sign up with georged1997@gmail.com');
-                          window.location.reload();
+                          
+                          // Force a complete page reload to clear all state
+                          window.location.href = window.location.origin;
                         } else {
                           alert('Failed to wipe account. Please try again.');
                         }
