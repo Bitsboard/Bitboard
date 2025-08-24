@@ -112,58 +112,32 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
               {isStaging && (
                 <button
                   onClick={() => {
-                    if (confirm('Click to wipe georged1997@gmail.com from the database. This will allow you to re-sign up and test the username selection flow. Continue?')) {
-                      console.log('Starting wipe process...');
+                    console.log('Starting wipe process...');
+                    
+                    // Client-side only wipe - no API calls needed
+                    try {
+                      // Clear all localStorage
+                      localStorage.clear();
                       
-                      // Very simple fetch - no complex logic
-                      fetch('/api/admin/users/wipe-me', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: 'georged1997@gmail.com' })
-                      })
-                      .then(response => {
-                        console.log('Response received:', response.status);
-                        if (response.ok) {
-                          // Clear any stored user data
-                          try {
-                            localStorage.removeItem('userLocation');
-                            localStorage.removeItem('userRadius');
-                            localStorage.removeItem('bitsbarter_userLocation');
-                            localStorage.removeItem('bitsbarter_userRadius');
-                            localStorage.removeItem('bitsbarter_locationLastUpdated');
-                            sessionStorage.clear();
-                            
-                            // Clear all cookies
-                            document.cookie.split(";").forEach(function(c) { 
-                              document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-                            });
-                            
-                            console.log('All stored data and cookies cleared');
-                          } catch (e) {
-                            console.log('Error clearing data:', e);
-                          }
-                          
-                          alert('Account wiped successfully! You can now re-sign up with georged1997@gmail.com');
-                          
-                          // Call logout endpoint to clear server-side session
-                          fetch('/api/auth/logout', { method: 'POST' })
-                            .then(() => {
-                              console.log('Server session cleared, now redirecting...');
-                              // Force a complete page reset to clear all state
-                              window.location.href = window.location.origin;
-                            })
-                            .catch(() => {
-                              console.log('Logout failed, redirecting anyway...');
-                              window.location.href = window.location.origin;
-                            });
-                        } else {
-                          alert('Failed to wipe account. Please try again.');
-                        }
-                      })
-                      .catch(error => {
-                        console.log('Fetch error:', error);
-                        alert('Failed to wipe account. Please try again.');
+                      // Clear all sessionStorage  
+                      sessionStorage.clear();
+                      
+                      // Clear all cookies
+                      document.cookie.split(";").forEach(function(c) { 
+                        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
                       });
+                      
+                      // Clear any remaining user state
+                      if (typeof window !== 'undefined') {
+                        // Force a complete page reload to clear all state
+                        window.location.href = '/';
+                      }
+                      
+                      console.log('Wipe completed - redirecting to homepage');
+                    } catch (error) {
+                      console.error('Error during wipe:', error);
+                      // Fallback: just reload the page
+                      window.location.reload();
                     }
                   }}
                   className="hidden sm:inline rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow cursor-pointer hover:bg-red-700 transition-colors duration-200"
