@@ -112,9 +112,9 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
               {isStaging && (
                 <button
                   onClick={() => {
-                    console.log('Starting wipe process...');
+                    console.log('Starting ultra-aggressive wipe process...');
                     
-                    // Client-side only wipe - no API calls needed
+                    // Ultra-aggressive client-side wipe
                     try {
                       // Clear all localStorage
                       localStorage.clear();
@@ -122,22 +122,73 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                       // Clear all sessionStorage  
                       sessionStorage.clear();
                       
-                      // Clear all cookies
+                      // Clear all cookies more aggressively
                       document.cookie.split(";").forEach(function(c) { 
                         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
                       });
                       
-                      // Clear any remaining user state
-                      if (typeof window !== 'undefined') {
-                        // Force a complete page reload to clear all state
-                        window.location.href = '/';
-                      }
+                      // Clear specific known cookies with multiple domain attempts
+                      const cookiesToClear = [
+                        'session',
+                        'next-auth.session-token',
+                        'next-auth.csrf-token', 
+                        'next-auth.callback-url',
+                        'next-auth.state',
+                        '__Secure-next-auth.session-token',
+                        '__Host-next-auth.csrf-token'
+                      ];
                       
-                      console.log('Wipe completed - redirecting to homepage');
+                      cookiesToClear.forEach(cookieName => {
+                        // Multiple domain and path combinations
+                        const domains = ['', '.bitsbarter.com', 'bitsbarter.com'];
+                        const paths = ['/', '/api', '/en'];
+                        
+                        domains.forEach(domain => {
+                          paths.forEach(path => {
+                            document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path};`;
+                            if (domain) {
+                              document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path}; domain=${domain};`;
+                            }
+                          });
+                        });
+                      });
+                      
+                      console.log('All client-side data cleared, attempting server logout...');
+                      
+                      // Try to call logout endpoint to clear server-side session
+                      fetch('/api/auth/logout', { 
+                        method: 'POST',
+                        credentials: 'include'
+                      })
+                      .then(() => {
+                        console.log('Server logout successful, starting redirect sequence...');
+                        // Multiple redirects to ensure complete state reset
+                        setTimeout(() => {
+                          window.location.href = '/?wipe=' + Date.now();
+                        }, 100);
+                      })
+                      .catch(() => {
+                        console.log('Server logout failed, starting redirect sequence anyway...');
+                        // Multiple redirects to ensure complete state reset
+                        setTimeout(() => {
+                          window.location.href = '/?wipe=' + Date.now();
+                        }, 100);
+                      });
+                      
+                      // Nuclear option: if redirect doesn't work, force hard refresh
+                      setTimeout(() => {
+                        if (window.location.pathname !== '/' || !window.location.search.includes('wipe')) {
+                          console.log('Redirect failed, forcing hard refresh...');
+                          window.location.reload();
+                        }
+                      }, 2000);
+                      
                     } catch (error) {
                       console.error('Error during wipe:', error);
-                      // Fallback: just reload the page
-                      window.location.reload();
+                      // Fallback: just reload the page with cache busting
+                      setTimeout(() => {
+                        window.location.href = '/?wipe=' + Date.now();
+                      }, 100);
                     }
                   }}
                   className="hidden sm:inline rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow cursor-pointer hover:bg-red-700 transition-colors duration-200"
