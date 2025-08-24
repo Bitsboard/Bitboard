@@ -116,7 +116,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                       console.log('Starting wipe process...');
                       
                       // Very simple fetch - no complex logic
-                      fetch('/api/test/wipe-account', {
+                      fetch('/api/wipe-test-account', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' }
                       })
