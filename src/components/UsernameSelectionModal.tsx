@@ -55,7 +55,11 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
       
       if (response.ok) {
         setIsAvailable(data.available ?? false);
-        setError(null);
+        if (!data.available) {
+          setError("Username is already taken");
+        } else {
+          setError(null);
+        }
       } else {
         setError(data.error || "Failed to check username");
         setIsAvailable(false);
@@ -90,12 +94,24 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
     return "border-gray-300 dark:border-gray-600";
   };
 
+  const getErrorMessage = () => {
+    if (!username || username.length < 3) return null;
+    
+    if (username.length < 3) return "Username must be at least 3 characters long";
+    if (username.length > 12) return "Username must be 12 characters or less";
+    if (!/^[a-zA-Z0-9_-]+$/.test(username)) return "Username can only contain letters, numbers, hyphens, and underscores";
+    if (username.includes('admin') || username.includes('mod')) return "Username cannot contain 'admin' or 'mod'";
+    if (isAvailable === false) return "Username is already taken";
+    
+    return null;
+  };
+
   return (
     <Modal 
       open={true} 
       onClose={onClose}
       dark={dark} 
-      size="lg" 
+      size="md" 
       ariaLabel="Choose your username"
       zIndex={10000}
     >
@@ -114,7 +130,7 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
             </div>
           </div>
           
-          {/* Right side - Welcome text (takes up two-thirds) */}
+          {/* Right side - Welcome text */}
           <div className="flex-1 ml-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               Welcome to Bitsbarter
@@ -128,16 +144,14 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
           </div>
         </div>
         
-        {/* Close button - positioned absolutely at top right */}
-        <div className="absolute top-0 right-0">
-          <ModalCloseButton onClose={onClose} dark={dark} />
-        </div>
+        {/* Close button */}
+        <ModalCloseButton onClose={onClose} dark={dark} />
       </ModalHeader>
       
       <ModalBody className="space-y-6 px-6 pb-6">
         {isClosing && (
           <div className={cn(
-            "text-center p-3 rounded-xl border",
+            "text-center p-3 rounded-lg border",
             dark ? "bg-orange-900/20 border-orange-700/50 text-orange-300" : "bg-orange-50 border-orange-200 text-orange-700"
           )}>
             <div className="flex items-center justify-center gap-2">
@@ -239,7 +253,7 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
           </div>
 
           {/* Error message */}
-          {error && (
+          {getErrorMessage() && (
             <div className={cn(
               "p-3 rounded-lg border text-sm",
               dark ? "bg-red-900/20 border-red-700/50 text-red-300" : "bg-red-50 border-red-200 text-red-700"
@@ -248,7 +262,7 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
-                {error}
+                {getErrorMessage()}
               </div>
             </div>
           )}
