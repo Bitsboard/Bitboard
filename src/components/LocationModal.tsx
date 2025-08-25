@@ -27,53 +27,84 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
     const leafletRef = React.useRef<any>(null);
     const lang = useLang();
     const [query, setQuery] = React.useState<string>(initialCenter?.name || "");
+    
+    // Safe setQuery function that prevents worldwide text from being set as query
+    const safeSetQuery = React.useCallback((value: string) => {
+        if (value === t('all_listings_globally', lang)) {
+            setQuery("");
+        } else {
+            setQuery(value);
+        }
+    }, [lang, t]);
+
+    // Safe setCenter function that prevents worldwide text from being set as center name
+    const safeSetCenter = React.useCallback((value: Place) => {
+        if (value.name === t('all_listings_globally', lang)) {
+            // Keep the original name, don't set to worldwide text
+            setCenter(prev => ({
+                ...value,
+                name: prev.name || value.name
+            }));
+        } else {
+            setCenter(value);
+        }
+    }, [lang, t]);
     const [radiusKm, setRadiusKm] = React.useState<number>(initialRadiusKm);
-    const [center, setCenter] = React.useState<Place>({
-        name: initialCenter?.name || "",
-        lat: initialCenter?.lat ?? 43.6532,
-        lng: initialCenter?.lng ?? -79.3832,
+    const [center, setCenter] = React.useState<Place>(() => {
+        if (initialCenter?.lat && initialCenter?.lng) {
+            return {
+                name: initialCenter.name || "",
+                lat: initialCenter.lat,
+                lng: initialCenter.lng,
+            };
+        }
+        // Only use defaults if no initialCenter is provided
+        return {
+            name: "",
+            lat: 43.6532,
+            lng: -79.3832,
+        };
     });
     const [remoteResults, setRemoteResults] = React.useState<Array<{ name: string; lat: number; lng: number }>>([]);
     const [locating, setLocating] = React.useState<boolean>(false);
     const [usingMyLocation, setUsingMyLocation] = React.useState<boolean>(false);
     const [circleMode, setCircleMode] = React.useState<'global' | 'local'>(initialRadiusKm === 0 ? 'global' : 'local');
 
+
     // Update query and center when initialCenter changes (e.g., when modal opens with different location)
     React.useEffect(() => {
         if (initialCenter?.lat && initialCenter?.lng) {
-            setCenter({
+            const validLocation = {
                 name: initialCenter.name || "",
                 lat: initialCenter.lat,
                 lng: initialCenter.lng,
-            });
+            };
+            safeSetCenter(validLocation);
+
         }
         
         // Handle worldwide mode (radius = 0)
         if (initialRadiusKm === 0) {
             setQuery(""); // Keep search bar empty for worldwide mode
-            // For worldwide mode, use a special place with valid coordinates but worldwide name
-            setCenter({
-                name: t('all_listings_globally', lang),
-                lat: 0, // Use 0,0 for worldwide (valid coordinates)
-                lng: 0
-            });
+            // For worldwide mode, keep the current coordinates and name
+            // This prevents jumping to 0,0 (null island) and keeps the city name
         } else if (initialCenter?.name) {
-            setQuery(initialCenter.name);
+            safeSetQuery(initialCenter.name);
         }
     }, [initialCenter, initialRadiusKm, open, lang]);
 
     // Handle radius changes to worldwide mode
     React.useEffect(() => {
         if (radiusKm === 0) {
+            // Keep the current location coordinates and name, just clear the query
+            // This way the pin stays in place (e.g., NYC) when switching to worldwide
             setQuery(""); // Keep search bar empty for worldwide mode
-            // For worldwide mode, use a special place with valid coordinates but worldwide name
-            setCenter({
-                name: t('all_listings_globally', lang),
-                lat: 0, // Use 0,0 for worldwide (valid coordinates)
-                lng: 0
-            });
+            // Don't change the center name - keep the original city name
+            console.log('LocationModal: Switched to worldwide mode, keeping center at:', center);
         }
-    }, [radiusKm, lang]);
+    }, [radiusKm, lang, center]);
+
+
 
     // Map zoom helper tied to radius
     function zoomForRadiusKm(r: number): number {
@@ -226,8 +257,8 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             if (mapRef.current) {
                 mapRef.current.remove();
             }
-            const initLat = radiusKm === 0 ? 0 : center.lat;
-            const initLng = radiusKm === 0 ? 5 : center.lng;
+            const initLat = center.lat;
+            const initLng = center.lng;
             const map = L.map(containerRef.current, { zoomControl: false }).setView([initLat, initLng], zoomForRadiusKm(radiusKm));
             mapRef.current = map;
             // Disable interactions
@@ -256,7 +287,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             const marker = (L as any).marker([center.lat, center.lng], { draggable: false, icon: bbIcon }).addTo(map);
             markerRef.current = marker;
             if (radiusKm === 0) {
-                const circle = (L as any).circleMarker([0, 5], { radius: getGlobalRadiusPx(), stroke: false, fillColor: '#f97316', fillOpacity: 0.25 }).addTo(map);
+                const circle = (L as any).circleMarker([center.lat, center.lng], { radius: getGlobalRadiusPx(), stroke: false, fillColor: '#f97316', fillOpacity: 0.25 }).addTo(map);
                 circleRef.current = circle;
             } else {
                 const circle = (L as any).circleMarker([center.lat, center.lng], { radius: getCircleRadiusPx(), color: "#f97316", fillColor: "#f97316", fillOpacity: 0.15 }).addTo(map);
@@ -287,7 +318,10 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         } else {
             // Use initialCenter directly since center state might not be updated yet
             const currentName = initialCenter?.name || center?.name || "";
-            if (currentName && !query) setQuery(currentName);
+            // Don't set worldwide text as query
+            if (currentName && !query && currentName !== t('all_listings_globally', lang)) {
+                safeSetQuery(currentName);
+            }
         }
     }, [open, initialCenter?.name, center?.name, lang]);
 
@@ -302,12 +336,17 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
 
     // When a city is explicitly selected (center changes) and we're not in "My Location" mode,
     // mirror that selection into the input so the text box always shows the chosen city.
+    // Don't mirror worldwide mode - keep the search bar empty with just the placeholder.
     React.useEffect(() => {
         if (!open) return;
-        if (!usingMyLocation && center?.name) {
-            setQuery(center.name);
+        if (!usingMyLocation && center?.name && radiusKm !== 0) {
+            safeSetQuery(center.name);
         }
-    }, [center.name, usingMyLocation, open]);
+        // Ensure worldwide mode keeps search field empty
+        if (radiusKm === 0) {
+            setQuery("");
+        }
+    }, [center.name, usingMyLocation, open, radiusKm]);
 
     // Safety net: if center changes to a concrete city (not My Location/coords), exit My Location mode
     React.useEffect(() => {
@@ -333,7 +372,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         // Remove any existing circle
         try { circleRef.current?.remove(); } catch {}
         if (currentRadius === 0) {
-            circleRef.current = (L as any).circleMarker([0, 5], { radius: getGlobalRadiusPx(), stroke: false, fillColor: '#f97316', fillOpacity: 0.25 }).addTo(mapRef.current);
+            circleRef.current = (L as any).circleMarker([at.lat, at.lng], { radius: getGlobalRadiusPx(), stroke: false, fillColor: '#f97316', fillOpacity: 0.25 }).addTo(mapRef.current);
             setCircleMode('global');
         } else {
             circleRef.current = (L as any).circleMarker([at.lat, at.lng], { radius: getCircleRadiusPx(), color: '#f97316', fillColor: '#f97316', fillOpacity: 0.15 }).addTo(mapRef.current);
@@ -348,7 +387,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         const tint = mapRef.current.getPane('worldTint') as any;
         if (tint) tint.style.background = 'transparent';
         if (radiusKm === 0) {
-            mapRef.current.setView([0, 5], zoomForRadiusKm(0));
+            mapRef.current.setView([center.lat, center.lng], zoomForRadiusKm(0));
             markerRef.current?.setLatLng([center.lat, center.lng]);
             recreateCircle(0, center);
         } else {
@@ -410,13 +449,20 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                     <div className="sm:col-span-2">
                         <label className={cn("text-xs mb-1 block", dark ? "text-neutral-400" : "text-neutral-500")}>{t('location', lang)}</label>
                         <div className={cn("relative rounded-xl border", dark ? "border-neutral-700 bg-neutral-800" : "border-neutral-300 bg-white")}>
+                            {/* Search input - placeholder always shows "Enter a city" to encourage city selection, especially when worldwide is selected */}
                             <input
                                 value={query}
                                 onChange={(e) => { 
-                                    setQuery(e.target.value); 
+                                    safeSetQuery(e.target.value); 
                                     // Exit worldwide mode when user starts typing
                                     if (radiusKm === 0) {
                                         setRadiusKm(25);
+                                    }
+                                }}
+                                onFocus={() => {
+                                    // Ensure search field is empty when focusing in worldwide mode
+                                    if (radiusKm === 0) {
+                                        setQuery("");
                                     }
                                 }}
                                 placeholder={t('enter_city', lang)}
@@ -426,10 +472,10 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                                 <div className={cn("absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-auto rounded-xl border shadow", dark ? "border-neutral-700 bg-neutral-900" : "border-neutral-300 bg-white")}>
                                     {suggestions.map((s, idx) => (
                                         <button key={`${s.name}-${idx}`} onClick={() => { 
-                                            setCenter({ name: s.name, lat: s.lat, lng: s.lng }); 
+                                            safeSetCenter({ name: s.name, lat: s.lat, lng: s.lng }); 
                                             setUsingMyLocation(false); 
                                             try { localStorage.setItem('usingMyLocation', '0'); } catch {} 
-                                            setQuery(s.name); 
+                                            safeSetQuery(s.name); 
                                             setRemoteResults([]); 
                                             // Reset radius to default when selecting a city (exit worldwide mode)
                                             if (radiusKm === 0) {
@@ -473,21 +519,21 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                                         (pos) => {
                                             const { latitude, longitude } = pos.coords;
                                             // Immediately drop a pin at the user's coordinates for instant feedback
-                                            setCenter({ name: t('my_location', lang), lat: latitude, lng: longitude });
+                                            safeSetCenter({ name: t('my_location', lang), lat: latitude, lng: longitude });
                                             setUsingMyLocation(true);
                                             try { localStorage.setItem('usingMyLocation', '1'); } catch {}
                                             setQuery('');
                                             (async () => {
                                                 const nearest = await reverseToNearestCity(latitude, longitude);
                                                 if (nearest?.name) {
-                                                    setCenter({ name: nearest.name, lat: nearest.lat, lng: nearest.lng });
+                                                    safeSetCenter({ name: nearest.name, lat: nearest.lat, lng: nearest.lng });
                                                     // Keep the input labeled as "My Location" while using current location
                                                     setUsingMyLocation(true);
                                                     try { localStorage.setItem('usingMyLocation', '1'); } catch {}
                                                     setQuery('');
                                                 } else {
                                                     const coordLabel = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-                                                    setCenter({ name: coordLabel, lat: latitude, lng: longitude });
+                                                    safeSetCenter({ name: coordLabel, lat: latitude, lng: longitude });
                                                     setUsingMyLocation(true);
                                                     try { localStorage.setItem('usingMyLocation', '1'); } catch {}
                                                     setQuery('');
