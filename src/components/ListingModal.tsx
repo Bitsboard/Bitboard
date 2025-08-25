@@ -16,7 +16,7 @@ interface ListingModalProps {
   unit: Unit;
   btcCad: number | null;
   dark: boolean;
-  onChat: () => void;
+  onChat?: () => void;
   open: boolean;
 }
 
@@ -71,11 +71,8 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
   }
 
   function handleChatClick() {
-    if (onChat) {
-      onChat();
-    } else {
-      setShowChat(true);
-    }
+    // Always use the integrated chat functionality
+    setShowChat(!showChat);
   }
 
   return (

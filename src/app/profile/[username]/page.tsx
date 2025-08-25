@@ -716,12 +716,7 @@ export default function PublicProfilePage() {
           unit={unit}
           dark={dark}
           btcCad={effectiveBtcCad}
-          onChat={() => {
-            if (!user) {
-              setModal('showAuth', true);
-            }
-            // Chat is now integrated into the modal, no need to open separate modal
-          }}
+
         />
       )}
 
