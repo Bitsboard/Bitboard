@@ -707,8 +707,8 @@ export default function PublicProfilePage() {
         )}
       </div>
 
-      {/* Listing Modal */}
-      {active && (
+      {/* Listing Modal OR Chat Modal - only one shown at a time */}
+      {active && !modals.chatFor && (
         <ListingModal
           listing={active}
           open={!!active}
@@ -720,11 +720,9 @@ export default function PublicProfilePage() {
             if (!user) {
               setModal('showAuth', true);
             } else {
-              closeModal(); // Close the listing modal first
-              setModal('chatFor', active); // Then open the chat modal
+              setModal('chatFor', active);
             }
           }}
-
         />
       )}
 
