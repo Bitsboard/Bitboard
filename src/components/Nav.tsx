@@ -290,7 +290,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
           
           {/* Settings Menu - Always visible, subtle */}
           <div className="relative">
-            <button onClick={() => setMenuOpen(v => !v)} aria-expanded={menuOpen} aria-haspopup="menu" className={cn("rounded-xl px-3 py-2 text-base font-bold shadow-lg ring-1 transition-all duration-200 hover:scale-105", dark ? "text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 ring-neutral-700" : "text-neutral-600 hover:text-neutral-800 hover:bg-neutral-100 ring-neutral-300")}>☰</button>
+            <button onClick={() => setMenuOpen(v => !v)} aria-expanded={menuOpen} aria-haspopup="menu" className={cn("rounded-xl px-3 py-2.5 text-base font-bold shadow-lg ring-1 transition-all duration-200 hover:scale-105", dark ? "text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 ring-neutral-700" : "text-neutral-600 hover:text-neutral-800 hover:bg-neutral-100 ring-neutral-300")}>☰</button>
             {menuOverlay}
           </div>
         </div>
