@@ -219,7 +219,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
             
             {showChat ? (
               /* Chat Interface */
-              <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="flex-1 flex flex-col overflow-hidden" style={{ maxHeight: "calc(90vh - 64px - 120px)" }}>
                 {/* Safety Tips */}
                 {showTips && (
                   <div className={cn("mx-3 rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>
@@ -241,7 +241,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                     <div
                       key={m.id}
                       className={cn(
-                        "max-w-[70%] rounded-2xl px-3 py-2 text-sm",
+                        "inline-block max-w-[70%] rounded-2xl px-3 py-2 text-sm break-words",
                         m.who === "me" ? "ml-auto bg-orange-500 text-white" : dark ? "bg-neutral-900" : "bg-neutral-100"
                       )}
                     >
@@ -272,7 +272,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                   <div className={cn("border-t", dark ? "border-neutral-900" : "border-neutral-200")}>
                     <div className="flex items-center justify-between px-4 py-3">
                       <div className="font-semibold">Escrow proposal</div>
-                      <button onClick={() => setShowEscrow(false)} className={cn("rounded px-2 py-1 text-xs", dark ? "hover:bg-neutral-900" : "hover:bg-neutral-100")}>
+                      <button onClick={() => setShowEscrow(false)} className={cn("rounded px-2 py-1 text-xs", dark ? "hover:bg-neutral-900" : "hover:bg-neutral-200")}>
                         Hide
                       </button>
                     </div>
