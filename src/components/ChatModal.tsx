@@ -170,7 +170,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
           <div 
             className={cn(
               "m-4 p-4 rounded-xl border cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02]",
-              dark ? "bg-neutral-900 border-neutral-700 hover:bg-neutral-800" : "bg-neutral-100 border-neutral-200 hover:bg-neutral-50"
+              dark ? "bg-neutral-900 border-neutral-700 hover:border-orange-500/50" : "bg-neutral-100 border-neutral-200 hover:border-orange-500/50"
             )}
             onClick={() => {
               if (onBackToListing) {
@@ -181,8 +181,8 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
             }}
           >
             <div className="flex items-center gap-4">
-              {/* Listing image - now bigger */}
-              <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+              {/* Listing image - now much larger */}
+              <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                 <img 
                   src={listing.images[0]} 
                   alt={listing.title}
