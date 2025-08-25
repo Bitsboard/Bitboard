@@ -59,17 +59,21 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
   }
 
   function handleChatClick() {
+    console.log('handleChatClick called, user:', user, 'onShowAuth:', !!onShowAuth);
     if (!user) {
+      console.log('No user, showing auth modal');
       if (onShowAuth) {
         onShowAuth();
       }
     } else {
+      console.log('User exists, setting showChat to true');
       setShowChat(true);
     }
   }
 
   // If showing chat, render ChatModal instead
   if (showChat) {
+    console.log('Rendering ChatModal, showChat:', showChat);
     return (
       <ChatModal
         listing={listing}
