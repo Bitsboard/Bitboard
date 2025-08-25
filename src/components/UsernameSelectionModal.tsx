@@ -36,6 +36,13 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
   const checkUsernameAvailability = async () => {
     if (username.length < 3) return;
 
+    // Check for inappropriate content first
+    if (username.includes('admin') || username.includes('mod')) {
+      setError("Username cannot contain 'admin' or 'mod'");
+      setIsAvailable(false);
+      return;
+    }
+
     const validation = validateUsername(username);
     if (!validation.isValid) {
       setError(validation.error || "Invalid username");

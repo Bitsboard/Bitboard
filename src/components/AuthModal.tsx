@@ -111,7 +111,15 @@ export function AuthModal({ onClose, onAuthed, dark }: AuthModalProps) {
           </button>
           
           <div className="text-[11px] text-neutral-500">
-            By continuing, you agree to our Terms.
+            By continuing, you agree to our{' '}
+            <a 
+              href="/terms" 
+              className="underline hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Terms
+            </a>.
           </div>
           
           <button
