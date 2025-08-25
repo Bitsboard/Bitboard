@@ -720,7 +720,8 @@ export default function PublicProfilePage() {
             if (!user) {
               setModal('showAuth', true);
             } else {
-              setModal('chatFor', active);
+              closeModal(); // Close the listing modal first
+              setModal('chatFor', active); // Then open the chat modal
             }
           }}
 

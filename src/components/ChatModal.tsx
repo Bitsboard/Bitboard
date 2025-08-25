@@ -42,7 +42,8 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit }: ChatModalPro
       dark={dark}
       size="xl"
       ariaLabel={`Chat about ${listing.title}`}
-      panelClassName={cn("flex w-full flex-col")}
+      panelClassName={cn("flex w-full flex-col h-[95vh]")}
+      maxHeightVh={95}
     >
       {/* Header with listing details and back button */}
       <div className={cn("flex items-center justify-between border-b px-6 py-4", dark ? "border-neutral-900" : "border-neutral-200")}>
@@ -51,7 +52,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit }: ChatModalPro
           <button 
             onClick={onClose}
             className={cn(
-              "flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200",
+              "flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 font-medium",
               dark 
                 ? "hover:bg-neutral-800 text-neutral-300 hover:text-white" 
                 : "hover:bg-neutral-100 text-neutral-600 hover:text-neutral-800"
@@ -60,6 +61,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit }: ChatModalPro
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
+            Back
           </button>
           
           {/* Listing image */}
@@ -87,7 +89,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit }: ChatModalPro
       </div>
 
       {/* Chat content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0">
         {showTips && (
           <div className={cn("m-4 rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>
             <div className="flex items-start justify-between gap-3">
@@ -102,7 +104,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit }: ChatModalPro
           </div>
         )}
         
-        <div className="flex-1 space-y-2 overflow-auto p-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-2 min-h-0">
           {messages.map((m) => (
             <div
               key={m.id}
