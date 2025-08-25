@@ -6,7 +6,7 @@ export function UnitToggle() {
   const { unit, setUnit } = useUnit();
 
   return (
-    <div className="relative inline-flex rounded-2xl p-1 shadow-lg border backdrop-blur-sm bg-white/70 dark:bg-neutral-800/60 dark:border-neutral-700/50">
+    <div className="relative inline-flex rounded-2xl p-1 shadow-lg border backdrop-blur-sm bg-white/70 dark:bg-neutral-800/60 dark:border-neutral-700/50 w-32">
       <div
         className={`absolute inset-1 rounded-xl transition-all duration-300 ease-out ${
           unit === 'BTC' 
