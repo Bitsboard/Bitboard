@@ -602,7 +602,7 @@ export default function PublicProfilePage() {
                 <select
                   value={sortBy}
                   onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
-                  className={`px-3 pr-12 py-2 rounded-lg border text-sm ${
+                  className={`px-3 pr-16 py-2 rounded-lg border text-sm ${
                     dark 
                       ? "bg-neutral-800 border-neutral-700 text-white" 
                       : "bg-white border-neutral-300 text-neutral-900"
