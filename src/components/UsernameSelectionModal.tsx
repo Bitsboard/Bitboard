@@ -83,41 +83,6 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
     }
   };
 
-  const getStatusIcon = () => {
-    if (isChecking) return (
-      <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent" />
-    );
-    if (isAvailable === null) return null;
-    if (isAvailable) return (
-      <div className="flex items-center justify-center w-4 h-4 bg-green-500 rounded-full">
-        <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-        </svg>
-      </div>
-    );
-    return (
-      <div className="flex items-center justify-center w-4 h-4 bg-red-500 rounded-full">
-        <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-        </svg>
-      </div>
-    );
-  };
-
-  const getStatusText = () => {
-    if (isChecking) return "Checking availability...";
-    if (isAvailable === null) return "";
-    if (isAvailable) return "Username is available!";
-    return "Username is taken";
-  };
-
-  const getStatusColor = () => {
-    if (isChecking) return "text-orange-500";
-    if (isAvailable === null) return "text-gray-500";
-    if (isAvailable) return "text-green-600";
-    return "text-red-600";
-  };
-
   const getInputBorderColor = () => {
     if (focused) return "ring-2 ring-orange-500 border-orange-500";
     if (isAvailable === true) return "ring-2 ring-green-500 border-green-500";
@@ -135,29 +100,38 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
       zIndex={10000}
     >
       <ModalHeader dark={dark}>
-        <div className="text-center w-full">
-          <div className="mb-4">
-            <div className="w-24 h-24 mx-auto flex items-center justify-center">
+        <div className="flex items-start justify-between w-full">
+          {/* Left side - Logo */}
+          <div className="flex-shrink-0">
+            <div className="w-16 h-16">
               <Image
                 src="/Bitsbarterlogo.svg"
                 alt="Bitsbarter Logo"
-                width={96}
-                height={96}
+                width={64}
+                height={64}
                 className="w-full h-full"
               />
             </div>
           </div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">
-            Welcome to Bitsbarter
+          
+          {/* Right side - Welcome text (takes up two-thirds) */}
+          <div className="flex-1 ml-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              Welcome to Bitsbarter
+            </h2>
+            <p className={cn(
+              "text-base",
+              dark ? "text-gray-300" : "text-gray-600"
+            )}>
+              Please choose a username
+            </p>
           </div>
-          <p className={cn(
-            "text-sm mt-2",
-            dark ? "text-gray-300" : "text-gray-600"
-          )}>
-            Choose your username to start trading with Bitcoin
-          </p>
         </div>
-        <ModalCloseButton onClose={onClose} dark={dark} />
+        
+        {/* Close button - positioned absolutely at top right */}
+        <div className="absolute top-0 right-0">
+          <ModalCloseButton onClose={onClose} dark={dark} />
+        </div>
       </ModalHeader>
       
       <ModalBody className="space-y-6 px-6 pb-6">
@@ -173,12 +147,13 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
           </div>
         )}
         
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Username field */}
           <div className="space-y-3">
             <label 
               htmlFor="username" 
               className={cn(
-                "block text-sm font-semibold",
+                "block text-sm font-medium",
                 dark ? "text-gray-200" : "text-gray-700"
               )}
             >
@@ -194,7 +169,7 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
                 className={cn(
-                  "w-full px-4 py-3 text-lg font-medium rounded-xl shadow-sm transition-all duration-200 focus:outline-none",
+                  "w-full px-4 py-3 text-base rounded-lg border transition-all duration-200 focus:outline-none",
                   getInputBorderColor(),
                   dark 
                     ? "bg-gray-800 text-white placeholder-gray-400" 
@@ -206,13 +181,24 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
                 autoFocus
               />
               
-              {/* Status indicator overlay */}
+              {/* Status indicator */}
               {username.length >= 3 && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                  {getStatusIcon()}
-                  <span className={cn("text-sm font-medium", getStatusColor())}>
-                    {getStatusText()}
-                  </span>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {isChecking ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent" />
+                  ) : isAvailable === true ? (
+                    <div className="flex items-center justify-center w-4 h-4 bg-green-500 rounded-full">
+                      <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  ) : isAvailable === false ? (
+                    <div className="flex items-center justify-center w-4 h-4 bg-red-500 rounded-full">
+                      <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  ) : null}
                 </div>
               )}
             </div>
@@ -255,7 +241,7 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
           {/* Error message */}
           {error && (
             <div className={cn(
-              "p-3 rounded-xl border text-sm font-medium",
+              "p-3 rounded-lg border text-sm",
               dark ? "bg-red-900/20 border-red-700/50 text-red-300" : "bg-red-50 border-red-200 text-red-700"
             )}>
               <div className="flex items-center gap-2">
@@ -267,12 +253,12 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
             </div>
           )}
 
-          {/* Submit button */}
+          {/* Confirm button */}
           <button
             type="submit"
             disabled={!username || !isAvailable || isSubmitting}
             className={cn(
-              "w-full py-3 px-6 rounded-xl font-semibold text-lg transition-all duration-200 transform",
+              "w-full py-3 px-6 rounded-lg font-semibold text-base transition-all duration-200",
               !username || !isAvailable || isSubmitting
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                 : "bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
@@ -284,19 +270,10 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
                 <span>Setting username...</span>
               </div>
             ) : (
-              "Start Trading with Bitcoin"
+              "Confirm"
             )}
           </button>
         </form>
-
-        {/* Additional info */}
-        <div className={cn(
-          "text-center text-xs p-3 rounded-lg",
-          dark ? "bg-gray-800/50 text-gray-400" : "bg-gray-100 text-gray-600"
-        )}>
-          <p>Your username will be visible to other traders</p>
-          <p>You can change it later in your profile settings</p>
-        </div>
       </ModalBody>
     </Modal>
   );
