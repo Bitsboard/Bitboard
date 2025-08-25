@@ -720,6 +720,9 @@ export default function PublicProfilePage() {
           onShowAuth={() => setModal('showAuth', true)}
         />
       )}
+      
+      {/* Debug: Log user state */}
+      {console.log('Profile page - user state:', user, 'modals.active:', modals.active)}
 
       {/* Chat Modal - no longer needed since it's handled by ListingModal */}
       {/* {modals.chatFor && (

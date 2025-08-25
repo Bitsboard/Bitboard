@@ -140,6 +140,10 @@ export const useSettingsStore = create<SettingsStore>()(
 // Hook to use settings
 export function useSettings() {
     const store = useSettingsStore();
+    
+    // Debug: Log user state
+    console.log('useSettings hook - user state:', store.user, 'modals:', store.modals);
+    
     return store;
 }
 
