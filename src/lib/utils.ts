@@ -302,10 +302,37 @@ const PROFANITY_LIST = [
   // Add more as needed
 ];
 
+// List of legitimate words that contain profane substrings (whitelist)
+const LEGITIMATE_WORDS = [
+  'massachusetts', 'assassin', 'assassination', 'assemble', 'assembly',
+  'assess', 'assessment', 'asset', 'assist', 'assistance', 'assistant',
+  'associate', 'association', 'assume', 'assumption', 'assure', 'assurance',
+  'pass', 'passage', 'passenger', 'passion', 'passionate', 'passport',
+  'class', 'classic', 'classical', 'classify', 'classification',
+  'glass', 'grass', 'brass', 'crass', 'mass', 'massive', 'massacre',
+  'bass', 'sass', 'tassel', 'cassette', 'casserole', 'cassava', 
+  'cassowary', 'cassia', 'cassini', 'cassandra', 'cassius', 'cassidy', 'cassie',
+  'butter', 'butterfly', 'buttercup', 'buttermilk', 'butterscotch',
+  'scunthorpe', 'penistone', 'lightwater', 'cockermouth', 'cockburn',
+  'fucking', 'fuckingham', 'shitfield', 'shitford', 'shitwell'
+];
+
 // Check if username contains profanity
 export function containsProfanity(username: string): boolean {
   const lowerUsername = username.toLowerCase();
-  return PROFANITY_LIST.some(word => lowerUsername.includes(word));
+  
+  // First check if the entire username is a legitimate word
+  if (LEGITIMATE_WORDS.includes(lowerUsername)) {
+    return false;
+  }
+  
+  // Use word boundaries to avoid false positives
+  // This prevents "massachusetts" from being flagged for containing "ass"
+  return PROFANITY_LIST.some(word => {
+    // Create a regex pattern that matches the profane word as a whole word or at word boundaries
+    const pattern = new RegExp(`\\b${word}\\b|^${word}|${word}$|_${word}|${word}_`, 'i');
+    return pattern.test(lowerUsername);
+  });
 }
 
 // Validate username format and content
