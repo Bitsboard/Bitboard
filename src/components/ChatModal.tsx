@@ -167,10 +167,22 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
           className="flex-1 overflow-y-auto min-h-0"
         >
           {/* Listing details box - now part of the scrollable chat area */}
-          <div className={cn("m-4 p-4 rounded-xl border", dark ? "bg-neutral-900 border-neutral-700" : "bg-neutral-100 border-neutral-200")}>
-            <div className="flex items-center gap-3">
-              {/* Listing image */}
-              <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+          <div 
+            className={cn(
+              "m-4 p-4 rounded-xl border cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02]",
+              dark ? "bg-neutral-900 border-neutral-700 hover:bg-neutral-800" : "bg-neutral-100 border-neutral-200 hover:bg-neutral-50"
+            )}
+            onClick={() => {
+              if (onBackToListing) {
+                onBackToListing();
+              } else {
+                onClose();
+              }
+            }}
+          >
+            <div className="flex items-center gap-4">
+              {/* Listing image - now bigger */}
+              <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
                 <img 
                   src={listing.images[0]} 
                   alt={listing.title}
@@ -180,11 +192,32 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
               
               {/* Listing details */}
               <div className="flex flex-col flex-1">
-                <h3 className={cn("font-semibold text-sm", dark ? "text-white" : "text-neutral-900")}>
+                <div className="flex items-center gap-2 mb-2">
+                  {/* Type pill */}
+                  <span className={cn(
+                    "px-2 py-1 rounded-full text-xs font-medium",
+                    listing.type === 'sell' 
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                      : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+                  )}>
+                    {listing.type === 'sell' ? 'Selling' : 'Looking for'}
+                  </span>
+                </div>
+                
+                <h3 className={cn("font-semibold text-sm mb-2", dark ? "text-white" : "text-neutral-900")}>
                   {listing.title}
                 </h3>
-                <div className="flex items-center gap-2 mt-1">
+                
+                <div className="flex items-center gap-3">
                   <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="sm" />
+                  
+                  {/* Dollar equivalent */}
+                  {btcCad && (
+                    <span className={cn("text-xs font-medium", dark ? "text-neutral-400" : "text-neutral-600")}>
+                      ≈ ${((listing.priceSats / 100000000) * btcCad).toFixed(2)}
+                    </span>
+                  )}
+                  
                   <span className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>
                     📍 {listing.location}
                   </span>
