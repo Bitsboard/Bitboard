@@ -217,7 +217,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
           {user && (
             <button
               onClick={onPost}
-              className="rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-500/30 transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:shadow-xl hover:scale-105"
+              className="h-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-5 text-sm font-semibold text-white shadow-lg shadow-orange-500/30 transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:shadow-xl hover:scale-105 flex items-center justify-center"
             >
               {t('post_listing', lang)}
             </button>
@@ -235,7 +235,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                     e.preventDefault();
                     router.push(`/profile/${user.handle}`);
                   }}
-                  className="inline-flex items-center gap-3 px-4 py-2.5 rounded-xl bg-neutral-100/80 dark:bg-neutral-800/50 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/50 transition-all duration-200 group border border-neutral-300/50 dark:border-neutral-700/50"
+                  className="inline-flex items-center gap-3 px-4 h-10 rounded-xl bg-neutral-100/80 dark:bg-neutral-800/50 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/50 transition-all duration-200 group border border-neutral-300/50 dark:border-neutral-700/50"
                 >
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -256,7 +256,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                 </a>
               ) : (
                 // Show username selection prompt if user hasn't chosen a username
-                <div className="inline-flex items-center gap-3 px-4 py-2.5 rounded-xl bg-yellow-100/80 dark:bg-yellow-900/50 border border-yellow-300/50 dark:border-yellow-700/50">
+                <div className="inline-flex items-center gap-3 px-4 h-10 rounded-xl bg-yellow-100/80 dark:bg-yellow-900/50 border border-yellow-300/50 dark:border-yellow-700/50">
                   <div className="h-7 w-7 rounded-full bg-yellow-500 flex items-center justify-center shadow-sm">
                     <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -275,13 +275,13 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => onAuth()} 
-                className="rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:scale-105"
+                className="h-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-5 text-sm font-semibold text-white transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:scale-105 flex items-center justify-center"
               >
                 Register
               </button>
               <button 
                 onClick={() => onAuth()} 
-                className="rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:scale-105"
+                className="h-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-5 text-sm font-semibold text-white transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:scale-105 flex items-center justify-center"
               >
                 {t('sign_in', lang)}
               </button>
@@ -290,7 +290,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
           
           {/* Settings Menu - Always visible, subtle */}
           <div className="relative">
-            <button onClick={() => setMenuOpen(v => !v)} aria-expanded={menuOpen} aria-haspopup="menu" className={cn("rounded-xl px-3 py-2.5 text-base font-bold shadow-lg ring-1 transition-all duration-200 hover:scale-105", dark ? "text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 ring-neutral-700" : "text-neutral-600 hover:text-neutral-800 hover:bg-neutral-100 ring-neutral-300")}>☰</button>
+            <button onClick={() => setMenuOpen(v => !v)} aria-expanded={menuOpen} aria-haspopup="menu" className={cn("h-10 rounded-xl px-3 text-base font-bold shadow-lg ring-1 transition-all duration-200 hover:scale-105 flex items-center justify-center", dark ? "text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 ring-neutral-700" : "text-neutral-600 hover:text-neutral-800 hover:bg-neutral-100 ring-neutral-300")}>☰</button>
             {menuOverlay}
           </div>
         </div>
