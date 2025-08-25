@@ -5,6 +5,7 @@ import { randomUrlSafeString, sha256Base64Url } from '@/lib/auth';
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const redirect = url.searchParams.get('redirect') || '/profile';
+  const isPopup = url.searchParams.get('popup') === 'true';
 
   const clientId = process.env.GOOGLE_CLIENT_ID || '';
   const callbackUrl = new URL('/api/auth/callback', url.origin).toString();
@@ -12,12 +13,15 @@ export async function GET(req: Request) {
   const codeVerifier = randomUrlSafeString(64);
   const codeChallenge = await sha256Base64Url(codeVerifier);
 
+  // If this is a popup, we'll redirect to auth-success page after OAuth
+  const finalRedirect = isPopup ? '/auth-success' : redirect;
+
   const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
   authUrl.searchParams.set('client_id', clientId);
   authUrl.searchParams.set('redirect_uri', callbackUrl);
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('scope', 'openid email profile');
-  authUrl.searchParams.set('state', `${state}|${encodeURIComponent(redirect)}`);
+  authUrl.searchParams.set('state', `${state}|${encodeURIComponent(finalRedirect)}`);
   authUrl.searchParams.set('code_challenge', codeChallenge);
   authUrl.searchParams.set('code_challenge_method', 'S256');
 

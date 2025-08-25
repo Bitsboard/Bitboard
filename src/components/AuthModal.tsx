@@ -16,7 +16,7 @@ export function AuthModal({ onClose, onAuthed, dark }: AuthModalProps) {
   useEffect(() => {
     // Get current page URL to redirect back after login
     const currentUrl = window.location.pathname + window.location.search + window.location.hash;
-    setLoginUrl(`/api/auth/login?redirect=${encodeURIComponent(currentUrl)}`);
+    setLoginUrl(`/api/auth/login?redirect=${encodeURIComponent(currentUrl)}&popup=true`);
   }, []);
 
   // Check for authentication completion
@@ -55,10 +55,21 @@ export function AuthModal({ onClose, onAuthed, dark }: AuthModalProps) {
     );
 
     if (popup) {
-      // Check if popup was closed
+      // Listen for success message from popup
+      const handleMessage = (event: MessageEvent) => {
+        if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
+          setIsAuthenticating(false);
+          // The popup will close itself, and we'll detect the session change
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+
+      // Check if popup was closed manually
       const checkClosed = setInterval(() => {
         if (popup.closed) {
           clearInterval(checkClosed);
+          window.removeEventListener('message', handleMessage);
           setIsAuthenticating(false);
         }
       }, 1000);
