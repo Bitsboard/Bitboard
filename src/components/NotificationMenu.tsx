@@ -164,13 +164,28 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
           className={cn(
             "w-6 h-6 transition-all duration-300",
             unreadCount > 0 
-              ? "text-transparent bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-400 bg-clip-text animate-pulse" 
+              ? "text-orange-500" 
               : "text-neutral-600 dark:text-neutral-400"
           )} 
           fill="currentColor" 
           viewBox="0 0 24 24"
         >
-          <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+          <defs>
+            {unreadCount > 0 && (
+              <linearGradient id="bellGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#fbbf24" />
+                <stop offset="50%" stopColor="#f97316" />
+                <stop offset="100%" stopColor="#fbbf24" />
+              </linearGradient>
+            )}
+          </defs>
+          <path 
+            d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"
+            fill={unreadCount > 0 ? "url(#bellGradient)" : "currentColor"}
+            className={cn(
+              unreadCount > 0 && "animate-pulse"
+            )}
+          />
         </svg>
         
         {/* Small red circle indicator when there are notifications */}
