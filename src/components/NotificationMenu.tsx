@@ -51,7 +51,7 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
         message: 'Welcome to the Bitcoin trading platform. Check out our safety guidelines to get started.',
         timestamp: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
         read: false,
-        actionUrl: '/safety'
+        actionUrl: '/notifications'
       }
     ];
     
