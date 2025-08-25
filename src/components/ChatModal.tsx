@@ -81,7 +81,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
           </button>
           
           {/* Listing title - now with truncation */}
-          <h2 className={cn("text-lg font-semibold truncate max-w-xs", dark ? "text-white" : "text-neutral-900")}>
+          <h2 className={cn("text-lg font-semibold truncate max-w-sm", dark ? "text-white" : "text-neutral-900")}>
             {listing.title}
           </h2>
         </div>
@@ -124,8 +124,8 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
             }}
           >
             <div className="flex items-center gap-4">
-              {/* Listing image - now larger */}
-              <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+              {/* Listing image - now much larger */}
+              <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
                 <img 
                   src={listing.images[0]} 
                   alt={listing.title}
@@ -206,10 +206,10 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                 <div className="flex items-center gap-3">
                   <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="sm" />
                   
-                  {/* Location pill */}
+                  {/* Location pill - now with consistent pill styling */}
                   <span className={cn(
-                    "px-2 py-1 rounded-full text-xs font-medium bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
-                    "flex items-center gap-1"
+                    "px-2 py-1 rounded-full text-xs font-medium",
+                    dark ? "bg-neutral-800 text-neutral-300 border border-neutral-700" : "bg-neutral-100 text-neutral-700 border border-neutral-200"
                   )}>
                     📍 {listing.location}
                   </span>
