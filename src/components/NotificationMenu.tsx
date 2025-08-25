@@ -173,14 +173,14 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
           <defs>
             {unreadCount > 0 && (
               <linearGradient id="bellGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#fbbf24">
-                  <animate attributeName="offset" values="0;1;0" dur="2s" repeatCount="indefinite" />
+                <stop offset="0%" stopColor="#f97316">
+                  <animate attributeName="offset" values="-1;2" dur="2s" repeatCount="indefinite" />
                 </stop>
-                <stop offset="50%" stopColor="#f97316">
-                  <animate attributeName="offset" values="0.5;1.5;0.5" dur="2s" repeatCount="indefinite" />
+                <stop offset="50%" stopColor="#ef4444">
+                  <animate attributeName="offset" values="-0.5;2.5" dur="2s" repeatCount="indefinite" />
                 </stop>
-                <stop offset="100%" stopColor="#fbbf24">
-                  <animate attributeName="offset" values="1;2;1" dur="2s" repeatCount="indefinite" />
+                <stop offset="100%" stopColor="#f97316">
+                  <animate attributeName="offset" values="0;3" dur="2s" repeatCount="indefinite" />
                 </stop>
               </linearGradient>
             )}
@@ -193,7 +193,7 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
         
         {/* Small red circle indicator when there are notifications */}
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 bg-red-500 rounded-full h-3 w-3 flex items-center justify-center">
+          <span className="absolute top-0 right-0 bg-red-500 rounded-full h-3 w-3 flex items-center justify-center">
             {/* No number, just the red circle */}
           </span>
         )}
