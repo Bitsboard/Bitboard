@@ -1,5 +1,6 @@
 export { AuthModal } from "./AuthModal";
 export { ChatModal } from "./ChatModal";
+export { GoogleSignInOverlay } from "./GoogleSignInOverlay";
 export { ListingCard } from "./ListingCard";
 export { ListingModal } from "./ListingModal";
 export { ListingRow } from "./ListingRow";

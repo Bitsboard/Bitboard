@@ -1,0 +1,991 @@
+[0;34m[INFO] === SYSTEM INFORMATION ===[0m
+[0;34m[INFO] Node.js version: v24.5.0[0m
+[0;34m[INFO] npm version: 11.5.1[0m
+[0;34m[INFO] Git branch: staging[0m
+[0;34m[INFO] Git commit: 97f78df[0m
+[0;34m[INFO] Working directory: /Users/georgedanayan/Bitboard[0m
+[0;34m[INFO] Available memory: [0m
+[1;33m[WARNING] Uncommitted changes detected - this may affect build reproducibility[0m
+ M .vercel/output/config.json
+ M .vercel/output/diagnostics/cli_traces.json
+ M .vercel/output/diagnostics/trace
+ M .vercel/output/functions/_not-found.func/.vc-config.json
+ M .vercel/output/functions/_not-found.func/___next_launcher.cjs
+ M .vercel/output/functions/about.func
+ M .vercel/output/functions/about.prerender-config.json
+ M .vercel/output/functions/about.prerender-fallback.html
+ M .vercel/output/functions/about.rsc.prerender-config.json
+ M .vercel/output/functions/about.rsc.prerender-fallback.rsc
+ M .vercel/output/functions/api/admin/listings/delete.func/index.js
+ M .vercel/output/functions/api/admin/listings/delete.func/index.js.map
+ M .vercel/output/functions/api/admin/listings/list.func/index.js
+ M .vercel/output/functions/api/admin/listings/list.func/index.js.map
+ M .vercel/output/functions/api/admin/users/ban.func/index.js
+ M .vercel/output/functions/api/admin/users/ban.func/index.js.map
+ M .vercel/output/functions/api/admin/users/list.func/index.js
+ M .vercel/output/functions/api/admin/users/list.func/index.js.map
+ M .vercel/output/functions/api/admin/users/verify.func/index.js
+ M .vercel/output/functions/api/admin/users/verify.func/index.js.map
+ M .vercel/output/functions/api/auth/callback.func/index.js
+ M .vercel/output/functions/api/auth/callback.func/index.js.map
+ M .vercel/output/functions/api/auth/login.func/index.js
+ M .vercel/output/functions/api/auth/login.func/index.js.map
+ M .vercel/output/functions/api/auth/logout.func/index.js
+ M .vercel/output/functions/api/auth/logout.func/index.js.map
+ M .vercel/output/functions/api/auth/session.func/index.js
+ M .vercel/output/functions/api/auth/session.func/index.js.map
+ M .vercel/output/functions/api/auth/username.func/index.js
+ M .vercel/output/functions/api/auth/username.func/index.js.map
+ M .vercel/output/functions/api/chat/list.func/index.js
+ M .vercel/output/functions/api/chat/list.func/index.js.map
+ M .vercel/output/functions/api/chat/send.func/index.js
+ M .vercel/output/functions/api/chat/send.func/index.js.map
+ M .vercel/output/functions/api/escrow/propose.func/index.js
+ M .vercel/output/functions/api/escrow/propose.func/index.js.map
+ M .vercel/output/functions/api/health.func/index.js
+ M .vercel/output/functions/api/health.func/index.js.map
+ M .vercel/output/functions/api/listings.func/index.js
+ M .vercel/output/functions/api/listings.func/index.js.map
+ M .vercel/output/functions/api/listings/[id].func/index.js
+ M .vercel/output/functions/api/listings/[id].func/index.js.map
+ M .vercel/output/functions/api/ping.func/index.js
+ M .vercel/output/functions/api/ping.func/index.js.map
+ M .vercel/output/functions/api/places.func/index.js
+ M .vercel/output/functions/api/places.func/index.js.map
+ M .vercel/output/functions/api/rate.func/index.js
+ M .vercel/output/functions/api/rate.func/index.js.map
+ M .vercel/output/functions/api/users/[username].func/index.js
+ M .vercel/output/functions/api/users/[username].func/index.js.map
+ M .vercel/output/functions/api/users/[username]/listings.func/index.js
+ M .vercel/output/functions/api/users/[username]/listings.func/index.js.map
+ M .vercel/output/functions/careers.func
+ M .vercel/output/functions/careers.prerender-config.json
+ M .vercel/output/functions/careers.prerender-fallback.html
+ M .vercel/output/functions/careers.rsc.func
+ M .vercel/output/functions/careers.rsc.prerender-config.json
+ M .vercel/output/functions/careers.rsc.prerender-fallback.rsc
+ M .vercel/output/functions/contact.func
+ M .vercel/output/functions/contact.prerender-config.json
+ M .vercel/output/functions/contact.prerender-fallback.html
+ M .vercel/output/functions/contact.rsc.func
+ M .vercel/output/functions/contact.rsc.prerender-config.json
+ M .vercel/output/functions/contact.rsc.prerender-fallback.rsc
+ M .vercel/output/functions/en/[username].func/index.js
+ M .vercel/output/functions/en/[username].func/index.js.map
+ M .vercel/output/functions/escrow.func
+ M .vercel/output/functions/escrow.prerender-config.json
+ M .vercel/output/functions/escrow.prerender-fallback.html
+ M .vercel/output/functions/escrow.rsc.func
+ M .vercel/output/functions/escrow.rsc.prerender-config.json
+ M .vercel/output/functions/escrow.rsc.prerender-fallback.rsc
+ M .vercel/output/functions/faq.func
+ M .vercel/output/functions/faq.prerender-config.json
+ M .vercel/output/functions/faq.prerender-fallback.html
+ M .vercel/output/functions/faq.rsc.func
+ M .vercel/output/functions/faq.rsc.prerender-config.json
+ M .vercel/output/functions/faq.rsc.prerender-fallback.rsc
+ M .vercel/output/functions/help.func
+ M .vercel/output/functions/help.prerender-config.json
+ M .vercel/output/functions/help.prerender-fallback.html
+ M .vercel/output/functions/help.rsc.func
+ M .vercel/output/functions/help.rsc.prerender-config.json
+ M .vercel/output/functions/help.rsc.prerender-fallback.rsc
+ M .vercel/output/functions/icon.svg.prerender-config.json
+ M .vercel/output/functions/icon.svg.rsc.func/.vc-config.json
+ M .vercel/output/functions/icon.svg.rsc.func/___next_launcher.cjs
+ M .vercel/output/functions/index.func
+ M .vercel/output/functions/index.prerender-config.json
+ M .vercel/output/functions/index.prerender-fallback.html
+ M .vercel/output/functions/index.rsc.func
+ M .vercel/output/functions/index.rsc.prerender-config.json
+ M .vercel/output/functions/index.rsc.prerender-fallback.rsc
+ M .vercel/output/functions/notifications.func
+ M .vercel/output/functions/notifications.prerender-config.json
+ M .vercel/output/functions/notifications.prerender-fallback.html
+ M .vercel/output/functions/notifications.rsc.func
+ M .vercel/output/functions/notifications.rsc.prerender-config.json
+ M .vercel/output/functions/notifications.rsc.prerender-fallback.rsc
+ M .vercel/output/functions/privacy.func
+ M .vercel/output/functions/privacy.prerender-config.json
+ M .vercel/output/functions/privacy.prerender-fallback.html
+ M .vercel/output/functions/privacy.rsc.func
+ M .vercel/output/functions/privacy.rsc.prerender-config.json
+ M .vercel/output/functions/privacy.rsc.prerender-fallback.rsc
+ D .vercel/output/functions/profile.func
+ D .vercel/output/functions/profile.prerender-config.json
+ D .vercel/output/functions/profile.prerender-fallback.html
+ D .vercel/output/functions/profile.rsc.func
+ D .vercel/output/functions/profile.rsc.prerender-config.json
+ D .vercel/output/functions/profile.rsc.prerender-fallback.rsc
+ M .vercel/output/functions/safety.func
+ M .vercel/output/functions/safety.prerender-config.json
+ M .vercel/output/functions/safety.prerender-fallback.html
+ M .vercel/output/functions/safety.rsc.func
+ M .vercel/output/functions/safety.rsc.prerender-config.json
+ M .vercel/output/functions/safety.rsc.prerender-fallback.rsc
+ M .vercel/output/functions/search.func/index.js
+ M .vercel/output/functions/search.func/index.js.map
+ M .vercel/output/functions/support.func
+ M .vercel/output/functions/support.prerender-config.json
+ M .vercel/output/functions/support.prerender-fallback.html
+ M .vercel/output/functions/support.rsc.func
+ M .vercel/output/functions/support.rsc.prerender-config.json
+ M .vercel/output/functions/support.rsc.prerender-fallback.rsc
+ M .vercel/output/functions/terms.func
+ M .vercel/output/functions/terms.prerender-config.json
+ M .vercel/output/functions/terms.prerender-fallback.html
+ M .vercel/output/functions/terms.rsc.func
+ M .vercel/output/functions/terms.rsc.prerender-config.json
+ M .vercel/output/functions/terms.rsc.prerender-fallback.rsc
+ M .vercel/output/functions/test-settings.func
+ M .vercel/output/functions/test-settings.prerender-config.json
+ M .vercel/output/functions/test-settings.prerender-fallback.html
+ M .vercel/output/functions/test-settings.rsc.func
+ M .vercel/output/functions/test-settings.rsc.prerender-config.json
+ M .vercel/output/functions/test-settings.rsc.prerender-fallback.rsc
+ M .vercel/output/static/404.html
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/admin/listings/delete.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/admin/listings/list.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/admin/users/ban.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/admin/users/list.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/admin/users/verify.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/auth/callback.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/auth/login.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/auth/logout.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/auth/session.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/auth/username.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/chat/list.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/chat/send.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/escrow/propose.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/health.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/listings.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/listings/[id].func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/ping.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/places.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/rate.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/users/[username].func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/api/users/[username]/listings.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/en/[username].func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/functions/search.func.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/manifest/27d10e462fba646daaa29468a0656e12.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/manifest/__RSC_SERVER_MANIFEST.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/webpack/1813.js
+ M .vercel/output/static/_worker.js/__next-on-pages-dist__/webpack/65350c40fb927cd816847882c65007ef.js
+ M .vercel/output/static/_worker.js/index.js
+ M .vercel/output/static/_worker.js/nop-build-log.json
+ M .vercel/output/static/about.html
+ M .vercel/output/static/about.rsc
+ M .vercel/output/static/careers.html
+ M .vercel/output/static/careers.rsc
+ M .vercel/output/static/contact.html
+ M .vercel/output/static/contact.rsc
+ M .vercel/output/static/de/500.html
+ M .vercel/output/static/en/500.html
+ M .vercel/output/static/es/500.html
+ M .vercel/output/static/escrow.html
+ M .vercel/output/static/escrow.rsc
+ M .vercel/output/static/faq.html
+ M .vercel/output/static/faq.rsc
+ M .vercel/output/static/fr/500.html
+ M .vercel/output/static/help.html
+ M .vercel/output/static/help.rsc
+ M .vercel/output/static/index.html
+ M .vercel/output/static/index.rsc
+ M .vercel/output/static/notifications.html
+ M .vercel/output/static/notifications.rsc
+ M .vercel/output/static/privacy.html
+ M .vercel/output/static/privacy.rsc
+ D .vercel/output/static/profile.html
+ D .vercel/output/static/profile.rsc
+ M .vercel/output/static/safety.html
+ M .vercel/output/static/safety.rsc
+ M .vercel/output/static/support.html
+ M .vercel/output/static/support.rsc
+ M .vercel/output/static/terms.html
+ M .vercel/output/static/terms.rsc
+ M .vercel/output/static/test-settings.html
+ M .vercel/output/static/test-settings.rsc
+ M build-logs/latest_build.log
+ M build-logs/latest_errors.log
+ M src/components/Carousel.tsx
+ M src/components/ListingCard.tsx
+ M src/components/ListingModal.tsx
+ M src/components/ListingRow.tsx
+ M src/components/LocationModal.tsx
+?? build-logs/build_20250824_200221.log
+?? build-logs/build_20250824_201137.log
+?? build-logs/build_20250824_201621.log
+?? build-logs/build_20250824_202002.log
+?? build-logs/build_20250824_202258.log
+[0;34m[INFO] === CLEANING PREVIOUS BUILDS ===[0m
+[0;34m[INFO] Removing .next directory[0m
+[0;34m[INFO] Removing .vercel directory[0m
+[0;34m[INFO] === CHECKING DEPENDENCIES ===[0m
+[0;34m[INFO] Dependencies already installed[0m
+[0;34m[INFO] === RUNNING LINTING ===[0m
+
+> lint
+> next lint
+
+
+./src/app/api/listings/[id]/route.ts
+1:1  Error: Definition for rule '@typescript-eslint/ban-ts-comment' was not found.  @typescript-eslint/ban-ts-comment
+
+./src/app/careers/page.tsx
+46:30  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+48:19  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+51:89  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+69:27  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+69:76  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+74:17  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+170:16  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+173:15  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+174:40  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/app/en/[username]/page.tsx
+187:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/app/escrow/page.tsx
+18:62  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/app/privacy/page.tsx
+24:89  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:93  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:95  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:100  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:105  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:108  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+180:101  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/app/profile/[username]/page.tsx
+170:6  Warning: React Hook useEffect has a missing dependency: 'user'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+203:6  Warning: React Hook useEffect has a missing dependency: 'allUserListings'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+448:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/app/search/SearchClient.tsx
+186:8  Warning: React Hook useCallback has missing dependencies: 'resolveLatLng', 'satsFromUnitValue', and 'savedRadiusKm'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+260:8  Warning: React Hook useCallback has a missing dependency: 'satsFromUnitValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+309:8  Warning: React Hook useEffect has a missing dependency: 'filterMockData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/terms/page.tsx
+24:94  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:100  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+31:26  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+31:35  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+32:26  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+32:31  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+33:26  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+33:34  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+34:26  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+34:34  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+35:26  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+35:38  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+77:58  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+80:74  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+103:49  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+119:48  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+119:54  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+119:60  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+119:73  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+135:34  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/components/AuthModal.tsx
+56:93  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/components/Carousel.tsx
+86:29  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+159:33  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/ChatModal.tsx
+139:14  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/components/ListingCard.tsx
+106:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/ListingModal.tsx
+116:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/ListingRow.tsx
+120:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/LocationAutocomplete.tsx
+122:54  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+122:60  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+122:63  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+122:67  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+122:70  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+122:77  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./src/components/LocationModal.tsx
+90:8  Warning: React Hook React.useEffect has missing dependencies: 'center' and 'lastValidLocation'. Either include them or remove the dependency array. You can also replace multiple useState variables with useReducer if 'setCenter' needs the current value of 'lastValidLocation'.  react-hooks/exhaustive-deps
+298:8  Warning: React Hook React.useEffect has missing dependencies: 'center.lat', 'center.lng', and 'radiusKm'. Either include them or remove the dependency array. You can also replace multiple useState variables with useReducer if 'setCircleMode' needs the current value of 'radiusKm'.  react-hooks/exhaustive-deps
+315:8  Warning: React Hook React.useEffect has a missing dependency: 'query'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+383:8  Warning: React Hook React.useEffect has missing dependencies: 'center' and 'recreateCircle'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/Nav.tsx
+101:15  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/NewListingModal.tsx
+68:52  Error: React Hook "useLang" is called conditionally. React Hooks must be called in the exact same order in every component render.  react-hooks/rules-of-hooks
+69:56  Error: React Hook "useLang" is called conditionally. React Hooks must be called in the exact same order in every component render.  react-hooks/rules-of-hooks
+157:62  Error: React Hook "useLang" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+157:92  Error: React Hook "useLang" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+208:20  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/components/SavedSearchesBar.tsx
+50:56  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+50:68  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./src/components/UsernameSelectionModal.tsx
+32:6  Warning: React Hook useEffect has a missing dependency: 'checkUsernameAvailability'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/lib/cf.ts
+1:1  Error: Definition for rule '@typescript-eslint/ban-ts-comment' was not found.  @typescript-eslint/ban-ts-comment
+
+./src/lib/hooks/useListings.ts
+73:8  Warning: React Hook useCallback has a missing dependency: 'allListings'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/lib/hooks/usePerformance.ts
+50:9  Warning: React Hook useMemo has a missing dependency: 'factory'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+53:12  Warning: React Hook useMemo has a missing dependency: 'memoizedFactory'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/shims/async_hooks.ts
+22:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+[0;32m[SUCCESS] Linting passed[0m
+[0;34m[INFO] === RUNNING TESTS ===[0m
+
+> test
+> jest
+
+PASS src/lib/__tests__/utils.test.ts
+  Utility Functions
+    cn
+      ✓ should combine class names correctly (10 ms)
+      ✓ should handle Tailwind CSS classes correctly
+    debounce
+      ✓ should debounce function calls (1 ms)
+    throttle
+      ✓ should throttle function calls
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        0.367 s, estimated 1 s
+Ran all test suites.
+[0;32m[SUCCESS] Tests passed[0m
+[0;34m[INFO] === BUILDING NEXT.JS ===[0m
+
+> build
+> next build
+
+  ▲ Next.js 14.2.5
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+ ⚠ Using edge runtime on a page currently disables static generation for that page
+   Generating static pages (0/26) ...
+   Generating static pages (6/26) 
+   Generating static pages (12/26) 
+   Generating static pages (19/26) 
+ ✓ Generating static pages (26/26)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    1.38 kB         143 kB
+├ ○ /_not-found                          917 B          88.5 kB
+├ ○ /about                               2.63 kB         108 kB
+├ ○ /admin                               4.34 kB         109 kB
+├ ƒ /api/admin/listings/delete           0 B                0 B
+├ ƒ /api/admin/listings/list             0 B                0 B
+├ ƒ /api/admin/users/ban                 0 B                0 B
+├ ƒ /api/admin/users/list                0 B                0 B
+├ ƒ /api/admin/users/verify              0 B                0 B
+├ ƒ /api/admin/users/wipe-me             0 B                0 B
+├ ƒ /api/auth/callback                   0 B                0 B
+├ ƒ /api/auth/login                      0 B                0 B
+├ ƒ /api/auth/logout                     0 B                0 B
+├ ƒ /api/auth/session                    0 B                0 B
+├ ƒ /api/auth/username                   0 B                0 B
+├ ƒ /api/chat/list                       0 B                0 B
+├ ƒ /api/chat/send                       0 B                0 B
+├ ƒ /api/escrow/propose                  0 B                0 B
+├ ƒ /api/health                          0 B                0 B
+├ ƒ /api/listings                        0 B                0 B
+├ ƒ /api/listings/[id]                   0 B                0 B
+├ ƒ /api/ping                            0 B                0 B
+├ ƒ /api/places                          0 B                0 B
+├ ƒ /api/rate                            0 B                0 B
+├ ƒ /api/test/wipe-account               0 B                0 B
+├ ƒ /api/users/[username]                0 B                0 B
+├ ƒ /api/users/[username]/listings       0 B                0 B
+├ ƒ /api/users/check-username            0 B                0 B
+├ ƒ /api/users/me                        0 B                0 B
+├ ƒ /api/users/set-username              0 B                0 B
+├ ƒ /api/wipe-test-account               0 B                0 B
+├ ○ /careers                             144 B          87.7 kB
+├ ○ /contact                             3.01 kB         108 kB
+├ ƒ /en/[username]                       7.64 kB         113 kB
+├ ○ /escrow                              144 B          87.7 kB
+├ ○ /faq                                 2.99 kB         108 kB
+├ ○ /help                                3.19 kB         108 kB
+├ ○ /icon.svg                            0 B                0 B
+├ ○ /notifications                       3.35 kB         101 kB
+├ ○ /privacy                             4 kB            101 kB
+├ ƒ /profile/[username]                  7.93 kB         146 kB
+├ ○ /safety                              2.07 kB         107 kB
+├ ƒ /search                              1.26 kB        88.8 kB
+├ ○ /support                             3.21 kB         108 kB
+├ ○ /terms                               4.23 kB         102 kB
+└ ○ /test-settings                       1.15 kB         139 kB
++ First Load JS shared by all            87.5 kB
+  ├ chunks/526-5fb20ed4b854f927.js       31.6 kB
+  ├ chunks/fd9d1056-354cea10f727e5bf.js  53.7 kB
+  └ other shared chunks (total)          2.22 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+[0;32m[SUCCESS] Next.js build completed[0m
+[0;34m[INFO] === BUILDING FOR CLOUDFLARE PAGES ===[0m
+[0;34m[INFO] Starting Cloudflare Pages build with verbose logging...[0m
+
+> build:cf:verbose
+> npx @cloudflare/next-on-pages@^1.13.12
+
+⚡️ @cloudflare/next-on-pages CLI v.1.13.14
+⚡️ Detected Package Manager: npm (11.5.1)
+⚡️ Preparing project...
+⚡️ Project is ready
+⚡️ Building project...
+▲  Vercel CLI 46.0.2
+▲  2025-08-25T00:23:18.300Z proxy-agent Creating new ProxyAgent instance: { keepAlive: true }
+▲  WARN! Build not running on Vercel. System environment variables will not be available.
+▲  Warning: Detected "engines": { "node": ">=20" } in your `package.json` that will automatically upgrade when a new major Node.js Version is released. Learn More: http://vercel.link/node-version
+▲  WARNING: You should not upload the `.next` directory.
+▲  Installing dependencies...
+▲  npm warn Unknown cli config "--unsafe-perm". This will stop working in the next major version of npm.
+▲  up to date in 518ms
+▲  
+▲  209 packages are looking for funding
+▲  run `npm fund` for details
+▲  Detected Next.js version: 14.2.5
+▲  Running "npm run build"
+▲  > build
+▲  > next build
+▲  Attention: Next.js now collects completely anonymous telemetry regarding usage.
+▲  This information is used to shape Next.js' roadmap and prioritize features.
+▲  You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+▲  https://nextjs.org/telemetry
+▲  ▲ Next.js 14.2.5
+▲  - Environments: .env.local
+▲  Creating an optimized production build ...
+▲  2025-08-25T00:23:19.463Z next:build:webpack-build using separate compiler workers
+▲  2025-08-25T00:23:19.846Z next:jsconfig-paths-plugin tsconfig.json or jsconfig.json paths: { '@/*': [ '*' ] }
+▲  2025-08-25T00:23:19.847Z next:jsconfig-paths-plugin resolved baseUrl: { baseUrl: '/Users/georgedanayan/Bitboard/src', isImplicit: false }
+▲  2025-08-25T00:23:19.849Z next:jsconfig-paths-plugin tsconfig.json or jsconfig.json paths: { '@/*': [ '*' ] }
+▲  2025-08-25T00:23:19.849Z next:jsconfig-paths-plugin resolved baseUrl: { baseUrl: '/Users/georgedanayan/Bitboard/src', isImplicit: false }
+▲  2025-08-25T00:23:19.854Z next:jsconfig-paths-plugin tsconfig.json or jsconfig.json paths: { '@/*': [ '*' ] }
+▲  2025-08-25T00:23:19.854Z next:jsconfig-paths-plugin resolved baseUrl: { baseUrl: '/Users/georgedanayan/Bitboard/src', isImplicit: false }
+▲  2025-08-25T00:23:19.892Z next:build:webpack-build starting compiler server
+▲  2025-08-25T00:23:19.892Z next:build:webpack-build starting server compiler
+▲  2025-08-25T00:23:20.044Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.045Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.045Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.045Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.045Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.045Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.045Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.045Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.046Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.046Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.046Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.046Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.047Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.047Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.047Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.047Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.047Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-route-loader
+▲  2025-08-25T00:23:20.069Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.069Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.069Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.069Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.069Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.069Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.069Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.069Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.069Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.069Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.069Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.069Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.069Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.069Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.069Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.069Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.078Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.079Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.079Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.079Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.079Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.079Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.079Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.079Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.079Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.079Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.079Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.079Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.079Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.079Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.079Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.079Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.084Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.084Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.084Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.084Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.084Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.084Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.084Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.084Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.084Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.084Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.084Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.085Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.085Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.085Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.085Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.085Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-app-loader
+▲  2025-08-25T00:23:20.109Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-route-loader
+▲  2025-08-25T00:23:20.109Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-route-loader
+▲  2025-08-25T00:23:20.109Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-route-loader
+▲  2025-08-25T00:23:20.196Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-route-loader
+▲  2025-08-25T00:23:20.206Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-route-loader
+▲  2025-08-25T00:23:20.207Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-route-loader
+▲  2025-08-25T00:23:20.207Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-route-loader
+▲  2025-08-25T00:23:20.259Z next:jsconfig-paths-plugin skipping request as it is inside node_modules path
+▲  2025-08-25T00:23:20.266Z next:jsconfig-paths-plugin moduleName did not match any paths pattern @opentelemetry/api
+▲  2025-08-25T00:23:20.267Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next/server
+▲  2025-08-25T00:23:20.281Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next/server
+▲  2025-08-25T00:23:20.313Z next:jsconfig-paths-plugin moduleName did not match any paths pattern react-server-dom-webpack/server.edge
+▲  2025-08-25T00:23:20.319Z next:jsconfig-paths-plugin moduleName did not match any paths pattern @opentelemetry/api
+▲  2025-08-25T00:23:20.337Z next:jsconfig-paths-plugin moduleName did not match any paths pattern react-server-dom-webpack/server.edge
+▲  2025-08-25T00:23:20.342Z next:jsconfig-paths-plugin moduleName did not match any paths pattern react-server-dom-webpack/server.edge
+▲  2025-08-25T00:23:20.342Z next:jsconfig-paths-plugin moduleName did not match any paths pattern react-server-dom-webpack/server.edge
+▲  2025-08-25T00:23:20.344Z next:jsconfig-paths-plugin skipping request as it is inside node_modules ../server/web/exports/index
+▲  2025-08-25T00:23:20.349Z next:jsconfig-paths-plugin skipping request as it is inside node_modules path
+▲  2025-08-25T00:23:20.350Z next:jsconfig-paths-plugin skipping request as it is inside node_modules ../server/web/exports/index
+▲  2025-08-25T00:23:20.359Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.367Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.367Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.367Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.397Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.397Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.398Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.399Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.406Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.406Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.407Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.407Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.408Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.409Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.409Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.409Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.412Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.412Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.413Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.413Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.415Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.415Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.415Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.416Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.417Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.418Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.418Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.419Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.421Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.421Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.422Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.422Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.424Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.424Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.425Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.425Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.438Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.438Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.438Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.439Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.443Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.443Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.444Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.444Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.446Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.446Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.447Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.447Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.448Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.448Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.449Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.449Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.452Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.452Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.452Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.453Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-image-loader
+▲  2025-08-25T00:23:20.525Z next:jsconfig-paths-plugin skipping request as it is inside node_modules path
+▲  2025-08-25T00:23:20.525Z next:jsconfig-paths-plugin skipping request as it is a relative path ./GlobalHeader
+▲  2025-08-25T00:23:20.525Z next:jsconfig-paths-plugin skipping request as it is a relative path ./LocaleHydrator
+▲  2025-08-25T00:23:20.526Z next:jsconfig-paths-plugin skipping request as it is a relative path ./GlobalHeader
+▲  2025-08-25T00:23:20.526Z next:jsconfig-paths-plugin skipping request as it is a relative path ./LocaleHydrator
+▲  2025-08-25T00:23:20.526Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/lib/contexts/ThemeContext
+▲  2025-08-25T00:23:20.526Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/lib/contexts/LocationContext
+▲  2025-08-25T00:23:20.526Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/components/Footer
+▲  2025-08-25T00:23:20.527Z next:jsconfig-paths-plugin skipping request as it is inside node_modules path
+▲  2025-08-25T00:23:20.535Z next:jsconfig-paths-plugin skipping request as it is a relative path ./GlobalHeader
+▲  2025-08-25T00:23:20.535Z next:jsconfig-paths-plugin skipping request as it is a relative path ./GlobalHeader
+▲  2025-08-25T00:23:20.536Z next:jsconfig-paths-plugin skipping request as it is a relative path ./LocaleHydrator
+▲  2025-08-25T00:23:20.536Z next:jsconfig-paths-plugin skipping request as it is a relative path ./LocaleHydrator
+▲  2025-08-25T00:23:20.536Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/components/Footer
+▲  2025-08-25T00:23:20.537Z next:jsconfig-paths-plugin skipping request as it is inside node_modules url
+▲  2025-08-25T00:23:20.537Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/lib/i18n
+▲  2025-08-25T00:23:20.537Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/lib/contexts/ThemeContext
+▲  2025-08-25T00:23:20.537Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/lib/contexts/LocationContext
+▲  2025-08-25T00:23:20.537Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/lib/i18n
+▲  2025-08-25T00:23:20.615Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/components/Footer
+▲  2025-08-25T00:23:20.615Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/components/Footer
+▲  2025-08-25T00:23:20.617Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/lib/contexts/ThemeContext
+▲  2025-08-25T00:23:20.617Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/lib/contexts/ThemeContext
+▲  2025-08-25T00:23:20.617Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/lib/contexts/LocationContext
+▲  2025-08-25T00:23:20.617Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/lib/contexts/LocationContext
+▲  2025-08-25T00:23:20.618Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/lib/i18n
+▲  2025-08-25T00:23:20.618Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/lib/i18n
+▲  2025-08-25T00:23:20.618Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/lib/i18n
+▲  2025-08-25T00:23:20.618Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/lib/i18n
+▲  2025-08-25T00:23:20.621Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/lib/i18n
+▲  2025-08-25T00:23:20.621Z next:jsconfig-paths-plugin skipping request as it is an absolute path /Users/georgedanayan/Bitboard/src/lib/i18n
+▲  2025-08-25T00:23:20.631Z next:jsconfig-paths-plugin skipping request as it is inside node_modules url
+▲  2025-08-25T00:23:21.431Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-route-loader
+▲  2025-08-25T00:23:21.452Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-route-loader
+▲  2025-08-25T00:23:21.452Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-route-loader
+▲  2025-08-25T00:23:21.452Z next:jsconfig-paths-plugin moduleName did not match any paths pattern next-metadata-route-loader
+▲  2025-08-25T00:23:21.671Z next:build:webpack-build server compiler finished 1779ms
+▲  2025-08-25T00:23:22.071Z next:jsconfig-paths-plugin tsconfig.json or jsconfig.json paths: { '@/*': [ '*' ] }
+▲  2025-08-25T00:23:22.073Z next:jsconfig-paths-plugin resolved baseUrl: { baseUrl: '/Users/georgedanayan/Bitboard/src', isImplicit: false }
+▲  2025-08-25T00:23:22.075Z next:jsconfig-paths-plugin tsconfig.json or jsconfig.json paths: { '@/*': [ '*' ] }
+▲  2025-08-25T00:23:22.075Z next:jsconfig-paths-plugin resolved baseUrl: { baseUrl: '/Users/georgedanayan/Bitboard/src', isImplicit: false }
+▲  2025-08-25T00:23:22.078Z next:jsconfig-paths-plugin tsconfig.json or jsconfig.json paths: { '@/*': [ '*' ] }
+▲  2025-08-25T00:23:22.078Z next:jsconfig-paths-plugin resolved baseUrl: { baseUrl: '/Users/georgedanayan/Bitboard/src', isImplicit: false }
+▲  2025-08-25T00:23:22.118Z next:build:webpack-build starting compiler edge-server
+▲  2025-08-25T00:23:22.118Z next:build:webpack-build starting edge-server compiler
+▲  2025-08-25T00:23:24.232Z next:build:webpack-build edge-server compiler finished 2114ms
+▲  2025-08-25T00:23:24.704Z next:jsconfig-paths-plugin tsconfig.json or jsconfig.json paths: { '@/*': [ '*' ] }
+▲  2025-08-25T00:23:24.706Z next:jsconfig-paths-plugin resolved baseUrl: { baseUrl: '/Users/georgedanayan/Bitboard/src', isImplicit: false }
+▲  2025-08-25T00:23:24.708Z next:jsconfig-paths-plugin tsconfig.json or jsconfig.json paths: { '@/*': [ '*' ] }
+▲  2025-08-25T00:23:24.708Z next:jsconfig-paths-plugin resolved baseUrl: { baseUrl: '/Users/georgedanayan/Bitboard/src', isImplicit: false }
+▲  2025-08-25T00:23:24.712Z next:jsconfig-paths-plugin tsconfig.json or jsconfig.json paths: { '@/*': [ '*' ] }
+▲  2025-08-25T00:23:24.712Z next:jsconfig-paths-plugin resolved baseUrl: { baseUrl: '/Users/georgedanayan/Bitboard/src', isImplicit: false }
+▲  2025-08-25T00:23:24.745Z next:build:webpack-build starting compiler client
+▲  2025-08-25T00:23:24.745Z next:build:webpack-build starting client compiler
+▲  
+▲  Source path: /Users/georgedanayan/Bitboard/src/styles/globals.css
+▲  Setting up new context...
+▲  Finding changed files: 3.338ms
+▲  Reading changed files: 2.201s
+▲  Sorting candidates: 21.72ms
+▲  Generate rules: 447.4ms
+▲  Build stylesheet: 6.455ms
+▲  Potential classes:  9623
+▲  Active contexts:  1
+▲  JIT TOTAL: 2.814s
+▲  2025-08-25T00:23:29.953Z next:build:webpack-build client compiler finished 5208ms
+▲  ✓ Compiled successfully
+▲  Skipping linting
+▲  Checking validity of types ...
+▲  Collecting page data ...
+▲  ⚠ Using edge runtime on a page currently disables static generation for that page
+▲  2025-08-25T00:23:36.473Z next:build:build-traces starting build traces
+▲  Generating static pages (0/26) ...
+▲  Generating static pages (6/26)
+▲  Generating static pages (12/26)
+▲  Generating static pages (19/26)
+▲  ✓ Generating static pages (26/26)
+▲  Finalizing page optimization ...
+▲  Collecting build traces ...
+▲  2025-08-25T00:23:39.773Z next:build:build-traces finished build tracing 3299ms
+▲  
+▲  Route (app)                              Size     First Load JS
+▲  ┌ ○ /                                    1.38 kB         142 kB
+▲  ├ ○ /_not-found                          917 B          88.4 kB
+▲  ├ ○ /about                               2.63 kB         108 kB
+▲  ├ ○ /admin                               4.34 kB         109 kB
+▲  ├ ƒ /api/admin/listings/delete           0 B                0 B
+▲  ├ ƒ /api/admin/listings/list             0 B                0 B
+▲  ├ ƒ /api/admin/users/ban                 0 B                0 B
+▲  ├ ƒ /api/admin/users/list                0 B                0 B
+▲  ├ ƒ /api/admin/users/verify              0 B                0 B
+▲  ├ ƒ /api/admin/users/wipe-me             0 B                0 B
+▲  ├ ƒ /api/auth/callback                   0 B                0 B
+▲  ├ ƒ /api/auth/login                      0 B                0 B
+▲  ├ ƒ /api/auth/logout                     0 B                0 B
+▲  ├ ƒ /api/auth/session                    0 B                0 B
+▲  ├ ƒ /api/auth/username                   0 B                0 B
+▲  ├ ƒ /api/chat/list                       0 B                0 B
+▲  ├ ƒ /api/chat/send                       0 B                0 B
+▲  ├ ƒ /api/escrow/propose                  0 B                0 B
+▲  ├ ƒ /api/health                          0 B                0 B
+▲  ├ ƒ /api/listings                        0 B                0 B
+▲  ├ ƒ /api/listings/[id]                   0 B                0 B
+▲  ├ ƒ /api/ping                            0 B                0 B
+▲  ├ ƒ /api/places                          0 B                0 B
+▲  ├ ƒ /api/rate                            0 B                0 B
+▲  ├ ƒ /api/test/wipe-account               0 B                0 B
+▲  ├ ƒ /api/users/[username]                0 B                0 B
+▲  ├ ƒ /api/users/[username]/listings       0 B                0 B
+▲  ├ ƒ /api/users/check-username            0 B                0 B
+▲  ├ ƒ /api/users/me                        0 B                0 B
+▲  ├ ƒ /api/users/set-username              0 B                0 B
+▲  ├ ƒ /api/wipe-test-account               0 B                0 B
+▲  ├ ○ /careers                             144 B          87.6 kB
+▲  ├ ○ /contact                             3.01 kB         108 kB
+▲  ├ ƒ /en/[username]                       7.64 kB         113 kB
+▲  ├ ○ /escrow                              144 B          87.6 kB
+▲  ├ ○ /faq                                 2.99 kB         108 kB
+▲  ├ ○ /help                                3.19 kB         108 kB
+▲  ├ ○ /icon.svg                            0 B                0 B
+▲  ├ ○ /notifications                       3.35 kB         101 kB
+▲  ├ ○ /privacy                             4 kB            101 kB
+▲  ├ ƒ /profile/[username]                  7.93 kB         145 kB
+▲  ├ ○ /safety                              2.07 kB         107 kB
+▲  ├ ƒ /search                              1.26 kB        88.7 kB
+▲  ├ ○ /support                             3.21 kB         108 kB
+▲  ├ ○ /terms                               4.23 kB         101 kB
+▲  └ ○ /test-settings                       1.15 kB         138 kB
+▲  + First Load JS shared by all            87.5 kB
+▲  ├ chunks/526-5fb20ed4b854f927.js       31.6 kB
+▲  ├ chunks/fd9d1056-354cea10f727e5bf.js  53.7 kB
+▲  └ other shared chunks (total)          2.16 kB
+▲  ○  (Static)   prerendered as static content
+▲  ƒ  (Dynamic)  server-rendered on demand
+▲  Traced Next.js server files in: 101.674ms
+▲  Created all serverless functions in: 29.305ms
+▲  Collected static files (public/, static/, .next/static): 2.763ms
+▲  Build Completed in .vercel/output [22s]
+⚡️ Completed `npx vercel build`.
+
+⚡️ Build Summary (@cloudflare/next-on-pages v1.13.14)
+⚡️ 
+⚡️ Edge Function Routes (30)
+⚡️   ┌ /api/admin/listings/delete
+⚡️   ├ /api/admin/listings/list
+⚡️   ├ /api/admin/users/ban
+⚡️   ├ /api/admin/users/list
+⚡️   ├ /api/admin/users/verify
+⚡️   ├ /api/admin/users/wipe-me
+⚡️   ├ /api/auth/callback
+⚡️   ├ /api/auth/login
+⚡️   ├ /api/auth/logout
+⚡️   ├ /api/auth/session
+⚡️   ├ /api/auth/username
+⚡️   ├ /api/chat/list
+⚡️   ├ /api/chat/send
+⚡️   ├ /api/escrow/propose
+⚡️   ├ /api/health
+⚡️   ├ /api/listings
+⚡️   ├ /api/listings/[id]
+⚡️   ├ /api/ping
+⚡️   ├ /api/places
+⚡️   ├ /api/rate
+⚡️   ├ /api/test/wipe-account
+⚡️   ├ /api/users/[username]
+⚡️   ├ /api/users/[username]/listings
+⚡️   ├ /api/users/check-username
+⚡️   ├ /api/users/me
+⚡️   ├ /api/users/set-username
+⚡️   ├ /api/wipe-test-account
+⚡️   ├ /en/[username]
+⚡️   ├ /profile/[username]
+⚡️   └ /search
+⚡️ 
+⚡️ Prerendered Routes (29)
+⚡️   ┌ /
+⚡️   ├ /about
+⚡️   ├ /about.rsc
+⚡️   ├ /admin
+⚡️   ├ /admin.rsc
+⚡️   ├ /careers
+⚡️   ├ /careers.rsc
+⚡️   ├ /contact
+⚡️   ├ /contact.rsc
+⚡️   ├ /escrow
+⚡️   ├ /escrow.rsc
+⚡️   ├ /faq
+⚡️   ├ /faq.rsc
+⚡️   ├ /help
+⚡️   ├ /help.rsc
+⚡️   ├ /icon.svg
+⚡️   ├ /index.rsc
+⚡️   ├ /notifications
+⚡️   ├ /notifications.rsc
+⚡️   └ ... 10 more
+⚡️ 
+⚡️ Other Static Assets (94)
+⚡️   ┌ /_app.rsc.json
+⚡️   ├ /_document.rsc.json
+⚡️   ├ /_error.rsc.json
+⚡️   ├ /404.html
+⚡️   └ ... 90 more
+
+⚡️ Build log saved to '.vercel/output/static/_worker.js/nop-build-log.json'
+⚡️ Generated '.vercel/output/static/_worker.js/index.js'.
+⚡️ Build completed in 0.86s
+[0;32m[SUCCESS] Cloudflare Pages build completed[0m
+[0;34m[INFO] === VERIFYING BUILD OUTPUT ===[0m
+[0;32m[SUCCESS] Build output directory exists[0m
+[0;34m[INFO] Build output size: 9.3M[0m
+[0;34m[INFO] Number of files:      173[0m
+[0;34m[INFO] Key build artifacts:[0m
+total 1032
+drwxr-xr-x@ 46 georgedanayan  staff   1472 Aug 24 20:23 .
+drwxr-xr-x@  7 georgedanayan  staff    224 Aug 24 20:23 ..
+-rw-r--r--@  2 georgedanayan  staff  17604 Aug 24 20:23 404.html
+-rw-r--r--@  1 georgedanayan  staff      2 Aug 24 20:23 404.rsc.json
+-rw-r--r--@  2 georgedanayan  staff   1010 Aug 19 13:59 Bitsbarterlogo.svg
+-rw-r--r--@  1 georgedanayan  staff      2 Aug 24 20:23 _app.rsc.json
+-rw-r--r--@  1 georgedanayan  staff      2 Aug 24 20:23 _document.rsc.json
+-rw-r--r--@  1 georgedanayan  staff      2 Aug 24 20:23 _error.rsc.json
+-rw-r--r--@  1 georgedanayan  staff    214 Aug 24 20:23 _headers
+drwxr-xr-x@  3 georgedanayan  staff     96 Aug 24 20:23 _next
+-rw-r--r--@  1 georgedanayan  staff    122 Aug 24 20:23 _routes.json
+drwxr-xr-x@  5 georgedanayan  staff    160 Aug 24 20:23 _worker.js
+-rw-r--r--@  1 georgedanayan  staff  19288 Aug 24 20:23 about.html
+-rw-r--r--@  1 georgedanayan  staff   6512 Aug 24 20:23 about.rsc
+-rw-r--r--@  1 georgedanayan  staff  16072 Aug 24 20:23 admin.html
+-rw-r--r--@  1 georgedanayan  staff   6509 Aug 24 20:23 admin.rsc
+-rw-r--r--@  1 georgedanayan  staff  31889 Aug 24 20:23 careers.html
+-rw-r--r--@  1 georgedanayan  staff  14956 Aug 24 20:23 careers.rsc
+drwxr-xr-x@  3 georgedanayan  staff     96 Aug 24 20:23 cdn-cgi
+[0;32m[SUCCESS] Worker bundle exists[0m
+[0;34m[INFO] Worker bundle size:  52K[0m
+[0;34m[INFO] === BUILD SUMMARY ===[0m
+[0;32m[SUCCESS] Build completed successfully at Sun Aug 24 20:23:42 EDT 2025[0m
+[0;34m[INFO] Build logs saved to: build-logs/build_20250824_202258.log[0m
+[0;34m[INFO] === DEPLOYING TO CLOUDFLARE PAGES ===[0m
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mWarning: Your working directory is a git repo and has uncommitted changes[0m
+
+  To silence this warning, pass in --commit-dirty=true
+
+
+Uploading... (86/124)
+Uploading... (99/124)
+Uploading... (111/124)
+Uploading... (124/124)
+✨ Success! Uploaded 38 files (86 already uploaded) (2.65 sec)
+
+✨ Uploading _headers
+Attaching additional modules:
+┌────────────────────────────────────────────────────────────────────────┬──────┬─────────────┐
+│ Name                                                                   │ Type │ Size        │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/cache/adaptor.js                                │ esm  │ 2.29 KiB    │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/cache/cache-api.js                              │ esm  │ 0.43 KiB    │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/cache/kv.js                                     │ esm  │ 0.35 KiB    │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/admin/listings/delete.func.js     │ esm  │ 17.49 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/admin/listings/list.func.js       │ esm  │ 17.53 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/admin/users/ban.func.js           │ esm  │ 17.93 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/admin/users/list.func.js          │ esm  │ 17.53 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/admin/users/verify.func.js        │ esm  │ 17.96 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/admin/users/wipe-me.func.js       │ esm  │ 17.24 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/auth/callback.func.js             │ esm  │ 18.86 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/auth/login.func.js                │ esm  │ 17.18 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/auth/logout.func.js               │ esm  │ 16.50 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/auth/session.func.js              │ esm  │ 18.38 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/auth/username.func.js             │ esm  │ 18.09 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/chat/list.func.js                 │ esm  │ 17.19 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/chat/send.func.js                 │ esm  │ 17.33 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/escrow/propose.func.js            │ esm  │ 18.93 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/health.func.js                    │ esm  │ 17.37 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/listings/[id].func.js             │ esm  │ 17.18 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/listings.func.js                  │ esm  │ 79.30 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/ping.func.js                      │ esm  │ 16.33 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/places.func.js                    │ esm  │ 21.04 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/rate.func.js                      │ esm  │ 17.36 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/test/wipe-account.func.js         │ esm  │ 17.17 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/users/[username]/listings.func.js │ esm  │ 19.30 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/users/[username].func.js          │ esm  │ 18.02 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/users/check-username.func.js      │ esm  │ 17.38 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/users/me.func.js                  │ esm  │ 17.45 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/users/set-username.func.js        │ esm  │ 17.80 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/api/wipe-test-account.func.js         │ esm  │ 17.14 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/en/[username].func.js                 │ esm  │ 47.24 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/profile/[username].func.js            │ esm  │ 53.85 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/functions/search.func.js                        │ esm  │ 36.63 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/manifest/27d10e462fba646daaa29468a0656e12.js    │ esm  │ 1.50 KiB    │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/manifest/__RSC_SERVER_MANIFEST.js               │ esm  │ 0.19 KiB    │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/webpack/0406212c5b03d4d7d56d829c11dc80f8.js     │ esm  │ 62.53 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/webpack/0db62fc21f400f4ff93662ca787c3a50.js     │ esm  │ 108.14 KiB  │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/webpack/1813.js                                 │ esm  │ 2.57 KiB    │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/webpack/6420.js                                 │ esm  │ 1.00 KiB    │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/webpack/65350c40fb927cd816847882c65007ef.js     │ esm  │ 16.66 KiB   │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/webpack/7889.js                                 │ esm  │ 0.08 KiB    │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/webpack/8080.js                                 │ esm  │ 1.06 KiB    │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/webpack/8084.js                                 │ esm  │ 1.04 KiB    │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/webpack/aa3445b4fb5eebd2c7327faf1cb0f3a9.js     │ esm  │ 532.06 KiB  │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ __next-on-pages-dist__/webpack/d146f456c84ad77aa2bdb7f4ffff385c.js     │ esm  │ 2.39 KiB    │
+├────────────────────────────────────────────────────────────────────────┼──────┼─────────────┤
+│ Total (45 modules)                                                     │      │ 1411.00 KiB │
+└────────────────────────────────────────────────────────────────────────┴──────┴─────────────┘
+✨ Compiled Worker successfully
+✨ Uploading Worker bundle
+✨ Uploading _routes.json
+🌎 Deploying...
+✨ Deployment complete! Take a peek over at https://38de67a4.bitboard-8dl.pages.dev
+✨ Deployment alias URL: https://staging.bitboard-8dl.pages.dev
+[0;32m[SUCCESS] Deployment completed successfully[0m

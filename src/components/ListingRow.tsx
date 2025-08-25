@@ -115,7 +115,7 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Profile Icon - Positioned so its center aligns with the left edge radius */}
-                <div className="flex-shrink-0 -ml-1.5">
+                <div className="flex-shrink-0 -ml-2">
                   {!sellerImageError ? (
                     <img
                       src={generateProfilePicture(listing.seller.name)}

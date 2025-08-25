@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
-import { Modal, ModalHeader, ModalTitle, ModalBody, ModalCloseButton } from "./Modal";
+import React, { useState } from "react";
+import { GoogleSignInOverlay } from "./GoogleSignInOverlay";
 import type { User } from "@/lib/types";
 
 interface AuthModalProps {
@@ -12,67 +11,62 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ onClose, onAuthed, dark }: AuthModalProps) {
-  const [loginUrl, setLoginUrl] = useState<string>('/api/auth/login');
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [showGoogleSignIn, setShowGoogleSignIn] = useState(false);
 
-  useEffect(() => {
-    // Get current page URL to redirect back after login
-    const currentUrl = window.location.pathname + window.location.search + window.location.hash;
-    setLoginUrl(`/api/auth/login?redirect=${encodeURIComponent(currentUrl)}`);
-  }, []);
-
-  // Check for authentication completion
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await fetch('/api/auth/session');
-        const data = await response.json() as any;
-        if (data.session?.user) {
-          // User is authenticated, call onAuthed
-          onAuthed({
-            id: data.session.user.username || 'unknown',
-            email: data.session.user.email || 'unknown',
-            handle: data.session.user.username || null,
-            hasChosenUsername: data.session.user.hasChosenUsername || false
-          });
-        }
-      } catch (error) {
-        console.error('Error checking auth session:', error);
-      }
-    };
-
-    // Check auth status every 2 seconds while modal is open
-    const interval = setInterval(checkAuth, 2000);
-    return () => clearInterval(interval);
-  }, [onAuthed]);
+  const handleGoogleSuccess = (userData: any) => {
+    // Transform the user data to match the expected User type
+    onAuthed({
+      id: userData.user.id || 'unknown',
+      email: userData.user.email || 'unknown',
+      handle: userData.user.username || null,
+      hasChosenUsername: userData.user.hasChosenUsername || false
+    });
+  };
 
   return (
-    <Modal open={true} onClose={onClose} dark={dark} size="sm" ariaLabel="Sign in to bitsbarter" zIndex={9999}>
-      <ModalHeader dark={dark}>
-        <ModalTitle>Sign in</ModalTitle>
-        <ModalCloseButton onClose={onClose} dark={dark} />
-      </ModalHeader>
-      <ModalBody className="space-y-6">
-        <div className="text-sm text-neutral-400">Use your Google account to sign in. We don't share your email publicly.</div>
-        <a 
-          href={loginUrl} 
-          onClick={() => setIsAuthenticating(true)}
-          className="flex items-center justify-center gap-3 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-neutral-900 shadow ring-1 ring-neutral-200 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isAuthenticating ? (
-            <>
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-neutral-900"></div>
-              <span>Signing in...</span>
-            </>
-          ) : (
-            <>
+    <>
+      {/* Main Auth Modal */}
+      <div className={`fixed inset-0 z-[9999] flex items-center justify-center ${dark ? 'bg-black/50' : 'bg-white/50'}`}>
+        <div className={`rounded-2xl p-6 max-w-sm w-full mx-4 ${dark ? 'bg-neutral-900 border border-neutral-700' : 'bg-white border border-neutral-200'} shadow-2xl`}>
+          <div className="text-center space-y-6">
+            <div>
+              <h2 className={`text-xl font-semibold ${dark ? 'text-white' : 'text-neutral-900'}`}>
+                Sign in to bitsbarter
+              </h2>
+              <p className={`text-sm mt-2 ${dark ? 'text-neutral-400' : 'text-neutral-600'}`}>
+                Use your Google account to sign in. We don't share your email publicly.
+              </p>
+            </div>
+            
+            <button
+              onClick={() => setShowGoogleSignIn(true)}
+              className="flex items-center justify-center gap-3 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-neutral-900 shadow ring-1 ring-neutral-200 hover:bg-neutral-50 transition-colors w-full"
+            >
               <span className="text-xl">G</span>
               <span>Continue with Google</span>
-            </>
-          )}
-        </a>
-        <div className="text-[11px] text-neutral-500">By continuing, you agree to our Terms.</div>
-      </ModalBody>
-    </Modal>
+            </button>
+            
+            <div className="text-[11px] text-neutral-500">
+              By continuing, you agree to our Terms.
+            </div>
+            
+            <button
+              onClick={onClose}
+              className={`text-sm ${dark ? 'text-neutral-400 hover:text-neutral-300' : 'text-neutral-600 hover:text-neutral-800'}`}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Google Sign-In Overlay */}
+      <GoogleSignInOverlay
+        open={showGoogleSignIn}
+        onClose={() => setShowGoogleSignIn(false)}
+        onSuccess={handleGoogleSuccess}
+        dark={dark}
+      />
+    </>
   );
 }
