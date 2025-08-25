@@ -84,7 +84,7 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
 
   const getStatusIcon = () => {
     if (isChecking) return (
-      <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent" />
+      <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent" />
     );
     if (isAvailable === null) return null;
     if (isAvailable) return (
@@ -111,14 +111,14 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
   };
 
   const getStatusColor = () => {
-    if (isChecking) return "text-blue-600";
+    if (isChecking) return "text-orange-500";
     if (isAvailable === null) return "text-gray-500";
     if (isAvailable) return "text-green-600";
     return "text-red-600";
   };
 
   const getInputBorderColor = () => {
-    if (focused) return "ring-2 ring-blue-500 border-blue-500";
+    if (focused) return "ring-2 ring-orange-500 border-orange-500";
     if (isAvailable === true) return "ring-2 ring-green-500 border-green-500";
     if (isAvailable === false) return "ring-2 ring-red-500 border-red-500";
     return "border-gray-300 dark:border-gray-600";
@@ -135,43 +135,41 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
     >
       <ModalHeader dark={dark}>
         <div className="text-center w-full">
-          <div className="mb-3">
+          <div className="mb-4">
             <div className={cn(
-              "w-16 h-16 mx-auto rounded-full flex items-center justify-center",
-              dark ? "bg-gradient-to-br from-blue-500 to-purple-600" : "bg-gradient-to-br from-blue-500 to-indigo-600"
+              "w-20 h-20 mx-auto rounded-2xl flex items-center justify-center shadow-lg",
+              "bg-gradient-to-br from-orange-500 to-red-500"
             )}>
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
+              <span className="text-3xl font-bold text-white">₿</span>
             </div>
           </div>
-          <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Welcome to Bitsbarter!
+          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+            Welcome to Bitsbarter
           </div>
           <p className={cn(
             "text-sm mt-2",
             dark ? "text-gray-300" : "text-gray-600"
           )}>
-            Choose your unique username to get started
+            Choose your username to start trading with Bitcoin
           </p>
         </div>
         <ModalCloseButton onClose={onClose} dark={dark} />
       </ModalHeader>
       
-      <ModalBody className="space-y-8 px-8 pb-8">
+      <ModalBody className="space-y-6 px-6 pb-6">
         {isClosing && (
           <div className={cn(
-            "text-center p-3 rounded-lg border",
-            dark ? "bg-blue-900/20 border-blue-700/50 text-blue-300" : "bg-blue-50 border-blue-200 text-blue-700"
+            "text-center p-3 rounded-xl border",
+            dark ? "bg-orange-900/20 border-orange-700/50 text-orange-300" : "bg-orange-50 border-orange-200 text-orange-700"
           )}>
             <div className="flex items-center justify-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent" />
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent" />
               <span className="text-sm font-medium">Logging out...</span>
             </div>
           </div>
         )}
         
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-3">
             <label 
               htmlFor="username" 
@@ -216,30 +214,36 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
             </div>
             
             {/* Username requirements */}
-            <div className={cn(
-              "grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs",
-              dark ? "text-gray-400" : "text-gray-500"
-            )}>
-              <div className="flex items-center gap-2">
+            <div className="space-y-2">
+              <div className={cn(
+                "flex items-center gap-2 text-xs",
+                username.length >= 3 ? "text-green-600" : "text-gray-500"
+              )}>
                 <div className={cn(
                   "w-2 h-2 rounded-full",
                   username.length >= 3 ? "bg-green-500" : "bg-gray-400"
                 )} />
-                <span>3-12 characters</span>
+                <span>3-12 characters long</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className={cn(
+                "flex items-center gap-2 text-xs",
+                /^[a-zA-Z0-9_-]+$/.test(username) || username.length === 0 ? "text-green-600" : "text-gray-500"
+              )}>
                 <div className={cn(
                   "w-2 h-2 rounded-full",
                   /^[a-zA-Z0-9_-]+$/.test(username) || username.length === 0 ? "bg-green-500" : "bg-gray-400"
                 )} />
-                <span>Letters, numbers, -_</span>
+                <span>Only letters, numbers, hyphens, and underscores</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className={cn(
+                "flex items-center gap-2 text-xs",
+                username.length === 0 || !username.includes('admin') && !username.includes('mod') ? "text-green-600" : "text-gray-500"
+              )}>
                 <div className={cn(
                   "w-2 h-2 rounded-full",
                   username.length === 0 || !username.includes('admin') && !username.includes('mod') ? "bg-green-500" : "bg-gray-400"
                 )} />
-                <span>Appropriate content</span>
+                <span>No inappropriate content</span>
               </div>
             </div>
           </div>
@@ -247,11 +251,11 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
           {/* Error message */}
           {error && (
             <div className={cn(
-              "p-4 rounded-xl border text-sm font-medium",
+              "p-3 rounded-xl border text-sm font-medium",
               dark ? "bg-red-900/20 border-red-700/50 text-red-300" : "bg-red-50 border-red-200 text-red-700"
             )}>
               <div className="flex items-center gap-2">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
                 {error}
@@ -267,7 +271,7 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
               "w-full py-3 px-6 rounded-xl font-semibold text-lg transition-all duration-200 transform",
               !username || !isAvailable || isSubmitting
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+                : "bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
             )}
           >
             {isSubmitting ? (
@@ -276,17 +280,17 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
                 <span>Setting username...</span>
               </div>
             ) : (
-              "Get Started with Bitsbarter"
+              "Start Trading with Bitcoin"
             )}
           </button>
         </form>
 
         {/* Additional info */}
         <div className={cn(
-          "text-center text-xs",
-          dark ? "text-gray-400" : "text-gray-500"
+          "text-center text-xs p-3 rounded-lg",
+          dark ? "bg-gray-800/50 text-gray-400" : "bg-gray-100 text-gray-600"
         )}>
-          <p>Your username will be visible to other users</p>
+          <p>Your username will be visible to other traders</p>
           <p>You can change it later in your profile settings</p>
         </div>
       </ModalBody>
