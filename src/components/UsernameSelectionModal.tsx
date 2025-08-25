@@ -36,9 +36,20 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
   const checkUsernameAvailability = async () => {
     if (username.length < 3) return;
 
-    // Check for inappropriate content first
-    if (username.includes('admin') || username.includes('mod')) {
-      setError("Username cannot contain 'admin' or 'mod'");
+    // Check for inappropriate content first - comprehensive list
+    const inappropriateWords = [
+      'admin', 'mod', 'moderator', 'administrator',
+      'shit', 'fuck', 'ass', 'bitch', 'cunt', 'dick', 'pussy', 'cock',
+      'bastard', 'whore', 'slut', 'faggot', 'nigger', 'nigga',
+      'fucker', 'motherfucker', 'shithead', 'asshole', 'dumbass',
+      'retard', 'retarded', 'idiot', 'stupid', 'dumb'
+    ];
+    
+    const lowerUsername = username.toLowerCase();
+    const foundInappropriate = inappropriateWords.find(word => lowerUsername.includes(word));
+    
+    if (foundInappropriate) {
+      setError(`Username cannot contain inappropriate content`);
       setIsAvailable(false);
       return;
     }
@@ -109,7 +120,22 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
     if (username.length < 3) return "Username must be at least 3 characters long";
     if (username.length > 12) return "Username must be 12 characters or less";
     if (!/^[a-zA-Z0-9_-]+$/.test(username)) return "Username can only contain letters, numbers, hyphens, and underscores";
-    if (username.includes('admin') || username.includes('mod')) return "Username cannot contain 'admin' or 'mod'";
+    
+    // Check for inappropriate content using the same list as checkUsernameAvailability
+    const inappropriateWords = [
+      'admin', 'mod', 'moderator', 'administrator',
+      'shit', 'fuck', 'ass', 'bitch', 'cunt', 'dick', 'pussy', 'cock',
+      'bastard', 'whore', 'slut', 'faggot', 'nigger', 'nigga',
+      'fucker', 'motherfucker', 'shithead', 'asshole', 'dumbass',
+      'retard', 'retarded', 'idiot', 'stupid', 'dumb'
+    ];
+    
+    const lowerUsername = username.toLowerCase();
+    const foundInappropriate = inappropriateWords.find(word => lowerUsername.includes(word));
+    
+    if (foundInappropriate) {
+      return "Username cannot contain inappropriate content";
+    }
     
     // If we have a specific error from the API, show that
     if (error) return error;
