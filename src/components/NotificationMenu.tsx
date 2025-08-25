@@ -173,24 +173,27 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
           <defs>
             {unreadCount > 0 && (
               <linearGradient id="bellGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#fbbf24" />
-                <stop offset="50%" stopColor="#f97316" />
-                <stop offset="100%" stopColor="#fbbf24" />
+                <stop offset="0%" stopColor="#fbbf24">
+                  <animate attributeName="offset" values="0;1;0" dur="2s" repeatCount="indefinite" />
+                </stop>
+                <stop offset="50%" stopColor="#f97316">
+                  <animate attributeName="offset" values="0.5;1.5;0.5" dur="2s" repeatCount="indefinite" />
+                </stop>
+                <stop offset="100%" stopColor="#fbbf24">
+                  <animate attributeName="offset" values="1;2;1" dur="2s" repeatCount="indefinite" />
+                </stop>
               </linearGradient>
             )}
           </defs>
           <path 
             d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"
             fill={unreadCount > 0 ? "url(#bellGradient)" : "currentColor"}
-            className={cn(
-              unreadCount > 0 && "animate-pulse"
-            )}
           />
         </svg>
         
         {/* Small red circle indicator when there are notifications */}
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 rounded-full h-3 w-3 flex items-center justify-center animate-pulse">
+          <span className="absolute -top-0.5 -right-0.5 bg-red-500 rounded-full h-3 w-3 flex items-center justify-center">
             {/* No number, just the red circle */}
           </span>
         )}
