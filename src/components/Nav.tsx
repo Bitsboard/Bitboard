@@ -272,9 +272,20 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
               <NotificationMenu dark={dark} />
             </div>
           ) : (
-            <button onClick={onAuth} className="rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:scale-105">
-              {t('sign_in', lang)}
-            </button>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => onAuth()} 
+                className="rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:scale-105"
+              >
+                Register
+              </button>
+              <button 
+                onClick={() => onAuth()} 
+                className="rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:scale-105"
+              >
+                {t('sign_in', lang)}
+              </button>
+            </div>
           )}
           
           {/* Settings Menu - Always visible, subtle */}

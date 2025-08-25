@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Modal, ModalHeader, ModalTitle, ModalBody, ModalCloseButton } from "./Modal";
+import { Modal, ModalHeader, ModalBody, ModalCloseButton } from "./Modal";
 import { validateUsername } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface UsernameSelectionModalProps {
   dark: boolean;
@@ -136,11 +137,14 @@ export function UsernameSelectionModal({ dark, onUsernameSelected, onClose, isCl
       <ModalHeader dark={dark}>
         <div className="text-center w-full">
           <div className="mb-4">
-            <div className={cn(
-              "w-20 h-20 mx-auto rounded-2xl flex items-center justify-center shadow-lg",
-              "bg-gradient-to-br from-orange-500 to-red-500"
-            )}>
-              <span className="text-3xl font-bold text-white">₿</span>
+            <div className="w-24 h-24 mx-auto flex items-center justify-center">
+              <Image
+                src="/Bitsbarterlogo.svg"
+                alt="Bitsbarter Logo"
+                width={96}
+                height={96}
+                className="w-full h-full"
+              />
             </div>
           </div>
           <div className="text-2xl font-bold text-gray-900 dark:text-white">
