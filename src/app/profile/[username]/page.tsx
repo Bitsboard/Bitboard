@@ -708,10 +708,10 @@ export default function PublicProfilePage() {
       </div>
 
       {/* Listing Modal OR Chat Modal - only one shown at a time */}
-      {active && !modals.chatFor && (
+      {modals.active && !modals.chatFor && (
         <ListingModal
-          listing={active}
-          open={!!active}
+          listing={modals.active}
+          open={!!modals.active}
           onClose={closeModal}
           unit={unit}
           dark={dark}
@@ -722,7 +722,7 @@ export default function PublicProfilePage() {
             } else {
               // Clear the active listing and open chat modal for complete replacement
               setModal('active', null);
-              setModal('chatFor', active);
+              setModal('chatFor', modals.active);
             }
           }}
         />
