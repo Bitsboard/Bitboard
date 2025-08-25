@@ -733,8 +733,9 @@ export default function PublicProfilePage() {
         <ChatModal
           listing={modals.chatFor}
           onClose={() => {
+            // Clear both chat and active states to prevent listing modal from reappearing
             setModal('chatFor', null);
-            // Don't restore the listing modal - user stays on base page
+            setModal('active', null);
           }}
           dark={dark}
           btcCad={effectiveBtcCad}
