@@ -267,9 +267,6 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                   </span>
                 </div>
               )}
-              
-              {/* Notifications - Now grouped with profile */}
-              <NotificationMenu dark={dark} />
             </div>
           ) : (
             <div className="flex items-center gap-3">
@@ -288,9 +285,12 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
             </div>
           )}
           
+          {/* Notifications - Centered between profile and hamburger */}
+          {user && <NotificationMenu dark={dark} />}
+          
           {/* Settings Menu - Always visible, subtle */}
           <div className="relative">
-            <button onClick={() => setMenuOpen(v => !v)} aria-expanded={menuOpen} aria-haspopup="menu" className={cn("h-10 rounded-xl px-3 text-base font-bold shadow-lg ring-1 transition-all duration-200 hover:scale-105 flex items-center justify-center", dark ? "text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 ring-neutral-700" : "text-neutral-600 hover:text-neutral-800 hover:bg-neutral-100 ring-neutral-300")}>☰</button>
+            <button onClick={() => setMenuOpen(v => !v)} aria-expanded={menuOpen} aria-haspopup="menu" className={cn("h-10 rounded-xl px-3 text-base font-bold shadow-lg ring-1 transition-all duration-200 hover:scale-105 flex items-center justify-center", dark ? "text-neutral-200 hover:text-neutral-100 hover:bg-neutral-700/50 ring-neutral-700 bg-neutral-800/50" : "text-neutral-700 hover:text-neutral-800 hover:bg-neutral-200/80 ring-neutral-300 bg-neutral-100/80")}>☰</button>
             {menuOverlay}
           </div>
         </div>
