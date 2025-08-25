@@ -193,7 +193,7 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
         
         {/* Small red circle indicator when there are notifications */}
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 bg-red-500 rounded-full h-2 w-2 flex items-center justify-center animate-pulse">
+          <span className="absolute top-0 -right-1 bg-red-500 rounded-full h-2 w-2 flex items-center justify-center animate-pulse">
             {/* No number, just the red circle */}
           </span>
         )}
