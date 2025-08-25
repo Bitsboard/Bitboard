@@ -77,11 +77,11 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
     return (
       <ChatModal
         listing={listing}
-        onClose={() => setShowChat(false)}
+        onClose={onClose} // This will close the entire modal and return to base page
         dark={dark}
         btcCad={btcCad}
         unit={unit}
-        onBackToListing={() => setShowChat(false)}
+        onBackToListing={() => setShowChat(false)} // This goes back to listing modal
       />
     );
   }
