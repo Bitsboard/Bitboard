@@ -23,6 +23,15 @@ export function useUsernameSelection(externalUser?: User | null) {
     }
   }, [externalUser, modalClosedByUser]);
 
+  // Reset modalClosedByUser flag when user re-authenticates
+  useEffect(() => {
+    if (externalUser && !externalUser.hasChosenUsername) {
+      // If user re-authenticates and still needs username, reset the closed flag
+      console.log('useUsernameSelection: user re-authenticated, resetting modal closed flag');
+      setModalClosedByUser(false);
+    }
+  }, [externalUser?.id]); // Only trigger when user ID changes (re-authentication)
+
   const closeModal = () => {
     console.log('useUsernameSelection: closeModal called');
     setShowUsernameModal(false);
