@@ -195,7 +195,13 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                   </svg>
                 </div>
-                <p className="text-neutral-500 dark:text-neutral-400">{t('no_notifications', lang)}</p>
+                <p className="text-neutral-500 dark:text-neutral-400 mb-4">{t('no_notifications', lang)}</p>
+                <a
+                  href="/notifications"
+                  className="inline-block text-sm text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium px-4 py-2 rounded-lg border border-orange-200 dark:border-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors duration-200"
+                >
+                  {t('view_all_notifications', lang)}
+                </a>
               </div>
             ) : (
               <div className="divide-y divide-neutral-200 dark:divide-neutral-700">
@@ -244,16 +250,14 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
             )}
           </div>
 
-          {notifications.length > 0 && (
-            <div className="p-3 border-t border-neutral-200 dark:border-neutral-700">
-              <a
-                href="/notifications"
-                className="block text-center text-sm text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium"
-              >
-                {t('view_all_notifications', lang)}
-              </a>
-            </div>
-          )}
+          <div className="p-3 border-t border-neutral-200 dark:border-neutral-700">
+            <a
+              href="/notifications"
+              className="block text-center text-sm text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium"
+            >
+              {t('view_all_notifications', lang)}
+            </a>
+          </div>
         </div>
       )}
     </div>
