@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { PriceBlock } from "./PriceBlock";
 import { Carousel } from "./Carousel";
@@ -42,6 +42,14 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
   const lang = useLang();
   const a = accent(listing);
   const [sellerImageError, setSellerImageError] = React.useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [messages, setMessages] = useState<{ id: number; who: "me" | "seller"; text: string; at: number }[]>([
+    { id: 1, who: "seller", text: "Hey! Happy to answer any questions.", at: Date.now() - 1000 * 60 * 12 },
+  ]);
+  const [text, setText] = useState("");
+  const [attachEscrow, setAttachEscrow] = useState(false);
+  const [showEscrow, setShowEscrow] = useState(false);
+  const [showTips, setShowTips] = useState(true);
   
   // Debug: Log btcCad value
   React.useEffect(() => {
@@ -52,6 +60,22 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
     if (type !== "want") return raw;
     const cleaned = raw.replace(/^\s*(looking\s*for\s*:?-?\s*)/i, "");
     return cleaned.trim();
+  }
+
+  function sendMessage() {
+    if (!text && !attachEscrow) return;
+    if (text) setMessages((prev) => [...prev, { id: Math.random(), who: "me", text, at: Date.now() }]);
+    if (attachEscrow) setShowEscrow(true);
+    setText("");
+    setAttachEscrow(false);
+  }
+
+  function handleChatClick() {
+    if (onChat) {
+      onChat();
+    } else {
+      setShowChat(true);
+    }
   }
 
   return (
@@ -151,8 +175,11 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                 </div>
                 {/* Row 1, Col 2: button */}
                 <div className="flex justify-end">
-                  <button onClick={onChat} className="min-w-[240px] rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2 text-sm font-semibold text-white shadow">
-                    {t('send_message', lang)}
+                  <button 
+                    onClick={handleChatClick} 
+                    className="min-w-[240px] rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2 text-sm font-semibold text-white shadow"
+                  >
+                    {showChat ? t('back_to_listing', lang) || 'Back to Listing' : t('send_message', lang)}
                   </button>
                 </div>
                 {/* Row 2, Col 1: report (same size as warning, bold) */}
@@ -170,7 +197,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
             </div>
           </div>
 
-          {/* Right: static top area + scrollable description with extra right padding */}
+          {/* Right: static top area + scrollable description or chat */}
           <div className={cn("md:col-span-2 border-l flex flex-col", dark ? "border-neutral-900" : "border-neutral-200")} style={{ maxHeight: "calc(90vh - 64px)" }}>
             <div className="p-3 pr-6 shrink-0">
               {/* Top row: price left, location right */}
@@ -191,16 +218,129 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                 </div>
               </div>
               <div className={cn("mt-2 h-px", dark ? "bg-neutral-900" : "bg-neutral-200")} />
-              {/* Info previously on the right column has been moved under the image; keep right column focused on price/location and description. */}
             </div>
-            <div className="flex-1 overflow-y-auto overscroll-contain scroll-bounce p-3 pr-10 mr-2 md:mr-3">
-              <div className={cn("prose prose-sm max-w-none", dark ? "prose-invert" : "")}>
-                <p className={cn("whitespace-pre-wrap", dark ? "text-neutral-300" : "text-neutral-800")}>{listing.description}</p>
+            
+            {showChat ? (
+              /* Chat Interface */
+              <div className="flex-1 flex flex-col overflow-hidden">
+                {/* Safety Tips */}
+                {showTips && (
+                  <div className={cn("mx-3 rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <strong className="mr-2">Safety tips:</strong>
+                        Meet in a <em>very public</em> place (mall, café, police e-commerce zone), bring a friend, keep chats in-app, verify serials and condition before paying, and prefer Lightning escrow over cash.
+                      </div>
+                      <button onClick={() => setShowTips(false)} className={cn("rounded px-2 py-1", dark ? "hover:bg-neutral-800" : "hover:bg-neutral-200")}>
+                        Hide
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Messages */}
+                <div className="flex-1 space-y-2 overflow-auto p-4">
+                  {messages.map((m) => (
+                    <div
+                      key={m.id}
+                      className={cn(
+                        "max-w-[70%] rounded-2xl px-3 py-2 text-sm",
+                        m.who === "me" ? "ml-auto bg-orange-500 text-neutral-950" : dark ? "bg-neutral-900" : "bg-neutral-100"
+                      )}
+                    >
+                      {m.text}
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Message Input */}
+                <div className={cn("flex items-center gap-2 border-t p-3", dark ? "border-neutral-900" : "border-neutral-200")}>
+                  <input
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    placeholder="Write a message…"
+                    className={cn("flex-1 rounded-xl px-3 py-2 focus:outline-none", dark ? "border border-neutral-800 bg-neutral-900 text-neutral-100" : "border border-neutral-300 bg-white text-neutral-900")}
+                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                  />
+                  <label className={cn("flex items-center gap-2 rounded-xl px-3 py-2 text-xs", dark ? "border border-neutral-800" : "border border-neutral-300")}>
+                    <input type="checkbox" checked={attachEscrow} onChange={(e) => setAttachEscrow(e.target.checked)} /> Attach escrow
+                  </label>
+                  <button onClick={sendMessage} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-neutral-950">
+                    Send
+                  </button>
+                </div>
+                
+                {/* Escrow Panel */}
+                {showEscrow && (
+                  <div className={cn("border-t", dark ? "border-neutral-900" : "border-neutral-200")}>
+                    <div className="flex items-center justify-between px-4 py-3">
+                      <div className="font-semibold">Escrow proposal</div>
+                      <button onClick={() => setShowEscrow(false)} className={cn("rounded px-2 py-1 text-xs", dark ? "hover:bg-neutral-900" : "hover:bg-neutral-100")}>
+                        Hide
+                      </button>
+                    </div>
+                    <div className="px-4 pb-4">
+                      <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} />
+                      <div className={cn("mt-1 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>
+                        Funds are locked via Lightning hold invoice until both parties confirm release.
+                      </div>
+                    </div>
+                    <EscrowFlow listing={listing} onClose={() => setShowEscrow(false)} dark={dark} />
+                  </div>
+                )}
               </div>
-            </div>
+            ) : (
+              /* Description Interface */
+              <div className="flex-1 overflow-y-auto overscroll-contain scroll-bounce p-3 pr-10 mr-2 md:mr-3">
+                <div className={cn("prose prose-sm max-w-none", dark ? "prose-invert" : "")}>
+                  <p className={cn("whitespace-pre-wrap", dark ? "text-neutral-300" : "text-neutral-800")}>{listing.description}</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </Modal>
   );
+}
+
+function EscrowFlow({ listing, onClose, dark }: { listing: Listing; onClose: () => void; dark: boolean }) {
+  const [step, setStep] = useState(1);
+  const feeBps = 100; // 1%
+  const fee = Math.ceil((listing.priceSats * feeBps) / 10000);
+  const total = listing.priceSats + fee;
+  const [invoice, setInvoice] = useState(() => `lnbchold${total}n1p${Math.random().toString(36).slice(2, 10)}...`);
+
+  return (
+    <div className="grid grid-cols-1 gap-4 p-4">
+      <div className={cn("rounded-xl p-3 text-sm", dark ? "border border-neutral-800 bg-neutral-900" : "border border-neutral-300 bg-white")}>
+        <div>
+          Send <span className="font-bold text-orange-500">{formatSats(total)} sats</span> to lock funds:
+        </div>
+        <div className={cn("mt-3 rounded-lg p-3 text-xs", dark ? "bg-neutral-800" : "bg-neutral-100")}>{invoice}</div>
+        <div className={cn("mt-2 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>Includes escrow fee {formatSats(fee)} sats (1%).</div>
+        <div className="mt-3 flex gap-2">
+          <button onClick={() => setStep(2)} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-neutral-950 shadow shadow-orange-500/30">
+            I&apos;ve deposited
+          </button>
+          <button
+            onClick={() => setInvoice(`lnbchold${total}n1p${Math.random().toString(36).slice(2, 10)}...`)}
+            className={cn("rounded-xl px-4 py-2 text-sm", dark ? "border border-neutral-800 hover:bg-neutral-900" : "border border-neutral-300 hover:bg-neutral-100")}
+          >
+            Regenerate
+          </button>
+          <button onClick={onClose} className={cn("ml-auto rounded-xl px-4 py-2 text-sm", dark ? "border border-neutral-800 hover:bg-neutral-900" : "border border-neutral-300 hover:bg-neutral-100")}>
+            Close
+          </button>
+        </div>
+      </div>
+      <div className={cn("rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-400" : "bg-neutral-100 text-neutral-600")}>
+        Step {step}/3 — Meet in a very public place; if all good, both confirm release. Otherwise request refund; mediator can arbitrate.
+      </div>
+    </div>
+  );
+}
+
+function formatSats(n: number) {
+  return new Intl.NumberFormat(undefined).format(n);
 }

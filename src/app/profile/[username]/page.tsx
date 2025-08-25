@@ -719,9 +719,8 @@ export default function PublicProfilePage() {
           onChat={() => {
             if (!user) {
               setModal('showAuth', true);
-            } else {
-              setModal('chatFor', active);
             }
+            // Chat is now integrated into the modal, no need to open separate modal
           }}
         />
       )}

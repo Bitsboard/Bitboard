@@ -110,6 +110,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         // Listing modal
         message_seller: "Message seller",
         send_message: "Send a Message",
+        back_to_listing: "Back to Listing",
         share_listing: "Share listing",
         listing_warning: "For safety, keep correspondence in-app.",
         learn_more: "Learn more",
@@ -392,6 +393,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         // Listing modal
         message_seller: "Contacter le vendeur",
         send_message: "Envoyer un message",
+        back_to_listing: "Retour à l'annonce",
         share_listing: "Partager l'annonce",
         listing_warning: "Pour votre sécurité, gardez la correspondance dans l'application.",
         learn_more: "En savoir plus",
@@ -526,6 +528,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         // Listing modal
         message_seller: "Enviar mensaje al vendedor",
         send_message: "Enviar mensaje",
+        back_to_listing: "Volver al anuncio",
         share_listing: "Compartir anuncio",
         listing_warning: "Por seguridad, mantén la correspondencia en la app.",
         learn_more: "Más información",
@@ -660,6 +663,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         // Listing modal
         message_seller: "Nachricht an Verkäufer",
         send_message: "Nachricht senden",
+        back_to_listing: "Zurück zum Inserat",
         share_listing: "Anzeige teilen",
         listing_warning: "Zur Sicherheit Korrespondenz in der App führen.",
         learn_more: "Mehr erfahren",
