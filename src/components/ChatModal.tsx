@@ -25,6 +25,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit }: ChatModalPro
   const [attachEscrow, setAttachEscrow] = useState(false);
   const [showEscrow, setShowEscrow] = useState(false);
   const [showTips, setShowTips] = useState(true);
+  const [showOptions, setShowOptions] = useState(false);
 
   function send() {
     if (!text && !attachEscrow) return;
@@ -41,22 +42,54 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit }: ChatModalPro
       dark={dark}
       size="xl"
       ariaLabel={`Chat about ${listing.title}`}
-      panelClassName={cn("flex w-full flex-col md:flex-row")}
+      panelClassName={cn("flex w-full flex-col")}
     >
-      <div className={cn("flex items-center justify-between border-b px-4 py-3 md:border-b-0 md:border-r", dark ? "border-neutral-900" : "border-neutral-200")}>
-        <div>
-          <div className="text-sm opacity-70">Chat about</div>
-          <div className="font-semibold">{listing.title}</div>
+      {/* Header with listing details and back button */}
+      <div className={cn("flex items-center justify-between border-b px-6 py-4", dark ? "border-neutral-900" : "border-neutral-200")}>
+        <div className="flex items-center gap-4">
+          {/* Back button */}
+          <button 
+            onClick={onClose}
+            className={cn(
+              "flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200",
+              dark 
+                ? "hover:bg-neutral-800 text-neutral-300 hover:text-white" 
+                : "hover:bg-neutral-100 text-neutral-600 hover:text-neutral-800"
+            )}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          
+          {/* Listing image */}
+          <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+            <img 
+              src={listing.images[0]} 
+              alt={listing.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          
+          {/* Listing details */}
+          <div className="flex flex-col">
+            <h3 className={cn("font-semibold text-sm", dark ? "text-white" : "text-neutral-900")}>
+              {listing.title}
+            </h3>
+            <div className="flex items-center gap-2">
+              <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="sm" />
+              <span className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>
+                📍 {listing.location}
+              </span>
+            </div>
+          </div>
         </div>
-        <button onClick={onClose} className={cn("rounded-lg px-3 py-1", dark ? "text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200" : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-800")}>
-          Close
-        </button>
       </div>
 
-      {/* Chat column */}
-      <div className="flex flex-1 flex-col">
+      {/* Chat content */}
+      <div className="flex-1 flex flex-col">
         {showTips && (
-          <div className={cn("m-3 rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>
+          <div className={cn("m-4 rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>
             <div className="flex items-start justify-between gap-3">
               <div>
                 <strong className="mr-2">Safety tips:</strong>
@@ -68,53 +101,121 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit }: ChatModalPro
             </div>
           </div>
         )}
+        
         <div className="flex-1 space-y-2 overflow-auto p-4">
           {messages.map((m) => (
             <div
               key={m.id}
               className={cn(
-                "max-w-[70%] rounded-2xl px-3 py-2 text-sm",
-                m.who === "me" ? "ml-auto bg-orange-500 text-neutral-950" : dark ? "bg-neutral-900" : "bg-neutral-100"
+                "inline-block max-w-[70%] rounded-2xl px-3 py-2 text-sm break-words",
+                m.who === "me" ? "ml-auto bg-orange-500 text-white" : dark ? "bg-neutral-900" : "bg-neutral-100"
               )}
             >
               {m.text}
             </div>
           ))}
         </div>
-        <div className={cn("flex items-center gap-2 border-t p-3", dark ? "border-neutral-900" : "border-neutral-200")}>
+        
+        {/* Message Input */}
+        <div className={cn("flex items-center gap-2 border-t p-4", dark ? "border-neutral-900" : "border-neutral-200")}>
+          {/* Plus button with options */}
+          <div className="relative">
+            <button
+              onClick={() => setShowOptions(!showOptions)}
+              className={cn(
+                "flex items-center justify-center w-10 h-10 rounded-xl border-2 transition-all duration-200",
+                dark 
+                  ? "border-neutral-700 hover:border-neutral-600 hover:bg-neutral-800" 
+                  : "border-neutral-300 hover:border-neutral-400 hover:bg-neutral-100"
+              )}
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </button>
+            
+            {/* Dropdown options */}
+            {showOptions && (
+              <div className={cn(
+                "absolute bottom-full left-0 mb-2 w-48 rounded-xl shadow-lg border z-10",
+                dark ? "bg-neutral-800 border-neutral-700" : "bg-white border-neutral-200"
+              )}>
+                <div className="py-2">
+                  <button
+                    onClick={() => {
+                      setText("I'd like to make an offer on this item. What's your best price?");
+                      setShowOptions(false);
+                    }}
+                    className={cn(
+                      "w-full text-left px-4 py-2 text-sm hover:bg-orange-500 hover:text-white transition-colors duration-200",
+                      dark ? "text-neutral-300 hover:bg-orange-500" : "text-neutral-700 hover:bg-orange-500"
+                    )}
+                  >
+                    💰 Give an offer
+                  </button>
+                  <button
+                    onClick={() => {
+                      setText("Is this item still available?");
+                      setShowOptions(false);
+                    }}
+                    className={cn(
+                      "w-full text-left px-4 py-2 text-sm hover:bg-orange-500 hover:text-white transition-colors duration-200",
+                      dark ? "text-neutral-300 hover:bg-orange-500" : "text-neutral-700 hover:bg-orange-500"
+                    )}
+                  >
+                    ❓ Check availability
+                  </button>
+                  <button
+                    onClick={() => {
+                      setText("Can I see more photos of this item?");
+                      setShowOptions(false);
+                    }}
+                    className={cn(
+                      "w-full text-left px-4 py-2 text-sm hover:bg-orange-500 hover:text-white transition-colors duration-200",
+                      dark ? "text-neutral-300 hover:bg-orange-500" : "text-neutral-700 hover:bg-orange-500"
+                    )}
+                  >
+                    📸 Request more photos
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          
           <input
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Write a message…"
             className={cn("flex-1 rounded-xl px-3 py-2 focus:outline-none", dark ? "border border-neutral-800 bg-neutral-900 text-neutral-100" : "border border-neutral-300 bg-white text-neutral-900")}
+            onKeyPress={(e) => e.key === 'Enter' && send()}
           />
           <label className={cn("flex items-center gap-2 rounded-xl px-3 py-2 text-xs", dark ? "border border-neutral-800" : "border border-neutral-300")}>
-            <input type="checkbox" checked={attachEscrow} onChange={(e) => setAttachEscrow(e.target.checked)} /> Attach escrow proposal
+            <input type="checkbox" checked={attachEscrow} onChange={(e) => setAttachEscrow(e.target.checked)} /> Attach escrow
           </label>
-          <button onClick={send} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-neutral-950">
+          <button onClick={send} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white">
             Send
           </button>
         </div>
-      </div>
-
-      {/* Escrow side panel */}
-      {showEscrow && (
-        <div className={cn("w-full max-w-md border-l", dark ? "border-neutral-900" : "border-neutral-200")}>
-          <div className="flex items-center justify-between px-4 py-3">
-            <div className="font-semibold">Escrow proposal</div>
-            <button onClick={() => setShowEscrow(false)} className={cn("rounded px-2 py-1 text-xs", dark ? "hover:bg-neutral-900" : "hover:bg-neutral-100")}>
-              Hide
-            </button>
-          </div>
-          <div className="px-4 pb-4">
-            <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} />
-            <div className={cn("mt-1 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>
-              Funds are locked via Lightning hold invoice until both parties confirm release.
+        
+        {/* Escrow Panel */}
+        {showEscrow && (
+          <div className={cn("border-t", dark ? "border-neutral-900" : "border-neutral-200")}>
+            <div className="flex items-center justify-between px-4 py-3">
+              <div className="font-semibold">Escrow proposal</div>
+              <button onClick={() => setShowEscrow(false)} className={cn("rounded px-2 py-1 text-xs", dark ? "hover:bg-neutral-900" : "hover:bg-neutral-200")}>
+                Hide
+              </button>
             </div>
+            <div className="px-4 pb-4">
+              <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} />
+              <div className={cn("mt-1 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>
+                Funds are locked via Lightning hold invoice until both parties confirm release.
+              </div>
+            </div>
+            <EscrowFlow listing={listing} onClose={() => setShowEscrow(false)} dark={dark} />
           </div>
-          <EscrowFlow listing={listing} onClose={() => setShowEscrow(false)} dark={dark} />
-        </div>
-      )}
+        )}
+      </div>
     </Modal>
   );
 }
@@ -135,8 +236,8 @@ function EscrowFlow({ listing, onClose, dark }: { listing: Listing; onClose: () 
         <div className={cn("mt-3 rounded-lg p-3 text-xs", dark ? "bg-neutral-800" : "bg-neutral-100")}>{invoice}</div>
         <div className={cn("mt-2 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>Includes escrow fee {formatSats(fee)} sats (1%).</div>
         <div className="mt-3 flex gap-2">
-          <button onClick={() => setStep(2)} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-neutral-950 shadow shadow-orange-500/30">
-            I've deposited
+          <button onClick={() => setStep(2)} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow shadow-orange-500/30">
+            I&apos;ve deposited
           </button>
           <button
             onClick={() => setInvoice(`lnbchold${total}n1p${Math.random().toString(36).slice(2, 10)}...`)}

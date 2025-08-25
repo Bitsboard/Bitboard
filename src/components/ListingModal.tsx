@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { PriceBlock } from "./PriceBlock";
 import { Carousel } from "./Carousel";
@@ -42,33 +42,11 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
   const lang = useLang();
   const a = accent(listing);
   const [sellerImageError, setSellerImageError] = React.useState(false);
-  const [showChat, setShowChat] = useState(false);
-  const [messages, setMessages] = useState<{ id: number; who: "me" | "seller"; text: string; at: number }[]>([
-    { id: 1, who: "seller", text: "Hey! Happy to answer any questions.", at: Date.now() - 1000 * 60 * 12 },
-  ]);
-  const [text, setText] = useState("");
-  const [attachEscrow, setAttachEscrow] = useState(false);
-  const [showEscrow, setShowEscrow] = useState(false);
-  const [showTips, setShowTips] = useState(true);
-  const [showOptions, setShowOptions] = useState(false);
   
   // Debug: Log btcCad value
   React.useEffect(() => {
     console.log('ListingModal btcCad:', btcCad, 'unit:', unit, 'listing.priceSats:', listing.priceSats);
   }, [btcCad, unit, listing.priceSats]);
-
-  // Click outside handler for options dropdown
-  React.useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      const target = event.target as Element;
-      if (showOptions && !target.closest('.options-dropdown')) {
-        setShowOptions(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showOptions]);
 
   function sanitizeTitle(raw: string, type: "sell" | "want"): string {
     if (type !== "want") return raw;
@@ -76,17 +54,10 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
     return cleaned.trim();
   }
 
-  function sendMessage() {
-    if (!text && !attachEscrow) return;
-    if (text) setMessages((prev) => [...prev, { id: Math.random(), who: "me", text, at: Date.now() }]);
-    if (attachEscrow) setShowEscrow(true);
-    setText("");
-    setAttachEscrow(false);
-  }
-
   function handleChatClick() {
-    // Always use the integrated chat functionality
-    setShowChat(!showChat);
+    if (onChat) {
+      onChat();
+    }
   }
 
   return (
@@ -121,7 +92,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
       <div className="relative">
         <div className="grid grid-cols-1 md:grid-cols-5" style={{ maxHeight: "calc(90vh - 64px)" }}>
           {/* Left: media + seller + safety/report (static) */}
-          <div className={cn(showChat ? "md:col-span-2" : "md:col-span-3", "overflow-hidden")}>
+          <div className="md:col-span-3 overflow-hidden">
             <div className="relative">
               <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[5/4]" showThumbnails showDots={false} rounded="" />
               <div className={cn("pointer-events-none absolute left-0 right-0 top-0 h-1 bg-gradient-to-r", a.stripe)} />
@@ -190,7 +161,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                     onClick={handleChatClick} 
                     className="min-w-[240px] rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2 text-sm font-semibold text-white shadow"
                   >
-                    {showChat ? t('back_to_listing', lang) || 'Back to Listing' : t('send_message', lang)}
+                    {t('send_message', lang)}
                   </button>
                 </div>
                 {/* Row 2, Col 1: report (same size as warning, bold) */}
@@ -208,8 +179,8 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
             </div>
           </div>
 
-          {/* Right: static top area + scrollable description or chat */}
-          <div className={cn("border-l flex flex-col", dark ? "border-neutral-900" : "border-neutral-200", showChat ? "md:col-span-3" : "md:col-span-2")} style={{ maxHeight: "calc(90vh - 64px)" }}>
+          {/* Right: static top area + scrollable description */}
+          <div className={cn("md:col-span-2 border-l flex flex-col", dark ? "border-neutral-900" : "border-neutral-200")} style={{ maxHeight: "calc(90vh - 64px)" }}>
             <div className="p-3 pr-6 shrink-0">
               {/* Top row: price left, location right */}
               <div className="flex items-center justify-between gap-2">
@@ -231,147 +202,12 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
               <div className={cn("mt-2 h-px", dark ? "bg-neutral-900" : "bg-neutral-200")} />
             </div>
             
-            {showChat ? (
-              /* Chat Interface */
-              <div className="flex-1 flex flex-col overflow-hidden" style={{ maxHeight: "calc(90vh - 64px - 120px)" }}>
-                {/* Safety Tips */}
-                {showTips && (
-                  <div className={cn("mx-3 rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <strong className="mr-2">Safety tips:</strong>
-                        Meet in a <em>very public</em> place (mall, café, police e-commerce zone), bring a friend, keep chats in-app, verify serials and condition before paying, and prefer Lightning escrow over cash.
-                      </div>
-                      <button onClick={() => setShowTips(false)} className={cn("rounded px-2 py-1", dark ? "hover:bg-neutral-800" : "hover:bg-neutral-200")}>
-                        Hide
-                      </button>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Messages */}
-                <div className="flex-1 space-y-2 overflow-auto p-4">
-                  {messages.map((m) => (
-                    <div
-                      key={m.id}
-                      className={cn(
-                        "inline-block max-w-[70%] rounded-2xl px-3 py-2 text-sm break-words",
-                        m.who === "me" ? "ml-auto bg-orange-500 text-white" : dark ? "bg-neutral-900" : "bg-neutral-100"
-                      )}
-                    >
-                      {m.text}
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Message Input */}
-                <div className={cn("flex items-center gap-2 border-t p-3", dark ? "border-neutral-900" : "border-neutral-200")}>
-                  {/* Plus button with options */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowOptions(!showOptions)}
-                      className={cn(
-                        "flex items-center justify-center w-10 h-10 rounded-xl border-2 transition-all duration-200",
-                        dark 
-                          ? "border-neutral-700 hover:border-neutral-600 hover:bg-neutral-800" 
-                          : "border-neutral-300 hover:border-neutral-400 hover:bg-neutral-100"
-                      )}
-                    >
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                    </button>
-                    
-                    {/* Dropdown options */}
-                    {showOptions && (
-                      <div className={cn(
-                        "options-dropdown absolute bottom-full left-0 mb-2 w-48 rounded-xl shadow-lg border z-10",
-                        dark ? "bg-neutral-800 border-neutral-700" : "bg-white border-neutral-200"
-                      )}>
-                        <div className="py-2">
-                          <button
-                            onClick={() => {
-                              setText("I'd like to make an offer on this item. What's your best price?");
-                              setShowOptions(false);
-                            }}
-                            className={cn(
-                              "w-full text-left px-4 py-2 text-sm hover:bg-orange-500 hover:text-white transition-colors duration-200",
-                              dark ? "text-neutral-300 hover:bg-orange-500" : "text-neutral-700 hover:bg-orange-500"
-                            )}
-                          >
-                            💰 Give an offer
-                          </button>
-                          <button
-                            onClick={() => {
-                              setText("Is this item still available?");
-                              setShowOptions(false);
-                            }}
-                            className={cn(
-                              "w-full text-left px-4 py-2 text-sm hover:bg-orange-500 hover:text-white transition-colors duration-200",
-                              dark ? "text-neutral-300 hover:bg-orange-500" : "text-neutral-700 hover:bg-orange-500"
-                            )}
-                          >
-                            ❓ Check availability
-                          </button>
-                          <button
-                            onClick={() => {
-                              setText("Can I see more photos of this item?");
-                              setShowOptions(false);
-                            }}
-                            className={cn(
-                              "w-full text-left px-4 py-2 text-sm hover:bg-orange-500 hover:text-white transition-colors duration-200",
-                              dark ? "text-neutral-300 hover:bg-orange-500" : "text-neutral-700 hover:bg-orange-500"
-                            )}
-                          >
-                            📸 Request more photos
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <input
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="Write a message…"
-                    className={cn("flex-1 rounded-xl px-3 py-2 focus:outline-none", dark ? "border border-neutral-800 bg-neutral-900 text-neutral-100" : "border border-neutral-300 bg-white text-neutral-900")}
-                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                  />
-                  <label className={cn("flex items-center gap-2 rounded-xl px-3 py-2 text-xs", dark ? "border border-neutral-800" : "border border-neutral-300")}>
-                    <input type="checkbox" checked={attachEscrow} onChange={(e) => setAttachEscrow(e.target.checked)} /> Attach escrow
-                  </label>
-                  <button onClick={sendMessage} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white">
-                    Send
-                  </button>
-                </div>
-                
-                {/* Escrow Panel */}
-                {showEscrow && (
-                  <div className={cn("border-t", dark ? "border-neutral-900" : "border-neutral-200")}>
-                    <div className="flex items-center justify-between px-4 py-3">
-                      <div className="font-semibold">Escrow proposal</div>
-                      <button onClick={() => setShowEscrow(false)} className={cn("rounded px-2 py-1 text-xs", dark ? "hover:bg-neutral-900" : "hover:bg-neutral-200")}>
-                        Hide
-                      </button>
-                    </div>
-                    <div className="px-4 pb-4">
-                      <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} />
-                      <div className={cn("mt-1 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>
-                        Funds are locked via Lightning hold invoice until both parties confirm release.
-                      </div>
-                    </div>
-                    <EscrowFlow listing={listing} onClose={() => setShowEscrow(false)} dark={dark} />
-                  </div>
-                )}
+            {/* Description Interface */}
+            <div className="flex-1 overflow-y-auto overscroll-contain scroll-bounce p-3 pr-10 mr-2 md:mr-3">
+              <div className={cn("prose prose-sm max-w-none", dark ? "prose-invert" : "")}>
+                <p className={cn("whitespace-pre-wrap", dark ? "text-neutral-300" : "text-neutral-800")}>{listing.description}</p>
               </div>
-            ) : (
-              /* Description Interface */
-              <div className="flex-1 overflow-y-auto overscroll-contain scroll-bounce p-3 pr-10 mr-2 md:mr-3">
-                <div className={cn("prose prose-sm max-w-none", dark ? "prose-invert" : "")}>
-                  <p className={cn("whitespace-pre-wrap", dark ? "text-neutral-300" : "text-neutral-800")}>{listing.description}</p>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
@@ -379,43 +215,4 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
   );
 }
 
-function EscrowFlow({ listing, onClose, dark }: { listing: Listing; onClose: () => void; dark: boolean }) {
-  const [step, setStep] = useState(1);
-  const feeBps = 100; // 1%
-  const fee = Math.ceil((listing.priceSats * feeBps) / 10000);
-  const total = listing.priceSats + fee;
-  const [invoice, setInvoice] = useState(() => `lnbchold${total}n1p${Math.random().toString(36).slice(2, 10)}...`);
 
-  return (
-    <div className="grid grid-cols-1 gap-4 p-4">
-      <div className={cn("rounded-xl p-3 text-sm", dark ? "border border-neutral-800 bg-neutral-900" : "border border-neutral-300 bg-white")}>
-        <div>
-          Send <span className="font-bold text-orange-500">{formatSats(total)} sats</span> to lock funds:
-        </div>
-        <div className={cn("mt-3 rounded-lg p-3 text-xs", dark ? "bg-neutral-800" : "bg-neutral-100")}>{invoice}</div>
-        <div className={cn("mt-2 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>Includes escrow fee {formatSats(fee)} sats (1%).</div>
-        <div className="mt-3 flex gap-2">
-          <button onClick={() => setStep(2)} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-neutral-950 shadow shadow-orange-500/30">
-            I&apos;ve deposited
-          </button>
-          <button
-            onClick={() => setInvoice(`lnbchold${total}n1p${Math.random().toString(36).slice(2, 10)}...`)}
-            className={cn("rounded-xl px-4 py-2 text-sm", dark ? "border border-neutral-800 hover:bg-neutral-900" : "border border-neutral-300 hover:bg-neutral-100")}
-          >
-            Regenerate
-          </button>
-          <button onClick={onClose} className={cn("ml-auto rounded-xl px-4 py-2 text-sm", dark ? "border border-neutral-800 hover:bg-neutral-900" : "border border-neutral-300 hover:bg-neutral-100")}>
-            Close
-          </button>
-        </div>
-      </div>
-      <div className={cn("rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-400" : "bg-neutral-100 text-neutral-600")}>
-        Step {step}/3 — Meet in a very public place; if all good, both confirm release. Otherwise request refund; mediator can arbitrate.
-      </div>
-    </div>
-  );
-}
-
-function formatSats(n: number) {
-  return new Intl.NumberFormat(undefined).format(n);
-}
