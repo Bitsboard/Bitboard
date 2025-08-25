@@ -42,33 +42,16 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
       console.warn('Failed to load notifications from localStorage:', error);
     }
 
-    // Fallback to mock notifications if none saved
+    // Fallback to welcome notification for fresh accounts
     const mockNotifications: Notification[] = [
       {
-        id: '1',
-        type: 'message',
-        title: 'New message from John',
-        message: 'Hi! I\'m interested in your Bitcoin listing...',
-        timestamp: Date.now() - 1000 * 60 * 30, // 30 minutes ago
-        read: false,
-        actionUrl: '/chat'
-      },
-      {
-        id: '2',
-        type: 'update',
-        title: 'Escrow completed',
-        message: 'Your transaction with Sarah has been completed successfully.',
-        timestamp: Date.now() - 1000 * 60 * 60 * 2, // 2 hours ago
-        read: false,
-        actionUrl: '/profile'
-      },
-      {
-        id: '3',
+        id: 'welcome',
         type: 'system',
         title: 'Welcome to bitsbarter!',
-        message: 'Your account has been verified. Start trading with Bitcoin today!',
+        message: 'Welcome to the Bitcoin trading platform. Check out our safety guidelines to get started.',
         timestamp: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
-        read: true
+        read: false,
+        actionUrl: '/safety'
       }
     ];
     

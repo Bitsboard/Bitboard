@@ -41,74 +41,13 @@ export default function NotificationsPage() {
     // Fallback to mock notifications if none saved
     const mockNotifications: Notification[] = [
       {
-        id: '1',
-        type: 'message',
-        title: 'New message from John',
-        message: 'Hi! I\'m interested in your Bitcoin listing. Is it still available? I can meet tomorrow if that works for you.',
-        timestamp: Date.now() - 1000 * 60 * 30, // 30 minutes ago
-        read: false,
-        actionUrl: '/chat'
-      },
-      {
-        id: '2',
-        type: 'update',
-        title: 'Escrow completed',
-        message: 'Your transaction with Sarah has been completed successfully. The Bitcoin has been released to your wallet.',
-        timestamp: Date.now() - 1000 * 60 * 60 * 2, // 2 hours ago
-        read: false,
-        actionUrl: '/profile'
-      },
-      {
-        id: '3',
+        id: 'welcome',
         type: 'system',
         title: 'Welcome to bitsbarter!',
-        message: 'Your account has been verified. Start trading with Bitcoin today! We\'re excited to have you on board.',
+        message: 'Welcome to the Bitcoin trading platform. Check out our safety guidelines to get started.',
         timestamp: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
-        read: true
-      },
-      {
-        id: '4',
-        type: 'message',
-        title: 'Message from Alice',
-        message: 'Thanks for the quick response! I\'ll see you at the coffee shop at 2 PM.',
-        timestamp: Date.now() - 1000 * 60 * 60 * 6, // 6 hours ago
-        read: true,
-        actionUrl: '/chat'
-      },
-      {
-        id: '5',
-        type: 'update',
-        title: 'Listing expired',
-        message: 'Your listing "Bitcoin Mining Rig" has expired. You can renew it or create a new one.',
-        timestamp: Date.now() - 1000 * 60 * 60 * 24 * 2, // 2 days ago
-        read: true,
-        actionUrl: '/profile'
-      },
-      {
-        id: '6',
-        type: 'system',
-        title: 'Security update',
-        message: 'We\'ve enhanced our platform security. Your account is now protected with additional verification measures.',
-        timestamp: Date.now() - 1000 * 60 * 60 * 24 * 3, // 3 days ago
-        read: true
-      },
-      {
-        id: '7',
-        type: 'message',
-        title: 'Bob wants to trade',
-        message: 'I have a MacBook Pro that I\'d like to trade for Bitcoin. Are you interested?',
-        timestamp: Date.now() - 1000 * 60 * 60 * 24 * 4, // 4 days ago
-        read: true,
-        actionUrl: '/chat'
-      },
-      {
-        id: '8',
-        type: 'update',
-        title: 'Payment received',
-        message: 'You\'ve received 0.001 BTC from your recent sale. The funds are now in your wallet.',
-        timestamp: Date.now() - 1000 * 60 * 60 * 24 * 5, // 5 days ago
-        read: true,
-        actionUrl: '/profile'
+        read: false,
+        actionUrl: '/safety'
       }
     ];
     

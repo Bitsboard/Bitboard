@@ -466,7 +466,7 @@ export default function PublicProfilePage() {
               {/* User Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-4xl lg:text-5xl font-bold text-white truncate" style={{ fontFamily: 'Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>
+                  <h1 className="text-4xl lg:text-5xl font-bold text-white" style={{ fontFamily: 'Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>
                     {username}
                   </h1>
                   {userVerified && (
