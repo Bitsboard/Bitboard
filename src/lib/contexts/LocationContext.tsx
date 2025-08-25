@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { locationService, LOCATION_CONFIG } from '@/lib/locationService';
 import type { Place } from '@/lib/types';
+import { useIpLocation } from '@/lib/hooks/useIpLocation';
 
 interface LocationContextType {
   center: Place;
@@ -14,6 +15,7 @@ interface LocationContextType {
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
 
 export function LocationProvider({ children }: { children: React.ReactNode }) {
+  const { location: ipLocation } = useIpLocation();
   const [center, setCenter] = useState<Place>(LOCATION_CONFIG.DEFAULT_CENTER);
   const [radiusKm, setRadiusKm] = useState<number>(LOCATION_CONFIG.DEFAULT_RADIUS_KM);
 
@@ -39,14 +41,23 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           if (locationService.isLocationStale()) {
             console.log('LocationContext: Location data is stale, clearing');
             locationService.clearUserLocation();
-            setCenter(LOCATION_CONFIG.DEFAULT_CENTER);
+            // Use IP-based location if available, otherwise fallback to Toronto
+            if (ipLocation?.lat && ipLocation?.lng) {
+              setCenter(ipLocation);
+            } else {
+              setCenter(LOCATION_CONFIG.DEFAULT_CENTER);
+            }
             setRadiusKm(LOCATION_CONFIG.DEFAULT_RADIUS_KM);
           }
           
         } catch (error) {
           console.warn('LocationContext: Failed to load user location:', error);
-          // Fall back to defaults
-          setCenter(LOCATION_CONFIG.DEFAULT_CENTER);
+          // Fall back to IP-based location if available, otherwise use Toronto
+          if (ipLocation?.lat && ipLocation?.lng) {
+            setCenter(ipLocation);
+          } else {
+            setCenter(LOCATION_CONFIG.DEFAULT_CENTER);
+          }
           setRadiusKm(LOCATION_CONFIG.DEFAULT_RADIUS_KM);
         }
       };
@@ -54,6 +65,14 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       loadSavedLocation();
     }
   }, []);
+
+  // Update center when IP location becomes available (if no saved location exists)
+  useEffect(() => {
+    if (!locationService.getUserLocation() && ipLocation?.lat && ipLocation?.lng) {
+      console.log('LocationContext: Using IP-based location as default:', ipLocation);
+      setCenter(ipLocation);
+    }
+  }, [ipLocation]);
 
   // Update location and save to localStorage
   const updateLocation = (place: Place, radius: number) => {
@@ -72,7 +91,12 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   const clearLocation = () => {
     console.log('LocationContext: Clearing location');
     locationService.clearUserLocation();
-    setCenter(LOCATION_CONFIG.DEFAULT_CENTER);
+    // Use IP-based location if available, otherwise fallback to Toronto
+    if (ipLocation?.lat && ipLocation?.lng) {
+      setCenter(ipLocation);
+    } else {
+      setCenter(LOCATION_CONFIG.DEFAULT_CENTER);
+    }
     setRadiusKm(LOCATION_CONFIG.DEFAULT_RADIUS_KM);
   };
 

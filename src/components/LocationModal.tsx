@@ -6,6 +6,7 @@ import { Modal, ModalHeader, ModalBody, ModalFooter, ModalCloseButton } from "./
 import type { Place } from "@/lib/types";
 import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
+import { useIpLocation } from "@/lib/hooks/useIpLocation";
 
 type LocationModalProps = {
     open: boolean;
@@ -50,6 +51,8 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         }
     }, [lang, t]);
     const [radiusKm, setRadiusKm] = React.useState<number>(initialRadiusKm);
+    const { location: ipLocation } = useIpLocation();
+    
     const [center, setCenter] = React.useState<Place>(() => {
         if (initialCenter?.lat && initialCenter?.lng) {
             return {
@@ -58,7 +61,15 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
                 lng: initialCenter.lng,
             };
         }
-        // Only use defaults if no initialCenter is provided
+        // Use IP-based location if available, otherwise fallback to Toronto
+        if (ipLocation?.lat && ipLocation?.lng) {
+            return {
+                name: ipLocation.name || "",
+                lat: ipLocation.lat,
+                lng: ipLocation.lng,
+            };
+        }
+        // Fallback to Toronto coordinates
         return {
             name: "",
             lat: 43.6532,
@@ -92,6 +103,18 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             safeSetQuery(initialCenter.name);
         }
     }, [initialCenter, initialRadiusKm, open, lang]);
+
+    // Update center when IP location becomes available (if no initialCenter was provided)
+    React.useEffect(() => {
+        if (!initialCenter?.lat && !initialCenter?.lng && ipLocation?.lat && ipLocation?.lng) {
+            // Only update if we don't have an initialCenter and IP location is available
+            safeSetCenter({
+                name: ipLocation.name || "",
+                lat: ipLocation.lat,
+                lng: ipLocation.lng,
+            });
+        }
+    }, [ipLocation, initialCenter]);
 
     // Handle radius changes to worldwide mode
     React.useEffect(() => {
