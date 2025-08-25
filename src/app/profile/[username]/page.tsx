@@ -707,8 +707,8 @@ export default function PublicProfilePage() {
         )}
       </div>
 
-      {/* Listing Modal OR Chat Modal - only one shown at a time */}
-      {modals.active && !modals.chatFor && (
+      {/* Listing Modal - now handles chat transformation internally */}
+      {modals.active && (
         <ListingModal
           listing={modals.active}
           open={!!modals.active}
@@ -716,20 +716,13 @@ export default function PublicProfilePage() {
           unit={unit}
           dark={dark}
           btcCad={effectiveBtcCad}
-          onChat={() => {
-            if (!user) {
-              setModal('showAuth', true);
-            } else {
-              // Clear the active listing and open chat modal for complete replacement
-              setModal('active', null);
-              setModal('chatFor', modals.active);
-            }
-          }}
+          user={user}
+          onShowAuth={() => setModal('showAuth', true)}
         />
       )}
 
-      {/* Chat Modal */}
-      {modals.chatFor && (
+      {/* Chat Modal - no longer needed since it's handled by ListingModal */}
+      {/* {modals.chatFor && (
         <ChatModal
           listing={modals.chatFor}
           onClose={() => {
@@ -741,7 +734,7 @@ export default function PublicProfilePage() {
           btcCad={effectiveBtcCad}
           unit={unit}
         />
-      )}
+      )} */}
 
       {/* Username Change Modal */}
       {modals.showUsernameChange && (

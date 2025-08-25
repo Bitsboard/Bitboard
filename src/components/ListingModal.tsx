@@ -9,6 +9,7 @@ import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
 import { generateProfilePicture, getInitials, formatPostAge } from "@/lib/utils";
 import type { Listing, Category, Unit, Seller } from "@/lib/types";
+import { ChatModal } from "./ChatModal";
 
 interface ListingModalProps {
   listing: Listing;
@@ -18,6 +19,8 @@ interface ListingModalProps {
   dark: boolean;
   onChat?: () => void;
   open: boolean;
+  user?: any;
+  onShowAuth?: () => void;
 }
 
 function cn(...xs: Array<string | false | null | undefined>) {
@@ -37,11 +40,12 @@ function accent(listing: Listing) {
   return { stripe: "from-fuchsia-500 to-violet-500", chip: "from-fuchsia-500 to-violet-500" };
 }
 
-export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, open }: ListingModalProps) {
+export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, open, user, onShowAuth }: ListingModalProps) {
   const boosted = listing.boostedUntil && listing.boostedUntil > Date.now();
   const lang = useLang();
   const a = accent(listing);
   const [sellerImageError, setSellerImageError] = React.useState(false);
+  const [showChat, setShowChat] = React.useState(false);
   
   // Debug: Log btcCad value
   React.useEffect(() => {
@@ -55,9 +59,27 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
   }
 
   function handleChatClick() {
-    if (onChat) {
-      onChat();
+    if (!user) {
+      if (onShowAuth) {
+        onShowAuth();
+      }
+    } else {
+      setShowChat(true);
     }
+  }
+
+  // If showing chat, render ChatModal instead
+  if (showChat) {
+    return (
+      <ChatModal
+        listing={listing}
+        onClose={() => setShowChat(false)}
+        dark={dark}
+        btcCad={btcCad}
+        unit={unit}
+        onBackToListing={() => setShowChat(false)}
+      />
+    );
   }
 
   return (
@@ -86,7 +108,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
           >
             {t('share_listing', lang)}
           </button>
-          <ModalCloseButton onClose={onClose} dark={dark} label={t('close', lang)} />
+          <ModalCloseButton onClose={onClose} dark={dark} />
         </div>
       </ModalHeader>
       <div className="relative">

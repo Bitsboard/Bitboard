@@ -13,13 +13,14 @@ interface ChatModalProps {
   dark: boolean;
   btcCad: number | null;
   unit: Unit;
+  onBackToListing?: () => void;
 }
 
 function cn(...xs: Array<string | false | null | undefined>) {
   return xs.filter(Boolean).join(" ");
 }
 
-export function ChatModal({ listing, onClose, dark, btcCad, unit }: ChatModalProps) {
+export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListing }: ChatModalProps) {
   const [messages, setMessages] = useState<{ id: number; who: "me" | "seller"; text: string; at: number }[]>([
     { id: 1, who: "seller", text: "Hey! Happy to answer any questions.", at: Date.now() - 1000 * 60 * 12 },
   ]);
@@ -53,7 +54,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit }: ChatModalPro
         <div className="flex items-center gap-4">
           {/* Back button */}
           <button 
-            onClick={onClose}
+            onClick={onBackToListing || onClose}
             className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 font-medium bg-gradient-to-r from-orange-500 to-red-500 text-white shadow hover:from-orange-600 hover:to-red-600"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
