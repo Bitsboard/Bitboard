@@ -62,32 +62,10 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
             </svg>
             Back
           </button>
-          
-          {/* Listing image */}
-          <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
-            <img 
-              src={listing.images[0]} 
-              alt={listing.title}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          
-          {/* Listing details */}
-          <div className="flex flex-col">
-            <h3 className={cn("font-semibold text-sm", dark ? "text-white" : "text-neutral-900")}>
-              {listing.title}
-            </h3>
-            <div className="flex items-center gap-2">
-              <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="sm" />
-              <span className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>
-                📍 {listing.location}
-              </span>
-            </div>
-          </div>
         </div>
         
         {/* Right side: Seller username pill and verified badge */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mr-12">
           <Link
             href={`/profile/${listing.seller.name}`}
             className={cn(
@@ -125,7 +103,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
           {(listing.seller.verifications?.email || listing.seller.verifications?.phone || listing.seller.verifications?.lnurl) && (
             <span
               className={cn(
-                "verified-badge inline-flex h-6 w-6 items-center justify-center rounded-full text-white font-bold shadow-md"
+                "verified-badge inline-flex h-5 w-5 items-center justify-center rounded-full text-white font-bold shadow-md"
               )}
               style={{
                 background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
@@ -133,7 +111,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
               aria-label="Verified"
               title="User has verified their identity"
             >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </span>
@@ -158,8 +136,35 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
 
       {/* Chat content */}
       <div className="flex-1 flex flex-col min-h-0">
+        {/* Listing details box at the top of chat area */}
+        <div className={cn("m-4 p-4 rounded-xl border", dark ? "bg-neutral-900 border-neutral-700" : "bg-neutral-100 border-neutral-200")}>
+          <div className="flex items-center gap-3">
+            {/* Listing image */}
+            <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+              <img 
+                src={listing.images[0]} 
+                alt={listing.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            
+            {/* Listing details */}
+            <div className="flex flex-col flex-1">
+              <h3 className={cn("font-semibold text-sm", dark ? "text-white" : "text-neutral-900")}>
+                {listing.title}
+              </h3>
+              <div className="flex items-center gap-2 mt-1">
+                <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="sm" />
+                <span className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>
+                  📍 {listing.location}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {showTips && (
-          <div className={cn("m-4 rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>
+          <div className={cn("mx-4 rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>
             <div className="flex items-start justify-between gap-3">
               <div>
                 <strong className="mr-2">Safety tips:</strong>
