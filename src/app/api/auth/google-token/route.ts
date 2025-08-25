@@ -75,9 +75,7 @@ export async function POST(req: Request) {
     const headers = new Headers();
     headers.append('Set-Cookie', createCookie('session', jwt, { 
       httpOnly: true, 
-      maxAgeSec: 60 * 60 * 24 * 7,
-      sameSite: 'lax',
-      secure: true
+      maxAgeSec: 60 * 60 * 24 * 7
     }));
 
     return new Response(JSON.stringify({
