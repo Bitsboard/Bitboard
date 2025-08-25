@@ -82,6 +82,11 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
             </svg>
             Back
           </button>
+          
+          {/* Listing title */}
+          <h2 className={cn("text-lg font-semibold truncate max-w-md", dark ? "text-white" : "text-neutral-900")}>
+            {listing.title}
+          </h2>
         </div>
         
         {/* Right side: Seller username pill and verified badge */}
