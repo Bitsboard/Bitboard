@@ -83,44 +83,80 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit }: ChatModalPro
           </div>
         </div>
         
-        {/* Seller username pill */}
-        <Link
-          href={`/profile/${listing.seller.name}`}
-          className={cn(
-            "inline-flex items-center px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative",
-            "bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50",
-            "border border-neutral-300/60 dark:border-neutral-700/50",
-            "hover:scale-105 hover:shadow-md"
-          )}
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose(); // Close the modal when clicking username
-          }}
-        >
-          {/* Profile Icon - Positioned so its center aligns with the left edge radius */}
-          <div className="flex-shrink-0 -ml-2">
-            <img
-              src={`https://api.dicebear.com/7.x/initials/svg?seed=${listing.seller.name}`}
-              alt={`${listing.seller.name}'s profile picture`}
-              className="w-5 h-5 rounded-full object-cover"
-              onError={(e) => {
-                // Fallback to initials if image fails
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-                const parent = target.parentElement;
-                if (parent) {
-                  const fallback = document.createElement('div');
-                  fallback.className = 'w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white';
-                  fallback.textContent = listing.seller.name.split(' ').map(n => n[0]).join('').toUpperCase();
-                  parent.appendChild(fallback);
-                }
-              }}
-            />
-          </div>
+        {/* Right side: Close button and Seller username pill */}
+        <div className="flex items-center gap-3">
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className={cn(
+              "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
+              dark 
+                ? "hover:bg-neutral-800 text-neutral-400 hover:text-white" 
+                : "hover:bg-neutral-100 text-neutral-600 hover:text-neutral-800"
+            )}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
           
-          {/* Username - Right side of pill with proper spacing */}
-          <span className={cn("text-sm ml-1", dark ? "text-white" : "text-neutral-700")}>{listing.seller.name}</span>
-        </Link>
+          {/* Seller username pill */}
+          <Link
+            href={`/profile/${listing.seller.name}`}
+            className={cn(
+              "inline-flex items-center px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative",
+              "bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50",
+              "border border-neutral-300/60 dark:border-neutral-700/50",
+              "hover:scale-105 hover:shadow-md"
+            )}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose(); // Close the modal when clicking username
+            }}
+          >
+            {/* Profile Icon - Positioned so its center aligns with the left edge radius */}
+            <div className="flex-shrink-0 -ml-2">
+              <img
+                src={`https://api.dicebear.com/7.x/initials/svg?seed=${listing.seller.name}`}
+                alt={`${listing.seller.name}'s profile picture`}
+                className="w-5 h-5 rounded-full object-cover"
+                onError={(e) => {
+                  // Fallback to initials if image fails
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    const fallback = document.createElement('div');
+                    fallback.className = 'w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white';
+                    fallback.textContent = listing.seller.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                    parent.appendChild(fallback);
+                  }
+                }}
+              />
+            </div>
+            
+            {/* Username - Right side of pill with proper spacing */}
+            <span className={cn("text-sm ml-1", dark ? "text-white" : "text-neutral-700")}>{listing.seller.name}</span>
+            
+            {/* Verified badge */}
+            {(listing.seller.verifications?.email || listing.seller.verifications?.phone || listing.seller.verifications?.lnurl) && (
+              <span
+                className={cn(
+                  "verified-badge inline-flex h-6 w-6 items-center justify-center rounded-full text-white font-bold shadow-md ml-2"
+                )}
+                style={{
+                  background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
+                }}
+                aria-label="Verified"
+                title="User has verified their identity"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
+            )}
+          </Link>
+        </div>
       </div>
 
       {/* Chat content */}

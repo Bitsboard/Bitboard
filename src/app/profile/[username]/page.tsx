@@ -720,6 +720,8 @@ export default function PublicProfilePage() {
             if (!user) {
               setModal('showAuth', true);
             } else {
+              // Clear the active listing and open chat modal for complete replacement
+              setModal('active', null);
               setModal('chatFor', active);
             }
           }}
@@ -730,7 +732,10 @@ export default function PublicProfilePage() {
       {modals.chatFor && (
         <ChatModal
           listing={modals.chatFor}
-          onClose={() => setModal('chatFor', null)}
+          onClose={() => {
+            setModal('chatFor', null);
+            // Don't restore the listing modal - user stays on base page
+          }}
           dark={dark}
           btcCad={effectiveBtcCad}
           unit={unit}
