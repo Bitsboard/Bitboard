@@ -33,14 +33,16 @@ export function useIpLocation() {
         // First, get the user's IP address
         const ipResponse = await fetch('https://api.ipify.org?format=json');
         if (ipResponse.ok) {
-          const { ip } = await ipResponse.json();
+          const ipData = await ipResponse.json() as { ip: string };
+          const { ip } = ipData;
           
           // Then get location data for that IP
           for (const service of services.slice(0, 2)) { // Skip ipify since we already have the IP
             try {
               const response = await fetch(service + (service.includes('ip=') ? ip : ''));
               if (response.ok) {
-                ipLocation = await response.json();
+                const locationData = await response.json() as IpLocationResponse;
+                ipLocation = locationData;
                 if (ipLocation.city && ipLocation.latitude && ipLocation.longitude) {
                   break; // We got valid data, stop trying other services
                 }
