@@ -625,13 +625,7 @@ export default function SearchClient() {
                 </div>
 
                 {active && (
-                    <ListingModal listing={active} open={!!active} onClose={() => setModal('active', null)} unit={unit} btcCad={btcCad} dark={dark} onChat={() => {
-                        if (!user) {
-                            setModal('showAuth', true);
-                        } else {
-                            setModal('chatFor', active);
-                        }
-                    }} />
+                    <ListingModal listing={active} open={!!active} onClose={() => setModal('active', null)} unit={unit} btcCad={btcCad} dark={dark} user={user} onShowAuth={() => setModal('showAuth', true)} />
                 )}
                 {showLocationModal && (
                     <LocationModal

@@ -23,7 +23,7 @@ import { mockListings } from '@/lib/mockData';
 
 export default function HomePage() {
   // Use centralized settings
-  const { unit, layout } = useSettings();
+  const { unit, layout, user } = useSettings();
   const { theme, isDark } = useTheme();
   const dark = isDark;
 
@@ -151,14 +151,14 @@ export default function HomePage() {
             unit={unit}
             btcCad={btcCad}
             dark={dark}
-            onChat={() => {
-              setModal('chatFor', active);
-            }}
+            user={user}
+            onShowAuth={() => setModal('showAuth', true)}
           />
         )}
-        {chatFor && (
+        {/* Remove old chat modal since ListingModal now handles transformation */}
+        {/* {chatFor && (
           <ChatModal listing={chatFor} onClose={() => setModal('chatFor', null)} dark={dark} btcCad={btcCad} unit={unit} />
-        )}
+        )} */}
         {showNew && (
           <NewListingModal
             dark={dark}
