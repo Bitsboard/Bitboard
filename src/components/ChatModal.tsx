@@ -80,66 +80,12 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
             Back
           </button>
           
-          {/* Listing title */}
-          <h2 className={cn("text-lg font-semibold truncate max-w-md", dark ? "text-white" : "text-neutral-900")}>
+          {/* Listing title - now with truncation */}
+          <h2 className={cn("text-lg font-semibold truncate max-w-xs", dark ? "text-white" : "text-neutral-900")}>
             {listing.title}
           </h2>
         </div>
         
-        {/* Right side: Seller username pill and verified badge */}
-        <div className="flex items-center gap-2 mr-12">
-          <Link
-            href={`/profile/${listing.seller.name}`}
-            className={cn(
-              "inline-flex items-center px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative",
-              "bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50",
-              "border border-neutral-300/60 dark:border-neutral-700/50",
-              "hover:scale-105 hover:shadow-md"
-            )}
-            onClick={(e) => {
-              e.stopPropagation();
-              onClose(); // Close the modal when clicking username
-            }}
-          >
-            {/* Profile Icon - Positioned so its center aligns with the left edge radius */}
-            <div className="flex-shrink-0 -ml-2">
-              {!sellerImageError ? (
-                <img
-                  src={generateProfilePicture(listing.seller.name)}
-                  alt={`${listing.seller.name}'s profile picture`}
-                  className="w-5 h-5 rounded-full object-cover"
-                  onError={() => setSellerImageError(true)}
-                />
-              ) : (
-                <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
-                  {getInitials(listing.seller.name)}
-                </div>
-              )}
-            </div>
-            
-            {/* Username - Right side of pill with proper spacing */}
-            <span className={cn("text-sm ml-1", dark ? "text-white" : "text-neutral-700")}>{listing.seller.name}</span>
-          </Link>
-          
-          {/* Verified badge - outside the Link component */}
-          {(listing.seller.verifications?.email || listing.seller.verifications?.phone || listing.seller.verifications?.lnurl) && (
-            <span
-              className={cn(
-                "verified-badge inline-flex h-5 w-5 items-center justify-center rounded-full text-white font-bold shadow-md"
-              )}
-              style={{
-                background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
-              }}
-              aria-label="Verified"
-              title="User has verified their identity"
-            >
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </span>
-          )}
-        </div>
-
         {/* Close button - positioned absolutely at the very top right */}
         <button
           onClick={onClose}
@@ -178,8 +124,8 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
             }}
           >
             <div className="flex items-center gap-4">
-              {/* Listing image */}
-              <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+              {/* Listing image - now larger */}
+              <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                 <img 
                   src={listing.images[0]} 
                   alt={listing.title}
@@ -199,6 +145,58 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                   )}>
                     {listing.type === 'sell' ? 'Selling' : 'Looking for'}
                   </span>
+                  
+                  {/* Username pill - moved from header */}
+                  <Link
+                    href={`/profile/${listing.seller.name}`}
+                    className={cn(
+                      "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer relative",
+                      "bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50",
+                      "border border-neutral-300/60 dark:border-neutral-700/50",
+                      "hover:scale-105 hover:shadow-md"
+                    )}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onClose(); // Close the modal when clicking username
+                    }}
+                  >
+                    {/* Profile Icon */}
+                    <div className="flex-shrink-0 -ml-1 mr-1">
+                      {!sellerImageError ? (
+                        <img
+                          src={generateProfilePicture(listing.seller.name)}
+                          alt={`${listing.seller.name}'s profile picture`}
+                          className="w-3 h-3 rounded-full object-cover"
+                          onError={() => setSellerImageError(true)}
+                        />
+                      ) : (
+                        <div className="w-3 h-3 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
+                          {getInitials(listing.seller.name)}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Username */}
+                    <span className={cn("text-xs", dark ? "text-white" : "text-neutral-700")}>{listing.seller.name}</span>
+                    
+                    {/* Verified badge */}
+                    {(listing.seller.verifications?.email || listing.seller.verifications?.phone || listing.seller.verifications?.lnurl) && (
+                      <span
+                        className={cn(
+                          "ml-1 inline-flex h-3 w-3 items-center justify-center rounded-full text-white font-bold shadow-md"
+                        )}
+                        style={{
+                          background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
+                        }}
+                        aria-label="Verified"
+                        title="User has verified their identity"
+                      >
+                        <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </span>
+                    )}
+                  </Link>
                 </div>
                 
                 <h3 className={cn("font-semibold text-sm mb-2", dark ? "text-white" : "text-neutral-900")}>
@@ -208,14 +206,11 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                 <div className="flex items-center gap-3">
                   <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="sm" />
                   
-                  {/* Dollar equivalent */}
-                  {btcCad && (
-                    <span className={cn("text-xs font-medium", dark ? "text-neutral-400" : "text-neutral-600")}>
-                      ≈ ${((listing.priceSats / 100000000) * btcCad).toFixed(2)}
-                    </span>
-                  )}
-                  
-                  <span className={cn("text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>
+                  {/* Location pill */}
+                  <span className={cn(
+                    "px-2 py-1 rounded-full text-xs font-medium bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
+                    "flex items-center gap-1"
+                  )}>
                     📍 {listing.location}
                   </span>
                 </div>
