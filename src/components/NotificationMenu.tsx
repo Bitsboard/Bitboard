@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useTheme } from "@/lib/contexts/ThemeContext";
 import { useLang } from "@/lib/i18n-client";
 import { t } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 interface Notification {
   id: string;
@@ -159,12 +160,23 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
         className="relative px-2 h-10 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors duration-200 flex items-center justify-center"
         aria-label="Notifications"
       >
-                        <svg className="w-6 h-6 text-neutral-600 dark:text-neutral-400" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
-                </svg>
+        <svg 
+          className={cn(
+            "w-6 h-6 transition-all duration-300",
+            unreadCount > 0 
+              ? "text-transparent bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-400 bg-clip-text animate-pulse" 
+              : "text-neutral-600 dark:text-neutral-400"
+          )} 
+          fill="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+        </svg>
+        
+        {/* Small red circle indicator when there are notifications */}
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-            {unreadCount > 9 ? '9+' : unreadCount}
+          <span className="absolute -top-1 -right-1 bg-red-500 rounded-full h-3 w-3 flex items-center justify-center animate-pulse">
+            {/* No number, just the red circle */}
           </span>
         )}
       </button>
