@@ -25,7 +25,6 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
     { id: 1, who: "seller", text: "Hey! Happy to answer any questions.", at: Date.now() - 1000 * 60 * 12 },
   ]);
   const [text, setText] = useState("");
-  const [attachEscrow, setAttachEscrow] = useState(false);
   const [showEscrow, setShowEscrow] = useState(false);
   const [showTips, setShowTips] = useState(true);
   const [showOptions, setShowOptions] = useState(false);
@@ -52,11 +51,9 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
   }, []);
 
   function send() {
-    if (!text && !attachEscrow) return;
-    if (text) setMessages((prev) => [...prev, { id: Math.random(), who: "me", text, at: Date.now() }]);
-    if (attachEscrow) setShowEscrow(true);
+    if (!text) return;
+    setMessages((prev) => [...prev, { id: Math.random(), who: "me", text, at: Date.now() }]);
     setText("");
-    setAttachEscrow(false);
   }
 
   return (
@@ -64,7 +61,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       open={true}
       onClose={onClose}
       dark={dark}
-      size="lg"
+      size="md"
       ariaLabel={`Chat about ${listing.title}`}
       panelClassName={cn("flex w-full flex-col h-[95vh]")}
       maxHeightVh={95}
@@ -166,7 +163,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
           ref={chatContainerRef}
           className="flex-1 overflow-y-auto min-h-0"
         >
-          {/* Listing details box - now part of the scrollable chat area */}
+          {/* Listing details box - now mimics list-view card */}
           <div 
             className={cn(
               "m-4 p-4 rounded-xl border cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02]",
@@ -181,8 +178,8 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
             }}
           >
             <div className="flex items-center gap-4">
-              {/* Listing image - now much larger */}
-              <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+              {/* Listing image */}
+              <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
                 <img 
                   src={listing.images[0]} 
                   alt={listing.title}
@@ -227,13 +224,13 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
           </div>
 
           {showTips && (
-            <div className={cn("mx-4 rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>
+            <div className="mx-4 rounded-xl p-3 text-xs bg-red-600 text-white">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <strong className="mr-2">Safety tips:</strong>
                   Meet in a <em>very public</em> place (mall, café, police e-commerce zone), bring a friend, keep chats in-app, verify serials and condition before paying, and prefer Lightning escrow over cash.
                 </div>
-                <button onClick={() => setShowTips(false)} className={cn("rounded px-2 py-1", dark ? "hover:bg-neutral-800" : "hover:bg-neutral-200")}>
+                <button onClick={() => setShowTips(false)} className="rounded px-2 py-1 hover:bg-red-700">
                   Hide
                 </button>
               </div>
@@ -342,9 +339,6 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
             className={cn("flex-1 rounded-xl px-3 py-2 focus:outline-none", dark ? "border border-neutral-800 bg-neutral-900 text-neutral-100" : "border border-neutral-300 bg-white text-neutral-900")}
             onKeyPress={(e) => e.key === 'Enter' && send()}
           />
-          <label className={cn("flex items-center gap-2 rounded-xl px-3 py-2 text-xs", dark ? "border border-neutral-800" : "border border-neutral-300")}>
-            <input type="checkbox" checked={attachEscrow} onChange={(e) => setAttachEscrow(e.target.checked)} /> Attach escrow
-          </label>
           <button onClick={send} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white">
             Send
           </button>
