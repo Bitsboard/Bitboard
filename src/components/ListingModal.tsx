@@ -107,7 +107,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
       <div className="relative">
         <div className="grid grid-cols-1 md:grid-cols-5" style={{ maxHeight: "calc(90vh - 64px)" }}>
           {/* Left: media + seller + safety/report (static) */}
-          <div className="md:col-span-3 overflow-hidden">
+          <div className={cn(showChat ? "md:col-span-2" : "md:col-span-3", "overflow-hidden")}>
             <div className="relative">
               <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[5/4]" showThumbnails showDots={false} rounded="" />
               <div className={cn("pointer-events-none absolute left-0 right-0 top-0 h-1 bg-gradient-to-r", a.stripe)} />
@@ -195,7 +195,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
           </div>
 
           {/* Right: static top area + scrollable description or chat */}
-          <div className={cn("md:col-span-2 border-l flex flex-col", dark ? "border-neutral-900" : "border-neutral-200")} style={{ maxHeight: "calc(90vh - 64px)" }}>
+          <div className={cn("border-l flex flex-col", dark ? "border-neutral-900" : "border-neutral-200", showChat ? "md:col-span-3" : "md:col-span-2")} style={{ maxHeight: "calc(90vh - 64px)" }}>
             <div className="p-3 pr-6 shrink-0">
               {/* Top row: price left, location right */}
               <div className="flex items-center justify-between gap-2">
@@ -242,7 +242,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                       key={m.id}
                       className={cn(
                         "max-w-[70%] rounded-2xl px-3 py-2 text-sm",
-                        m.who === "me" ? "ml-auto bg-orange-500 text-neutral-950" : dark ? "bg-neutral-900" : "bg-neutral-100"
+                        m.who === "me" ? "ml-auto bg-orange-500 text-white" : dark ? "bg-neutral-900" : "bg-neutral-100"
                       )}
                     >
                       {m.text}
