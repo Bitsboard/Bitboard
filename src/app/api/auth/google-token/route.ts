@@ -5,7 +5,8 @@ import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export async function POST(req: Request) {
   try {
-    const { credential } = await req.json();
+    const body = await req.json() as { credential: string };
+    const { credential } = body;
     
     if (!credential) {
       return new Response('Missing credential', { status: 400 });
