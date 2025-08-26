@@ -59,8 +59,13 @@ export function HeroSection({
                     </div>
 
                     {/* Right: Location above search */}
-                    <div className="w-full md:w-[460px] md:self-center">
-                        <div className="mb-2 md:mb-1 flex md:justify-end">
+                    <div className="w-full md:w-[460px] md:self-center relative">
+                        {/* Orange diagonal stripe background */}
+                        <div className="absolute inset-0 -rotate-6 scale-110 opacity-25">
+                            <div className="w-full h-full bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 rounded-3xl transform skew-x-6"></div>
+                        </div>
+                        
+                        <div className="mb-2 md:mb-1 flex md:justify-end relative z-10">
                             <button onClick={onLocationClick} className={cn("w-full md:w-[calc(100%-120px)] rounded-3xl px-6 py-5 text-left focus:outline-none", inputBase)}>
                                 <div className="flex items-center justify-between gap-3">
                                     <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>
@@ -70,7 +75,7 @@ export function HeroSection({
                                 </div>
                             </button>
                         </div>
-                        <div className="relative mt-2">
+                        <div className="relative mt-2 z-10">
                             <input
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
