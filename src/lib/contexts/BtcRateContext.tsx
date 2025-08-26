@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { dataService } from '@/lib/dataService';
+import { DataService } from '@/lib/dataService';
 
 interface BtcRateContextType {
   btcCad: number | null;
@@ -18,7 +18,7 @@ export function BtcRateProvider({ children }: { children: ReactNode }) {
     const loadBtcRate = async () => {
       try {
         setIsLoading(true);
-        const rate = await dataService.getInstance().getBtcRate();
+        const rate = await DataService.getInstance().getBtcRate();
         setBtcCad(rate);
       } catch (error) {
         console.warn('Failed to load BTC rate:', error);
