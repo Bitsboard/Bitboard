@@ -44,8 +44,66 @@ export function HeroSection({
             </div>
 
             {/* Orange angled stripe across the header */}
-            <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -right-20 -top-20 w-96 h-[120%] bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 transform rotate-12 opacity-20"></div>
+            <div className="absolute inset-0">
+                <div className="absolute top-0 right-20 w-[500px] h-full bg-gradient-to-br from-orange-300 via-orange-400 to-orange-500 opacity-50" style={{clipPath: 'polygon(30% 0%, 100% 0%, 70% 100%, 0% 100%)'}}></div>
+            </div>
+
+            {/* Floating product images in orbiting formation */}
+            <div className="absolute inset-0 pointer-events-none">
+                {/* Chair - orbiting item */}
+                <div className="absolute animate-orbit-chair">
+                    <img src="/Chair.png" alt="Chair" className="w-20 h-20 object-contain drop-shadow-lg" />
+                </div>
+                
+                {/* Phone - orbiting item */}
+                <div className="absolute animate-orbit-phone">
+                    <img src="/Phone.png" alt="Phone" className="w-16 h-16 object-contain drop-shadow-lg" />
+                </div>
+                
+                {/* Shoe - orbiting item */}
+                <div className="absolute animate-orbit-shoe">
+                    <img src="/Shoe.png" alt="Shoe" className="w-20 h-20 object-contain drop-shadow-lg" />
+                </div>
+                
+                {/* Watch - orbiting item */}
+                <div className="absolute animate-orbit-watch">
+                    <img src="/Watch.png" alt="Watch" className="w-16 h-16 object-contain drop-shadow-lg" />
+                </div>
+
+                {/* Backpack - orbiting item */}
+                <div className="absolute animate-orbit-backpack">
+                    <img src="/Backpack.png" alt="Backpack" className="w-18 h-18 object-contain drop-shadow-lg" />
+                </div>
+
+                {/* Bike - orbiting item */}
+                <div className="absolute animate-orbit-bike">
+                    <img src="/Bike.png" alt="Bike" className="w-20 h-20 object-contain drop-shadow-lg" />
+                </div>
+
+                {/* Drill - orbiting item */}
+                <div className="absolute animate-orbit-drill">
+                    <img src="/Drill.png" alt="Drill" className="w-16 h-16 object-contain drop-shadow-lg" />
+                </div>
+
+                {/* Guitar - orbiting item */}
+                <div className="absolute animate-orbit-guitar">
+                    <img src="/Guitar.png" alt="Guitar" className="w-20 h-20 object-contain drop-shadow-lg" />
+                </div>
+
+                {/* Lamp - orbiting item */}
+                <div className="absolute animate-orbit-lamp">
+                    <img src="/Lamp.png" alt="Lamp" className="w-18 h-18 object-contain drop-shadow-lg" />
+                </div>
+
+                {/* Plant - orbiting item */}
+                <div className="absolute animate-orbit-plant">
+                    <img src="/Plant.png" alt="Plant" className="w-16 h-16 object-contain drop-shadow-lg" />
+                </div>
+
+                {/* Shirt - orbiting item */}
+                <div className="absolute animate-orbit-shirt">
+                    <img src="/Shirt.png" alt="Shirt" className="w-18 h-18 object-contain drop-shadow-lg" />
+                </div>
             </div>
 
             <div className="relative mx-auto max-w-7xl px-4 py-8 sm:py-10">
