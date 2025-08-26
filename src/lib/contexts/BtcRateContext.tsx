@@ -18,7 +18,7 @@ export function BtcRateProvider({ children }: { children: ReactNode }) {
     const loadBtcRate = async () => {
       try {
         setIsLoading(true);
-        const rate = await dataService.getBtcRate();
+        const rate = await dataService.getInstance().getBtcRate();
         setBtcCad(rate);
       } catch (error) {
         console.warn('Failed to load BTC rate:', error);
@@ -28,7 +28,9 @@ export function BtcRateProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    loadBtcRate();
+    // Add a small delay to prevent blocking the initial render
+    const timer = setTimeout(loadBtcRate, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -41,7 +43,8 @@ export function BtcRateProvider({ children }: { children: ReactNode }) {
 export function useBtcRate() {
   const context = useContext(BtcRateContext);
   if (context === undefined) {
-    throw new Error('useBtcRate must be used within a BtcRateProvider');
+    console.warn('useBtcRate used outside of BtcRateProvider, returning null');
+    return null;
   }
   return context.btcCad;
 }
