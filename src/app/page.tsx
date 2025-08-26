@@ -30,7 +30,7 @@ export default function HomePage() {
 
   
   const ENV = process.env.NEXT_PUBLIC_ENV || process.env.NEXT_PUBLIC_BRANCH || 'development';
-  const isDeployed = ENV === "production" || ENV === "staging" || ENV === "main"; // Include staging and main
+  const isDeployed = true; // Force real API usage - no more mock data
   
 
   
