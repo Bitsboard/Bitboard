@@ -282,7 +282,10 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             }
             const initLat = center.lat;
             const initLng = center.lng;
-            const map = L.map(containerRef.current, { zoomControl: false }).setView([initLat, initLng], zoomForRadiusKm(radiusKm));
+            // For worldwide mode, center the map on (0,0) but keep the pin at the actual location
+            const mapCenterLat = radiusKm === 0 ? 0 : initLat;
+            const mapCenterLng = radiusKm === 0 ? 0 : initLng;
+            const map = L.map(containerRef.current, { zoomControl: false }).setView([mapCenterLat, mapCenterLng], zoomForRadiusKm(radiusKm));
             mapRef.current = map;
             // Disable interactions
             map.dragging.disable();
@@ -410,7 +413,8 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         const tint = mapRef.current.getPane('worldTint') as any;
         if (tint) tint.style.background = 'transparent';
         if (radiusKm === 0) {
-            mapRef.current.setView([center.lat, center.lng], zoomForRadiusKm(0));
+            // For worldwide mode, center the map on (0,0) but keep the pin at the actual location
+            mapRef.current.setView([0, 0], zoomForRadiusKm(0));
             markerRef.current?.setLatLng([center.lat, center.lng]);
             recreateCircle(0, center);
         } else {
