@@ -302,49 +302,56 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
             
             {/* Dropdown options */}
             {showOptions && (
-              <div className={cn(
-                "absolute bottom-full left-0 mb-2 w-48 rounded-xl shadow-lg border z-10",
-                dark ? "bg-neutral-800 border-neutral-700" : "bg-white border-neutral-200"
-              )}>
-                <div className="py-2">
-                  <button
-                    onClick={() => {
-                      setText("I'd like to make an offer on this item. What's your best price?");
-                      setShowOptions(false);
-                    }}
-                    className={cn(
-                      "w-full text-left px-4 py-2 text-sm hover:bg-orange-500 hover:text-white transition-colors duration-200",
-                      dark ? "text-neutral-300 hover:bg-orange-500" : "text-neutral-700 hover:bg-orange-500"
-                    )}
-                  >
-                    💰 Give an offer
-                  </button>
-                  <button
-                    onClick={() => {
-                      setText("Is this item still available?");
-                      setShowOptions(false);
-                    }}
-                    className={cn(
-                      "w-full text-left px-4 py-2 text-sm hover:bg-orange-500 hover:text-white transition-colors duration-200",
-                      dark ? "text-neutral-300 hover:bg-orange-500" : "text-neutral-700 hover:bg-orange-500"
-                    )}
-                  >
-                    ❓ Check availability
-                  </button>
-                  <button
-                    onClick={() => {
-                      setText("Can I see more photos of this item?");
-                      setShowOptions(false);
-                    }}
-                    className={cn(
-                      "w-full text-left px-4 py-2 text-sm hover:bg-orange-500 hover:text-white transition-colors duration-200",
-                      dark ? "text-neutral-300 hover:bg-orange-500" : "text-neutral-700 hover:bg-orange-500"
-                    )}
-                  >
-                    📸 Request more photos
-                  </button>
+              <>
+                {/* Click outside overlay */}
+                <div 
+                  className="fixed inset-0 z-0" 
+                  onClick={() => setShowOptions(false)}
+                />
+                <div className={cn(
+                  "absolute bottom-full left-0 mb-2 w-48 rounded-xl shadow-lg border z-10",
+                  dark ? "bg-neutral-800 border-neutral-700" : "bg-white border-neutral-200"
+                )}>
+                  <div className="py-2">
+                    <button
+                      onClick={() => {
+                        setText("I'd like to make an offer on this item. What's your best price?");
+                        setShowOptions(false);
+                      }}
+                      className={cn(
+                        "w-full text-left px-4 py-2 text-sm hover:bg-orange-500 hover:text-white transition-colors duration-200",
+                        dark ? "text-neutral-300 hover:bg-orange-500" : "text-neutral-700 hover:bg-orange-500"
+                      )}
+                    >
+                      💰 Give an offer
+                    </button>
+                    <button
+                      onClick={() => {
+                        setText("Is this item still available?");
+                        setShowOptions(false);
+                      }}
+                      className={cn(
+                        "w-full text-left px-4 py-2 text-sm hover:bg-orange-500 hover:text-white transition-colors duration-200",
+                        dark ? "text-neutral-300 hover:bg-orange-500" : "text-neutral-700 hover:bg-orange-500"
+                      )}
+                    >
+                      ❓ Check availability
+                    </button>
+                    <button
+                      onClick={() => {
+                        setText("Can I see more photos of this item?");
+                        setShowOptions(false);
+                      }}
+                      className={cn(
+                        "w-full text-left px-4 py-2 text-sm hover:bg-orange-500 hover:text-white transition-colors duration-200",
+                        dark ? "text-neutral-300 hover:bg-orange-500" : "text-neutral-700 hover:bg-orange-500"
+                      )}
+                    >
+                      📸 Request more photos
+                    </button>
+                  </div>
                 </div>
-              </div>
+              </>
             )}
           </div>
           

@@ -86,8 +86,8 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
         <div className="mt-3">
           <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="lg" compactFiat />
         </div>
-        {/* Seller info at bottom (one line, left) */}
-        <div className="mt-4 text-left text-sm">
+        {/* Seller info at bottom (one line, right) */}
+        <div className="mt-4 text-right text-sm">
           <div className={cn("inline-flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}>
             {/* Username as clickable pill/tag - encapsulates both icon and name */}
             <Link
