@@ -199,8 +199,11 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
               STAGING
             </button>
           )}
+        </div>
 
-          {/* Language Selector - Back to original position */}
+        {/* Right side elements with consistent spacing */}
+        <div className="flex items-center gap-1">
+          {/* Language Selector - Now positioned left of post listing button */}
           <div ref={langRef} className="relative hidden sm:block">
             <button onClick={() => setLangOpen((v) => !v)} aria-label="Language"
               className={cn("px-2 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105", dark ? "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/50" : "text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100")}>
@@ -215,10 +218,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
               </div>
             )}
           </div>
-        </div>
 
-        {/* Right side elements with consistent spacing */}
-        <div className="flex items-center gap-2">
           {/* Primary Action - Post Listing (when signed in) */}
           {user && (
             <button
