@@ -15,7 +15,7 @@ interface Notification {
   actionUrl?: string;
 }
 
-export default function NotificationsPage() {
+export default function MessagesPage() {
   const { theme } = useTheme();
   const dark = theme === 'dark';
   const lang = useLang();
@@ -173,10 +173,10 @@ export default function NotificationsPage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">
-                {t('notifications', lang)}
+                {t('messages', lang)}
               </h1>
               <p className="text-neutral-600 dark:text-neutral-400">
-                {t('stay_updated', lang)}
+                {t('message_center_description', lang)}
               </p>
             </div>
             {unreadCount > 0 && (

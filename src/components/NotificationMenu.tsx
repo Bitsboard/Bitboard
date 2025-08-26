@@ -52,7 +52,7 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
         message: 'Welcome to the Bitcoin trading platform. Check out our safety guidelines to get started.',
         timestamp: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
         read: false,
-        actionUrl: '/notifications'
+        actionUrl: '/messages'
       }
     ];
     
@@ -204,7 +204,7 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
           <div className="p-4 border-b border-neutral-200 dark:border-neutral-700">
             <div className="flex items-center justify-between">
                           <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
-              {t('notifications', lang)}
+              {t('messages', lang)}
             </h3>
             {unreadCount > 0 && (
               <button
@@ -225,7 +225,7 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                   </svg>
                 </div>
-                <p className="text-neutral-500 dark:text-neutral-400">{t('no_notifications', lang)}</p>
+                <p className="text-neutral-500 dark:text-neutral-400">{t('no_messages', lang)}</p>
               </div>
             ) : (
               <div className="divide-y divide-neutral-200 dark:divide-neutral-700">
@@ -276,10 +276,10 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
 
           <div className="p-3 border-t border-neutral-200 dark:border-neutral-700">
             <a
-              href="/notifications"
+              href="/messages"
               className="block text-center text-sm text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium"
             >
-              {t('view_all_notifications', lang)}
+              {t('view_all_messages', lang)}
             </a>
           </div>
         </div>
