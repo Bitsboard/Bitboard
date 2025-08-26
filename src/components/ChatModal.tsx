@@ -123,9 +123,9 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
               }
             }}
           >
-            <div className="flex items-center gap-4">
-              {/* Listing image - now much larger */}
-              <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+            <div className="flex items-start gap-4">
+              {/* Listing image - now even larger */}
+              <div className="w-32 h-32 rounded-lg overflow-hidden flex-shrink-0">
                 <img 
                   src={listing.images[0]} 
                   alt={listing.title}
@@ -134,8 +134,9 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
               </div>
               
               {/* Listing details */}
-              <div className="flex flex-col flex-1">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="flex flex-col flex-1 min-h-0">
+                {/* Top row: Type pill and Location */}
+                <div className="flex items-center justify-between mb-2">
                   {/* Type pill */}
                   <span className={cn(
                     "px-2 py-1 rounded-full text-xs font-medium",
@@ -146,7 +147,28 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                     {listing.type === 'sell' ? 'Selling' : 'Looking for'}
                   </span>
                   
-                  {/* Username pill - moved from header */}
+                  {/* Location pill - now positioned top right */}
+                  <span className={cn(
+                    "px-2 py-1 rounded-full text-xs font-medium",
+                    dark ? "bg-neutral-800 text-neutral-300 border border-neutral-700" : "bg-neutral-100 text-neutral-700 border border-neutral-200"
+                  )}>
+                    📍 {listing.location}
+                  </span>
+                </div>
+                
+                {/* Title */}
+                <h3 className={cn("font-semibold text-sm mb-2", dark ? "text-white" : "text-neutral-900")}>
+                  {listing.title}
+                </h3>
+                
+                {/* Price */}
+                <div className="mb-2">
+                  <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="sm" />
+                </div>
+                
+                {/* Bottom row: Username and Reputation */}
+                <div className="flex items-center justify-between mt-auto">
+                  {/* Username pill */}
                   <Link
                     href={`/profile/${listing.seller.name}`}
                     className={cn(
@@ -197,22 +219,14 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                       </span>
                     )}
                   </Link>
-                </div>
-                
-                <h3 className={cn("font-semibold text-sm mb-2", dark ? "text-white" : "text-neutral-900")}>
-                  {listing.title}
-                </h3>
-                
-                <div className="flex items-center gap-3">
-                  <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="sm" />
                   
-                  {/* Location pill - now with consistent pill styling */}
-                  <span className={cn(
+                  {/* User reputation - positioned to the right of username */}
+                  <div className={cn(
                     "px-2 py-1 rounded-full text-xs font-medium",
-                    dark ? "bg-neutral-800 text-neutral-300 border border-neutral-700" : "bg-neutral-100 text-neutral-700 border border-neutral-200"
+                    dark ? "bg-neutral-800 text-neutral-300 border border-neutral-700" : "bg-neutral-100 text-neutral-600 border border-neutral-200"
                   )}>
-                    📍 {listing.location}
-                  </span>
+                    ⭐ {listing.seller.rating || 'New'}
+                  </div>
                 </div>
               </div>
             </div>
@@ -223,9 +237,16 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <strong className="mr-2">Safety tips:</strong>
-                  Meet in a <em>very public</em> place (mall, café, police e-commerce zone), bring a friend, keep chats in-app, verify serials and condition before paying, and prefer Lightning escrow over cash.
+                  stay safe and meet in a very public place, like a mall, café, or a police e-commerce zone. Keep all chats in-app, and report any suspicious activity.{' '}
+                  <Link 
+                    href="/safety" 
+                    className="underline hover:text-red-200 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Learn more
+                  </Link>
                 </div>
-                <button onClick={() => setShowTips(false)} className="rounded px-2 py-1 hover:bg-red-700">
+                <button onClick={() => setShowTips(false)} className="rounded px-2 py-1 hover:bg-red-700 transition-colors">
                   Hide
                 </button>
               </div>
