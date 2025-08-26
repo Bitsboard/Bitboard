@@ -6,10 +6,10 @@ export const CONFIG = {
     PAGE_SIZE: 24,
     DEFAULT_RADIUS_KM: LOCATION_CONFIG.DEFAULT_RADIUS_KM,
     DEFAULT_CENTER: LOCATION_CONFIG.DEFAULT_CENTER,
-    BTC_RATE_CACHE_DURATION: 5 * 60 * 1000, // 5 minutes
+    BTC_RATE_CACHE_DURATION: 60 * 1000, // 60 seconds - matches server update interval
 } as const;
 
-// Cache for BTC rate
+// Cache for BTC rate - this will be populated by server-side updates
 let btcRateCache: { rate: number | null; timestamp: number } | null = null;
 
 export class DataService {
@@ -24,7 +24,7 @@ export class DataService {
         return DataService.instance;
     }
 
-    // BTC Rate Management
+    // BTC Rate Management - now fetches from our server's cached rate
     async getBtcRate(): Promise<number | null> {
         // Check cache first
         if (btcRateCache && Date.now() - btcRateCache.timestamp < CONFIG.BTC_RATE_CACHE_DURATION) {
@@ -32,8 +32,13 @@ export class DataService {
         }
 
         try {
-            const response = await fetch("/api/rate");
-            if (!response.ok) throw new Error('Failed to fetch BTC rate');
+            // Fetch from our server's cached rate endpoint
+            const response = await fetch("/api/btc-rate", { 
+                cache: 'no-store', // Always get fresh rate from our server
+                next: { revalidate: 0 } // Disable Next.js caching
+            });
+            
+            if (!response.ok) throw new Error('Failed to fetch BTC rate from server');
 
             const data: RateResponse = await response.json();
 
@@ -45,8 +50,9 @@ export class DataService {
 
             return data.cad;
         } catch (error) {
-            console.warn('Failed to fetch BTC rate:', error);
-            return null;
+            console.warn('Failed to fetch BTC rate from server:', error);
+            // Return cached rate if available, even if expired
+            return btcRateCache?.rate || null;
         }
     }
 
