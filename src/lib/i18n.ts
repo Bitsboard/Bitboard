@@ -90,6 +90,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         notification_summary: "Message Summary",
         total: "Total",
         stay_updated: "Your message center for chats, updates, and system announcements",
+        message_center_description: "Your message center for chats, updates, and system announcements",
         view_all_notifications: "View all messages",
         // Profile
         sign_out: "Sign Out",

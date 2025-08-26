@@ -177,7 +177,25 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
           fill="currentColor" 
           viewBox="0 0 24 24"
         >
-          <path d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          <defs>
+            {unreadCount > 0 && (
+              <linearGradient id="envelopeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#f97316">
+                  <animate attributeName="offset" values="-1;2" dur="2s" repeatCount="indefinite" />
+                </stop>
+                <stop offset="50%" stopColor="#ef4444">
+                  <animate attributeName="offset" values="-0.5;2.5" dur="2s" repeatCount="indefinite" />
+                </stop>
+                <stop offset="100%" stopColor="#f97316">
+                  <animate attributeName="offset" values="0;3" dur="2s" repeatCount="indefinite" />
+                </stop>
+              </linearGradient>
+            )}
+          </defs>
+          <path 
+            d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+            fill={unreadCount > 0 ? "url(#envelopeGradient)" : "currentColor"}
+          />
         </svg>
         
         {/* Small red circle indicator when there are notifications */}

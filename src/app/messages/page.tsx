@@ -190,7 +190,7 @@ export default function MessagesPage() {
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex flex-wrap gap-2 border-b border-neutral-200 dark:border-neutral-700">
+          <div className="flex flex-wrap gap-2 border-b border-neutral-200 dark:border-neutral-700 pb-4">
             {[
               { key: 'all', label: t('all', lang), count: getFilterCount('all') },
               { key: 'unread', label: t('unread', lang), count: getFilterCount('unread') },
