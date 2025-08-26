@@ -20,7 +20,6 @@ import { useLocation } from "@/lib/contexts/LocationContext";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import type { Listing, User } from "@/lib/types";
-import { mockListings } from '@/lib/mockData';
 
 export default function HomePage() {
   // Use centralized settings

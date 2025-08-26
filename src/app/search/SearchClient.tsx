@@ -12,7 +12,6 @@ import { useTheme } from "@/lib/contexts/ThemeContext";
 import { useLocation } from "@/lib/contexts/LocationContext";
 import { dataService, CONFIG } from "@/lib/dataService";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { mockListings } from '@/lib/mockData';
 
 export default function SearchClient() {
     const params = useSearchParams();
@@ -28,7 +27,7 @@ export default function SearchClient() {
     
     // Check if we're deployed (same logic as homepage)
     const ENV = process.env.NEXT_PUBLIC_ENV || process.env.NEXT_PUBLIC_BRANCH || 'development';
-    const isDeployed = ENV === "production" || ENV === "staging" || ENV === "main";
+    const isDeployed = true; // Force real API usage - no more mock data
 
     const layoutParam = (params.get("layout") || "").trim();
     const initialLayout: "grid" | "list" = layoutParam === "list"
@@ -192,73 +191,6 @@ export default function SearchClient() {
         return `/api/listings?${sp.toString()}`;
     }, [buildParams]);
 
-    // Filter mock data based on search parameters
-    const filterMockData = useCallback(() => {
-        let filtered = [...mockListings];
-
-        // Filter by query
-        if (inputQuery) {
-            const queryLower = inputQuery.toLowerCase();
-            filtered = filtered.filter(listing => 
-                listing.title.toLowerCase().includes(queryLower) ||
-                listing.description.toLowerCase().includes(queryLower) ||
-                listing.category.toLowerCase().includes(queryLower)
-            );
-        }
-
-        // Filter by category
-        if (selCategory && selCategory !== "Featured") {
-            filtered = filtered.filter(listing => listing.category === selCategory);
-        }
-
-        // Filter by ad type
-        if (selAdType && selAdType !== "all") {
-            filtered = filtered.filter(listing => listing.type === selAdType);
-        }
-
-        // Filter by price
-        if (minPrice) {
-            const minSats = satsFromUnitValue(minPrice);
-            if (minSats) {
-                filtered = filtered.filter(listing => listing.priceSats >= Number(minSats));
-            }
-        }
-
-        if (maxPrice) {
-            const maxSats = satsFromUnitValue(maxPrice);
-            if (maxSats) {
-                filtered = filtered.filter(listing => listing.priceSats <= Number(maxSats));
-            }
-        }
-
-        // Sort
-        const [sortBy, sortOrder] = sortChoice.split(':');
-        filtered.sort((a, b) => {
-            let comparison = 0;
-            
-            switch (sortBy) {
-                case 'date':
-                    comparison = b.createdAt - a.createdAt;
-                    break;
-                case 'price':
-                    comparison = a.priceSats - b.priceSats;
-                    break;
-                case 'rating':
-                    comparison = (b.seller.rating || 0) - (a.seller.rating || 0);
-                    break;
-                case 'score':
-                    comparison = (b.seller.score || 0) - (a.seller.score || 0);
-                    break;
-                default:
-                    comparison = b.createdAt - a.createdAt;
-            }
-
-            return sortOrder === 'asc' ? -comparison : comparison;
-        });
-
-        return filtered;
-    }, [inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice]);
-
     // Initial load and when params change
     useEffect(() => {
         const load = async () => {
@@ -267,59 +199,10 @@ export default function SearchClient() {
                 setIsLoading(true);
                 setInitialLoaded(false);
 
-                if (isDeployed) {
-                    // Use real API for production/staging
-                    const response = await dataService.getListings({
-                        limit: CONFIG.PAGE_SIZE,
-                        offset: 0,
-                        lat: Number(centerLat) || savedCenter?.lat,
-                        lng: Number(centerLng) || savedCenter?.lng,
-                        radiusKm: radiusKm,
-                        query: inputQuery,
-                        category: selCategory !== "Featured" ? selCategory : undefined,
-                        adType: selAdType !== "all" ? selAdType : undefined,
-                        minPrice: minPrice ? Number(minPrice) : undefined,
-                        maxPrice: maxPrice ? Number(maxPrice) : undefined,
-                        sortBy: sortChoice.split(':')[0],
-                        sortOrder: sortChoice.split(':')[1] || 'desc'
-                    });
-
-                    setListings(response.listings);
-                    setTotal(response.total);
-                    setHasMore(response.listings.length < response.total);
-                } else {
-                    // Use mock data for development
-                    const filteredData = filterMockData();
-                    const paginatedData = filteredData.slice(0, CONFIG.PAGE_SIZE);
-
-                    setListings(paginatedData);
-                    setTotal(filteredData.length);
-                    setHasMore(paginatedData.length < filteredData.length);
-                }
-            } catch (error) {
-                console.error('Failed to load listings:', error);
-            } finally {
-                isFetchingRef.current = false;
-                setIsLoading(false);
-                setInitialLoaded(true);
-            }
-        };
-
-        load();
-    }, [isDeployed, centerLat, centerLng, savedCenter, radiusKm, inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice]);
-
-    const loadMore = useCallback(async () => {
-        if (isFetchingRef.current || !hasMore || isLoadingMore) return;
-
-        try {
-            isFetchingRef.current = true;
-            setIsLoadingMore(true);
-
-            if (isDeployed) {
-                // Use real API for production/staging
+                // Always use real API - no more mock data
                 const response = await dataService.getListings({
                     limit: CONFIG.PAGE_SIZE,
-                    offset: listings.length,
+                    offset: 0,
                     lat: Number(centerLat) || savedCenter?.lat,
                     lng: Number(centerLng) || savedCenter?.lng,
                     radiusKm: radiusKm,
@@ -332,25 +215,54 @@ export default function SearchClient() {
                     sortOrder: sortChoice.split(':')[1] || 'desc'
                 });
 
-                setListings(prev => [...prev, ...response.listings]);
+                setListings(response.listings);
                 setTotal(response.total);
-                setHasMore(listings.length + response.listings.length < response.total);
-            } else {
-                // Use mock data for development
-                const filteredData = filterMockData();
-                const paginatedData = filteredData.slice(listings.length, listings.length + CONFIG.PAGE_SIZE);
-
-                setListings(prev => [...prev, ...paginatedData]);
-                setTotal(filteredData.length);
-                setHasMore(listings.length + paginatedData.length < filteredData.length);
+                setHasMore(response.listings.length < response.total);
+            } catch (error) {
+                console.error('Failed to load listings:', error);
+            } finally {
+                isFetchingRef.current = false;
+                setIsLoading(false);
+                setInitialLoaded(true);
             }
+        };
+
+        load();
+    }, [centerLat, centerLng, savedCenter, radiusKm, inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice]);
+
+    const loadMore = useCallback(async () => {
+        if (isFetchingRef.current || !hasMore || isLoadingMore) return;
+
+        try {
+            isFetchingRef.current = true;
+            setIsLoadingMore(true);
+
+            // Always use real API - no more mock data
+            const response = await dataService.getListings({
+                limit: CONFIG.PAGE_SIZE,
+                offset: listings.length,
+                lat: Number(centerLat) || savedCenter?.lat,
+                lng: Number(centerLng) || savedCenter?.lng,
+                radiusKm: radiusKm,
+                query: inputQuery,
+                category: selCategory !== "Featured" ? selCategory : undefined,
+                adType: selAdType !== "all" ? selAdType : undefined,
+                minPrice: minPrice ? Number(minPrice) : undefined,
+                maxPrice: maxPrice ? Number(maxPrice) : undefined,
+                sortBy: sortChoice.split(':')[0],
+                sortOrder: sortChoice.split(':')[1] || 'desc'
+            });
+
+            setListings(prev => [...prev, ...response.listings]);
+            setTotal(response.total);
+            setHasMore(listings.length + response.listings.length < response.total);
         } catch (error) {
             console.error('Failed to load more listings:', error);
         } finally {
             isFetchingRef.current = false;
             setIsLoadingMore(false);
         }
-    }, [isDeployed, centerLat, centerLng, savedCenter, radiusKm, inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice, filterMockData, listings.length, hasMore, isLoadingMore]);
+    }, [centerLat, centerLng, savedCenter, radiusKm, inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice, listings.length, hasMore, isLoadingMore]);
 
     // Remove IntersectionObserver - using Load More button instead
 

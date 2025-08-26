@@ -2,7 +2,7 @@
 
 export const runtime = 'edge';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useTheme } from '@/lib/contexts/ThemeContext';
 import { useLang } from '@/lib/i18n-client';
@@ -10,7 +10,7 @@ import { t } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import type { Session, ProfileData, SortOptionProfile } from '@/lib/types';
-import { mockListings } from '@/lib/mockData';
+import { CONFIG } from '@/lib/dataService';
 
 export default function PublicProfilePage() {
   const [loading, setLoading] = useState(true);
@@ -55,33 +55,10 @@ export default function PublicProfilePage() {
 
         // Check if database is not available (local development)
         if (profileData.error === 'no_db_binding') {
-          // Use mock data for development
-          const mockUser = mockListings.find(listing => listing.seller.name === username);
-          if (mockUser) {
-            const userListings = mockListings.filter(listing => listing.seller.name === username);
-            const combinedProfileData = {
-              sso: 'google',
-              email: `${username}@example.com`,
-              username: username,
-              verified: mockUser.seller.score >= 50,
-              registeredAt: Math.floor(Date.now() / 1000) - 365 * 24 * 60 * 60, // 1 year ago
-              profilePhoto: null,
-              listings: userListings.map(listing => ({
-                id: parseInt(listing.id) || 0,
-                title: listing.title,
-                type: listing.type === 'sell' ? 'selling' : 'looking_for',
-                priceSat: listing.priceSats,
-                createdAt: Math.floor(listing.createdAt / 1000)
-              }))
-            };
-            setProfileData(combinedProfileData);
-            setLoading(false);
-            return;
-          } else {
-            setProfileData(null);
-            setLoading(false);
-            return;
-          }
+          // No mock data fallback - force real API usage
+          setProfileData(null);
+          setLoading(false);
+          return;
         }
 
         // Get user listings
