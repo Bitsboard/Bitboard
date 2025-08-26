@@ -93,25 +93,23 @@ export class DataService {
             const responseData = await response.json() as any;
             const data = responseData.data || responseData; // Handle both nested and direct formats
             
-            // Map listings with async seller creation
-            const listings = await Promise.all(
-                (data.listings || []).map(async (row: any) => ({
-                    id: String(row.id),
-                    title: row.title,
-                    description: row.description || "No description available",
-                    priceSats: Number(row.priceSat) || 0,
-                    category: (row.category as any) || "Electronics",
-                    location: this.cleanLocationLabel(row.location) || "Toronto, ON",
-                    lat: Number.isFinite(row.lat as any) ? (row.lat as number) : CONFIG.DEFAULT_CENTER.lat,
-                    lng: Number.isFinite(row.lng as any) ? (row.lng as number) : CONFIG.DEFAULT_CENTER.lng,
-                    type: (row.adType as any) === "want" ? "want" : "sell",
-                    images: this.processImageUrls(row.imageUrl),
-                    boostedUntil: row.boostedUntil ?? null,
-                    seller: await this.createSellerFromRow(row),
-                    createdAt: Number(row.createdAt) * 1000,
-                    postedBy: row.postedBy,
-                }))
-            );
+            // Map listings with seller creation
+            const listings = (data.listings || []).map((row: any) => ({
+                id: String(row.id),
+                title: row.title,
+                description: row.description || "No description available",
+                priceSats: Number(row.priceSat) || 0,
+                category: (row.category as any) || "Electronics",
+                location: this.cleanLocationLabel(row.location) || "Toronto, ON",
+                lat: Number.isFinite(row.lat as any) ? (row.lat as number) : CONFIG.DEFAULT_CENTER.lat,
+                lng: Number.isFinite(row.lng as any) ? (row.lng as number) : CONFIG.DEFAULT_CENTER.lng,
+                type: (row.adType as any) === "want" ? "want" : "sell",
+                images: this.processImageUrls(row.imageUrl),
+                boostedUntil: row.boostedUntil ?? null,
+                seller: this.createSellerFromRow(row),
+                createdAt: Number(row.createdAt) * 1000,
+                postedBy: row.postedBy,
+            }));
 
             return {
                 listings,
@@ -183,7 +181,7 @@ export class DataService {
         return [...base, ...fallbackImages].slice(0, 5);
     }
 
-    private async createSellerFromRow(row: any): Promise<any> {
+    private createSellerFromRow(row: any): any {
         // postedBy should always be present from the API JOIN
         if (!row.postedBy) {
             console.warn('dataService: Missing postedBy field for listing:', row.id);
@@ -195,36 +193,22 @@ export class DataService {
         
         const name = row.postedBy.replace(/^@/, "");
         
-        // Try to fetch real user data from the database
-        let userData: any = null;
-        try {
-            const response = await fetch(`/api/users/${name}`);
-            if (response.ok) {
-                const data = await response.json() as any;
-                if (data.user) {
-                    userData = data.user;
-                }
-            }
-        } catch (error) {
-            console.warn('Failed to fetch user data for reputation:', error);
-        }
-
-        // Use real user data if available, otherwise fall back to defaults
-        const score = userData?.rating ? Math.round(userData.rating * 10) : 50; // Convert rating (0-5) to score (0-50)
-        const deals = userData?.deals || 0;
-        const verified = userData?.verified || false;
+        // Use user data that's now fetched directly from the main listings API
+        const userRating = row.userRating || 0;
+        const userDeals = row.userDeals || 0;
+        const userVerified = Boolean(row.userVerified);
 
         return {
             name,
-            score,
-            deals,
-            rating: userData?.rating || 5.0,
+            score: userRating, // Rating is already the thumbs up count
+            deals: userDeals,
+            rating: userRating,
             verifications: {
                 email: true,
-                phone: verified,
-                lnurl: verified
+                phone: userVerified,
+                lnurl: userVerified
             },
-            onTimeRelease: verified ? 0.97 : 0.9,
+            onTimeRelease: userVerified ? 0.97 : 0.9,
         };
     }
 }

@@ -107,6 +107,9 @@ export async function GET(req: NextRequest) {
                          l.image_url AS imageUrl,
                          l.price_sat AS priceSat,
                          u.username AS postedBy,
+                         u.rating AS userRating,
+                         u.deals AS userDeals,
+                         u.verified AS userVerified,
                          l.boosted_until AS boostedUntil,
                          l.created_at AS createdAt
                   FROM listings l
@@ -124,7 +127,10 @@ export async function GET(req: NextRequest) {
                          l.title,
                          l.price_sat AS priceSat,
                          l.created_at AS createdAt,
-                         u.username AS postedBy
+                         u.username AS postedBy,
+                         u.rating AS userRating,
+                         u.deals AS userDeals,
+                         u.verified AS userVerified
                   FROM listings l
                   JOIN users u ON l.posted_by = u.id
                   ${whereClauseStr}
