@@ -194,7 +194,7 @@ export default function MessagesPage() {
             {[
               { key: 'all', label: t('all', lang), count: getFilterCount('all') },
               { key: 'unread', label: t('unread', lang), count: getFilterCount('unread') },
-              { key: 'messages', label: t('messages', lang), count: getFilterCount('messages') },
+              { key: 'messages', label: 'Conversations', count: getFilterCount('messages') },
               { key: 'updates', label: t('updates', lang), count: getFilterCount('updates') },
               { key: 'system', label: t('system', lang), count: getFilterCount('system') }
             ].map((tab) => (
