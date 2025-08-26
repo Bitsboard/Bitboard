@@ -2,7 +2,9 @@ import type { Place } from './types';
 
 // Configuration constants
 export const LOCATION_CONFIG = {
-    DEFAULT_RADIUS_KM: 25,
+    DEFAULT_RADIUS_KM: 500,
+    MAX_RADIUS_KM: 1000,
+    MIN_RADIUS_KM: 1,
     DEFAULT_CENTER: { name: "Toronto (City Center)", lat: 43.653, lng: -79.383 },
     STORAGE_KEYS: {
         LOCATION: 'bitsbarter_userLocation',
