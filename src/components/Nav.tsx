@@ -217,7 +217,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
           {user && (
             <button
               onClick={onPost}
-              className="h-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-5 text-sm font-semibold text-white shadow-lg shadow-orange-500/30 transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:shadow-xl hover:scale-105 flex items-center justify-center"
+              className="h-10 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 text-sm font-semibold text-white shadow-lg shadow-orange-500/30 transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:shadow-xl hover:scale-105 flex items-center justify-center"
             >
               {t('post_listing', lang)}
             </button>
@@ -235,22 +235,22 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                     e.preventDefault();
                     router.push(`/profile/${user.handle}`);
                   }}
-                  className="inline-flex items-center gap-3 px-4 h-10 rounded-xl bg-neutral-100/80 dark:bg-neutral-800/50 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/50 transition-all duration-200 group border border-neutral-300/50 dark:border-neutral-700/50"
+                  className="inline-flex items-center gap-3 px-4 h-10 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/30 transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:shadow-xl hover:scale-105 group"
                 >
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={avatarUrl} alt="avatar" className={cn("h-7 w-7 rounded-full border-2 shadow-sm", dark ? "border-white/30" : "border-neutral-300/50")} />
+                    <img src={avatarUrl} alt="avatar" className="h-7 w-7 rounded-full border-2 border-white/30 shadow-sm" />
                   ) : (
-                    <div className="h-7 w-7 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center shadow-sm">
+                    <div className="h-7 w-7 rounded-full bg-white/20 flex items-center justify-center shadow-sm">
                       <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                     </div>
                   )}
-                  <span className={cn("text-sm font-medium hidden md:block", dark ? "text-neutral-200" : "text-neutral-700")}>
+                  <span className="text-sm font-medium hidden md:block text-white">
                     {user.handle}
                   </span>
-                  <svg className="w-4 h-4 text-neutral-400 group-hover:text-neutral-300 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-4 h-4 text-white/80 group-hover:text-white transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </a>
@@ -272,13 +272,13 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => onAuth()} 
-                className="h-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-5 text-sm font-semibold text-white transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:scale-105 flex items-center justify-center"
+                className="h-10 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 text-sm font-semibold text-white transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:scale-105 flex items-center justify-center"
               >
                 Register
               </button>
               <button 
                 onClick={() => onAuth()} 
-                className="h-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-5 text-sm font-semibold text-white transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:scale-105 flex items-center justify-center"
+                className="h-10 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 text-sm font-semibold text-white transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:scale-105 flex items-center justify-center"
               >
                 {t('sign_in', lang)}
               </button>
@@ -290,7 +290,19 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
           
           {/* Settings Menu - Always visible, subtle */}
           <div className="relative">
-            <button onClick={() => setMenuOpen(v => !v)} aria-expanded={menuOpen} aria-haspopup="menu" className={cn("h-10 rounded-xl px-3 text-base font-bold shadow-lg ring-1 transition-all duration-200 flex items-center justify-center", dark ? "text-neutral-200 hover:text-neutral-100 hover:bg-neutral-700/50 ring-neutral-700 bg-neutral-800/50" : "text-neutral-700 hover:text-neutral-800 hover:bg-neutral-200/80 ring-neutral-300 bg-neutral-100/80")}>☰</button>
+            <div 
+              onClick={() => setMenuOpen(v => !v)} 
+              className={cn(
+                "h-10 px-3 flex items-center justify-center cursor-pointer",
+                dark ? "text-white" : "text-black"
+              )}
+            >
+              <div className="flex flex-col gap-1">
+                <div className={cn("w-5 h-0.5 rounded-full transition-all duration-200", dark ? "bg-white" : "bg-black")}></div>
+                <div className={cn("w-5 h-0.5 rounded-full transition-all duration-200", dark ? "bg-white" : "bg-black")}></div>
+                <div className={cn("w-5 h-0.5 rounded-full transition-all duration-200", dark ? "bg-white" : "bg-black")}></div>
+              </div>
+            </div>
             {menuOverlay}
           </div>
         </div>
