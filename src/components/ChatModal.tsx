@@ -362,7 +362,16 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
             className={cn("flex-1 rounded-xl px-3 py-2 focus:outline-none", dark ? "border border-neutral-800 bg-neutral-900 text-neutral-100" : "border border-neutral-300 bg-white text-neutral-900")}
             onKeyPress={(e) => e.key === 'Enter' && send()}
           />
-          <button onClick={send} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white">
+          <button 
+            onClick={send} 
+            disabled={!text.trim()}
+            className={cn(
+              "rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200",
+              text.trim() 
+                ? "bg-orange-500 text-white hover:bg-orange-600 cursor-pointer" 
+                : "bg-neutral-400 text-neutral-600 cursor-not-allowed"
+            )}
+          >
             Send
           </button>
         </div>
