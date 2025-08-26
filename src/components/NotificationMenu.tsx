@@ -157,38 +157,18 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative px-2 h-10 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors duration-200 flex items-center justify-center"
-        aria-label="Notifications"
+        className={cn(
+          "relative flex items-center justify-center w-10 h-10 rounded-xl border-2 transition-all duration-200",
+          unreadCount > 0
+            ? "border-orange-500 bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/30"
+            : dark 
+              ? "border-neutral-700 hover:border-neutral-600 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-300" 
+              : "border-neutral-300 hover:border-neutral-400 hover:bg-neutral-100 text-neutral-600 hover:text-neutral-700"
+        )}
+        aria-label="Messages"
       >
-        <svg 
-          className={cn(
-            "w-6 h-6 transition-all duration-300",
-            unreadCount > 0 
-              ? "text-orange-500" 
-              : "text-neutral-600 dark:text-neutral-400"
-          )} 
-          fill="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <defs>
-            {unreadCount > 0 && (
-              <linearGradient id="bellGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#f97316">
-                  <animate attributeName="offset" values="-1;2" dur="2s" repeatCount="indefinite" />
-                </stop>
-                <stop offset="50%" stopColor="#ef4444">
-                  <animate attributeName="offset" values="-0.5;2.5" dur="2s" repeatCount="indefinite" />
-                </stop>
-                <stop offset="100%" stopColor="#f97316">
-                  <animate attributeName="offset" values="0;3" dur="2s" repeatCount="indefinite" />
-                </stop>
-              </linearGradient>
-            )}
-          </defs>
-          <path 
-            d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"
-            fill={unreadCount > 0 ? "url(#bellGradient)" : "currentColor"}
-          />
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
         
         {/* Small red circle indicator when there are notifications */}
