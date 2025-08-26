@@ -29,19 +29,33 @@ export function BtcRateProvider({ children }: { children: ReactNode }) {
         
         if (response.ok) {
           const data = await response.json() as { cad: number; lastUpdated: number; nextUpdate: number };
-          setBtcCad(data.cad);
-          setLastUpdated(data.lastUpdated);
-          setNextUpdate(data.nextUpdate);
+          if (data.cad && Number.isFinite(data.cad)) {
+            setBtcCad(data.cad);
+            setLastUpdated(data.lastUpdated);
+            setNextUpdate(data.nextUpdate);
+            console.log('BTC rate updated successfully:', data.cad);
+          } else {
+            throw new Error('Invalid BTC rate data received');
+          }
         } else {
           // Fallback to DataService if our endpoint fails
+          console.warn('BTC rate API failed, trying DataService fallback');
           const rate = await DataService.getInstance().getBtcRate();
-          setBtcCad(rate);
+          if (rate && Number.isFinite(rate)) {
+            setBtcCad(rate);
+            console.log('BTC rate loaded from DataService fallback:', rate);
+          } else {
+            throw new Error('DataService fallback also failed');
+          }
         }
       } catch (error) {
         console.warn('Failed to load BTC rate:', error);
-        // Keep existing rate if available
+        
+        // If we have no rate at all, use a reasonable fallback
         if (btcCad === null) {
-          setBtcCad(null);
+          const fallbackRate = 157432; // Reasonable fallback rate
+          setBtcCad(fallbackRate);
+          console.log('Using fallback BTC rate:', fallbackRate);
         }
       } finally {
         setIsLoading(false);

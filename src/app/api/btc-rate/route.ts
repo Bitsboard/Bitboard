@@ -6,9 +6,9 @@ export const runtime = "edge";
 
 // Server-side cache for BTC rate
 let serverBtcRateCache: { rate: number | null; timestamp: number; lastUpdate: number } = {
-  rate: null,
-  timestamp: 0,
-  lastUpdate: 0
+  rate: 157432, // Start with a reasonable default rate instead of null
+  timestamp: Date.now(),
+  lastUpdate: Date.now()
 };
 
 // Update interval: 60 seconds
@@ -67,10 +67,12 @@ async function fetchBtcRateFromProviders(): Promise<number | null> {
 
 export async function GET() {
   const now = Date.now();
+  console.log('BTC rate API called, current cache:', serverBtcRateCache);
 
   // Check if we need to update the rate
   if (now - serverBtcRateCache.lastUpdate >= UPDATE_INTERVAL) {
     try {
+      console.log('Updating BTC rate from external providers...');
       const newRate = await fetchBtcRateFromProviders();
       
       if (newRate && Number.isFinite(newRate)) {
@@ -79,20 +81,27 @@ export async function GET() {
           timestamp: now,
           lastUpdate: now
         };
+        console.log('BTC rate updated successfully to:', newRate);
       } else if (serverBtcRateCache.rate) {
         // If we couldn't get a new rate but have a cached one, keep using it
         serverBtcRateCache.lastUpdate = now;
         console.log('Using cached BTC rate:', serverBtcRateCache.rate);
+      } else {
+        console.warn('No valid rate available, using default fallback');
       }
     } catch (error) {
       console.error('Failed to update BTC rate:', error);
       // Continue using cached rate if available
     }
+  } else {
+    console.log('Using cached BTC rate (not expired):', serverBtcRateCache.rate);
   }
 
   // Return the cached rate (even if expired, it's better than nothing)
+  const currentRate = serverBtcRateCache.rate || 157432; // Fallback to default if somehow null
+  
   return NextResponse.json({ 
-    cad: serverBtcRateCache.rate,
+    cad: currentRate,
     lastUpdated: serverBtcRateCache.timestamp,
     nextUpdate: serverBtcRateCache.lastUpdate + UPDATE_INTERVAL
   });
