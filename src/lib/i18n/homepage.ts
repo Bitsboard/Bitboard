@@ -13,8 +13,8 @@ export const homepageTranslations = {
         services_label: "Services",
 
         // Empty states
-        no_goods_match: "No goods match your search",
-        try_widen_radius: "Try widening your radius or clearing filters",
+        no_goods_match: "No matches",
+        try_widen_radius: "Try widening your radius, using different search terms, or clearing filters.",
         no_services_match: "No services match your search",
         try_adjust_filters: "Try adjusting your filters",
 
