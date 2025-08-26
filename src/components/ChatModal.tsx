@@ -123,7 +123,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
               }
             }}
           >
-            <div className="flex items-end gap-4">
+            <div className="flex items-start gap-4">
               {/* Listing image - now even larger */}
               <div className="w-32 h-32 rounded-lg overflow-hidden flex-shrink-0">
                 <img 
@@ -133,49 +133,50 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                 />
               </div>
               
-              {/* Listing details */}
-              <div className="flex flex-col flex-1 min-h-0 justify-between">
-                {/* Top content: Type pill, Location, Title, Price */}
-                <div>
-                  {/* Top row: Type pill and Location */}
-                  <div className="flex items-center justify-between mb-2">
-                    {/* Type pill */}
-                    <span className={cn(
-                      "px-2 py-1 rounded-full text-xs font-medium",
-                      listing.type === 'sell' 
-                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                        : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-                    )}>
-                      {listing.type === 'sell' ? 'Selling' : 'Looking for'}
-                    </span>
-                    
-                    {/* Location pill - now positioned top right */}
-                    <span className={cn(
-                      "px-2 py-1 rounded-full text-xs font-medium",
-                      dark ? "bg-neutral-800 text-neutral-300 border border-neutral-700" : "bg-neutral-100 text-neutral-700 border border-neutral-200"
-                    )}>
-                      📍 {listing.location}
-                    </span>
-                  </div>
+              {/* Listing details - reorganized for better hierarchy */}
+              <div className="flex flex-col flex-1 min-h-0 justify-between h-32">
+                {/* Top section: Type pill and Location */}
+                <div className="flex items-center justify-between mb-3">
+                  {/* Type pill */}
+                  <span className={cn(
+                    "px-3 py-1.5 rounded-full text-xs font-semibold",
+                    listing.type === 'sell' 
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                      : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+                  )}>
+                    {listing.type === 'sell' ? 'Selling' : 'Looking for'}
+                  </span>
                   
-                  {/* Title */}
-                  <h3 className={cn("font-semibold text-sm mb-2", dark ? "text-white" : "text-neutral-900")}>
+                  {/* Location pill - now more prominent */}
+                  <span className={cn(
+                    "px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5",
+                    dark ? "bg-neutral-800 text-neutral-300 border border-neutral-700" : "bg-neutral-100 text-neutral-700 border border-neutral-200"
+                  )}>
+                    <span className="text-red-500">📍</span>
+                    {listing.location}
+                  </span>
+                </div>
+                
+                {/* Middle section: Title and Price - now better balanced */}
+                <div className="flex-1 flex flex-col justify-center">
+                  {/* Title - now larger and more prominent */}
+                  <h3 className={cn("font-bold text-base mb-3 leading-tight", dark ? "text-white" : "text-neutral-900")}>
                     {listing.title}
                   </h3>
                   
-                  {/* Price */}
-                  <div className="mb-2">
-                    <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="sm" />
+                  {/* Price - now more prominent with better spacing */}
+                  <div className="mb-3">
+                    <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="md" />
                   </div>
                 </div>
                 
-                {/* Bottom row: Username and Reputation - now at bottom */}
-                <div className="flex items-center justify-end gap-2">
-                  {/* Username pill */}
+                {/* Bottom section: User info and reputation - now better organized */}
+                <div className="flex items-center justify-between">
+                  {/* Username pill - now more compact */}
                   <Link
                     href={`/profile/${listing.seller.name}`}
                     className={cn(
-                      "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer relative",
+                      "inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer relative",
                       "bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50",
                       "border border-neutral-300/60 dark:border-neutral-700/50",
                       "hover:scale-105 hover:shadow-md"
@@ -186,16 +187,16 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                     }}
                   >
                     {/* Profile Icon */}
-                    <div className="flex-shrink-0 -ml-1 mr-1">
+                    <div className="flex-shrink-0 -ml-1 mr-2">
                       {!sellerImageError ? (
                         <img
                           src={generateProfilePicture(listing.seller.name)}
                           alt={`${listing.seller.name}'s profile picture`}
-                          className="w-3 h-3 rounded-full object-cover"
+                          className="w-4 h-4 rounded-full object-cover"
                           onError={() => setSellerImageError(true)}
                         />
                       ) : (
-                        <div className="w-3 h-3 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
+                        <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
                           {getInitials(listing.seller.name)}
                         </div>
                       )}
@@ -208,7 +209,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                     {(listing.seller.verifications?.email || listing.seller.verifications?.phone || listing.seller.verifications?.lnurl) && (
                       <span
                         className={cn(
-                          "ml-1 inline-flex h-3 w-3 items-center justify-center rounded-full text-white font-bold shadow-md"
+                          "ml-1.5 inline-flex h-3.5 w-3.5 items-center justify-center rounded-full text-white font-bold shadow-md"
                         )}
                         style={{
                           background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
@@ -216,17 +217,17 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                         aria-label="Verified"
                         title="User has verified their identity"
                       >
-                        <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </span>
                     )}
                   </Link>
                   
-                  {/* User reputation - positioned to the right of username */}
+                  {/* User reputation - now more prominent */}
                   <span className={cn(
-                    "text-xs font-medium",
-                    dark ? "text-neutral-300" : "text-neutral-600"
+                    "px-3 py-1.5 rounded-full text-xs font-semibold",
+                    dark ? "bg-neutral-800 text-neutral-300 border border-neutral-700" : "bg-neutral-100 text-neutral-700 border border-neutral-200"
                   )}>
                     +{listing.seller.score} 👍
                   </span>
