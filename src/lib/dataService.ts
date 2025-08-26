@@ -92,8 +92,29 @@ export class DataService {
 
             const responseData = await response.json() as any;
             const data = responseData.data || responseData; // Handle both nested and direct formats
+            
+            // Map listings with async seller creation
+            const listings = await Promise.all(
+                (data.listings || []).map(async (row: any) => ({
+                    id: String(row.id),
+                    title: row.title,
+                    description: row.description || "No description available",
+                    priceSats: Number(row.priceSat) || 0,
+                    category: (row.category as any) || "Electronics",
+                    location: this.cleanLocationLabel(row.location) || "Toronto, ON",
+                    lat: Number.isFinite(row.lat as any) ? (row.lat as number) : CONFIG.DEFAULT_CENTER.lat,
+                    lng: Number.isFinite(row.lng as any) ? (row.lng as number) : CONFIG.DEFAULT_CENTER.lng,
+                    type: (row.adType as any) === "want" ? "want" : "sell",
+                    images: this.processImageUrls(row.imageUrl),
+                    boostedUntil: row.boostedUntil ?? null,
+                    seller: await this.createSellerFromRow(row),
+                    createdAt: Number(row.createdAt) * 1000,
+                    postedBy: row.postedBy,
+                }))
+            );
+
             return {
-                listings: this.mapApiRowsToListings(data.listings || []),
+                listings,
                 total: data.total || 0,
                 page: Math.floor((params.offset || 0) / (params.limit || CONFIG.PAGE_SIZE)),
                 limit: params.limit || CONFIG.PAGE_SIZE,
@@ -137,39 +158,6 @@ export class DataService {
     }
 
     // Data Transformation
-    private mapApiRowsToListings(rows: Array<{
-        id: number;
-        title: string;
-        description?: string;
-        category?: string;
-        adType?: string;
-        location?: string;
-        lat?: number;
-        lng?: number;
-        imageUrl?: string | string[];
-        priceSat: number;
-        boostedUntil?: number | null;
-        createdAt: number;
-        postedBy?: string;
-    }>): Listing[] {
-        return rows.map((row) => ({
-            id: String(row.id),
-            title: row.title,
-            description: row.description || "No description available",
-            priceSats: Number(row.priceSat) || 0,
-            category: (row.category as any) || "Electronics",
-            location: this.cleanLocationLabel(row.location) || "Toronto, ON",
-            lat: Number.isFinite(row.lat as any) ? (row.lat as number) : CONFIG.DEFAULT_CENTER.lat,
-            lng: Number.isFinite(row.lng as any) ? (row.lng as number) : CONFIG.DEFAULT_CENTER.lng,
-            type: (row.adType as any) === "want" ? "want" : "sell",
-            images: this.processImageUrls(row.imageUrl),
-            boostedUntil: row.boostedUntil ?? null,
-            seller: this.createSellerFromRow(row),
-            createdAt: Number(row.createdAt) * 1000,
-            postedBy: row.postedBy,
-        }));
-    }
-
     private cleanLocationLabel(raw?: string): string {
         if (!raw) return "";
         const s = raw.replace(/\s*[•|\-].*$/, "").replace(/\(.*?\)/g, "").trim();
@@ -195,7 +183,7 @@ export class DataService {
         return [...base, ...fallbackImages].slice(0, 5);
     }
 
-    private createSellerFromRow(row: any): any {
+    private async createSellerFromRow(row: any): Promise<any> {
         // postedBy should always be present from the API JOIN
         if (!row.postedBy) {
             console.warn('dataService: Missing postedBy field for listing:', row.id);
@@ -206,16 +194,31 @@ export class DataService {
         }
         
         const name = row.postedBy.replace(/^@/, "");
-        const base = Number(row.id) % 100;
-        const score = 5 + (base % 80);
-        const deals = base % 40;
-        const verified = score >= 50;
+        
+        // Try to fetch real user data from the database
+        let userData: any = null;
+        try {
+            const response = await fetch(`/api/users/${name}`);
+            if (response.ok) {
+                const data = await response.json() as any;
+                if (data.user) {
+                    userData = data.user;
+                }
+            }
+        } catch (error) {
+            console.warn('Failed to fetch user data for reputation:', error);
+        }
+
+        // Use real user data if available, otherwise fall back to defaults
+        const score = userData?.rating ? Math.round(userData.rating * 10) : 50; // Convert rating (0-5) to score (0-50)
+        const deals = userData?.deals || 0;
+        const verified = userData?.verified || false;
 
         return {
             name,
             score,
             deals,
-            rating: 4 + ((base % 10) / 10),
+            rating: userData?.rating || 5.0,
             verifications: {
                 email: true,
                 phone: verified,
