@@ -28,7 +28,7 @@ export function BtcRateProvider({ children }: { children: ReactNode }) {
         });
         
         if (response.ok) {
-          const data = await response.json();
+          const data = await response.json() as { cad: number; lastUpdated: number; nextUpdate: number };
           setBtcCad(data.cad);
           setLastUpdated(data.lastUpdated);
           setNextUpdate(data.nextUpdate);
