@@ -165,11 +165,23 @@ export async function GET(req: NextRequest) {
       '1541532713592-79a0317b6b77', '1555617117-08d3a8fef16c'
     ];
 
-    const listings = results.map((r: any, i: number) => ({
-      ...r,
-      imageUrl: r.imageUrl && r.imageUrl.trim() ? r.imageUrl :
-        `https://images.unsplash.com/photo-${stock[i % stock.length]}?q=80&w=1600&auto=format&fit=crop`,
-    }));
+    const listings = results.map((r: any, i: number) => {
+      // Debug: Log the raw rating values from database
+      if (i < 3) { // Only log first 3 to avoid spam
+        console.log(`API: Listing ${r.id} raw rating from DB:`, {
+          id: r.id,
+          userRating: r.userRating,
+          userRatingType: typeof r.userRating,
+          postedBy: r.postedBy
+        });
+      }
+      
+      return {
+        ...r,
+        imageUrl: r.imageUrl && r.imageUrl.trim() ? r.imageUrl :
+          `https://images.unsplash.com/photo-${stock[i % stock.length]}?q=80&w=1600&auto=format&fit=crop`,
+      };
+    });
 
     return NextResponse.json({
       success: true,
