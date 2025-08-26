@@ -166,8 +166,11 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                   <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="sm" />
                 </div>
                 
+                {/* Spacer to push username up */}
+                <div className="flex-1 min-h-[20px]"></div>
+                
                 {/* Bottom row: Username and Reputation */}
-                <div className="flex items-center justify-end gap-2 mt-2">
+                <div className="flex items-center justify-end gap-2">
                   {/* Username pill */}
                   <Link
                     href={`/profile/${listing.seller.name}`}
