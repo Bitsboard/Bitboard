@@ -14,7 +14,8 @@ import { useRouter } from "next/navigation";
 import { useLang } from "@/lib/i18n-client";
 import { useSettings } from "@/lib/settings";
 import { useTheme } from "@/lib/contexts/ThemeContext";
-import { useListings, useBtcRate, useSearchFilters } from "@/lib/hooks";
+import { useListings, useSearchFilters } from "@/lib/hooks";
+import { useBtcRate } from "@/lib/contexts/BtcRateContext";
 import { useLocation } from "@/lib/contexts/LocationContext";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";

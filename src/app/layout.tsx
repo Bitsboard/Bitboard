@@ -5,6 +5,7 @@ import GlobalHeader from "./GlobalHeader";
 import { LocaleHydrator } from "./LocaleHydrator";
 import { ThemeProvider } from "@/lib/contexts/ThemeContext";
 import { LocationProvider } from "@/lib/contexts/LocationContext";
+import { BtcRateProvider } from "@/lib/contexts/BtcRateContext";
 
 import Footer from "@/components/Footer";
 
@@ -71,9 +72,11 @@ export default function RootLayout({
         <LocaleHydrator>
           <ThemeProvider>
             <LocationProvider>
-              <GlobalHeader />
-              {children}
-              <Footer />
+              <BtcRateProvider>
+                <GlobalHeader />
+                {children}
+                <Footer />
+              </BtcRateProvider>
             </LocationProvider>
           </ThemeProvider>
         </LocaleHydrator>

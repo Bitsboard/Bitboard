@@ -5,7 +5,7 @@ export const runtime = 'edge';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { ListingCard, ListingRow, ListingModal, ChatModal } from '@/components';
-import { useBtcRate } from '@/lib/hooks/useBtcRate';
+import { useBtcRate } from '@/lib/contexts/BtcRateContext';
 import { generateProfilePicture, getInitials, isDefaultUsername } from '@/lib/utils';
 import { useSettings } from '@/lib/settings';
 import { useTheme } from '@/lib/contexts/ThemeContext';
