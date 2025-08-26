@@ -210,41 +210,6 @@ a:focus-visible {
   animation: shoe-bob 4.5s ease-in-out infinite;
 }
 
-/* Clean organized orbiting system using CSS offset-path for true oval */
-@keyframes orbit-item {
-  0% {
-    offset-distance: 0%;
-    transform: scale(1.4) rotate(-0deg) rotate(45deg);
-  }
-  25% {
-    offset-distance: 25%;
-    transform: scale(1) rotate(-90deg) rotate(45deg);
-  }
-  50% {
-    offset-distance: 50%;
-    transform: scale(0.4) rotate(-180deg) rotate(45deg);
-  }
-  75% {
-    offset-distance: 75%;
-    transform: scale(1) rotate(-270deg) rotate(45deg);
-  }
-  100% {
-    offset-distance: 100%;
-    transform: scale(1.4) rotate(-360deg) rotate(45deg);
-  }
-}
-
-/* Single animation class for all items */
-.animate-orbit-item {
-  offset-path: path(
-    "M 420 30 A 240 160 0 0 1 660 190 A 240 160 0 0 1 420 350 A 240 160 0 0 1 180 190 A 240 160 0 0 1 420 30"
-  );
-  animation: orbit-item 30s linear infinite;
-  animation-fill-mode: both;
-  will-change: transform;
-  transform-origin: center;
-}
-
 /* Counter-rotation animation to keep items upright */
 @keyframes counter-rotate {
   0% {

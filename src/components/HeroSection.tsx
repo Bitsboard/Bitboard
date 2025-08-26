@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
 import type { Place } from "@/lib/types";
+import OrbitingProductsDemo from './OrbitingProductsDemo';
 
 interface HeroSectionProps {
     center: Place;
@@ -49,61 +50,8 @@ export function HeroSection({
             </div>
 
             {/* Floating product images in organized orbiting formation */}
-            <div className="absolute inset-0 pointer-events-none" style={{transform: 'rotate(-45deg)', transformOrigin: '620px 90px', left: '400px', top: '-150px'}}>
-                {/* Chair - orbiting item */}
-                <div className="absolute animate-orbit-item" style={{animationDelay: '0s'}}>
-                    <img src="/Chair.png" alt="Chair" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
-                </div>
-                
-                {/* Phone - orbiting item */}
-                <div className="absolute animate-orbit-item" style={{animationDelay: '2.73s'}}>
-                    <img src="/Phone.png" alt="Phone" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
-                </div>
-                
-                {/* Shoe - orbiting item */}
-                <div className="absolute animate-orbit-item" style={{animationDelay: '5.45s'}}>
-                    <img src="/Shoe.png" alt="Shoe" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
-                </div>
-                
-                {/* Watch - orbiting item */}
-                <div className="absolute animate-orbit-item" style={{animationDelay: '8.18s'}}>
-                    <img src="/Watch.png" alt="Watch" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
-                </div>
-
-                {/* Backpack - orbiting item */}
-                <div className="absolute animate-orbit-item" style={{animationDelay: '10.91s'}}>
-                    <img src="/Backpack.png" alt="Backpack" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
-                </div>
-
-                {/* Bike - orbiting item */}
-                <div className="absolute animate-orbit-item" style={{animationDelay: '13.64s'}}>
-                    <img src="/Bike.png" alt="Bike" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
-                </div>
-
-                {/* Drill - orbiting item */}
-                <div className="absolute animate-orbit-item" style={{animationDelay: '16.36s'}}>
-                    <img src="/Drill.png" alt="Drill" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
-                </div>
-
-                {/* Guitar - orbiting item */}
-                <div className="absolute animate-orbit-item" style={{animationDelay: '19.09s'}}>
-                    <img src="/Guitar.png" alt="Guitar" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
-                </div>
-
-                {/* Lamp - orbiting item */}
-                <div className="absolute animate-orbit-item" style={{animationDelay: '21.82s'}}>
-                    <img src="/Lamp.png" alt="Lamp" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
-                </div>
-
-                {/* Plant - orbiting item */}
-                <div className="absolute animate-orbit-item" style={{animationDelay: '24.55s'}}>
-                    <img src="/Plant.png" alt="Plant" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
-                </div>
-
-                {/* Shirt - orbiting item */}
-                <div className="absolute animate-orbit-item" style={{animationDelay: '27.27s'}}>
-                    <img src="/Shirt.png" alt="Shirt" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
-                </div>
+            <div className="absolute pointer-events-none" style={{right: '0px', top: '-50px'}}>
+                <OrbitingProductsDemo />
             </div>
 
             <div className="relative mx-auto max-w-7xl px-4 py-8 sm:py-10">
