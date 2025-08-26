@@ -193,7 +193,7 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
             )}
           </defs>
           <path 
-            d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+            d="M21.75 9v.906a2.25 2.25 0 01-1.183 1.978l-6.478 3.488M2.25 9v.906m0 0v2.25c0 1.07 1.916 2.25 4.25 2.25s4.25-1.18 4.25-2.25V9m-8.5 0h18.5m0 0a2.25 2.25 0 01-2.25 2.25H4.5A2.25 2.25 0 012.25 9m0 0V6.75c0-1.07 1.916-2.25 4.25-2.25s4.25 1.18 4.25 2.25V9"
             fill={unreadCount > 0 ? "url(#envelopeGradient)" : "currentColor"}
           />
         </svg>
