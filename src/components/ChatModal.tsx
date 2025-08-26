@@ -123,7 +123,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
               }
             }}
           >
-            <div className="flex items-start gap-4">
+            <div className="flex items-end gap-4">
               {/* Listing image - now even larger */}
               <div className="w-32 h-32 rounded-lg overflow-hidden flex-shrink-0">
                 <img 
@@ -134,42 +134,42 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
               </div>
               
               {/* Listing details */}
-              <div className="flex flex-col flex-1 min-h-0">
-                {/* Top row: Type pill and Location */}
-                <div className="flex items-center justify-between mb-2">
-                  {/* Type pill */}
-                  <span className={cn(
-                    "px-2 py-1 rounded-full text-xs font-medium",
-                    listing.type === 'sell' 
-                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                      : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-                  )}>
-                    {listing.type === 'sell' ? 'Selling' : 'Looking for'}
-                  </span>
+              <div className="flex flex-col flex-1 min-h-0 justify-between">
+                {/* Top content: Type pill, Location, Title, Price */}
+                <div>
+                  {/* Top row: Type pill and Location */}
+                  <div className="flex items-center justify-between mb-2">
+                    {/* Type pill */}
+                    <span className={cn(
+                      "px-2 py-1 rounded-full text-xs font-medium",
+                      listing.type === 'sell' 
+                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                        : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+                    )}>
+                      {listing.type === 'sell' ? 'Selling' : 'Looking for'}
+                    </span>
+                    
+                    {/* Location pill - now positioned top right */}
+                    <span className={cn(
+                      "px-2 py-1 rounded-full text-xs font-medium",
+                      dark ? "bg-neutral-800 text-neutral-300 border border-neutral-700" : "bg-neutral-100 text-neutral-700 border border-neutral-200"
+                    )}>
+                      📍 {listing.location}
+                    </span>
+                  </div>
                   
-                  {/* Location pill - now positioned top right */}
-                  <span className={cn(
-                    "px-2 py-1 rounded-full text-xs font-medium",
-                    dark ? "bg-neutral-800 text-neutral-300 border border-neutral-700" : "bg-neutral-100 text-neutral-700 border border-neutral-200"
-                  )}>
-                    📍 {listing.location}
-                  </span>
+                  {/* Title */}
+                  <h3 className={cn("font-semibold text-sm mb-2", dark ? "text-white" : "text-neutral-900")}>
+                    {listing.title}
+                  </h3>
+                  
+                  {/* Price */}
+                  <div className="mb-2">
+                    <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="sm" />
+                  </div>
                 </div>
                 
-                {/* Title */}
-                <h3 className={cn("font-semibold text-sm mb-2", dark ? "text-white" : "text-neutral-900")}>
-                  {listing.title}
-                </h3>
-                
-                {/* Price */}
-                <div className="mb-2">
-                  <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="sm" />
-                </div>
-                
-                {/* Spacer to push username up */}
-                <div className="flex-1 min-h-[20px]"></div>
-                
-                {/* Bottom row: Username and Reputation */}
+                {/* Bottom row: Username and Reputation - now at bottom */}
                 <div className="flex items-center justify-end gap-2">
                   {/* Username pill */}
                   <Link
