@@ -123,7 +123,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
               }
             }}
           >
-            <div className="flex items-end gap-4">
+            <div className="flex items-start gap-4">
               {/* Listing image - now even larger */}
               <div className="w-32 h-32 rounded-lg overflow-hidden flex-shrink-0">
                 <img 
@@ -168,6 +168,9 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                     <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="sm" />
                   </div>
                 </div>
+                
+                {/* Spacer to push username to bottom */}
+                <div className="flex-1 min-h-[20px]"></div>
                 
                 {/* Bottom row: Username and Reputation - now at bottom */}
                 <div className="flex items-center justify-end gap-2">
