@@ -98,7 +98,7 @@ export class DataService {
             console.log('DataService: Is data.listings array?', Array.isArray(data.listings));
             
             // Handle different response structures
-            const listingsArray = data.listings || data.data || [];
+            const listingsArray = data.listings || data.data?.listings || [];
             console.log('DataService: Using listings array:', listingsArray);
             
             if (!Array.isArray(listingsArray)) {
@@ -127,13 +127,14 @@ export class DataService {
                 createdAt: Number(row.createdAt) * 1000,
                 postedBy: row.postedBy,
             }));
+            
             console.log('DataService: Transformed listings:', listings);
             console.log('DataService: First listing seller rating:', listings[0]?.seller?.rating);
             
             return {
                 listings,
-                total: data.total || 0,
-                page: Math.floor((params.offset || 0) / (params.limit || CONFIG.PAGE_SIZE)),
+                total: data.total || data.data?.total || 0,
+                page: data.page || 0,
                 limit: params.limit || CONFIG.PAGE_SIZE,
             };
         } catch (error) {
