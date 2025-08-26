@@ -71,30 +71,28 @@ export class DataService {
         sortBy?: string;
         sortOrder?: string;
     }): Promise<ListingsResponse> {
-        const searchParams = new URLSearchParams();
-
-        if (params.limit) searchParams.set('limit', String(params.limit));
-        if (params.offset) searchParams.set('offset', String(params.offset));
-        if (params.lat) searchParams.set('lat', String(params.lat));
-        if (params.lng) searchParams.set('lng', String(params.lng));
-        if (params.radiusKm) searchParams.set('radiusKm', String(params.radiusKm));
-        if (params.query) searchParams.set('q', params.query);
-        if (params.category) searchParams.set('category', params.category);
-        if (params.adType && params.adType !== 'all') searchParams.set('adType', params.adType);
-        if (params.minPrice) searchParams.set('minPrice', String(params.minPrice));
-        if (params.maxPrice) searchParams.set('maxPrice', String(params.maxPrice));
-        if (params.sortBy) searchParams.set('sortBy', params.sortBy);
-        if (params.sortOrder) searchParams.set('sortOrder', params.sortOrder);
-
         try {
-            const response = await fetch(`/api/listings?${searchParams.toString()}`);
-            if (!response.ok) throw new Error('Failed to fetch listings');
-
-            const responseData = await response.json() as any;
-            const data = responseData.data || responseData; // Handle both nested and direct formats
+            console.log('DataService: Fetching listings with params:', params);
             
-            // Map listings with seller creation
-            const listings = (data.listings || []).map((row: any) => ({
+            const queryParams = new URLSearchParams();
+            if (params.limit) queryParams.append('limit', params.limit.toString());
+            if (params.offset) queryParams.append('offset', params.offset.toString());
+            if (params.lat) queryParams.append('lat', params.lat.toString());
+            if (params.lng) queryParams.append('lng', params.lng.toString());
+            if (params.radiusKm) queryParams.append('radiusKm', params.radiusKm.toString());
+
+            const url = `/api/listings?${queryParams.toString()}`;
+            console.log('DataService: Fetching from URL:', url);
+            
+            const response = await fetch(url, { cache: 'no-store' });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json() as any;
+            console.log('DataService: Raw API response:', data);
+            
+            const listings = data.listings.map((row: any) => ({
                 id: String(row.id),
                 title: row.title,
                 description: row.description || "No description available",
@@ -110,7 +108,9 @@ export class DataService {
                 createdAt: Number(row.createdAt) * 1000,
                 postedBy: row.postedBy,
             }));
-
+            console.log('DataService: Transformed listings:', listings);
+            console.log('DataService: First listing seller rating:', listings[0]?.seller?.rating);
+            
             return {
                 listings,
                 total: data.total || 0,

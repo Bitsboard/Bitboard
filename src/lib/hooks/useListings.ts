@@ -13,7 +13,10 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
 
     // Initial page load
     useEffect(() => {
+        console.log('useListings: Initial load, isDeployed:', isDeployed);
+        
         if (!isDeployed) {
+            console.log('useListings: Skipping API call - not deployed');
             // Use mock data for development
             return;
         }
@@ -21,6 +24,7 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
         // API logic for production
         const loadFromAPI = async () => {
             try {
+                console.log('useListings: Loading from API...');
                 setIsLoading(true);
                 setCurrentPage(0);
                 const response = await dataService.getListings({
@@ -31,6 +35,9 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
                     radiusKm,
                 });
 
+                console.log('useListings: API response:', response);
+                console.log('useListings: First listing seller rating:', response.listings[0]?.seller?.rating);
+                
                 setListings(response.listings);
                 setAllListings(response.listings);
                 setTotal(response.total);
