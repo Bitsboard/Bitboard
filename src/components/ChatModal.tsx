@@ -112,7 +112,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
           {/* Listing details box - now mimics list-view card */}
           <div 
             className={cn(
-              "m-4 p-4 rounded-xl border cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02]",
+              "m-4 p-4 rounded-xl border cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] relative",
               dark ? "bg-neutral-900 border-neutral-700 hover:border-orange-500/50" : "bg-neutral-100 border-neutral-200 hover:border-orange-500/50"
             )}
             onClick={() => {
@@ -169,70 +169,70 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                     <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="md" />
                   </div>
                 </div>
-                
-                {/* Bottom section: User info and reputation - now better organized */}
-                <div className="flex items-center justify-between">
-                  {/* Username pill - now more compact */}
-                  <Link
-                    href={`/profile/${listing.seller.name}`}
-                    className={cn(
-                      "inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer relative",
-                      "bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50",
-                      "border border-neutral-300/60 dark:border-neutral-700/50",
-                      "hover:scale-105 hover:shadow-md"
-                    )}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onClose(); // Close the modal when clicking username
-                    }}
-                  >
-                    {/* Profile Icon */}
-                    <div className="flex-shrink-0 -ml-1 mr-2">
-                      {!sellerImageError ? (
-                        <img
-                          src={generateProfilePicture(listing.seller.name)}
-                          alt={`${listing.seller.name}'s profile picture`}
-                          className="w-4 h-4 rounded-full object-cover"
-                          onError={() => setSellerImageError(true)}
-                        />
-                      ) : (
-                        <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
-                          {getInitials(listing.seller.name)}
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Username */}
-                    <span className={cn("text-xs", dark ? "text-white" : "text-neutral-700")}>{listing.seller.name}</span>
-                    
-                    {/* Verified badge */}
-                    {(listing.seller.verifications?.email || listing.seller.verifications?.phone || listing.seller.verifications?.lnurl) && (
-                      <span
-                        className={cn(
-                          "ml-1.5 inline-flex h-3.5 w-3.5 items-center justify-center rounded-full text-white font-bold shadow-md"
-                        )}
-                        style={{
-                          background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
-                        }}
-                        aria-label="Verified"
-                        title="User has verified their identity"
-                      >
-                        <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </span>
-                    )}
-                  </Link>
-                  
-                  {/* User reputation - now more prominent */}
-                  <span className={cn(
-                    "px-3 py-1.5 rounded-full text-xs font-semibold",
-                    dark ? "bg-neutral-800 text-neutral-300 border border-neutral-700" : "bg-neutral-100 text-neutral-700 border border-neutral-200"
-                  )}>
-                    +{listing.seller.score} 👍
-                  </span>
-                </div>
               </div>
+            </div>
+            
+            {/* Bottom section: User info and reputation - now positioned at bottom right */}
+            <div className="absolute bottom-4 right-4 flex items-center gap-3">
+              {/* Username pill - now more compact */}
+              <Link
+                href={`/profile/${listing.seller.name}`}
+                className={cn(
+                  "inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer relative",
+                  "bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50",
+                  "border border-neutral-300/60 dark:border-neutral-700/50",
+                  "hover:scale-105 hover:shadow-md"
+                )}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClose(); // Close the modal when clicking username
+                }}
+              >
+                {/* Profile Icon */}
+                <div className="flex-shrink-0 -ml-1 mr-2">
+                  {!sellerImageError ? (
+                    <img
+                      src={generateProfilePicture(listing.seller.name)}
+                      alt={`${listing.seller.name}'s profile picture`}
+                      className="w-4 h-4 rounded-full object-cover"
+                      onError={() => setSellerImageError(true)}
+                    />
+                  ) : (
+                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
+                      {getInitials(listing.seller.name)}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Username */}
+                <span className={cn("text-xs", dark ? "text-white" : "text-neutral-700")}>{listing.seller.name}</span>
+                
+                {/* Verified badge */}
+                {(listing.seller.verifications?.email || listing.seller.verifications?.phone || listing.seller.verifications?.lnurl) && (
+                  <span
+                    className={cn(
+                      "ml-1.5 inline-flex h-3.5 w-3.5 items-center justify-center rounded-full text-white font-bold shadow-md"
+                    )}
+                    style={{
+                      background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
+                    }}
+                    aria-label="Verified"
+                    title="User has verified their identity"
+                  >
+                    <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </span>
+                )}
+              </Link>
+              
+              {/* User reputation - now more prominent */}
+              <span className={cn(
+                "px-3 py-1.5 rounded-full text-xs font-semibold",
+                dark ? "bg-neutral-800 text-neutral-300 border border-neutral-700" : "bg-neutral-100 text-neutral-700 border border-neutral-200"
+              )}>
+                +{listing.seller.score} 👍
+              </span>
             </div>
           </div>
 
