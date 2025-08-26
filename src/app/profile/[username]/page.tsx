@@ -271,7 +271,7 @@ export default function PublicProfilePage() {
 
   // Get user info from API response or fallback to default values
   const userVerified = userProfile?.verified || false;
-  const userScore = userProfile?.rating ? Math.round(userProfile.rating * 10) : 0; // Convert rating (0-5) to score (0-50)
+  const userScore = userProfile?.rating || 0; // Rating is already the thumbs up count, no conversion needed
   const oldestListing = userListings.length > 0 ? userListings.reduce((oldest, current) => 
     current.createdAt < oldest.createdAt ? current : oldest
   ) : null;

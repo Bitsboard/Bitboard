@@ -114,9 +114,9 @@ export async function GET(
         seller: {
           name: listing.sellerName,
           verified: Boolean(listing.sellerVerified),
-          score: user.rating ? Math.round(user.rating * 10) : 50, // Convert rating (0-5) to score (0-50)
+          score: user.rating || 0, // Rating is already the thumbs up count, no conversion needed
           deals: user.deals || 0, // Use real deals count
-          rating: user.rating || 5.0, // Use real rating
+          rating: user.rating || 0, // Use real thumbs up count
           verifications: {
             email: Boolean(listing.sellerVerified),
             phone: false,
