@@ -111,94 +111,96 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
               >
                 BETA
               </span>
-              {isStaging && (
-                <button
-                  onClick={() => {
-                    console.log('Starting real database wipe process...');
-                    
-                    if (confirm('This will PERMANENTLY delete your georged1997@gmail.com account from the database. You will need to re-sign up and choose a new username. Continue?')) {
-                      // First clear all client-side state
-                      try {
-                        // Clear all localStorage
-                        localStorage.clear();
-                        
-                        // Clear all sessionStorage  
-                        sessionStorage.clear();
-                        
-                        // Clear all cookies more aggressively
-                        document.cookie.split(";").forEach(function(c) { 
-                          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-                        });
-                        
-                        // Clear specific known cookies with multiple domain attempts
-                        const cookiesToClear = [
-                          'session',
-                          'next-auth.session-token',
-                          'next-auth.csrf-token', 
-                          'next-auth.callback-url',
-                          'next-auth.state',
-                          '__Secure-next-auth.session-token',
-                          '__Host-next-auth.csrf-token'
-                        ];
-                        
-                        cookiesToClear.forEach(cookieName => {
-                          // Multiple domain and path combinations
-                          const domains = ['', '.bitsbarter.com', 'bitsbarter.com'];
-                          const paths = ['/', '/api', '/en'];
-                          
-                          domains.forEach(domain => {
-                            paths.forEach(path => {
-                              document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path};`;
-                              if (domain) {
-                                document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path}; domain=${domain};`;
-                              }
-                            });
-                          });
-                        });
-                        
-                        console.log('Client-side data cleared, now deleting from database...');
-                        
-                        // Now actually delete the account from the database
-                        fetch('/api/wipe-test-account', { 
-                          method: 'POST',
-                          credentials: 'include'
-                        })
-                        .then(response => response.json())
-                        .then((data: unknown) => {
-                          const responseData = data as { success?: boolean; message?: string; error?: string };
-                          if (responseData.success) {
-                            console.log('Database wipe successful:', responseData.message);
-                            alert('Account wiped successfully! You can now re-sign up and choose a new username.');
-                            // Redirect to homepage
-                            window.location.href = '/?wiped=' + Date.now();
-                          } else {
-                            console.error('Database wipe failed:', responseData.error);
-                            alert('Failed to wipe account from database: ' + responseData.error);
-                          }
-                        })
-                        .catch(error => {
-                          console.error('Database wipe error:', error);
-                          alert('Failed to wipe account from database. Please try again.');
-                        });
-                        
-                      } catch (error) {
-                        console.error('Error during wipe:', error);
-                        alert('Error during wipe process. Please try again.');
-                      }
-                    }
-                  }}
-                  className={cn(
-                    "absolute -top-2 -right-2 rounded-full px-2 py-1 text-xs font-bold text-white shadow-lg transition-all duration-200",
-                    "bg-red-600 hover:bg-red-700 hover:scale-110"
-                  )}
-                >
-                  STAGING
-                </button>
-              )}
             </div>
           </a>
 
-          {/* Language Selector - Subtle and compact */}
+          {/* Staging Tag - Back to original position */}
+          {isStaging && (
+            <button
+              onClick={() => {
+                console.log('Starting real database wipe process...');
+                
+                if (confirm('This will PERMANENTLY delete your georged1997@gmail.com account from the database. You will need to re-sign up and choose a new username. Continue?')) {
+                  // First clear all client-side state
+                  try {
+                    // Clear all localStorage
+                    localStorage.clear();
+                    
+                    // Clear all sessionStorage  
+                    sessionStorage.clear();
+                    
+                    // Clear all cookies more aggressively
+                    document.cookie.split(";").forEach(function(c) { 
+                      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                    });
+                    
+                    // Clear specific known cookies with multiple domain attempts
+                    const cookiesToClear = [
+                      'session',
+                      'next-auth.session-token',
+                      'next-auth.csrf-token', 
+                      'next-auth.callback-url',
+                      'next-auth.state',
+                      '__Secure-next-auth.session-token',
+                      '__Host-next-auth.csrf-token'
+                    ];
+                    
+                    cookiesToClear.forEach(cookieName => {
+                      // Multiple domain and path combinations
+                      const domains = ['', '.bitsbarter.com', 'bitsbarter.com'];
+                      const paths = ['/', '/api', '/en'];
+                      
+                      domains.forEach(domain => {
+                        paths.forEach(path => {
+                          document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path};`;
+                          if (domain) {
+                            document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path}; domain=${domain};`;
+                          }
+                        });
+                      });
+                    });
+                    
+                    console.log('Client-side data cleared, now deleting from database...');
+                    
+                    // Now actually delete the account from the database
+                    fetch('/api/wipe-test-account', { 
+                      method: 'POST',
+                      credentials: 'include'
+                    })
+                    .then(response => response.json())
+                    .then((data: unknown) => {
+                      const responseData = data as { success?: boolean; message?: string; error?: string };
+                      if (responseData.success) {
+                        console.log('Database wipe successful:', responseData.message);
+                        alert('Account wiped successfully! You can now re-sign up and choose a new username.');
+                        // Redirect to homepage
+                        window.location.href = '/?wiped=' + Date.now();
+                      } else {
+                        console.error('Database wipe failed:', responseData.error);
+                        alert('Failed to wipe account from database: ' + responseData.error);
+                      }
+                    })
+                    .catch(error => {
+                      console.error('Database wipe error:', error);
+                      alert('Failed to wipe account from database. Please try again.');
+                    });
+                    
+                  } catch (error) {
+                    console.error('Error during wipe:', error);
+                    alert('Error during wipe process. Please try again.');
+                  }
+                }
+              }}
+              className={cn(
+                "hidden sm:inline rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow cursor-pointer hover:bg-red-700 transition-colors duration-200"
+              )}
+              title="Click to wipe georged1997@gmail.com from database for testing"
+            >
+              STAGING
+            </button>
+          )}
+
+          {/* Language Selector - Back to original position */}
           <div ref={langRef} className="relative hidden sm:block">
             <button onClick={() => setLangOpen((v) => !v)} aria-label="Language"
               className={cn("px-2 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105", dark ? "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/50" : "text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100")}>
@@ -216,7 +218,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
         </div>
 
         {/* Right side elements with consistent spacing */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {/* Primary Action - Post Listing (when signed in) */}
           {user && (
             <button
