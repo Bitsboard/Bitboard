@@ -91,8 +91,27 @@ export class DataService {
 
             const data = await response.json() as any;
             console.log('DataService: Raw API response:', data);
+            console.log('DataService: Response keys:', Object.keys(data));
+            console.log('DataService: data.listings:', data.listings);
+            console.log('DataService: data.data:', data.data);
+            console.log('DataService: Response type:', typeof data);
+            console.log('DataService: Is data.listings array?', Array.isArray(data.listings));
             
-            const listings = data.listings.map((row: any) => ({
+            // Handle different response structures
+            const listingsArray = data.listings || data.data || [];
+            console.log('DataService: Using listings array:', listingsArray);
+            
+            if (!Array.isArray(listingsArray)) {
+                console.error('DataService: listingsArray is not an array:', listingsArray);
+                return {
+                    listings: [],
+                    total: 0,
+                    page: 0,
+                    limit: params.limit || CONFIG.PAGE_SIZE,
+                };
+            }
+            
+            const listings = listingsArray.map((row: any) => ({
                 id: String(row.id),
                 title: row.title,
                 description: row.description || "No description available",
@@ -101,7 +120,7 @@ export class DataService {
                 location: this.cleanLocationLabel(row.location) || "Toronto, ON",
                 lat: Number.isFinite(row.lat as any) ? (row.lat as number) : CONFIG.DEFAULT_CENTER.lat,
                 lng: Number.isFinite(row.lng as any) ? (row.lng as number) : CONFIG.DEFAULT_CENTER.lng,
-                type: (row.adType as any) === "want" ? "want" : "sell",
+                type: (row.adType as any) === "want" ? "want" : "sell" as "want" | "sell",
                 images: this.processImageUrls(row.imageUrl),
                 boostedUntil: row.boostedUntil ?? null,
                 seller: this.createSellerFromRow(row),
