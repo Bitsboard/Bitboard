@@ -35,8 +35,15 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
       const savedNotifications = localStorage.getItem('notifications');
       if (savedNotifications) {
         const parsed = JSON.parse(savedNotifications);
-        setNotifications(parsed);
-        setUnreadCount(parsed.filter((n: Notification) => !n.read).length);
+        // Clean up old URLs that might point to /notifications
+        const cleanedNotifications = parsed.map((n: Notification) => ({
+          ...n,
+          actionUrl: n.actionUrl === '/notifications' ? '/messages' : n.actionUrl
+        }));
+        setNotifications(cleanedNotifications);
+        setUnreadCount(cleanedNotifications.filter((n: Notification) => !n.read).length);
+        // Save the cleaned version back to localStorage
+        localStorage.setItem('notifications', JSON.stringify(cleanedNotifications));
         return;
       }
     } catch (error) {
@@ -259,7 +266,7 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
               href="/messages"
               className="block text-center text-sm text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium"
             >
-              {t('view_all_messages', lang)}
+              View all messages
             </a>
           </div>
         </div>
