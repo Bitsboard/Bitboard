@@ -152,7 +152,8 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
         const h = containerRef.current?.clientHeight ?? 280;
         const w = containerRef.current?.clientWidth ?? 400;
         const diag = Math.sqrt(h * h + w * w);
-        return Math.ceil(diag / 2) + 20; // cover full map with small padding
+        // Make the circle much larger to cover the entire world map
+        return Math.ceil(diag * 0.8); // 80% of diagonal to ensure full coverage
     }
     // Helpers for reverse-geocoding and formatting
     const US_STATE_ABBR: Record<string, string> = {
