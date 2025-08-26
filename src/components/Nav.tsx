@@ -187,16 +187,17 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                       }
                     }
                   }}
-                  className="hidden sm:inline rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow cursor-pointer hover:bg-red-700 transition-colors duration-200"
-                  title="Click to wipe georged1997@gmail.com from database for testing"
+                  className={cn(
+                    "absolute -top-2 -right-2 rounded-full px-2 py-1 text-xs font-bold text-white shadow-lg transition-all duration-200",
+                    "bg-red-600 hover:bg-red-700 hover:scale-110"
+                  )}
                 >
                   STAGING
                 </button>
               )}
             </div>
           </a>
-        </div>
-        <div className="flex items-center gap-1">
+
           {/* Language Selector - Subtle and compact */}
           <div ref={langRef} className="relative hidden sm:block">
             <button onClick={() => setLangOpen((v) => !v)} aria-label="Language"
@@ -212,7 +213,10 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
               </div>
             )}
           </div>
+        </div>
 
+        {/* Right side elements with consistent spacing */}
+        <div className="flex items-center gap-3">
           {/* Primary Action - Post Listing (when signed in) */}
           {user && (
             <button
@@ -225,7 +229,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
 
           {/* User Profile Section - Unified button design */}
           {user ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
               {/* Unified Profile Button */}
               {user.handle ? (
                 <a 
@@ -285,8 +289,8 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
             </div>
           )}
           
-          {/* Notifications - Centered between profile and hamburger */}
-          {user && <div className="mx-2"><NotificationMenu dark={dark} /></div>}
+          {/* Notifications - Now with consistent spacing */}
+          {user && <NotificationMenu dark={dark} />}
           
           {/* Settings Menu - Always visible, subtle */}
           <div className="relative">
