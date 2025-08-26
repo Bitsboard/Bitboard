@@ -114,9 +114,9 @@ export async function GET(
         seller: {
           name: listing.sellerName,
           verified: Boolean(listing.sellerVerified),
-          score: user.rating || 0, // Rating is already the thumbs up count, no conversion needed
+          score: Math.floor(user.rating || 0), // Ensure whole number, default to 0
           deals: user.deals || 0, // Use real deals count
-          rating: user.rating || 0, // Use real thumbs up count
+          rating: Math.floor(user.rating || 0), // Ensure whole number, default to 0
           verifications: {
             email: Boolean(listing.sellerVerified),
             phone: false,
@@ -133,7 +133,7 @@ export async function GET(
         verified: Boolean(user.verified),
         registeredAt: user.created_at,
         profilePhoto: user.image,
-        rating: user.rating || 5.0,
+        rating: Math.floor(user.rating || 0), // Ensure whole number, default to 0
         deals: user.deals || 0
       },
       listings: transformedListings,
