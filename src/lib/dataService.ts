@@ -80,6 +80,13 @@ export class DataService {
             if (params.lat) queryParams.append('lat', params.lat.toString());
             if (params.lng) queryParams.append('lng', params.lng.toString());
             if (params.radiusKm) queryParams.append('radiusKm', params.radiusKm.toString());
+            if (params.query) queryParams.append('q', params.query);
+            if (params.category) queryParams.append('category', params.category);
+            if (params.adType) queryParams.append('adType', params.adType);
+            if (params.minPrice) queryParams.append('minPrice', params.minPrice.toString());
+            if (params.maxPrice) queryParams.append('maxPrice', params.maxPrice.toString());
+            if (params.sortBy) queryParams.append('sortBy', params.sortBy);
+            if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
 
             const url = `/api/listings?${queryParams.toString()}`;
             console.log('DataService: Fetching from URL:', url);
