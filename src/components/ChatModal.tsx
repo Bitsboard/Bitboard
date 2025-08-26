@@ -225,7 +225,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                     "px-2 py-1 rounded-full text-xs font-medium",
                     dark ? "bg-neutral-800 text-neutral-300 border border-neutral-700" : "bg-neutral-100 text-neutral-600 border border-neutral-200"
                   )}>
-                    ⭐ {listing.seller.rating || 'New'}
+                    +{listing.seller.score} 👍
                   </div>
                 </div>
               </div>

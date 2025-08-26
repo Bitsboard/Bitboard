@@ -25,12 +25,6 @@ function accent(listing: Listing) {
   return { stripe: "from-fuchsia-500 to-violet-500", chip: "from-fuchsia-500 to-violet-500" };
 }
 
-function stars(rating: number) {
-  const full = Math.floor(rating);
-  const half = rating - full >= 0.5;
-  return "★".repeat(full) + (half ? "½" : "");
-}
-
 function sanitizeTitle(raw: string, type: "sell" | "want"): string {
   if (type !== "want") return raw;
   const cleaned = raw.replace(/^\s*(looking\s*for\s*:?-?\s*)/i, "");

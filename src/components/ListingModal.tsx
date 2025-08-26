@@ -27,12 +27,6 @@ function cn(...xs: Array<string | false | null | undefined>) {
   return xs.filter(Boolean).join(" ");
 }
 
-function stars(rating: number) {
-  const full = Math.floor(rating);
-  const half = rating - full >= 0.5;
-  return "★".repeat(full) + (half ? "½" : "");
-}
-
 function accent(listing: Listing) {
   if (listing.type === "sell") {
     return { stripe: "from-emerald-500 to-teal-500", chip: "from-emerald-500 to-teal-500" };

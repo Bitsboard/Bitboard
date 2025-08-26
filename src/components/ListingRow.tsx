@@ -24,17 +24,17 @@ function cn(...xs: Array<string | false | null | undefined>) {
   return xs.filter(Boolean).join(" ");
 }
 
-function stars(rating: number) {
-  const full = Math.floor(rating);
-  const half = rating - full >= 0.5;
-  return "★".repeat(full) + (half ? "½" : "");
-}
-
 function accent(listing: Listing) {
   if (listing.type === "sell") {
     return { stripe: "from-emerald-500 to-teal-500", chip: "from-emerald-500 to-teal-500" };
   }
   return { stripe: "from-fuchsia-500 to-violet-500", chip: "from-fuchsia-500 to-violet-500" };
+}
+
+function sanitizeTitle(raw: string, type: "sell" | "want"): string {
+  if (type !== "want") return raw;
+  const cleaned = raw.replace(/^\s*(looking\s*for\s*:?-?\s*)/i, "");
+  return cleaned.trim();
 }
 
 export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowProps) {
@@ -43,17 +43,6 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
   const [sellerImageError, setSellerImageError] = React.useState(false);
   const lang = useLang();
   
-  function stars(rating: number) {
-    const full = Math.floor(rating);
-    const half = rating - full >= 0.5;
-    return "★".repeat(full) + (half ? "½" : "");
-  }
-  function sanitizeTitle(raw: string, type: "sell" | "want"): string {
-    if (type !== "want") return raw;
-    const cleaned = raw.replace(/^\s*(looking\s*for\s*:?-?\s*)/i, "");
-    return cleaned.trim();
-  }
-
   return (
     <article
       onClick={onOpen}
