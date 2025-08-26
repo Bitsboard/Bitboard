@@ -34,7 +34,7 @@ export async function GET(
 
     // First, get the user ID from username
     const userResult = await db.prepare(
-      'SELECT id, username, verified, created_at, image FROM users WHERE username = ?'
+      'SELECT id, username, verified, created_at, image, rating, deals FROM users WHERE username = ?'
     ).bind(username).all();
 
     if (!userResult.results || userResult.results.length === 0) {
@@ -114,9 +114,9 @@ export async function GET(
         seller: {
           name: listing.sellerName,
           verified: Boolean(listing.sellerVerified),
-          score: 75, // Default score since we don't have this in the DB yet
-          deals: 0, // Default deals count
-          rating: 4.5, // Default rating
+          score: user.rating ? Math.round(user.rating * 10) : 50, // Convert rating (0-5) to score (0-50)
+          deals: user.deals || 0, // Use real deals count
+          rating: user.rating || 5.0, // Use real rating
           verifications: {
             email: Boolean(listing.sellerVerified),
             phone: false,
@@ -132,7 +132,9 @@ export async function GET(
         username: user.username,
         verified: Boolean(user.verified),
         registeredAt: user.created_at,
-        profilePhoto: user.image
+        profilePhoto: user.image,
+        rating: user.rating || 5.0,
+        deals: user.deals || 0
       },
       listings: transformedListings,
       count: transformedListings.length

@@ -35,7 +35,7 @@ export default function PublicProfilePage() {
   // State for user data
   const [userListings, setUserListings] = useState<Listing[]>([]);
   const [allUserListings, setAllUserListings] = useState<Listing[]>([]); // Store all loaded listings for sorting
-  const [userProfile, setUserProfile] = useState<{ username: string; verified: boolean; registeredAt: number; profilePhoto: string } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ username: string; verified: boolean; registeredAt: number; profilePhoto: string; rating?: number; deals?: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -271,7 +271,7 @@ export default function PublicProfilePage() {
 
   // Get user info from API response or fallback to default values
   const userVerified = userProfile?.verified || false;
-  const userScore = 0; // Start with 0 reputation for new users
+  const userScore = userProfile?.rating ? Math.round(userProfile.rating * 10) : 0; // Convert rating (0-5) to score (0-50)
   const oldestListing = userListings.length > 0 ? userListings.reduce((oldest, current) => 
     current.createdAt < oldest.createdAt ? current : oldest
   ) : null;
