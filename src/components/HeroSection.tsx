@@ -43,6 +43,11 @@ export function HeroSection({
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_50%)]" />
             </div>
 
+            {/* Orange angled stripe across the header */}
+            <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute -right-20 -top-20 w-96 h-[120%] bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 transform rotate-12 opacity-20"></div>
+            </div>
+
             <div className="relative mx-auto max-w-7xl px-4 py-8 sm:py-10">
                 <div className="flex flex-col-reverse items-start gap-3 md:flex-row md:items-center md:justify-between">
                     {/* Left Content */}
@@ -60,18 +65,15 @@ export function HeroSection({
 
                     {/* Right: Location above search */}
                     <div className="w-full md:w-[460px] md:self-center relative">
-                        {/* Orange diagonal stripe background */}
-                        <div className="absolute inset-0 -rotate-6 scale-110 opacity-25">
-                            <div className="w-full h-full bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 rounded-3xl transform skew-x-6"></div>
-                        </div>
-                        
                         <div className="mb-2 md:mb-1 flex md:justify-end relative z-10">
                             <button onClick={onLocationClick} className={cn("w-full md:w-[calc(100%-120px)] rounded-3xl px-6 py-5 text-left focus:outline-none", inputBase)}>
                                 <div className="flex items-center justify-between gap-3">
                                     <div className={cn("truncate", dark ? "text-neutral-100" : "text-neutral-900")}>
-                                        {radiusKm === 0 ? t('all_listings_globally', lang) : (center?.name || t('choose_location', lang))}
+                                        {radiusKm === 0 ? "Worldwide" : (center?.name || t('choose_location', lang))}
                                     </div>
-                                    <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>{radiusKm === 0 ? t('change', lang) : `${radiusKm} km`}</div>
+                                    <div className={cn("text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>
+                                        {radiusKm === 0 ? t('change', lang) : `${radiusKm} km`}
+                                    </div>
                                 </div>
                             </button>
                         </div>
