@@ -48,61 +48,61 @@ export function HeroSection({
                 <div className="absolute top-0 right-20 w-[500px] h-full bg-gradient-to-br from-orange-300 via-orange-400 to-orange-500 opacity-50" style={{clipPath: 'polygon(30% 0%, 100% 0%, 70% 100%, 0% 100%)'}}></div>
             </div>
 
-            {/* Floating product images in orbiting formation */}
+            {/* Floating product images in organized orbiting formation */}
             <div className="absolute inset-0 pointer-events-none">
                 {/* Chair - orbiting item */}
-                <div className="absolute animate-orbit-chair">
-                    <img src="/Chair.png" alt="Chair" className="w-20 h-20 object-contain drop-shadow-lg" />
+                <div className="absolute animate-orbit-item" style={{animationDelay: '0s'}}>
+                    <img src="/Chair.png" alt="Chair" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
                 </div>
                 
                 {/* Phone - orbiting item */}
-                <div className="absolute animate-orbit-phone">
-                    <img src="/Phone.png" alt="Phone" className="w-16 h-16 object-contain drop-shadow-lg" />
+                <div className="absolute animate-orbit-item" style={{animationDelay: '1.1s'}}>
+                    <img src="/Phone.png" alt="Phone" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
                 </div>
                 
                 {/* Shoe - orbiting item */}
-                <div className="absolute animate-orbit-shoe">
-                    <img src="/Shoe.png" alt="Shoe" className="w-20 h-20 object-contain drop-shadow-lg" />
+                <div className="absolute animate-orbit-item" style={{animationDelay: '2.2s'}}>
+                    <img src="/Shoe.png" alt="Shoe" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
                 </div>
                 
                 {/* Watch - orbiting item */}
-                <div className="absolute animate-orbit-watch">
-                    <img src="/Watch.png" alt="Watch" className="w-16 h-16 object-contain drop-shadow-lg" />
+                <div className="absolute animate-orbit-item" style={{animationDelay: '3.3s'}}>
+                    <img src="/Watch.png" alt="Watch" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
                 </div>
 
                 {/* Backpack - orbiting item */}
-                <div className="absolute animate-orbit-backpack">
-                    <img src="/Backpack.png" alt="Backpack" className="w-18 h-18 object-contain drop-shadow-lg" />
+                <div className="absolute animate-orbit-item" style={{animationDelay: '4.4s'}}>
+                    <img src="/Backpack.png" alt="Backpack" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
                 </div>
 
                 {/* Bike - orbiting item */}
-                <div className="absolute animate-orbit-bike">
-                    <img src="/Bike.png" alt="Bike" className="w-20 h-20 object-contain drop-shadow-lg" />
+                <div className="absolute animate-orbit-item" style={{animationDelay: '5.5s'}}>
+                    <img src="/Bike.png" alt="Bike" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
                 </div>
 
                 {/* Drill - orbiting item */}
-                <div className="absolute animate-orbit-drill">
-                    <img src="/Drill.png" alt="Drill" className="w-16 h-16 object-contain drop-shadow-lg" />
+                <div className="absolute animate-orbit-item" style={{animationDelay: '6.6s'}}>
+                    <img src="/Drill.png" alt="Drill" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
                 </div>
 
                 {/* Guitar - orbiting item */}
-                <div className="absolute animate-orbit-guitar">
-                    <img src="/Guitar.png" alt="Guitar" className="w-20 h-20 object-contain drop-shadow-lg" />
+                <div className="absolute animate-orbit-item" style={{animationDelay: '7.7s'}}>
+                    <img src="/Guitar.png" alt="Guitar" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
                 </div>
 
                 {/* Lamp - orbiting item */}
-                <div className="absolute animate-orbit-lamp">
-                    <img src="/Lamp.png" alt="Lamp" className="w-18 h-18 object-contain drop-shadow-lg" />
+                <div className="absolute animate-orbit-item" style={{animationDelay: '8.8s'}}>
+                    <img src="/Lamp.png" alt="Lamp" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
                 </div>
 
                 {/* Plant - orbiting item */}
-                <div className="absolute animate-orbit-plant">
-                    <img src="/Plant.png" alt="Plant" className="w-16 h-16 object-contain drop-shadow-lg" />
+                <div className="absolute animate-orbit-item" style={{animationDelay: '9.9s'}}>
+                    <img src="/Plant.png" alt="Plant" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
                 </div>
 
                 {/* Shirt - orbiting item */}
-                <div className="absolute animate-orbit-shirt">
-                    <img src="/Shirt.png" alt="Shirt" className="w-18 h-18 object-contain drop-shadow-lg" />
+                <div className="absolute animate-orbit-item" style={{animationDelay: '11s'}}>
+                    <img src="/Shirt.png" alt="Shirt" className="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-300" />
                 </div>
             </div>
 
