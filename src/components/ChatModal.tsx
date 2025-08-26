@@ -167,7 +167,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                 </div>
                 
                 {/* Bottom row: Username and Reputation */}
-                <div className="flex items-center justify-between mt-auto">
+                <div className="flex items-center justify-end gap-2 mt-auto">
                   {/* Username pill */}
                   <Link
                     href={`/profile/${listing.seller.name}`}

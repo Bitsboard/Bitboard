@@ -286,7 +286,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
           )}
           
           {/* Notifications - Centered between profile and hamburger */}
-          {user && <NotificationMenu dark={dark} />}
+          {user && <div className="mx-2"><NotificationMenu dark={dark} /></div>}
           
           {/* Settings Menu - Always visible, subtle */}
           <div className="relative">
