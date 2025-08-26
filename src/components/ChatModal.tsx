@@ -221,12 +221,12 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                   </Link>
                   
                   {/* User reputation - positioned to the right of username */}
-                  <div className={cn(
-                    "px-2 py-1 rounded-full text-xs font-medium",
-                    dark ? "bg-neutral-800 text-neutral-300 border border-neutral-700" : "bg-neutral-100 text-neutral-600 border border-neutral-200"
+                  <span className={cn(
+                    "text-xs font-medium",
+                    dark ? "text-neutral-300" : "text-neutral-600"
                   )}>
                     +{listing.seller.score} 👍
-                  </div>
+                  </span>
                 </div>
               </div>
             </div>

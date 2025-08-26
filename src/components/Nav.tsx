@@ -196,7 +196,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
             </div>
           </a>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           {/* Language Selector - Subtle and compact */}
           <div ref={langRef} className="relative hidden sm:block">
             <button onClick={() => setLangOpen((v) => !v)} aria-label="Language"

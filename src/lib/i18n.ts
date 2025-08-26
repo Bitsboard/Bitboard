@@ -86,7 +86,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
         no_notifications: "No messages yet",
         no_notifications_found: "No messages found",
         you_are_caught_up: "You're all caught up! No messages at the moment.",
-        no_filter_notifications: "No {filter} messages found.",
+        no_filter_notifications: "No {filter} found.",
         notification_summary: "Message Summary",
         total: "Total",
         stay_updated: "Your message center for chats, updates, and system announcements",
