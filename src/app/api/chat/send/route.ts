@@ -118,38 +118,28 @@ export async function POST(req: Request) {
       currentUserId = currentUserCheck.results[0].id as string;
       console.log('✅ Current user ID found:', currentUserId);
     } else {
-      // If current user doesn't exist in users table, create them
-      console.log('⚠️ Current user not found, creating new user account...');
+      // If current user doesn't exist in users table, this indicates a serious OAuth problem
+      console.log('❌ Current user not found in users table:', userEmail);
       
-      try {
-        // Generate a unique user ID
-        const newUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
-        // Create the user account
-        await db.prepare(`
-          INSERT INTO users (id, email, username, sso, verified, created_at, image, has_chosen_username) 
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `).bind(
-          newUserId,
-          userEmail,
-          userEmail.split('@')[0], // Use email prefix as temporary username
-          'google',
-          1,
-          Math.floor(Date.now() / 1000),
-          null, // No image for now
-          0 // Hasn't chosen username yet
-        ).run();
-        
-        currentUserId = newUserId;
-        console.log('✅ New user account created with ID:', currentUserId);
-        
-      } catch (createError) {
-        console.error('❌ Failed to create user account:', createError);
+      // Check if OAuth environment variables are properly configured
+      const googleClientId = process.env.GOOGLE_CLIENT_ID;
+      const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+      
+      if (!googleClientId || !googleClientSecret) {
+        console.error('❌ OAuth environment variables missing on staging');
         return NextResponse.json({ 
-          error: 'user_creation_failed',
-          message: 'Failed to create user account'
+          error: 'oauth_configuration_error',
+          message: 'OAuth is not properly configured on staging. User accounts cannot be created.',
+          details: 'Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET environment variables'
         }, { status: 500 });
       }
+      
+      return NextResponse.json({ 
+        error: 'user_not_found',
+        message: `User ${userEmail} not found in database. This suggests the OAuth flow failed during login.`,
+        details: 'User should have been created during OAuth authentication. Please try logging out and logging back in.',
+        oauthConfigured: !!googleClientId && !!googleClientSecret
+      }, { status: 404 });
     }
     
     // Get the other user's ID from the users table by username
