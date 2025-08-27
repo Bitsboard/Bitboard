@@ -97,7 +97,7 @@ export async function GET(req: Request) {
           console.log('🔐 OAuth callback: Created new users table with correct schema');
           
           // Copy data from old table
-          await db.prepare('INSERT INTO users_new SELECT * FROM users').run();
+          await db.prepare('INSERT INTO users_new (id, email, username, sso, verified, created_at, image, has_chosen_username) SELECT id, email, username, sso, verified, created_at, image, has_chosen_username FROM users').run();
           console.log('🔐 OAuth callback: Copied data to new table');
           
           // Drop old table and rename new one
