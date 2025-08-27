@@ -5,14 +5,24 @@ export const runtime = "edge";
 
 // Generate a unique chat ID based on userA, userB, and listing
 function generateChatId(userA: string, userB: string, listingId: string): string {
-  // Sort users alphabetically to ensure consistent chat ID regardless of who initiates
-  const [firstUser, secondUser] = [userA, userB].sort();
-  return `chat_${firstUser}_${secondUser}_${listingId}_${Date.now()}`;
+  // Generate a proper UUID v4 instead of the string format
+  const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+  return uuid;
 }
 
 // Generate a unique message ID
 function generateMessageId(): string {
-  return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  // Generate a proper UUID v4 instead of the string format
+  const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+  return uuid;
 }
 
 export async function POST(req: Request) {
