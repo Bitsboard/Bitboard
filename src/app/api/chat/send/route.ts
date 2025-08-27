@@ -127,12 +127,28 @@ export async function POST(req: Request) {
         console.log('Creating new chat with ID:', actualChatId);
         
         try {
-          await db.prepare(`
+          // First, let's check the exact data types and values we're working with
+          console.log('Debug: Checking data types...');
+          console.log('listingId type:', typeof listingId, 'value:', listingId);
+          console.log('userEmail type:', typeof userEmail, 'value:', userEmail);
+          console.log('otherUserId type:', typeof otherUserId, 'value:', otherUserId);
+          
+          // Check if the listing_id is actually an integer in the listings table
+          const listingTypeCheck = await db.prepare(`
+            SELECT id, typeof(id) as id_type FROM listings WHERE id = ? LIMIT 1
+          `).bind(listingId).all();
+          
+          if (listingTypeCheck.results && listingTypeCheck.results.length > 0) {
+            console.log('Listing ID type in database:', listingTypeCheck.results[0].id_type);
+          }
+          
+          // Try to create the chat with proper data type handling
+          const chatInsertResult = await db.prepare(`
             INSERT INTO chats (id, listing_id, buyer_id, seller_id, created_at, last_message_at) 
             VALUES (?, ?, ?, ?, ?, ?)
           `).bind(
             actualChatId,
-            listingId, 
+            parseInt(listingId) || listingId, // Try to convert to integer if possible
             userEmail, 
             otherUserId, 
             Math.floor(Date.now() / 1000),
@@ -140,8 +156,21 @@ export async function POST(req: Request) {
           ).run();
           
           console.log('✅ New chat created successfully');
+          console.log('Chat insert result:', chatInsertResult);
+          
         } catch (insertError) {
           console.error('❌ Error creating chat:', insertError);
+          
+          // Let's get more details about the constraint failure
+          try {
+            const constraintInfo = await db.prepare(`
+              PRAGMA foreign_key_list(chats)
+            `).all();
+            console.log('Foreign key constraints for chats table:', constraintInfo.results);
+          } catch (pragmaError) {
+            console.log('Could not get foreign key info:', pragmaError);
+          }
+          
           return NextResponse.json({ 
             error: 'chat_creation_failed',
             message: 'Failed to create chat due to database constraint',
