@@ -45,7 +45,7 @@ export function HeroSection({
             </div>
 
             {/* Floating product images in organized orbiting formation */}
-            <div className="absolute pointer-events-none right-0 sm:right-0 md:right-0 top-[-20px] sm:top-[-30px] md:top-[-50px]">
+            <div className="absolute pointer-events-none right-0 top-0 w-full h-full flex justify-end">
                 <OrbitingProductsDemo />
             </div>
 
@@ -66,27 +66,33 @@ export function HeroSection({
 
                     {/* Right: Location above search */}
                     <div className="w-full md:w-[460px] md:self-center relative">
-                        <div className="mb-3 sm:mb-2 md:mb-1 flex md:justify-end relative z-10">
-                            <button onClick={onLocationClick} className={cn("w-full md:w-[calc(100%-120px)] rounded-3xl px-4 sm:px-6 py-4 sm:py-5 text-left focus:outline-none", inputBase)}>
-                                <div className="flex items-center justify-between gap-3">
-                                    <div className={cn("truncate text-sm sm:text-base", dark ? "text-neutral-100" : "text-neutral-900")}>
-                                        {radiusKm === 0 ? "Worldwide" : (center?.name || t('choose_location', lang))}
-                                    </div>
-                                    <div className={cn("text-xs sm:text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>
-                                        {radiusKm === 0 ? t('change', lang) : `${radiusKm} km`}
-                                    </div>
+                        {/* Search and Location Inputs */}
+                        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-2xl">
+                            {/* Search Input */}
+                            <div className="flex-1">
+                                <div className="mb-3 sm:mb-2 md:mb-1 flex md:justify-end relative z-10">
+                                    <button onClick={onLocationClick} className={cn("w-full md:w-[calc(100%-120px)] rounded-3xl px-4 sm:px-6 py-4 sm:py-5 text-left focus:outline-none", inputBase)}>
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className={cn("truncate text-sm sm:text-base", dark ? "text-neutral-100" : "text-neutral-900")}>
+                                                {radiusKm === 0 ? "Worldwide" : (center?.name || t('choose_location', lang))}
+                                            </div>
+                                            <div className={cn("text-xs sm:text-sm whitespace-nowrap shrink-0", dark ? "text-neutral-300" : "text-neutral-700")}>
+                                                {radiusKm === 0 ? t('change', lang) : `${radiusKm} km`}
+                                            </div>
+                                        </div>
+                                    </button>
                                 </div>
-                            </button>
-                        </div>
-                        <div className="relative mt-3 sm:mt-2 z-10">
-                            <input
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                onKeyDown={(e) => { if (e.key === "Enter") onSearch(); }}
-                                placeholder="Search for anything"
-                                className={cn("w-full rounded-3xl px-4 sm:px-6 pr-24 sm:pr-32 py-4 sm:py-5 text-base sm:text-lg focus:outline-none transition-all duration-300", inputBase)}
-                            />
-                            <button onClick={onSearch} className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-3 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white shadow">{t('search', lang)}</button>
+                                <div className="relative mt-3 sm:mt-2 z-10">
+                                    <input
+                                        value={query}
+                                        onChange={(e) => setQuery(e.target.value)}
+                                        onKeyDown={(e) => { if (e.key === "Enter") onSearch(); }}
+                                        placeholder="Search for anything"
+                                        className={cn("w-full rounded-3xl px-4 sm:px-6 pr-24 sm:pr-32 py-4 sm:py-5 text-base sm:text-lg focus:outline-none transition-all duration-300", inputBase)}
+                                    />
+                                    <button onClick={onSearch} className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-3 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white shadow">{t('search', lang)}</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

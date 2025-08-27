@@ -30,18 +30,15 @@ const ITEMS: Item[] = [
   { src: "/Shirt.png", label: "Shirt", sizeWeight: 0.9 },
 ];
 
-// Ellipse and motion settings (responsive to container size)
-const cx = 520, cy = 230; // center coordinates (restored to right position)
-const rx = 320, ry = 220; // radii (restored to larger size)
+// Ellipse and motion settings (match the earlier CSS path)
+const rx = 240, ry = 160; // radii
 const DURATION_MS = 34_500; // full loop duration (15% slower)
-const TILT_DEG = -30; // global stylized tilt (changed from -60)
+const TILT_DEG = -30; // global stylized tilt
+const ITEM_ROTATION = 15; // counter-clockwise rotation for all items
 
-// Responsive scaling - disable on mobile/tablet
-const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024; // lg breakpoint
-
-// Visual near/far scaling (top is near) - only on desktop
+// Visual near/far scaling (top is near)
 const SCALE_NEAR = 1.4;
-const SCALE_FAR = 0.4; // Restored to original value for proper size variation
+const SCALE_FAR = 0.4;
 
 // Base bubble size (Tailwind w-20/h-20 => 80px)
 const BASE_DIAM = 80; // px
@@ -52,7 +49,7 @@ const BASE_RADIUS = BASE_DIAM / 2; // 40 px
 const USE_WEIGHTS = false;
 
 // Global multiplier to uniformly scale all items (visual + spacing)
-const GLOBAL_SCALE = isDesktop ? 1.15 : 0.8; // Full scale on desktop, smaller on mobile/tablet
+const GLOBAL_SCALE = 1.15; // +15%
 
 // LUT resolution for fast arc-length queries
 const LUT_RES = 2048; // precision to reduce artifacts
@@ -77,18 +74,10 @@ function normTheta(t: number) {
 }
 
 function perspectiveScale(theta: number) {
-  // On mobile/tablet, no scaling - all items same size
-  if (!isDesktop) {
-    return 1.0; // No size variation
-  }
-  
   // Map top (-PI/2) as front/near (max scale), bottom (+PI/2) as far (min)
   const thetaPrime = theta + Math.PI / 2; // cos(0)=1 at top
   const t = (1 + Math.cos(thetaPrime)) / 2; // 1 at top, 0 at bottom
-  const scale = SCALE_FAR + (SCALE_NEAR - SCALE_FAR) * t;
-  
-  // Set minimum floor of 10% size
-  return Math.max(scale, 0.1);
+  return SCALE_FAR + (SCALE_NEAR - SCALE_FAR) * t;
 }
 
 // Display scale used for *rendered* size (independent of weights when disabled)
@@ -156,6 +145,9 @@ export default function OrbitingProductsDemo() {
   );
 
   const [now, setNow] = React.useState(0);
+  const [isMobile, setIsMobile] = React.useState(false);
+  const [isTablet, setIsTablet] = React.useState(false);
+  
   React.useEffect(() => {
     if (prefersReduced) return; // don't animate
     let raf = 0;
@@ -164,6 +156,32 @@ export default function OrbitingProductsDemo() {
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [prefersReduced]);
+
+  // Detect screen size for responsive positioning
+  React.useEffect(() => {
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  // Responsive orbit positioning
+  const getOrbitPosition = () => {
+    if (isMobile) {
+      return { cx: 480, cy: 220 }; // Mobile: moved further right and down
+    } else if (isTablet) {
+      return { cx: 650, cy: 200 }; // Tablet: moved further right, medium height
+    } else {
+      return { cx: 680, cy: 250 }; // Desktop: far right, lower
+    }
+  };
+
+  const { cx, cy } = getOrbitPosition();
 
   // Precompute LUT once
   const lut = React.useMemo(() => makeArcLUT(), []);
@@ -224,30 +242,9 @@ export default function OrbitingProductsDemo() {
   const nodes = thetas.map((theta, i) => {
     const x = cx + rx * Math.cos(theta);
     const y = cy + ry * Math.sin(theta);
-    
-    // Debug: log coordinate ranges for first few items
-    if (i < 3) {
-      console.log(`Item ${i}: x=${x.toFixed(1)}, y=${y.toFixed(1)}, theta=${theta.toFixed(2)}`);
-    }
-    
     // Visual size: do not amplify by item weight unless USE_WEIGHTS
     const s = GLOBAL_SCALE * displayScaleAt(theta) * (USE_WEIGHTS ? (ITEMS[i].sizeWeight ?? 1) : 1);
-    
-    // Apply minimum floor of 10% size to prevent objects from disappearing
-    const finalScale = Math.max(s, 0.1);
-    
-    // Dynamic z-index: large items (near) go in front, small items (far) go behind
-    // Use specific scaling thresholds for smooth transitions
-    let zIndex;
-    if (finalScale > 1.2) {
-      zIndex = 50; // Large items (near side) - above orange line
-    } else if (finalScale > 0.8) {
-      zIndex = 40; // Medium items - above orange line
-    } else {
-      zIndex = 5; // Small items (far side) - below orange line
-    }
-    
-    return { x, y, s: finalScale, i, zIndex };
+    return { x, y, s, i };
   });
 
   // Painter's algorithm: smaller first (farther), bigger last (nearer)
@@ -322,25 +319,29 @@ export default function OrbitingProductsDemo() {
   }, []);
   // =================== END DEV SELF-TESTS ===================
 
+  if (prefersReduced) return null;
+
   return (
-    <div className="w-full flex items-center justify-center py-6 sm:py-8 md:py-10 bg-transparent">
-      {/* Responsive stage that scales with screen size */}
-      <div className="relative w-[95vw] h-[45vw] sm:w-[85vw] sm:h-[40vw] md:w-[75vw] md:h-[35vw] lg:w-[840px] lg:h-[380px] max-w-[840px] max-h-[380px] min-w-[320px] min-h-[240px] overflow-visible">
+    <div className="w-full h-full flex items-center justify-center bg-transparent">
+      {/* Fixed-size stage so coordinates match the ellipse */}
+      <div className="relative" style={{ width: 840, height: 380 }}>
         {/* Orbiting layer with global tilt */}
         <div
           className="absolute inset-0"
           style={{ transform: `rotate(${TILT_DEG}deg)`, transformOrigin: `${cx}px ${cy}px` }}
         >
-          {nodes.map(({ x, y, s, i, zIndex }) => (
+          {nodes.map(({ x, y, s, i }) => (
             <div
               key={i}
               className="absolute pointer-events-none"
               style={{
                 left: x,
                 top: y,
-                transform: `translate(-50%, -50%) scale(${s.toFixed(3)})`,
+                transform: `translate(-50%, -50%)`,
                 willChange: "transform, left, top",
-                zIndex: zIndex, // Apply dynamic z-index
+                // Nuclear option: fixed container size prevents shrinking to zero
+                width: '80px',
+                height: '80px',
               }}
             >
               <div className="tilt-float" style={{ transform: `rotate(${(TILT_AMP_DEG * Math.sin(tiltOmega * now + tiltPhases[i])).toFixed(3)}deg)` }}>
@@ -348,7 +349,10 @@ export default function OrbitingProductsDemo() {
                   src={ITEMS[i].src}
                   alt={ITEMS[i].label}
                   className="w-20 h-20 object-contain drop-shadow-lg"
-                  style={{ transform: 'rotate(45deg)' }}
+                  style={{ 
+                    transform: `rotate(${ITEM_ROTATION}deg) scale(${s.toFixed(3)})`,
+                    transformOrigin: 'center'
+                  }}
                   draggable={false}
                 />
                 <span className="sr-only">{ITEMS[i].label}</span>
@@ -359,14 +363,12 @@ export default function OrbitingProductsDemo() {
       </div>
 
       {/* Styles for independent tilt */}
-      <style>{`
+      <style jsx>{`
         .tilt-float {
           transform-origin: center;
           will-change: transform;
         }
       `}</style>
-
-      {/* Reduced motion: freeze animation by not running RAF */}
     </div>
   );
 }
