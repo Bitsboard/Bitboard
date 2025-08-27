@@ -19,29 +19,38 @@ export async function getD1(): Promise<D1Database | null> {
 }
 
 export async function ensureChatSchema(db: D1Database): Promise<void> {
-  // Minimal schema for chats and messages
+  // Create chats table with TEXT PRIMARY KEY to match the actual schema
   await db
     .prepare(`CREATE TABLE IF NOT EXISTS chats (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      listing_id INTEGER,
-      buyer_id TEXT,
-      seller_id TEXT,
-      created_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+      id TEXT PRIMARY KEY,
+      listing_id INTEGER NOT NULL,
+      buyer_id TEXT NOT NULL,
+      seller_id TEXT NOT NULL,
+      created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+      last_message_at INTEGER DEFAULT (strftime('%s','now'))
     )`)
     .run();
 
+  // Create messages table with TEXT PRIMARY KEY to match the actual schema
   await db
     .prepare(`CREATE TABLE IF NOT EXISTS messages (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      chat_id INTEGER NOT NULL,
+      id TEXT PRIMARY KEY,
+      chat_id TEXT NOT NULL,
       from_id TEXT NOT NULL,
-      text TEXT NOT NULL,
+      text TEXT NOT NULL CHECK (length(text) > 0 AND length(text) <= 1000),
       created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
-      FOREIGN KEY(chat_id) REFERENCES chats(id) ON DELETE CASCADE
+      read_at INTEGER
     )`)
     .run();
 
-  await db.prepare('CREATE INDEX IF NOT EXISTS idx_messages_chat_created ON messages(chat_id, created_at DESC)').run();
+  // Create indexes for performance
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_chats_listing_id ON chats(listing_id)').run();
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_chats_buyer_id ON chats(buyer_id)').run();
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_chats_seller_id ON chats(seller_id)').run();
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_chats_last_message ON chats(last_message_at DESC)').run();
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_messages_chat_id ON messages(chat_id)').run();
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_messages_from_id ON messages(from_id)').run();
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at DESC)').run();
 }
 
 

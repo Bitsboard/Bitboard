@@ -4,6 +4,11 @@ import { getD1, ensureChatSchema } from '@/lib/cf';
 
 export const runtime = "edge";
 
+// Generate a unique ID for chats and messages
+function generateId(): string {
+  return `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
 export async function POST(req: Request) {
   try {
     const { chatId, text, listingId, otherUserId, userEmail } = await req.json() as { 
@@ -46,11 +51,13 @@ export async function POST(req: Request) {
       if (existingChat.results && existingChat.results.length > 0) {
         actualChatId = existingChat.results[0].id as string;
       } else {
-        // Create new chat
-        const chatResult = await db.prepare(`
-          INSERT INTO chats (listing_id, buyer_id, seller_id, created_at, last_message_at) 
-          VALUES (?, ?, ?, ?, ?)
+        // Create new chat with generated ID
+        const newChatId = generateId();
+        await db.prepare(`
+          INSERT INTO chats (id, listing_id, buyer_id, seller_id, created_at, last_message_at) 
+          VALUES (?, ?, ?, ?, ?, ?)
         `).bind(
+          newChatId,
           listingId, 
           userEmail, 
           otherUserId, 
@@ -58,8 +65,7 @@ export async function POST(req: Request) {
           Math.floor(Date.now() / 1000)
         ).run();
         
-        actualChatId = chatResult.meta?.last_row_id?.toString() || 
-                      await db.prepare('SELECT last_insert_rowid() AS id').all().then(r => (r.results?.[0]?.id as string));
+        actualChatId = newChatId;
       }
     }
     
@@ -67,19 +73,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "failed to create or find chat" }, { status: 500 });
     }
     
-    // Insert the message
-    const messageResult = await db.prepare(`
-      INSERT INTO messages (chat_id, from_id, text, created_at) 
-      VALUES (?, ?, ?, ?)
+    // Insert the message with generated ID
+    const messageId = generateId();
+    await db.prepare(`
+      INSERT INTO messages (id, chat_id, from_id, text, created_at) 
+      VALUES (?, ?, ?, ?, ?)
     `).bind(
+      messageId,
       actualChatId, 
       userEmail, 
       text.trim(), 
       Math.floor(Date.now() / 1000)
     ).run();
-    
-    const messageId = messageResult.meta?.last_row_id?.toString() || 
-                     await db.prepare('SELECT last_insert_rowid() AS id').all().then(r => (r.results?.[0]?.id as string));
     
     // Update chat's last_message_at
     await db.prepare(`
