@@ -44,7 +44,7 @@ export async function GET(req: Request) {
 
     const session = {
       user: {
-        id: userRow?.id ?? payload.sub ?? null,
+        id: userRow?.id ?? 'unknown',  // Only use database ID, don't fall back to OAuth ID
         email: payload.email ?? null,
         username: userRow?.username ?? null,
         image: userRow?.image ?? payload.picture ?? null,
