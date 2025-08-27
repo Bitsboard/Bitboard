@@ -7,13 +7,66 @@ import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
+interface AdminStats {
+  users: {
+    total: number;
+    verified: number;
+    admin: number;
+    banned: number;
+    new7d: number;
+    new30d: number;
+  };
+  listings: {
+    total: number;
+    active: number;
+    sold: number;
+    new7d: number;
+    new30d: number;
+    avgPriceSats: number;
+    totalValueActive: number;
+  };
+  chats: {
+    total: number;
+    new7d: number;
+    new30d: number;
+  };
+  messages: {
+    total: number;
+    new7d: number;
+    new30d: number;
+    unread: number;
+  };
+  categories: Array<{
+    category: string;
+    count: number;
+    avg_price: number;
+  }>;
+  recentActivity: Array<{
+    type: string;
+    identifier: string;
+    action: string;
+    timestamp: number;
+  }>;
+}
+
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
   const router = useRouter();
   const lang = useLang();
+
+  // Check if user is already authenticated on component mount
+  useEffect(() => {
+    const savedAuth = localStorage.getItem('admin_authenticated');
+    if (savedAuth === 'true') {
+      setIsAuthenticated(true);
+      loadStats();
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +78,10 @@ export default function AdminPage() {
       if (password === "admin123") {
         setIsAuthenticated(true);
         setPassword("");
+        // Save authentication state to localStorage
+        localStorage.setItem('admin_authenticated', 'true');
+        // Load stats immediately after login
+        loadStats();
       } else {
         setError("Incorrect password");
       }
@@ -33,6 +90,37 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('admin_authenticated');
+    setStats(null);
+  };
+
+  const loadStats = async () => {
+    try {
+      setStatsLoading(true);
+      const response = await fetch('/api/admin/stats');
+      if (response.ok) {
+        const data = await response.json() as { success: boolean; data?: AdminStats };
+        if (data.success && data.data) {
+          setStats(data.data);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading admin stats:', error);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  const formatSats = (sats: number) => {
+    return new Intl.NumberFormat().format(sats);
+  };
+
+  const formatDate = (timestamp: number) => {
+    return new Date(timestamp * 1000).toLocaleDateString();
   };
 
   if (!isAuthenticated) {
@@ -110,20 +198,138 @@ export default function AdminPage() {
                 Admin Dashboard
               </h1>
               <p className="text-lg text-neutral-600 dark:text-neutral-400">
-                Welcome to the admin panel
+                Real-time platform statistics and management
               </p>
             </div>
             
-            <button
-              onClick={() => setIsAuthenticated(false)}
-              className="px-4 py-2 bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-colors"
-            >
-              Logout
-            </button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={loadStats}
+                disabled={statsLoading}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+              >
+                {statsLoading ? 'Refreshing...' : 'Refresh Stats'}
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-colors"
+              >
+                Logout
+              </button>
+            </div>
           </div>
 
+          {/* Real-time Stats Grid */}
+          {statsLoading ? (
+            <div className="text-center py-12">
+              <div className="text-neutral-600 dark:text-neutral-400">Loading statistics...</div>
+            </div>
+          ) : stats ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {/* Users */}
+              <div className={cn(
+                "p-6 rounded-2xl border",
+                "bg-white dark:bg-neutral-900",
+                "border-neutral-200 dark:border-neutral-800"
+              )}>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.users.total}</div>
+                    <div className="text-sm text-neutral-600 dark:text-neutral-400">Total Users</div>
+                  </div>
+                </div>
+                <div className="text-xs text-neutral-500 space-y-1">
+                  <div>✅ {stats.users.verified} verified</div>
+                  <div>👑 {stats.users.admin} admins</div>
+                  <div>🚫 {stats.users.banned} banned</div>
+                  <div>📈 +{stats.users.new7d} this week</div>
+                </div>
+              </div>
+
+              {/* Listings */}
+              <div className={cn(
+                "p-6 rounded-2xl border",
+                "bg-white dark:bg-neutral-900",
+                "border-neutral-200 dark:border-neutral-800"
+              )}>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.listings.total}</div>
+                    <div className="text-sm text-neutral-600 dark:text-neutral-400">Total Listings</div>
+                  </div>
+                </div>
+                <div className="text-xs text-neutral-500 space-y-1">
+                  <div>🟢 {stats.listings.active} active</div>
+                  <div>💰 {stats.listings.sold} sold</div>
+                  <div>📈 +{stats.listings.new7d} this week</div>
+                  <div>💎 {formatSats(stats.listings.avgPriceSats)} avg sats</div>
+                </div>
+              </div>
+
+              {/* Chats */}
+              <div className={cn(
+                "p-6 rounded-2xl border",
+                "bg-white dark:bg-neutral-900",
+                "border-neutral-200 dark:border-neutral-800"
+              )}>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.chats.total}</div>
+                    <div className="text-sm text-neutral-600 dark:text-neutral-400">Active Chats</div>
+                  </div>
+                </div>
+                <div className="text-xs text-neutral-500 space-y-1">
+                  <div>💬 {stats.messages.total} messages</div>
+                  <div>📧 {stats.messages.unread} unread</div>
+                  <div>📈 +{stats.chats.new7d} this week</div>
+                  <div>📅 +{stats.chats.new30d} this month</div>
+                </div>
+              </div>
+
+              {/* Platform Value */}
+              <div className={cn(
+                "p-6 rounded-2xl border",
+                "bg-white dark:bg-neutral-900",
+                "border-neutral-200 dark:border-neutral-800"
+              )}>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-neutral-900 dark:text-white">{formatSats(stats.listings.totalValueActive)}</div>
+                    <div className="text-sm text-neutral-600 dark:text-neutral-400">Total Value (sats)</div>
+                  </div>
+                </div>
+                <div className="text-xs text-neutral-500 space-y-1">
+                  <div>💎 Active listings value</div>
+                  <div>📊 {stats.listings.active} active items</div>
+                  <div>📈 +{stats.listings.new7d} new this week</div>
+                  <div>📅 +{stats.listings.new30d} new this month</div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
           {/* Admin Actions Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {/* User Management */}
             <div className={cn(
               "p-6 rounded-2xl border transition-all duration-200 hover:shadow-lg",
@@ -251,41 +457,66 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {/* Quick Stats */}
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className={cn(
-              "p-6 rounded-2xl border",
-              "bg-white dark:bg-neutral-900",
-              "border-neutral-200 dark:border-neutral-800"
-            )}>
-              <div className="text-2xl font-bold text-neutral-900 dark:text-white">1,234</div>
-              <div className="text-sm text-neutral-600 dark:text-neutral-400">Total Users</div>
+          {/* Category Distribution */}
+          {stats?.categories && stats.categories.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-6">Category Distribution</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {stats.categories.map((category, index) => (
+                  <div key={index} className={cn(
+                    "p-4 rounded-xl border",
+                    "bg-white dark:bg-neutral-900",
+                    "border-neutral-200 dark:border-neutral-800"
+                  )}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-semibold text-neutral-900 dark:text-white">{category.category}</span>
+                      <span className="text-2xl font-bold text-orange-500">{category.count}</span>
+                    </div>
+                    <div className="text-sm text-neutral-600 dark:text-neutral-400">
+                      Avg: {formatSats(Math.round(category.avg_price))} sats
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className={cn(
-              "p-6 rounded-2xl border",
-              "bg-white dark:bg-neutral-900",
-              "border-neutral-200 dark:border-neutral-800"
-            )}>
-              <div className="text-2xl font-bold text-neutral-900 dark:text-white">567</div>
-              <div className="text-sm text-neutral-600 dark:text-neutral-400">Active Listings</div>
+          )}
+
+          {/* Recent Activity */}
+          {stats?.recentActivity && stats.recentActivity.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-6">Recent Activity</h2>
+              <div className={cn(
+                "rounded-xl border overflow-hidden",
+                "bg-white dark:bg-neutral-900",
+                "border-neutral-200 dark:border-neutral-800"
+              )}>
+                <div className="p-4 border-b border-neutral-200 dark:border-neutral-800">
+                  <h3 className="font-semibold text-neutral-900 dark:text-white">Last 7 Days</h3>
+                </div>
+                <div className="divide-y divide-neutral-200 dark:divide-neutral-800">
+                  {stats.recentActivity.map((activity, index) => (
+                    <div key={index} className="p-4 flex items-center gap-4">
+                      <div className={cn(
+                        "w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold",
+                        activity.type === 'user' ? "bg-blue-500" :
+                        activity.type === 'listing' ? "bg-green-500" : "bg-purple-500"
+                      )}>
+                        {activity.type === 'user' ? '👤' : activity.type === 'listing' ? '📦' : '💬'}
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium text-neutral-900 dark:text-white">
+                          {activity.identifier}
+                        </div>
+                        <div className="text-sm text-neutral-600 dark:text-neutral-400">
+                          {activity.action} • {formatDate(activity.timestamp)}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-            <div className={cn(
-              "p-6 rounded-2xl border",
-              "bg-white dark:bg-neutral-900",
-              "border-neutral-200 dark:border-neutral-800"
-            )}>
-              <div className="text-2xl font-bold text-neutral-900 dark:text-white">89</div>
-              <div className="text-sm text-neutral-600 dark:text-neutral-400">Pending Reviews</div>
-            </div>
-            <div className={cn(
-              "p-6 rounded-2xl border",
-              "bg-white dark:bg-neutral-900",
-              "border-neutral-200 dark:border-neutral-800"
-            )}>
-              <div className="text-2xl font-bold text-neutral-900 dark:text-white">99.9%</div>
-              <div className="text-sm text-neutral-600 dark:text-neutral-400">Uptime</div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </ErrorBoundary>
