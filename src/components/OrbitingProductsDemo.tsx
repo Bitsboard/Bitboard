@@ -31,7 +31,7 @@ const ITEMS: Item[] = [
 ];
 
 // Ellipse and motion settings (match the earlier CSS path)
-const rx = 240, ry = 160; // radii
+const rx = 300, ry = 200; // radii (increased from 240, 160 for larger orbit)
 const DURATION_MS = 34_500; // full loop duration (15% slower)
 const TILT_DEG = -30; // global stylized tilt
 const ITEM_ROTATION = 15; // counter-clockwise rotation for all items
@@ -173,11 +173,11 @@ export default function OrbitingProductsDemo() {
   // Responsive orbit positioning
   const getOrbitPosition = () => {
     if (isMobile) {
-      return { cx: 480, cy: 220 }; // Mobile: moved further right and down
+      return { cx: 520, cy: 240 }; // Mobile: moved further right and down
     } else if (isTablet) {
-      return { cx: 650, cy: 200 }; // Tablet: moved further right, medium height
+      return { cx: 700, cy: 200 }; // Tablet: moved further right
     } else {
-      return { cx: 680, cy: 250 }; // Desktop: far right, lower
+      return { cx: 720, cy: 270 }; // Desktop: moved down and to the right
     }
   };
 
