@@ -1,15 +1,16 @@
 import '../../../../shims/async_hooks';
 import { NextResponse } from "next/server";
 import { getD1, ensureChatSchema } from '@/lib/cf';
-import { getSessionFromRequest } from '@/lib/auth';
 
 export const runtime = "edge";
 
 export async function GET(req: Request) {
   try {
-    const session = await getSessionFromRequest(req);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+    const url = new URL(req.url);
+    const userEmail = url.searchParams.get('userEmail');
+    
+    if (!userEmail) {
+      return NextResponse.json({ error: 'userEmail required' }, { status: 401 });
     }
 
     const db = await getD1();
@@ -27,7 +28,7 @@ export async function GET(req: Request) {
         c.created_at,
         c.last_message_at,
         l.title as listing_title,
-        l.price_sats as listing_price,
+        l.price_sat as listing_price,
         l.image_url as listing_image,
         CASE 
           WHEN c.buyer_id = ? THEN 'buyer'
@@ -44,10 +45,10 @@ export async function GET(req: Request) {
     `;
     
     const chats = await db.prepare(chatsQuery).bind(
-      session.user.email, 
-      session.user.email, 
-      session.user.email, 
-      session.user.email
+      userEmail, 
+      userEmail, 
+      userEmail, 
+      userEmail
     ).all();
     
     // For each chat, get the latest message
@@ -65,7 +66,7 @@ export async function GET(req: Request) {
           SELECT COUNT(*) as count
           FROM messages 
           WHERE chat_id = ? AND from_id != ? AND (read_at IS NULL OR read_at = 0)
-        `).bind(chat.id, session.user.email).all();
+        `).bind(chat.id, userEmail).all();
         
         return {
           ...chat,

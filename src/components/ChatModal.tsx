@@ -63,7 +63,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       setIsLoading(true);
       
       // First, try to find existing chat
-      const chatResponse = await fetch('/api/chat/list');
+      const chatResponse = await fetch(`/api/chat/list?userEmail=${encodeURIComponent(user.email)}`);
       if (chatResponse.ok) {
         const chatData = await chatResponse.json() as { chats?: any[] };
         const existingChat = chatData.chats?.find((c: any) => 
@@ -88,10 +88,10 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
 
   const loadMessages = async (chatId: string) => {
     try {
-      const response = await fetch(`/api/chat/${chatId}`);
+      const response = await fetch(`/api/chat/${chatId}?userEmail=${encodeURIComponent(user?.email || '')}`);
       if (response.ok) {
-        const data = await response.json() as { messages?: Message[] };
-        if (data.messages) {
+        const data = await response.json() as { success: boolean; messages?: Message[] };
+        if (data.success && data.messages) {
           setMessages(data.messages);
         }
       }
@@ -113,7 +113,8 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
           text: text.trim(),
           listingId: listing.id,
           otherUserId: listing.postedBy || listing.seller.name,
-          chatId: chat?.id
+          chatId: chat?.id,
+          userEmail: user.email
         })
       });
       

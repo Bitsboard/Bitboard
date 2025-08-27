@@ -1,23 +1,23 @@
 import '../../../../shims/async_hooks';
 import { NextResponse } from "next/server";
 import { getD1, ensureChatSchema } from '@/lib/cf';
-import { getSessionFromRequest } from '@/lib/auth';
 
 export const runtime = "edge";
 
 export async function POST(req: Request) {
   try {
-    const session = await getSessionFromRequest(req);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-    }
-
-    const { chatId, text, listingId, otherUserId } = await req.json() as { 
+    const { chatId, text, listingId, otherUserId, userEmail } = await req.json() as { 
       chatId?: string; 
       text?: string; 
       listingId?: string;
       otherUserId?: string;
+      userEmail?: string;
     };
+    
+    // Simple authentication - check if userEmail is provided
+    if (!userEmail) {
+      return NextResponse.json({ error: 'userEmail required' }, { status: 401 });
+    }
     
     if (!text || !text.trim()) {
       return NextResponse.json({ error: "text required" }, { status: 400 });
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
         SELECT id FROM chats 
         WHERE listing_id = ? AND 
         ((buyer_id = ? AND seller_id = ?) OR (buyer_id = ? AND seller_id = ?))
-      `).bind(listingId, session.user.email, otherUserId, otherUserId, session.user.email).all();
+      `).bind(listingId, userEmail, otherUserId, otherUserId, userEmail).all();
       
       if (existingChat.results && existingChat.results.length > 0) {
         actualChatId = existingChat.results[0].id as string;
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
           VALUES (?, ?, ?, ?, ?)
         `).bind(
           listingId, 
-          session.user.email, 
+          userEmail, 
           otherUserId, 
           Math.floor(Date.now() / 1000),
           Math.floor(Date.now() / 1000)
@@ -73,7 +73,7 @@ export async function POST(req: Request) {
       VALUES (?, ?, ?, ?)
     `).bind(
       actualChatId, 
-      session.user.email, 
+      userEmail, 
       text.trim(), 
       Math.floor(Date.now() / 1000)
     ).run();
