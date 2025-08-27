@@ -52,6 +52,41 @@ export async function POST(req: Request) {
     // Ensure chat schema exists
     await ensureChatSchema(db);
     
+    // Validate that the listing exists
+    console.log('Validating listing exists...');
+    const listingCheck = await db.prepare(`
+      SELECT id, title FROM listings WHERE id = ?
+    `).bind(listingId).all();
+    
+    if (!listingCheck.results || listingCheck.results.length === 0) {
+      console.log('❌ Listing not found:', listingId);
+      return NextResponse.json({ 
+        error: 'listing_not_found',
+        message: `Listing with ID ${listingId} does not exist`
+      }, { status: 404 });
+    }
+    
+    console.log('✅ Listing found:', listingCheck.results[0].title);
+    
+    // Validate that the other user exists (check if they have any listings or are a known user)
+    console.log('Validating other user exists...');
+    const userCheck = await db.prepare(`
+      SELECT DISTINCT posted_by FROM listings WHERE posted_by = ?
+      UNION
+      SELECT DISTINCT id FROM users WHERE id = ?
+      LIMIT 1
+    `).bind(otherUserId, otherUserId).all();
+    
+    if (!userCheck.results || userCheck.results.length === 0) {
+      console.log('❌ Other user not found:', otherUserId);
+      return NextResponse.json({ 
+        error: 'user_not_found',
+        message: `User ${otherUserId} does not exist or has no listings`
+      }, { status: 404 });
+    }
+    
+    console.log('✅ Other user validated');
+    
     let actualChatId = chatId;
     
     // If no chatId provided, find or create a new chat
@@ -73,19 +108,28 @@ export async function POST(req: Request) {
         actualChatId = generateChatId(userEmail, otherUserId, listingId);
         console.log('Creating new chat with ID:', actualChatId);
         
-        await db.prepare(`
-          INSERT INTO chats (id, listing_id, buyer_id, seller_id, created_at, last_message_at) 
-          VALUES (?, ?, ?, ?, ?, ?)
-        `).bind(
-          actualChatId,
-          listingId, 
-          userEmail, 
-          otherUserId, 
-          Math.floor(Date.now() / 1000),
-          Math.floor(Date.now() / 1000)
-        ).run();
-        
-        console.log('New chat created successfully');
+        try {
+          await db.prepare(`
+            INSERT INTO chats (id, listing_id, buyer_id, seller_id, created_at, last_message_at) 
+            VALUES (?, ?, ?, ?, ?, ?)
+          `).bind(
+            actualChatId,
+            listingId, 
+            userEmail, 
+            otherUserId, 
+            Math.floor(Date.now() / 1000),
+            Math.floor(Date.now() / 1000)
+          ).run();
+          
+          console.log('✅ New chat created successfully');
+        } catch (insertError) {
+          console.error('❌ Error creating chat:', insertError);
+          return NextResponse.json({ 
+            error: 'chat_creation_failed',
+            message: 'Failed to create chat due to database constraint',
+            details: String(insertError)
+          }, { status: 500 });
+        }
       }
     }
     
@@ -97,25 +141,43 @@ export async function POST(req: Request) {
     const messageId = generateMessageId();
     console.log('Inserting message:', messageId);
     
-    await db.prepare(`
-      INSERT INTO messages (id, chat_id, from_id, text, created_at) 
-      VALUES (?, ?, ?, ?, ?)
-    `).bind(
-      messageId,
-      actualChatId, 
-      userEmail, 
-      text.trim(), 
-      Math.floor(Date.now() / 1000)
-    ).run();
+    try {
+      await db.prepare(`
+        INSERT INTO messages (id, chat_id, from_id, text, created_at) 
+        VALUES (?, ?, ?, ?, ?)
+      `).bind(
+        messageId,
+        actualChatId, 
+        userEmail, 
+        text.trim(), 
+        Math.floor(Date.now() / 1000)
+      ).run();
+      
+      console.log('✅ Message inserted successfully');
+    } catch (messageError) {
+      console.error('❌ Error inserting message:', messageError);
+      return NextResponse.json({ 
+        error: 'message_insertion_failed',
+        message: 'Failed to insert message due to database constraint',
+        details: String(messageError)
+      }, { status: 500 });
+    }
     
     // Update chat's last_message_at
-    await db.prepare(`
-      UPDATE chats 
-      SET last_message_at = ? 
-      WHERE id = ?
-    `).bind(Math.floor(Date.now() / 1000), actualChatId).run();
+    try {
+      await db.prepare(`
+        UPDATE chats 
+        SET last_message_at = ? 
+        WHERE id = ?
+      `).bind(Math.floor(Date.now() / 1000), actualChatId).run();
+      
+      console.log('✅ Chat timestamp updated successfully');
+    } catch (updateError) {
+      console.error('❌ Error updating chat timestamp:', updateError);
+      // Don't fail the entire request for this, just log it
+    }
     
-    console.log('Message sent successfully');
+    console.log('🎉 Message sent successfully!');
     
     return NextResponse.json({ 
       ok: true, 
