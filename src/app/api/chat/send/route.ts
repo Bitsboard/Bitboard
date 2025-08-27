@@ -70,18 +70,36 @@ export async function POST(req: Request) {
     
     // Validate that the other user exists (check if they have any listings or are a known user)
     console.log('Validating other user exists...');
+    
+    // Check multiple possible username fields
     const userCheck = await db.prepare(`
-      SELECT DISTINCT posted_by FROM listings WHERE posted_by = ?
+      SELECT DISTINCT posted_by as username FROM listings WHERE posted_by = ?
       UNION
-      SELECT DISTINCT id FROM users WHERE id = ?
+      SELECT DISTINCT id as username FROM users WHERE id = ?
+      UNION
+      SELECT DISTINCT username as username FROM users WHERE username = ?
+      UNION
+      SELECT DISTINCT email as username FROM users WHERE email = ?
       LIMIT 1
-    `).bind(otherUserId, otherUserId).all();
+    `).bind(otherUserId, otherUserId, otherUserId, otherUserId).all();
     
     if (!userCheck.results || userCheck.results.length === 0) {
       console.log('❌ Other user not found:', otherUserId);
+      
+      // Let's also check what users actually exist to help debug
+      const allUsers = await db.prepare(`
+        SELECT DISTINCT posted_by FROM listings 
+        WHERE posted_by IS NOT NULL AND posted_by != ''
+        ORDER BY posted_by
+        LIMIT 10
+      `).all();
+      
+      console.log('Available users in listings:', allUsers.results?.map(u => u.posted_by) || []);
+      
       return NextResponse.json({ 
         error: 'user_not_found',
-        message: `User ${otherUserId} does not exist or has no listings`
+        message: `User ${otherUserId} does not exist or has no listings`,
+        availableUsers: allUsers.results?.map(u => u.posted_by) || []
       }, { status: 404 });
     }
     
