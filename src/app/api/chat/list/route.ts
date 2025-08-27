@@ -5,31 +5,19 @@ export const runtime = "edge";
 
 export async function GET(req: Request) {
   try {
-    console.log('Chat list API called');
-    
     const url = new URL(req.url);
     const userEmail = url.searchParams.get('userEmail');
     
-    console.log('User email from query:', userEmail);
-    
     if (!userEmail) {
-      console.log('No userEmail provided');
       return NextResponse.json({ error: 'userEmail required' }, { status: 401 });
     }
 
-    console.log('Getting D1 database...');
     const db = await getD1();
-    if (!db) {
-      console.log('No database binding found');
-      return NextResponse.json({ chats: [], error: 'no_db_binding' }, { status: 500 });
-    }
+    if (!db) return NextResponse.json({ chats: [], error: 'no_db_binding' }, { status: 500 });
     
-    console.log('Ensuring chat schema...');
     await ensureChatSchema(db);
-    console.log('Chat schema ensured');
     
     // Get all chats where the user is either buyer or seller
-    console.log('Executing chats query...');
     const chatsQuery = `
       SELECT 
         c.id,
@@ -41,6 +29,8 @@ export async function GET(req: Request) {
         l.title as listing_title,
         l.price_sat as listing_price,
         l.image_url as listing_image,
+        l.category as listing_category,
+        l.type as listing_type,
         CASE 
           WHEN c.buyer_id = ? THEN 'buyer'
           ELSE 'seller'
@@ -62,14 +52,10 @@ export async function GET(req: Request) {
       userEmail
     ).all();
     
-    console.log('Chats query result:', chats);
-    
-    // For each chat, get the latest message
-    console.log('Processing chats with messages...');
+    // For each chat, get the latest message and unread count
     const chatsWithMessages = await Promise.all(
       (chats.results || []).map(async (chat: any) => {
-        console.log('Processing chat:', chat.id);
-        
+        // Get latest message
         const latestMessage = await db.prepare(`
           SELECT id, from_id, text, created_at, read_at
           FROM messages 
@@ -78,6 +64,7 @@ export async function GET(req: Request) {
           LIMIT 1
         `).bind(chat.id).all();
         
+        // Get unread count
         const unreadCount = await db.prepare(`
           SELECT COUNT(*) as count
           FROM messages 
@@ -92,15 +79,13 @@ export async function GET(req: Request) {
       })
     );
     
-    console.log('Returning chats with messages:', chatsWithMessages);
-    return NextResponse.json({ chats: chatsWithMessages });
+    return NextResponse.json({ 
+      chats: chatsWithMessages,
+      userEmail,
+      totalChats: chatsWithMessages.length
+    });
   } catch (error) {
     console.error('Error fetching chats:', error);
-    console.error('Error details:', {
-      name: error instanceof Error ? error.name : 'Unknown',
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : 'No stack trace'
-    });
     return NextResponse.json({ error: 'server_error' }, { status: 500 });
   }
 }
