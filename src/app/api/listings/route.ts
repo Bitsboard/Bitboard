@@ -95,6 +95,21 @@ export async function GET(req: NextRequest) {
     // Execute query
     let results: any[] = [];
     try {
+      // First, let's diagnose what's in the database
+      console.log('🔍 Listings API: Checking database state...');
+      
+      const userCount = await db.prepare('SELECT COUNT(*) as count FROM users').all();
+      const listingCount = await db.prepare('SELECT COUNT(*) as count FROM listings').all();
+      const sampleUsers = await db.prepare('SELECT id, email, username FROM users LIMIT 3').all();
+      const sampleListings = await db.prepare('SELECT id, title, posted_by FROM listings LIMIT 3').all();
+      
+      console.log('🔍 Listings API: Database state:', {
+        userCount: userCount.results?.[0]?.count,
+        listingCount: listingCount.results?.[0]?.count,
+        sampleUsers: sampleUsers.results,
+        sampleListings: sampleListings.results
+      });
+      
       const rich = await db
         .prepare(`SELECT l.id,
                          l.title,
@@ -120,7 +135,9 @@ export async function GET(req: NextRequest) {
         .bind(...binds, ...orderBinds, validatedQuery.limit, validatedQuery.offset)
         .all();
       results = rich.results ?? [];
-    } catch {
+      console.log('🔍 Listings API: Rich query returned', results.length, 'results');
+    } catch (error) {
+      console.log('🔍 Listings API: Rich query failed:', error);
       // Fallback to minimal schema
       const minimal = await db
         .prepare(`SELECT l.id,
@@ -139,6 +156,38 @@ export async function GET(req: NextRequest) {
         .bind(...binds, validatedQuery.limit, validatedQuery.offset)
         .all();
       results = minimal.results ?? [];
+      console.log('🔍 Listings API: Minimal query returned', results.length, 'results');
+    }
+    
+    // If still no results, try a basic listings query without JOIN
+    if (results.length === 0) {
+      console.log('🔍 Listings API: Trying basic listings query without JOIN...');
+      try {
+        const basic = await db
+          .prepare(`SELECT l.id,
+                           l.title,
+                           l.description,
+                           l.category,
+                           l.ad_type AS adType,
+                           l.location,
+                           l.lat,
+                           l.lng,
+                           l.image_url AS imageUrl,
+                           l.price_sat AS priceSat,
+                           l.posted_by AS postedBy,
+                           l.boosted_until AS boostedUntil,
+                           l.created_at AS createdAt
+                    FROM listings l
+                    ${whereClauseStr}
+                    ORDER BY ${validatedQuery.sortBy === 'price' ? 'l.price_sat' : 'l.created_at'} ${validatedQuery.sortOrder}
+                    LIMIT ? OFFSET ?`)
+          .bind(...binds, validatedQuery.limit, validatedQuery.offset)
+          .all();
+        results = basic.results ?? [];
+        console.log('🔍 Listings API: Basic query returned', results.length, 'results');
+      } catch (basicError) {
+        console.log('🔍 Listings API: Basic query also failed:', basicError);
+      }
     }
 
     // Get total count
