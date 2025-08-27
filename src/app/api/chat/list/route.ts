@@ -30,6 +30,48 @@ export async function GET(req: Request) {
     const userId = userResult.results[0].id;
     console.log('Found user ID:', userId, 'for email:', userEmail);
     
+    // MIGRATION: Fix existing chat IDs that use the old string format
+    try {
+      console.log('🔧 Checking for old format chat IDs to migrate...');
+      
+      // Find chats with old format IDs (starting with 'chat_')
+      const oldChats = await db.prepare(`
+        SELECT id FROM chats WHERE id LIKE 'chat_%'
+      `).all();
+      
+      if (oldChats.results && oldChats.results.length > 0) {
+        console.log('🔧 Found', oldChats.results.length, 'chats with old format IDs, migrating...');
+        
+        for (const oldChat of oldChats.results) {
+          const oldId = oldChat.id;
+          
+          // Generate new UUID for this chat
+          const newId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+          });
+          
+          console.log('🔧 Migrating chat ID:', oldId, '→', newId);
+          
+          // Update the chat ID
+          await db.prepare('UPDATE chats SET id = ? WHERE id = ?').bind(newId, oldId).run();
+          
+          // Update all messages that reference this chat
+          await db.prepare('UPDATE messages SET chat_id = ? WHERE chat_id = ?').bind(newId, oldId).run();
+          
+          console.log('🔧 Successfully migrated chat and messages');
+        }
+        
+        console.log('🔧 Chat ID migration completed');
+      } else {
+        console.log('🔧 No old format chat IDs found, migration not needed');
+      }
+    } catch (migrationError) {
+      console.log('🔧 Chat ID migration failed:', migrationError);
+      // Continue with the request even if migration fails
+    }
+    
     // Get all chats where the user is either buyer or seller using their UUID
     const chatsQuery = `
       SELECT 
