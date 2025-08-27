@@ -26,15 +26,30 @@ export async function GET(
     
     await ensureChatSchema(db);
     
-    // Verify user has access to this chat
+    // First get the user's UUID from their email
+    const userResult = await db.prepare(`
+      SELECT id FROM users WHERE email = ?
+    `).bind(userEmail).all();
+    
+    if (!userResult.results || userResult.results.length === 0) {
+      return NextResponse.json({ error: 'user not found' }, { status: 404 });
+    }
+    
+    const userId = userResult.results[0].id;
+    console.log('🔍 Chat API: User ID:', userId, 'for email:', userEmail);
+    
+    // Verify user has access to this chat using UUID
     const chatAccess = await db.prepare(`
       SELECT id FROM chats 
       WHERE id = ? AND (buyer_id = ? OR seller_id = ?)
-    `).bind(chatId, userEmail, userEmail).all();
+    `).bind(chatId, userId, userId).all();
     
     if (!chatAccess.results || chatAccess.results.length === 0) {
+      console.log('🔍 Chat API: Access denied for chat:', chatId, 'user:', userId);
       return NextResponse.json({ error: 'chat not found or access denied' }, { status: 404 });
     }
+    
+    console.log('🔍 Chat API: Access granted for chat:', chatId, 'user:', userId);
     
     // Get messages for this chat
     const messages = await db.prepare(`
