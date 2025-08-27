@@ -23,15 +23,15 @@ export default function AdminPage() {
         console.log('Session response status:', response.status);
         
         if (response.ok) {
-          const data = await response.json() as { session?: Session | null };
+          const data = await response.json() as { session?: any };
           console.log('Session data:', data);
           const userSession = data?.session;
           
-          if (userSession) {
+          if (userSession && userSession.user) {
             console.log('User session found:', userSession);
             setSession(userSession);
 
-            if (userSession.user?.email) {
+            if (userSession.user.email) {
               console.log('Checking admin status for:', userSession.user.email);
               // Check if user is admin
               const adminResponse = await fetch('/api/admin/check', {
