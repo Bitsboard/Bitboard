@@ -79,11 +79,13 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       if (chatResponse.ok) {
         const chatData = await chatResponse.json() as { chats?: any[] };
         console.log('🔍 ChatModal: Found chats:', chatData.chats?.length || 0);
+        console.log('🔍 ChatModal: All chats:', chatData.chats);
         
-        const existingChat = chatData.chats?.find((c: any) => 
-          c.listing_id === listing.id && 
-          (c.buyer_id === user.email || c.seller_id === user.email)
-        );
+        // Look for chat that matches this listing
+        const existingChat = chatData.chats?.find((c: any) => {
+          console.log('🔍 ChatModal: Checking chat:', c.id, 'listing_id:', c.listing_id, 'vs listing.id:', listing.id);
+          return c.listing_id == listing.id; // Use == for type coercion since listing.id might be string/number
+        });
         
         if (existingChat) {
           console.log('🔍 ChatModal: Found existing chat:', existingChat.id);

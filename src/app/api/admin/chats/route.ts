@@ -23,6 +23,8 @@ export async function GET(req: Request) {
     
     await ensureChatSchema(db);
     
+    console.log('🔍 Admin Chats API: Database connection established, fetching chats...');
+    
     // Get all chats with listing and user details
     const chats = await db.prepare(`
       SELECT 
@@ -44,6 +46,11 @@ export async function GET(req: Request) {
       LEFT JOIN users seller ON c.seller_id = seller.id
       ORDER BY c.last_message_at DESC, c.created_at DESC
     `).all();
+    
+    console.log('🔍 Admin Chats API: Raw chats query result:', {
+      chatCount: chats.results?.length || 0,
+      chats: chats.results?.slice(0, 3) // Show first 3 chats for debugging
+    });
     
     // For each chat, get message count and latest message
     const chatsWithDetails = await Promise.all(
