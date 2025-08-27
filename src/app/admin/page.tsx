@@ -18,14 +18,21 @@ export default function AdminPage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        console.log('Checking authentication...');
         const response = await fetch('/api/auth/session');
+        console.log('Session response status:', response.status);
+        
         if (response.ok) {
           const data = await response.json() as { session?: Session | null };
+          console.log('Session data:', data);
           const userSession = data?.session;
+          
           if (userSession) {
+            console.log('User session found:', userSession);
             setSession(userSession);
 
             if (userSession.user?.email) {
+              console.log('Checking admin status for:', userSession.user.email);
               // Check if user is admin
               const adminResponse = await fetch('/api/admin/check', {
                 method: 'POST',
@@ -33,12 +40,20 @@ export default function AdminPage() {
                 body: JSON.stringify({ email: userSession.user.email })
               });
 
+              console.log('Admin check response status:', adminResponse.status);
               if (adminResponse.ok) {
                 const adminData = await adminResponse.json() as { isAdmin: boolean };
+                console.log('Admin data:', adminData);
                 setIsAdmin(adminData.isAdmin);
+              } else {
+                console.error('Admin check failed:', adminResponse.status);
               }
             }
+          } else {
+            console.log('No user session found');
           }
+        } else {
+          console.error('Session response not ok:', response.status);
         }
       } catch (error) {
         console.error('Failed to check authentication:', error);
@@ -52,12 +67,14 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!loading && !session) {
+      console.log('No session, redirecting to home');
       router.push('/');
     }
   }, [loading, session, router]);
 
   useEffect(() => {
     if (!loading && session && !isAdmin) {
+      console.log('Session exists but not admin, redirecting to home');
       router.push('/');
     }
   }, [loading, session, isAdmin, router]);
