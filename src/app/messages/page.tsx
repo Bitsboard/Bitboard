@@ -12,7 +12,6 @@ interface ChatWithDetails extends Chat {
   listing_price: number;
   listing_image: string;
   listing_category: string;
-  listing_type: string;
   user_role: 'buyer' | 'seller';
   other_user_id: string;
   latestMessage: Message | null;
@@ -275,7 +274,7 @@ export default function MessagesPage() {
                         </div>
                         
                         <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-1">
-                          {chat.listing_type === 'sell' ? 'Buying from' : 'Selling to'}: {chat.other_user_id}
+                          {chat.user_role === 'buyer' ? 'Buying from' : 'Selling to'}: {chat.other_user_id}
                         </p>
                         
                         {chat.latestMessage && (
@@ -337,7 +336,7 @@ export default function MessagesPage() {
                         {selectedChat.listing_title}
                       </h3>
                       <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                        {selectedChat.listing_type === 'sell' ? 'Buying from' : 'Selling to'}: {selectedChat.other_user_id}
+                        {selectedChat.user_role === 'buyer' ? 'Buying from' : 'Selling to'}: {selectedChat.other_user_id}
                       </p>
                     </div>
                     
