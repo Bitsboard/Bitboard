@@ -85,16 +85,20 @@ export async function GET(req: Request) {
         l.price_sat as listing_price,
         l.image_url as listing_image,
         l.category as listing_category,
+        buyer.username as buyer_username,
+        seller.username as seller_username,
         CASE 
           WHEN c.buyer_id = ? THEN 'buyer'
           ELSE 'seller'
         END as user_role,
         CASE 
-          WHEN c.buyer_id = ? THEN c.seller_id
-          ELSE c.buyer_id
-        END as other_user_id
+          WHEN c.buyer_id = ? THEN seller.username
+          ELSE buyer.username
+        END as other_user_username
       FROM chats c
       JOIN listings l ON c.listing_id = l.id
+      LEFT JOIN users buyer ON c.buyer_id = buyer.id
+      LEFT JOIN users seller ON c.seller_id = seller.id
       WHERE c.buyer_id = ? OR c.seller_id = ?
       ORDER BY c.last_message_at DESC, c.created_at DESC
     `;
