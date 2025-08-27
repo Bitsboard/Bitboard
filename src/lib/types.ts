@@ -77,18 +77,20 @@ export type User = {
 // Chat Types
 export type Message = {
   id: string;
-  chatId: string;
-  fromId: string;
+  chat_id: string;
+  from_id: string;
   text: string;
-  createdAt: number;
+  created_at: number;
+  read_at?: number;
 };
 
 export type Chat = {
   id: string;
-  listingId: string;
-  buyerId: string;
-  sellerId: string;
-  createdAt: number;
+  listing_id: string;
+  buyer_id: string;
+  seller_id: string;
+  created_at: number;
+  last_message_at: number;
   messages: Message[];
 };
 

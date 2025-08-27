@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { PriceBlock } from "./PriceBlock";
 import { Modal } from "./Modal";
 import { generateProfilePicture, getInitials, cn } from "@/lib/utils";
-import type { Listing, Category, Unit, Seller } from "@/lib/types";
+import type { Listing, Category, Unit, Seller, Message, Chat } from "@/lib/types";
 import Link from "next/link";
 
 interface ChatModalProps {
@@ -15,23 +15,6 @@ interface ChatModalProps {
   unit: Unit;
   onBackToListing?: () => void;
   user?: { email: string; username?: string };
-}
-
-interface Message {
-  id: string;
-  from_id: string;
-  text: string;
-  created_at: number;
-  read_at?: number;
-}
-
-interface Chat {
-  id: string;
-  listing_id: string;
-  buyer_id: string;
-  seller_id: string;
-  created_at: number;
-  last_message_at: number;
 }
 
 export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListing, user }: ChatModalProps) {
@@ -140,6 +123,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         // Add message to local state
         const newMessage: Message = {
           id: data.messageId || Date.now().toString(),
+          chat_id: data.chatId || chat?.id || 'temp',
           from_id: user.email,
           text: text.trim(),
           created_at: Math.floor(Date.now() / 1000)
@@ -156,7 +140,8 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
             buyer_id: user.email,
             seller_id: listing.postedBy || listing.seller.name,
             created_at: Math.floor(Date.now() / 1000),
-            last_message_at: Math.floor(Date.now() / 1000)
+            last_message_at: Math.floor(Date.now() / 1000),
+            messages: []
           });
         }
       }
