@@ -6,19 +6,31 @@ export const runtime = "edge";
 
 export async function GET(req: Request) {
   try {
+    console.log('Chat list API called');
+    
     const url = new URL(req.url);
     const userEmail = url.searchParams.get('userEmail');
     
+    console.log('User email from query:', userEmail);
+    
     if (!userEmail) {
+      console.log('No userEmail provided');
       return NextResponse.json({ error: 'userEmail required' }, { status: 401 });
     }
 
+    console.log('Getting D1 database...');
     const db = await getD1();
-    if (!db) return NextResponse.json({ chats: [], error: 'no_db_binding' }, { status: 500 });
+    if (!db) {
+      console.log('No database binding found');
+      return NextResponse.json({ chats: [], error: 'no_db_binding' }, { status: 500 });
+    }
     
+    console.log('Ensuring chat schema...');
     await ensureChatSchema(db);
+    console.log('Chat schema ensured');
     
     // Get all chats where the user is either buyer or seller
+    console.log('Executing chats query...');
     const chatsQuery = `
       SELECT 
         c.id,
@@ -51,9 +63,14 @@ export async function GET(req: Request) {
       userEmail
     ).all();
     
+    console.log('Chats query result:', chats);
+    
     // For each chat, get the latest message
+    console.log('Processing chats with messages...');
     const chatsWithMessages = await Promise.all(
       (chats.results || []).map(async (chat: any) => {
+        console.log('Processing chat:', chat.id);
+        
         const latestMessage = await db.prepare(`
           SELECT id, from_id, text, created_at, read_at
           FROM messages 
@@ -76,9 +93,15 @@ export async function GET(req: Request) {
       })
     );
     
+    console.log('Returning chats with messages:', chatsWithMessages);
     return NextResponse.json({ chats: chatsWithMessages });
   } catch (error) {
     console.error('Error fetching chats:', error);
+    console.error('Error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : 'No stack trace'
+    });
     return NextResponse.json({ error: 'server_error' }, { status: 500 });
   }
 }
