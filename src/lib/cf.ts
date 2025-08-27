@@ -1,7 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import '../shims/async_hooks';
-
 export type CfEnv = {
   DB?: D1Database;
   [key: string]: unknown;
