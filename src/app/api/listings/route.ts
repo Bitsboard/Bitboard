@@ -33,6 +33,34 @@ export async function GET(req: NextRequest) {
         .run();
     } catch { }
 
+    // Ensure users table has all required columns for listings API
+    try {
+      console.log('🔧 Listings API: Ensuring users table has complete schema...');
+      
+      // Check if users table exists and has required columns
+      const tableInfo = await db.prepare("PRAGMA table_info(users)").all();
+      const hasRating = tableInfo.results?.some((col: any) => col.name === 'rating');
+      const hasDeals = tableInfo.results?.some((col: any) => col.name === 'deals');
+      const hasVerified = tableInfo.results?.some((col: any) => col.name === 'verified');
+      
+      if (!hasRating || !hasDeals || !hasVerified) {
+        console.log('🔧 Listings API: Users table missing required columns, adding them...');
+        
+        // Add missing columns one by one
+        try { await db.prepare('ALTER TABLE users ADD COLUMN rating REAL DEFAULT 5.0').run(); } catch {}
+        try { await db.prepare('ALTER TABLE users ADD COLUMN deals INTEGER DEFAULT 0').run(); } catch {}
+        try { await db.prepare('ALTER TABLE users ADD COLUMN last_active INTEGER DEFAULT 0').run(); } catch {}
+        try { await db.prepare('ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0').run(); } catch {}
+        try { await db.prepare('ALTER TABLE users ADD COLUMN banned INTEGER DEFAULT 0').run(); } catch {}
+        
+        console.log('🔧 Listings API: Users table schema updated successfully');
+      } else {
+        console.log('🔧 Listings API: Users table already has complete schema');
+      }
+    } catch (migrationError) {
+      console.log('🔧 Listings API: Users table migration check failed:', migrationError);
+    }
+
     // Build optional filters
     const whereClause: string[] = [];
     const binds: any[] = [];
