@@ -44,9 +44,17 @@ export async function GET(req: Request) {
 
   // Upsert user in D1 users table
   try {
+    console.log('🔐 OAuth callback: Starting user creation/update...');
+    console.log('🔐 OAuth callback: User email:', user.email);
+    console.log('🔐 OAuth callback: User name:', user.name);
+    
     const { env } = getRequestContext();
+    console.log('🔐 OAuth callback: Got request context, env keys:', Object.keys(env || {}));
+    
     const db = (env as any).DB as D1Database | undefined;
     if (db) {
+      console.log('🔐 OAuth callback: Database connection found, creating users table...');
+      
       await db.prepare(`CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
         email TEXT UNIQUE,
@@ -57,22 +65,44 @@ export async function GET(req: Request) {
         image TEXT,
         has_chosen_username INTEGER DEFAULT 0 CHECK (has_chosen_username IN (0, 1))
       )`).run();
+      
+      console.log('🔐 OAuth callback: Users table ensured, checking for existing user...');
+      
       const existing = await db.prepare('SELECT id, username FROM users WHERE email = ?').bind(user.email).all();
       let userId = existing.results?.[0]?.id as string | undefined;
+      
       if (!userId) {
         userId = uuidv4();
+        console.log('🔐 OAuth callback: Creating new user with ID:', userId);
+        
         // Don't generate a default username - user must choose one
         await db.prepare('INSERT INTO users (id, email, username, sso, verified, created_at, image, has_chosen_username) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
           .bind(userId, user.email, null, 'google', 1, Math.floor(Date.now() / 1000), user.picture ?? null, 0)
           .run();
+          
+        console.log('🔐 OAuth callback: New user created successfully!');
       } else {
+        console.log('🔐 OAuth callback: Updating existing user:', userId);
+        
         await db.prepare('UPDATE users SET image = COALESCE(?, image), sso = ? WHERE id = ?')
           .bind(user.picture ?? null, 'google', userId)
           .run();
+          
+        console.log('🔐 OAuth callback: Existing user updated successfully!');
       }
       // Optional: ensure listings table has posted_by column; association left as future enhancement
+    } else {
+      console.error('🔐 OAuth callback: No database connection found!');
     }
-  } catch { }
+  } catch (error) {
+    console.error('🔐 OAuth callback: Error during user creation/update:', error);
+    console.error('🔐 OAuth callback: Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace',
+      userEmail: user.email,
+      userData: user
+    });
+  }
 
   const secret = getAuthSecret();
   const expiresSec = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;
