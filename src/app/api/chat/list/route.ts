@@ -17,7 +17,20 @@ export async function GET(req: Request) {
     
     await ensureChatSchema(db);
     
-    // Get all chats where the user is either buyer or seller
+    // First, find the user by email to get their UUID
+    const userResult = await db.prepare(`
+      SELECT id FROM users WHERE email = ?
+    `).bind(userEmail).all();
+    
+    if (!userResult.results || userResult.results.length === 0) {
+      console.log('No user found for email:', userEmail);
+      return NextResponse.json({ chats: [], userEmail, totalChats: 0 });
+    }
+    
+    const userId = userResult.results[0].id;
+    console.log('Found user ID:', userId, 'for email:', userEmail);
+    
+    // Get all chats where the user is either buyer or seller using their UUID
     const chatsQuery = `
       SELECT 
         c.id,
@@ -45,11 +58,13 @@ export async function GET(req: Request) {
     `;
     
     const chats = await db.prepare(chatsQuery).bind(
-      userEmail, 
-      userEmail, 
-      userEmail, 
-      userEmail
+      userId, 
+      userId, 
+      userId, 
+      userId
     ).all();
+    
+    console.log('Found chats:', chats.results?.length || 0, 'for user ID:', userId);
     
     // For each chat, get the latest message and unread count
     const chatsWithMessages = await Promise.all(
@@ -68,7 +83,7 @@ export async function GET(req: Request) {
           SELECT COUNT(*) as count
           FROM messages 
           WHERE chat_id = ? AND from_id != ? AND (read_at IS NULL OR read_at = 0)
-        `).bind(chat.id, userEmail).all();
+        `).bind(chat.id, userId).all();
         
         return {
           ...chat,
@@ -81,6 +96,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ 
       chats: chatsWithMessages,
       userEmail,
+      userId,
       totalChats: chatsWithMessages.length
     });
   } catch (error) {
