@@ -40,8 +40,8 @@ export async function GET(req: Request) {
         seller.username as seller_username
       FROM chats c
       JOIN listings l ON c.listing_id = l.id
-      LEFT JOIN users buyer ON c.buyer_id = buyer.email
-      LEFT JOIN users seller ON c.seller_id = seller.email
+      LEFT JOIN users buyer ON c.buyer_id = buyer.id
+      LEFT JOIN users seller ON c.seller_id = seller.id
       ORDER BY c.last_message_at DESC, c.created_at DESC
     `).all();
     
