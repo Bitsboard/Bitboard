@@ -58,13 +58,46 @@ export async function GET(req: Request) {
       await db.prepare(`CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
         email TEXT UNIQUE,
-        username TEXT UNIQUE,
+        username TEXT UNIQUE,  -- Remove NOT NULL constraint to allow NULL initially
         sso TEXT,
         verified INTEGER DEFAULT 0,
         created_at INTEGER NOT NULL,
         image TEXT,
         has_chosen_username INTEGER DEFAULT 0 CHECK (has_chosen_username IN (0, 1))
       )`).run();
+      
+      // Check if we need to migrate from an old schema with NOT NULL username
+      try {
+        const tableInfo = await db.prepare("PRAGMA table_info(users)").all();
+        const usernameColumn = tableInfo.results?.find((col: any) => col.name === 'username');
+        
+        if (usernameColumn && usernameColumn.notnull === 1) {
+          console.log('🔐 OAuth callback: Detected NOT NULL constraint on username, migrating table...');
+          
+          // Create new table with correct schema
+          await db.prepare(`CREATE TABLE users_new (
+            id TEXT PRIMARY KEY,
+            email TEXT UNIQUE,
+            username TEXT UNIQUE,
+            sso TEXT,
+            verified INTEGER DEFAULT 0,
+            created_at INTEGER NOT NULL,
+            image TEXT,
+            has_chosen_username INTEGER DEFAULT 0 CHECK (has_chosen_username IN (0, 1))
+          )`).run();
+          
+          // Copy data from old table
+          await db.prepare('INSERT INTO users_new SELECT * FROM users').run();
+          
+          // Drop old table and rename new one
+          await db.prepare('DROP TABLE users').run();
+          await db.prepare('ALTER TABLE users_new RENAME TO users').run();
+          
+          console.log('🔐 OAuth callback: Successfully migrated users table to allow NULL usernames');
+        }
+      } catch (migrationError) {
+        console.log('🔐 OAuth callback: Table migration check:', migrationError);
+      }
       
       console.log('🔐 OAuth callback: Users table ensured, checking for existing user...');
       
