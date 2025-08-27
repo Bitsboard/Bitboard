@@ -113,33 +113,33 @@ export async function POST(req: Request) {
       SELECT id FROM users WHERE email = ?
     `).bind(userEmail).all();
     
-    let currentUserId: number;
+    let currentUserId: string;
     if (currentUserCheck.results && currentUserCheck.results.length > 0) {
-      currentUserId = currentUserCheck.results[0].id as number;
+      currentUserId = currentUserCheck.results[0].id as string;
       console.log('✅ Current user ID found:', currentUserId);
     } else {
-      // If current user doesn't exist in users table, create them or use a fallback
-      console.log('⚠️ Current user not in users table, using email as fallback');
-      currentUserId = 0; // We'll handle this differently
+      // If current user doesn't exist in users table, we can't proceed
+      console.log('❌ Current user not found in users table:', userEmail);
+      return NextResponse.json({ 
+        error: 'current_user_not_found',
+        message: 'Current user not found in database'
+      }, { status: 404 });
     }
     
-    // Get the other user's ID from the listings table
+    // Get the other user's ID from the users table by username
     const otherUserCheck = await db.prepare(`
-      SELECT DISTINCT posted_by FROM listings WHERE posted_by = ?
-      LIMIT 1
+      SELECT id FROM users WHERE username = ?
     `).bind(otherUserId).all();
     
-    let otherUserNumericId: number;
+    let otherUserActualId: string;
     if (otherUserCheck.results && otherUserCheck.results.length > 0) {
-      // For now, we'll use a hash of the username as a numeric ID
-      // This is a temporary fix - ideally we'd have proper user IDs
-      otherUserNumericId = otherUserId.charCodeAt(0) * 1000 + otherUserId.length;
-      console.log('✅ Other user ID generated:', otherUserNumericId);
+      otherUserActualId = otherUserCheck.results[0].id as string;
+      console.log('✅ Other user ID found:', otherUserActualId);
     } else {
-      console.log('❌ Other user not found in listings');
+      console.log('❌ Other user not found in users table:', otherUserId);
       return NextResponse.json({ 
-        error: 'user_not_found',
-        message: `User ${otherUserId} has no listings`
+        error: 'other_user_not_found',
+        message: `User ${otherUserId} not found in database`
       }, { status: 404 });
     }
     
@@ -154,14 +154,14 @@ export async function POST(req: Request) {
         SELECT id FROM chats 
         WHERE listing_id = ? AND 
         ((buyer_id = ? AND seller_id = ?) OR (buyer_id = ? AND seller_id = ?))
-      `).bind(listingId, currentUserId, otherUserNumericId, otherUserNumericId, currentUserId).all();
+      `).bind(listingId, currentUserId, otherUserActualId, otherUserActualId, currentUserId).all();
       
       if (existingChat.results && existingChat.results.length > 0) {
         actualChatId = existingChat.results[0].id as string;
         console.log('Using existing chat:', actualChatId);
       } else {
         // Create new chat with unique ID
-        actualChatId = generateChatId(userEmail, otherUserNumericId.toString(), listingId);
+        actualChatId = generateChatId(userEmail, otherUserActualId, listingId);
         console.log('Creating new chat with ID:', actualChatId);
         
         try {
@@ -169,7 +169,7 @@ export async function POST(req: Request) {
           console.log('Debug: Checking data types...');
           console.log('listingId type:', typeof listingId, 'value:', listingId);
           console.log('userEmail type:', typeof userEmail, 'value:', userEmail);
-          console.log('otherUserId type:', typeof otherUserNumericId, 'value:', otherUserNumericId);
+          console.log('otherUserId type:', typeof otherUserActualId, 'value:', otherUserActualId);
           
           // Check if the listing_id is actually an integer in the listings table
           const listingTypeCheck = await db.prepare(`
@@ -188,7 +188,7 @@ export async function POST(req: Request) {
             actualChatId,
             parseInt(listingId) || listingId, // Try to convert to integer if possible
             currentUserId, 
-            otherUserNumericId, 
+            otherUserActualId, 
             Math.floor(Date.now() / 1000),
             Math.floor(Date.now() / 1000)
           ).run();
