@@ -36,7 +36,18 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
     if (user?.email) {
       loadChat();
     }
-  }, [user?.email]);
+  }, [user?.email, listing.id]); // Add listing.id as dependency to ensure reload when listing changes
+
+  // Also load chat when the modal opens (additional safety)
+  useEffect(() => {
+    if (user?.email && listing.id) {
+      // Small delay to ensure component is fully mounted
+      const timer = setTimeout(() => {
+        loadChat();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [user?.email, listing.id]);
 
   // Poll for new messages every 5 seconds if chat is active
   useEffect(() => {
@@ -61,20 +72,26 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
     
     try {
       setIsLoading(true);
+      console.log('🔍 ChatModal: Loading chat for listing:', listing.id, 'user:', user.email);
       
       // First, try to find existing chat
       const chatResponse = await fetch(`/api/chat/list?userEmail=${encodeURIComponent(user.email)}`);
       if (chatResponse.ok) {
         const chatData = await chatResponse.json() as { chats?: any[] };
+        console.log('🔍 ChatModal: Found chats:', chatData.chats?.length || 0);
+        
         const existingChat = chatData.chats?.find((c: any) => 
           c.listing_id === listing.id && 
           (c.buyer_id === user.email || c.seller_id === user.email)
         );
         
         if (existingChat) {
+          console.log('🔍 ChatModal: Found existing chat:', existingChat.id);
           setChat(existingChat);
           await loadMessages(existingChat.id);
           return;
+        } else {
+          console.log('🔍 ChatModal: No existing chat found for this listing');
         }
       }
       
