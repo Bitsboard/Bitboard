@@ -85,12 +85,17 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         const existingChat = chatData.chats?.find((c: any) => {
           console.log('🔍 ChatModal: Checking chat:', c.id, 'listing_id:', c.listing_id, 'vs listing.id:', listing.id);
           console.log('🔍 ChatModal: User ID:', user.id, 'buyer_id:', c.buyer_id, 'seller_id:', c.seller_id);
+          console.log('🔍 ChatModal: Data types - listing_id:', typeof c.listing_id, 'listing.id:', typeof listing.id);
+          console.log('🔍 ChatModal: Data types - user.id:', typeof user.id, 'buyer_id:', typeof c.buyer_id, 'seller_id:', typeof c.seller_id);
           
           // Check both listing ID and user involvement
           const listingMatches = c.listing_id == listing.id;
           const userInvolved = c.buyer_id === user.id || c.seller_id === user.id;
           
           console.log('🔍 ChatModal: Listing matches:', listingMatches, 'User involved:', userInvolved);
+          console.log('🔍 ChatModal: Raw comparison - listing_id === listing.id:', c.listing_id === listing.id);
+          console.log('🔍 ChatModal: Raw comparison - buyer_id === user.id:', c.buyer_id === user.id);
+          console.log('🔍 ChatModal: Raw comparison - seller_id === user.id:', c.seller_id === user.id);
           
           return listingMatches && userInvolved;
         });
