@@ -58,12 +58,17 @@ export async function GET(req: Request) {
       await db.prepare(`CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
         email TEXT UNIQUE,
-        username TEXT UNIQUE,  -- Remove NOT NULL constraint to allow NULL initially
+        username TEXT UNIQUE,
         sso TEXT,
         verified INTEGER DEFAULT 0,
         created_at INTEGER NOT NULL,
         image TEXT,
-        has_chosen_username INTEGER DEFAULT 0 CHECK (has_chosen_username IN (0, 1))
+        has_chosen_username INTEGER DEFAULT 0 CHECK (has_chosen_username IN (0, 1)),
+        rating REAL DEFAULT 5.0,
+        deals INTEGER DEFAULT 0,
+        last_active INTEGER DEFAULT 0,
+        is_admin INTEGER DEFAULT 0,
+        banned INTEGER DEFAULT 0
       )`).run();
       
       // Check if we need to migrate from an old schema with NOT NULL username
@@ -91,13 +96,18 @@ export async function GET(req: Request) {
             verified INTEGER DEFAULT 0,
             created_at INTEGER NOT NULL,
             image TEXT,
-            has_chosen_username INTEGER DEFAULT 0 CHECK (has_chosen_username IN (0, 1))
+            has_chosen_username INTEGER DEFAULT 0 CHECK (has_chosen_username IN (0, 1)),
+            rating REAL DEFAULT 5.0,
+            deals INTEGER DEFAULT 0,
+            last_active INTEGER DEFAULT 0,
+            is_admin INTEGER DEFAULT 0,
+            banned INTEGER DEFAULT 0
           )`).run();
           
           console.log('🔐 OAuth callback: Created new users table with correct schema');
           
           // Copy data from old table
-          await db.prepare('INSERT INTO users_new (id, email, username, sso, verified, created_at, image, has_chosen_username) SELECT id, email, username, sso, verified, created_at, image, has_chosen_username FROM users').run();
+          await db.prepare('INSERT INTO users_new (id, email, username, sso, verified, created_at, image, has_chosen_username, rating, deals, last_active, is_admin, banned) SELECT id, email, username, sso, verified, created_at, image, has_chosen_username, 5.0, 0, 0, 0, 0 FROM users').run();
           console.log('🔐 OAuth callback: Copied data to new table');
           
           // Drop old table and rename new one
@@ -127,8 +137,8 @@ export async function GET(req: Request) {
         console.log('🔐 OAuth callback: Creating new user with ID:', userId);
         
         // Don't generate a default username - user must choose one
-        await db.prepare('INSERT INTO users (id, email, username, sso, verified, created_at, image, has_chosen_username) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
-          .bind(userId, user.email, null, 'google', 1, Math.floor(Date.now() / 1000), user.picture ?? null, 0)
+        await db.prepare('INSERT INTO users (id, email, username, sso, verified, created_at, image, has_chosen_username, rating, deals, last_active, is_admin, banned) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+          .bind(userId, user.email, null, 'google', 1, Math.floor(Date.now() / 1000), user.picture ?? null, 0, 5.0, 0, 0, 0, 0)
           .run();
           
         console.log('🔐 OAuth callback: New user created successfully!');
