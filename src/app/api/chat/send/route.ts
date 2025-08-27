@@ -44,7 +44,7 @@ export async function POST(req: Request) {
       `).bind(listingId, session.user.email, otherUserId, otherUserId, session.user.email).all();
       
       if (existingChat.results && existingChat.results.length > 0) {
-        actualChatId = existingChat.results[0].id;
+        actualChatId = existingChat.results[0].id as string;
       } else {
         // Create new chat
         const chatResult = await db.prepare(`
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
         ).run();
         
         actualChatId = chatResult.meta?.last_row_id?.toString() || 
-                      await db.prepare('SELECT last_insert_rowid() AS id').all().then(r => r.results?.[0]?.id);
+                      await db.prepare('SELECT last_insert_rowid() AS id').all().then(r => (r.results?.[0]?.id as string));
       }
     }
     
@@ -79,7 +79,7 @@ export async function POST(req: Request) {
     ).run();
     
     const messageId = messageResult.meta?.last_row_id?.toString() || 
-                     await db.prepare('SELECT last_insert_rowid() AS id').all().then(r => r.results?.[0]?.id);
+                     await db.prepare('SELECT last_insert_rowid() AS id').all().then(r => (r.results?.[0]?.id as string));
     
     // Update chat's last_message_at
     await db.prepare(`
