@@ -74,6 +74,14 @@ export async function GET(req: Request) {
         if (usernameColumn && usernameColumn.notnull === 1) {
           console.log('🔐 OAuth callback: Detected NOT NULL constraint on username, migrating table...');
           
+          // Drop any existing migration tables first
+          try {
+            await db.prepare('DROP TABLE IF EXISTS users_new').run();
+            console.log('🔐 OAuth callback: Cleaned up any existing migration tables');
+          } catch (cleanupError) {
+            console.log('🔐 OAuth callback: Cleanup check:', cleanupError);
+          }
+          
           // Create new table with correct schema
           await db.prepare(`CREATE TABLE users_new (
             id TEXT PRIMARY KEY,
@@ -86,14 +94,24 @@ export async function GET(req: Request) {
             has_chosen_username INTEGER DEFAULT 0 CHECK (has_chosen_username IN (0, 1))
           )`).run();
           
+          console.log('🔐 OAuth callback: Created new users table with correct schema');
+          
           // Copy data from old table
           await db.prepare('INSERT INTO users_new SELECT * FROM users').run();
+          console.log('🔐 OAuth callback: Copied data to new table');
           
           // Drop old table and rename new one
           await db.prepare('DROP TABLE users').run();
           await db.prepare('ALTER TABLE users_new RENAME TO users').run();
           
           console.log('🔐 OAuth callback: Successfully migrated users table to allow NULL usernames');
+          
+          // Verify the migration worked
+          const newTableInfo = await db.prepare("PRAGMA table_info(users)").all();
+          const newUsernameColumn = newTableInfo.results?.find((col: any) => col.name === 'username');
+          console.log('🔐 OAuth callback: Migration verification - username column notnull:', newUsernameColumn?.notnull);
+        } else {
+          console.log('🔐 OAuth callback: Username column already allows NULL, no migration needed');
         }
       } catch (migrationError) {
         console.log('🔐 OAuth callback: Table migration check:', migrationError);
