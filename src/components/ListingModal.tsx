@@ -76,6 +76,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
         btcCad={btcCad}
         unit={unit}
         onBackToListing={() => setShowChat(false)} // This goes back to listing modal
+        user={user}
       />
     );
   }

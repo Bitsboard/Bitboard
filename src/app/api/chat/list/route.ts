@@ -1,13 +1,83 @@
 import '../../../../shims/async_hooks';
 import { NextResponse } from "next/server";
 import { getD1, ensureChatSchema } from '@/lib/cf';
+import { getSessionFromRequest } from '@/lib/auth';
 
 export const runtime = "edge";
 
-export async function GET() {
-  const db = await getD1();
-  if (!db) return NextResponse.json({ messages: [], error: 'no_db_binding' }, { status: 200 });
-  await ensureChatSchema(db);
-  const res = await db.prepare(`SELECT id, chat_id AS chatId, from_id AS fromId, text, created_at AS createdAt FROM messages ORDER BY created_at DESC LIMIT 50`).all();
-  return NextResponse.json({ messages: res.results ?? [] });
+export async function GET(req: Request) {
+  try {
+    const session = await getSessionFromRequest(req);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+    }
+
+    const db = await getD1();
+    if (!db) return NextResponse.json({ chats: [], error: 'no_db_binding' }, { status: 500 });
+    
+    await ensureChatSchema(db);
+    
+    // Get all chats where the user is either buyer or seller
+    const chatsQuery = `
+      SELECT 
+        c.id,
+        c.listing_id,
+        c.buyer_id,
+        c.seller_id,
+        c.created_at,
+        c.last_message_at,
+        l.title as listing_title,
+        l.price_sats as listing_price,
+        l.image_url as listing_image,
+        CASE 
+          WHEN c.buyer_id = ? THEN 'buyer'
+          ELSE 'seller'
+        END as user_role,
+        CASE 
+          WHEN c.buyer_id = ? THEN c.seller_id
+          ELSE c.buyer_id
+        END as other_user_id
+      FROM chats c
+      JOIN listings l ON c.listing_id = l.id
+      WHERE c.buyer_id = ? OR c.seller_id = ?
+      ORDER BY c.last_message_at DESC, c.created_at DESC
+    `;
+    
+    const chats = await db.prepare(chatsQuery).bind(
+      session.user.email, 
+      session.user.email, 
+      session.user.email, 
+      session.user.email
+    ).all();
+    
+    // For each chat, get the latest message
+    const chatsWithMessages = await Promise.all(
+      (chats.results || []).map(async (chat: any) => {
+        const latestMessage = await db.prepare(`
+          SELECT id, from_id, text, created_at, read_at
+          FROM messages 
+          WHERE chat_id = ? 
+          ORDER BY created_at DESC 
+          LIMIT 1
+        `).bind(chat.id).all();
+        
+        const unreadCount = await db.prepare(`
+          SELECT COUNT(*) as count
+          FROM messages 
+          WHERE chat_id = ? AND from_id != ? AND (read_at IS NULL OR read_at = 0)
+        `).bind(chat.id, session.user.email).all();
+        
+        return {
+          ...chat,
+          latestMessage: latestMessage.results?.[0] || null,
+          unreadCount: unreadCount.results?.[0]?.count || 0
+        };
+      })
+    );
+    
+    return NextResponse.json({ chats: chatsWithMessages });
+  } catch (error) {
+    console.error('Error fetching chats:', error);
+    return NextResponse.json({ error: 'server_error' }, { status: 500 });
+  }
 }

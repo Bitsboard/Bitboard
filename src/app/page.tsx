@@ -157,7 +157,7 @@ export default function HomePage() {
         )}
         {/* Remove old chat modal since ListingModal now handles transformation */}
         {/* {chatFor && (
-          <ChatModal listing={chatFor} onClose={() => setModal('chatFor', null)} dark={dark} btcCad={btcCad} unit={unit} />
+          <ChatModal listing={chatFor} onClose={() => setModal('chatFor', null)} dark={dark} btcCad={btcCad} unit={unit} user={user} />
         )} */}
         {showNew && (
           <NewListingModal

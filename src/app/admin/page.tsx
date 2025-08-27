@@ -229,6 +229,32 @@ export default function AdminPage() {
               </button>
             </div>
 
+            {/* Chat Management */}
+            <div className={cn(
+              "p-6 rounded-2xl border transition-all duration-200 hover:shadow-lg",
+              "bg-white dark:bg-neutral-900",
+              "border-neutral-200 dark:border-neutral-800",
+              "hover:border-blue-300 dark:hover:border-blue-600"
+            )}>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Chat Management</h3>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">Monitor and manage user conversations</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => router.push('/admin/chats')}
+                className="w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200"
+              >
+                View Chats
+              </button>
+            </div>
+
             {/* Testing Tools */}
             <div className={cn(
               "p-6 rounded-2xl border transition-all duration-200 hover:shadow-lg",
