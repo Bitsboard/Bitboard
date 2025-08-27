@@ -6,7 +6,7 @@ import { useLang } from "@/lib/i18n-client";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import type { Session } from "@/lib/types";
+import type { Session } from "@/lib/auth";
 
 export default function AdminPage() {
   const [session, setSession] = useState<Session | null>(null);

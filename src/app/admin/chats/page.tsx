@@ -6,7 +6,7 @@ import { useLang } from "@/lib/i18n-client";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import type { Session } from "@/lib/types";
+import type { Session } from "@/lib/auth";
 
 interface Chat {
   id: string;
