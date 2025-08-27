@@ -10,6 +10,22 @@ function generateId(): string {
 
 export async function POST(req: Request) {
   try {
+    // Simple test to see if we even reach this point
+    console.log('=== CHAT SEND API REACHED ===');
+    
+    // Test basic functionality
+    const testResponse = { test: 'API route is working' };
+    console.log('Test response:', testResponse);
+    
+    // For now, just return success to test if the route works at all
+    return NextResponse.json({ 
+      ok: true, 
+      test: 'API route reached successfully',
+      timestamp: Date.now()
+    });
+    
+    // Comment out the rest for now to isolate the issue
+    /*
     console.log('Chat send API called');
     
     const { chatId, text, listingId, otherUserId, userEmail } = await req.json() as { 
@@ -127,8 +143,11 @@ export async function POST(req: Request) {
       messageId, 
       chatId: actualChatId 
     });
+    */
+    
   } catch (error) {
-    console.error('Error sending message:', error);
+    console.error('=== CHAT SEND API ERROR ===');
+    console.error('Error in chat send API:', error);
     console.error('Error details:', {
       name: error instanceof Error ? error.name : 'Unknown',
       message: error instanceof Error ? error.message : String(error),
