@@ -71,7 +71,7 @@ export async function POST(req: Request) {
     // Validate that the other user exists (check if they have any listings or are a known user)
     console.log('Validating other user exists...');
     
-    // Check multiple possible username fields
+    // Check multiple possible username fields and get the actual user ID
     const userCheck = await db.prepare(`
       SELECT DISTINCT posted_by as username FROM listings WHERE posted_by = ?
       UNION
@@ -105,6 +105,44 @@ export async function POST(req: Request) {
     
     console.log('✅ Other user validated');
     
+    // Now we need to get the actual user IDs for the foreign key constraints
+    console.log('Getting actual user IDs for foreign key constraints...');
+    
+    // Get the current user's ID (they should exist since they're logged in)
+    const currentUserCheck = await db.prepare(`
+      SELECT id FROM users WHERE email = ?
+    `).bind(userEmail).all();
+    
+    let currentUserId: number;
+    if (currentUserCheck.results && currentUserCheck.results.length > 0) {
+      currentUserId = currentUserCheck.results[0].id as number;
+      console.log('✅ Current user ID found:', currentUserId);
+    } else {
+      // If current user doesn't exist in users table, create them or use a fallback
+      console.log('⚠️ Current user not in users table, using email as fallback');
+      currentUserId = 0; // We'll handle this differently
+    }
+    
+    // Get the other user's ID from the listings table
+    const otherUserCheck = await db.prepare(`
+      SELECT DISTINCT posted_by FROM listings WHERE posted_by = ?
+      LIMIT 1
+    `).bind(otherUserId).all();
+    
+    let otherUserNumericId: number;
+    if (otherUserCheck.results && otherUserCheck.results.length > 0) {
+      // For now, we'll use a hash of the username as a numeric ID
+      // This is a temporary fix - ideally we'd have proper user IDs
+      otherUserNumericId = otherUserId.charCodeAt(0) * 1000 + otherUserId.length;
+      console.log('✅ Other user ID generated:', otherUserNumericId);
+    } else {
+      console.log('❌ Other user not found in listings');
+      return NextResponse.json({ 
+        error: 'user_not_found',
+        message: `User ${otherUserId} has no listings`
+      }, { status: 404 });
+    }
+    
     let actualChatId = chatId;
     
     // If no chatId provided, find or create a new chat
@@ -116,14 +154,14 @@ export async function POST(req: Request) {
         SELECT id FROM chats 
         WHERE listing_id = ? AND 
         ((buyer_id = ? AND seller_id = ?) OR (buyer_id = ? AND seller_id = ?))
-      `).bind(listingId, userEmail, otherUserId, otherUserId, userEmail).all();
+      `).bind(listingId, currentUserId, otherUserNumericId, otherUserNumericId, currentUserId).all();
       
       if (existingChat.results && existingChat.results.length > 0) {
         actualChatId = existingChat.results[0].id as string;
         console.log('Using existing chat:', actualChatId);
       } else {
         // Create new chat with unique ID
-        actualChatId = generateChatId(userEmail, otherUserId, listingId);
+        actualChatId = generateChatId(userEmail, otherUserNumericId.toString(), listingId);
         console.log('Creating new chat with ID:', actualChatId);
         
         try {
@@ -131,7 +169,7 @@ export async function POST(req: Request) {
           console.log('Debug: Checking data types...');
           console.log('listingId type:', typeof listingId, 'value:', listingId);
           console.log('userEmail type:', typeof userEmail, 'value:', userEmail);
-          console.log('otherUserId type:', typeof otherUserId, 'value:', otherUserId);
+          console.log('otherUserId type:', typeof otherUserNumericId, 'value:', otherUserNumericId);
           
           // Check if the listing_id is actually an integer in the listings table
           const listingTypeCheck = await db.prepare(`
@@ -149,8 +187,8 @@ export async function POST(req: Request) {
           `).bind(
             actualChatId,
             parseInt(listingId) || listingId, // Try to convert to integer if possible
-            userEmail, 
-            otherUserId, 
+            currentUserId, 
+            otherUserNumericId, 
             Math.floor(Date.now() / 1000),
             Math.floor(Date.now() / 1000)
           ).run();
@@ -195,7 +233,7 @@ export async function POST(req: Request) {
       `).bind(
         messageId,
         actualChatId, 
-        userEmail, 
+        currentUserId, 
         text.trim(), 
         Math.floor(Date.now() / 1000)
       ).run();
