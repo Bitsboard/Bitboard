@@ -34,8 +34,6 @@ interface Chat {
   last_message_at: number;
 }
 
-
-
 export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListing, user }: ChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [chat, setChat] = useState<Chat | null>(null);
@@ -98,11 +96,9 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       }
       
       // No existing chat found, messages will be empty
-      setMessages([]);
-      setChat(null);
+      setIsLoading(false);
     } catch (error) {
       console.error('Error loading chat:', error);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -112,7 +108,9 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       const response = await fetch(`/api/chat/${chatId}`);
       if (response.ok) {
         const data = await response.json() as { messages?: Message[] };
-        setMessages(data.messages || []);
+        if (data.messages) {
+          setMessages(data.messages);
+        }
       }
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -125,37 +123,35 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
     try {
       setIsSending(true);
       
-              const messageData = {
-          text: text.trim(),
-          listingId: listing.id,
-          otherUserId: listing.postedBy || listing.seller.name,
-          ...(chat && { chatId: chat.id })
-        };
-      
       const response = await fetch('/api/chat/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(messageData)
+        body: JSON.stringify({
+          text: text.trim(),
+          listingId: listing.id,
+          otherUserId: listing.postedBy || listing.seller.name,
+          chatId: chat?.id
+        })
       });
       
       if (response.ok) {
-        const result = await response.json() as { messageId?: string; chatId?: string };
+        const data = await response.json() as { messageId?: string; chatId?: string };
         
         // Add message to local state
         const newMessage: Message = {
-          id: result.messageId || Math.random().toString(),
+          id: data.messageId || Date.now().toString(),
           from_id: user.email,
           text: text.trim(),
           created_at: Math.floor(Date.now() / 1000)
         };
         
         setMessages(prev => [...prev, newMessage]);
-        setText("");
+        setText('');
         
-        // Update chat if this was a new chat
-        if (!chat && result.chatId) {
+        // Update chat if this is a new chat
+        if (data.chatId && !chat) {
           setChat({
-            id: result.chatId,
+            id: data.chatId,
             listing_id: listing.id,
             buyer_id: user.email,
             seller_id: listing.postedBy || listing.seller.name,
@@ -163,8 +159,6 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
             last_message_at: Math.floor(Date.now() / 1000)
           });
         }
-      } else {
-        console.error('Failed to send message');
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -173,19 +167,15 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
-  const formatTime = (timestamp: number) => {
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-
-  const isMyMessage = (message: Message) => message.from_id === user?.email;
+  // Auto-scroll to bottom when modal opens
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <Modal
@@ -203,7 +193,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
           {/* Back button */}
           <button 
             onClick={onBackToListing || onClose}
-            className={cn("flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 font-medium bg-gradient-to-r from-orange-500 to-red-500 text-white shadow hover:from-orange-600 hover:to-red-600")}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 font-medium bg-gradient-to-r from-orange-500 to-red-500 text-white shadow hover:from-orange-600 hover:to-red-600"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -217,43 +207,20 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
           </h2>
         </div>
         
-        {/* Action buttons - positioned absolutely at the very top right */}
-        <div className="absolute top-4 right-4 flex items-center gap-2">
-          {/* Refresh button */}
-          {chat?.id && (
-            <button
-              onClick={() => loadMessages(chat.id)}
-              disabled={isLoading}
-              className={cn(
-                "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
-                dark 
-                  ? "hover:bg-neutral-800 text-neutral-400 hover:text-white" 
-                  : "hover:bg-neutral-100 text-neutral-600 hover:text-neutral-800",
-                isLoading && "opacity-50 cursor-not-allowed"
-              )}
-              title="Refresh messages"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </button>
+        {/* Close button - positioned absolutely at the very top right */}
+        <button
+          onClick={onClose}
+          className={cn(
+            "absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
+            dark 
+              ? "hover:bg-neutral-800 text-neutral-400 hover:text-white" 
+              : "hover:bg-neutral-100 text-neutral-600 hover:text-neutral-800"
           )}
-          
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className={cn(
-              "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
-              dark 
-                ? "hover:bg-neutral-800 text-neutral-400 hover:text-white" 
-                : "hover:bg-neutral-100 text-neutral-600 hover:text-neutral-800"
-            )}
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
       {/* Chat content - now scrollable as one unit */}
@@ -266,116 +233,344 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
           {/* Listing details box - now mimics list-view card */}
           <div 
             className={cn(
-              "m-4 p-4 rounded-xl border",
-              dark ? "border-neutral-800 bg-neutral-900" : "border-neutral-200 bg-white"
+              "m-4 p-4 rounded-xl border cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] relative",
+              dark ? "bg-neutral-900 border-neutral-700 hover:border-orange-500/50" : "bg-neutral-100 border-neutral-200 hover:border-orange-500/50"
             )}
+            onClick={() => {
+              if (onBackToListing) {
+                onBackToListing();
+              } else {
+                onClose();
+              }
+            }}
           >
             <div className="flex items-start gap-4">
-              {/* Listing image */}
-              <div className="flex-shrink-0">
+              {/* Listing image - now even larger */}
+              <div className="w-32 h-32 rounded-lg overflow-hidden flex-shrink-0">
                 <img 
-                  src={listing.images[0] || `/placeholder-${listing.category}.png`} 
+                  src={listing.images[0]} 
                   alt={listing.title}
-                  className="w-20 h-20 rounded-lg object-cover"
-                  onError={() => setSellerImageError(true)}
+                  className="w-full h-full object-cover"
                 />
               </div>
               
-              {/* Listing details */}
-              <div className="flex-1 min-w-0">
-                <h3 className={cn("text-lg font-semibold mb-2", dark ? "text-white" : "text-neutral-900")}>
-                  {listing.title}
-                </h3>
-                <div className="mb-2">
-                  <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="sm" />
+              {/* Listing details - reorganized for better hierarchy */}
+              <div className="flex flex-col flex-1 min-h-0 justify-between h-32">
+                {/* Top section: Type pill and Location */}
+                <div className="flex items-center justify-between mb-3">
+                  {/* Type pill */}
+                  <span className={cn(
+                    "px-3 py-1.5 rounded-full text-xs font-semibold",
+                    listing.type === 'sell' 
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                      : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+                  )}>
+                    {listing.type === 'sell' ? 'Selling' : 'Looking for'}
+                  </span>
+                  
+                  {/* Location pill - now more prominent */}
+                  <span className={cn(
+                    "px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5",
+                    dark ? "bg-neutral-800 text-neutral-300 border border-neutral-700" : "bg-neutral-100 text-neutral-700 border border-neutral-200"
+                  )}>
+                    <span className="text-red-500">📍</span>
+                    {listing.location}
+                  </span>
                 </div>
-                <div className={cn("text-sm", dark ? "text-neutral-400" : "text-neutral-600")}>
-                  📍 {listing.location}
+                
+                {/* Middle section: Title and Price - now better balanced */}
+                <div className="flex-1 flex flex-col justify-center">
+                  {/* Title - now larger and more prominent */}
+                  <h3 className={cn("font-bold text-base mb-3 leading-tight", dark ? "text-white" : "text-neutral-900")}>
+                    {listing.title}
+                  </h3>
+                  
+                  {/* Price - now more prominent with better spacing */}
+                  <div className="mb-3">
+                    <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} size="md" />
+                  </div>
                 </div>
               </div>
+            </div>
+            
+            {/* Bottom section: User info and reputation - now positioned at bottom right */}
+            <div className="absolute bottom-4 right-4 flex items-center gap-3">
+              {/* Username pill - now more compact */}
+              <Link
+                href={`/profile/${listing.seller.name}`}
+                className={cn(
+                  "inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer relative",
+                  "bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50",
+                  "border border-neutral-300/60 dark:border-neutral-700/50",
+                  "hover:scale-105 hover:shadow-md"
+                )}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClose(); // Close the modal when clicking username
+                }}
+              >
+                {/* Profile Icon */}
+                <div className="flex-shrink-0 -ml-1 mr-2">
+                  {!sellerImageError ? (
+                    <img
+                      src={generateProfilePicture(listing.seller.name)}
+                      alt={`${listing.seller.name}'s profile picture`}
+                      className="w-4 h-4 rounded-full object-cover"
+                      onError={() => setSellerImageError(true)}
+                    />
+                  ) : (
+                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
+                      {getInitials(listing.seller.name)}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Username */}
+                <span className={cn("text-xs", dark ? "text-white" : "text-neutral-700")}>{listing.seller.name}</span>
+                
+                {/* Verified badge */}
+                {(listing.seller.verifications?.email || listing.seller.verifications?.phone || listing.seller.verifications?.lnurl) && (
+                  <span
+                    className={cn(
+                      "ml-1.5 inline-flex h-3.5 w-3.5 items-center justify-center rounded-full text-white font-bold shadow-md"
+                    )}
+                    style={{
+                      background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
+                    }}
+                    aria-label="Verified"
+                    title="User has verified their identity"
+                  >
+                    <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </span>
+                )}
+              </Link>
+              
+              {/* User reputation - now simple text without pill styling */}
+              <span className={cn(
+                "text-xs font-medium",
+                dark ? "text-neutral-300" : "text-neutral-600"
+              )}>
+                +{listing.seller.score} 👍
+              </span>
             </div>
           </div>
 
+          {showTips && (
+            <div className="mx-4 rounded-xl p-3 text-xs bg-red-600 text-white">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <strong className="mr-2">Safety tips:</strong>
+                  stay safe and meet in a very public place, like a mall, café, or a police e-commerce zone. Keep all chats in-app, and report any suspicious activity.{' '}
+                  <Link 
+                    href="/safety" 
+                    className="underline hover:text-red-200 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Learn more
+                  </Link>
+                </div>
+                <button onClick={() => setShowTips(false)} className="rounded px-2 py-1 hover:bg-red-700 transition-colors">
+                  Hide
+                </button>
+              </div>
+            </div>
+          )}
+          
           {/* Messages */}
-          {isLoading ? (
-            <div className="flex justify-center p-8">
-              <div className={cn("text-sm", dark ? "text-neutral-400" : "text-neutral-600")}>
-                Loading chat...
+          <div className="p-4 space-y-3">
+            {isLoading ? (
+              <div className="text-center text-neutral-500 dark:text-neutral-400">
+                Loading messages...
               </div>
-            </div>
-          ) : messages.length === 0 ? (
-            <div className="flex justify-center p-8">
-              <div className={cn("text-center", dark ? "text-neutral-400" : "text-neutral-600")}>
-                <div className="text-4xl mb-2">💬</div>
-                <div className="text-sm">Start the conversation about this listing</div>
+            ) : messages.length === 0 ? (
+              <div className="text-center text-neutral-500 dark:text-neutral-400">
+                No messages yet. Start the conversation!
               </div>
-            </div>
-          ) : (
-            <div className="px-4 space-y-3 pb-4">
-              {messages.map((message) => (
+            ) : (
+              messages.map((m) => (
                 <div
-                  key={message.id}
+                  key={m.id}
                   className={cn(
                     "flex",
-                    isMyMessage(message) ? "justify-end" : "justify-start"
+                    m.from_id === user?.email ? "justify-end" : "justify-start"
                   )}
                 >
-                  <div
-                    className={cn(
-                      "max-w-xs lg:max-w-md px-4 py-2 rounded-2xl",
-                      isMyMessage(message)
-                        ? "bg-gradient-to-r from-orange-500 to-red-500 text-white"
-                        : dark
-                        ? "bg-neutral-800 text-white"
-                        : "bg-neutral-100 text-neutral-900"
-                    )}
-                  >
-                    <div className="text-sm">{message.text}</div>
+                  <div className={cn(
+                    "max-w-[70%] rounded-2xl px-3 py-2 text-sm break-words relative",
+                    m.from_id === user?.email
+                      ? "bg-orange-500 text-white" 
+                      : dark ? "bg-neutral-900" : "bg-neutral-100"
+                  )}>
+                    <div className="mb-1">{m.text}</div>
                     <div className={cn(
-                      "text-xs mt-1",
-                      isMyMessage(message) ? "text-orange-100" : "text-neutral-500"
+                      "text-xs opacity-70",
+                      m.from_id === user?.email ? "text-white/80" : dark ? "text-neutral-400" : "text-neutral-500"
                     )}>
-                      {formatTime(message.created_at)}
+                      {new Date(m.created_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Message input */}
-        <div className={cn("border-t p-4", dark ? "border-neutral-800" : "border-neutral-200")}>
-          <div className="flex gap-3">
-            <input
-              type="text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your message..."
-              className={cn(
-                "flex-1 px-4 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-orange-500",
-                dark 
-                  ? "bg-neutral-800 border-neutral-700 text-white placeholder-neutral-400" 
-                  : "bg-white border-neutral-300 text-neutral-900 placeholder-neutral-500"
-              )}
-              disabled={isSending}
-            />
-            <button
-              onClick={sendMessage}
-              disabled={!text.trim() || isSending}
-              className={cn(
-                "px-6 py-2 rounded-xl font-medium transition-all duration-200",
-                text.trim() && !isSending
-                  ? "bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600"
-                  : "bg-neutral-300 text-neutral-500 cursor-not-allowed"
-              )}
-            >
-              {isSending ? "Sending..." : "Send"}
-            </button>
+              ))
+            )}
           </div>
         </div>
+        
+        {/* Message Input */}
+        <div className={cn("flex items-center gap-2 border-t p-4", dark ? "border-neutral-900" : "border-neutral-200")}>
+          {/* Plus button with options */}
+          <div className="relative">
+            <button
+              onClick={() => setShowOptions(!showOptions)}
+              className={cn(
+                "flex items-center justify-center w-10 h-10 rounded-xl border-2 transition-all duration-200",
+                dark 
+                  ? "border-neutral-700 hover:border-neutral-600 hover:bg-neutral-800" 
+                  : "border-neutral-300 hover:border-neutral-400 hover:bg-neutral-100"
+              )}
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </button>
+            
+            {/* Dropdown options */}
+            {showOptions && (
+              <>
+                {/* Click outside overlay */}
+                <div 
+                  className="fixed inset-0 z-0" 
+                  onClick={() => setShowOptions(false)}
+                />
+                <div className={cn(
+                  "absolute bottom-full left-0 mb-2 w-48 rounded-xl shadow-lg border z-10",
+                  dark ? "bg-neutral-800 border-neutral-700" : "bg-white border-neutral-200"
+                )}>
+                  <div className="py-2">
+                    <button
+                      onClick={() => {
+                        setText("I'd like to make an offer on this item. What's your best price?");
+                        setShowOptions(false);
+                      }}
+                      className={cn(
+                        "w-full text-left px-4 py-2 text-sm hover:bg-orange-500 hover:text-white transition-colors duration-200",
+                        dark ? "text-neutral-300 hover:bg-orange-500" : "text-neutral-700 hover:bg-orange-500"
+                      )}
+                    >
+                      💰 Give an offer
+                    </button>
+                    <button
+                      onClick={() => {
+                        setText("Is this item still available?");
+                        setShowOptions(false);
+                      }}
+                      className={cn(
+                        "w-full text-left px-4 py-2 text-sm hover:bg-orange-500 hover:text-white transition-colors duration-200",
+                        dark ? "text-neutral-300 hover:bg-orange-500" : "text-neutral-700 hover:bg-orange-500"
+                      )}
+                    >
+                      ❓ Check availability
+                    </button>
+                    <button
+                      onClick={() => {
+                        setText("Can I see more photos of this item?");
+                        setShowOptions(false);
+                      }}
+                      className={cn(
+                        "w-full text-left px-4 py-2 text-sm hover:bg-orange-500 hover:text-white transition-colors duration-200",
+                        dark ? "text-neutral-300 hover:bg-orange-500" : "text-neutral-700 hover:bg-orange-500"
+                      )}
+                    >
+                      📸 Request more photos
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+          
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Write a message…"
+            className={cn("flex-1 rounded-xl px-3 py-2 focus:outline-none", dark ? "border border-neutral-800 bg-neutral-900 text-neutral-100" : "border border-neutral-300 bg-white text-neutral-900")}
+            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+          />
+          <button 
+            onClick={sendMessage} 
+            disabled={!text.trim() || isSending}
+            className={cn(
+              "rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200",
+              text.trim() && !isSending
+                ? "bg-orange-500 text-white hover:bg-orange-600 cursor-pointer" 
+                : "bg-neutral-400 text-neutral-600 cursor-not-allowed"
+            )}
+          >
+            {isSending ? 'Sending...' : 'Send'}
+          </button>
+        </div>
+        
+        {/* Escrow Panel */}
+        {showEscrow && (
+          <div className={cn("border-t", dark ? "border-neutral-900" : "border-neutral-200")}>
+            <div className="flex items-center justify-between px-4 py-3">
+              <div className="font-semibold">Escrow proposal</div>
+              <button onClick={() => setShowEscrow(false)} className={cn("rounded px-2 py-1 text-xs", dark ? "hover:bg-neutral-900" : "hover:bg-neutral-200")}>
+                Hide
+              </button>
+            </div>
+            <div className="px-4 pb-4">
+              <PriceBlock sats={listing.priceSats} unit={unit} btcCad={btcCad} dark={dark} />
+              <div className={cn("mt-1 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>
+                Funds are locked via Lightning hold invoice until both parties confirm release.
+              </div>
+            </div>
+            <EscrowFlow listing={listing} onClose={() => setShowEscrow(false)} dark={dark} />
+          </div>
+        )}
       </div>
     </Modal>
   );
+}
+
+function EscrowFlow({ listing, onClose, dark }: { listing: Listing; onClose: () => void; dark: boolean }) {
+  const [step, setStep] = useState(1);
+  const feeBps = 100; // 1%
+  const fee = Math.ceil((listing.priceSats * feeBps) / 10000);
+  const total = listing.priceSats + fee;
+  const [invoice, setInvoice] = useState(() => `lnbchold${total}n1p${Math.random().toString(36).slice(2, 10)}...`);
+
+  return (
+    <div className="grid grid-cols-1 gap-4 p-4">
+      <div className={cn("rounded-xl p-3 text-sm", dark ? "border border-neutral-800 bg-neutral-900" : "border border-neutral-300 bg-white")}>
+        <div>
+          Send <span className="font-bold text-orange-500">{formatSats(total)} sats</span> to lock funds:
+        </div>
+        <div className={cn("mt-3 rounded-lg p-3 text-xs", dark ? "bg-neutral-800" : "bg-neutral-100")}>{invoice}</div>
+        <div className={cn("mt-2 text-xs", dark ? "text-neutral-400" : "text-neutral-600")}>Includes escrow fee {formatSats(fee)} sats (1%).</div>
+        <div className="mt-3 flex gap-2">
+          <button onClick={() => setStep(2)} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow shadow-orange-500/30">
+            I&apos;ve deposited
+          </button>
+          <button
+            onClick={() => setInvoice(`lnbchold${total}n1p${Math.random().toString(36).slice(2, 10)}...`)}
+            className={cn("rounded-xl px-4 py-2 text-sm", dark ? "border border-neutral-800 hover:bg-neutral-900" : "border border-neutral-300 hover:bg-neutral-100")}
+          >
+            Regenerate
+          </button>
+          <button onClick={onClose} className={cn("ml-auto rounded-xl px-4 py-2 text-sm", dark ? "border border-neutral-800 hover:bg-neutral-900" : "border border-neutral-300 hover:bg-neutral-100")}>
+            Close
+          </button>
+        </div>
+      </div>
+      <div className={cn("rounded-xl p-3 text-xs", dark ? "bg-neutral-900 text-neutral-400" : "bg-neutral-100 text-neutral-600")}>
+        Step {step}/3 — Meet in a very public place; if all good, both confirm release. Otherwise request refund; mediator can arbitrate.
+      </div>
+    </div>
+  );
+}
+
+function formatSats(n: number) {
+  return new Intl.NumberFormat(undefined).format(n);
 }
