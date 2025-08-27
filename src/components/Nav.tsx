@@ -223,7 +223,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
           {user && (
             <button
               onClick={onPost}
-              className="h-10 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 text-sm font-semibold text-white shadow-lg shadow-orange-500/30 transition-all duration-200 hover:from-orange-400 hover:to-red-400 hover:shadow-xl hover:scale-105 flex items-center justify-center"
+              className="h-10 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 text-sm font-semibold text-white transition-all duration-200 hover:from-orange-400 hover:to-red-400 flex items-center justify-center"
             >
               {t('post_listing', lang)}
             </button>
