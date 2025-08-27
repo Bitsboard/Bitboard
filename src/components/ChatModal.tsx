@@ -120,15 +120,39 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
 
   const loadMessages = async (chatId: string) => {
     try {
-      const response = await fetch(`/api/chat/${chatId}?userEmail=${encodeURIComponent(user?.email || '')}`);
+      console.log('🔍 ChatModal: Loading messages for chat:', chatId);
+      
+      // Add timeout to prevent UI from getting stuck
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Message loading timeout')), 10000); // 10 second timeout
+      });
+      
+      const fetchPromise = fetch(`/api/chat/${chatId}?userEmail=${encodeURIComponent(user?.email || '')}`);
+      
+      const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
+      
       if (response.ok) {
         const data = await response.json() as { success: boolean; messages?: Message[] };
+        console.log('🔍 ChatModal: Messages response:', data);
+        
         if (data.success && data.messages) {
           setMessages(data.messages);
+          console.log('🔍 ChatModal: Loaded', data.messages.length, 'messages');
+        } else {
+          console.log('🔍 ChatModal: No messages found or API error');
+          setMessages([]);
         }
+      } else {
+        console.error('🔍 ChatModal: Failed to load messages, status:', response.status);
+        setMessages([]);
       }
     } catch (error) {
-      console.error('Error loading messages:', error);
+      console.error('🔍 ChatModal: Error loading messages:', error);
+      setMessages([]);
+    } finally {
+      // Always clear loading state
+      setIsLoading(false);
+      console.log('🔍 ChatModal: Loading complete, isLoading set to false');
     }
   };
 
