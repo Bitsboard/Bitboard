@@ -6,54 +6,42 @@ import { useLang } from "@/lib/i18n-client";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import type { Session } from "@/lib/auth";
+import { useSettingsStore } from "@/lib/settings";
 
 export default function AdminPage() {
-  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
   const lang = useLang();
+  const { user } = useSettingsStore();
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         console.log('Checking authentication...');
-        const response = await fetch('/api/auth/session');
-        console.log('Session response status:', response.status);
+        console.log('User from settings:', user);
         
-        if (response.ok) {
-          const data = await response.json() as { session?: any };
-          console.log('Session data:', data);
-          const userSession = data?.session;
+        if (user && user.email) {
+          console.log('User found:', user);
+          console.log('Checking admin status for:', user.email);
           
-          if (userSession && userSession.user) {
-            console.log('User session found:', userSession);
-            setSession(userSession);
+          // Check if user is admin
+          const adminResponse = await fetch('/api/admin/check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: user.email })
+          });
 
-            if (userSession.user.email) {
-              console.log('Checking admin status for:', userSession.user.email);
-              // Check if user is admin
-              const adminResponse = await fetch('/api/admin/check', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: userSession.user.email })
-              });
-
-              console.log('Admin check response status:', adminResponse.status);
-              if (adminResponse.ok) {
-                const adminData = await adminResponse.json() as { isAdmin: boolean };
-                console.log('Admin data:', adminData);
-                setIsAdmin(adminData.isAdmin);
-              } else {
-                console.error('Admin check failed:', adminResponse.status);
-              }
-            }
+          console.log('Admin check response status:', adminResponse.status);
+          if (adminResponse.ok) {
+            const adminData = await adminResponse.json() as { isAdmin: boolean };
+            console.log('Admin data:', adminData);
+            setIsAdmin(adminData.isAdmin);
           } else {
-            console.log('No user session found');
+            console.error('Admin check failed:', adminResponse.status);
           }
         } else {
-          console.error('Session response not ok:', response.status);
+          console.log('No user found');
         }
       } catch (error) {
         console.error('Failed to check authentication:', error);
@@ -63,21 +51,21 @@ export default function AdminPage() {
     };
 
     checkAuth();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    if (!loading && !session) {
-      console.log('No session, redirecting to home');
+    if (!loading && !user) {
+      console.log('No user, redirecting to home');
       router.push('/');
     }
-  }, [loading, session, router]);
+  }, [loading, user, router]);
 
   useEffect(() => {
-    if (!loading && session && !isAdmin) {
-      console.log('Session exists but not admin, redirecting to home');
+    if (!loading && user && !isAdmin) {
+      console.log('User exists but not admin, redirecting to home');
       router.push('/');
     }
-  }, [loading, session, isAdmin, router]);
+  }, [loading, user, isAdmin, router]);
 
   if (loading) {
     return (
@@ -87,7 +75,7 @@ export default function AdminPage() {
     );
   }
 
-  if (!session || !isAdmin) {
+  if (!user || !isAdmin) {
     return null;
   }
 
@@ -101,7 +89,7 @@ export default function AdminPage() {
               Admin Dashboard
             </h1>
             <p className="text-lg text-neutral-600 dark:text-neutral-400">
-              Welcome back, {session.user?.username || session.user?.email}
+              Welcome back, {user.handle || user.email}
             </p>
           </div>
 
@@ -297,13 +285,12 @@ export default function AdminPage() {
                       const response = await fetch('/api/admin/users/wipe-me', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: session.user?.email })
+                        body: JSON.stringify({ email: user.email })
                       });
                       
                       if (response.ok) {
                         alert('Account wiped successfully! You will be redirected to the home page.');
-                        // Clear session and redirect
-                        setSession(null);
+                        // Clear user and redirect
                         router.push('/');
                       } else {
                         const errorData = await response.json() as { error?: string };
