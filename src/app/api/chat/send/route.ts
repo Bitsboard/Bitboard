@@ -118,12 +118,38 @@ export async function POST(req: Request) {
       currentUserId = currentUserCheck.results[0].id as string;
       console.log('✅ Current user ID found:', currentUserId);
     } else {
-      // If current user doesn't exist in users table, we can't proceed
-      console.log('❌ Current user not found in users table:', userEmail);
-      return NextResponse.json({ 
-        error: 'current_user_not_found',
-        message: 'Current user not found in database'
-      }, { status: 404 });
+      // If current user doesn't exist in users table, create them
+      console.log('⚠️ Current user not found, creating new user account...');
+      
+      try {
+        // Generate a unique user ID
+        const newUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Create the user account
+        await db.prepare(`
+          INSERT INTO users (id, email, username, sso, verified, created_at, image, has_chosen_username) 
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          newUserId,
+          userEmail,
+          userEmail.split('@')[0], // Use email prefix as temporary username
+          'google',
+          1,
+          Math.floor(Date.now() / 1000),
+          null, // No image for now
+          0 // Hasn't chosen username yet
+        ).run();
+        
+        currentUserId = newUserId;
+        console.log('✅ New user account created with ID:', currentUserId);
+        
+      } catch (createError) {
+        console.error('❌ Failed to create user account:', createError);
+        return NextResponse.json({ 
+          error: 'user_creation_failed',
+          message: 'Failed to create user account'
+        }, { status: 500 });
+      }
     }
     
     // Get the other user's ID from the users table by username
