@@ -35,7 +35,7 @@ export async function GET(req: Request) {
         c.created_at,
         c.last_message_at,
         l.title as listing_title,
-        l.price_sats as listing_price,
+        l.price_sat as listing_price,
         l.image_url as listing_image,
         l.created_at as listing_created_at,
         buyer.username as buyer_username,
