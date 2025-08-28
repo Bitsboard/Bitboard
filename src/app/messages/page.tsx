@@ -55,6 +55,7 @@ export default function MessagesPage() {
   const [isSending, setIsSending] = useState(false);
   const [activeTab, setActiveTab] = useState<'chats' | 'notifications'>('chats');
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const [lastUpdated, setLastUpdated] = useState<number>(Date.now());
 
   // Load chats when component mounts
   useEffect(() => {
@@ -64,17 +65,18 @@ export default function MessagesPage() {
     }
   }, [user?.email]);
 
-  // Poll for new messages every 10 seconds
+  // Poll for new messages every 30 seconds
   useEffect(() => {
     if (!user?.email) return;
     
     const interval = setInterval(() => {
-      loadChats();
+      // Background update without showing loading state
+      loadChatsBackground();
       loadSystemNotifications();
       if (selectedChat) {
         loadMessages(selectedChat.id);
       }
-    }, 10000);
+    }, 30000); // Changed from 10000 to 30000 (30 seconds)
     
     return () => clearInterval(interval);
   }, [user?.email, selectedChat]);
@@ -88,11 +90,28 @@ export default function MessagesPage() {
       if (response.ok) {
         const data: ChatListResponse = await response.json();
         setChats(data.chats || []);
+        setLastUpdated(Date.now());
       }
     } catch (error) {
       console.error('Error loading chats:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadChatsBackground = async () => {
+    if (!user?.email) return;
+    
+    try {
+      // Background update without showing loading state
+      const response = await fetch(`/api/chat/list?userEmail=${encodeURIComponent(user.email)}`);
+      if (response.ok) {
+        const data: ChatListResponse = await response.json();
+        setChats(data.chats || []);
+        setLastUpdated(Date.now());
+      }
+    } catch (error) {
+      console.error('Error loading chats in background:', error);
     }
   };
 
@@ -304,6 +323,13 @@ export default function MessagesPage() {
               <div className="text-sm text-neutral-600 dark:text-neutral-400">
                 {chats.length} conversation{chats.length !== 1 ? 's' : ''}
               </div>
+              <button
+                onClick={loadChats}
+                disabled={isLoading}
+                className="px-3 py-1 rounded-lg text-sm font-medium bg-orange-600 text-white hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              >
+                {isLoading ? 'Refreshing...' : 'Refresh'}
+              </button>
             </div>
           </div>
 
@@ -367,6 +393,9 @@ export default function MessagesPage() {
           <div className="lg:col-span-1 bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden">
             <div className="p-4 border-b border-neutral-200 dark:border-neutral-700">
               <h3 className="font-semibold text-neutral-900 dark:text-white">Conversations</h3>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                Last updated: {new Date(lastUpdated).toLocaleTimeString()}
+              </p>
             </div>
             
             {isLoading ? (
