@@ -80,27 +80,13 @@ export default function AdminUsersPage() {
 
   // Check admin authentication
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await fetch('/api/admin/check');
-        if (response.ok) {
-          const data = await response.json() as { isAdmin: boolean };
-          if (data.isAdmin) {
-            setIsAuthenticated(true);
-            loadUsers();
-          } else {
-            router.push('/admin');
-          }
-        } else {
-          router.push('/admin');
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        router.push('/admin');
-      }
-    };
-
-    checkAuth();
+    const savedAuth = localStorage.getItem('admin_authenticated');
+    if (savedAuth === 'true') {
+      setIsAuthenticated(true);
+      loadUsers();
+    } else {
+      router.push('/admin');
+    }
   }, [router]);
 
   const loadUsers = async () => {

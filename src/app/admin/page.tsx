@@ -135,7 +135,7 @@ export default function AdminPage() {
     if (activityFilter === 'all') return true;
     if (activityFilter === 'users') return activity.type === 'user';
     if (activityFilter === 'listings') return activity.type === 'listing';
-    if (activityFilter === 'conversations') return activity.type === 'chat' || activity.type === 'message';
+    if (activityFilter === 'conversations') return activity.type === 'message'; // Only show messages, not conversation starts
     return false;
   }) || [];
 
@@ -180,7 +180,7 @@ export default function AdminPage() {
   const formatActivityDescription = (activity: AdminStats['recentActivity'][0]) => {
     const UserLink = ({ username }: { username: string }) => (
       <a 
-        href={`/profile/${username}`}
+        href={`/admin/users?search=${encodeURIComponent(username)}`}
         className="font-bold text-orange-600 dark:text-orange-400 hover:underline"
         target="_blank"
         rel="noopener noreferrer"
@@ -189,9 +189,9 @@ export default function AdminPage() {
       </a>
     );
 
-    const ListingLink = ({ title }: { title: string | null }) => (
+    const ListingLink = ({ title, id }: { title: string | null; id: number | null }) => (
       <a 
-        href={`/search?q=${encodeURIComponent(title || '')}`}
+        href={`/admin/listings?search=${encodeURIComponent(title || '')}`}
         className="font-bold text-blue-600 dark:text-blue-400 hover:underline"
         target="_blank"
         rel="noopener noreferrer"
@@ -214,7 +214,7 @@ export default function AdminPage() {
             <>
               <UserLink username={activity.username} />
               {' '}[{activity.user_id}] has listed{' '}
-              <ListingLink title={activity.listing_title} />
+              <ListingLink title={activity.listing_title} id={activity.listing_id} />
             </>
           );
         } else if (activity.action === 'updated') {
@@ -222,7 +222,7 @@ export default function AdminPage() {
             <>
               <UserLink username={activity.username} />
               {' '}[{activity.user_id}] has updated{' '}
-              <ListingLink title={activity.listing_title} />
+              <ListingLink title={activity.listing_title} id={activity.listing_id} />
             </>
           );
         }
@@ -230,27 +230,17 @@ export default function AdminPage() {
           <>
             <UserLink username={activity.username} />
             {' '}[{activity.user_id}] has {activity.action}{' '}
-            <ListingLink title={activity.listing_title} />
-          </>
-        );
-      case 'chat':
-        return (
-          <>
-            <UserLink username={activity.username} />
-            {' '}has started a chat with{' '}
-            <UserLink username={activity.other_username || ''} />
-            {' '}for their{' '}
-            <ListingLink title={activity.listing_title} />
+            <ListingLink title={activity.listing_title} id={activity.listing_id} />
           </>
         );
       case 'message':
         return (
           <>
             <UserLink username={activity.username} />
-            {' '}has messaged{' '}
+            {' '}messaged{' '}
             <UserLink username={activity.other_username || ''} />
-            {' '}for their{' '}
-            <ListingLink title={activity.listing_title} />
+            {' '}for{' '}
+            <ListingLink title={activity.listing_title} id={activity.listing_id} />
           </>
         );
       default:
