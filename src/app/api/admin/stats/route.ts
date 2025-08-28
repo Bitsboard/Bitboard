@@ -151,7 +151,7 @@ export async function GET(req: Request) {
             (SELECT username FROM users WHERE id = m.from_id)
         END as other_username,
         m.chat_id as chat_id,
-        (SELECT COUNT(*) FROM messages WHERE chat_id = m.chat_id) as message_count
+        (SELECT COUNT(*) FROM messages WHERE chat_id = m.chat_id AND created_at <= m.created_at) as message_count
       FROM messages m
       JOIN users u ON m.from_id = u.id
       JOIN chats c ON m.chat_id = c.id
