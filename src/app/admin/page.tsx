@@ -469,26 +469,24 @@ export default function AdminPage() {
 
               {/* Reports & System Notifications Box */}
               <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800">
-                <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-0.5">Reports</div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">System & Analytics</div>
                 <div className="space-y-1.5">
                   <button 
                     onClick={() => setShowNotificationForm(true)}
                     className="w-full px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors"
                   >
-                    Send Notification
+                    Send Sys Msg
                   </button>
                   <button 
                     onClick={() => router.push('/admin/reports')}
-                    className="w-full px-3 py-1.5 bg-neutral-500 hover:bg-neutral-600 text-white text-sm font-medium rounded-lg transition-colors"
+                    className="w-full px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors"
                   >
-                    View Reports
+                    Report management
                   </button>
                   <button 
                     onClick={() => router.push('/admin/analytics')}
-                    className="w-full px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium rounded-lg transition-colors"
+                    className="w-full px-3 py-1.5 bg-neutral-500 hover:bg-neutral-600 text-white text-sm font-medium rounded-lg transition-colors"
                   >
-                    Analytics
+                    View analytics
                   </button>
                 </div>
               </div>
