@@ -43,6 +43,7 @@ interface AdminStats {
     listing_id: number | null;
     other_username: string | null;
     chat_id: string | null;
+    message_count?: number; // Added for message activity
   }>;
 }
 
@@ -315,6 +316,18 @@ export default function AdminPage() {
             <UserTag username={activity.other_username || 'Unknown User'} />
             {' '}for{' '}
             <ListingTag title={activity.listing_title} id={activity.listing_id} />
+            {' '}
+            <a 
+              href={`/admin/chats?search=${encodeURIComponent(activity.listing_title || '')}`}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-purple-200 dark:bg-purple-800 text-purple-900 dark:text-purple-100 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors border border-purple-300 dark:border-purple-600"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {activity.message_count || 1} messages
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
           </>
         );
       default:
@@ -475,10 +488,6 @@ export default function AdminPage() {
 
               {/* Reports & System Notifications Box */}
               <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 flex flex-col">
-                <div className="flex-1">
-                  <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-0.5">Reports</div>
-                  <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">System & Analytics</div>
-                </div>
                 <div className="space-y-1.5">
                   <button 
                     onClick={() => setShowNotificationForm(true)}
