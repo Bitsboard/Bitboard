@@ -113,7 +113,7 @@ export default function MessagesPage() {
     try {
       console.log('Messages page: Loading chats for email:', user.email);
       setIsLoading(true);
-      const response = await fetch(`/api/chat/list?email=${encodeURIComponent(user.email)}`);
+      const response = await fetch(`/api/chat/list?userEmail=${encodeURIComponent(user.email)}`);
       console.log('Messages page: Chat API response status:', response.status);
       if (response.ok) {
         const data: ChatListResponse = await response.json();
@@ -133,13 +133,13 @@ export default function MessagesPage() {
     if (!user?.email) return;
     
     try {
-      const response = await fetch(`/api/chat/list?email=${encodeURIComponent(user.email)}`);
+      const response = await fetch(`/api/chat/list?userEmail=${encodeURIComponent(user.email)}`);
       if (response.ok) {
         const data: ChatListResponse = await response.json();
         setChats(data.chats || []);
       }
     } catch (error) {
-      console.error('Error loading chats background:', error);
+      console.error('Messages page: Error loading chats background:', error);
     }
   };
 
