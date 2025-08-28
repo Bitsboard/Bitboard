@@ -13,6 +13,7 @@ interface Chat {
   last_message_time: number;
   unread_count: number;
   listing_id: number;
+  listing_image?: string;
 }
 
 interface Message {
@@ -75,7 +76,8 @@ export default function MessagesPage() {
           last_message: chat.latest_message_text,
           last_message_time: chat.latest_message_time,
           unread_count: chat.unreadCount,
-          listing_id: chat.listing_id
+          listing_id: chat.listing_id,
+          listing_image: chat.listing_image
         }));
         setChats(transformedChats);
         
@@ -226,7 +228,7 @@ export default function MessagesPage() {
           </div>
           
           {/* Content List */}
-          <div className="flex-1 overflow-y-auto rounded-br-3xl p-3">
+          <div className="flex-1 overflow-y-auto rounded-br-3xl">
             {!user?.email ? (
               <div className="text-center py-8">
                 <div className="w-16 h-16 mx-auto mb-4 bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center">
@@ -254,54 +256,83 @@ export default function MessagesPage() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {filteredChats.map((chat) => (
                   <div
                     key={chat.id}
                     onClick={() => loadMessages(chat.id)}
-                    className={`p-3 rounded-2xl cursor-pointer transition-all duration-200 hover:scale-[1.02] ${
+                    className={`p-4 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 ${
                       selectedChat === chat.id
-                        ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg ring-2 ring-orange-300'
-                        : 'bg-white/60 dark:bg-neutral-800/60 hover:bg-white/80 dark:hover:bg-neutral-700/80 border border-neutral-200/50 dark:border-neutral-700/50'
+                        ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white'
+                        : 'bg-white dark:bg-neutral-900'
                     }`}
                   >
-                    {/* Compact Layout */}
+                    {/* Compact Layout - Full Width */}
                     <div className="flex items-start gap-3">
-                      {/* Listing Icon */}
-                      <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-700 dark:to-neutral-800 rounded-xl flex items-center justify-center shadow-sm">
-                        <svg className="w-5 h-5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
+                      {/* Listing Image/Icon */}
+                      <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden shadow-sm">
+                        {chat.listing_image ? (
+                          <img 
+                            src={chat.listing_image} 
+                            alt={chat.listing_title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              // Fallback to icon if image fails to load
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              target.nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                        ) : null}
+                        <div className={`w-full h-full bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-700 dark:to-neutral-800 flex items-center justify-center ${chat.listing_image ? 'hidden' : ''}`}>
+                          <svg className="w-6 h-6 text-neutral-500 dark:text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
                       </div>
                       
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         {/* Title and Age */}
-                        <div className="flex items-center justify-between mb-1">
-                          <h3 className="font-semibold text-sm truncate">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className={`font-semibold text-sm truncate ${
+                            selectedChat === chat.id ? 'text-white' : 'text-neutral-900 dark:text-white'
+                          }`}>
                             {chat.listing_title}
                           </h3>
-                          <span className="text-xs opacity-80 flex-shrink-0 ml-2">
+                          <span className={`text-xs flex-shrink-0 ml-2 ${
+                            selectedChat === chat.id ? 'text-white/80' : 'text-neutral-500 dark:text-neutral-400'
+                          }`}>
                             {formatTimestamp(chat.last_message_time)}
                           </span>
                         </div>
                         
                         {/* Seller Pill */}
                         <div className="mb-2">
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
+                            selectedChat === chat.id 
+                              ? 'bg-white/20 text-white border-white/30'
+                              : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800'
+                          }`}>
                             {chat.other_user}
                           </span>
                         </div>
                         
                         {/* Last Message */}
-                        <p className="text-xs opacity-70 truncate leading-relaxed">
+                        <p className={`text-xs truncate leading-relaxed ${
+                          selectedChat === chat.id ? 'text-white/80' : 'text-neutral-600 dark:text-neutral-300'
+                        }`}>
                           {chat.last_message || 'No messages yet'}
                         </p>
                         
                         {/* Unread Badge */}
                         {chat.unread_count > 0 && (
                           <div className="mt-2 flex justify-end">
-                            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center font-medium">
+                            <span className={`text-xs px-2 py-1 rounded-full min-w-[20px] text-center font-medium ${
+                              selectedChat === chat.id 
+                                ? 'bg-white/20 text-white border border-white/30'
+                                : 'bg-red-500 text-white'
+                            }`}>
                               {chat.unread_count}
                             </span>
                           </div>
@@ -343,27 +374,40 @@ export default function MessagesPage() {
 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.is_from_current_user ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-sm ${
-                        message.is_from_current_user
-                          ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-                          : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100'
-                      }`}
-                    >
-                      <p className="text-sm">{message.content}</p>
-                      <p className={`text-xs mt-1 ${
-                        message.is_from_current_user ? 'text-blue-100' : 'text-neutral-500 dark:text-neutral-400'
-                      }`}>
-                        {formatTimestamp(message.timestamp)}
-                      </p>
+                {messages.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center">
+                      <svg className="w-8 h-8 text-neutral-500 dark:text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12h.01M16h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
                     </div>
+                    <p className="text-neutral-600 dark:text-neutral-400 text-sm">
+                      No messages yet. Start the conversation!
+                    </p>
                   </div>
-                ))}
+                ) : (
+                  messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${message.is_from_current_user ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-sm ${
+                          message.is_from_current_user
+                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                            : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100'
+                        }`}
+                      >
+                        <p className="text-sm">{message.content}</p>
+                        <p className={`text-xs mt-1 ${
+                          message.is_from_current_user ? 'text-blue-100' : 'text-neutral-500 dark:text-neutral-400'
+                        }`}>
+                          {formatTimestamp(message.timestamp)}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
                 <div ref={messagesEndRef} />
               </div>
 
@@ -397,7 +441,7 @@ export default function MessagesPage() {
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <div className="w-24 h-24 mx-auto mb-6 bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center">
-                  <svg className="w-12 h-12 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-12 h-12 text-neutral-500 dark:text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12h.01M16h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
                 </div>
