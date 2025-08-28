@@ -420,9 +420,9 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="h-screen bg-neutral-50 dark:bg-neutral-900 flex flex-col overflow-hidden messages-page">
+    <div className="h-[calc(100vh-4rem)] bg-neutral-50 dark:bg-neutral-900 flex flex-col overflow-hidden messages-page">
       {/* Main Content - Full Height, No Scrolling */}
-      <div className="max-w-7xl mx-auto px-4 py-2 w-full h-full">
+      <div className="flex-1 max-w-7xl mx-auto px-4 py-2 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 h-full">
           {/* Left Sidebar - Conversations List */}
           <div className="lg:col-span-1 h-full">
@@ -545,7 +545,7 @@ export default function MessagesPage() {
                   <div className="p-3 text-center">
                     <div className="w-10 h-10 bg-neutral-100 dark:bg-neutral-800 rounded-2xl flex items-center justify-center mx-auto mb-1">
                       <svg className="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                       </svg>
                     </div>
                     <h3 className="font-medium text-neutral-900 dark:text-white mb-1 text-xs">No conversations yet</h3>
@@ -562,7 +562,7 @@ export default function MessagesPage() {
                     <p className="text-xs text-neutral-600 dark:text-neutral-400">You&apos;re all caught up!</p>
                   </div>
                 ) : (
-                  <div className="overflow-y-auto max-h-full">
+                  <div className="h-full overflow-y-auto">
                     {activeTab === 'chats' && filteredChats.map((chat) => (
                       <div
                         key={chat.id}

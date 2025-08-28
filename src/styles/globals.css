@@ -119,7 +119,7 @@
 
 /* Ensure messages page takes full viewport height minus header */
 .messages-page {
-  height: 100vh !important;
+  height: calc(100vh - 4rem) !important;
   overflow: hidden !important;
 }
 
