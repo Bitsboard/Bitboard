@@ -246,7 +246,7 @@ export default function AdminPage() {
     const UserTag = ({ username }: { username: string }) => (
       <a 
         href={`/admin/users?search=${encodeURIComponent(username)}`}
-        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-orange-200 dark:bg-orange-800 text-orange-900 dark:text-orange-100 hover:bg-orange-300 dark:hover:bg-orange-700 transition-colors border border-orange-300 dark:border-orange-600"
+        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors border border-blue-300 dark:border-blue-600"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -260,7 +260,7 @@ export default function AdminPage() {
     const ListingTag = ({ title, id }: { title: string | null; id: number | null }) => (
       <a 
         href={`/admin/listings?search=${encodeURIComponent(title || '')}`}
-        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors border border-blue-300 dark:border-blue-600"
+        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-green-200 dark:bg-green-800 text-green-900 dark:text-green-100 hover:bg-green-300 dark:hover:bg-green-700 transition-colors border border-green-300 dark:border-green-600"
         target="_blank"
         rel="noopener noreferrer"
       >
