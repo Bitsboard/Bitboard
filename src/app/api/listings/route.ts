@@ -150,13 +150,16 @@ export async function GET(req: NextRequest) {
       '1541532713592-79a0317b6b77', '1555617117-08d3a8fef16c'
     ];
 
-    const listings = results.map((r: any, i: number) => {
-      // Debug: Log the raw rating values from database
+    const listings = results.map((r: any, i: any) => {
+      // Debug: Log the raw title values from database
       if (i < 3) { // Only log first 3 to avoid spam
-        console.log(`API: Listing ${r.id} raw rating from DB:`, {
+        console.log(`API: Listing ${r.id} raw title from DB:`, {
           id: r.id,
-          userRating: r.userRating,
-          userRatingType: typeof r.userRating,
+          title: r.title,
+          titleType: typeof r.title,
+          titleLength: r.title?.length,
+          endsWithZero: r.title?.endsWith('0'),
+          lastChar: r.title?.slice(-1),
           postedBy: r.postedBy
         });
       }
