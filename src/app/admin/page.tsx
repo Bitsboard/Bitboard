@@ -242,76 +242,110 @@ export default function AdminPage() {
 
   // Format activity description based on type
   const formatActivityDescription = (activity: AdminStats['recentActivity'][0]) => {
-    const UserLink = ({ username }: { username: string }) => (
+    const UserTag = ({ username }: { username: string }) => (
       <a 
         href={`/admin/users?search=${encodeURIComponent(username)}`}
-        className="font-bold text-orange-600 dark:text-orange-400 hover:underline"
+        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors border border-orange-200 dark:border-orange-800"
         target="_blank"
         rel="noopener noreferrer"
       >
-        {username}
+        @{username}
       </a>
     );
 
-    const ListingLink = ({ title, id }: { title: string | null; id: number | null }) => (
+    const ListingTag = ({ title, id }: { title: string | null; id: number | null }) => (
       <a 
         href={`/admin/listings?search=${encodeURIComponent(title || '')}`}
-        className="font-bold text-blue-600 dark:text-blue-400 hover:underline"
+        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors border border-blue-200 dark:border-blue-800"
         target="_blank"
         rel="noopener noreferrer"
       >
-        {title}
+        📋 {title || 'Unknown Listing'}
       </a>
     );
+
+    const ActionTag = ({ action }: { action: string }) => {
+      const getActionStyle = (action: string) => {
+        const lowerAction = action.toLowerCase();
+        if (lowerAction.includes('created') || lowerAction.includes('added') || lowerAction.includes('joined') || lowerAction.includes('listed')) {
+          return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border-green-200 dark:border-green-800 hover:bg-green-200 dark:hover:bg-green-900/50';
+        } else if (lowerAction.includes('deleted') || lowerAction.includes('removed') || lowerAction.includes('banned')) {
+          return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-red-200 dark:border-red-800 hover:bg-red-200 dark:hover:bg-red-900/50';
+        } else if (lowerAction.includes('updated') || lowerAction.includes('modified') || lowerAction.includes('changed')) {
+          return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800 hover:bg-blue-200 dark:hover:bg-blue-900/50';
+        } else if (lowerAction.includes('messaged') || lowerAction.includes('started chat')) {
+          return 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-800 hover:bg-purple-200 dark:hover:bg-purple-900/50';
+        } else {
+          return 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700';
+        }
+      };
+
+      return (
+        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border transition-colors ${getActionStyle(action)}`}>
+          {action}
+        </span>
+      );
+    };
 
     switch (activity.type) {
       case 'user':
         return (
           <>
-            <UserLink username={activity.username} />
-            {' '}[{activity.user_id}] has created an account.
+            <UserTag username={activity.username} />
+            {' '}has{' '}
+            <ActionTag action={activity.action} />
+            {' '}an account.
           </>
         );
       case 'listing':
         if (activity.action === 'listed') {
           return (
             <>
-              <UserLink username={activity.username} />
-              {' '}[{activity.user_id}] has listed{' '}
-              <ListingLink title={activity.listing_title} id={activity.listing_id} />
+              <UserTag username={activity.username} />
+              {' '}has{' '}
+              <ActionTag action={activity.action} />
+              {' '}
+              <ListingTag title={activity.listing_title} id={activity.listing_id} />
             </>
           );
         } else if (activity.action === 'updated') {
           return (
             <>
-              <UserLink username={activity.username} />
-              {' '}[{activity.user_id}] has updated{' '}
-              <ListingLink title={activity.listing_title} id={activity.listing_id} />
+              <UserTag username={activity.username} />
+              {' '}has{' '}
+              <ActionTag action={activity.action} />
+              {' '}
+              <ListingTag title={activity.listing_title} id={activity.listing_id} />
             </>
           );
         }
         return (
           <>
-            <UserLink username={activity.username} />
-            {' '}[{activity.user_id}] has {activity.action}{' '}
-            <ListingLink title={activity.listing_title} id={activity.listing_id} />
+            <UserTag username={activity.username} />
+            {' '}has{' '}
+            <ActionTag action={activity.action} />
+            {' '}
+            <ListingTag title={activity.listing_title} id={activity.listing_id} />
           </>
         );
       case 'message':
         return (
           <>
-            <UserLink username={activity.username} />
-            {' '}messaged{' '}
-            <UserLink username={activity.other_username || ''} />
+            <UserTag username={activity.username} />
+            {' '}
+            <ActionTag action="messaged" />
+            {' '}
+            <UserTag username={activity.other_username || 'Unknown User'} />
             {' '}for{' '}
-            <ListingLink title={activity.listing_title} id={activity.listing_id} />
+            <ListingTag title={activity.listing_title} id={activity.listing_id} />
           </>
         );
       default:
         return (
           <>
-            <UserLink username={activity.username} />
-            {' '}{activity.action}
+            <UserTag username={activity.username} />
+            {' '}
+            <ActionTag action={activity.action} />
           </>
         );
     }
@@ -712,81 +746,67 @@ export default function AdminPage() {
                 </div>
               </div>
               
-              {/* Activity Table */}
+              {/* Activity Feed - Condensed Text Editor Style */}
               <div className="bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-neutral-50 dark:bg-neutral-800">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                          Date/Time
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                          Activity
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+                <div className="p-4">
+                  {paginatedActivity.length === 0 ? (
+                    <div className="text-center py-8 text-neutral-500 dark:text-neutral-400">
+                      No {activityFilter === 'all' ? '' : activityFilter} activity found
+                    </div>
+                  ) : (
+                    <div className="space-y-2 font-mono text-sm">
                       {paginatedActivity.map((activity, index) => (
-                        <tr key={index} className="hover:bg-neutral-50 dark:hover:bg-neutral-800">
-                          <td className="px-4 py-3 text-sm text-neutral-600 dark:text-neutral-400">
-                            {new Date(activity.timestamp * 1000).toLocaleString()}
-                          </td>
-                          <td className="px-4 py-3 text-sm">
-                            <span className={cn("font-medium", getActionColor(activity.action))}>
-                              {formatActivityDescription(activity)}
-                            </span>
-                          </td>
-                        </tr>
+                        <div key={index} className="flex items-start gap-3 py-1 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded px-2 -mx-2 transition-colors">
+                          <span className="text-neutral-400 dark:text-neutral-500 text-xs font-mono flex-shrink-0 w-20">
+                            {new Date(activity.timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                          <span className="text-neutral-600 dark:text-neutral-400">
+                            {formatActivityDescription(activity)}
+                          </span>
+                        </div>
                       ))}
-                    </tbody>
-                  </table>
+                    </div>
+                  )}
                 </div>
                 
-                {paginatedActivity.length === 0 && (
-                  <div className="text-center py-8 text-neutral-500 dark:text-neutral-400">
-                    No {activityFilter === 'all' ? '' : activityFilter} activity found
-                  </div>
-                )}
-
-                {/* Pagination */}
+                {/* Pagination - Condensed Style */}
                 {totalPages > 1 && (
-                  <div className="flex justify-between items-center py-4 px-4 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
-                    <div className="text-sm text-neutral-600 dark:text-neutral-400">
+                  <div className="flex justify-between items-center py-3 px-4 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800">
+                    <div className="text-xs text-neutral-600 dark:text-neutral-400">
                       Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredActivity.length)} of {filteredActivity.length} activities
                     </div>
                     
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <button
                         onClick={() => setCurrentPage(1)}
                         disabled={currentPage === 1}
-                        className="px-2 py-1 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-2 py-1 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
                         First
                       </button>
                       <button
                         onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                         disabled={currentPage === 1}
-                        className="px-3 py-1 rounded text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-2 py-1 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
-                        Previous
+                        Prev
                       </button>
                       
-                      <span className="px-3 py-1 text-sm font-medium text-neutral-900 dark:text-white">
+                      <span className="px-2 py-1 text-xs font-medium text-neutral-900 dark:text-white">
                         {currentPage} of {totalPages}
                       </span>
                       
                       <button
                         onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                         disabled={currentPage === totalPages}
-                        className="px-3 py-1 rounded text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-2 py-1 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
                         Next
                       </button>
                       <button
                         onClick={() => setCurrentPage(totalPages)}
                         disabled={currentPage === totalPages}
-                        className="px-2 py-1 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-2 py-1 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
                         Last
                       </button>
