@@ -58,19 +58,7 @@ export async function GET(req: Request) {
       FROM messages
     `).all();
 
-    // Get category distribution
-    const categoryStats = await db.prepare(`
-      SELECT 
-        category,
-        COUNT(*) as count,
-        AVG(price_sat) as avg_price
-      FROM listings 
-      WHERE status = 'active'
-      GROUP BY category 
-      ORDER BY count DESC
-    `).all();
-
-    // Get recent activity (last 10 actions)
+    // Get recent activity (last 20 actions for better filtering)
     const recentActivity = await db.prepare(`
       SELECT 
         'user' as type,
@@ -89,14 +77,30 @@ export async function GET(req: Request) {
       WHERE created_at >= strftime('%s', 'now', '-7 days')
       UNION ALL
       SELECT 
+        'listing' as type,
+        title as identifier,
+        'updated' as action,
+        created_at as timestamp
+      FROM listings 
+      WHERE updated_at >= strftime('%s', 'now', '-7 days') AND updated_at != created_at
+      UNION ALL
+      SELECT 
         'chat' as type,
         'Chat started' as identifier,
         'created' as action,
         created_at as timestamp
       FROM chats 
       WHERE created_at >= strftime('%s', 'now', '-7 days')
+      UNION ALL
+      SELECT 
+        'message' as type,
+        'Message sent' as identifier,
+        'sent' as action,
+        created_at as timestamp
+      FROM messages 
+      WHERE created_at >= strftime('%s', 'now', '-7 days')
       ORDER BY timestamp DESC
-      LIMIT 10
+      LIMIT 20
     `).all();
 
     const stats = {
@@ -128,7 +132,6 @@ export async function GET(req: Request) {
         new30d: Number(messageStats.results?.[0]?.new_messages_30d) || 0,
         unread: Number(messageStats.results?.[0]?.unread_messages) || 0
       },
-      categories: categoryStats.results || [],
       recentActivity: recentActivity.results || []
     };
 

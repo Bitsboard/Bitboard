@@ -36,11 +36,6 @@ interface AdminStats {
     new30d: number;
     unread: number;
   };
-  categories: Array<{
-    category: string;
-    count: number;
-    avg_price: number;
-  }>;
   recentActivity: Array<{
     type: string;
     identifier: string;
@@ -49,6 +44,8 @@ interface AdminStats {
   }>;
 }
 
+type ActivityFilter = 'all' | 'listings' | 'chats' | 'users' | 'messages';
+
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
@@ -56,6 +53,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
+  const [activityFilter, setActivityFilter] = useState<ActivityFilter>('all');
   const router = useRouter();
   const lang = useLang();
 
@@ -121,6 +119,32 @@ export default function AdminPage() {
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleDateString();
+  };
+
+  const formatTime = (timestamp: number) => {
+    return new Date(timestamp * 1000).toLocaleTimeString();
+  };
+
+  // Filter recent activity based on selected filter
+  const filteredActivity = stats?.recentActivity?.filter(activity => {
+    if (activityFilter === 'all') return true;
+    return activity.type === activityFilter.slice(0, -1); // Remove 's' from plural
+  }) || [];
+
+  // Get action color based on action type
+  const getActionColor = (action: string) => {
+    const lowerAction = action.toLowerCase();
+    if (lowerAction.includes('created') || lowerAction.includes('added') || lowerAction.includes('joined')) {
+      return 'text-green-600 dark:text-green-400';
+    } else if (lowerAction.includes('deleted') || lowerAction.includes('removed') || lowerAction.includes('banned')) {
+      return 'text-red-600 dark:text-red-400';
+    } else if (lowerAction.includes('updated') || lowerAction.includes('modified') || lowerAction.includes('changed')) {
+      return 'text-blue-600 dark:text-blue-400';
+    } else if (lowerAction.includes('sent') || lowerAction.includes('message')) {
+      return 'text-purple-600 dark:text-purple-400';
+    } else {
+      return 'text-neutral-600 dark:text-neutral-400';
+    }
   };
 
   if (!isAuthenticated) {
@@ -194,11 +218,11 @@ export default function AdminPage() {
           {/* Header */}
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-4">
+              <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-2">
                 Admin Dashboard
               </h1>
               <p className="text-lg text-neutral-600 dark:text-neutral-400">
-                Real-time platform statistics and management
+                Platform overview and activity monitoring
               </p>
             </div>
             
@@ -208,7 +232,7 @@ export default function AdminPage() {
                 disabled={statsLoading}
                 className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
               >
-                {statsLoading ? 'Refreshing...' : 'Refresh Stats'}
+                {statsLoading ? 'Refreshing...' : 'Refresh'}
               </button>
               <button
                 onClick={handleLogout}
@@ -219,301 +243,181 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {/* Real-time Stats Grid */}
+          {/* Simple Stats Overview */}
           {statsLoading ? (
             <div className="text-center py-12">
               <div className="text-neutral-600 dark:text-neutral-400">Loading statistics...</div>
             </div>
           ) : stats ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
               {/* Users */}
-              <div className={cn(
-                "p-6 rounded-2xl border",
-                "bg-white dark:bg-neutral-900",
-                "border-neutral-200 dark:border-neutral-800"
-              )}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.users.total}</div>
-                    <div className="text-sm text-neutral-600 dark:text-neutral-400">Total Users</div>
-                  </div>
-                </div>
-                <div className="text-xs text-neutral-500 space-y-1">
-                  <div>✅ {stats.users.verified} verified</div>
-                  <div>👑 {stats.users.admin} admins</div>
-                  <div>🚫 {stats.users.banned} banned</div>
-                  <div>📈 +{stats.users.new7d} this week</div>
-                </div>
+              <div className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800">
+                <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.users.total}</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400">Total Users</div>
+                <div className="text-xs text-neutral-500 mt-1">+{stats.users.new7d} this week</div>
               </div>
 
               {/* Listings */}
-              <div className={cn(
-                "p-6 rounded-2xl border",
-                "bg-white dark:bg-neutral-900",
-                "border-neutral-200 dark:border-neutral-800"
-              )}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.listings.total}</div>
-                    <div className="text-sm text-neutral-600 dark:text-neutral-400">Total Listings</div>
-                  </div>
-                </div>
-                <div className="text-xs text-neutral-500 space-y-1">
-                  <div>🟢 {stats.listings.active} active</div>
-                  <div>💰 {stats.listings.sold} sold</div>
-                  <div>📈 +{stats.listings.new7d} this week</div>
-                  <div>💎 {formatSats(stats.listings.avgPriceSats)} avg sats</div>
-                </div>
+              <div className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800">
+                <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.listings.total}</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400">Total Listings</div>
+                <div className="text-xs text-neutral-500 mt-1">+{stats.listings.new7d} this week</div>
               </div>
 
               {/* Chats */}
-              <div className={cn(
-                "p-6 rounded-2xl border",
-                "bg-white dark:bg-neutral-900",
-                "border-neutral-200 dark:border-neutral-800"
-              )}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.chats.total}</div>
-                    <div className="text-sm text-neutral-600 dark:text-neutral-400">Active Chats</div>
-                  </div>
-                </div>
-                <div className="text-xs text-neutral-500 space-y-1">
-                  <div>💬 {stats.messages.total} messages</div>
-                  <div>📧 {stats.messages.unread} unread</div>
-                  <div>📈 +{stats.chats.new7d} this week</div>
-                  <div>📅 +{stats.chats.new30d} this month</div>
-                </div>
+              <div className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800">
+                <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.chats.total}</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400">Active Chats</div>
+                <div className="text-xs text-neutral-500 mt-1">+{stats.chats.new7d} this week</div>
               </div>
 
-              {/* Platform Value */}
-              <div className={cn(
-                "p-6 rounded-2xl border",
-                "bg-white dark:bg-neutral-900",
-                "border-neutral-200 dark:border-neutral-800"
-              )}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-neutral-900 dark:text-white">{formatSats(stats.listings.totalValueActive)}</div>
-                    <div className="text-sm text-neutral-600 dark:text-neutral-400">Total Value (sats)</div>
-                  </div>
-                </div>
-                <div className="text-xs text-neutral-500 space-y-1">
-                  <div>💎 Active listings value</div>
-                  <div>📊 {stats.listings.active} active items</div>
-                  <div>📈 +{stats.listings.new7d} new this week</div>
-                  <div>📅 +{stats.listings.new30d} new this month</div>
-                </div>
+              {/* Messages */}
+              <div className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800">
+                <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.messages.total}</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400">Total Messages</div>
+                <div className="text-xs text-neutral-500 mt-1">{stats.messages.unread} unread</div>
               </div>
             </div>
           ) : null}
 
-          {/* Admin Actions Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {/* User Management */}
-            <div className={cn(
-              "p-6 rounded-2xl border transition-all duration-200 hover:shadow-lg",
-              "bg-white dark:bg-neutral-900",
-              "border-neutral-200 dark:border-neutral-800",
-              "hover:border-orange-300 dark:hover:border-orange-600"
-            )}>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">User Management</h3>
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400">Manage users and permissions</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => router.push('/admin/users')}
-                className="w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200"
-              >
-                Manage Users
-              </button>
-            </div>
+          {/* Admin Actions */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <button 
+              onClick={() => router.push('/admin/users')}
+              className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-blue-300 dark:hover:border-blue-600 transition-colors text-left"
+            >
+              <div className="font-medium text-neutral-900 dark:text-white">User Management</div>
+              <div className="text-sm text-neutral-600 dark:text-neutral-400">Manage users and permissions</div>
+            </button>
 
-            {/* Listing Management */}
-            <div className={cn(
-              "p-6 rounded-2xl border transition-all duration-200 hover:shadow-lg",
-              "bg-white dark:bg-neutral-900",
-              "border-neutral-200 dark:border-neutral-800",
-              "hover:border-green-300 dark:hover:border-green-600"
-            )}>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Listing Management</h3>
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400">Manage marketplace listings</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => router.push('/admin/listings')}
-                className="w-full px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200"
-              >
-                Manage Listings
-              </button>
-            </div>
+            <button 
+              onClick={() => router.push('/admin/listings')}
+              className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-green-300 dark:hover:border-green-600 transition-colors text-left"
+            >
+              <div className="font-medium text-neutral-900 dark:text-white">Listing Management</div>
+              <div className="text-sm text-neutral-600 dark:text-neutral-400">Manage marketplace listings</div>
+            </button>
 
-            {/* Chat Management */}
-            <div className={cn(
-              "p-6 rounded-2xl border transition-all duration-200 hover:shadow-lg",
-              "bg-white dark:bg-neutral-900",
-              "border-neutral-200 dark:border-neutral-800",
-              "hover:border-purple-300 dark:hover:border-purple-600"
-            )}>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Chat Management</h3>
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400">Monitor all chat conversations</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => router.push('/admin/chats')}
-                className="w-full px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200"
-              >
-                View Chats
-              </button>
-            </div>
+            <button 
+              onClick={() => router.push('/admin/chats')}
+              className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-purple-300 dark:hover:border-purple-600 transition-colors text-left"
+            >
+              <div className="font-medium text-neutral-900 dark:text-white">Chat Management</div>
+              <div className="text-sm text-neutral-600 dark:text-neutral-400">Monitor all conversations</div>
+            </button>
 
-            {/* Testing Tools */}
-            <div className={cn(
-              "p-6 rounded-2xl border transition-all duration-200 hover:shadow-lg",
-              "bg-white dark:bg-neutral-900",
-              "border-neutral-200 dark:border-neutral-800",
-              "hover:border-red-300 dark:hover:border-red-600"
-            )}>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Testing Tools</h3>
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400">Development and testing utilities</p>
-                </div>
-              </div>
-              <button 
-                onClick={async () => {
-                  if (confirm('Are you sure you want to wipe your account from the database? This action cannot be undone.')) {
-                    try {
-                      const response = await fetch('/api/admin/users/wipe-me', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: 'georged1997@gmail.com' })
-                      });
-                      
-                      if (response.ok) {
-                        alert('Account wiped successfully! You will be redirected to the home page.');
-                        router.push('/');
-                      } else {
-                        const errorData = await response.json() as { error?: string };
-                        alert(`Failed to wipe account: ${errorData.error || 'Unknown error'}`);
-                      }
-                    } catch (error: unknown) {
-                      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-                      alert('Failed to wipe account. Please try again.');
-                      console.error('Error wiping account:', errorMessage);
+            <button 
+              onClick={async () => {
+                if (confirm('Are you sure you want to wipe your account? This cannot be undone.')) {
+                  try {
+                    const response = await fetch('/api/admin/users/wipe-me', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ email: 'georged1997@gmail.com' })
+                    });
+                    
+                    if (response.ok) {
+                      alert('Account wiped successfully! Redirecting to home page.');
+                      router.push('/');
+                    } else {
+                      const errorData = await response.json() as { error?: string };
+                      alert(`Failed to wipe account: ${errorData.error || 'Unknown error'}`);
                     }
+                  } catch (error: unknown) {
+                    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                    alert('Failed to wipe account. Please try again.');
+                    console.error('Error wiping account:', errorMessage);
                   }
-                }}
-                className="w-full px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200"
-              >
-                Wipe My Account
-              </button>
-            </div>
+                }
+              }}
+              className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-red-300 dark:hover:border-red-600 transition-colors text-left"
+            >
+              <div className="font-medium text-neutral-900 dark:text-white">Testing Tools</div>
+              <div className="text-sm text-neutral-600 dark:text-neutral-400">Wipe my account</div>
+            </button>
           </div>
 
-          {/* Category Distribution */}
-          {stats?.categories && stats.categories.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-6">Category Distribution</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {stats.categories.map((category, index) => (
-                  <div key={index} className={cn(
-                    "p-4 rounded-xl border",
-                    "bg-white dark:bg-neutral-900",
-                    "border-neutral-200 dark:border-neutral-800"
-                  )}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-semibold text-neutral-900 dark:text-white">{category.category}</span>
-                      <span className="text-2xl font-bold text-orange-500">{category.count}</span>
-                    </div>
-                    <div className="text-sm text-neutral-600 dark:text-neutral-400">
-                      Avg: {formatSats(Math.round(category.avg_price))} sats
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Recent Activity */}
+          {/* Live Activity Feed */}
           {stats?.recentActivity && stats.recentActivity.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-6">Recent Activity</h2>
-              <div className={cn(
-                "rounded-xl border overflow-hidden",
-                "bg-white dark:bg-neutral-900",
-                "border-neutral-200 dark:border-neutral-800"
-              )}>
-                <div className="p-4 border-b border-neutral-200 dark:border-neutral-800">
-                  <h3 className="font-semibold text-neutral-900 dark:text-white">Last 7 Days</h3>
-                </div>
-                <div className="divide-y divide-neutral-200 dark:divide-neutral-800">
-                  {stats.recentActivity.map((activity, index) => (
-                    <div key={index} className="p-4 flex items-center gap-4">
-                      <div className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold",
-                        activity.type === 'user' ? "bg-blue-500" :
-                        activity.type === 'listing' ? "bg-green-500" : "bg-purple-500"
-                      )}>
-                        {activity.type === 'user' ? '👤' : activity.type === 'listing' ? '📦' : '💬'}
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-medium text-neutral-900 dark:text-white">
-                          {activity.identifier}
-                        </div>
-                        <div className="text-sm text-neutral-600 dark:text-neutral-400">
-                          {activity.action} • {formatDate(activity.timestamp)}
-                        </div>
-                      </div>
-                    </div>
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-neutral-900 dark:text-white">Live Activity Feed</h2>
+                
+                {/* Activity Filter */}
+                <div className="flex gap-2">
+                  {(['all', 'listings', 'chats', 'users', 'messages'] as ActivityFilter[]).map((filter) => (
+                    <button
+                      key={filter}
+                      onClick={() => setActivityFilter(filter)}
+                      className={cn(
+                        "px-3 py-1 rounded-lg text-sm font-medium transition-colors",
+                        activityFilter === filter
+                          ? "bg-orange-500 text-white"
+                          : "bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-300 dark:hover:bg-neutral-700"
+                      )}
+                    >
+                      {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                    </button>
                   ))}
                 </div>
+              </div>
+              
+              {/* Activity Table */}
+              <div className="bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-neutral-50 dark:bg-neutral-800">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                          Time
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                          Type
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                          Action
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                          Details
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+                      {filteredActivity.map((activity, index) => (
+                        <tr key={index} className="hover:bg-neutral-50 dark:hover:bg-neutral-800">
+                          <td className="px-4 py-3 text-sm text-neutral-600 dark:text-neutral-400">
+                            {formatTime(activity.timestamp)}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-neutral-600 dark:text-neutral-400">
+                            <span className={cn(
+                              "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
+                              activity.type === 'user' ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" :
+                              activity.type === 'listing' ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" :
+                              activity.type === 'chat' ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" :
+                              "bg-neutral-100 text-neutral-800 dark:bg-neutral-900 dark:text-neutral-200"
+                            )}>
+                              {activity.type}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            <span className={cn("font-medium", getActionColor(activity.action))}>
+                              {activity.action}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-neutral-900 dark:text-white">
+                            {activity.identifier}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {filteredActivity.length === 0 && (
+                  <div className="text-center py-8 text-neutral-500 dark:text-neutral-400">
+                    No {activityFilter === 'all' ? '' : activityFilter} activity found
+                  </div>
+                )}
               </div>
             </div>
           )}
