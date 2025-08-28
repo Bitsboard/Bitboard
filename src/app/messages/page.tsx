@@ -174,7 +174,7 @@ export default function MessagesPage() {
     : chats;
 
   return (
-    <div className="h-[calc(100vh-4rem)] bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-950 dark:to-neutral-900 flex flex-col overflow-hidden rounded-3xl m-2">
+    <div className="h-[calc(100vh-4rem)] bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-950 dark:to-neutral-900 flex flex-col overflow-hidden rounded-3xl">
       {/* Main Container - Fixed Height */}
       <div className="flex-1 flex overflow-hidden rounded-3xl">
         {/* Left Panel - Conversations */}
@@ -246,7 +246,7 @@ export default function MessagesPage() {
               <div className="text-center py-8">
                 <div className="w-16 h-16 mx-auto mb-4 bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center">
                   <svg className="w-8 h-8 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12h.01M16h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
                 </div>
                 <p className="text-neutral-600 dark:text-neutral-400 text-sm">
@@ -265,28 +265,48 @@ export default function MessagesPage() {
                         : 'bg-white/60 dark:bg-neutral-800/60 hover:bg-white/80 dark:hover:bg-neutral-700/80 border border-neutral-200/50 dark:border-neutral-700/50'
                     }`}
                   >
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-sm truncate">
-                          {chat.listing_title}
-                        </h3>
-                        <span className="text-xs opacity-80">
-                          {formatTimestamp(chat.last_message_time)}
-                        </span>
+                    {/* Compact Layout */}
+                    <div className="flex items-start gap-3">
+                      {/* Listing Icon */}
+                      <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-700 dark:to-neutral-800 rounded-xl flex items-center justify-center shadow-sm">
+                        <svg className="w-5 h-5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs opacity-80 truncate">
-                          {chat.other_user}
-                        </p>
-                        {chat.unread_count > 0 && (
-                          <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center">
-                            {chat.unread_count}
+                      
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        {/* Title and Age */}
+                        <div className="flex items-center justify-between mb-1">
+                          <h3 className="font-semibold text-sm truncate">
+                            {chat.listing_title}
+                          </h3>
+                          <span className="text-xs opacity-80 flex-shrink-0 ml-2">
+                            {formatTimestamp(chat.last_message_time)}
                           </span>
+                        </div>
+                        
+                        {/* Seller Pill */}
+                        <div className="mb-2">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800">
+                            {chat.other_user}
+                          </span>
+                        </div>
+                        
+                        {/* Last Message */}
+                        <p className="text-xs opacity-70 truncate leading-relaxed">
+                          {chat.last_message || 'No messages yet'}
+                        </p>
+                        
+                        {/* Unread Badge */}
+                        {chat.unread_count > 0 && (
+                          <div className="mt-2 flex justify-end">
+                            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center font-medium">
+                              {chat.unread_count}
+                            </span>
+                          </div>
                         )}
                       </div>
-                      <p className="text-xs opacity-70 truncate">
-                        {chat.last_message}
-                      </p>
                     </div>
                   </div>
                 ))}
