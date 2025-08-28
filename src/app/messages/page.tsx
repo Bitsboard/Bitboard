@@ -16,6 +16,15 @@ interface Chat {
   listing_image?: string;
 }
 
+interface SystemNotification {
+  id: string;
+  title: string;
+  message: string;
+  timestamp: number;
+  read: boolean;
+  type: 'system' | 'welcome' | 'update';
+}
+
 interface Message {
   id: string;
   content: string;
@@ -30,7 +39,9 @@ export default function MessagesPage() {
   const { user } = useUser();
   
   const [chats, setChats] = useState<Chat[]>([]);
+  const [systemNotifications, setSystemNotifications] = useState<SystemNotification[]>([]);
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
+  const [selectedNotification, setSelectedNotification] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
@@ -69,13 +80,14 @@ export default function MessagesPage() {
       if (response.ok) {
         const data = await response.json() as { chats: any[] };
         console.log('Chat API response:', data); // Debug log
+        
         const transformedChats = data.chats.map((chat: any) => ({
           id: chat.id,
           listing_title: chat.listing_title,
           other_user: chat.other_user_username,
-          last_message: chat.latest_message_text,
-          last_message_time: chat.latest_message_time,
-          unread_count: chat.unreadCount,
+          last_message: chat.latest_message_text || 'No messages yet',
+          last_message_time: chat.latest_message_time || chat.last_message_at || chat.created_at,
+          unread_count: chat.unread_count || 0,
           listing_id: chat.listing_id,
           listing_image: chat.listing_image
         }));
@@ -93,6 +105,32 @@ export default function MessagesPage() {
       console.error('Error loading chats:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadSystemNotifications = () => {
+    // Load system notifications from localStorage or create defaults
+    try {
+      const stored = localStorage.getItem('systemNotifications');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setSystemNotifications(parsed);
+      } else {
+        const defaultNotifications: SystemNotification[] = [
+          {
+            id: 'welcome',
+            title: 'Welcome to bitsbarter!',
+            message: 'Your account has been verified. Start trading with Bitcoin today!',
+            timestamp: Date.now() - 86400000, // 24 hours ago
+            read: true,
+            type: 'welcome'
+          }
+        ];
+        setSystemNotifications(defaultNotifications);
+        localStorage.setItem('systemNotifications', JSON.stringify(defaultNotifications));
+      }
+    } catch (error) {
+      console.error('Error loading system notifications:', error);
     }
   };
 
@@ -116,6 +154,7 @@ export default function MessagesPage() {
         }));
         setMessages(transformedMessages);
         setSelectedChat(chatId);
+        setSelectedNotification(null);
       } else {
         console.error('Messages API error:', response.status, response.statusText);
       }
@@ -158,9 +197,26 @@ export default function MessagesPage() {
     }
   };
 
+  const selectNotification = (notification: SystemNotification) => {
+    setSelectedNotification(notification.id);
+    setSelectedChat(null);
+    
+    // Mark as read if not already read
+    if (!notification.read) {
+      setSystemNotifications(prev => {
+        const updated = prev.map(n => 
+          n.id === notification.id ? { ...n, read: true } : n
+        );
+        localStorage.setItem('systemNotifications', JSON.stringify(updated));
+        return updated;
+      });
+    }
+  };
+
   useEffect(() => {
     if (user?.email) {
       loadChats();
+      loadSystemNotifications();
     }
   }, [user?.email]);
 
@@ -170,22 +226,32 @@ export default function MessagesPage() {
     }
   }, [messages]);
 
-  // Filter chats based on unread status
+  // Filter chats and notifications based on unread status
   const filteredChats = filter === 'unread' 
     ? chats.filter(chat => chat.unread_count > 0)
     : chats;
+  
+  const filteredNotifications = filter === 'unread'
+    ? systemNotifications.filter(notification => !notification.read)
+    : systemNotifications;
+
+  // Combine notifications and chats with notifications at top
+  const combinedItems = [
+    ...filteredNotifications.map(notification => ({ ...notification, itemType: 'notification' as const })),
+    ...filteredChats.map(chat => ({ ...chat, itemType: 'chat' as const }))
+  ];
 
   return (
     <div className="h-[calc(100vh-4rem)] bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-950 dark:to-neutral-900 flex flex-col overflow-hidden rounded-3xl">
       {/* Main Container - Fixed Height */}
       <div className="flex-1 flex overflow-hidden rounded-3xl">
-        {/* Left Panel - Conversations */}
+        {/* Left Panel - Conversations & Notifications */}
         <div className="w-80 bg-white/80 dark:bg-neutral-900/90 backdrop-blur-sm border-r border-neutral-200/50 dark:border-neutral-800/50 flex flex-col rounded-r-3xl shadow-xl">
           {/* Header - Shorter */}
           <div className="p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 flex-shrink-0 rounded-tr-3xl shadow-lg">
             <div className="flex items-center justify-between mb-3">
               <h1 className="text-lg font-bold text-white drop-shadow-sm">
-                Messages
+                Messages & Notifications
               </h1>
               <button
                 onClick={loadChats}
@@ -212,7 +278,7 @@ export default function MessagesPage() {
                     : 'text-white/80 hover:text-white'
                 }`}
               >
-                All ({chats.length})
+                All ({combinedItems.length})
               </button>
               <button
                 onClick={() => setFilter('unread')}
@@ -222,7 +288,7 @@ export default function MessagesPage() {
                     : 'text-white/80 hover:text-white'
                 }`}
               >
-                Unread ({chats.filter(c => c.unread_count > 0).length})
+                Unread ({(chats.filter(c => c.unread_count > 0).length + systemNotifications.filter(n => !n.read).length)})
               </button>
             </div>
           </div>
@@ -244,7 +310,7 @@ export default function MessagesPage() {
               <div className="flex items-center justify-center py-8">
                 <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
               </div>
-            ) : filteredChats.length === 0 ? (
+            ) : combinedItems.length === 0 ? (
               <div className="text-center py-8">
                 <div className="w-16 h-16 mx-auto mb-4 bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center">
                   <svg className="w-8 h-8 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -252,90 +318,141 @@ export default function MessagesPage() {
                   </svg>
                 </div>
                 <p className="text-neutral-600 dark:text-neutral-400 text-sm">
-                  {filter === 'unread' ? 'No unread conversations' : 'No conversations yet'}
+                  {filter === 'unread' ? 'No unread items' : 'No messages or notifications yet'}
                 </p>
               </div>
             ) : (
               <div className="divide-y divide-neutral-200 dark:divide-neutral-800">
-                {filteredChats.map((chat) => (
+                {combinedItems.map((item) => (
                   <div
-                    key={chat.id}
-                    onClick={() => loadMessages(chat.id)}
+                    key={`${item.itemType}-${item.id}`}
+                    onClick={() => {
+                      if (item.itemType === 'chat') {
+                        loadMessages(item.id);
+                      } else {
+                        selectNotification(item as SystemNotification);
+                      }
+                    }}
                     className={`p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 ${
-                      selectedChat === chat.id
+                      (item.itemType === 'chat' && selectedChat === item.id) ||
+                      (item.itemType === 'notification' && selectedNotification === item.id)
                         ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white'
                         : 'bg-white dark:bg-neutral-900'
                     }`}
                   >
-                    {/* Condensed Layout - Inspired by modern messaging platforms */}
-                    <div className="flex items-start gap-3">
-                      {/* Listing Image/Icon */}
-                      <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden shadow-sm">
-                        {chat.listing_image ? (
-                          <img 
-                            src={chat.listing_image} 
-                            alt={chat.listing_title}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              // Fallback to icon if image fails to load
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                              target.nextElementSibling?.classList.remove('hidden');
-                            }}
-                          />
-                        ) : null}
-                        <div className={`w-full h-full bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-700 dark:to-neutral-800 flex items-center justify-center ${chat.listing_image ? 'hidden' : ''}`}>
-                          <svg className="w-6 h-6 text-neutral-500 dark:text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    {item.itemType === 'notification' ? (
+                      /* System Notification Layout */
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-800 dark:to-purple-900 flex items-center justify-center shadow-sm">
+                          <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19h6a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
                           </svg>
                         </div>
-                      </div>
-                      
-                      {/* Content - Condensed Layout */}
-                      <div className="flex-1 min-w-0">
-                        {/* Title */}
-                        <h3 className={`font-semibold text-sm truncate mb-1 ${
-                          selectedChat === chat.id ? 'text-white' : 'text-neutral-900 dark:text-white'
-                        }`}>
-                          {chat.listing_title}
-                        </h3>
                         
-                        {/* Last Message and Age - Side by Side */}
-                        <div className="flex items-center justify-between gap-2">
-                          <p className={`text-xs truncate flex-1 ${
-                            selectedChat === chat.id ? 'text-white/80' : 'text-neutral-600 dark:text-neutral-300'
+                        <div className="flex-1 min-w-0">
+                          <h3 className={`font-semibold text-sm truncate mb-1 ${
+                            selectedNotification === item.id ? 'text-white' : 'text-neutral-900 dark:text-white'
                           }`}>
-                            {chat.last_message || 'No messages yet'}
-                          </p>
-                          <span className={`text-xs flex-shrink-0 ${
-                            selectedChat === chat.id ? 'text-white/70' : 'text-neutral-500 dark:text-neutral-400'
-                          }`}>
-                            {formatTimestamp(chat.last_message_time)}
-                          </span>
-                        </div>
-                        
-                        {/* Bottom Row: Seller and Unread Count */}
-                        <div className="flex items-center justify-between mt-1">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                            selectedChat === chat.id 
-                              ? 'bg-white/20 text-white'
-                              : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200'
-                          }`}>
-                            {chat.other_user}
-                          </span>
+                            {item.title}
+                          </h3>
                           
-                          {chat.unread_count > 0 && (
-                            <span className={`text-xs px-2 py-0.5 rounded-full min-w-[18px] text-center font-medium ${
-                              selectedChat === chat.id 
-                                ? 'bg-white/20 text-white'
-                                : 'bg-red-500 text-white'
+                          <div className="flex items-center justify-between gap-2">
+                            <p className={`text-xs truncate flex-1 ${
+                              selectedNotification === item.id ? 'text-white/80' : 'text-neutral-600 dark:text-neutral-300'
                             }`}>
-                              {chat.unread_count}
+                              {item.message}
+                            </p>
+                            <span className={`text-xs flex-shrink-0 ${
+                              selectedNotification === item.id ? 'text-white/70' : 'text-neutral-500 dark:text-neutral-400'
+                            }`}>
+                              {formatTimestamp(item.timestamp)}
                             </span>
+                          </div>
+                          
+                          {!item.read && (
+                            <div className="mt-1 flex justify-end">
+                              <span className={`text-xs px-2 py-0.5 rounded-full min-w-[18px] text-center font-medium ${
+                                selectedNotification === item.id 
+                                  ? 'bg-white/20 text-white'
+                                  : 'bg-purple-500 text-white'
+                              }`}>
+                                New
+                              </span>
+                            </div>
                           )}
                         </div>
                       </div>
-                    </div>
+                    ) : (
+                      /* Chat Layout */
+                      <div className="flex items-start gap-3">
+                        {/* Listing Image/Icon */}
+                        <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden shadow-sm">
+                          {item.listing_image ? (
+                            <img 
+                              src={item.listing_image} 
+                              alt={item.listing_title}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                // Fallback to icon if image fails to load
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                target.nextElementSibling?.classList.remove('hidden');
+                              }}
+                            />
+                          ) : null}
+                          <div className={`w-full h-full bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-700 dark:to-neutral-800 flex items-center justify-center ${item.listing_image ? 'hidden' : ''}`}>
+                            <svg className="w-6 h-6 text-neutral-500 dark:text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 00-2-2V6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                        </div>
+                        
+                        {/* Content - Condensed Layout */}
+                        <div className="flex-1 min-w-0">
+                          {/* Title */}
+                          <h3 className={`font-semibold text-sm truncate mb-1 ${
+                            selectedChat === item.id ? 'text-white' : 'text-neutral-900 dark:text-white'
+                          }`}>
+                            {item.listing_title}
+                          </h3>
+                          
+                          {/* Last Message and Age - Side by Side */}
+                          <div className="flex items-center justify-between gap-2">
+                            <p className={`text-xs truncate flex-1 ${
+                              selectedChat === item.id ? 'text-white/80' : 'text-neutral-600 dark:text-neutral-300'
+                            }`}>
+                              {item.last_message}
+                            </p>
+                            <span className={`text-xs flex-shrink-0 ${
+                              selectedChat === item.id ? 'text-white/70' : 'text-neutral-500 dark:text-neutral-400'
+                            }`}>
+                              {formatTimestamp(item.last_message_time)}
+                            </span>
+                          </div>
+                          
+                          {/* Bottom Row: Seller and Unread Count */}
+                          <div className="flex items-center justify-between mt-1">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                              selectedChat === item.id 
+                                ? 'bg-white/20 text-white'
+                                : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200'
+                            }`}>
+                              {item.other_user}
+                            </span>
+                            
+                                                         {item.unread_count > 0 && (
+                               <span className={`text-xs px-2 py-0.5 rounded-full min-w-[18px] text-center font-medium ${
+                                 selectedChat === item.id 
+                                   ? 'bg-white/20 text-white'
+                                   : 'bg-red-500 text-white'
+                               }`}>
+                                 {item.unread_count}
+                               </span>
+                             )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -343,7 +460,7 @@ export default function MessagesPage() {
           </div>
         </div>
 
-        {/* Right Panel - Chat Messages */}
+        {/* Right Panel - Chat Messages or Notification View */}
         <div className="flex-1 bg-white/80 dark:bg-neutral-900/90 backdrop-blur-sm flex flex-col rounded-l-3xl shadow-xl">
           {selectedChat ? (
             <>
@@ -423,6 +540,31 @@ export default function MessagesPage() {
                 </div>
               </div>
             </>
+          ) : selectedNotification ? (
+            <>
+              {/* Notification View */}
+              <div className="p-6">
+                <div className="text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+                    <svg className="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19h6a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-bold text-neutral-900 dark:text-white mb-2">
+                    {systemNotifications.find(n => n.id === selectedNotification)?.title}
+                  </h2>
+                  <p className="text-neutral-600 dark:text-neutral-400 mb-4">
+                    {systemNotifications.find(n => n.id === selectedNotification)?.message}
+                  </p>
+                  <button
+                    onClick={() => setSelectedNotification(null)}
+                    className="px-6 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl font-medium hover:from-purple-600 hover:to-purple-700 transition-all duration-200 hover:scale-105 shadow-md"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </>
           ) : (
             /* Empty State */
             <div className="flex-1 flex items-center justify-center">
@@ -433,10 +575,10 @@ export default function MessagesPage() {
                   </svg>
                 </div>
                 <h2 className="text-xl font-bold text-neutral-900 dark:text-white mb-2">
-                  Select a conversation
+                  Select a conversation or notification
                 </h2>
                 <p className="text-neutral-600 dark:text-neutral-400">
-                  Choose a chat from the left panel to start messaging
+                  Choose a chat or notification from the left panel
                 </p>
               </div>
             </div>
