@@ -168,7 +168,7 @@ export async function GET(req: NextRequest) {
         // Create the seller object structure that the frontend expects
         seller: {
           name: r.postedBy || 'unknown',
-          score: r.userDeals || 0,
+          score: r.userRating || 5.0,
           deals: r.userDeals || 0,
           rating: r.userRating || 5.0,
           verifications: {

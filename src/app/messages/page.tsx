@@ -265,8 +265,10 @@ export default function MessagesPage() {
   };
 
   const formatTimestamp = (timestamp: number) => {
+    // Convert to milliseconds if timestamp is in seconds (Unix timestamp)
+    const timestampMs = timestamp > 1000000000000 ? timestamp : timestamp * 1000;
     const now = Date.now();
-    const diff = now - timestamp;
+    const diff = now - timestampMs;
     
     const minutes = Math.floor(diff / (1000 * 60));
     const hours = Math.floor(diff / (1000 * 60 * 60));
