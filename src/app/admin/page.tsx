@@ -59,6 +59,20 @@ export default function AdminPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage] = useState(50);
+  
+  // System notification state
+  const [showNotificationForm, setShowNotificationForm] = useState(false);
+  const [notificationForm, setNotificationForm] = useState({
+    targetGroup: 'all' as 'all' | 'verified' | 'unverified' | 'admin' | 'buyers' | 'sellers',
+    title: '',
+    message: '',
+    icon: 'info' as 'info' | 'success' | 'warning' | 'error' | 'system',
+    actionUrl: ''
+  });
+  const [sendingNotification, setSendingNotification] = useState(false);
+  const [notificationSuccess, setNotificationSuccess] = useState<string | null>(null);
+  const [notificationError, setNotificationError] = useState<string | null>(null);
+  
   const router = useRouter();
   const lang = useLang();
 
@@ -99,6 +113,56 @@ export default function AdminPage() {
     setIsAuthenticated(false);
     localStorage.removeItem('admin_authenticated');
     setStats(null);
+  };
+
+  const sendSystemNotification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSendingNotification(true);
+    setNotificationError(null);
+    setNotificationSuccess(null);
+
+    try {
+      const response = await fetch('/api/admin/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(notificationForm),
+      });
+
+      const data = await response.json() as { success: boolean; message?: string; error?: string };
+
+      if (response.ok && data.success) {
+        setNotificationSuccess(data.message || 'Notification sent successfully');
+        setNotificationForm({
+          targetGroup: 'all',
+          title: '',
+          message: '',
+          icon: 'info',
+          actionUrl: ''
+        });
+        setShowNotificationForm(false);
+      } else {
+        setNotificationError(data.error || 'Failed to send notification');
+      }
+    } catch (error) {
+      setNotificationError('Network error. Please try again.');
+      console.error('Error sending notification:', error);
+    } finally {
+      setSendingNotification(false);
+    }
+  };
+
+  const resetNotificationForm = () => {
+    setNotificationForm({
+      targetGroup: 'all',
+      title: '',
+      message: '',
+      icon: 'info',
+      actionUrl: ''
+    });
+    setNotificationError(null);
+    setNotificationSuccess(null);
   };
 
   const loadStats = async () => {
@@ -413,35 +477,215 @@ export default function AdminPage() {
             </button>
 
             <button 
-              onClick={async () => {
-                if (confirm('Are you sure you want to wipe your account? This cannot be undone.')) {
-                  try {
-                    const response = await fetch('/api/admin/users/wipe-me', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ email: 'georged1997@gmail.com' })
-                    });
-                    
-                    if (response.ok) {
-                      alert('Account wiped successfully! Redirecting to home page.');
-                      router.push('/');
-                    } else {
-                      const errorData = await response.json() as { error?: string };
-                      alert(`Failed to wipe account: ${errorData.error || 'Unknown error'}`);
-                    }
-                  } catch (error: unknown) {
-                    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-                    alert('Failed to wipe account. Please try again.');
-                    console.error('Error wiping account:', errorMessage);
-                  }
-                }
-              }}
-              className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-red-300 dark:hover:border-red-600 transition-colors text-left"
+              onClick={() => setShowNotificationForm(true)}
+              className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-orange-300 dark:hover:border-orange-600 transition-colors text-left"
             >
-              <div className="font-medium text-neutral-900 dark:text-white">Testing Tools</div>
-              <div className="text-sm text-neutral-600 dark:text-neutral-400">Wipe my account</div>
+              <div className="font-medium text-neutral-900 dark:text-white">System Notifications</div>
+              <div className="text-sm text-neutral-600 dark:text-neutral-400">Send notifications to users</div>
             </button>
           </div>
+
+          {/* System Notification Modal */}
+          {showNotificationForm && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white dark:bg-neutral-900 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="p-6 border-b border-neutral-200 dark:border-neutral-700">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-neutral-900 dark:text-white">
+                      Send System Notification
+                    </h2>
+                    <button
+                      onClick={() => {
+                        setShowNotificationForm(false);
+                        resetNotificationForm();
+                      }}
+                      className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+                    >
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <p className="text-neutral-600 dark:text-neutral-400 mt-2">
+                    Send a notification to users that will appear in their messages
+                  </p>
+                </div>
+
+                <form onSubmit={sendSystemNotification} className="p-6 space-y-6">
+                  {/* Target Group */}
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-2">
+                      Target Group *
+                    </label>
+                    <select
+                      value={notificationForm.targetGroup}
+                      onChange={(e) => setNotificationForm(prev => ({ ...prev, targetGroup: e.target.value as any }))}
+                      className="w-full px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      required
+                    >
+                      <option value="all">All Users</option>
+                      <option value="verified">Verified Users Only</option>
+                      <option value="unverified">Unverified Users Only</option>
+                      <option value="admin">Admin Users Only</option>
+                      <option value="buyers">Buyers Only</option>
+                      <option value="sellers">Sellers Only</option>
+                    </select>
+                  </div>
+
+                  {/* Title */}
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-2">
+                      Title *
+                    </label>
+                    <input
+                      type="text"
+                      value={notificationForm.title}
+                      onChange={(e) => setNotificationForm(prev => ({ ...prev, title: e.target.value }))}
+                      className="w-full px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      placeholder="Enter notification title"
+                      required
+                      maxLength={100}
+                    />
+                  </div>
+
+                  {/* Message */}
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-2">
+                      Message *
+                    </label>
+                    <textarea
+                      value={notificationForm.message}
+                      onChange={(e) => setNotificationForm(prev => ({ ...prev, message: e.target.value }))}
+                      className="w-full px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      placeholder="Enter notification message"
+                      rows={4}
+                      required
+                      maxLength={500}
+                    />
+                    <div className="text-xs text-neutral-500 mt-1 text-right">
+                      {notificationForm.message.length}/500
+                    </div>
+                  </div>
+
+                  {/* Icon */}
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-2">
+                      Icon *
+                    </label>
+                    <div className="grid grid-cols-5 gap-3">
+                      {(['info', 'success', 'warning', 'error', 'system'] as const).map((icon) => (
+                        <button
+                          key={icon}
+                          type="button"
+                          onClick={() => setNotificationForm(prev => ({ ...prev, icon }))}
+                          className={`p-3 rounded-lg border-2 transition-colors ${
+                            notificationForm.icon === icon
+                              ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                              : 'border-neutral-300 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-600'
+                          }`}
+                        >
+                          <div className="text-center">
+                            <div className="w-8 h-8 mx-auto mb-2 flex items-center justify-center">
+                              {icon === 'info' && (
+                                <svg className="w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              )}
+                              {icon === 'success' && (
+                                <svg className="w-6 h-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              )}
+                              {icon === 'warning' && (
+                                <svg className="w-6 h-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                </svg>
+                              )}
+                              {icon === 'error' && (
+                                <svg className="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              )}
+                              {icon === 'system' && (
+                                <svg className="w-6 h-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                              )}
+                            </div>
+                            <div className="text-xs font-medium text-neutral-700 dark:text-neutral-300 capitalize">
+                              {icon}
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Action URL (Optional) */}
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-2">
+                      Action URL (Optional)
+                    </label>
+                    <input
+                      type="url"
+                      value={notificationForm.actionUrl}
+                      onChange={(e) => setNotificationForm(prev => ({ ...prev, actionUrl: e.target.value }))}
+                      className="w-full px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      placeholder="https://example.com (optional)"
+                    />
+                    <div className="text-xs text-neutral-500 mt-1">
+                      Users can click this URL when viewing the notification
+                    </div>
+                  </div>
+
+                  {/* Success/Error Messages */}
+                  {notificationSuccess && (
+                    <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                      <div className="flex items-center">
+                        <svg className="w-5 h-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span className="text-green-800 dark:text-green-200">{notificationSuccess}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {notificationError && (
+                    <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                      <div className="flex items-center">
+                        <svg className="w-5 h-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-red-800 dark:text-red-200">{notificationError}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Form Actions */}
+                  <div className="flex items-center justify-end gap-3 pt-4 border-t border-neutral-200 dark:border-neutral-700">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowNotificationForm(false);
+                        resetNotificationForm();
+                      }}
+                      className="px-6 py-2 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={sendingNotification || !notificationForm.title.trim() || !notificationForm.message.trim()}
+                      className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {sendingNotification ? 'Sending...' : 'Send Notification'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
 
           {/* Live Activity Feed */}
           {stats?.recentActivity && stats.recentActivity.length > 0 && (
