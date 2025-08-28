@@ -424,77 +424,74 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {/* Simple Stats Overview */}
+          {/* Integrated Stats & Management Boxes */}
           {statsLoading ? (
             <div className="text-center py-12">
               <div className="text-neutral-600 dark:text-neutral-400">Loading statistics...</div>
             </div>
           ) : stats ? (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-              {/* Users */}
-              <div className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800">
-                <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.users.total}</div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400">Total Users</div>
-                <div className="text-xs text-neutral-500 mt-1">+{stats.users.new7d} this week</div>
+              {/* Users Box with Management Button */}
+              <div className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 hover:shadow-md">
+                <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-1">{stats.users.total}</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">Total Users</div>
+                <div className="text-xs text-neutral-500 mb-4">+{stats.users.new7d} this week</div>
+                <button 
+                  onClick={() => router.push('/admin/users')}
+                  className="w-full px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors"
+                >
+                  User Management
+                </button>
               </div>
 
-              {/* Listings */}
-              <div className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800">
-                <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.listings.total}</div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400">Total Listings</div>
-                <div className="text-xs text-neutral-500 mt-1">+{stats.listings.new7d} this week</div>
+              {/* Listings Box with Management Button */}
+              <div className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-green-300 dark:hover:border-green-600 transition-all duration-200 hover:shadow-md">
+                <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-1">{stats.listings.total}</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">Total Listings</div>
+                <div className="text-xs text-neutral-500 mb-4">+{stats.listings.new7d} this week</div>
+                <button 
+                  onClick={() => router.push('/admin/listings')}
+                  className="w-full px-3 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors"
+                >
+                  Listing Management
+                </button>
               </div>
 
-              {/* Chats */}
-              <div className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800">
-                <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.conversations.total}</div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400">Active Conversations</div>
-                <div className="text-xs text-neutral-500 mt-1">+{stats.conversations.new7d} this week</div>
+              {/* Chats Box with Management Button */}
+              <div className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 hover:shadow-md">
+                <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-1">{stats.conversations.total}</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">Active Conversations</div>
+                <div className="text-xs text-neutral-500 mb-4">+{stats.conversations.new7d} this week</div>
+                <button 
+                  onClick={() => router.push('/admin/chats')}
+                  className="w-full px-3 py-2 bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium rounded-lg transition-colors"
+                >
+                  Chat Management
+                </button>
               </div>
 
-              {/* Messages */}
+              {/* Reports & System Notifications Box */}
               <div className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800">
-                <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.conversations.messages}</div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400">Total Messages</div>
-                <div className="text-xs text-neutral-500 mt-1">{stats.conversations.unread} unread</div>
+                <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-1">Reports</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">System & Analytics</div>
+                <div className="text-xs text-neutral-500 mb-4">Management tools</div>
+                <div className="space-y-2">
+                  <button 
+                    onClick={() => setShowNotificationForm(true)}
+                    className="w-full px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    Send Notification
+                  </button>
+                  <button 
+                    onClick={() => router.push('/admin/reports')}
+                    className="w-full px-3 py-2 bg-neutral-500 hover:bg-neutral-600 text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    View Reports
+                  </button>
+                </div>
               </div>
             </div>
           ) : null}
-
-          {/* Admin Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <button 
-              onClick={() => router.push('/admin/users')}
-              className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-blue-300 dark:hover:border-blue-600 transition-colors text-left"
-            >
-              <div className="font-medium text-neutral-900 dark:text-white">User Management</div>
-              <div className="text-sm text-neutral-600 dark:text-neutral-400">Manage users and permissions</div>
-            </button>
-
-            <button 
-              onClick={() => router.push('/admin/listings')}
-              className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-green-300 dark:hover:border-green-600 transition-colors text-left"
-            >
-              <div className="font-medium text-neutral-900 dark:text-white">Listing Management</div>
-              <div className="text-sm text-neutral-600 dark:text-neutral-400">Manage marketplace listings</div>
-            </button>
-
-            <button 
-              onClick={() => router.push('/admin/chats')}
-              className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-purple-300 dark:hover:border-purple-600 transition-colors text-left"
-            >
-              <div className="font-medium text-neutral-900 dark:text-white">Chat Management</div>
-              <div className="text-sm text-neutral-600 dark:text-neutral-400">Monitor all conversations</div>
-            </button>
-
-            <button 
-              onClick={() => setShowNotificationForm(true)}
-              className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-orange-300 dark:hover:border-orange-600 transition-colors text-left"
-            >
-              <div className="font-medium text-neutral-900 dark:text-white">System Notifications</div>
-              <div className="text-sm text-neutral-600 dark:text-neutral-400">Send notifications to users</div>
-            </button>
-          </div>
 
           {/* System Notification Modal */}
           {showNotificationForm && (
