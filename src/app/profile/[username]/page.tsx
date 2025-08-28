@@ -546,7 +546,7 @@ export default function PublicProfilePage() {
                 </div>
                 <div>
                   <div className="text-sm text-white mb-1 font-medium">Reputation</div>
-                  <div className="text-lg font-semibold text-white">+{userScore}</div>
+                  <div className="text-lg font-semibold text-white">+{userProfile?.rating || 0}</div>
                 </div>
               </div>
             </div>

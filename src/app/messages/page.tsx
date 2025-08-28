@@ -86,11 +86,8 @@ export default function MessagesPage() {
   // Load chats when component mounts
   useEffect(() => {
     if (user?.email) {
-      console.log('Messages page: User email found, loading chats and notifications');
       loadChats();
       loadSystemNotifications();
-    } else {
-      console.log('Messages page: No user email found, user object:', user);
     }
   }, [user?.email]);
 
@@ -99,7 +96,6 @@ export default function MessagesPage() {
     if (!user?.email) return;
     
     const interval = setInterval(() => {
-      console.log('Messages page: Polling for new messages');
       loadChatsBackground();
       loadSystemNotifications();
     }, 60000);
@@ -111,13 +107,10 @@ export default function MessagesPage() {
     if (!user?.email) return;
     
     try {
-      console.log('Messages page: Loading chats for email:', user.email);
       setIsLoading(true);
       const response = await fetch(`/api/chat/list?userEmail=${encodeURIComponent(user.email)}`);
-      console.log('Messages page: Chat API response status:', response.status);
       if (response.ok) {
         const data: ChatListResponse = await response.json();
-        console.log('Messages page: Chat API response data:', data);
         setChats(data.chats || []);
       } else {
         console.error('Messages page: Chat API error response:', response.status, response.statusText);
@@ -171,7 +164,7 @@ export default function MessagesPage() {
 
   const loadMessages = async (chatId: string) => {
     try {
-      const response = await fetch(`/api/chat/${chatId}?email=${encodeURIComponent(user?.email || '')}`);
+      const response = await fetch(`/api/chat/${chatId}?userEmail=${encodeURIComponent(user?.email || '')}`);
       if (response.ok) {
         const data: MessageResponse = await response.json();
         setMessages(data.messages || []);
@@ -311,16 +304,6 @@ export default function MessagesPage() {
     }))
   ].sort((a, b) => a.priority - b.priority);
 
-  console.log('Messages page: Debug info:', {
-    chatsCount: chats.length,
-    notificationsCount: systemNotifications.length,
-    filteredChatsCount: filteredChats.length,
-    filteredNotificationsCount: filteredNotifications.length,
-    combinedItemsCount: combinedItems.length,
-    user: user?.email,
-    isLoading
-  });
-
   const unreadChatsCount = chats.filter(chat => chat.unreadCount > 0).length;
   const unreadNotificationsCount = systemNotifications.filter(n => !n.read).length;
 
@@ -345,7 +328,7 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="h-screen bg-white dark:bg-neutral-950 flex flex-col overflow-hidden">
+    <div className="h-[calc(100vh-4rem)] bg-white dark:bg-neutral-950 flex flex-col overflow-hidden">
       {/* Main Container - Fixed Height */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Panel - Conversations & Notifications */}
