@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/lib/contexts/ThemeContext';
+import { useUser } from '@/lib/settings';
 
 interface Chat {
   id: string;
@@ -25,6 +26,7 @@ interface Message {
 export default function MessagesPage() {
   const router = useRouter();
   const { isDark: dark } = useTheme();
+  const { user } = useUser();
   
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
@@ -55,19 +57,24 @@ export default function MessagesPage() {
   };
 
   const loadChats = async () => {
+    if (!user?.email) {
+      console.log('No user email available, cannot load chats');
+      return;
+    }
+    
     setIsLoading(true);
     try {
-      const response = await fetch('/api/chat/list');
+      const response = await fetch(`/api/chat/list?userEmail=${encodeURIComponent(user.email)}`);
       if (response.ok) {
         const data = await response.json() as { chats: any[] };
         console.log('Chat API response:', data); // Debug log
         const transformedChats = data.chats.map((chat: any) => ({
-          id: chat.chat_id,
+          id: chat.id,
           listing_title: chat.listing_title,
-          other_user: chat.other_user,
-          last_message: chat.last_message,
-          last_message_time: chat.last_message_time,
-          unread_count: chat.unread_count || 0,
+          other_user: chat.other_user_username,
+          last_message: chat.latest_message_text,
+          last_message_time: chat.latest_message_time,
+          unread_count: chat.unreadCount,
           listing_id: chat.listing_id
         }));
         setChats(transformedChats);
@@ -88,8 +95,13 @@ export default function MessagesPage() {
   };
 
   const loadMessages = async (chatId: string) => {
+    if (!user?.email) {
+      console.log('No user email available, cannot load messages');
+      return;
+    }
+    
     try {
-      const response = await fetch(`/api/chat/${chatId}`);
+      const response = await fetch(`/api/chat/${chatId}?userEmail=${encodeURIComponent(user.email)}`);
       if (response.ok) {
         const data = await response.json() as { messages: any[]; current_user_id: string };
         console.log('Messages API response:', data); // Debug log
@@ -111,7 +123,7 @@ export default function MessagesPage() {
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !selectedChat || isSending) return;
+    if (!newMessage.trim() || !selectedChat || isSending || !user?.email) return;
     
     setIsSending(true);
     try {
@@ -120,7 +132,8 @@ export default function MessagesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           chat_id: selectedChat,
-          content: newMessage.trim()
+          content: newMessage.trim(),
+          userEmail: user.email
         })
       });
       
@@ -144,8 +157,10 @@ export default function MessagesPage() {
   };
 
   useEffect(() => {
-    loadChats();
-  }, []);
+    if (user?.email) {
+      loadChats();
+    }
+  }, [user?.email]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -212,7 +227,18 @@ export default function MessagesPage() {
           
           {/* Content List */}
           <div className="flex-1 overflow-y-auto rounded-br-3xl p-3">
-            {isLoading ? (
+            {!user?.email ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 mx-auto mb-4 bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center">
+                  <svg className="w-8 h-8 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <p className="text-neutral-600 dark:text-neutral-400 text-sm">
+                  Please sign in to view your messages
+                </p>
+              </div>
+            ) : isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
               </div>
