@@ -144,10 +144,17 @@ export class DataService {
         } catch (error) {
             console.error('Failed to fetch listings:', error);
             return {
-                listings: [],
-                total: 0,
-                page: 0,
-                limit: params.limit || CONFIG.PAGE_SIZE,
+                success: false,
+                data: {
+                    listings: [],
+                    total: 0
+                },
+                pagination: {
+                    page: 1,
+                    limit: params.limit || CONFIG.PAGE_SIZE,
+                    total: 0,
+                    totalPages: 0
+                }
             };
         }
     }

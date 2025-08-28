@@ -36,12 +36,17 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
                 });
 
                 console.log('useListings: API response:', response);
-                console.log('useListings: First listing seller rating:', response.listings[0]?.seller?.rating);
                 
-                setListings(response.listings);
-                setAllListings(response.listings);
-                setTotal(response.total);
-                setHasMore(response.listings.length < response.total);
+                // Handle new API response structure
+                const listingsData = response.data.listings;
+                const totalCount = response.data.total;
+                
+                console.log('useListings: First listing seller rating:', listingsData[0]?.seller?.rating);
+                
+                setListings(listingsData);
+                setAllListings(listingsData);
+                setTotal(totalCount);
+                setHasMore(listingsData.length < totalCount);
             } catch (error) {
                 console.error('Failed to load initial listings:', error);
             } finally {
@@ -66,12 +71,16 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
                 radiusKm,
             });
 
-            const newListings = [...allListings, ...response.listings];
+            // Handle new API response structure
+            const newListingsData = response.data.listings;
+            const newTotalCount = response.data.total;
+
+            const newListings = [...allListings, ...newListingsData];
             setAllListings(newListings);
             setListings(newListings);
             setCurrentPage(nextPage);
-            setTotal(response.total);
-            setHasMore(newListings.length < response.total);
+            setTotal(newTotalCount);
+            setHasMore(newListings.length < newTotalCount);
         } catch (error) {
             console.error('Failed to load more listings:', error);
         } finally {

@@ -215,9 +215,9 @@ export default function SearchClient() {
                     sortOrder: sortChoice.split(':')[1] || 'desc'
                 });
 
-                setListings(response.listings);
-                setTotal(response.total);
-                setHasMore(response.listings.length < response.total);
+                setListings(response.data.listings);
+                setTotal(response.data.total);
+                setHasMore(response.data.listings.length < response.data.total);
             } catch (error) {
                 console.error('Failed to load listings:', error);
             } finally {
@@ -253,9 +253,9 @@ export default function SearchClient() {
                 sortOrder: sortChoice.split(':')[1] || 'desc'
             });
 
-            setListings(prev => [...prev, ...response.listings]);
-            setTotal(response.total);
-            setHasMore(listings.length + response.listings.length < response.total);
+            setListings(prev => [...prev, ...response.data.listings]);
+            setTotal(response.data.total);
+            setHasMore(listings.length + response.data.listings.length < response.data.total);
         } catch (error) {
             console.error('Failed to load more listings:', error);
         } finally {

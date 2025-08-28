@@ -130,10 +130,17 @@ export type RateResponse = {
 };
 
 export type ListingsResponse = {
-  listings: Listing[];
-  total: number;
-  page: number;
-  limit: number;
+  success: boolean;
+  data: {
+    listings: Listing[];
+    total: number;
+  };
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 };
 
 // Form Types
