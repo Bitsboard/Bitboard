@@ -104,23 +104,17 @@
 .no-scroll {
   overflow: hidden !important;
   height: 100vh !important;
-  position: fixed !important;
-  width: 100% !important;
 }
 
 .no-scroll body {
   overflow: hidden !important;
   height: 100vh !important;
-  position: fixed !important;
-  width: 100% !important;
 }
 
 /* Additional rules for messages page */
 .no-scroll html {
   overflow: hidden !important;
   height: 100vh !important;
-  position: fixed !important;
-  width: 100% !important;
 }
 
 /* Messages page specific - ensure no scrolling possible */
@@ -132,34 +126,6 @@
 .messages-page .conversations-panel,
 .messages-page .chat-panel,
 .messages-page .notification-panel {
-  overflow-y: auto !important;
-}
-
-/* Ensure messages page takes exact height from header to footer */
-.messages-page {
-  height: calc(100vh - 5rem) !important;
-  overflow: hidden !important;
-}
-
-/* Force exact header-to-footer fit heights for messages page panels */
-.messages-page .conversations-panel {
-  height: calc(100vh - 7rem) !important;
-  max-height: calc(100vh - 7rem) !important;
-  min-height: calc(100vh - 7rem) !important;
-  overflow-y: auto !important;
-}
-
-.messages-page .chat-panel {
-  height: calc(100vh - 11rem) !important;
-  max-height: calc(100vh - 11rem) !important;
-  min-height: calc(100vh - 11rem) !important;
-  overflow-y: auto !important;
-}
-
-.messages-page .notification-panel {
-  height: calc(100vh - 7rem) !important;
-  max-height: calc(100vh - 7rem) !important;
-  min-height: calc(100vh - 7rem) !important;
   overflow-y: auto !important;
 }
 
