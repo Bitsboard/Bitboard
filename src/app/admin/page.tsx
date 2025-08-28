@@ -434,8 +434,7 @@ export default function AdminPage() {
               {/* Users Box with Management Button */}
               <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 hover:shadow-md">
                 <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-0.5">{stats.users.total}</div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-1">Users</div>
-                <div className="text-xs text-neutral-500 mb-3">+{stats.users.new7d} this week</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">Users</div>
                 <button 
                   onClick={() => router.push('/admin/users')}
                   className="w-full px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors"
@@ -447,8 +446,7 @@ export default function AdminPage() {
               {/* Listings Box with Management Button */}
               <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-green-300 dark:hover:border-green-600 transition-all duration-200 hover:shadow-md">
                 <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-0.5">{stats.listings.total}</div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-1">Listings</div>
-                <div className="text-xs text-neutral-500 mb-3">+{stats.listings.new7d} this week</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">Listings</div>
                 <button 
                   onClick={() => router.push('/admin/listings')}
                   className="w-full px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors"
@@ -460,8 +458,7 @@ export default function AdminPage() {
               {/* Chats Box with Management Button */}
               <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 hover:shadow-md">
                 <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-0.5">{stats.conversations.total}</div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-1">Active Conversations</div>
-                <div className="text-xs text-neutral-500 mb-3">+{stats.conversations.new7d} this week</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">Active Conversations</div>
                 <button 
                   onClick={() => router.push('/admin/chats')}
                   className="w-full px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium rounded-lg transition-colors"
@@ -473,8 +470,7 @@ export default function AdminPage() {
               {/* Reports & System Notifications Box */}
               <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800">
                 <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-0.5">Reports</div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-1">System & Analytics</div>
-                <div className="text-xs text-neutral-500 mb-3">Management tools</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">System & Analytics</div>
                 <div className="space-y-1.5">
                   <button 
                     onClick={() => setShowNotificationForm(true)}
@@ -484,9 +480,15 @@ export default function AdminPage() {
                   </button>
                   <button 
                     onClick={() => router.push('/admin/reports')}
-                    className="w-full px-3 py-1.5 bg-neutral-500 hover:bg-neutral-600 text-white text-sm font-medium rounded-colors"
+                    className="w-full px-3 py-1.5 bg-neutral-500 hover:bg-neutral-600 text-white text-sm font-medium rounded-lg transition-colors"
                   >
                     View Reports
+                  </button>
+                  <button 
+                    onClick={() => router.push('/admin/analytics')}
+                    className="w-full px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    Analytics
                   </button>
                 </div>
               </div>
