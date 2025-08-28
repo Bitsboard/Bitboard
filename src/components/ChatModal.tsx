@@ -157,16 +157,34 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
   };
 
   const sendMessage = async () => {
-    if (!text.trim() || !user?.email || isSending) return;
+    if (!text.trim() || !user?.id || isSending) return;
+    
+    const messageText = text.trim();
     
     try {
       setIsSending(true);
       
+      // Create optimistic message that appears instantly
+      const optimisticMessage: Message = {
+        id: `temp-${Date.now()}`,
+        chat_id: chat?.id || 'temp',
+        from_id: user.id, // ✅ Use user.id instead of user.email
+        text: messageText,
+        created_at: Math.floor(Date.now() / 1000)
+      };
+      
+      // Add message to UI immediately (optimistic update)
+      setMessages(prev => [...prev, optimisticMessage]);
+      
+      // Clear input immediately for better UX
+      setText('');
+      
+      // Send message to server in background
       const response = await fetch('/api/chat/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          text: text.trim(),
+          text: messageText,
           listingId: listing.id,
           otherUserId: listing.postedBy || listing.seller.name,
           chatId: chat?.id,
@@ -175,35 +193,50 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       });
       
       if (response.ok) {
-        const data = await response.json() as { messageId?: string; chatId?: string };
+        const data = await response.json() as { messageId?: string; chatId?: string; message?: Message };
         
-        // Add message to local state
-        const newMessage: Message = {
-          id: data.messageId || Date.now().toString(),
-          chat_id: data.chatId || chat?.id || 'temp',
-          from_id: user.email,
-          text: text.trim(),
-          created_at: Math.floor(Date.now() / 1000)
-        };
-        
-        setMessages(prev => [...prev, newMessage]);
-        setText('');
+        if (data.message) {
+          // Replace optimistic message with real one from server
+          setMessages(prev => prev.map(msg => 
+            msg.id === optimisticMessage.id ? data.message! : msg
+          ));
+        } else if (data.messageId) {
+          // Update optimistic message with real ID
+          setMessages(prev => prev.map(msg => 
+            msg.id === optimisticMessage.id 
+              ? { ...msg, id: data.messageId! }
+              : msg
+          ));
+        }
         
         // Update chat if this is a new chat
         if (data.chatId && !chat) {
           setChat({
             id: data.chatId,
             listing_id: listing.id,
-            buyer_id: user.email,
+            buyer_id: user.id, // ✅ Use user.id instead of user.email
             seller_id: listing.postedBy || listing.seller.name,
             created_at: Math.floor(Date.now() / 1000),
             last_message_at: Math.floor(Date.now() / 1000),
             messages: []
           });
         }
+      } else {
+        // If sending failed, remove optimistic message and show error
+        setMessages(prev => prev.filter(msg => msg.id !== optimisticMessage.id));
+        
+        // Restore the message text so user can try again
+        setText(messageText);
+        console.error('Failed to send message');
       }
     } catch (error) {
       console.error('Error sending message:', error);
+      
+      // Remove optimistic message on error
+      setMessages(prev => prev.filter(msg => msg.id !== `temp-${Date.now()}`));
+      
+      // Restore the message text so user can try again
+      setText(messageText);
     } finally {
       setIsSending(false);
     }
@@ -431,30 +464,42 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                 No messages yet. Start the conversation!
               </div>
             ) : (
-              messages.map((m) => (
-                <div
-                  key={m.id}
-                  className={cn(
-                    "flex",
-                    m.from_id === user?.id ? "justify-end" : "justify-start"
-                  )}
-                >
-                  <div className={cn(
-                    "max-w-[70%] rounded-2xl px-3 py-2 text-sm break-words relative",
-                    m.from_id === user?.id
-                      ? "bg-orange-500 text-white" 
-                      : dark ? "bg-neutral-900" : "bg-neutral-100"
-                  )}>
-                    <div className="mb-1">{m.text}</div>
+              messages.map((m) => {
+                const isOptimistic = m.id.startsWith('temp-');
+                const isOwnMessage = m.from_id === user?.id;
+                
+                return (
+                  <div
+                    key={m.id}
+                    className={cn(
+                      "flex",
+                      isOwnMessage ? "justify-end" : "justify-start"
+                    )}
+                  >
                     <div className={cn(
-                      "text-xs opacity-70",
-                      m.from_id === user?.id ? "text-white/80" : dark ? "text-neutral-400" : "text-neutral-500"
+                      "max-w-[70%] rounded-2xl px-3 py-2 text-sm break-words relative transition-all duration-200",
+                      isOwnMessage
+                        ? isOptimistic 
+                          ? "bg-orange-400 text-white opacity-80" // Optimistic message styling
+                          : "bg-orange-500 text-white"
+                        : dark ? "bg-neutral-900" : "bg-neutral-100"
                     )}>
-                      {new Date(m.created_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      <div className="mb-1 flex items-center gap-2">
+                        {m.text}
+                        {isOptimistic && (
+                          <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        )}
+                      </div>
+                      <div className={cn(
+                        "text-xs opacity-70",
+                        isOwnMessage ? "text-white/80" : dark ? "text-neutral-400" : "text-neutral-500"
+                      )}>
+                        {isOptimistic ? 'Sending...' : new Date(m.created_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
