@@ -70,7 +70,7 @@ export async function GET(
       SELECT id, chat_id, from_id, text, created_at, read_at
       FROM messages 
       WHERE chat_id = ? 
-      ORDER BY created_at DESC  -- ✅ Changed to DESC for newest first (most recent messages)
+      ORDER BY created_at ASC  -- ✅ FIXED: ASC order for chronological display (oldest first, newest at bottom)
       LIMIT ? OFFSET ?
     `).bind(chatId, limit, offset).all();
     

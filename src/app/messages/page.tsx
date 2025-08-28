@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTheme } from "@/lib/contexts/ThemeContext";
 import { useLang } from "@/lib/i18n-client";
 import { t } from "@/lib/i18n";
@@ -62,6 +62,18 @@ export default function MessagesPage() {
   // Cache duration constants
   const CHAT_CACHE_DURATION = 30 * 1000; // 30 seconds
   const MESSAGE_CACHE_DURATION = 15 * 1000; // 15 seconds
+  
+  // ✅ ADDED: Auto-scroll to bottom when messages change
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+  
+  // Auto-scroll when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   // Load chats when component mounts
   useEffect(() => {
@@ -306,8 +318,8 @@ export default function MessagesPage() {
         read_at: undefined
       };
       
-      // Add message to UI immediately (optimistic update)
-      setMessages(prev => [optimisticMessage, ...prev]);
+      // ✅ FIXED: Add message to UI at the end (chronological order)
+      setMessages(prev => [...prev, optimisticMessage]);
       
       // Update chat list to show latest message
       setChats(prev => prev.map(chat => 
@@ -333,9 +345,10 @@ export default function MessagesPage() {
       });
       
       if (response.ok) {
-        const data = await response.json() as { success: boolean; message?: Message };
-        if (data.success && data.message) {
-          // Replace optimistic message with real one from server
+        const data = await response.json() as { success: boolean; message?: Message; messageId?: string };
+        
+        if (data.message) {
+          // ✅ FIXED: Replace optimistic message with real one from server
           setMessages(prev => prev.map(msg => 
             msg.id === optimisticMessage.id ? data.message! : msg
           ));
@@ -345,6 +358,13 @@ export default function MessagesPage() {
             chat.id === selectedChat.id 
               ? { ...chat, latestMessage: data.message!, unreadCount: chat.unreadCount }
               : chat
+          ));
+        } else if (data.messageId) {
+          // ✅ FIXED: If server only returns messageId, update the optimistic message ID
+          setMessages(prev => prev.map(msg => 
+            msg.id === optimisticMessage.id 
+              ? { ...msg, id: data.messageId! }
+              : msg
           ));
         }
       } else {
@@ -363,7 +383,7 @@ export default function MessagesPage() {
     } catch (error) {
       console.error('Error sending message:', error);
       
-      // Remove optimistic message on error
+      // ✅ FIXED: Remove optimistic message on error using the correct ID
       setMessages(prev => prev.filter(msg => msg.id !== `temp-${Date.now()}`));
       
       // Restore the message text so user can try again
@@ -750,6 +770,9 @@ export default function MessagesPage() {
                       );
                     })
                   )}
+                  
+                  {/* ✅ ADDED: Scroll anchor for auto-scrolling to bottom */}
+                  <div ref={messagesEndRef} />
                 </div>
 
                 {/* Message Input */}
