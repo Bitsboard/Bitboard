@@ -432,9 +432,11 @@ export default function AdminPage() {
           ) : stats ? (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
               {/* Users Box with Management Button */}
-              <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 hover:shadow-md">
-                <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-0.5">{stats.users.total}</div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">Users</div>
+              <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 hover:shadow-md flex flex-col">
+                <div className="flex-1">
+                  <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-0.5">{stats.users.total}</div>
+                  <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">Users</div>
+                </div>
                 <button 
                   onClick={() => router.push('/admin/users')}
                   className="w-full px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors"
@@ -444,9 +446,11 @@ export default function AdminPage() {
               </div>
 
               {/* Listings Box with Management Button */}
-              <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-green-300 dark:hover:border-green-600 transition-all duration-200 hover:shadow-md">
-                <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-0.5">{stats.listings.total}</div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">Listings</div>
+              <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-green-300 dark:hover:border-green-600 transition-all duration-200 hover:shadow-md flex flex-col">
+                <div className="flex-1">
+                  <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-0.5">{stats.listings.total}</div>
+                  <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">Listings</div>
+                </div>
                 <button 
                   onClick={() => router.push('/admin/listings')}
                   className="w-full px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors"
@@ -456,9 +460,11 @@ export default function AdminPage() {
               </div>
 
               {/* Chats Box with Management Button */}
-              <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 hover:shadow-md">
-                <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-0.5">{stats.conversations.total}</div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">Active Conversations</div>
+              <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 hover:shadow-md flex flex-col">
+                <div className="flex-1">
+                  <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-0.5">{stats.conversations.total}</div>
+                  <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">Active Conversations</div>
+                </div>
                 <button 
                   onClick={() => router.push('/admin/chats')}
                   className="w-full px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium rounded-lg transition-colors"
@@ -468,19 +474,23 @@ export default function AdminPage() {
               </div>
 
               {/* Reports & System Notifications Box */}
-              <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800">
+              <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 flex flex-col">
+                <div className="flex-1">
+                  <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-0.5">Reports</div>
+                  <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">System & Analytics</div>
+                </div>
                 <div className="space-y-1.5">
                   <button 
                     onClick={() => setShowNotificationForm(true)}
                     className="w-full px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors"
                   >
-                    Send Sys Msg
+                    Send System Msg
                   </button>
                   <button 
                     onClick={() => router.push('/admin/reports')}
                     className="w-full px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors"
                   >
-                    Report management
+                    Manage reports
                   </button>
                   <button 
                     onClick={() => router.push('/admin/analytics')}
