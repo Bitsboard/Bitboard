@@ -420,12 +420,12 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="h-screen bg-neutral-50 dark:bg-neutral-900 flex flex-col overflow-hidden">
-      {/* Main Container - Exact Viewport Height */}
+    <div className="h-[calc(100vh-5rem)] bg-neutral-50 dark:bg-neutral-900 flex flex-col overflow-hidden">
+      {/* Main Container - Exact Height from Header to Footer */}
       <div className="max-w-7xl mx-auto px-4 py-2 w-full h-full">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 h-full">
           
-          {/* Left Panel - Conversations List - EXACT VIEWPORT FIT */}
+          {/* Left Panel - Conversations List - EXACT HEADER TO FOOTER FIT */}
           <div className="lg:col-span-1 h-full">
             <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 h-full flex flex-col shadow-lg">
               
@@ -537,8 +537,8 @@ export default function MessagesPage() {
                 </div>
               </div>
               
-              {/* Content Area - EXACT VIEWPORT FIT with Scrollable Content */}
-              <div className="h-[calc(100vh-6rem)] overflow-y-auto conversations-panel">
+              {/* Content Area - EXACT HEADER TO FOOTER FIT with Scrollable Content */}
+              <div className="h-[calc(100vh-7rem)] overflow-y-auto conversations-panel">
                 {isLoading ? (
                   <div className="p-3 text-center">
                     <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-1"></div>
@@ -662,13 +662,13 @@ export default function MessagesPage() {
             </div>
           </div>
 
-          {/* Right Panel - Chat/Notification Content - EXACT VIEWPORT FIT */}
+          {/* Right Panel - Chat/Notification Content - EXACT HEADER TO FOOTER FIT */}
           <div className="lg:col-span-2 h-full">
             <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 h-full flex flex-col shadow-lg">
               
               {!selectedChat && !selectedNotification ? (
-                // Empty State - Exact Viewport Fit
-                <div className="h-[calc(100vh-6rem)] flex items-center justify-center">
+                // Empty State - Exact Header to Footer Fit
+                <div className="h-[calc(100vh-7rem)] flex items-center justify-center">
                   <div className="text-center">
                     <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-3xl flex items-center justify-center mx-auto mb-3 shadow-lg">
                       {activeTab === 'chats' ? (
@@ -694,7 +694,7 @@ export default function MessagesPage() {
                 </div>
                 
               ) : selectedChat ? (
-                // Chat View - Exact Viewport Fit Layout
+                // Chat View - Exact Header to Footer Fit Layout
                 <>
                   {/* Chat Header - Fixed */}
                   <div className="p-3 border-b border-neutral-200 dark:border-neutral-700 bg-gradient-to-r from-orange-500 to-orange-600 rounded-t-2xl flex-shrink-0">
@@ -733,8 +733,8 @@ export default function MessagesPage() {
                     </div>
                   </div>
 
-                  {/* Messages Area - EXACT VIEWPORT FIT with Scrollable Content */}
-                  <div className="h-[calc(100vh-10rem)] overflow-y-auto p-3 space-y-2 bg-neutral-50 dark:bg-neutral-900 chat-panel">
+                  {/* Messages Area - EXACT HEADER TO FOOTER FIT with Scrollable Content */}
+                  <div className="h-[calc(100vh-11rem)] overflow-y-auto p-3 space-y-2 bg-neutral-50 dark:bg-neutral-900 chat-panel">
                     {messages.length === 0 ? (
                       <div className="text-center py-6">
                         <div className="w-12 h-12 bg-neutral-200 dark:bg-neutral-700 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-sm">
@@ -810,7 +810,7 @@ export default function MessagesPage() {
                 </>
                 
               ) : (
-                // Notification View - Exact Viewport Fit Layout
+                // Notification View - Exact Header to Footer Fit Layout
                 <>
                   {/* Notification Header - Fixed */}
                   <div className="p-3 border-b border-neutral-200 dark:border-neutral-700 bg-gradient-to-r from-orange-500 to-orange-600 rounded-t-2xl flex-shrink-0">
@@ -834,8 +834,8 @@ export default function MessagesPage() {
                     </div>
                   </div>
 
-                  {/* Notification Content - EXACT VIEWPORT FIT with Scrollable Content */}
-                  <div className="h-[calc(100vh-6rem)] p-3 bg-neutral-50 dark:bg-neutral-900 overflow-y-auto notification-panel">
+                  {/* Notification Content - EXACT HEADER TO FOOTER FIT with Scrollable Content */}
+                  <div className="h-[calc(100vh-7rem)] p-3 bg-neutral-50 dark:bg-neutral-900 overflow-y-auto notification-panel">
                     <div className="max-w-2xl">
                       <p className="text-neutral-700 dark:text-neutral-300 leading-relaxed text-sm">
                         {selectedNotification?.message}
