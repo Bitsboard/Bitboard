@@ -329,7 +329,7 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="h-screen bg-white dark:bg-neutral-950 flex flex-col">
+    <div className="h-screen bg-white dark:bg-neutral-950 flex flex-col overflow-hidden">
       {/* Main Container - Fixed Height */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Panel - Conversations & Notifications */}
@@ -414,7 +414,7 @@ export default function MessagesPage() {
                 <p className="text-xs text-neutral-600 dark:text-neutral-400">You&apos;re all caught up!</p>
               </div>
             ) : (
-              <div>
+              <div className="p-2">
                 {combinedItems.map((item) => {
                   if (item.type === 'notification') {
                     const notification = item.data;
@@ -422,9 +422,9 @@ export default function MessagesPage() {
                       <div
                         key={`notification-${notification.id}`}
                         onClick={() => selectNotification(notification)}
-                        className={`p-3 border-b border-neutral-100 dark:border-neutral-700 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 ${
+                        className={`mb-2 p-3 bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-neutral-300 dark:hover:border-neutral-600 ${
                           selectedNotification?.id === notification.id 
-                            ? 'bg-purple-50 dark:bg-purple-900/20 border-r-2 border-purple-500' 
+                            ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/20' 
                             : ''
                         }`}
                       >
@@ -459,9 +459,9 @@ export default function MessagesPage() {
                       <div
                         key={`chat-${chat.id}`}
                         onClick={() => selectChat(chat)}
-                        className={`p-3 border-b border-neutral-100 dark:border-neutral-700 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 ${
+                        className={`mb-2 p-3 bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-neutral-300 dark:hover:border-neutral-600 ${
                           selectedChat?.id === chat.id 
-                            ? 'bg-orange-50 dark:bg-orange-900/20 border-r-2 border-orange-500' 
+                            ? 'ring-2 ring-orange-500 bg-orange-50 dark:bg-orange-900/20' 
                             : ''
                         }`}
                       >
@@ -475,7 +475,7 @@ export default function MessagesPage() {
                               />
                             ) : (
                               <svg className="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2v12a2 2 0 002 2z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                               </svg>
                             )}
                           </div>
@@ -556,7 +556,7 @@ export default function MessagesPage() {
               
               <div className="flex-1 p-4 overflow-y-auto">
                 <div className="max-w-2xl mx-auto">
-                  <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 mb-4">
+                  <div className="bg-purple-50 dark:bg-purple-900/20 rounded-2xl p-6 mb-4 border border-purple-200 dark:border-purple-800">
                     <div className="flex items-center gap-3 mb-4">
                       {getNotificationIcon(selectedNotification.type)}
                       <div>
@@ -577,7 +577,7 @@ export default function MessagesPage() {
                           href={selectedNotification.actionUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors"
                         >
                           <span>Take Action</span>
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -601,12 +601,12 @@ export default function MessagesPage() {
                       {selectedChat?.listing_image ? (
                         <img 
                           src={selectedChat.listing_image} 
-                          alt={selectedChat.listing_title}
+                          alt={selectedChat?.listing_title || ''}
                           className="w-8 h-8 rounded-lg object-cover"
                         />
                       ) : (
                         <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2v12a2 2 0 002 2z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                       )}
                     </div>
@@ -680,13 +680,13 @@ export default function MessagesPage() {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type your message..."
-                    className="flex-1 px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="flex-1 px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-xl bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                     disabled={isSending}
                   />
                   <button
                     type="submit"
                     disabled={!newMessage.trim() || isSending}
-                    className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-6 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {isSending ? 'Sending...' : 'Send'}
                   </button>

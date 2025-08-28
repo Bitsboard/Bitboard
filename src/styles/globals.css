@@ -100,21 +100,39 @@
   }
 }
 
-/* Prevent scrolling on messages page */
+/* Prevent scrolling on messages page - STRICT VERSION */
 .no-scroll {
   overflow: hidden !important;
   height: 100vh !important;
+  position: fixed !important;
+  width: 100% !important;
 }
 
 .no-scroll body {
   overflow: hidden !important;
   height: 100vh !important;
+  position: fixed !important;
+  width: 100% !important;
 }
 
 /* Additional rules for messages page */
 .no-scroll html {
   overflow: hidden !important;
   height: 100vh !important;
+  position: fixed !important;
+  width: 100% !important;
+}
+
+/* Messages page specific - ensure no scrolling possible */
+.messages-page,
+.messages-page * {
+  overflow: hidden !important;
+}
+
+.messages-page .conversations-panel,
+.messages-page .chat-panel,
+.messages-page .notification-panel {
+  overflow-y: auto !important;
 }
 
 /* Ensure messages page takes exact height from header to footer */
