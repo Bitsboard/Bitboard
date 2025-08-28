@@ -33,34 +33,6 @@ export async function GET(req: NextRequest) {
         .run();
     } catch { }
 
-    // Ensure users table has all required columns for listings API
-    try {
-      console.log('🔧 Listings API: Ensuring users table has complete schema...');
-      
-      // Check if users table exists and has required columns
-      const tableInfo = await db.prepare("PRAGMA table_info(users)").all();
-      const hasRating = tableInfo.results?.some((col: any) => col.name === 'rating');
-      const hasDeals = tableInfo.results?.some((col: any) => col.name === 'deals');
-      const hasVerified = tableInfo.results?.some((col: any) => col.name === 'verified');
-      
-      if (!hasRating || !hasDeals || !hasVerified) {
-        console.log('🔧 Listings API: Users table missing required columns, adding them...');
-        
-        // Add missing columns one by one
-        try { await db.prepare('ALTER TABLE users ADD COLUMN rating REAL DEFAULT 5.0').run(); } catch {}
-        try { await db.prepare('ALTER TABLE users ADD COLUMN deals INTEGER DEFAULT 0').run(); } catch {}
-        try { await db.prepare('ALTER TABLE users ADD COLUMN last_active INTEGER DEFAULT 0').run(); } catch {}
-        try { await db.prepare('ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0').run(); } catch {}
-        try { await db.prepare('ALTER TABLE users ADD COLUMN banned INTEGER DEFAULT 0').run(); } catch {}
-        
-        console.log('🔧 Listings API: Users table schema updated successfully');
-      } else {
-        console.log('🔧 Listings API: Users table already has complete schema');
-      }
-    } catch (migrationError) {
-      console.log('🔧 Listings API: Users table migration check failed:', migrationError);
-    }
-
     // Build optional filters
     const whereClause: string[] = [];
     const binds: any[] = [];
@@ -120,102 +92,38 @@ export async function GET(req: NextRequest) {
       orderBinds = [validatedQuery.lat, validatedQuery.lat, validatedQuery.lng, validatedQuery.lng];
     }
 
-    // Execute query
+    // Execute single optimized query with COALESCE for missing columns
     let results: any[] = [];
     try {
-      // First, let's diagnose what's in the database
-      console.log('🔍 Listings API: Checking database state...');
-      
-      const userCount = await db.prepare('SELECT COUNT(*) as count FROM users').all();
-      const listingCount = await db.prepare('SELECT COUNT(*) as count FROM listings').all();
-      const sampleUsers = await db.prepare('SELECT id, email, username FROM users LIMIT 3').all();
-      const sampleListings = await db.prepare('SELECT id, title, posted_by FROM listings LIMIT 3').all();
-      
-      console.log('🔍 Listings API: Database state:', {
-        userCount: userCount.results?.[0]?.count,
-        listingCount: listingCount.results?.[0]?.count,
-        sampleUsers: sampleUsers.results,
-        sampleListings: sampleListings.results
-      });
-      
-      const rich = await db
+      const optimized = await db
         .prepare(`SELECT l.id,
                          l.title,
-                         l.description,
-                         l.category,
-                         l.ad_type AS adType,
-                         l.location,
-                         l.lat,
-                         l.lng,
-                         l.image_url AS imageUrl,
+                         COALESCE(l.description, '') as description,
+                         COALESCE(l.category, 'general') as category,
+                         COALESCE(l.ad_type, 'goods') AS adType,
+                         COALESCE(l.location, '') as location,
+                         COALESCE(l.lat, 0) as lat,
+                         COALESCE(l.lng, 0) as lng,
+                         COALESCE(l.image_url, '') AS imageUrl,
                          l.price_sat AS priceSat,
-                         u.username AS postedBy,
-                         u.rating AS userRating,
-                         u.deals AS userDeals,
-                         u.verified AS userVerified,
-                         l.boosted_until AS boostedUntil,
+                         COALESCE(u.username, 'unknown') AS postedBy,
+                         COALESCE(u.rating, 5.0) AS userRating,
+                         COALESCE(u.deals, 0) AS userDeals,
+                         COALESCE(u.verified, 0) AS userVerified,
+                         COALESCE(l.boosted_until, 0) AS boostedUntil,
                          l.created_at AS createdAt
                   FROM listings l
-                  JOIN users u ON l.posted_by = u.id
+                  LEFT JOIN users u ON l.posted_by = u.id
                   ${whereClauseStr}
                   ${orderClause}
                   LIMIT ? OFFSET ?`)
         .bind(...binds, ...orderBinds, validatedQuery.limit, validatedQuery.offset)
         .all();
-      results = rich.results ?? [];
-      console.log('🔍 Listings API: Rich query returned', results.length, 'results');
+      results = optimized.results ?? [];
+      console.log('🔍 Listings API: Optimized query returned', results.length, 'results');
     } catch (error) {
-      console.log('🔍 Listings API: Rich query failed:', error);
-      // Fallback to minimal schema
-      const minimal = await db
-        .prepare(`SELECT l.id,
-                         l.title,
-                         l.price_sat AS priceSat,
-                         l.created_at AS createdAt,
-                         u.username AS postedBy,
-                         u.rating AS userRating,
-                         u.deals AS userDeals,
-                         u.verified AS userVerified
-                  FROM listings l
-                  JOIN users u ON l.posted_by = u.id
-                  ${whereClauseStr}
-                  ORDER BY ${validatedQuery.sortBy === 'price' ? 'l.price_sat' : 'l.created_at'} ${validatedQuery.sortOrder}
-                  LIMIT ? OFFSET ?`)
-        .bind(...binds, validatedQuery.limit, validatedQuery.offset)
-        .all();
-      results = minimal.results ?? [];
-      console.log('🔍 Listings API: Minimal query returned', results.length, 'results');
-    }
-    
-    // If still no results, try a basic listings query without JOIN
-    if (results.length === 0) {
-      console.log('🔍 Listings API: Trying basic listings query without JOIN...');
-      try {
-        const basic = await db
-          .prepare(`SELECT l.id,
-                           l.title,
-                           l.description,
-                           l.category,
-                           l.ad_type AS adType,
-                           l.location,
-                           l.lat,
-                           l.lng,
-                           l.image_url AS imageUrl,
-                           l.price_sat AS priceSat,
-                           l.posted_by AS postedBy,
-                           l.boosted_until AS boostedUntil,
-                           l.created_at AS createdAt
-                    FROM listings l
-                    ${whereClauseStr}
-                    ORDER BY ${validatedQuery.sortBy === 'price' ? 'l.price_sat' : 'l.created_at'} ${validatedQuery.sortOrder}
-                    LIMIT ? OFFSET ?`)
-          .bind(...binds, validatedQuery.limit, validatedQuery.offset)
-          .all();
-        results = basic.results ?? [];
-        console.log('🔍 Listings API: Basic query returned', results.length, 'results');
-      } catch (basicError) {
-        console.log('🔍 Listings API: Basic query also failed:', basicError);
-      }
+      console.error('🔍 Listings API: Query failed:', error);
+      results = [];
     }
 
     // Get total count

@@ -7,10 +7,28 @@ export const CONFIG = {
     DEFAULT_RADIUS_KM: LOCATION_CONFIG.DEFAULT_RADIUS_KM,
     DEFAULT_CENTER: LOCATION_CONFIG.DEFAULT_CENTER,
     BTC_RATE_CACHE_DURATION: 60 * 1000, // 60 seconds - matches server update interval
+    LISTINGS_CACHE_DURATION: 30 * 1000, // 30 seconds for listings
+    CHAT_CACHE_DURATION: 15 * 1000, // 15 seconds for chat data
 } as const;
 
 // Cache for BTC rate - this will be populated by server-side updates
 let btcRateCache: { rate: number | null; timestamp: number } | null = null;
+
+// Cache for listings data
+let listingsCache: { [key: string]: { data: any; timestamp: number } } = {};
+
+// Cache for chat data
+let chatCache: { [key: string]: { data: any; timestamp: number } } = {};
+
+// Helper function to generate cache keys
+function generateCacheKey(params: any, endpoint: string): string {
+    return `${endpoint}:${JSON.stringify(params)}`;
+}
+
+// Helper function to check if cache is valid
+function isCacheValid(timestamp: number, duration: number): boolean {
+    return Date.now() - timestamp < duration;
+}
 
 export class DataService {
     private static instance: DataService;
@@ -74,6 +92,14 @@ export class DataService {
         try {
             console.log('DataService: Fetching listings with params:', params);
             
+            // Check cache first
+            const cacheKey = generateCacheKey(params, 'listings');
+            const cached = listingsCache[cacheKey];
+            if (cached && isCacheValid(cached.timestamp, CONFIG.LISTINGS_CACHE_DURATION)) {
+                console.log('DataService: Returning cached listings data');
+                return cached.data;
+            }
+            
             const queryParams = new URLSearchParams();
             if (params.limit) queryParams.append('limit', params.limit.toString());
             if (params.offset) queryParams.append('offset', params.offset.toString());
@@ -98,52 +124,23 @@ export class DataService {
 
             const data = await response.json() as any;
             console.log('DataService: Raw API response:', data);
-            console.log('DataService: Response keys:', Object.keys(data));
-            console.log('DataService: data.listings:', data.listings);
-            console.log('DataService: data.data:', data.data);
-            console.log('DataService: Response type:', typeof data);
-            console.log('DataService: Is data.listings array?', Array.isArray(data.listings));
             
-            // Handle different response structures
-            const listingsArray = data.listings || data.data?.listings || [];
-            console.log('DataService: Using listings array:', listingsArray);
+            // Cache the successful response
+            listingsCache[cacheKey] = {
+                data: data,
+                timestamp: Date.now()
+            };
             
-            if (!Array.isArray(listingsArray)) {
-                console.error('DataService: listingsArray is not an array:', listingsArray);
-                return {
-                    listings: [],
-                    total: 0,
-                    page: 0,
-                    limit: params.limit || CONFIG.PAGE_SIZE,
-                };
+            // Clean up old cache entries (keep only last 10)
+            const cacheKeys = Object.keys(listingsCache);
+            if (cacheKeys.length > 10) {
+                const oldestKey = cacheKeys.reduce((a, b) => 
+                    listingsCache[a].timestamp < listingsCache[b].timestamp ? a : b
+                );
+                delete listingsCache[oldestKey];
             }
             
-            const listings = listingsArray.map((row: any) => ({
-                id: String(row.id),
-                title: row.title,
-                description: row.description || "No description available",
-                priceSats: Number(row.priceSat) || 0,
-                category: (row.category as any) || "Electronics",
-                location: this.cleanLocationLabel(row.location) || "Toronto, ON",
-                lat: Number.isFinite(row.lat as any) ? (row.lat as number) : CONFIG.DEFAULT_CENTER.lat,
-                lng: Number.isFinite(row.lng as any) ? (row.lng as number) : CONFIG.DEFAULT_CENTER.lng,
-                type: (row.adType as any) === "want" ? "want" : "sell" as "want" | "sell",
-                images: this.processImageUrls(row.imageUrl),
-                boostedUntil: row.boostedUntil ?? null,
-                seller: this.createSellerFromRow(row),
-                createdAt: Number(row.createdAt) * 1000,
-                postedBy: row.postedBy,
-            }));
-            
-            console.log('DataService: Transformed listings:', listings);
-            console.log('DataService: First listing seller rating:', listings[0]?.seller?.rating);
-            
-            return {
-                listings,
-                total: data.total || data.data?.total || 0,
-                page: data.page || 0,
-                limit: params.limit || CONFIG.PAGE_SIZE,
-            };
+            return data;
         } catch (error) {
             console.error('Failed to fetch listings:', error);
             return {

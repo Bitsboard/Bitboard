@@ -72,8 +72,8 @@ export async function GET(req: Request) {
       // Continue with the request even if migration fails
     }
     
-    // Get all chats where the user is either buyer or seller using their UUID
-    const chatsQuery = `
+    // Get all chats with latest messages and unread counts in a single efficient query
+    const efficientChatsQuery = `
       SELECT 
         c.id,
         c.listing_id,
@@ -94,7 +94,13 @@ export async function GET(req: Request) {
         CASE 
           WHEN c.buyer_id = ? THEN seller.username
           ELSE buyer.username
-        END as other_user_username
+        END as other_user_username,
+        -- Get latest message in the same query
+        (SELECT text FROM messages WHERE chat_id = c.id ORDER BY created_at DESC LIMIT 1) as latest_message_text,
+        (SELECT created_at FROM messages WHERE chat_id = c.id ORDER BY created_at DESC LIMIT 1) as latest_message_time,
+        (SELECT from_id FROM messages WHERE chat_id = c.id ORDER BY created_at DESC LIMIT 1) as latest_message_from,
+        -- Get unread count in the same query
+        (SELECT COUNT(*) FROM messages WHERE chat_id = c.id AND from_id != ? AND (read_at IS NULL OR read_at = 0)) as unread_count
       FROM chats c
       JOIN listings l ON c.listing_id = l.id
       LEFT JOIN users buyer ON c.buyer_id = buyer.id
@@ -103,41 +109,27 @@ export async function GET(req: Request) {
       ORDER BY c.last_message_at DESC, c.created_at DESC
     `;
     
-    const chats = await db.prepare(chatsQuery).bind(
+    const chats = await db.prepare(efficientChatsQuery).bind(
       userId, 
       userId, 
+      userId,  // for unread count
       userId, 
       userId
     ).all();
     
     console.log('Found chats:', chats.results?.length || 0, 'for user ID:', userId);
     
-    // For each chat, get the latest message and unread count
-    const chatsWithMessages = await Promise.all(
-      (chats.results || []).map(async (chat: any) => {
-        // Get latest message
-        const latestMessage = await db.prepare(`
-          SELECT id, from_id, text, created_at, read_at
-          FROM messages 
-          WHERE chat_id = ? 
-          ORDER BY created_at DESC 
-          LIMIT 1
-        `).bind(chat.id).all();
-        
-        // Get unread count
-        const unreadCount = await db.prepare(`
-          SELECT COUNT(*) as count
-          FROM messages 
-          WHERE chat_id = ? AND from_id != ? AND (read_at IS NULL OR read_at = 0)
-        `).bind(chat.id, userId).all();
-        
-        return {
-          ...chat,
-          latestMessage: latestMessage.results?.[0] || null,
-          unreadCount: unreadCount.results?.[0]?.count || 0
-        };
-      })
-    );
+    // Transform the results to match the expected format
+    const chatsWithMessages = (chats.results || []).map((chat: any) => ({
+      ...chat,
+      latestMessage: chat.latest_message_text ? {
+        id: 'latest',
+        from_id: chat.latest_message_from,
+        text: chat.latest_message_text,
+        created_at: chat.latest_message_time
+      } : null,
+      unreadCount: chat.unread_count || 0
+    }));
     
     return NextResponse.json({ 
       chats: chatsWithMessages,
