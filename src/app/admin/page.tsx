@@ -264,36 +264,13 @@ export default function AdminPage() {
       </a>
     );
 
-    const ActionTag = ({ action }: { action: string }) => {
-      const getActionStyle = (action: string) => {
-        const lowerAction = action.toLowerCase();
-        if (lowerAction.includes('created') || lowerAction.includes('added') || lowerAction.includes('joined') || lowerAction.includes('listed')) {
-          return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border-green-200 dark:border-green-800 hover:bg-green-200 dark:hover:bg-green-900/50';
-        } else if (lowerAction.includes('deleted') || lowerAction.includes('removed') || lowerAction.includes('banned')) {
-          return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-red-200 dark:border-red-800 hover:bg-red-200 dark:hover:bg-red-900/50';
-        } else if (lowerAction.includes('updated') || lowerAction.includes('modified') || lowerAction.includes('changed')) {
-          return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800 hover:bg-blue-200 dark:hover:bg-blue-900/50';
-        } else if (lowerAction.includes('messaged') || lowerAction.includes('started chat')) {
-          return 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white border-neutral-200 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700';
-        } else {
-          return 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700';
-        }
-      };
-
-      return (
-        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border transition-colors ${getActionStyle(action)}`}>
-          {action}
-        </span>
-      );
-    };
-
     switch (activity.type) {
       case 'user':
         return (
           <>
             <UserTag username={activity.username} />
             {' '}has{' '}
-            <ActionTag action={activity.action} />
+            <span className="text-neutral-600 dark:text-neutral-400">{activity.action}</span>
             {' '}an account.
           </>
         );
@@ -302,9 +279,7 @@ export default function AdminPage() {
           return (
             <>
               <UserTag username={activity.username} />
-              {' '}has{' '}
-              <ActionTag action={activity.action} />
-              {' '}
+              {' '}has listed{' '}
               <ListingTag title={activity.listing_title} id={activity.listing_id} />
             </>
           );
@@ -312,9 +287,7 @@ export default function AdminPage() {
           return (
             <>
               <UserTag username={activity.username} />
-              {' '}has{' '}
-              <ActionTag action={activity.action} />
-              {' '}
+              {' '}has updated{' '}
               <ListingTag title={activity.listing_title} id={activity.listing_id} />
             </>
           );
@@ -323,7 +296,7 @@ export default function AdminPage() {
           <>
             <UserTag username={activity.username} />
             {' '}has{' '}
-            <ActionTag action={activity.action} />
+            <span className="text-neutral-600 dark:text-neutral-400">{activity.action}</span>
             {' '}
             <ListingTag title={activity.listing_title} id={activity.listing_id} />
           </>
@@ -332,9 +305,7 @@ export default function AdminPage() {
         return (
           <>
             <UserTag username={activity.username} />
-            {' '}
-            <ActionTag action="messaged" />
-            {' '}
+            {' '}messaged{' '}
             <UserTag username={activity.other_username || 'Unknown User'} />
             {' '}for{' '}
             <ListingTag title={activity.listing_title} id={activity.listing_id} />
@@ -345,7 +316,7 @@ export default function AdminPage() {
           <>
             <UserTag username={activity.username} />
             {' '}
-            <ActionTag action={activity.action} />
+            <span className="text-neutral-600 dark:text-neutral-400">{activity.action}</span>
           </>
         );
     }
