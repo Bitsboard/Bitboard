@@ -420,7 +420,7 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-4rem)] bg-neutral-50 dark:bg-neutral-900 flex flex-col overflow-hidden messages-page">
+    <div className="h-[calc(100vh-6rem)] bg-neutral-50 dark:bg-neutral-900 flex flex-col overflow-hidden messages-page">
       {/* Main Content - Full Height, No Scrolling */}
       <div className="flex-1 max-w-7xl mx-auto px-4 py-2 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 h-full">
