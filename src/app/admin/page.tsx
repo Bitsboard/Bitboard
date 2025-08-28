@@ -56,6 +56,9 @@ export default function AdminPage() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
   const [activityFilter, setActivityFilter] = useState<ActivityFilter>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage] = useState(50);
   const router = useRouter();
   const lang = useLang();
 
@@ -136,6 +139,27 @@ export default function AdminPage() {
     return false;
   }) || [];
 
+  // Paginate the filtered activity
+  const paginatedActivity = filteredActivity.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Calculate total pages
+  useEffect(() => {
+    const total = Math.ceil(filteredActivity.length / itemsPerPage);
+    setTotalPages(total);
+    // Reset to first page if current page is out of bounds
+    if (currentPage > total && total > 0) {
+      setCurrentPage(1);
+    }
+  }, [filteredActivity.length, currentPage, itemsPerPage]);
+
+  // Reset to first page when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activityFilter]);
+
   // Get action color based on action type
   const getActionColor = (action: string) => {
     const lowerAction = action.toLowerCase();
@@ -154,22 +178,88 @@ export default function AdminPage() {
 
   // Format activity description based on type
   const formatActivityDescription = (activity: AdminStats['recentActivity'][0]) => {
+    const UserLink = ({ username }: { username: string }) => (
+      <a 
+        href={`/profile/${username}`}
+        className="font-bold text-orange-600 dark:text-orange-400 hover:underline"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {username}
+      </a>
+    );
+
+    const ListingLink = ({ title }: { title: string | null }) => (
+      <a 
+        href={`/search?q=${encodeURIComponent(title || '')}`}
+        className="font-bold text-blue-600 dark:text-blue-400 hover:underline"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {title}
+      </a>
+    );
+
     switch (activity.type) {
       case 'user':
-        return `${activity.username} [${activity.user_id}] has created an account.`;
+        return (
+          <>
+            <UserLink username={activity.username} />
+            {' '}[{activity.user_id}] has created an account.
+          </>
+        );
       case 'listing':
         if (activity.action === 'listed') {
-          return `${activity.username} [${activity.user_id}] has listed ${activity.listing_title}`;
+          return (
+            <>
+              <UserLink username={activity.username} />
+              {' '}[{activity.user_id}] has listed{' '}
+              <ListingLink title={activity.listing_title} />
+            </>
+          );
         } else if (activity.action === 'updated') {
-          return `${activity.username} [${activity.user_id}] has updated ${activity.listing_title}`;
+          return (
+            <>
+              <UserLink username={activity.username} />
+              {' '}[{activity.user_id}] has updated{' '}
+              <ListingLink title={activity.listing_title} />
+            </>
+          );
         }
-        return `${activity.username} [${activity.user_id}] has ${activity.action} ${activity.listing_title}`;
+        return (
+          <>
+            <UserLink username={activity.username} />
+            {' '}[{activity.user_id}] has {activity.action}{' '}
+            <ListingLink title={activity.listing_title} />
+          </>
+        );
       case 'chat':
-        return `${activity.username} has started a chat with ${activity.other_username} for their ${activity.listing_title}`;
+        return (
+          <>
+            <UserLink username={activity.username} />
+            {' '}has started a chat with{' '}
+            <UserLink username={activity.other_username || ''} />
+            {' '}for their{' '}
+            <ListingLink title={activity.listing_title} />
+          </>
+        );
       case 'message':
-        return `${activity.username} has messaged ${activity.other_username} for their ${activity.listing_title}`;
+        return (
+          <>
+            <UserLink username={activity.username} />
+            {' '}has messaged{' '}
+            <UserLink username={activity.other_username || ''} />
+            {' '}for their{' '}
+            <ListingLink title={activity.listing_title} />
+          </>
+        );
       default:
-        return `${activity.username} ${activity.action}`;
+        return (
+          <>
+            <UserLink username={activity.username} />
+            {' '}{activity.action}
+          </>
+        );
     }
   };
 
@@ -403,7 +493,7 @@ export default function AdminPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
-                      {filteredActivity.map((activity, index) => (
+                      {paginatedActivity.map((activity, index) => (
                         <tr key={index} className="hover:bg-neutral-50 dark:hover:bg-neutral-800">
                           <td className="px-4 py-3 text-sm text-neutral-600 dark:text-neutral-400">
                             {new Date(activity.timestamp * 1000).toLocaleString()}
@@ -419,9 +509,54 @@ export default function AdminPage() {
                   </table>
                 </div>
                 
-                {filteredActivity.length === 0 && (
+                {paginatedActivity.length === 0 && (
                   <div className="text-center py-8 text-neutral-500 dark:text-neutral-400">
                     No {activityFilter === 'all' ? '' : activityFilter} activity found
+                  </div>
+                )}
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex justify-between items-center py-4 px-4 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
+                    <div className="text-sm text-neutral-600 dark:text-neutral-400">
+                      Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredActivity.length)} of {filteredActivity.length} activities
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setCurrentPage(1)}
+                        disabled={currentPage === 1}
+                        className="px-2 py-1 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        First
+                      </button>
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                        className="px-3 py-1 rounded text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Previous
+                      </button>
+                      
+                      <span className="px-3 py-1 text-sm font-medium text-neutral-900 dark:text-white">
+                        {currentPage} of {totalPages}
+                      </span>
+                      
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                        className="px-3 py-1 rounded text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Next
+                      </button>
+                      <button
+                        onClick={() => setCurrentPage(totalPages)}
+                        disabled={currentPage === totalPages}
+                        className="px-2 py-1 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Last
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
