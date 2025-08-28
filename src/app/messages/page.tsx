@@ -18,6 +18,16 @@ interface ChatWithDetails extends Chat {
   unreadCount: number;
 }
 
+interface SystemNotification {
+  id: string;
+  type: 'system' | 'update' | 'message';
+  title: string;
+  message: string;
+  timestamp: number;
+  read: boolean;
+  actionUrl?: string;
+}
+
 interface ChatListResponse {
   chats: ChatWithDetails[];
   userEmail: string;
@@ -36,17 +46,21 @@ export default function MessagesPage() {
   const { user } = useSettingsStore();
   
   const [chats, setChats] = useState<ChatWithDetails[]>([]);
+  const [systemNotifications, setSystemNotifications] = useState<SystemNotification[]>([]);
   const [selectedChat, setSelectedChat] = useState<ChatWithDetails | null>(null);
+  const [selectedNotification, setSelectedNotification] = useState<SystemNotification | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const [activeTab, setActiveTab] = useState<'chats' | 'notifications'>('chats');
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
 
   // Load chats when component mounts
   useEffect(() => {
     if (user?.email) {
       loadChats();
+      loadSystemNotifications();
     }
   }, [user?.email]);
 
@@ -56,6 +70,7 @@ export default function MessagesPage() {
     
     const interval = setInterval(() => {
       loadChats();
+      loadSystemNotifications();
       if (selectedChat) {
         loadMessages(selectedChat.id);
       }
@@ -81,6 +96,34 @@ export default function MessagesPage() {
     }
   };
 
+  const loadSystemNotifications = async () => {
+    try {
+      // Load notifications from localStorage (same as NotificationMenu)
+      const savedNotifications = localStorage.getItem('notifications');
+      if (savedNotifications) {
+        const parsed = JSON.parse(savedNotifications);
+        setSystemNotifications(parsed);
+      } else {
+        // Fallback to welcome notification for fresh accounts
+        const defaultNotifications: SystemNotification[] = [
+          {
+            id: 'welcome',
+            type: 'system',
+            title: 'Welcome to bitsbarter!',
+            message: 'Welcome to the Bitcoin trading platform. Check out our safety guidelines to get started.',
+            timestamp: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
+            read: false,
+            actionUrl: '/messages'
+          }
+        ];
+        setSystemNotifications(defaultNotifications);
+        localStorage.setItem('notifications', JSON.stringify(defaultNotifications));
+      }
+    } catch (error) {
+      console.error('Error loading system notifications:', error);
+    }
+  };
+
   const loadMessages = async (chatId: string) => {
     try {
       const response = await fetch(`/api/chat/${chatId}?userEmail=${encodeURIComponent(user?.email || '')}`);
@@ -97,15 +140,79 @@ export default function MessagesPage() {
 
   const selectChat = async (chat: ChatWithDetails) => {
     setSelectedChat(chat);
+    setSelectedNotification(null); // Clear selected notification
     await loadMessages(chat.id);
   };
 
+  const selectNotification = (notification: SystemNotification) => {
+    setSelectedNotification(notification);
+    setSelectedChat(null); // Clear selected chat
+    if (!notification.read) {
+      markNotificationAsRead(notification.id);
+    }
+  };
+
+  const markNotificationAsRead = (notificationId: string) => {
+    setSystemNotifications(prev => {
+      const updated = prev.map(n => 
+        n.id === notificationId ? { ...n, read: true } : n
+      );
+      // Persist to localStorage
+      try {
+        localStorage.setItem('notifications', JSON.stringify(updated));
+      } catch (error) {
+        console.warn('Failed to save notifications to localStorage:', error);
+      }
+      return updated;
+    });
+  };
+
+  const markAllNotificationsAsRead = () => {
+    setSystemNotifications(prev => {
+      const updated = prev.map(n => ({ ...n, read: true }));
+      try {
+        localStorage.setItem('notifications', JSON.stringify(updated));
+      } catch (error) {
+        console.warn('Failed to save notifications to localStorage:', error);
+      }
+      return updated;
+    });
+  };
+
+  const getNotificationIcon = (type: SystemNotification['type']) => {
+    switch (type) {
+      case 'message':
+        return (
+          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
+            <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          </div>
+        );
+      case 'update':
+        return (
+          <div className="w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+            <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        );
+      case 'system':
+        return (
+          <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center">
+            <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        );
+    }
+  };
+
   const sendMessage = async () => {
-    if (!newMessage.trim() || !selectedChat || !user?.email || isSending) return;
+    if (!newMessage.trim() || !selectedChat || isSending) return;
     
     try {
       setIsSending(true);
-      
       const response = await fetch('/api/chat/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -113,15 +220,15 @@ export default function MessagesPage() {
           text: newMessage.trim(),
           listingId: selectedChat.listing_id,
           otherUserId: selectedChat.other_user_id,
-          userEmail: user.email
+          chatId: selectedChat.id,
+          userEmail: user?.email
         })
       });
       
       if (response.ok) {
-        setNewMessage("");
-        // Reload messages and chats
+        setNewMessage('');
         await loadMessages(selectedChat.id);
-        await loadChats();
+        await loadChats(); // Refresh chat list to show latest message
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -130,10 +237,22 @@ export default function MessagesPage() {
     }
   };
 
-  const filteredChats = chats.filter(chat => {
-    if (filter === 'unread') return chat.unreadCount > 0;
-    return true;
-  });
+  // Computed values for filtering and counts
+  const filteredChats = filter === 'unread' 
+    ? chats.filter(chat => chat.unreadCount > 0)
+    : chats;
+
+  const filteredNotifications = filter === 'unread'
+    ? systemNotifications.filter(notification => !notification.read)
+    : systemNotifications;
+
+  const unreadChatsCount = chats.filter(chat => chat.unreadCount > 0).length;
+  const unreadNotificationsCount = systemNotifications.filter(n => !n.read).length;
+
+  const tabs = [
+    { key: 'chats', label: 'Chats', count: activeTab === 'chats' ? (filter === 'unread' ? unreadChatsCount : chats.length) : chats.length },
+    { key: 'notifications', label: 'Notifications', count: activeTab === 'notifications' ? (filter === 'unread' ? unreadNotificationsCount : systemNotifications.length) : systemNotifications.length }
+  ];
 
   const formatTimestamp = (timestamp: number) => {
     const now = Date.now();
@@ -190,15 +309,12 @@ export default function MessagesPage() {
 
           {/* Filter Tabs */}
           <div className="flex flex-wrap gap-2 border-b border-neutral-200 dark:border-neutral-700 pb-4">
-            {[
-              { key: 'all', label: 'All Chats', count: chats.length },
-              { key: 'unread', label: 'Unread', count: chats.filter(c => c.unreadCount > 0).length }
-            ].map((tab) => (
+            {tabs.map((tab) => (
               <button
                 key={tab.key}
-                onClick={() => setFilter(tab.key as 'all' | 'unread')}
+                onClick={() => setActiveTab(tab.key as 'chats' | 'notifications')}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                  filter === tab.key
+                  activeTab === tab.key
                     ? 'bg-orange-600 text-white'
                     : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
                 }`}
@@ -207,6 +323,41 @@ export default function MessagesPage() {
                 <span className="ml-2 text-sm opacity-75">({tab.count})</span>
               </button>
             ))}
+          </div>
+
+          {/* Filter Toggle */}
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex gap-2">
+              <button
+                onClick={() => setFilter('all')}
+                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                  filter === 'all'
+                    ? 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-white'
+                    : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setFilter('unread')}
+                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                  filter === 'unread'
+                    ? 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-white'
+                    : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                }`}
+              >
+                Unread
+              </button>
+            </div>
+            
+            {activeTab === 'notifications' && (
+              <button
+                onClick={markAllNotificationsAsRead}
+                className="px-3 py-1 rounded-lg text-sm font-medium text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors duration-200"
+              >
+                Mark all as read
+              </button>
+            )}
           </div>
         </div>
 
@@ -222,7 +373,7 @@ export default function MessagesPage() {
               <div className="p-4 text-center text-neutral-600 dark:text-neutral-400">
                 Loading chats...
               </div>
-            ) : filteredChats.length === 0 ? (
+            ) : activeTab === 'chats' && filteredChats.length === 0 ? (
               <div className="p-8 text-center">
                 <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -236,9 +387,23 @@ export default function MessagesPage() {
                   Start a conversation by messaging a seller about a listing.
                 </p>
               </div>
+            ) : activeTab === 'notifications' && filteredNotifications.length === 0 ? (
+              <div className="p-8 text-center">
+                <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-2">
+                  No notifications yet
+                </h3>
+                <p className="text-neutral-600 dark:text-neutral-400">
+                  You have no unread notifications.
+                </p>
+              </div>
             ) : (
               <div className="overflow-y-auto h-[500px]">
-                {filteredChats.map((chat) => (
+                {activeTab === 'chats' && filteredChats.map((chat) => (
                   <div
                     key={chat.id}
                     onClick={() => selectChat(chat)}
@@ -290,29 +455,72 @@ export default function MessagesPage() {
                     </div>
                   </div>
                 ))}
+                {activeTab === 'notifications' && filteredNotifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    onClick={() => selectNotification(notification)}
+                    className={`p-4 border-b border-neutral-100 dark:border-neutral-800 cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors duration-200 ${
+                      selectedNotification?.id === notification.id ? 'bg-orange-50 dark:bg-orange-900/20 border-r-2 border-orange-500' : ''
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-12 h-12 bg-neutral-100 dark:bg-neutral-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                        {getNotificationIcon(notification.type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-medium text-neutral-900 dark:text-white truncate">
+                            {notification.title}
+                          </h4>
+                          {!notification.read && (
+                            <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
+                              New
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-1">
+                          {notification.message}
+                        </p>
+                        <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-1">
+                          {formatTimestamp(notification.timestamp)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
 
-          {/* Chat Messages */}
+          {/* Chat Messages or Notification Details */}
           <div className="lg:col-span-2 bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden">
-            {!selectedChat ? (
+            {!selectedChat && !selectedNotification ? (
               <div className="h-full flex items-center justify-center">
                 <div className="text-center">
                   <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
+                    {activeTab === 'chats' ? (
+                      <svg className="w-8 h-8 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                    ) : (
+                      <svg className="w-8 h-8 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19a2 2 0 01-2-2V7a2 2 0 012-2h5l2 2h5a2 2 0 012 2v10a2 2 0 01-2 2H4z" />
+                      </svg>
+                    )}
                   </div>
                   <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-2">
-                    Select a conversation
+                    {activeTab === 'chats' ? 'Select a conversation' : 'Select a notification'}
                   </h3>
                   <p className="text-neutral-600 dark:text-neutral-400">
-                    Choose a chat from the list to start messaging.
+                    {activeTab === 'chats' 
+                      ? 'Choose a conversation from the list to start messaging.'
+                      : 'Choose a notification to view its details.'
+                    }
                   </p>
                 </div>
               </div>
-            ) : (
+            ) : selectedChat ? (
+              // Chat Messages View
               <>
                 {/* Chat Header */}
                 <div className="p-4 border-b border-neutral-200 dark:border-neutral-700">
@@ -363,18 +571,18 @@ export default function MessagesPage() {
                     messages.map((message) => (
                       <div
                         key={message.id}
-                        className={`flex ${message.from_id === user.id ? 'justify-end' : 'justify-start'}`}
+                        className={`flex ${message.from_id === user?.id ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
                           className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                            message.from_id === user.id
+                            message.from_id === user?.id
                               ? 'bg-orange-500 text-white'
                               : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white'
                           }`}
                         >
                           <p className="text-sm">{message.text}</p>
                           <p className={`text-xs mt-1 ${
-                            message.from_id === user.id
+                            message.from_id === user?.id
                               ? 'text-orange-100'
                               : 'text-neutral-500 dark:text-neutral-400'
                           }`}>
@@ -406,6 +614,51 @@ export default function MessagesPage() {
                       {isSending ? 'Sending...' : 'Send'}
                     </button>
                   </div>
+                </div>
+              </>
+            ) : (
+              // Notification Details View
+              <>
+                {/* Notification Header */}
+                <div className="p-4 border-b border-neutral-200 dark:border-neutral-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-neutral-100 dark:bg-neutral-800 rounded-lg flex items-center justify-center">
+                      {selectedNotification && getNotificationIcon(selectedNotification.type)}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-neutral-900 dark:text-white">
+                        {selectedNotification?.title}
+                      </h3>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                        {selectedNotification && formatTimestamp(selectedNotification.timestamp)}
+                      </p>
+                    </div>
+                    {selectedNotification && !selectedNotification.read && (
+                      <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
+                        New
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Notification Content */}
+                <div className="flex-1 p-6">
+                  <div className="prose dark:prose-invert max-w-none">
+                    <p className="text-neutral-700 dark:text-neutral-300 leading-relaxed">
+                      {selectedNotification?.message}
+                    </p>
+                  </div>
+                  
+                  {selectedNotification?.actionUrl && (
+                    <div className="mt-6 pt-6 border-t border-neutral-200 dark:border-neutral-700">
+                      <button
+                        onClick={() => window.location.href = selectedNotification.actionUrl!}
+                        className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors duration-200"
+                      >
+                        Take Action
+                      </button>
+                    </div>
+                  )}
                 </div>
               </>
             )}
