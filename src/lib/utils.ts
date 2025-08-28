@@ -254,12 +254,18 @@ export function getInitials(name: string): string {
 }
 
 export function formatPostAge(timestamp: number): string {
-  const now = Math.floor(Date.now() / 1000); // Convert to Unix timestamp (seconds)
-  const diff = now - timestamp; // Now both are in seconds
+  const now = Date.now(); // Current time in milliseconds
   
-  const minutes = Math.floor(diff / 60);
-  const hours = Math.floor(diff / (60 * 60));
-  const days = Math.floor(diff / (60 * 60 * 24));
+  // Detect if timestamp is in seconds or milliseconds
+  // If timestamp is less than 10000000000, it's likely in seconds (before year 2286)
+  // If timestamp is greater than 10000000000, it's likely in milliseconds
+  const timestampMs = timestamp < 10000000000 ? timestamp * 1000 : timestamp;
+  
+  const diff = now - timestampMs; // Both are now in milliseconds
+  
+  const minutes = Math.floor(diff / (1000 * 60));
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const months = Math.floor(days / 30);
   
   if (minutes < 60) {
