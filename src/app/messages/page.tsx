@@ -420,14 +420,16 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-6rem)] bg-neutral-50 dark:bg-neutral-900 flex flex-col overflow-hidden messages-page">
-      {/* Main Content - Full Height, No Scrolling */}
-      <div className="flex-1 max-w-7xl mx-auto px-4 py-2 w-full">
+    <div className="h-[calc(100vh-4rem)] bg-neutral-50 dark:bg-neutral-900 flex flex-col">
+      {/* Main Container - Fixed Height */}
+      <div className="flex-1 max-w-7xl mx-auto px-4 py-2 w-full h-full">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 h-full">
-          {/* Left Sidebar - Conversations List */}
+          
+          {/* Left Panel - Conversations List */}
           <div className="lg:col-span-1 h-full">
             <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 h-full flex flex-col shadow-lg">
-              {/* Header moved here - above conversations panel */}
+              
+              {/* Header - Fixed Height */}
               <div className="p-3 border-b border-neutral-200 dark:border-neutral-700 bg-gradient-to-r from-orange-500 to-orange-600 rounded-t-2xl flex-shrink-0">
                 <div className="flex items-center justify-between mb-2">
                   <h1 className="text-base font-bold text-white">
@@ -522,21 +524,21 @@ export default function MessagesPage() {
                       </button>
                     )}
                   </div>
-                </div>
-                
-                {/* Count Display */}
-                <div className="mt-1">
-                  <p className="text-xs text-orange-100">
-                    {activeTab === 'chats' 
-                      ? `${filteredChats.length} conversation${filteredChats.length !== 1 ? 's' : ''}`
-                      : `${filteredNotifications.length} notification${filteredNotifications.length !== 1 ? 's' : ''}`
-                    }
-                  </p>
+                  
+                  {/* Count Display */}
+                  <div className="mt-1">
+                    <p className="text-xs text-orange-100">
+                      {activeTab === 'chats' 
+                        ? `${filteredChats.length} conversation${filteredChats.length !== 1 ? 's' : ''}`
+                        : `${filteredNotifications.length} notification${filteredNotifications.length !== 1 ? 's' : ''}`
+                      }
+                    </p>
+                  </div>
                 </div>
               </div>
               
-              {/* Conversations List - Fixed Height, Scrollable Content */}
-              <div className="flex-1 overflow-hidden min-h-0">
+              {/* Content Area - Scrollable */}
+              <div className="flex-1 overflow-y-auto min-h-0">
                 {isLoading ? (
                   <div className="p-3 text-center">
                     <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-1"></div>
@@ -563,7 +565,7 @@ export default function MessagesPage() {
                     <p className="text-xs text-neutral-600 dark:text-neutral-400">You&apos;re all caught up!</p>
                   </div>
                 ) : (
-                  <div className="h-full overflow-y-auto">
+                  <div>
                     {activeTab === 'chats' && filteredChats.map((chat) => (
                       <div
                         key={chat.id}
@@ -660,10 +662,12 @@ export default function MessagesPage() {
             </div>
           </div>
 
-          {/* Right Side - Main Content Area - FULL HEIGHT */}
+          {/* Right Panel - Chat/Notification Content */}
           <div className="lg:col-span-2 h-full">
             <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 h-full flex flex-col shadow-lg">
+              
               {!selectedChat && !selectedNotification ? (
+                // Empty State
                 <div className="flex-1 flex items-center justify-center min-h-0">
                   <div className="text-center">
                     <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-3xl flex items-center justify-center mx-auto mb-3 shadow-lg">
@@ -688,10 +692,11 @@ export default function MessagesPage() {
                     </p>
                   </div>
                 </div>
+                
               ) : selectedChat ? (
-                // Chat Messages View - FULL HEIGHT
+                // Chat View
                 <>
-                  {/* Chat Header */}
+                  {/* Chat Header - Fixed */}
                   <div className="p-3 border-b border-neutral-200 dark:border-neutral-700 bg-gradient-to-r from-orange-500 to-orange-600 rounded-t-2xl flex-shrink-0">
                     <div className="flex items-center gap-2.5">
                       <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center overflow-hidden shadow-md">
@@ -728,13 +733,13 @@ export default function MessagesPage() {
                     </div>
                   </div>
 
-                  {/* Messages - Scrollable Area - TAKES REMAINING HEIGHT */}
+                  {/* Messages Area - Scrollable */}
                   <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-neutral-50 dark:bg-neutral-900 min-h-0">
                     {messages.length === 0 ? (
                       <div className="text-center py-6">
                         <div className="w-12 h-12 bg-neutral-200 dark:bg-neutral-700 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-sm">
                           <svg className="w-6 h-6 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                           </svg>
                         </div>
                         <h3 className="font-medium text-neutral-900 dark:text-white mb-1 text-sm">No messages yet</h3>
@@ -781,7 +786,7 @@ export default function MessagesPage() {
                     <div ref={messagesEndRef} />
                   </div>
 
-                  {/* Message Input - Fixed at Bottom */}
+                  {/* Message Input - Fixed */}
                   <div className="p-3 border-t border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex-shrink-0">
                     <div className="flex gap-2">
                       <input
@@ -803,10 +808,11 @@ export default function MessagesPage() {
                     </div>
                   </div>
                 </>
+                
               ) : (
-                // Notification Details View
+                // Notification View
                 <>
-                  {/* Notification Header */}
+                  {/* Notification Header - Fixed */}
                   <div className="p-3 border-b border-neutral-200 dark:border-neutral-700 bg-gradient-to-r from-orange-500 to-orange-600 rounded-t-2xl flex-shrink-0">
                     <div className="flex items-center gap-2.5">
                       <div className="flex-shrink-0">
@@ -828,7 +834,7 @@ export default function MessagesPage() {
                     </div>
                   </div>
 
-                  {/* Notification Content - Scrollable if needed */}
+                  {/* Notification Content - Scrollable */}
                   <div className="flex-1 p-3 bg-neutral-50 dark:bg-neutral-900 overflow-y-auto min-h-0">
                     <div className="max-w-2xl">
                       <p className="text-neutral-700 dark:text-neutral-300 leading-relaxed text-sm">
