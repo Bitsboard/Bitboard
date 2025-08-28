@@ -230,13 +230,46 @@ export default function MessagesPage() {
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedChat || isSending) return;
     
+    const messageText = newMessage.trim();
+    const currentUserId = user?.id;
+    
+    if (!currentUserId) {
+      console.error('No user ID available for sending message');
+      return;
+    }
+    
     try {
       setIsSending(true);
+      
+      // Create optimistic message that appears instantly
+      const optimisticMessage: Message = {
+        id: `temp-${Date.now()}`,
+        chat_id: selectedChat.id,
+        from_id: currentUserId,
+        text: messageText,
+        created_at: Math.floor(Date.now() / 1000),
+        read_at: undefined
+      };
+      
+      // Add message to UI immediately (optimistic update)
+      setMessages(prev => [optimisticMessage, ...prev]);
+      
+      // Update chat list to show latest message
+      setChats(prev => prev.map(chat => 
+        chat.id === selectedChat.id 
+          ? { ...chat, latestMessage: optimisticMessage, unreadCount: chat.unreadCount }
+          : chat
+      ));
+      
+      // Clear input immediately for better UX
+      setNewMessage('');
+      
+      // Send message to server in background
       const response = await fetch('/api/chat/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          text: newMessage.trim(),
+          text: messageText,
           listingId: selectedChat.listing_id,
           otherUserId: selectedChat.other_user_username,
           chatId: selectedChat.id,
@@ -245,12 +278,41 @@ export default function MessagesPage() {
       });
       
       if (response.ok) {
-        setNewMessage('');
-        await loadMessages(selectedChat.id);
-        await loadChats(); // Refresh chat list to show latest message
+        const data = await response.json() as { success: boolean; message?: Message };
+        if (data.success && data.message) {
+          // Replace optimistic message with real one from server
+          setMessages(prev => prev.map(msg => 
+            msg.id === optimisticMessage.id ? data.message! : msg
+          ));
+          
+          // Update chat list with real message
+          setChats(prev => prev.map(chat => 
+            chat.id === selectedChat.id 
+              ? { ...chat, latestMessage: data.message!, unreadCount: chat.unreadCount }
+              : chat
+          ));
+        }
+      } else {
+        // If sending failed, remove optimistic message and show error
+        setMessages(prev => prev.filter(msg => msg.id !== optimisticMessage.id));
+        setChats(prev => prev.map(chat => 
+          chat.id === selectedChat.id 
+            ? { ...chat, latestMessage: chat.latestMessage, unreadCount: chat.unreadCount }
+            : chat
+        ));
+        
+        // Restore the message text so user can try again
+        setNewMessage(messageText);
+        console.error('Failed to send message');
       }
     } catch (error) {
       console.error('Error sending message:', error);
+      
+      // Remove optimistic message on error
+      setMessages(prev => prev.filter(msg => msg.id !== `temp-${Date.now()}`));
+      
+      // Restore the message text so user can try again
+      setNewMessage(messageText);
     } finally {
       setIsSending(false);
     }
@@ -597,29 +659,41 @@ export default function MessagesPage() {
                       </p>
                     </div>
                   ) : (
-                    messages.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`flex ${message.from_id === user?.id ? 'justify-end' : 'justify-start'}`}
-                      >
+                    messages.map((message) => {
+                      const isOptimistic = message.id.startsWith('temp-');
+                      const isOwnMessage = message.from_id === user?.id;
+                      
+                      return (
                         <div
-                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                            message.from_id === user?.id
-                              ? 'bg-orange-500 text-white'
-                              : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white'
-                          }`}
+                          key={message.id}
+                          className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
                         >
-                          <p className="text-sm">{message.text}</p>
-                          <p className={`text-xs mt-1 ${
-                            message.from_id === user?.id
-                              ? 'text-orange-100'
-                              : 'text-neutral-500 dark:text-neutral-400'
-                          }`}>
-                            {formatTimestamp(message.created_at)}
-                          </p>
+                          <div
+                            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg transition-all duration-200 ${
+                              isOwnMessage
+                                ? isOptimistic 
+                                  ? 'bg-orange-400 text-white opacity-80' // Optimistic message styling
+                                  : 'bg-orange-500 text-white'
+                                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm">{message.text}</p>
+                              {isOptimistic && (
+                                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              )}
+                            </div>
+                            <p className={`text-xs mt-1 ${
+                              isOwnMessage
+                                ? isOptimistic ? 'text-orange-100' : 'text-orange-100'
+                                : 'text-neutral-500 dark:text-neutral-400'
+                            }`}>
+                              {isOptimistic ? 'Sending...' : formatTimestamp(message.created_at)}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
 
