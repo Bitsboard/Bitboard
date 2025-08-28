@@ -58,49 +58,102 @@ export async function GET(req: Request) {
       FROM messages
     `).all();
 
-    // Get recent activity (last 20 actions for better filtering)
+    // Get recent activity with better details (last 30 actions for comprehensive view)
     const recentActivity = await db.prepare(`
       SELECT 
         'user' as type,
-        email as identifier,
-        'created' as action,
-        created_at as timestamp
-      FROM users 
-      WHERE created_at >= strftime('%s', 'now', '-7 days')
+        u.username as username,
+        u.id as user_id,
+        u.email as email,
+        'created account' as action,
+        u.created_at as timestamp,
+        NULL as listing_title,
+        NULL as listing_id,
+        NULL as other_username,
+        NULL as chat_id
+      FROM users u
+      WHERE u.created_at >= strftime('%s', 'now', '-7 days')
       UNION ALL
       SELECT 
         'listing' as type,
-        title as identifier,
-        'created' as action,
-        created_at as timestamp
-      FROM listings 
-      WHERE created_at >= strftime('%s', 'now', '-7 days')
+        u.username as username,
+        u.id as user_id,
+        u.email as email,
+        'listed' as action,
+        l.created_at as timestamp,
+        l.title as listing_title,
+        l.id as listing_id,
+        NULL as other_username,
+        NULL as chat_id
+      FROM listings l
+      JOIN users u ON l.posted_by = u.id
+      WHERE l.created_at >= strftime('%s', 'now', '-7 days')
       UNION ALL
       SELECT 
         'listing' as type,
-        title as identifier,
+        u.username as username,
+        u.id as user_id,
+        u.email as email,
         'updated' as action,
-        created_at as timestamp
-      FROM listings 
-      WHERE updated_at >= strftime('%s', 'now', '-7 days') AND updated_at != created_at
+        l.updated_at as timestamp,
+        l.title as listing_title,
+        l.id as listing_id,
+        NULL as other_username,
+        NULL as chat_id
+      FROM listings l
+      JOIN users u ON l.posted_by = u.id
+      WHERE l.updated_at >= strftime('%s', 'now', '-7 days') AND l.updated_at != l.created_at
       UNION ALL
       SELECT 
         'chat' as type,
-        'Chat started' as identifier,
-        'created' as action,
-        created_at as timestamp
-      FROM chats 
-      WHERE created_at >= strftime('%s', 'now', '-7 days')
+        u.username as username,
+        u.id as user_id,
+        u.email as email,
+        'started chat' as action,
+        c.created_at as timestamp,
+        l.title as listing_title,
+        l.id as listing_id,
+        CASE 
+          WHEN c.buyer_id = u.id THEN 
+            (SELECT username FROM users WHERE id = c.seller_id)
+          ELSE 
+            (SELECT username FROM users WHERE id = c.buyer_id)
+        END as other_username,
+        c.id as chat_id
+      FROM chats c
+      JOIN users u ON (c.buyer_id = u.id OR c.seller_id = u.id)
+      JOIN listings l ON c.listing_id = l.id
+      WHERE c.created_at >= strftime('%s', 'now', '-7 days')
       UNION ALL
       SELECT 
         'message' as type,
-        'Message sent' as identifier,
-        'sent' as action,
-        created_at as timestamp
-      FROM messages 
-      WHERE created_at >= strftime('%s', 'now', '-7 days')
+        u.username as username,
+        u.id as user_id,
+        u.email as email,
+        'messaged' as action,
+        m.created_at as timestamp,
+        l.title as listing_title,
+        l.id as listing_id,
+        CASE 
+          WHEN m.from_id = u.id THEN 
+            (SELECT username FROM users WHERE id = (
+              SELECT CASE 
+                WHEN c.buyer_id = m.from_id THEN c.seller_id 
+                ELSE c.buyer_id 
+              END 
+              FROM chats c WHERE c.id = m.chat_id
+            ))
+          ELSE 
+            (SELECT username FROM users WHERE id = m.from_id)
+        END as other_username,
+        m.chat_id as chat_id
+      FROM messages m
+      JOIN users u ON m.from_id = u.id
+      JOIN chats c ON m.chat_id = c.id
+      JOIN listings l ON c.listing_id = l.id
+      WHERE m.created_at >= strftime('%s', 'now', '-7 days')
       ORDER BY timestamp DESC
-      LIMIT 20
+      LIMIT 30
     `).all();
 
     const stats = {
@@ -121,16 +174,12 @@ export async function GET(req: Request) {
         avgPriceSats: Math.round(Number(listingStats.results?.[0]?.avg_price_sats) || 0),
         totalValueActive: Number(listingStats.results?.[0]?.total_value_active) || 0
       },
-      chats: {
+      conversations: {
         total: Number(chatStats.results?.[0]?.total_chats) || 0,
+        messages: Number(messageStats.results?.[0]?.total_messages) || 0,
+        unread: Number(messageStats.results?.[0]?.unread_messages) || 0,
         new7d: Number(chatStats.results?.[0]?.new_chats_7d) || 0,
         new30d: Number(chatStats.results?.[0]?.new_chats_30d) || 0
-      },
-      messages: {
-        total: Number(messageStats.results?.[0]?.total_messages) || 0,
-        new7d: Number(messageStats.results?.[0]?.new_messages_7d) || 0,
-        new30d: Number(messageStats.results?.[0]?.new_messages_30d) || 0,
-        unread: Number(messageStats.results?.[0]?.unread_messages) || 0
       },
       recentActivity: recentActivity.results || []
     };

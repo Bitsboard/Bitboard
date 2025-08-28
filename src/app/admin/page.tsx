@@ -25,26 +25,28 @@ interface AdminStats {
     avgPriceSats: number;
     totalValueActive: number;
   };
-  chats: {
+  conversations: {
     total: number;
-    new7d: number;
-    new30d: number;
-  };
-  messages: {
-    total: number;
-    new7d: number;
-    new30d: number;
+    messages: number;
     unread: number;
+    new7d: number;
+    new30d: number;
   };
   recentActivity: Array<{
     type: string;
-    identifier: string;
+    username: string;
+    user_id: string;
+    email: string;
     action: string;
     timestamp: number;
+    listing_title: string | null;
+    listing_id: number | null;
+    other_username: string | null;
+    chat_id: string | null;
   }>;
 }
 
-type ActivityFilter = 'all' | 'listings' | 'chats' | 'users' | 'messages';
+type ActivityFilter = 'all' | 'listings' | 'conversations' | 'users';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -128,22 +130,46 @@ export default function AdminPage() {
   // Filter recent activity based on selected filter
   const filteredActivity = stats?.recentActivity?.filter(activity => {
     if (activityFilter === 'all') return true;
-    return activity.type === activityFilter.slice(0, -1); // Remove 's' from plural
+    if (activityFilter === 'users') return activity.type === 'user';
+    if (activityFilter === 'listings') return activity.type === 'listing';
+    if (activityFilter === 'conversations') return activity.type === 'chat' || activity.type === 'message';
+    return false;
   }) || [];
 
   // Get action color based on action type
   const getActionColor = (action: string) => {
     const lowerAction = action.toLowerCase();
-    if (lowerAction.includes('created') || lowerAction.includes('added') || lowerAction.includes('joined')) {
+    if (lowerAction.includes('created') || lowerAction.includes('added') || lowerAction.includes('joined') || lowerAction.includes('listed')) {
       return 'text-green-600 dark:text-green-400';
     } else if (lowerAction.includes('deleted') || lowerAction.includes('removed') || lowerAction.includes('banned')) {
       return 'text-red-600 dark:text-red-400';
     } else if (lowerAction.includes('updated') || lowerAction.includes('modified') || lowerAction.includes('changed')) {
       return 'text-blue-600 dark:text-blue-400';
-    } else if (lowerAction.includes('sent') || lowerAction.includes('message')) {
+    } else if (lowerAction.includes('messaged') || lowerAction.includes('started chat')) {
       return 'text-purple-600 dark:text-purple-400';
     } else {
       return 'text-neutral-600 dark:text-neutral-400';
+    }
+  };
+
+  // Format activity description based on type
+  const formatActivityDescription = (activity: AdminStats['recentActivity'][0]) => {
+    switch (activity.type) {
+      case 'user':
+        return `${activity.username} [${activity.user_id}] has created an account.`;
+      case 'listing':
+        if (activity.action === 'listed') {
+          return `${activity.username} [${activity.user_id}] has listed ${activity.listing_title}`;
+        } else if (activity.action === 'updated') {
+          return `${activity.username} [${activity.user_id}] has updated ${activity.listing_title}`;
+        }
+        return `${activity.username} [${activity.user_id}] has ${activity.action} ${activity.listing_title}`;
+      case 'chat':
+        return `${activity.username} has started a chat with ${activity.other_username} for their ${activity.listing_title}`;
+      case 'message':
+        return `${activity.username} has messaged ${activity.other_username} for their ${activity.listing_title}`;
+      default:
+        return `${activity.username} ${activity.action}`;
     }
   };
 
@@ -266,16 +292,16 @@ export default function AdminPage() {
 
               {/* Chats */}
               <div className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800">
-                <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.chats.total}</div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400">Active Chats</div>
-                <div className="text-xs text-neutral-500 mt-1">+{stats.chats.new7d} this week</div>
+                <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.conversations.total}</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400">Active Conversations</div>
+                <div className="text-xs text-neutral-500 mt-1">+{stats.conversations.new7d} this week</div>
               </div>
 
               {/* Messages */}
               <div className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800">
-                <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.messages.total}</div>
+                <div className="text-2xl font-bold text-neutral-900 dark:text-white">{stats.conversations.messages}</div>
                 <div className="text-sm text-neutral-600 dark:text-neutral-400">Total Messages</div>
-                <div className="text-xs text-neutral-500 mt-1">{stats.messages.unread} unread</div>
+                <div className="text-xs text-neutral-500 mt-1">{stats.conversations.unread} unread</div>
               </div>
             </div>
           ) : null}
@@ -345,7 +371,7 @@ export default function AdminPage() {
                 
                 {/* Activity Filter */}
                 <div className="flex gap-2">
-                  {(['all', 'listings', 'chats', 'users', 'messages'] as ActivityFilter[]).map((filter) => (
+                  {(['all', 'listings', 'conversations', 'users'] as ActivityFilter[]).map((filter) => (
                     <button
                       key={filter}
                       onClick={() => setActivityFilter(filter)}
@@ -369,16 +395,10 @@ export default function AdminPage() {
                     <thead className="bg-neutral-50 dark:bg-neutral-800">
                       <tr>
                         <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                          Time
+                          Date/Time
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                          Type
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                          Action
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                          Details
+                          Activity
                         </th>
                       </tr>
                     </thead>
@@ -386,26 +406,12 @@ export default function AdminPage() {
                       {filteredActivity.map((activity, index) => (
                         <tr key={index} className="hover:bg-neutral-50 dark:hover:bg-neutral-800">
                           <td className="px-4 py-3 text-sm text-neutral-600 dark:text-neutral-400">
-                            {formatTime(activity.timestamp)}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-neutral-600 dark:text-neutral-400">
-                            <span className={cn(
-                              "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
-                              activity.type === 'user' ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" :
-                              activity.type === 'listing' ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" :
-                              activity.type === 'chat' ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" :
-                              "bg-neutral-100 text-neutral-800 dark:bg-neutral-900 dark:text-neutral-200"
-                            )}>
-                              {activity.type}
-                            </span>
+                            {new Date(activity.timestamp * 1000).toLocaleString()}
                           </td>
                           <td className="px-4 py-3 text-sm">
                             <span className={cn("font-medium", getActionColor(activity.action))}>
-                              {activity.action}
+                              {formatActivityDescription(activity)}
                             </span>
-                          </td>
-                          <td className="px-4 py-3 text-sm text-neutral-900 dark:text-white">
-                            {activity.identifier}
                           </td>
                         </tr>
                       ))}
