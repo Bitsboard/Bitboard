@@ -249,7 +249,7 @@ export default function AdminPage() {
         target="_blank"
         rel="noopener noreferrer"
       >
-        @{username}
+        {username}
       </a>
     );
 
@@ -274,7 +274,7 @@ export default function AdminPage() {
         } else if (lowerAction.includes('updated') || lowerAction.includes('modified') || lowerAction.includes('changed')) {
           return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800 hover:bg-blue-200 dark:hover:bg-blue-900/50';
         } else if (lowerAction.includes('messaged') || lowerAction.includes('started chat')) {
-          return 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-800 hover:bg-purple-200 dark:hover:bg-purple-900/50';
+          return 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white border-neutral-200 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700';
         } else {
           return 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700';
         }
@@ -754,11 +754,16 @@ export default function AdminPage() {
                       No {activityFilter === 'all' ? '' : activityFilter} activity found
                     </div>
                   ) : (
-                    <div className="space-y-2 font-mono text-sm">
+                    <div className="space-y-0 font-mono text-sm">
                       {paginatedActivity.map((activity, index) => (
-                        <div key={index} className="flex items-start gap-3 py-1 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded px-2 -mx-2 transition-colors">
-                          <span className="text-neutral-400 dark:text-neutral-500 text-xs font-mono flex-shrink-0 w-20">
-                            {new Date(activity.timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <div key={index} className="flex items-start gap-3 py-0.5 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded px-2 -mx-2 transition-colors">
+                          <span className="text-neutral-400 dark:text-neutral-500 text-xs font-mono flex-shrink-0 w-32">
+                            {new Date(activity.timestamp * 1000).toLocaleString([], { 
+                              month: '2-digit', 
+                              day: '2-digit', 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
                           </span>
                           <span className="text-neutral-600 dark:text-neutral-400">
                             {formatActivityDescription(activity)}
