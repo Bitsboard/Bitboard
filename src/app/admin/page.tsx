@@ -234,7 +234,7 @@ export default function AdminPage() {
       return 'text-red-600 dark:text-red-400';
     } else if (lowerAction.includes('updated') || lowerAction.includes('modified') || lowerAction.includes('changed')) {
       return 'text-blue-600 dark:text-blue-400';
-    } else if (lowerAction.includes('messaged') || lowerAction.includes('started chat')) {
+            } else if (lowerAction.includes('messaged')) {
       return 'text-neutral-900 dark:text-white';
     } else {
       return 'text-neutral-600 dark:text-neutral-400';

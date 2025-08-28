@@ -106,28 +106,7 @@ export async function GET(req: Request) {
       FROM listings l
       JOIN users u ON l.posted_by = u.id
       WHERE l.updated_at >= strftime('%s', 'now', '-7 days') AND l.updated_at != l.created_at
-      UNION ALL
-      SELECT 
-        'chat' as type,
-        u.username as username,
-        u.id as user_id,
-        u.email as email,
-        'started chat' as action,
-        c.created_at as timestamp,
-        l.title as listing_title,
-        l.id as listing_id,
-        CASE 
-          WHEN c.buyer_id = u.id THEN 
-            (SELECT username FROM users WHERE id = c.seller_id)
-          ELSE 
-            (SELECT username FROM users WHERE id = c.buyer_id)
-        END as other_username,
-        c.id as chat_id,
-        (SELECT COUNT(*) FROM messages WHERE chat_id = c.id) as message_count
-      FROM chats c
-      JOIN users u ON (c.buyer_id = u.id OR c.seller_id = u.id)
-      JOIN listings l ON c.listing_id = l.id
-      WHERE c.created_at >= strftime('%s', 'now', '-7 days')
+
       UNION ALL
       SELECT 
         'message' as type,
