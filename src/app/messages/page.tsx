@@ -363,18 +363,18 @@ export default function MessagesPage() {
                     messages.map((message) => (
                       <div
                         key={message.id}
-                        className={`flex ${message.from_id === user.email ? 'justify-end' : 'justify-start'}`}
+                        className={`flex ${message.from_id === user.id ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
                           className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                            message.from_id === user.email
+                            message.from_id === user.id
                               ? 'bg-orange-500 text-white'
                               : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white'
                           }`}
                         >
                           <p className="text-sm">{message.text}</p>
                           <p className={`text-xs mt-1 ${
-                            message.from_id === user.email
+                            message.from_id === user.id
                               ? 'text-orange-100'
                               : 'text-neutral-500 dark:text-neutral-400'
                           }`}>

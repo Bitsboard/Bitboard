@@ -436,19 +436,19 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                   key={m.id}
                   className={cn(
                     "flex",
-                    m.from_id === user?.email ? "justify-end" : "justify-start"
+                    m.from_id === user?.id ? "justify-end" : "justify-start"
                   )}
                 >
                   <div className={cn(
                     "max-w-[70%] rounded-2xl px-3 py-2 text-sm break-words relative",
-                    m.from_id === user?.email
+                    m.from_id === user?.id
                       ? "bg-orange-500 text-white" 
                       : dark ? "bg-neutral-900" : "bg-neutral-100"
                   )}>
                     <div className="mb-1">{m.text}</div>
                     <div className={cn(
                       "text-xs opacity-70",
-                      m.from_id === user?.email ? "text-white/80" : dark ? "text-neutral-400" : "text-neutral-500"
+                      m.from_id === user?.id ? "text-white/80" : dark ? "text-neutral-400" : "text-neutral-500"
                     )}>
                       {new Date(m.created_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
