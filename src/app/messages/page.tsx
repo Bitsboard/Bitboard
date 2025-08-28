@@ -535,7 +535,8 @@ export default function MessagesPage() {
                 </div>
               </div>
               
-              <div className="flex-1 overflow-y-auto min-h-0">
+              {/* Conversations List - Fixed Height, Scrollable Content */}
+              <div className="flex-1 overflow-hidden min-h-0">
                 {isLoading ? (
                   <div className="p-3 text-center">
                     <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-1"></div>
@@ -663,7 +664,7 @@ export default function MessagesPage() {
           <div className="lg:col-span-2 h-full">
             <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 h-full flex flex-col shadow-lg">
               {!selectedChat && !selectedNotification ? (
-                <div className="flex-1 flex items-center justify-center">
+                <div className="flex-1 flex items-center justify-center min-h-0">
                   <div className="text-center">
                     <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-3xl flex items-center justify-center mx-auto mb-3 shadow-lg">
                       {activeTab === 'chats' ? (
