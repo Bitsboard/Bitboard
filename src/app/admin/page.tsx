@@ -245,22 +245,28 @@ export default function AdminPage() {
     const UserTag = ({ username }: { username: string }) => (
       <a 
         href={`/admin/users?search=${encodeURIComponent(username)}`}
-        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors border border-orange-200 dark:border-orange-800"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-orange-200 dark:bg-orange-800 text-orange-900 dark:text-orange-100 hover:bg-orange-300 dark:hover:bg-orange-700 transition-colors border-2 border-orange-300 dark:border-orange-600"
         target="_blank"
         rel="noopener noreferrer"
       >
         {username}
+        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+        </svg>
       </a>
     );
 
     const ListingTag = ({ title, id }: { title: string | null; id: number | null }) => (
       <a 
         href={`/admin/listings?search=${encodeURIComponent(title || '')}`}
-        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors border border-blue-200 dark:border-blue-800"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors border-2 border-blue-300 dark:border-blue-600"
         target="_blank"
         rel="noopener noreferrer"
       >
-        📋 {title || 'Unknown Listing'}
+        {title || 'Unknown Listing'}
+        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+        </svg>
       </a>
     );
 
@@ -728,12 +734,13 @@ export default function AdminPage() {
                     <div className="space-y-0 font-mono text-sm">
                       {paginatedActivity.map((activity, index) => (
                         <div key={index} className="flex items-start gap-3 py-0.5 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded px-2 -mx-2 transition-colors">
-                          <span className="text-neutral-400 dark:text-neutral-500 text-xs font-mono flex-shrink-0 w-32">
+                          <span className="text-neutral-400 dark:text-neutral-500 text-xs font-mono flex-shrink-0 w-36">
                             {new Date(activity.timestamp * 1000).toLocaleString([], { 
                               month: '2-digit', 
                               day: '2-digit', 
                               hour: '2-digit', 
-                              minute: '2-digit' 
+                              minute: '2-digit',
+                              second: '2-digit'
                             })}
                           </span>
                           <span className="text-neutral-600 dark:text-neutral-400">
