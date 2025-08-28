@@ -332,9 +332,9 @@ export default function MessagesPage() {
       {/* Main Container - Fixed Height */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Panel - Conversations & Notifications */}
-        <div className="w-80 bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 flex flex-col">
+        <div className="w-80 bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 flex flex-col rounded-r-2xl">
           {/* Header */}
-          <div className="p-4 border-b border-neutral-200 dark:border-neutral-700 bg-gradient-to-r from-orange-500 to-orange-600 flex-shrink-0">
+          <div className="p-4 border-b border-neutral-200 dark:border-neutral-700 bg-gradient-to-r from-orange-500 to-orange-600 flex-shrink-0 rounded-tr-2xl">
             <div className="flex items-center justify-between mb-3">
               <h1 className="text-lg font-bold text-white">
                 Messages & Notifications
@@ -396,7 +396,7 @@ export default function MessagesPage() {
           </div>
           
           {/* Content List */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto rounded-br-2xl">
             {isLoading ? (
               <div className="p-4 text-center">
                 <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
@@ -515,8 +515,8 @@ export default function MessagesPage() {
           </div>
         </div>
 
-        {/* Right Panel - Chat or Notification View */}
-        <div className="flex-1 bg-white dark:bg-neutral-900 flex flex-col">
+        {/* Right Panel - Chat Messages */}
+        <div className="flex-1 bg-white dark:bg-neutral-900 flex flex-col rounded-l-2xl">
           {!selectedChat && !selectedNotification ? (
             // Empty State
             <div className="flex-1 flex items-center justify-center">

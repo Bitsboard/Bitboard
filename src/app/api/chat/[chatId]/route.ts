@@ -73,6 +73,12 @@ export async function GET(
       ORDER BY created_at ASC  -- ✅ FIXED: ASC order for chronological display (oldest first, newest at bottom)
       LIMIT ? OFFSET ?
     `).bind(chatId, limit, offset).all();
+
+    // Transform messages to include is_from_current_user field
+    const transformedMessages = (messages.results || []).map((message: any) => ({
+      ...message,
+      is_from_current_user: message.from_id === userId
+    }));
     
     // ✅ OPTIMIZED: Only mark messages as read if they're from the other user AND we're on the first page
     // This prevents unnecessary updates when loading older messages
@@ -86,7 +92,7 @@ export async function GET(
     
     return NextResponse.json({ 
       success: true, 
-      messages: messages.results || [],
+      messages: transformedMessages,
       pagination: {
         page,
         limit,
