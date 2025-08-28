@@ -254,12 +254,12 @@ export function getInitials(name: string): string {
 }
 
 export function formatPostAge(timestamp: number): string {
-  const now = Date.now();
-  const diff = now - timestamp;
+  const now = Math.floor(Date.now() / 1000); // Convert to Unix timestamp (seconds)
+  const diff = now - timestamp; // Now both are in seconds
   
-  const minutes = Math.floor(diff / (1000 * 60));
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const minutes = Math.floor(diff / 60);
+  const hours = Math.floor(diff / (60 * 60));
+  const days = Math.floor(diff / (60 * 60 * 24));
   const months = Math.floor(days / 30);
   
   if (minutes < 60) {
