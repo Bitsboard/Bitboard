@@ -21,6 +21,28 @@ interface User {
   messagesCount: number;
   rating: number;
   deals: number;
+  totalListingsValue: number;
+  lastActivityAt?: number;
+}
+
+interface UserListing {
+  id: string;
+  title: string;
+  priceSat: number;
+  status: 'active' | 'sold' | 'expired';
+  createdAt: number;
+  views: number;
+  chatsCount: number;
+}
+
+interface UserChat {
+  id: string;
+  listingTitle: string;
+  listingId: string;
+  otherUsername: string;
+  lastMessageAt: number;
+  messageCount: number;
+  unreadCount: number;
 }
 
 interface UsersResponse {
@@ -37,17 +59,21 @@ export default function AdminUsersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<'all' | 'verified' | 'unverified' | 'banned' | 'admin'>('all');
-  const [sortBy, setSortBy] = useState<'createdAt' | 'lastLoginAt' | 'listingsCount' | 'rating' | 'deals'>('createdAt');
+  const [sortBy, setSortBy] = useState<'createdAt' | 'lastLoginAt' | 'listingsCount' | 'rating' | 'deals' | 'totalListingsValue' | 'lastActivityAt'>('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [itemsPerPage] = useState(25);
+  const [itemsPerPage] = useState(20);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showBanModal, setShowBanModal] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [banReason, setBanReason] = useState("");
   const [banDuration, setBanDuration] = useState(7); // days
   const [isProcessing, setIsProcessing] = useState(false);
+  const [expandedUser, setExpandedUser] = useState<string | null>(null);
+  const [userListings, setUserListings] = useState<{ [key: string]: UserListing[] }>({});
+  const [userChats, setUserChats] = useState<{ [key: string]: UserChat[] }>({});
+  const [loadingUserData, setLoadingUserData] = useState<string | null>(null);
   
   const router = useRouter();
   const lang = useLang();
@@ -90,6 +116,47 @@ export default function AdminUsersPage() {
       console.error('Error loading users:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadUserData = async (userId: string) => {
+    if (userListings[userId] && userChats[userId]) return; // Already loaded
+    
+    try {
+      setLoadingUserData(userId);
+      
+      // Load user listings
+      const listingsResponse = await fetch(`/api/admin/users/${userId}/listings`);
+      if (listingsResponse.ok) {
+        const listingsData = await listingsResponse.json() as { listings: UserListing[] };
+        setUserListings(prev => ({
+          ...prev,
+          [userId]: listingsData.listings || []
+        }));
+      }
+      
+      // Load user chats
+      const chatsResponse = await fetch(`/api/admin/users/${userId}/chats`);
+      if (chatsResponse.ok) {
+        const chatsData = await chatsResponse.json() as { chats: UserChat[] };
+        setUserChats(prev => ({
+          ...prev,
+          [userId]: chatsData.chats || []
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    } finally {
+      setLoadingUserData(null);
+    }
+  };
+
+  const toggleUserExpansion = (userId: string) => {
+    if (expandedUser === userId) {
+      setExpandedUser(null);
+    } else {
+      setExpandedUser(userId);
+      loadUserData(userId);
     }
   };
 
@@ -196,6 +263,14 @@ export default function AdminUsersPage() {
         aValue = a.deals;
         bValue = b.deals;
         break;
+      case 'totalListingsValue':
+        aValue = a.totalListingsValue;
+        bValue = b.totalListingsValue;
+        break;
+      case 'lastActivityAt':
+        aValue = a.lastActivityAt || 0;
+        bValue = b.lastActivityAt || 0;
+        break;
       default:
         aValue = a.createdAt;
         bValue = b.createdAt;
@@ -227,6 +302,10 @@ export default function AdminUsersPage() {
     if (days < 7) return `${days} days ago`;
     if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
     return `${Math.floor(days / 30)} months ago`;
+  };
+
+  const formatPrice = (priceSats: number) => {
+    return `${priceSats.toLocaleString()} sats`;
   };
 
   const getStatusColor = (user: User) => {
@@ -261,8 +340,8 @@ export default function AdminUsersPage() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-semibold text-neutral-900 dark:text-white">Admin - Users</h1>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Manage all platform users</p>
+              <h1 className="text-xl font-semibold text-neutral-900 dark:text-white">Admin - User Management</h1>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Comprehensive user oversight with listings and chat analytics</p>
             </div>
             <button
               onClick={() => router.push('/admin')}
@@ -275,9 +354,9 @@ export default function AdminUsersPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-4">
-        {/* Filters and Search */}
+        {/* Enhanced Filters and Search */}
         <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             {/* Search */}
             <div className="md:col-span-2">
               <input
@@ -321,31 +400,27 @@ export default function AdminUsersPage() {
                 <option value="listingsCount-desc">Most Listings</option>
                 <option value="rating-desc">Highest Rating</option>
                 <option value="deals-desc">Most Deals</option>
+                <option value="totalListingsValue-desc">Highest Value</option>
+                <option value="lastActivityAt-desc">Most Active</option>
               </select>
             </div>
           </div>
         </div>
 
-        {/* Users Table */}
+        {/* Enhanced Users Table */}
         <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-neutral-50 dark:bg-neutral-700">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                    User
+                    User Profile
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                    Status
+                    Status & Activity
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                    Activity
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                    Rating
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                    Joined
+                    Platform Stats
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                     Actions
@@ -355,105 +430,230 @@ export default function AdminUsersPage() {
               <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center">
+                    <td colSpan={4} className="px-4 py-8 text-center">
                       <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
                       <p className="text-neutral-600 dark:text-neutral-400">Loading users...</p>
                     </td>
                   </tr>
                 ) : paginatedUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                    <td colSpan={4} className="px-4 py-8 text-center text-neutral-500 dark:text-neutral-400">
                       No users found matching your criteria
                     </td>
                   </tr>
                 ) : (
                   paginatedUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-700">
-                      <td className="px-4 py-3">
-                        <div>
-                          <h4 className="font-medium text-neutral-900 dark:text-white text-sm">
-                            {user.username}
-                          </h4>
-                          <p className="text-xs text-neutral-600 dark:text-neutral-400">
-                            {user.email}
-                          </p>
-                          <p className="text-xs text-neutral-500 dark:text-neutral-500">
-                            ID: {user.id}
-                          </p>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user)}`}>
-                          {getStatusText(user)}
-                        </span>
-                        {user.isBanned && user.banReason && (
-                          <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                            {user.banReason}
-                          </p>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="text-xs text-neutral-600 dark:text-neutral-400">
-                          <p>Listings: {user.listingsCount}</p>
-                          <p>Chats: {user.chatsCount}</p>
-                          <p>Messages: {user.messagesCount}</p>
-                          {user.lastLoginAt && (
-                            <p>Last login: {formatRelativeTime(user.lastLoginAt)}</p>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div>
-                          <p className="text-sm font-medium text-neutral-900 dark:text-white">
-                            ⭐ {user.rating.toFixed(1)}
-                          </p>
-                          <p className="text-xs text-neutral-500 dark:text-neutral-500">
-                            {user.deals} deals
-                          </p>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div>
-                          <p className="text-sm text-neutral-900 dark:text-white">
-                            {formatDate(user.createdAt)}
-                          </p>
-                          <p className="text-xs text-neutral-500 dark:text-neutral-500">
-                            {formatRelativeTime(user.createdAt)}
-                          </p>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => {
-                              setSelectedUser(user);
-                              setShowVerifyModal(true);
-                            }}
-                            disabled={user.isVerified}
-                            className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                          >
-                            Verify
-                          </button>
-                          <button
-                            onClick={() => {
-                              setSelectedUser(user);
-                              setShowBanModal(true);
-                            }}
-                            disabled={user.isBanned}
-                            className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                          >
-                            Ban
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+                    <React.Fragment key={user.id}>
+                      <tr className="hover:bg-neutral-50 dark:hover:bg-neutral-700">
+                        <td className="px-4 py-3">
+                          <div>
+                            <h4 className="font-medium text-neutral-900 dark:text-white text-sm">
+                              {user.username}
+                            </h4>
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400">
+                              {user.email}
+                            </p>
+                            <p className="text-xs text-neutral-500 dark:text-neutral-500">
+                              ID: {user.id}
+                            </p>
+                            <p className="text-xs text-neutral-500 dark:text-neutral-500">
+                              Joined: {formatDate(user.createdAt)}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="space-y-1">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user)}`}>
+                              {getStatusText(user)}
+                            </span>
+                            {user.isBanned && user.banReason && (
+                              <p className="text-xs text-red-600 dark:text-red-400">
+                                {user.banReason}
+                              </p>
+                            )}
+                            {user.lastLoginAt && (
+                              <p className="text-xs text-neutral-500 dark:text-neutral-500">
+                                Last login: {formatRelativeTime(user.lastLoginAt)}
+                              </p>
+                            )}
+                            {user.lastActivityAt && (
+                              <p className="text-xs text-neutral-500 dark:text-neutral-500">
+                                Last activity: {formatRelativeTime(user.lastActivityAt)}
+                              </p>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-neutral-600 dark:text-neutral-400">Listings:</span>
+                              <span className="font-medium">{user.listingsCount}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-neutral-600 dark:text-neutral-400">Chats:</span>
+                              <span className="font-medium text-orange-600">{user.chatsCount}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-neutral-600 dark:text-neutral-400">Messages:</span>
+                              <span className="font-medium">{user.messagesCount}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-neutral-600 dark:text-neutral-400">Rating:</span>
+                              <span className="font-medium">⭐ {user.rating.toFixed(1)}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-neutral-600 dark:text-neutral-400">Deals:</span>
+                              <span className="font-medium">{user.deals}</span>
+                            </div>
+                            {user.totalListingsValue > 0 && (
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-neutral-600 dark:text-neutral-400">Total Value:</span>
+                                <span className="font-medium text-green-600">{formatPrice(user.totalListingsValue)}</span>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex flex-col gap-2">
+                            <button
+                              onClick={() => toggleUserExpansion(user.id)}
+                              className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200 transition-colors"
+                            >
+                              {expandedUser === user.id ? 'Hide' : 'View'} Details
+                            </button>
+                            <button
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setShowVerifyModal(true);
+                              }}
+                              disabled={user.isVerified}
+                              className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                              Verify
+                            </button>
+                            <button
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setShowBanModal(true);
+                              }}
+                              disabled={user.isBanned}
+                              className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                              Ban
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                      
+                      {/* Expanded User Information */}
+                      {expandedUser === user.id && (
+                        <tr>
+                          <td colSpan={4} className="px-4 py-3 bg-neutral-50 dark:bg-neutral-800">
+                            <div className="border-l-4 border-orange-500 pl-4">
+                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* User Listings */}
+                                <div>
+                                  <h5 className="font-medium text-neutral-900 dark:text-white text-sm mb-3">
+                                    User Listings ({user.listingsCount})
+                                  </h5>
+                                  
+                                  {loadingUserData === user.id ? (
+                                    <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400">
+                                      <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                                      Loading listings...
+                                    </div>
+                                  ) : userListings[user.id]?.length > 0 ? (
+                                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                                      {userListings[user.id].map((listing) => (
+                                        <div key={listing.id} className="flex items-center justify-between p-2 bg-white dark:bg-neutral-700 rounded border">
+                                          <div className="flex-1">
+                                            <p className="text-xs font-medium text-neutral-900 dark:text-white">
+                                              {listing.title}
+                                            </p>
+                                            <p className="text-xs text-neutral-600 dark:text-neutral-400">
+                                              {formatPrice(listing.priceSat)} • {listing.status} • {listing.views} views
+                                            </p>
+                                            <p className="text-xs text-neutral-500 dark:text-neutral-500">
+                                              {formatDate(listing.createdAt)} • {listing.chatsCount} chats
+                                            </p>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <a
+                                              href={`/admin/listings?listingId=${listing.id}`}
+                                              className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200 transition-colors"
+                                            >
+                                              View Listing
+                                            </a>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                                      No listings found for this user.
+                                    </p>
+                                  )}
+                                </div>
+
+                                {/* User Chats */}
+                                <div>
+                                  <h5 className="font-medium text-neutral-900 dark:text-white text-sm mb-3">
+                                    User Chats ({user.chatsCount})
+                                  </h5>
+                                  
+                                  {loadingUserData === user.id ? (
+                                    <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400">
+                                      <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                                      Loading chats...
+                                    </div>
+                                  ) : userChats[user.id]?.length > 0 ? (
+                                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                                      {userChats[user.id].map((chat) => (
+                                        <div key={chat.id} className="flex items-center justify-between p-2 bg-white dark:bg-neutral-700 rounded border">
+                                          <div className="flex-1">
+                                            <p className="text-xs font-medium text-neutral-900 dark:text-white">
+                                              {chat.listingTitle}
+                                            </p>
+                                            <p className="text-xs text-neutral-600 dark:text-neutral-400">
+                                              With: {chat.otherUsername}
+                                            </p>
+                                            <p className="text-xs text-neutral-500 dark:text-neutral-500">
+                                              {chat.messageCount} messages • {chat.unreadCount} unread
+                                            </p>
+                                            <p className="text-xs text-neutral-500 dark:text-neutral-500">
+                                              {formatRelativeTime(chat.lastMessageAt)}
+                                            </p>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <a
+                                              href={`/admin/chats?chatId=${chat.id}`}
+                                              className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs hover:bg-orange-200 transition-colors"
+                                            >
+                                              View Chat
+                                            </a>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                                      No chat conversations found for this user.
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   ))
                 )}
               </tbody>
             </table>
           </div>
 
-          {/* Pagination */}
+          {/* Enhanced Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-between items-center py-4 px-4 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
               <div className="text-sm text-neutral-600 dark:text-neutral-400">
