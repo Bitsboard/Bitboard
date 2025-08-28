@@ -13,7 +13,7 @@ interface ChatWithDetails extends Chat {
   listing_image: string;
   listing_category: string;
   user_role: 'buyer' | 'seller';
-  other_user_id: string;
+  other_user_username: string;
   latestMessage: Message | null;
   unreadCount: number;
 }
@@ -219,7 +219,7 @@ export default function MessagesPage() {
         body: JSON.stringify({
           text: newMessage.trim(),
           listingId: selectedChat.listing_id,
-          otherUserId: selectedChat.other_user_id,
+          otherUserId: selectedChat.other_user_username,
           chatId: selectedChat.id,
           userEmail: user?.email
         })
@@ -439,7 +439,7 @@ export default function MessagesPage() {
                         </div>
                         
                         <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-1">
-                          {chat.user_role === 'buyer' ? 'Buying from' : 'Selling to'}: {chat.other_user_id}
+                          {chat.user_role === 'buyer' ? 'Buying from' : 'Selling to'}: {chat.other_user_username}
                         </p>
                         
                         {chat.latestMessage && (
@@ -544,7 +544,7 @@ export default function MessagesPage() {
                         {selectedChat.listing_title}
                       </h3>
                       <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                        {selectedChat.user_role === 'buyer' ? 'Buying from' : 'Selling to'}: {selectedChat.other_user_id}
+                        {selectedChat.user_role === 'buyer' ? 'Buying from' : 'Selling to'}: {selectedChat.other_user_username}
                       </p>
                     </div>
                     
