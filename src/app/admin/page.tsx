@@ -245,12 +245,12 @@ export default function AdminPage() {
     const UserTag = ({ username }: { username: string }) => (
       <a 
         href={`/admin/users?search=${encodeURIComponent(username)}`}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-orange-200 dark:bg-orange-800 text-orange-900 dark:text-orange-100 hover:bg-orange-300 dark:hover:bg-orange-700 transition-colors border-2 border-orange-300 dark:border-orange-600"
+        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-orange-200 dark:bg-orange-800 text-orange-900 dark:text-orange-100 hover:bg-orange-300 dark:hover:bg-orange-700 transition-colors border border-orange-300 dark:border-orange-600"
         target="_blank"
         rel="noopener noreferrer"
       >
         {username}
-        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
         </svg>
       </a>
@@ -259,12 +259,12 @@ export default function AdminPage() {
     const ListingTag = ({ title, id }: { title: string | null; id: number | null }) => (
       <a 
         href={`/admin/listings?search=${encodeURIComponent(title || '')}`}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors border-2 border-blue-300 dark:border-blue-600"
+        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors border border-blue-300 dark:border-blue-600"
         target="_blank"
         rel="noopener noreferrer"
       >
         {title || 'Unknown Listing'}
-        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
         </svg>
       </a>
@@ -432,59 +432,59 @@ export default function AdminPage() {
           ) : stats ? (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
               {/* Users Box with Management Button */}
-              <div className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 hover:shadow-md">
-                <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-1">{stats.users.total}</div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">Total Users</div>
-                <div className="text-xs text-neutral-500 mb-4">+{stats.users.new7d} this week</div>
+              <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 hover:shadow-md">
+                <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-0.5">{stats.users.total}</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-1">Users</div>
+                <div className="text-xs text-neutral-500 mb-3">+{stats.users.new7d} this week</div>
                 <button 
                   onClick={() => router.push('/admin/users')}
-                  className="w-full px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors"
+                  className="w-full px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors"
                 >
                   User Management
                 </button>
               </div>
 
               {/* Listings Box with Management Button */}
-              <div className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-green-300 dark:hover:border-green-600 transition-all duration-200 hover:shadow-md">
-                <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-1">{stats.listings.total}</div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">Total Listings</div>
-                <div className="text-xs text-neutral-500 mb-4">+{stats.listings.new7d} this week</div>
+              <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-green-300 dark:hover:border-green-600 transition-all duration-200 hover:shadow-md">
+                <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-0.5">{stats.listings.total}</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-1">Listings</div>
+                <div className="text-xs text-neutral-500 mb-3">+{stats.listings.new7d} this week</div>
                 <button 
                   onClick={() => router.push('/admin/listings')}
-                  className="w-full px-3 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors"
+                  className="w-full px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors"
                 >
                   Listing Management
                 </button>
               </div>
 
               {/* Chats Box with Management Button */}
-              <div className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 hover:shadow-md">
-                <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-1">{stats.conversations.total}</div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">Active Conversations</div>
-                <div className="text-xs text-neutral-500 mb-4">+{stats.conversations.new7d} this week</div>
+              <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 hover:shadow-md">
+                <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-0.5">{stats.conversations.total}</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-1">Active Conversations</div>
+                <div className="text-xs text-neutral-500 mb-3">+{stats.conversations.new7d} this week</div>
                 <button 
                   onClick={() => router.push('/admin/chats')}
-                  className="w-full px-3 py-2 bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium rounded-lg transition-colors"
+                  className="w-full px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium rounded-lg transition-colors"
                 >
                   Chat Management
                 </button>
               </div>
 
               {/* Reports & System Notifications Box */}
-              <div className="p-4 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800">
-                <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-1">Reports</div>
-                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">System & Analytics</div>
-                <div className="text-xs text-neutral-500 mb-4">Management tools</div>
-                <div className="space-y-2">
+              <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800">
+                <div className="text-2xl font-bold text-neutral-900 dark:text-white mb-0.5">Reports</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-1">System & Analytics</div>
+                <div className="text-xs text-neutral-500 mb-3">Management tools</div>
+                <div className="space-y-1.5">
                   <button 
                     onClick={() => setShowNotificationForm(true)}
-                    className="w-full px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors"
+                    className="w-full px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors"
                   >
                     Send Notification
                   </button>
                   <button 
                     onClick={() => router.push('/admin/reports')}
-                    className="w-full px-3 py-2 bg-neutral-500 hover:bg-neutral-600 text-white text-sm font-medium rounded-lg transition-colors"
+                    className="w-full px-3 py-1.5 bg-neutral-500 hover:bg-neutral-600 text-white text-sm font-medium rounded-colors"
                   >
                     View Reports
                   </button>
