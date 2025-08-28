@@ -165,6 +165,24 @@ export async function GET(req: NextRequest) {
         ...r,
         imageUrl: r.imageUrl && r.imageUrl.trim() ? r.imageUrl :
           `https://images.unsplash.com/photo-${stock[i % stock.length]}?q=80&w=1600&auto=format&fit=crop`,
+        // Create the seller object structure that the frontend expects
+        seller: {
+          name: r.postedBy || 'unknown',
+          score: r.userDeals || 0,
+          deals: r.userDeals || 0,
+          rating: r.userRating || 5.0,
+          verifications: {
+            email: Boolean(r.userVerified),
+            phone: false, // Not implemented yet
+            lnurl: false  // Not implemented yet
+          },
+          onTimeRelease: 100 // Default value
+        },
+        // Add missing fields that the frontend expects
+        images: r.imageUrl && r.imageUrl.trim() ? [r.imageUrl] : [],
+        type: r.adType === 'want' ? 'want' : 'sell',
+        priceSats: r.priceSat || 0,
+        createdAt: r.createdAt || Date.now()
       };
     });
 
