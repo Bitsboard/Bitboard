@@ -113,13 +113,13 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
       <div className="relative">
         <div className="grid grid-cols-1 md:grid-cols-5" style={{ maxHeight: "calc(90vh - 64px)" }}>
           {/* Left: media + seller + safety/report (static) */}
-          <div className="md:col-span-3 overflow-hidden">
-            <div className="relative">
-              <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[5/4]" showThumbnails showDots={false} rounded="" />
+          <div className="md:col-span-3 flex flex-col overflow-hidden">
+            <div className="flex-shrink-0">
+              <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[4/3]" showThumbnails showDots={false} rounded="" />
               <div className={cn("pointer-events-none absolute left-0 right-0 top-0 h-1 bg-gradient-to-r", a.stripe)} />
               {/* Overlay chips removed per request */}
             </div>
-            <div className="p-4">
+            <div className="p-4 flex-shrink-0">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 items-center">
                 {/* Row 1, Col 1: seller info */}
                 <div className={cn("text-sm flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}>
@@ -201,7 +201,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
           </div>
 
           {/* Right: static top area + scrollable description */}
-          <div className={cn("md:col-span-2 border-l flex flex-col", dark ? "border-neutral-900" : "border-neutral-200")} style={{ maxHeight: "calc(90vh - 64px)" }}>
+          <div className={cn("md:col-span-2 border-l flex flex-col", dark ? "border-neutral-900" : "border-neutral-200")}>
             <div className="p-3 pr-6 shrink-0">
               {/* Top row: price left, location right */}
               <div className="flex items-center justify-between gap-2">
@@ -224,7 +224,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
             </div>
             
             {/* Description Interface */}
-            <div className="flex-1 overflow-y-auto overscroll-contain scroll-bounce p-3 pr-10 mr-2 md:mr-3">
+            <div className="flex-1 overflow-y-auto overscroll-contain scroll-bounce p-3 pr-10 mr-2 md:mr-3 min-h-0">
               <div className={cn("prose prose-sm max-w-none", dark ? "prose-invert" : "")}>
                 <p className={cn("whitespace-pre-wrap", dark ? "text-neutral-300" : "text-neutral-800")}>{listing.description}</p>
               </div>
