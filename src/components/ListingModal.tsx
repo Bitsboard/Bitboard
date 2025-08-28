@@ -111,23 +111,23 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
         </div>
       </ModalHeader>
       <div className="relative">
-        <div className="grid grid-cols-1 md:grid-cols-5" style={{ maxHeight: "calc(90vh - 64px)" }}>
+        <div className="grid grid-cols-1 md:grid-cols-5" style={{ maxHeight: "calc(95vh - 80px)" }}>
           {/* Left: media + seller + safety/report (static) */}
           <div className="md:col-span-3 flex flex-col overflow-hidden">
             <div className="flex-shrink-0">
-              <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[4/3]" showThumbnails showDots={false} rounded="" />
+              <Carousel images={listing.images} alt={listing.title} dark={dark} className="aspect-[3/2]" showThumbnails showDots={false} rounded="" />
               <div className={cn("pointer-events-none absolute left-0 right-0 top-0 h-1 bg-gradient-to-r", a.stripe)} />
               {/* Overlay chips removed per request */}
             </div>
-            <div className="p-4 flex-shrink-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 items-center">
+            <div className="p-3 flex-shrink-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-1.5 items-center">
                 {/* Row 1, Col 1: seller info */}
-                <div className={cn("text-sm flex items-center gap-2", dark ? "text-neutral-300" : "text-neutral-700")}>
+                <div className={cn("text-sm flex items-center gap-1.5", dark ? "text-neutral-300" : "text-neutral-700")}>
                   {/* Username as clickable pill/tag - encapsulates both icon and name */}
                   <Link
                     href={`/profile/${listing.seller.name}`}
                     className={cn(
-                      "inline-flex items-center px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative",
+                      "inline-flex items-center px-2.5 py-0.5 rounded-full font-medium transition-all duration-200 cursor-pointer relative",
                       "bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50",
                       "border border-neutral-300/60 dark:border-neutral-700/50",
                       "hover:scale-105 hover:shadow-md"
@@ -137,17 +137,17 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                       onClose(); // Close the modal when clicking username
                     }}
                   >
-                                    {/* Profile Icon - Positioned so its center aligns with the left edge radius */}
-                <div className="flex-shrink-0 -ml-2">
+                    {/* Profile Icon - Positioned so its center aligns with the left edge radius */}
+                    <div className="flex-shrink-0 -ml-1.5">
                       {!sellerImageError ? (
                         <img
                           src={generateProfilePicture(listing.seller.name)}
                           alt={`${listing.seller.name}'s profile picture`}
-                          className="w-5 h-5 rounded-full object-cover"
+                          className="w-4 h-4 rounded-full object-cover"
                           onError={() => setSellerImageError(true)}
                         />
                       ) : (
-                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
+                        <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
                           {getInitials(listing.seller.name)}
                         </div>
                       )}
@@ -160,7 +160,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                   {(listing.seller.verifications.email || listing.seller.verifications.phone || listing.seller.verifications.lnurl) && (
                     <span
                       className={cn(
-                        "verified-badge inline-flex h-6 w-6 items-center justify-center rounded-full text-white font-bold shadow-md"
+                        "verified-badge inline-flex h-5 w-5 items-center justify-center rounded-full text-white font-bold shadow-md"
                       )}
                       style={{
                         background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
@@ -168,7 +168,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                       aria-label="Verified"
                       title="User has verified their identity"
                     >
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </span>
@@ -180,7 +180,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                 <div className="flex justify-end">
                   <button 
                     onClick={handleChatClick} 
-                    className="min-w-[240px] rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2 text-sm font-semibold text-white shadow"
+                    className="min-w-[200px] rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-4 py-1.5 text-sm font-semibold text-white shadow"
                   >
                     {t('send_message', lang)}
                   </button>
@@ -191,7 +191,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                 </div>
                 {/* Row 2, Col 2: safety warning + localized learn more link */}
                 <div className="flex justify-end">
-                  <div className={cn("flex items-center gap-2 text-xs text-right whitespace-nowrap", dark ? "text-neutral-400" : "text-neutral-600")}>
+                  <div className={cn("flex items-center gap-1.5 text-xs text-right whitespace-nowrap", dark ? "text-neutral-400" : "text-neutral-600")}>
                     <span>{t('listing_warning', lang)}</span>
                     <a href={`/${lang}/safety`} className={cn("font-semibold underline", dark ? "text-neutral-300" : "text-neutral-700")}>{t('learn_more', lang)}</a>
                   </div>
