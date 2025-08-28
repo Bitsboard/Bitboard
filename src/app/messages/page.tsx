@@ -420,12 +420,12 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="h-screen bg-neutral-50 dark:bg-neutral-900 flex flex-col overflow-hidden messages-page">
+    <div className="h-[calc(100vh-4rem)] bg-neutral-50 dark:bg-neutral-900 flex flex-col overflow-hidden messages-page">
       {/* Main Content - Full Height, No Scrolling */}
-      <div className="max-w-7xl mx-auto px-4 py-3 w-full h-screen">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-screen">
+      <div className="max-w-7xl mx-auto px-4 py-2 w-full h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 h-full">
           {/* Left Sidebar - Conversations List */}
-          <div className="lg:col-span-1 h-screen">
+          <div className="lg:col-span-1 h-full">
             <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 h-full flex flex-col shadow-lg">
               {/* Header moved here - above conversations panel */}
               <div className="p-3 border-b border-neutral-200 dark:border-neutral-700 bg-gradient-to-r from-orange-500 to-orange-600 rounded-t-2xl flex-shrink-0">
@@ -660,7 +660,7 @@ export default function MessagesPage() {
           </div>
 
           {/* Right Side - Main Content Area - FULL HEIGHT */}
-          <div className="lg:col-span-2 h-screen">
+          <div className="lg:col-span-2 h-full">
             <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 h-full flex flex-col shadow-lg">
               {!selectedChat && !selectedNotification ? (
                 <div className="flex-1 flex items-center justify-center">
