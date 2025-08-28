@@ -8,6 +8,7 @@ import { LocationProvider } from "@/lib/contexts/LocationContext";
 import { BtcRateProvider } from "@/lib/contexts/BtcRateContext";
 
 import Footer from "@/components/Footer";
+import { LayoutContent } from "./LayoutContent";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -73,9 +74,9 @@ export default function RootLayout({
           <ThemeProvider>
             <LocationProvider>
               <BtcRateProvider>
-                <GlobalHeader />
-                {children}
-                <Footer />
+                <LayoutContent>
+                  {children}
+                </LayoutContent>
               </BtcRateProvider>
             </LocationProvider>
           </ThemeProvider>

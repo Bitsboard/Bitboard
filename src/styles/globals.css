@@ -100,6 +100,29 @@
   }
 }
 
+/* Prevent scrolling on messages page */
+.no-scroll {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+
+.no-scroll body {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+
+/* Additional rules for messages page */
+.no-scroll html {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+
+/* Ensure messages page takes full viewport height */
+.messages-page {
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+
 .animate-rotate-gradient {
   background: linear-gradient(
     90deg,
