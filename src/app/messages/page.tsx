@@ -256,24 +256,24 @@ export default function MessagesPage() {
     switch (type) {
       case 'message':
         return (
-          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
-            <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
+            <svg className="w-3 h-3 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
           </div>
         );
       case 'update':
         return (
-          <div className="w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
-            <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-6 h-6 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+            <svg className="w-3 h-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
         );
       case 'system':
         return (
-          <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center">
-            <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-6 h-6 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center">
+            <svg className="w-3 h-3 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
@@ -411,12 +411,12 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
-      {/* Minimal Header */}
-      <div className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+    <div className="h-screen bg-neutral-50 dark:bg-neutral-900 flex flex-col">
+      {/* Compact Header */}
+      <div className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 flex-shrink-0">
+        <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-neutral-900 dark:text-white">
+            <h1 className="text-lg font-semibold text-neutral-900 dark:text-white">
               Messages & Notifications
             </h1>
             <div className="flex items-center gap-2">
@@ -426,7 +426,7 @@ export default function MessagesPage() {
               <button
                 onClick={loadChats}
                 disabled={isLoading}
-                className="px-3 py-1.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 transition-colors text-sm"
+                className="px-2 py-1 bg-orange-500 text-white rounded text-xs hover:bg-orange-600 disabled:opacity-50 transition-colors"
               >
                 {isLoading ? '...' : '↻'}
               </button>
@@ -435,21 +435,21 @@ export default function MessagesPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        {/* Main Content - Side by Side Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100vh-180px)]">
-          {/* Left Sidebar - Compact List */}
-          <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 overflow-hidden h-full flex flex-col">
-              <div className="p-3 border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-medium text-neutral-900 dark:text-white text-sm">
+      {/* Main Content - Fixed Height, No Scrolling */}
+      <div className="flex-1 max-w-7xl mx-auto px-4 py-3 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-full">
+          {/* Left Sidebar - Conversations List */}
+          <div className="lg:col-span-1 h-full">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 h-full flex flex-col">
+              <div className="p-2 border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700 flex-shrink-0">
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="font-medium text-neutral-900 dark:text-white text-xs">
                     {activeTab === 'chats' ? 'Conversations' : 'Notifications'}
                   </h3>
                   <div className="flex gap-1">
                     <button
                       onClick={() => setActiveTab('chats')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                      className={`px-1.5 py-0.5 rounded text-xs font-medium transition-colors ${
                         activeTab === 'chats'
                           ? 'bg-orange-500 text-white'
                           : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700'
@@ -457,14 +457,14 @@ export default function MessagesPage() {
                     >
                       Chats
                       {unreadChatsCount > 0 && (
-                        <span className="ml-1 bg-white text-orange-500 text-xs px-1 py-0.5 rounded-full font-bold">
+                        <span className="ml-1 bg-white text-orange-500 text-xs px-0.5 py-0 rounded-full font-bold">
                           {unreadChatsCount}
                         </span>
                       )}
                     </button>
                     <button
                       onClick={() => setActiveTab('notifications')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                      className={`px-1.5 py-0.5 rounded text-xs font-medium transition-colors ${
                         activeTab === 'notifications'
                           ? 'bg-orange-500 text-white'
                           : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700'
@@ -472,7 +472,7 @@ export default function MessagesPage() {
                     >
                       Notifications
                       {unreadNotificationsCount > 0 && (
-                        <span className="ml-1 bg-white text-orange-500 text-xs px-1 py-0.5 rounded-full font-bold">
+                        <span className="ml-1 bg-white text-orange-500 text-xs px-0.5 py-0 rounded-full font-bold">
                           {unreadNotificationsCount}
                         </span>
                       )}
@@ -492,7 +492,7 @@ export default function MessagesPage() {
                   <div className="flex gap-1">
                     <button
                       onClick={() => setFilter('all')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                      className={`px-1.5 py-0.5 rounded text-xs font-medium transition-colors ${
                         filter === 'all'
                           ? 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-white'
                           : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
@@ -502,7 +502,7 @@ export default function MessagesPage() {
                     </button>
                     <button
                       onClick={() => setFilter('unread')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                      className={`px-1.5 py-0.5 rounded text-xs font-medium transition-colors ${
                         filter === 'unread'
                           ? 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-white'
                           : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
@@ -515,7 +515,7 @@ export default function MessagesPage() {
                   {activeTab === 'notifications' && (
                     <button
                       onClick={markAllNotificationsAsRead}
-                      className="px-2 py-1 rounded text-xs font-medium text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
+                      className="px-1.5 py-0.5 rounded text-xs font-medium text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
                     >
                       Mark all read
                     </button>
@@ -523,16 +523,16 @@ export default function MessagesPage() {
                 </div>
               </div>
               
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto min-h-0">
                 {isLoading ? (
-                  <div className="p-4 text-center">
-                    <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                  <div className="p-3 text-center">
+                    <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-1"></div>
                     <p className="text-xs text-neutral-600 dark:text-neutral-400">Loading...</p>
                   </div>
                 ) : activeTab === 'chats' && filteredChats.length === 0 ? (
-                  <div className="p-4 text-center">
-                    <div className="w-10 h-10 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <svg className="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="p-3 text-center">
+                    <div className="w-8 h-8 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-1">
+                      <svg className="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                       </svg>
                     </div>
@@ -540,9 +540,9 @@ export default function MessagesPage() {
                     <p className="text-xs text-neutral-600 dark:text-neutral-400">Start messaging sellers about listings</p>
                   </div>
                 ) : activeTab === 'notifications' && filteredNotifications.length === 0 ? (
-                  <div className="p-4 text-center">
-                    <div className="w-10 h-10 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <svg className="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="p-3 text-center">
+                    <div className="w-8 h-8 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-1">
+                      <svg className="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19a2 2 0 01-2-2V7a2 2 0 012-2h5l2 2h5a2 2 0 012 2v10a2 2 0 01-2 2H4z" />
                       </svg>
                     </div>
@@ -555,14 +555,14 @@ export default function MessagesPage() {
                       <div
                         key={chat.id}
                         onClick={() => selectChat(chat)}
-                        className={`p-2.5 border-b border-neutral-100 dark:border-neutral-700 cursor-pointer transition-colors ${
+                        className={`p-2 border-b border-neutral-100 dark:border-neutral-700 cursor-pointer transition-colors ${
                           selectedChat?.id === chat.id 
                             ? 'bg-orange-50 dark:bg-orange-900/20 border-r-2 border-orange-500' 
                             : 'hover:bg-neutral-50 dark:hover:bg-neutral-700'
                         }`}
                       >
                         <div className="flex items-start gap-2">
-                          <div className="w-8 h-8 bg-neutral-100 dark:bg-neutral-800 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          <div className="w-6 h-6 bg-neutral-100 dark:bg-neutral-800 rounded flex items-center justify-center flex-shrink-0 overflow-hidden">
                             {chat.listing_image ? (
                               <img 
                                 src={chat.listing_image} 
@@ -570,7 +570,7 @@ export default function MessagesPage() {
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <svg className="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <svg className="w-3 h-3 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                               </svg>
                             )}
@@ -582,7 +582,7 @@ export default function MessagesPage() {
                                 {chat.listing_title}
                               </h4>
                               {chat.unreadCount > 0 && (
-                                <span className="bg-orange-500 text-white text-xs px-1 py-0.5 rounded-full font-bold">
+                                <span className="bg-orange-500 text-white text-xs px-0.5 py-0 rounded-full font-bold">
                                   {chat.unreadCount}
                                 </span>
                               )}
@@ -610,7 +610,7 @@ export default function MessagesPage() {
                       <div
                         key={notification.id}
                         onClick={() => selectNotification(notification)}
-                        className={`p-2.5 border-b border-neutral-100 dark:border-neutral-700 cursor-pointer transition-colors ${
+                        className={`p-2 border-b border-neutral-100 dark:border-neutral-700 cursor-pointer transition-colors ${
                           selectedNotification?.id === notification.id 
                             ? 'bg-orange-50 dark:bg-orange-900/20 border-r-2 border-orange-500' 
                             : 'hover:bg-neutral-50 dark:hover:bg-neutral-700'
@@ -626,7 +626,7 @@ export default function MessagesPage() {
                                 {notification.title}
                               </h4>
                               {!notification.read && (
-                                <span className="bg-orange-500 text-white text-xs px-1 py-0.5 rounded-full font-bold">
+                                <span className="bg-orange-500 text-white text-xs px-0.5 py-0 rounded-full font-bold">
                                   New
                                 </span>
                               )}
@@ -648,18 +648,18 @@ export default function MessagesPage() {
           </div>
 
           {/* Right Side - Main Content Area */}
-          <div className="lg:col-span-2">
-            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 overflow-hidden h-full flex flex-col">
+          <div className="lg:col-span-2 h-full">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 h-full flex flex-col">
               {!selectedChat && !selectedNotification ? (
                 <div className="flex-1 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="w-12 h-12 bg-neutral-100 dark:bg-neutral-700 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <div className="w-10 h-10 bg-neutral-100 dark:bg-neutral-700 rounded-full flex items-center justify-center mx-auto mb-2">
                       {activeTab === 'chats' ? (
-                        <svg className="w-6 h-6 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
                       ) : (
-                        <svg className="w-6 h-6 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19a2 2 0 01-2-2V7a2 2 0 012-2h5l2 2h5a2 2 0 012 2v10a2 2 0 01-2 2H4z" />
                         </svg>
                       )}
@@ -679,9 +679,9 @@ export default function MessagesPage() {
                 // Chat Messages View
                 <>
                   {/* Compact Chat Header */}
-                  <div className="p-2.5 border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
+                  <div className="p-2 border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700 flex-shrink-0">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-neutral-100 dark:bg-neutral-800 rounded-lg flex items-center justify-center overflow-hidden">
+                      <div className="w-6 h-6 bg-neutral-100 dark:bg-neutral-800 rounded flex items-center justify-center overflow-hidden">
                         {selectedChat.listing_image ? (
                           <img 
                             src={selectedChat.listing_image} 
@@ -689,7 +689,7 @@ export default function MessagesPage() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <svg className="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="w-3 h-3 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                         )}
@@ -715,12 +715,12 @@ export default function MessagesPage() {
                     </div>
                   </div>
 
-                  {/* Messages */}
-                  <div className="flex-1 overflow-y-auto p-2.5 space-y-2 bg-neutral-50 dark:bg-neutral-900">
+                  {/* Messages - Scrollable Area */}
+                  <div className="flex-1 overflow-y-auto p-2 space-y-1.5 bg-neutral-50 dark:bg-neutral-900 min-h-0">
                     {messages.length === 0 ? (
-                      <div className="text-center py-4">
-                        <div className="w-10 h-10 bg-neutral-200 dark:bg-neutral-700 rounded-full flex items-center justify-center mx-auto mb-2">
-                          <svg className="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <div className="text-center py-3">
+                        <div className="w-8 h-8 bg-neutral-200 dark:bg-neutral-700 rounded-full flex items-center justify-center mx-auto mb-1">
+                          <svg className="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                           </svg>
                         </div>
@@ -738,7 +738,7 @@ export default function MessagesPage() {
                             className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
                           >
                             <div
-                              className={`max-w-xs lg:max-w-md px-2.5 py-1.5 rounded-2xl transition-all duration-200 ${
+                              className={`max-w-xs lg:max-w-md px-2 py-1 rounded-xl transition-all duration-200 ${
                                 isOwnMessage
                                   ? isOptimistic 
                                     ? 'bg-orange-400 text-white opacity-80'
@@ -746,13 +746,13 @@ export default function MessagesPage() {
                                   : 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white border border-neutral-200 dark:border-neutral-700'
                               }`}
                             >
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1">
                                 <p className="text-xs">{message.text}</p>
                                 {isOptimistic && (
-                                  <div className="w-2.5 h-2.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                  <div className="w-2 h-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                 )}
                               </div>
-                              <p className={`text-xs mt-1 ${
+                              <p className={`text-xs mt-0.5 ${
                                 isOwnMessage
                                   ? 'text-orange-100'
                                   : 'text-neutral-500 dark:text-neutral-400'
@@ -768,8 +768,8 @@ export default function MessagesPage() {
                     <div ref={messagesEndRef} />
                   </div>
 
-                  {/* Message Input */}
-                  <div className="p-2.5 border-t border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800">
+                  {/* Message Input - Fixed at Bottom */}
+                  <div className="p-2 border-t border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex-shrink-0">
                     <div className="flex gap-2">
                       <input
                         type="text"
@@ -777,13 +777,13 @@ export default function MessagesPage() {
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                         placeholder="Type your message..."
-                        className="flex-1 px-2.5 py-1.5 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-xs"
+                        className="flex-1 px-2 py-1 border border-neutral-300 dark:border-neutral-600 rounded text-xs bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         disabled={isSending}
                       />
                       <button
                         onClick={sendMessage}
                         disabled={!newMessage.trim() || isSending}
-                        className="px-3 py-1.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-xs"
+                        className="px-2 py-1 bg-orange-500 text-white rounded text-xs hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                       >
                         {isSending ? 'Sending...' : 'Send'}
                       </button>
@@ -794,7 +794,7 @@ export default function MessagesPage() {
                 // Notification Details View
                 <>
                   {/* Compact Notification Header */}
-                  <div className="p-2.5 border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
+                  <div className="p-2 border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700 flex-shrink-0">
                     <div className="flex items-center gap-2">
                       <div className="flex-shrink-0">
                         {selectedNotification && getNotificationIcon(selectedNotification.type)}
@@ -808,25 +808,25 @@ export default function MessagesPage() {
                         </p>
                       </div>
                       {selectedNotification && !selectedNotification.read && (
-                        <span className="bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full font-medium">
+                        <span className="bg-orange-500 text-white text-xs px-1 py-0 rounded-full font-medium">
                           New
                         </span>
                       )}
                     </div>
                   </div>
 
-                  {/* Notification Content */}
-                  <div className="flex-1 p-3 bg-neutral-50 dark:bg-neutral-900">
+                  {/* Notification Content - Scrollable if needed */}
+                  <div className="flex-1 p-2 bg-neutral-50 dark:bg-neutral-900 overflow-y-auto min-h-0">
                     <div className="max-w-2xl">
                       <p className="text-neutral-700 dark:text-neutral-300 leading-relaxed text-xs">
                         {selectedNotification?.message}
                       </p>
                       
                       {selectedNotification?.actionUrl && (
-                        <div className="mt-4 pt-3 border-t border-neutral-200 dark:border-neutral-700">
+                        <div className="mt-3 pt-2 border-t border-neutral-200 dark:border-neutral-700">
                           <button
                             onClick={() => window.location.href = selectedNotification.actionUrl!}
-                            className="px-3 py-1.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium text-xs"
+                            className="px-2 py-1 bg-orange-500 text-white rounded text-xs hover:bg-orange-600 transition-colors font-medium"
                           >
                             Take Action
                           </button>
