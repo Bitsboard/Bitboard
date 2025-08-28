@@ -70,7 +70,8 @@ export async function GET(req: Request) {
         NULL as listing_title,
         NULL as listing_id,
         NULL as other_username,
-        NULL as chat_id
+        NULL as chat_id,
+        NULL as message_count
       FROM users u
       WHERE u.created_at >= strftime('%s', 'now', '-7 days')
       UNION ALL
@@ -84,7 +85,8 @@ export async function GET(req: Request) {
         l.title as listing_title,
         l.id as listing_id,
         NULL as other_username,
-        NULL as chat_id
+        NULL as chat_id,
+        NULL as message_count
       FROM listings l
       JOIN users u ON l.posted_by = u.id
       WHERE l.created_at >= strftime('%s', 'now', '-7 days')
@@ -99,7 +101,8 @@ export async function GET(req: Request) {
         l.title as listing_title,
         l.id as listing_id,
         NULL as other_username,
-        NULL as chat_id
+        NULL as chat_id,
+        NULL as message_count
       FROM listings l
       JOIN users u ON l.posted_by = u.id
       WHERE l.updated_at >= strftime('%s', 'now', '-7 days') AND l.updated_at != l.created_at
@@ -119,7 +122,8 @@ export async function GET(req: Request) {
           ELSE 
             (SELECT username FROM users WHERE id = c.buyer_id)
         END as other_username,
-        c.id as chat_id
+        c.id as chat_id,
+        (SELECT COUNT(*) FROM messages WHERE chat_id = c.id) as message_count
       FROM chats c
       JOIN users u ON (c.buyer_id = u.id OR c.seller_id = u.id)
       JOIN listings l ON c.listing_id = l.id
@@ -146,7 +150,8 @@ export async function GET(req: Request) {
           ELSE 
             (SELECT username FROM users WHERE id = m.from_id)
         END as other_username,
-        m.chat_id as chat_id
+        m.chat_id as chat_id,
+        (SELECT COUNT(*) FROM messages WHERE chat_id = m.chat_id) as message_count
       FROM messages m
       JOIN users u ON m.from_id = u.id
       JOIN chats c ON m.chat_id = c.id
