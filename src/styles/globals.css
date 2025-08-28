@@ -123,6 +123,28 @@
   overflow: hidden !important;
 }
 
+/* Force fixed heights for messages page panels */
+.messages-page .conversations-panel {
+  height: calc(100vh - 8rem) !important;
+  max-height: calc(100vh - 8rem) !important;
+  min-height: calc(100vh - 8rem) !important;
+  overflow-y: auto !important;
+}
+
+.messages-page .chat-panel {
+  height: calc(100vh - 12rem) !important;
+  max-height: calc(100vh - 12rem) !important;
+  min-height: calc(100vh - 12rem) !important;
+  overflow-y: auto !important;
+}
+
+.messages-page .notification-panel {
+  height: calc(100vh - 8rem) !important;
+  max-height: calc(100vh - 8rem) !important;
+  min-height: calc(100vh - 8rem) !important;
+  overflow-y: auto !important;
+}
+
 .animate-rotate-gradient {
   background: linear-gradient(
     90deg,
