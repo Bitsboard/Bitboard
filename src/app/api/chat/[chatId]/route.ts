@@ -11,6 +11,8 @@ export async function GET(
   try {
     const url = new URL(req.url);
     const userEmail = url.searchParams.get('userEmail');
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const limit = parseInt(url.searchParams.get('limit') || '50'); // Default 50 messages per page
     
     if (!userEmail) {
       return NextResponse.json({ error: 'userEmail required' }, { status: 401 });
@@ -24,7 +26,8 @@ export async function GET(
     const db = await getD1();
     if (!db) return NextResponse.json({ error: 'no_db_binding' }, { status: 500 });
     
-    await ensureChatSchema(db);
+    // Schema is pre-created via migrations - no need to check on every request
+    // await ensureChatSchema(db); // ❌ REMOVED: Expensive schema check on every request
     
     // First get the user's UUID from their email
     const userResult = await db.prepare(`
@@ -51,24 +54,46 @@ export async function GET(
     
     console.log('🔍 Chat API: Access granted for chat:', chatId, 'user:', userId);
     
-    // Get messages for this chat
+    // ✅ IMPLEMENTED: Message pagination for performance
+    const offset = (page - 1) * limit;
+    
+    // Get total message count for pagination
+    const totalCountResult = await db.prepare(`
+      SELECT COUNT(*) as total FROM messages WHERE chat_id = ?
+    `).bind(chatId).all();
+    
+    const totalMessages = Number(totalCountResult.results?.[0]?.total) || 0;
+    const totalPages = Math.ceil(totalMessages / limit);
+    
+    // Get paginated messages for this chat
     const messages = await db.prepare(`
       SELECT id, chat_id, from_id, text, created_at, read_at
       FROM messages 
       WHERE chat_id = ? 
-      ORDER BY created_at ASC
-    `).bind(chatId).all();
+      ORDER BY created_at DESC  -- ✅ Changed to DESC for newest first (most recent messages)
+      LIMIT ? OFFSET ?
+    `).bind(chatId, limit, offset).all();
     
-    // Mark messages as read if they're from the other user
-    await db.prepare(`
-      UPDATE messages 
-      SET read_at = ? 
-      WHERE chat_id = ? AND from_id != ? AND (read_at IS NULL OR read_at = 0)
-    `).bind(Math.floor(Date.now() / 1000), chatId, userEmail).run();
+    // ✅ OPTIMIZED: Only mark messages as read if they're from the other user AND we're on the first page
+    // This prevents unnecessary updates when loading older messages
+    if (page === 1) {
+      await db.prepare(`
+        UPDATE messages 
+        SET read_at = ? 
+        WHERE chat_id = ? AND from_id != ? AND (read_at IS NULL OR read_at = 0)
+      `).bind(Math.floor(Date.now() / 1000), chatId, userId).run();
+    }
     
     return NextResponse.json({ 
       success: true, 
-      messages: messages.results || [] 
+      messages: messages.results || [],
+      pagination: {
+        page,
+        limit,
+        total: totalMessages,
+        totalPages,
+        hasMore: page < totalPages
+      }
     });
   } catch (error) {
     console.error('Error fetching chat messages:', error);

@@ -49,13 +49,13 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
     }
   }, [user?.email, listing.id]);
 
-  // Poll for new messages every 5 seconds if chat is active
+  // Poll for new messages every 30 seconds if chat is active (reduced from 5s for performance)
   useEffect(() => {
     if (!chat?.id) return;
     
     const interval = setInterval(() => {
       loadMessages(chat.id);
-    }, 5000);
+    }, 30000); // Changed from 5000 to 30000 (30 seconds)
     
     return () => clearInterval(interval);
   }, [chat?.id]);

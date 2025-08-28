@@ -42,7 +42,32 @@ export async function getD1(): Promise<D1Database | null> {
     
     if (env.DB) {
       console.log('✅ Database binding found:', typeof env.DB);
-      return env.DB as D1Database;
+      
+      // ✅ OPTIMIZATION: Set database optimization hints
+      try {
+        const db = env.DB as D1Database;
+        
+        // Enable WAL mode for better concurrent performance
+        await db.prepare('PRAGMA journal_mode = WAL').run();
+        
+        // Set page size for optimal performance
+        await db.prepare('PRAGMA page_size = 4096').run();
+        
+        // Enable memory-mapped I/O for better performance
+        await db.prepare('PRAGMA mmap_size = 268435456').run(); // 256MB
+        
+        // Set cache size for better performance
+        await db.prepare('PRAGMA cache_size = -64000').run(); // 64MB
+        
+        // Enable synchronous mode for better performance (NORMAL is a good balance)
+        await db.prepare('PRAGMA synchronous = NORMAL').run();
+        
+        console.log('✅ Database optimizations applied');
+        return db;
+      } catch (optimizationError) {
+        console.log('⚠️ Database optimizations failed, continuing with default settings:', optimizationError);
+        return env.DB as D1Database;
+      }
     }
     
     console.log('❌ No DB binding in environment');

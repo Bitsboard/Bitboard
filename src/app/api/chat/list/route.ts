@@ -15,7 +15,8 @@ export async function GET(req: Request) {
     const db = await getD1();
     if (!db) return NextResponse.json({ chats: [], error: 'no_db_binding' }, { status: 500 });
     
-    await ensureChatSchema(db);
+    // Schema is pre-created via migrations - no need to check on every request
+    // await ensureChatSchema(db); // ❌ REMOVED: Expensive schema check on every request
     
     // First, find the user by email to get their UUID
     const userResult = await db.prepare(`
@@ -73,7 +74,8 @@ export async function GET(req: Request) {
     }
     
     // Get all chats with latest messages and unread counts in a single efficient query
-    const efficientChatsQuery = `
+    // ✅ FIXED: Eliminated N+1 problem by using JOINs instead of subqueries
+    const optimizedChatsQuery = `
       SELECT 
         c.id,
         c.listing_id,
@@ -95,21 +97,34 @@ export async function GET(req: Request) {
           WHEN c.buyer_id = ? THEN seller.username
           ELSE buyer.username
         END as other_user_username,
-        -- Get latest message in the same query
-        (SELECT text FROM messages WHERE chat_id = c.id ORDER BY created_at DESC LIMIT 1) as latest_message_text,
-        (SELECT created_at FROM messages WHERE chat_id = c.id ORDER BY created_at DESC LIMIT 1) as latest_message_time,
-        (SELECT from_id FROM messages WHERE chat_id = c.id ORDER BY created_at DESC LIMIT 1) as latest_message_from,
-        -- Get unread count in the same query
-        (SELECT COUNT(*) FROM messages WHERE chat_id = c.id AND from_id != ? AND (read_at IS NULL OR read_at = 0)) as unread_count
+        -- ✅ Get latest message using efficient JOIN instead of subquery
+        latest_msg.text as latest_message_text,
+        latest_msg.created_at as latest_message_time,
+        latest_msg.from_id as latest_message_from,
+        -- ✅ Get unread count using efficient JOIN instead of subquery
+        COALESCE(unread_count.count, 0) as unread_count
       FROM chats c
       JOIN listings l ON c.listing_id = l.id
       LEFT JOIN users buyer ON c.buyer_id = buyer.id
       LEFT JOIN users seller ON c.seller_id = seller.id
+      -- ✅ Efficient JOIN for latest message (no more N+1 problem)
+      LEFT JOIN (
+        SELECT chat_id, text, created_at, from_id,
+               ROW_NUMBER() OVER (PARTITION BY chat_id ORDER BY created_at DESC) as rn
+        FROM messages
+      ) latest_msg ON c.id = latest_msg.chat_id AND latest_msg.rn = 1
+      -- ✅ Efficient JOIN for unread count (no more N+1 problem)
+      LEFT JOIN (
+        SELECT chat_id, COUNT(*) as count
+        FROM messages 
+        WHERE from_id != ? AND (read_at IS NULL OR read_at = 0)
+        GROUP BY chat_id
+      ) unread_count ON c.id = unread_count.chat_id
       WHERE c.buyer_id = ? OR c.seller_id = ?
       ORDER BY c.last_message_at DESC, c.created_at DESC
     `;
     
-    const chats = await db.prepare(efficientChatsQuery).bind(
+    const chats = await db.prepare(optimizedChatsQuery).bind(
       userId, 
       userId, 
       userId,  // for unread count

@@ -59,8 +59,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'no_db_binding' }, { status: 500 });
     }
     
-    // Ensure chat schema exists
-    await ensureChatSchema(db);
+    // Schema is pre-created via migrations - no need to check on every request
+    // await ensureChatSchema(db); // ❌ REMOVED: Expensive schema check on every request
     
     // Validate that the listing exists
     console.log('Validating listing exists...');
@@ -78,39 +78,43 @@ export async function POST(req: Request) {
     
     console.log('✅ Listing found:', listingCheck.results[0].title);
     
-    // Validate that the other user exists (check if they have any listings or are a known user)
+    // ✅ OPTIMIZED: Simplified user validation with single efficient query
     console.log('Validating other user exists...');
     
-    // Check multiple possible username fields and get the actual user ID
+    // Check if the other user exists in the users table (most common case)
     const userCheck = await db.prepare(`
-      SELECT DISTINCT posted_by as username FROM listings WHERE posted_by = ?
-      UNION
-      SELECT DISTINCT id as username FROM users WHERE id = ?
-      UNION
-      SELECT DISTINCT username as username FROM users WHERE username = ?
-      UNION
-      SELECT DISTINCT email as username FROM users WHERE email = ?
+      SELECT id, username FROM users WHERE username = ? OR id = ?
       LIMIT 1
-    `).bind(otherUserId, otherUserId, otherUserId, otherUserId).all();
+    `).bind(otherUserId, otherUserId).all();
     
     if (!userCheck.results || userCheck.results.length === 0) {
       console.log('❌ Other user not found:', otherUserId);
       
-      // Let's also check what users actually exist to help debug
-      const allUsers = await db.prepare(`
-        SELECT DISTINCT posted_by FROM listings 
-        WHERE posted_by IS NOT NULL AND posted_by != ''
-        ORDER BY posted_by
-        LIMIT 10
-      `).all();
+      // Fallback: check if they have any listings
+      const listingUserCheck = await db.prepare(`
+        SELECT DISTINCT posted_by FROM listings WHERE posted_by = ?
+        LIMIT 1
+      `).bind(otherUserId).all();
       
-      console.log('Available users in listings:', allUsers.results?.map(u => u.posted_by) || []);
-      
-      return NextResponse.json({ 
-        error: 'user_not_found',
-        message: `User ${otherUserId} does not exist or has no listings`,
-        availableUsers: allUsers.results?.map(u => u.posted_by) || []
-      }, { status: 404 });
+      if (!listingUserCheck.results || listingUserCheck.results.length === 0) {
+        console.log('❌ User not found in listings either:', otherUserId);
+        
+        // Let's also check what users actually exist to help debug
+        const allUsers = await db.prepare(`
+          SELECT DISTINCT posted_by FROM listings 
+          WHERE posted_by IS NOT NULL AND posted_by != ''
+          ORDER BY posted_by
+          LIMIT 10
+        `).all();
+        
+        console.log('Available users in listings:', allUsers.results?.map(u => u.posted_by) || []);
+        
+        return NextResponse.json({ 
+          error: 'user_not_found',
+          message: `User ${otherUserId} does not exist or has no listings`,
+          availableUsers: allUsers.results?.map(u => u.posted_by) || []
+        }, { status: 404 });
+      }
     }
     
     console.log('✅ Other user validated');

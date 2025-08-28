@@ -56,6 +56,12 @@ export default function MessagesPage() {
   const [activeTab, setActiveTab] = useState<'chats' | 'notifications'>('chats');
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [lastUpdated, setLastUpdated] = useState<number>(Date.now());
+  const [chatCache, setChatCache] = useState<{ [key: string]: { data: any; timestamp: number } }>({});
+  const [messageCache, setMessageCache] = useState<{ [key: string]: { data: any; timestamp: number } }>({});
+  
+  // Cache duration constants
+  const CHAT_CACHE_DURATION = 30 * 1000; // 30 seconds
+  const MESSAGE_CACHE_DURATION = 15 * 1000; // 15 seconds
 
   // Load chats when component mounts
   useEffect(() => {
@@ -65,7 +71,7 @@ export default function MessagesPage() {
     }
   }, [user?.email]);
 
-  // Poll for new messages every 30 seconds
+  // Poll for new messages every 60 seconds (reduced from 30s for performance)
   useEffect(() => {
     if (!user?.email) return;
     
@@ -76,7 +82,7 @@ export default function MessagesPage() {
       if (selectedChat) {
         loadMessages(selectedChat.id);
       }
-    }, 30000); // Changed from 10000 to 30000 (30 seconds)
+    }, 60000); // Changed from 30000 to 60000 (60 seconds)
     
     return () => clearInterval(interval);
   }, [user?.email, selectedChat]);
@@ -84,13 +90,31 @@ export default function MessagesPage() {
   const loadChats = async () => {
     if (!user?.email) return;
     
+    const cacheKey = `chats_${user.email}`;
+    
+    // Check cache first
+    const cached = chatCache[cacheKey];
+    if (cached && Date.now() - cached.timestamp < CHAT_CACHE_DURATION) {
+      console.log('📦 Using cached chat data');
+      setChats(cached.data.chats || []);
+      setLastUpdated(cached.timestamp);
+      return;
+    }
+    
     try {
       setIsLoading(true);
+      
       const response = await fetch(`/api/chat/list?userEmail=${encodeURIComponent(user.email)}`);
       if (response.ok) {
         const data: ChatListResponse = await response.json();
         setChats(data.chats || []);
         setLastUpdated(Date.now());
+        
+        // Cache the result
+        setChatCache(prev => ({
+          ...prev,
+          [cacheKey]: { data, timestamp: Date.now() }
+        }));
       }
     } catch (error) {
       console.error('Error loading chats:', error);
@@ -102,6 +126,14 @@ export default function MessagesPage() {
   const loadChatsBackground = async () => {
     if (!user?.email) return;
     
+    // Check cache first for background updates
+    const cacheKey = `chats_${user.email}`;
+    const cached = chatCache[cacheKey];
+    if (cached && Date.now() - cached.timestamp < CHAT_CACHE_DURATION) {
+      console.log('📦 Background update: using cached chat data');
+      return; // Don't update if cache is still valid
+    }
+    
     try {
       // Background update without showing loading state
       const response = await fetch(`/api/chat/list?userEmail=${encodeURIComponent(user.email)}`);
@@ -109,6 +141,12 @@ export default function MessagesPage() {
         const data: ChatListResponse = await response.json();
         setChats(data.chats || []);
         setLastUpdated(Date.now());
+        
+        // Cache the result
+        setChatCache(prev => ({
+          ...prev,
+          [cacheKey]: { data, timestamp: Date.now() }
+        }));
       }
     } catch (error) {
       console.error('Error loading chats in background:', error);
@@ -144,12 +182,29 @@ export default function MessagesPage() {
   };
 
   const loadMessages = async (chatId: string) => {
+    if (!user?.email) return;
+    
+    // Check cache first
+    const cacheKey = `messages_${chatId}`;
+    const cached = messageCache[cacheKey];
+    if (cached && Date.now() - cached.timestamp < MESSAGE_CACHE_DURATION) {
+      console.log('📦 Using cached message data for chat:', chatId);
+      setMessages(cached.data.messages || []);
+      return;
+    }
+    
     try {
       const response = await fetch(`/api/chat/${chatId}?userEmail=${encodeURIComponent(user?.email || '')}`);
       if (response.ok) {
         const data: MessageResponse = await response.json();
         if (data.success && data.messages) {
           setMessages(data.messages);
+          
+          // Cache the result
+          setMessageCache(prev => ({
+            ...prev,
+            [cacheKey]: { data, timestamp: Date.now() }
+          }));
         }
       }
     } catch (error) {
