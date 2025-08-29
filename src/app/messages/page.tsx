@@ -515,15 +515,40 @@ export default function MessagesPage() {
         <div className="flex-1 bg-white/80 dark:bg-neutral-900/90 backdrop-blur-sm flex flex-col rounded-l-3xl shadow-xl">
           {selectedChat ? (
             <>
-              {/* Chat Header - No Close Button */}
+              {/* Chat Header - Enhanced with listing details */}
               <div className="p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 bg-gradient-to-r from-orange-500 to-orange-600 flex-shrink-0 rounded-tl-3xl">
-                <div>
-                  <h2 className="text-lg font-bold text-white">
-                    {chats.find(c => c.id === selectedChat)?.listing_title}
-                  </h2>
-                  <p className="text-orange-100 text-sm">
-                    Chat with {chats.find(c => c.id === selectedChat)?.other_user}
-                  </p>
+                <div className="flex items-start gap-4">
+                  {/* Listing image */}
+                  <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-white/10">
+                    {chats.find(c => c.id === selectedChat)?.listing_image ? (
+                      <img 
+                        src={chats.find(c => c.id === selectedChat)?.listing_image} 
+                        alt={chats.find(c => c.id === selectedChat)?.listing_title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-white/20 flex items-center justify-center">
+                        <svg className="w-8 h-8 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 00-2-2V6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Listing details */}
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-lg font-bold text-white truncate">
+                      {chats.find(c => c.id === selectedChat)?.listing_title}
+                    </h2>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="text-orange-100 text-sm font-medium">
+                        Chat with {chats.find(c => c.id === selectedChat)?.other_user}
+                      </span>
+                      <span className="text-orange-100/80 text-xs">
+                        ID: {chats.find(c => c.id === selectedChat)?.listing_id}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -568,23 +593,22 @@ export default function MessagesPage() {
                     
                     return (
                       <div key={message.id}>
-                        {/* Timestamp above message if needed */}
-                        {shouldShowTimestamp && (
-                          <div className={`text-center mb-2 ${
-                            message.is_from_current_user ? 'text-right' : 'text-left'
-                          }`}>
-                            <span className="text-xs text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-2 py-1 rounded-full">
-                              {formatTimestamp(message.timestamp)}
-                            </span>
-                          </div>
-                        )}
-                        
                         {/* Message bubble */}
                         <div
                           className={`flex ${message.is_from_current_user ? 'justify-end' : 'justify-start'} ${
                             isGroupedWithPrev ? 'mt-1' : 'mt-3'
-                          }`}
+                          } relative`}
                         >
+                          {/* Timestamp above message if needed - positioned closer to the message */}
+                          {shouldShowTimestamp && (
+                            <div className={`absolute -top-6 ${
+                              message.is_from_current_user ? 'right-0' : 'left-0'
+                            }`}>
+                              <span className="text-xs text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-2 py-1 rounded-full">
+                                {formatTimestamp(message.timestamp)}
+                              </span>
+                            </div>
+                          )}
                           <div
                             className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-sm ${
                               message.is_from_current_user
