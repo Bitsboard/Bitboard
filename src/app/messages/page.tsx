@@ -324,40 +324,22 @@ export default function MessagesPage() {
   };
 
   // Function to open listing modal
-  const openListingModal = (listingId: number) => {
-    // Find the listing data from the selected chat
-    const selectedChatData = chats.find(c => c.id === selectedChat);
-    if (!selectedChatData) return;
-    
-    // Create a listing object that matches the Listing interface
-    const listing = {
-      id: listingId.toString(),
-      title: selectedChatData.listing_title,
-      description: 'Listing from chat',
-      priceSats: selectedChatData.listing_price || 0,
-      category: 'Featured' as const,
-      location: 'Unknown',
-      lat: 0,
-      lng: 0,
-      type: selectedChatData.listing_type || 'sell',
-      images: selectedChatData.listing_image ? [selectedChatData.listing_image] : [],
-      boostedUntil: null,
-      seller: {
-        name: selectedChatData.other_user,
-        score: 0,
-        deals: 0,
-        rating: 0,
-        verifications: {
-          email: false,
-          phone: false,
-          lnurl: false
-        },
-        onTimeRelease: 0
-      },
-      createdAt: selectedChatData.listing_created_at || Date.now()
-    };
-    
-    setModal('active', listing);
+  const openListingModal = async (listingId: number) => {
+    try {
+      // Fetch the real listing data from the API
+      const response = await fetch(`/api/listings/${listingId}`);
+      if (!response.ok) {
+        console.error('Failed to fetch listing:', response.status);
+        return;
+      }
+      
+      const listing = await response.json();
+      
+      // Set the modal with the real listing data
+      setModal('active', listing);
+    } catch (error) {
+      console.error('Error fetching listing:', error);
+    }
   };
 
   useEffect(() => {
@@ -661,10 +643,10 @@ export default function MessagesPage() {
                       {/* Listing image - Clickable to open listing modal */}
                       <div 
                         className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-white/10 cursor-pointer hover:scale-105 transition-transform duration-200"
-                        onClick={() => {
+                        onClick={async () => {
                           const selectedChatData = chats.find(c => c.id === selectedChat);
                           if (selectedChatData?.listing_id) {
-                            openListingModal(selectedChatData.listing_id);
+                            await openListingModal(selectedChatData.listing_id);
                           }
                         }}
                       >
@@ -755,10 +737,10 @@ export default function MessagesPage() {
                     {/* View Listing pill button - positioned at bottom right */}
                     <div className="flex justify-end mt-3">
                       <button
-                        onClick={() => {
+                        onClick={async () => {
                           const selectedChatData = chats.find(c => c.id === selectedChat);
                           if (selectedChatData?.listing_id) {
-                            openListingModal(selectedChatData.listing_id);
+                            await openListingModal(selectedChatData.listing_id);
                           }
                         }}
                         className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white text-sm font-medium rounded-full transition-all duration-200 hover:scale-105 border border-white/30"
