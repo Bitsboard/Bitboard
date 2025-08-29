@@ -2,7 +2,8 @@
 
 import React, { useMemo, useRef, useEffect, useState } from "react";
 import type { Listing, Unit, Layout } from "@/lib/types";
-import { ListingCard, ListingRow } from "./ListingCard";
+import { ListingCard } from "./ListingCard";
+import { ListingRow } from "./ListingRow";
 
 function cn(...xs: Array<string | false | null | undefined>) {
     return xs.filter(Boolean).join(" ");
