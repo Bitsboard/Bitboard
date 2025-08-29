@@ -63,110 +63,36 @@ export async function POST(req: Request) {
     // Step 2: Apply realistic reputation seeding
     console.log('🔄 Seeding realistic reputation values...');
     
-    // High reputation users (verified, active sellers)
-    await db.prepare(`
-      UPDATE users 
-      SET rating = 12 
-      WHERE username IN ('alice', 'bob', 'charlie', 'diana', 'emma') 
-      AND verified = 1
-    `).run();
+    // Generate random reputation for ALL seeded users (1-100 range)
+    // This creates a realistic distribution where most users have moderate reputation
+    // and some have higher reputation based on their activity
     
-    // Medium reputation users (regular users)
-    await db.prepare(`
-      UPDATE users 
-      SET rating = 7 
-      WHERE username IN ('frank', 'grace', 'henry', 'iris', 'jack') 
-      AND verified = 0
-    `).run();
+    // Get all usernames from the database
+    const allUsers = await db.prepare(`
+      SELECT username, verified FROM users ORDER BY username
+    `).all();
     
-    // Good reputation users (experienced users)
-    await db.prepare(`
-      UPDATE users 
-      SET rating = 9 
-      WHERE username IN ('kate', 'liam', 'maya', 'nathan', 'olivia') 
-      AND verified = 1
-    `).run();
+    console.log(`📊 Found ${allUsers.results?.length || 0} users to seed with reputation`);
     
-    // Decent reputation users
-    await db.prepare(`
-      UPDATE users 
-      SET rating = 5 
-      WHERE username IN ('paul', 'quinn', 'rachel', 'sam', 'taylor') 
-      AND verified = 0
-    `).run();
-    
-    // New users with some reputation
-    await db.prepare(`
-      UPDATE users 
-      SET rating = 3 
-      WHERE username IN ('uma', 'victor', 'willa', 'xander', 'yara') 
-      AND verified = 0
-    `).run();
-    
-    // Very active users with high reputation
-    await db.prepare(`
-      UPDATE users 
-      SET rating = 15 
-      WHERE username IN ('zoe', 'adam', 'bella', 'carlos', 'daisy') 
-      AND verified = 1
-    `).run();
-    
-    // Users with moderate reputation
-    await db.prepare(`
-      UPDATE users 
-      SET rating = 6 
-      WHERE username IN ('eddie', 'fiona', 'george', 'hannah', 'ian') 
-      AND verified = 0
-    `).run();
-    
-    // Additional seeded users with realistic reputation
-    await db.prepare(`
-      UPDATE users 
-      SET rating = 8 
-      WHERE username IN ('btcmerchant', 'btceducator', 'btcconsult') 
-      AND verified = 1
-    `).run();
-    
-    await db.prepare(`
-      UPDATE users 
-      SET rating = 11 
-      WHERE username IN ('bitcoinwhale', 'blockchaindev', 'btcblogger') 
-      AND verified = 1
-    `).run();
-    
-    await db.prepare(`
-      UPDATE users 
-      SET rating = 4 
-      WHERE username IN ('btcpodcast', 'asicivan', 'apiaustin') 
-      AND verified = 0
-    `).run();
-    
-    await db.prepare(`
-      UPDATE users 
-      SET rating = 13 
-      WHERE username IN ('blockchainb') 
-      AND verified = 1
-    `).run();
-    
-    // Set remaining users to have at least 1 thumbs up (new users)
-    // BUT ONLY if they haven't been set to a specific value above
-    await db.prepare(`
-      UPDATE users 
-      SET rating = 1 
-      WHERE rating = 0
-      AND username NOT IN (
-        'alice', 'bob', 'charlie', 'diana', 'emma',
-        'frank', 'grace', 'henry', 'iris', 'jack',
-        'kate', 'liam', 'maya', 'nathan', 'olivia',
-        'paul', 'quinn', 'rachel', 'sam', 'taylor',
-        'uma', 'victor', 'willa', 'xander', 'yara',
-        'zoe', 'adam', 'bella', 'carlos', 'daisy',
-        'eddie', 'fiona', 'george', 'hannah', 'ian',
-        'btcmerchant', 'btceducator', 'btcconsult',
-        'bitcoinwhale', 'blockchaindev', 'btcblogger',
-        'btcpodcast', 'asicivan', 'apiaustin', 'blockchainb'
-      )
-    `).run();
+    // Seed each user with a random realistic reputation
+    for (const user of (allUsers.results || [])) {
+      let reputation: number;
+      
+      if (user.verified) {
+        // Verified users get higher reputation (20-100)
+        reputation = Math.floor(Math.random() * 81) + 20;
+      } else {
+        // Non-verified users get lower reputation (1-50)
+        reputation = Math.floor(Math.random() * 50) + 1;
+      }
+      
+      // Update the user's reputation
+      await db.prepare(`
+        UPDATE users SET rating = ? WHERE username = ?
+      `).bind(reputation, user.username).run();
+      
+      console.log(`✅ ${user.username} (${user.verified ? 'verified' : 'unverified'}): +${reputation} 👍`);
+    }
     
     console.log('✅ Reputation seeding completed');
     
