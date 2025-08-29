@@ -603,15 +603,6 @@ export default function MessagesPage() {
                                 }`}>
                                   {item.other_user}
                                 </span>
-                                
-                                {/* Selling/Looking For Pill */}
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold text-white ${
-                                  item.listing_type === 'want' 
-                                    ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500' 
-                                    : 'bg-gradient-to-r from-emerald-500 to-teal-500'
-                                }`}>
-                                  {item.listing_type === 'want' ? 'Looking For' : 'Selling'}
-                                </span>
                               </div>
                               
                               {/* Listing Title */}
@@ -621,12 +612,19 @@ export default function MessagesPage() {
                                 {item.listing_title}
                               </h3>
                               
-                              {/* Last Message */}
-                              <p className={`text-xs truncate mb-1 ${
-                                selectedChat === item.id ? 'text-white/80' : 'text-neutral-600 dark:text-neutral-300'
-                              }`}>
-                                {item.last_message}
-                              </p>
+                              {/* Last Message with Age */}
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className={`text-xs flex-shrink-0 ${
+                                  selectedChat === item.id ? 'text-white/70' : 'text-neutral-500 dark:text-neutral-400'
+                                }`}>
+                                  {formatTimestamp(item.last_message_time)}
+                                </span>
+                                <p className={`text-xs truncate flex-1 ${
+                                  selectedChat === item.id ? 'text-white/80' : 'text-neutral-600 dark:text-neutral-300'
+                                }`}>
+                                  {item.last_message}
+                                </p>
+                              </div>
                               
                               {/* Bottom Row: Unread Count */}
                               {item.unread_count > 0 && (
@@ -642,12 +640,14 @@ export default function MessagesPage() {
                               )}
                             </div>
                             
-                            {/* Age of Most Recent Message - Top Right */}
+                            {/* Selling/Looking For Pill - Top Right */}
                             <div className="flex-shrink-0">
-                              <span className={`text-xs ${
-                                selectedChat === item.id ? 'text-white/70' : 'text-neutral-500 dark:text-neutral-400'
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold text-white ${
+                                item.listing_type === 'want' 
+                                  ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500' 
+                                  : 'bg-gradient-to-r from-emerald-500 to-teal-500'
                               }`}>
-                                {formatTimestamp(item.last_message_time)}
+                                {item.listing_type === 'want' ? 'Looking For' : 'Selling'}
                               </span>
                             </div>
                           </div>
