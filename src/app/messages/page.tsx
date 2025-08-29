@@ -326,6 +326,8 @@ export default function MessagesPage() {
   // Function to open listing modal
   const openListingModal = async (listingId: number) => {
     try {
+      console.log('🔍 Opening listing modal for ID:', listingId);
+      
       // Fetch the real listing data from the API
       const response = await fetch(`/api/listings/${listingId}`);
       if (!response.ok) {
@@ -334,9 +336,11 @@ export default function MessagesPage() {
       }
       
       const listing = await response.json();
+      console.log('🔍 Fetched listing data:', listing);
       
       // Set the modal with the real listing data
       setModal('active', listing);
+      console.log('🔍 Modal set to active with listing');
     } catch (error) {
       console.error('Error fetching listing:', error);
     }
@@ -638,11 +642,11 @@ export default function MessagesPage() {
               {selectedChat ? (
                 <>
                   {/* Chat Header - Comprehensive listing information */}
-                  <div className="p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 bg-gradient-to-r from-orange-500 to-orange-600 flex-shrink-0 rounded-tl-3xl">
-                    <div className="flex items-start gap-4">
+                  <div className="p-3 border-b border-neutral-200/50 dark:border-neutral-700/50 bg-gradient-to-r from-orange-500 to-orange-600 flex-shrink-0 rounded-tl-3xl">
+                    <div className="flex items-start gap-3">
                       {/* Listing image - Clickable to open listing modal */}
                       <div 
-                        className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-white/10 cursor-pointer hover:scale-105 transition-transform duration-200"
+                        className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-white/10 cursor-pointer hover:scale-105 transition-transform duration-200"
                         onClick={async () => {
                           const selectedChatData = chats.find(c => c.id === selectedChat);
                           if (selectedChatData?.listing_id) {
@@ -658,7 +662,7 @@ export default function MessagesPage() {
                           />
                         ) : (
                           <div className="w-full h-full bg-white/20 flex items-center justify-center">
-                            <svg className="w-6 h-6 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-5 h-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 00-2-2V6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                           </div>
@@ -667,9 +671,9 @@ export default function MessagesPage() {
                       
                       {/* Listing details */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 mb-2">
+                        <div className="flex items-center gap-2 mb-1">
                           {/* Selling/Looking for pill - consistent with ListingModal */}
-                          <span className={`flex-shrink-0 rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white ${
+                          <span className={`flex-shrink-0 rounded-full bg-gradient-to-r px-2 py-0.5 text-[10px] font-semibold text-white ${
                             chats.find(c => c.id === selectedChat)?.listing_type === 'want' 
                               ? 'from-fuchsia-500 to-violet-500' 
                               : 'from-emerald-500 to-teal-500'
@@ -677,56 +681,52 @@ export default function MessagesPage() {
                             {chats.find(c => c.id === selectedChat)?.listing_type === 'want' ? 'Looking For' : 'Selling'}
                           </span>
                           {/* Listing title */}
-                          <h2 className="text-lg font-bold text-white truncate">
+                          <h2 className="text-base font-bold text-white truncate">
                             {chats.find(c => c.id === selectedChat)?.listing_title}
                           </h2>
                         </div>
                         
-                        {/* First row: Basic info */}
-                        <div className="flex items-center gap-3 mt-1 text-orange-100 text-sm">
+                        {/* Basic info row */}
+                        <div className="flex items-center gap-2 text-orange-100 text-xs">
                           <span>Chat with {chats.find(c => c.id === selectedChat)?.other_user}</span>
                           <span>•</span>
                           <span>Listing #{chats.find(c => c.id === selectedChat)?.listing_id}</span>
-                        </div>
-                        
-                        {/* Second row: Price and age */}
-                        <div className="flex items-center gap-3 mt-1 text-orange-100/90 text-sm">
+                          <span>•</span>
                           <span className="font-medium">
                             {chats.find(c => c.id === selectedChat)?.listing_price ? 
                               `${(chats.find(c => c.id === selectedChat)?.listing_price! / 100000000).toFixed(8)} BTC` : 
                               'Price N/A'
                             }
                           </span>
-                          <span>•</span>
-                          <span>
-                            {chats.find(c => c.id === selectedChat)?.listing_created_at ? 
-                              formatTimestamp(chats.find(c => c.id === selectedChat)?.listing_created_at!) : 
-                              'Age N/A'
-                            }
-                          </span>
                         </div>
                       </div>
                       
-                      {/* Seller info with verified badge - consistent with ListingModal */}
+                      {/* Seller info with verified badge - exactly matching ListingModal style */}
                       <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-2 px-2.5 py-0.5 bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50 border border-neutral-300/60 dark:border-neutral-700/50 hover:scale-105 hover:shadow-md rounded-full transition-all duration-200 cursor-pointer">
-                          <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
-                            <span className="text-xs font-bold text-white">
-                              {chats.find(c => c.id === selectedChat)?.other_user?.charAt(0)?.toUpperCase() || 'U'}
-                            </span>
+                        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full font-medium transition-all duration-200 cursor-pointer relative bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50 border border-neutral-300/60 dark:border-neutral-700/50 hover:scale-105 hover:shadow-md">
+                          {/* Profile Icon - Positioned so its center aligns with the left edge radius */}
+                          <div className="flex-shrink-0 -ml-1.5">
+                            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
+                              <span className="text-xs font-bold text-white">
+                                {chats.find(c => c.id === selectedChat)?.other_user?.charAt(0)?.toUpperCase() || 'U'}
+                              </span>
+                            </div>
                           </div>
-                          <span className="text-white text-sm font-medium ml-1">
-                            {chats.find(c => c.id === selectedChat)?.other_user}
-                          </span>
+                          
+                          {/* Username - Right side of pill with proper spacing */}
+                          <span className="text-sm ml-1 text-white">{chats.find(c => c.id === selectedChat)?.other_user}</span>
+                          
                           {chats.find(c => c.id === selectedChat)?.seller_verified && (
                             <span 
-                              className="w-3.5 h-3.5 rounded-full flex items-center justify-center shadow-md"
+                              className="verified-badge inline-flex h-5 w-5 items-center justify-center rounded-full text-white font-bold shadow-md ml-1"
                               style={{
                                 background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
                               }}
+                              aria-label="Verified"
+                              title="User has verified their identity"
                             >
-                              <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M9 16.17L4.83 12l-1.41-1.41z" />
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                               </svg>
                             </span>
                           )}
@@ -734,8 +734,8 @@ export default function MessagesPage() {
                       </div>
                     </div>
                     
-                    {/* View Listing pill button - positioned at bottom right */}
-                    <div className="flex justify-end mt-3">
+                    {/* View Listing pill button - smaller and positioned at bottom right */}
+                    <div className="flex justify-end mt-2">
                       <button
                         onClick={async () => {
                           const selectedChatData = chats.find(c => c.id === selectedChat);
@@ -743,9 +743,9 @@ export default function MessagesPage() {
                             await openListingModal(selectedChatData.listing_id);
                           }
                         }}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white text-sm font-medium rounded-full transition-all duration-200 hover:scale-105 border border-white/30"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white text-xs font-medium rounded-full transition-all duration-200 hover:scale-105 border border-white/30"
                       >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
