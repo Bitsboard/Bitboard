@@ -327,6 +327,7 @@ export default function MessagesPage() {
   const openListingModal = async (listingId: number) => {
     try {
       console.log('🔍 Opening listing modal for ID:', listingId);
+      console.log('🔍 Current modal state before:', modals);
       
       // Fetch the real listing data from the API
       const response = await fetch(`/api/listings/${listingId}`);
@@ -341,6 +342,12 @@ export default function MessagesPage() {
       // Set the modal with the real listing data
       setModal('active', listing);
       console.log('🔍 Modal set to active with listing');
+      console.log('🔍 Modal state after setModal:', modals);
+      
+      // Force a re-render to see if the modal state changes
+      setTimeout(() => {
+        console.log('🔍 Modal state after timeout:', modals);
+      }, 100);
     } catch (error) {
       console.error('Error fetching listing:', error);
     }
@@ -646,11 +653,15 @@ export default function MessagesPage() {
                     <div className="flex items-start gap-3">
                       {/* Listing image - Clickable to open listing modal */}
                       <div 
-                        className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-white/10 cursor-pointer hover:scale-105 transition-transform duration-200"
+                        className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-white/10 cursor-pointer hover:scale-105 transition-transform duration-200"
                         onClick={async () => {
                           const selectedChatData = chats.find(c => c.id === selectedChat);
+                          console.log('🔍 Image clicked, selectedChatData:', selectedChatData);
                           if (selectedChatData?.listing_id) {
+                            console.log('🔍 Calling openListingModal with ID:', selectedChatData.listing_id);
                             await openListingModal(selectedChatData.listing_id);
+                          } else {
+                            console.log('🔍 No listing_id found in selectedChatData');
                           }
                         }}
                       >
@@ -662,7 +673,7 @@ export default function MessagesPage() {
                           />
                         ) : (
                           <div className="w-full h-full bg-white/20 flex items-center justify-center">
-                            <svg className="w-5 h-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-6 h-6 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 00-2-2V6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                           </div>
@@ -701,12 +712,12 @@ export default function MessagesPage() {
                         </div>
                       </div>
                       
-                      {/* Seller info with verified badge - exactly matching ListingModal style */}
+                      {/* Seller info with verified badge - exactly matching ListingCard style */}
                       <div className="flex items-center gap-2">
-                        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full font-medium transition-all duration-200 cursor-pointer relative bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50 border border-neutral-300/60 dark:border-neutral-700/50 hover:scale-105 hover:shadow-md">
+                        <div className="inline-flex items-center px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50 border border-neutral-300/60 dark:border-neutral-700/50 hover:scale-105 hover:shadow-md">
                           {/* Profile Icon - Positioned so its center aligns with the left edge radius */}
-                          <div className="flex-shrink-0 -ml-1.5">
-                            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
+                          <div className="flex-shrink-0 -ml-2">
+                            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
                               <span className="text-xs font-bold text-white">
                                 {chats.find(c => c.id === selectedChat)?.other_user?.charAt(0)?.toUpperCase() || 'U'}
                               </span>
@@ -718,7 +729,7 @@ export default function MessagesPage() {
                           
                           {chats.find(c => c.id === selectedChat)?.seller_verified && (
                             <span 
-                              className="verified-badge inline-flex h-5 w-5 items-center justify-center rounded-full text-white font-bold shadow-md ml-1"
+                              className="verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-bold shadow-md ml-1"
                               style={{
                                 background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
                               }}
@@ -739,8 +750,12 @@ export default function MessagesPage() {
                       <button
                         onClick={async () => {
                           const selectedChatData = chats.find(c => c.id === selectedChat);
+                          console.log('🔍 Button clicked, selectedChatData:', selectedChatData);
                           if (selectedChatData?.listing_id) {
+                            console.log('🔍 Calling openListingModal with ID:', selectedChatData.listing_id);
                             await openListingModal(selectedChatData.listing_id);
+                          } else {
+                            console.log('🔍 No listing_id found in selectedChatData');
                           }
                         }}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white text-xs font-medium rounded-full transition-all duration-200 hover:scale-105 border border-white/30"
