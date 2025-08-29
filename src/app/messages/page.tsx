@@ -90,9 +90,7 @@ export default function MessagesPage() {
         const data = await response.json() as { chats: any[] };
         console.log('Chat API response:', data); // Debug log
         
-        const transformedChats = data.chats.map((chat: any) => {
-          console.log('Raw chat data:', chat); // Debug log
-          return {
+        const transformedChats = data.chats.map((chat: any) => ({
             id: chat.id,
             listing_title: chat.listing_title,
             other_user: chat.other_user_username,
@@ -104,9 +102,8 @@ export default function MessagesPage() {
             listing_price: chat.listing_price || chat.price_sats,
             listing_created_at: chat.listing_created_at || chat.created_at,
             seller_verified: chat.seller_verified || false,
-            listing_type: chat.listing_type || 'sell'
-          };
-        });
+                      listing_type: chat.listing_type || 'sell'
+        }));
         setChats(transformedChats);
         
         // Auto-select the most recent chat
@@ -627,10 +624,6 @@ export default function MessagesPage() {
                           : 'from-emerald-500 to-teal-500'
                       }`}>
                         {chats.find(c => c.id === selectedChat)?.listing_type === 'want' ? 'Looking For' : 'Selling'}
-                        {/* Debug: Show actual type value */}
-                        <span className="ml-2 text-xs opacity-70">
-                          (type: {chats.find(c => c.id === selectedChat)?.listing_type || 'undefined'})
-                        </span>
                       </span>
                       {/* Listing title */}
                       <h2 className="text-lg font-bold text-white truncate">
