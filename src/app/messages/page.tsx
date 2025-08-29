@@ -117,7 +117,7 @@ export default function MessagesPage() {
             listing_created_at: chat.listing_created_at || chat.created_at,
             seller_verified: chat.seller_verified || false,
                       listing_type: chat.listing_type || 'sell',
-                      location: chat.location
+                      location: chat.listing_location
         }));
         setChats(transformedChats);
         
