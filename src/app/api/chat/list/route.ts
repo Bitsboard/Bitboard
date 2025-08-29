@@ -92,7 +92,6 @@ export async function GET(req: Request) {
         buyer.username as buyer_username,
         seller.username as seller_username,
         seller.verified as seller_verified,
-        seller.score as seller_score,
         seller.rating as seller_rating,
         CASE 
           WHEN c.buyer_id = ? THEN 'buyer'
