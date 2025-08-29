@@ -562,10 +562,10 @@ export default function MessagesPage() {
                           
                           {/* Bottom Row: Seller and Unread Count */}
                           <div className="flex items-center justify-between mt-1">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-all duration-200 ${
                               selectedChat === item.id 
-                                ? 'bg-white/20 text-white'
-                                : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200'
+                                ? 'bg-white/20 text-white border border-white/30'
+                                : 'bg-white/10 dark:bg-neutral-800/50 text-neutral-700 dark:text-neutral-300 border border-neutral-300/60 dark:border-neutral-700/50 hover:bg-white/20 dark:hover:bg-neutral-700/50'
                             }`}>
                               {item.other_user}
                             </span>
@@ -617,8 +617,12 @@ export default function MessagesPage() {
                   {/* Listing details */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">
-                      {/* Selling/Looking for pill */}
-                      <span className="flex-shrink-0 rounded-full bg-gradient-to-r from-orange-400 to-pink-500 px-3 py-1 text-xs font-semibold text-white">
+                      {/* Selling/Looking for pill - consistent with TypePill */}
+                      <span className={`flex-shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow ${
+                        chats.find(c => c.id === selectedChat)?.listing_type === 'want' 
+                          ? 'bg-fuchsia-600/90' 
+                          : 'bg-emerald-600/90'
+                      }`}>
                         {chats.find(c => c.id === selectedChat)?.listing_type === 'want' ? 'Looking For' : 'Selling'}
                       </span>
                       {/* Listing title */}
@@ -661,21 +665,26 @@ export default function MessagesPage() {
                     </div>
                   </div>
                   
-                  {/* Seller info with verified badge */}
+                  {/* Seller info with verified badge - consistent with ListingModal */}
                   <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-2 px-2 py-1 bg-white/20 rounded-full">
-                      <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
+                    <div className="flex items-center gap-2 px-2.5 py-0.5 bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50 border border-neutral-300/60 dark:border-neutral-700/50 hover:scale-105 hover:shadow-md rounded-full transition-all duration-200 cursor-pointer">
+                      <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
                         <span className="text-xs font-bold text-white">
                           {chats.find(c => c.id === selectedChat)?.other_user?.charAt(0)?.toUpperCase() || 'U'}
                         </span>
                       </div>
-                      <span className="text-white text-sm font-medium">
+                      <span className="text-white text-sm font-medium ml-1">
                         {chats.find(c => c.id === selectedChat)?.other_user}
                       </span>
                       {chats.find(c => c.id === selectedChat)?.seller_verified && (
-                        <span className="w-3.5 h-3.5 bg-blue-500 rounded-full flex items-center justify-center">
+                        <span 
+                          className="w-3.5 h-3.5 rounded-full flex items-center justify-center shadow-md"
+                          style={{
+                            background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
+                          }}
+                        >
                           <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                            <path d="M9 16.17L4.83 12l-1.41-1.41z" />
                           </svg>
                         </span>
                       )}
