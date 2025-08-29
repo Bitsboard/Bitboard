@@ -87,7 +87,8 @@ export function ItemsCarousel({ listings, unit, btcCad, dark, onOpen }: ItemsCar
                 aria-label="Next"
                 onClick={() => scrollByAmount(400)}
             >
-                </button>
+                <span className="font-extrabold">→</span>
+            </button>
         </div>
     );
 }

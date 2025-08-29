@@ -182,7 +182,18 @@ export async function GET(req: NextRequest) {
           onTimeRelease: 100 // Default value
         },
         // Add missing fields that the frontend expects
-        images: r.imageUrl && r.imageUrl.trim() ? [r.imageUrl] : [],
+        images: r.imageUrl && r.imageUrl.trim() ? 
+          // If we have a real image, create an array with it plus some stock images for variety
+          [r.imageUrl, 
+           `https://images.unsplash.com/photo-${stock[i % stock.length]}?q=80&w=1600&auto=format&fit=crop`,
+           `https://images.unsplash.com/photo-${stock[(i + 1) % stock.length]}?q=80&w=1600&auto=format&fit=crop`
+          ] : 
+          // If no real image, use multiple stock images
+          [
+            `https://images.unsplash.com/photo-${stock[i % stock.length]}?q=80&w=1600&auto=format&fit=crop`,
+            `https://images.unsplash.com/photo-${stock[(i + 1) % stock.length]}?q=80&w=1600&auto=format&fit=crop`,
+            `https://images.unsplash.com/photo-${stock[(i + 2) % stock.length]}?q=80&w=1600&auto=format&fit=crop`
+          ],
         type: r.adType === 'want' ? 'want' : 'sell',
         priceSats: r.priceSat || 0,
         createdAt: r.createdAt || Date.now()
