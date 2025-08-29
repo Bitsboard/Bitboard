@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useMemo, useRef, useEffect, useState } from "react";
-import type { Listing, Unit } from "@/lib/types";
-import { ListingCard } from "./ListingCard";
+import type { Listing, Unit, Layout } from "@/lib/types";
+import { ListingCard, ListingRow } from "./ListingCard";
 
 function cn(...xs: Array<string | false | null | undefined>) {
     return xs.filter(Boolean).join(" ");
@@ -13,10 +13,11 @@ interface ItemsCarouselProps {
     unit: Unit;
     btcCad: number | null;
     dark: boolean;
+    layout: Layout;
     onOpen: (l: Listing) => void;
 }
 
-export function ItemsCarousel({ listings, unit, btcCad, dark, onOpen }: ItemsCarouselProps) {
+export function ItemsCarousel({ listings, unit, btcCad, dark, layout, onOpen }: ItemsCarouselProps) {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const items = useMemo(() => listings ?? [], [listings]);
     const [isHover, setIsHover] = useState(false);
@@ -63,8 +64,17 @@ export function ItemsCarousel({ listings, unit, btcCad, dark, onOpen }: ItemsCar
                 )}
             >
                 {items.map((l) => (
-                    <div key={l.id} className="snap-center shrink-0 grow-0 basis-[260px] sm:basis-[280px] md:basis-[300px]" style={{ willChange: "transform" }}>
-                        <ListingCard listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => onOpen(l)} />
+                    <div key={l.id} className={cn(
+                        "snap-center shrink-0 grow-0",
+                        layout === 'list' 
+                            ? "basis-[400px] sm:basis-[450px] md:basis-[500px]" 
+                            : "basis-[260px] sm:basis-[280px] md:basis-[300px]"
+                    )} style={{ willChange: "transform" }}>
+                        {layout === 'list' ? (
+                            <ListingRow listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => onOpen(l)} />
+                        ) : (
+                            <ListingCard listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => onOpen(l)} />
+                        )}
                     </div>
                 ))}
             </div>

@@ -49,7 +49,7 @@ export function ListingsSection({
                             <h2 className={cn("text-3xl font-bold", dark ? "text-white" : "text-neutral-900")} style={{ fontFamily: 'Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial' }}>{t('featured', lang)}</h2>
                         </div>
                     </div>
-                    <ItemsCarousel listings={featured} unit={unit} btcCad={btcCad} dark={dark} onOpen={onOpen} />
+                    <ItemsCarousel listings={featured} unit={unit} btcCad={btcCad} dark={dark} layout={layout} onOpen={onOpen} />
                 </section>
             )}
 
