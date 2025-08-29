@@ -119,9 +119,17 @@ export default function MessagesPage() {
             seller_verified: chat.seller_verified || false,
             listing_type: chat.listing_type || 'sell',
             location: chat.listing_location,
-            seller_score: chat.seller_score || 0,
-            seller_rating: chat.seller_rating || 0
+            seller_score: chat.seller_score || chat.seller_rating || chat.user_score || chat.user_rating || 0,
+            seller_rating: chat.seller_rating || chat.user_rating || chat.seller_score || chat.user_score || 0
         }));
+        
+        console.log('🔍 Transformed chats with reputation data:', transformedChats.map(c => ({
+          id: c.id,
+          other_user: c.other_user,
+          seller_score: c.seller_score,
+          seller_rating: c.seller_rating,
+          seller_verified: c.seller_verified
+        })));
         setChats(transformedChats);
         
         // Auto-select the most recent chat
@@ -743,51 +751,54 @@ export default function MessagesPage() {
                       />
                       
                       {/* Content Section */}
-                      <div className="flex-1 min-w-0">
-                        {/* Top Row: Selling Tag + Title + Age + Location */}
-                        <div className="flex items-center gap-2 mb-1">
-                          {/* Selling/Looking For Tag */}
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold text-white ${
-                            chats.find(c => c.id === selectedChat)?.listing_type === 'want' 
-                              ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500' 
-                              : 'bg-gradient-to-r from-emerald-500 to-teal-500'
-                          }`}>
-                            {chats.find(c => c.id === selectedChat)?.listing_type === 'want' ? 'Looking For' : 'Selling'}
-                          </span>
+                      <div className="flex-1 min-w-0 flex flex-col justify-between h-32">
+                        {/* Top Section: Selling Tag + Title + Age + Location */}
+                        <div>
+                          {/* Top Row: Selling Tag + Title + Age + Location */}
+                          <div className="flex items-center gap-2 mb-1">
+                            {/* Selling/Looking For Tag */}
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold text-white ${
+                              chats.find(c => c.id === selectedChat)?.listing_type === 'want' 
+                                ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500' 
+                                : 'bg-gradient-to-r from-emerald-500 to-teal-500'
+                            }`}>
+                              {chats.find(c => c.id === selectedChat)?.listing_type === 'want' ? 'Looking For' : 'Selling'}
+                            </span>
+                            
+                            {/* Listing Title - Directly to the right of selling tag */}
+                            <h2 className="text-lg font-bold text-white truncate flex-1">
+                              {chats.find(c => c.id === selectedChat)?.listing_title || 'Untitled Listing'}
+                            </h2>
+                          </div>
                           
-                          {/* Listing Title - Directly to the right of selling tag */}
-                          <h2 className="text-lg font-bold text-white truncate flex-1">
-                            {chats.find(c => c.id === selectedChat)?.listing_title || 'Untitled Listing'}
-                          </h2>
+                          {/* Price + Dollar Equivalent */}
+                          <div className="text-white/90 mb-1">
+                            {/* Primary Price */}
+                            {unit === 'BTC' ? (
+                              <div>
+                                <span className="text-lg font-semibold">
+                                  {(Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000).toFixed(8)} BTC
+                                </span>
+                                {/* Dollar equivalent */}
+                                <div className="text-sm text-white/80">
+                                  {formatCADAmount((Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000) * (btcCad || 0))}
+                                </div>
+                              </div>
+                            ) : (
+                              <div>
+                                <span className="text-lg font-semibold">
+                                  {chats.find(c => c.id === selectedChat)?.listing_price?.toLocaleString() || 0} sats
+                                </span>
+                                {/* Dollar equivalent */}
+                                <div className="text-sm text-white/80">
+                                  {formatCADAmount((Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000) * (btcCad || 0))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
                         
-                        {/* Price + Dollar Equivalent */}
-                        <div className="text-white/90 mb-1">
-                          {/* Primary Price */}
-                          {unit === 'BTC' ? (
-                            <div>
-                              <span className="text-lg font-semibold">
-                                {(Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000).toFixed(8)} BTC
-                              </span>
-                              {/* Dollar equivalent */}
-                              <div className="text-sm text-white/80">
-                                {formatCADAmount((Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000) * (btcCad || 0))}
-                              </div>
-                            </div>
-                          ) : (
-                            <div>
-                              <span className="text-lg font-semibold">
-                                {chats.find(c => c.id === selectedChat)?.listing_price?.toLocaleString() || 0} sats
-                              </span>
-                              {/* Dollar equivalent */}
-                              <div className="text-sm text-white/80">
-                                {formatCADAmount((Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000) * (btcCad || 0))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* Username Pill - Aligned with bottom of image */}
+                        {/* Bottom Section: Username Pill - Aligned with bottom of image */}
                         <div className="flex items-center gap-2">
                           <div 
                             className="inline-flex items-center px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50 border border-neutral-300/60 dark:border-neutral-700/50 hover:scale-105 hover:shadow-md"
@@ -828,13 +839,26 @@ export default function MessagesPage() {
                           )}
                           
                           {/* User Reputation - +x 👍 format */}
-                          <span className="text-white/80 text-xs">+{chats.find(c => c.id === selectedChat)?.seller_score || chats.find(c => c.id === selectedChat)?.seller_rating || 0} 👍</span>
+                          <span className="text-white/80 text-xs">
+                            +{(() => {
+                              const selectedChatData = chats.find(c => c.id === selectedChat);
+                              const score = selectedChatData?.seller_score || selectedChatData?.seller_rating || 0;
+                              console.log('🔍 Reputation debug:', {
+                                chatId: selectedChat,
+                                other_user: selectedChatData?.other_user,
+                                seller_score: selectedChatData?.seller_score,
+                                seller_rating: selectedChatData?.seller_rating,
+                                final_score: score
+                              });
+                              return score;
+                            })()} 👍
+                          </span>
                         </div>
                       </div>
                       
                       {/* Right Side: Age + Location + View Listing Button */}
-                      <div className="flex flex-col items-end gap-2">
-                        {/* Age + Location - Right aligned with header edge */}
+                      <div className="flex flex-col justify-between h-32">
+                        {/* Top Section: Age + Location - Aligned with top of header */}
                         <div className="flex items-center gap-1">
                           {/* Posting Age - Use same logic as grid/list cards */}
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
@@ -857,7 +881,7 @@ export default function MessagesPage() {
                           </span>
                         </div>
                         
-                        {/* View Listing Button - Aligned with bottom of image */}
+                        {/* Bottom Section: View Listing Button - Aligned with bottom of image */}
                         <button
                           onClick={async () => {
                             const selectedChatData = chats.find(c => c.id === selectedChat);
