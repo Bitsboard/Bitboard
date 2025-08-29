@@ -110,16 +110,23 @@ export async function GET(req: Request) {
     console.log('🔍 Chat API: About to execute query with userId:', userId);
     console.log('🔍 Chat API: Query:', basicChatsQuery);
     
-    const chats = await db.prepare(basicChatsQuery).bind(
-      userId, 
-      userId, 
-      userId, 
-      userId
-    ).all();
-    
-    console.log('🔍 Chat API: Query executed successfully');
-    console.log('🔍 Chat API: Raw results:', chats);
-    console.log('🔍 Chat API: Found chats:', chats.results?.length || 0, 'for user ID:', userId);
+    let chats;
+    try {
+      chats = await db.prepare(basicChatsQuery).bind(
+        userId, 
+        userId, 
+        userId, 
+        userId
+      ).all();
+      
+      console.log('🔍 Chat API: Query executed successfully');
+      console.log('🔍 Chat API: Raw results:', chats);
+      console.log('🔍 Chat API: Found chats:', chats.results?.length || 0, 'for user ID:', userId);
+    } catch (dbError) {
+      const error = dbError as Error;
+      console.error('🔍 Chat API: Database query failed:', dbError);
+      throw new Error(`Database query failed: ${error.message}`);
+    }
     
     // Now fetch latest messages and unread counts for each chat
     const chatsWithMessages = await Promise.all((chats.results || []).map(async (chat: any) => {
@@ -159,7 +166,17 @@ export async function GET(req: Request) {
       totalChats: chatsWithMessages.length
     });
   } catch (error) {
-    console.error('Error fetching chats:', error);
-    return NextResponse.json({ error: 'server_error' }, { status: 500 });
+    const errorObj = error as Error;
+    console.error('🔍 Chat API: Error fetching chats:', error);
+    console.error('🔍 Chat API: Error details:', {
+      message: errorObj.message,
+      stack: errorObj.stack,
+      name: errorObj.name
+    });
+    return NextResponse.json({ 
+      error: 'server_error', 
+      details: errorObj.message,
+      timestamp: new Date().toISOString()
+    }, { status: 500 });
   }
 }
