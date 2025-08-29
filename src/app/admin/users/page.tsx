@@ -320,46 +320,52 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-950 dark:to-neutral-900">
       {/* Header */}
-      <div className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm border-b border-neutral-200/50 dark:border-neutral-700/50">
+        <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-semibold text-neutral-900 dark:text-white">Admin - User Management</h1>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Comprehensive user oversight with listings and chat analytics</p>
+              <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">User Management</h1>
+              <p className="text-lg text-neutral-600 dark:text-neutral-400 mt-2">Comprehensive user oversight with listings and chat analytics</p>
             </div>
             <button
               onClick={() => router.push('/admin')}
-              className="px-3 py-1.5 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors text-sm"
+              className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all duration-200 hover:scale-105 shadow-lg"
             >
-              Back to Admin
+              ← Back to Admin
             </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Enhanced Filters and Search */}
-        <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm rounded-2xl border border-neutral-200/50 dark:border-neutral-700/50 p-6 mb-8 shadow-xl">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
             {/* Search */}
             <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
+                Search Users
+              </label>
               <input
                 type="text"
                 placeholder="Search usernames or emails..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-xl bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm shadow-sm"
               />
             </div>
 
             {/* Status Filter */}
             <div>
+              <label className="block text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
+                Status
+              </label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-xl bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm shadow-sm"
               >
                 <option value="all">All Users</option>
                 <option value="verified">Verified</option>
@@ -371,6 +377,9 @@ export default function AdminUsersPage() {
 
             {/* Sort Options */}
             <div>
+              <label className="block text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
+                Sort By
+              </label>
               <select
                 value={`${sortBy}-${sortOrder}`}
                 onChange={(e) => {
@@ -378,7 +387,7 @@ export default function AdminUsersPage() {
                   setSortBy(newSortBy as any);
                   setSortOrder(newSortOrder as any);
                 }}
-                className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-xl bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm shadow-sm"
               >
                 <option value="createdAt-desc">Newest First</option>
                 <option value="createdAt-asc">Oldest First</option>
@@ -394,118 +403,121 @@ export default function AdminUsersPage() {
         </div>
 
         {/* Enhanced Users Table */}
-        <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 overflow-hidden">
+        <div className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm rounded-2xl border border-neutral-200/50 dark:border-neutral-700/50 overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-neutral-50 dark:bg-neutral-700">
+              <thead className="bg-gradient-to-r from-orange-500 to-amber-500">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">
                     User Profile
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">
                     Status & Activity
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">
                     Platform Stats
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+              <tbody className="divide-y divide-neutral-200/50 dark:divide-neutral-700/50">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={4} className="px-4 py-8 text-center">
-                      <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                      <p className="text-neutral-600 dark:text-neutral-400">Loading users...</p>
+                    <td colSpan={4} className="px-6 py-12 text-center">
+                      <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                      <p className="text-neutral-600 dark:text-neutral-400 text-lg">Loading users...</p>
                     </td>
                   </tr>
                 ) : paginatedUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-4 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                    <td colSpan={4} className="px-6 py-12 text-center text-neutral-500 dark:text-neutral-400 text-lg">
                       No users found matching your criteria
                     </td>
                   </tr>
                 ) : (
                   paginatedUsers.map((user) => (
                     <React.Fragment key={user.id}>
-                      <tr className="hover:bg-neutral-50 dark:hover:bg-neutral-700">
-                        <td className="px-4 py-3">
-                          <div>
-                            <h4 className="font-medium text-neutral-900 dark:text-white text-sm">
-                              {user.username}
-                            </h4>
-                            <p className="text-xs text-neutral-600 dark:text-neutral-400">
-                              {user.email}
-                            </p>
-                            <p className="text-xs text-neutral-500 dark:text-neutral-500">
-                              ID: {user.id}
-                            </p>
-                            <p className="text-xs text-neutral-500 dark:text-neutral-500">
-                              Joined: {formatDate(user.createdAt)}
-                            </p>
+                      <tr className="hover:bg-neutral-50/50 dark:hover:bg-neutral-700/50 transition-colors duration-200">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-amber-500 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                              {user.username.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <h4 className="font-bold text-neutral-900 dark:text-white text-lg">
+                                {user.username}
+                              </h4>
+                              <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                                {user.email}
+                              </p>
+                              <p className="text-xs text-neutral-500 dark:text-neutral-500 font-mono">
+                                ID: {user.id.slice(0, 8)}...
+                              </p>
+                              <p className="text-xs text-neutral-500 dark:text-neutral-500">
+                                Joined: {formatDate(user.createdAt)}
+                              </p>
+                            </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3">
-                          <div className="space-y-1">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user)}`}>
+                        <td className="px-6 py-4">
+                          <div className="space-y-2">
+                            <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold ${getStatusColor(user)}`}>
                               {getStatusText(user)}
                             </span>
                             {user.isBanned && user.banReason && (
-                              <p className="text-xs text-red-600 dark:text-red-400">
-                                {user.banReason}
+                              <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-lg">
+                                🚫 {user.banReason}
                               </p>
                             )}
                             {user.lastLoginAt && (
-                              <p className="text-xs text-neutral-500 dark:text-neutral-500">
-                                Last login: {formatRelativeTime(user.lastLoginAt)}
+                              <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                                🔐 Last login: {formatRelativeTime(user.lastLoginAt)}
                               </p>
                             )}
                             {user.lastActivityAt && (
-                              <p className="text-xs text-neutral-500 dark:text-neutral-500">
-                                Last activity: {formatRelativeTime(user.lastActivityAt)}
+                              <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                                📍 Last activity: {formatRelativeTime(user.lastActivityAt)}
                               </p>
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-3">
-                          <div className="space-y-1">
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="text-neutral-600 dark:text-neutral-400">Listings:</span>
-                              <span className="font-medium">{user.listingsCount}</span>
+                        <td className="px-6 py-4">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-neutral-50 dark:bg-neutral-700/50 rounded-lg p-3 text-center">
+                              <div className="text-2xl font-bold text-neutral-900 dark:text-white">{user.listingsCount}</div>
+                              <div className="text-xs text-neutral-600 dark:text-neutral-400">Listings</div>
                             </div>
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="text-neutral-600 dark:text-neutral-400">Chats:</span>
-                              <span className="font-medium text-orange-600">{user.chatsCount}</span>
+                            <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 text-center">
+                              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">{user.chatsCount}</div>
+                              <div className="text-xs text-neutral-600 dark:text-neutral-400">Chats</div>
                             </div>
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="text-neutral-600 dark:text-neutral-400">Messages:</span>
-                              <span className="font-medium">{user.messagesCount}</span>
+                            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 text-center">
+                              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{user.messagesCount}</div>
+                              <div className="text-xs text-neutral-600 dark:text-neutral-400">Messages</div>
                             </div>
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="text-neutral-600 dark:text-neutral-400">Rating:</span>
-                              <span className="font-medium">⭐ {user.rating.toFixed(1)}</span>
+                            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 text-center">
+                              <div className="text-2xl font-bold text-green-600 dark:text-green-400">⭐ {user.rating.toFixed(1)}</div>
+                              <div className="text-xs text-neutral-600 dark:text-neutral-400">Rating</div>
                             </div>
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="text-neutral-600 dark:text-neutral-400">Deals:</span>
-                              <span className="font-medium">{user.deals}</span>
-                            </div>
-                            {user.totalListingsValue > 0 && (
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-neutral-600 dark:text-neutral-400">Total Value:</span>
-                                <span className="font-medium text-green-600">{formatPrice(user.totalListingsValue)}</span>
-                              </div>
-                            )}
                           </div>
+                          {user.totalListingsValue > 0 && (
+                            <div className="mt-3 text-center">
+                              <div className="text-lg font-bold text-green-600 dark:text-green-400">
+                                {formatPrice(user.totalListingsValue)}
+                              </div>
+                              <div className="text-xs text-neutral-600 dark:text-neutral-400">Total Value</div>
+                            </div>
+                          )}
                         </td>
-                        <td className="px-4 py-3">
-                          <div className="flex flex-col gap-2">
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col gap-3">
                             <button
                               onClick={() => toggleUserExpansion(user.id)}
-                              className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200 transition-colors"
+                              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-200 hover:scale-105 shadow-md"
                             >
-                              {expandedUser === user.id ? 'Hide' : 'View'} Details
+                              {expandedUser === user.id ? '👁️ Hide' : '🔍 View'} Details
                             </button>
                             <button
                               onClick={() => {
@@ -513,9 +525,9 @@ export default function AdminUsersPage() {
                                 setShowVerifyModal(true);
                               }}
                               disabled={user.isVerified}
-                              className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                              className="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-sm font-semibold hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 shadow-md"
                             >
-                              Verify
+                              ✅ Verify
                             </button>
                             <button
                               onClick={() => {
@@ -523,9 +535,9 @@ export default function AdminUsersPage() {
                                 setShowBanModal(true);
                               }}
                               disabled={user.isBanned}
-                              className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                              className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg text-sm font-semibold hover:from-red-600 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 shadow-md"
                             >
-                              Ban
+                              🚫 Ban
                             </button>
                           </div>
                         </td>
@@ -534,29 +546,29 @@ export default function AdminUsersPage() {
                       {/* Expanded User Information */}
                       {expandedUser === user.id && (
                         <tr>
-                          <td colSpan={4} className="px-4 py-3 bg-neutral-50 dark:bg-neutral-800">
-                            <div className="border-l-4 border-orange-500 pl-4">
-                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <td colSpan={4} className="px-6 py-6 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20">
+                            <div className="border-l-4 border-orange-500 pl-6">
+                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 {/* User Listings */}
                                 <div>
-                                  <h5 className="font-medium text-neutral-900 dark:text-white text-sm mb-3">
-                                    User Listings ({user.listingsCount})
+                                  <h5 className="font-bold text-neutral-900 dark:text-white text-lg mb-4 flex items-center gap-2">
+                                    📋 User Listings ({user.listingsCount})
                                   </h5>
                                   
                                   {loadingUserData === user.id ? (
-                                    <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400">
-                                      <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                                    <div className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
+                                      <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
                                       Loading listings...
                                     </div>
                                   ) : userListings[user.id]?.length > 0 ? (
-                                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                                    <div className="space-y-3 max-h-64 overflow-y-auto custom-scrollbar">
                                       {userListings[user.id].map((listing) => (
-                                        <div key={listing.id} className="flex items-center justify-between p-2 bg-white dark:bg-neutral-700 rounded border">
+                                        <div key={listing.id} className="flex items-center justify-between p-4 bg-white dark:bg-neutral-700 rounded-xl border border-neutral-200 dark:border-neutral-600 shadow-sm">
                                           <div className="flex-1">
-                                            <p className="text-xs font-medium text-neutral-900 dark:text-white">
+                                            <p className="text-sm font-semibold text-neutral-900 dark:text-white">
                                               {listing.title}
                                             </p>
-                                            <p className="text-xs text-neutral-600 dark:text-neutral-400">
+                                            <p className="text-sm text-neutral-600 dark:text-neutral-400">
                                               {formatPrice(listing.priceSat)} • {listing.status} • {listing.views} views
                                             </p>
                                             <p className="text-xs text-neutral-500 dark:text-neutral-500">
@@ -566,16 +578,16 @@ export default function AdminUsersPage() {
                                           <div className="flex items-center gap-2">
                                             <a
                                               href={`/admin/listings?listingId=${listing.id}`}
-                                              className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200 transition-colors"
+                                              className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-xs font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-200 hover:scale-105 shadow-md"
                                             >
-                                              View Listing
+                                              🔗 View Listing
                                             </a>
                                           </div>
                                         </div>
                                       ))}
                                     </div>
                                   ) : (
-                                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                                    <p className="text-sm text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-700 p-4 rounded-xl border border-neutral-200 dark:border-neutral-600">
                                       No listings found for this user.
                                     </p>
                                   )}
@@ -583,27 +595,27 @@ export default function AdminUsersPage() {
 
                                 {/* User Chats */}
                                 <div>
-                                  <h5 className="font-medium text-neutral-900 dark:text-white text-sm mb-3">
-                                    User Chats ({user.chatsCount})
+                                  <h5 className="font-bold text-neutral-900 dark:text-white text-lg mb-4 flex items-center gap-2">
+                                    💬 User Chats ({user.chatsCount})
                                   </h5>
                                   
                                   {loadingUserData === user.id ? (
-                                    <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400">
-                                      <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                                    <div className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
+                                      <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
                                       Loading chats...
                                     </div>
                                   ) : userChats[user.id]?.length > 0 ? (
-                                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                                    <div className="space-y-3 max-h-64 overflow-y-auto custom-scrollbar">
                                       {userChats[user.id].map((chat) => (
-                                        <div key={chat.id} className="flex items-center justify-between p-2 bg-white dark:bg-neutral-700 rounded border">
+                                        <div key={chat.id} className="flex items-center justify-between p-4 bg-white dark:bg-neutral-700 rounded-xl border border-neutral-200 dark:border-neutral-600 shadow-sm">
                                           <div className="flex-1">
-                                            <p className="text-xs font-medium text-neutral-900 dark:text-white">
+                                            <p className="text-sm font-semibold text-neutral-900 dark:text-white">
                                               {chat.listingTitle}
                                             </p>
-                                            <p className="text-xs text-neutral-600 dark:text-neutral-400">
+                                            <p className="text-sm text-neutral-600 dark:text-neutral-400">
                                               With: {chat.otherUsername}
                                             </p>
-                                            <p className="text-xs text-neutral-500 dark:text-neutral-500">
+                                            <p className="text-sm text-neutral-500 dark:text-neutral-500">
                                               {chat.messageCount} messages • {chat.unreadCount} unread
                                             </p>
                                             <p className="text-xs text-neutral-500 dark:text-neutral-500">
@@ -613,16 +625,16 @@ export default function AdminUsersPage() {
                                           <div className="flex items-center gap-2">
                                             <a
                                               href={`/admin/chats?chatId=${chat.id}`}
-                                              className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs hover:bg-orange-200 transition-colors"
+                                              className="px-3 py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg text-xs font-semibold hover:from-orange-600 hover:to-orange-700 transition-all duration-200 hover:scale-105 shadow-md"
                                             >
-                                              View Chat
+                                              🔗 View Chat
                                             </a>
                                           </div>
                                         </div>
                                       ))}
                                     </div>
                                   ) : (
-                                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                                    <p className="text-sm text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-700 p-4 rounded-xl border border-neutral-200 dark:border-neutral-600">
                                       No chat conversations found for this user.
                                     </p>
                                   )}
@@ -641,42 +653,42 @@ export default function AdminUsersPage() {
 
           {/* Enhanced Pagination */}
           {totalPages > 1 && (
-            <div className="flex justify-between items-center py-4 px-4 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
+            <div className="flex justify-between items-center py-6 px-6 border-t border-neutral-200/50 dark:border-neutral-700/50 bg-gradient-to-r from-neutral-50 to-neutral-100 dark:from-neutral-700 dark:to-neutral-800">
               <div className="text-sm text-neutral-600 dark:text-neutral-400">
                 Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredUsers.length)} of {filteredUsers.length} users
               </div>
               
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <button
                   onClick={() => setCurrentPage(1)}
                   disabled={currentPage === 1}
-                  className="px-2 py-1 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-2 rounded-lg text-sm font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                 >
                   First
                 </button>
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1 rounded text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 rounded-lg text-sm font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                 >
                   Previous
                 </button>
                 
-                <span className="px-3 py-1 text-sm font-medium text-neutral-900 dark:text-white">
+                <span className="px-4 py-2 text-sm font-bold text-neutral-900 dark:text-white bg-white dark:bg-neutral-700 rounded-lg border border-neutral-200 dark:border-neutral-600">
                   {currentPage} of {totalPages}
                 </span>
                 
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1 rounded text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 rounded-lg text-sm font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                 >
                   Next
                 </button>
                 <button
                   onClick={() => setCurrentPage(totalPages)}
                   disabled={currentPage === totalPages}
-                  className="px-2 py-1 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-2 rounded-lg text-sm font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                 >
                   Last
                 </button>
@@ -688,32 +700,32 @@ export default function AdminUsersPage() {
 
       {/* Ban User Modal */}
       {showBanModal && selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">
-              Ban User: {selectedUser.username}
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-neutral-800 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-4">
+              🚫 Ban User: {selectedUser.username}
             </h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                <label className="block text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
                   Ban Reason
                 </label>
                 <textarea
                   value={banReason}
                   onChange={(e) => setBanReason(e.target.value)}
                   placeholder="Enter reason for banning this user..."
-                  className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                  className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-xl bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
                   rows={3}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                  Ban Duration (days)
+                <label className="block text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
+                  Ban Duration
                 </label>
                 <select
                   value={banDuration}
                   onChange={(e) => setBanDuration(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                  className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-xl bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
                 >
                   <option value={1}>1 day</option>
                   <option value={7}>7 days</option>
@@ -724,19 +736,19 @@ export default function AdminUsersPage() {
                 </select>
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-4 mt-8">
               <button
                 onClick={() => setShowBanModal(false)}
-                className="flex-1 px-4 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors"
+                className="flex-1 px-6 py-3 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-xl font-semibold hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-all duration-200"
               >
                 Cancel
               </button>
               <button
                 onClick={() => banUser(selectedUser.id, banReason, banDuration)}
                 disabled={!banReason.trim() || isProcessing}
-                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 transition-colors"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold hover:from-red-600 hover:to-red-700 disabled:opacity-50 transition-all duration-200 hover:scale-105 shadow-lg"
               >
-                {isProcessing ? 'Banning...' : 'Ban User'}
+                {isProcessing ? '🚫 Banning...' : '🚫 Ban User'}
               </button>
             </div>
           </div>
@@ -745,27 +757,27 @@ export default function AdminUsersPage() {
 
       {/* Verify User Modal */}
       {showVerifyModal && selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">
-              Verify User: {selectedUser.username}
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-neutral-800 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-4">
+              ✅ Verify User: {selectedUser.username}
             </h3>
-            <p className="text-neutral-600 dark:text-neutral-400 mb-6">
+            <p className="text-neutral-600 dark:text-neutral-400 mb-8 text-lg">
               Are you sure you want to verify this user? This will grant them verified status on the platform.
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               <button
                 onClick={() => setShowVerifyModal(false)}
-                className="flex-1 px-4 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors"
+                className="flex-1 px-6 py-3 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-xl font-semibold hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-all duration-200"
               >
                 Cancel
               </button>
               <button
                 onClick={() => verifyUser(selectedUser.id)}
                 disabled={isProcessing}
-                className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 transition-colors"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold hover:from-green-600 hover:to-green-700 disabled:opacity-50 transition-all duration-200 hover:scale-105 shadow-lg"
               >
-                {isProcessing ? 'Verifying...' : 'Verify User'}
+                {isProcessing ? '✅ Verifying...' : '✅ Verify User'}
               </button>
             </div>
           </div>
