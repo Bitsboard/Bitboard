@@ -591,31 +591,11 @@ export default function MessagesPage() {
                               </div>
                             </div>
                             
-                            {/* Content - Condensed Layout */}
+                            {/* Content - New Layout */}
                             <div className="flex-1 min-w-0">
-                              {/* Title */}
-                              <h3 className={`font-semibold text-sm truncate mb-1 ${
-                                selectedChat === item.id ? 'text-white' : 'text-neutral-900 dark:text-white'
-                              }`}>
-                                {item.listing_title}
-                              </h3>
-                              
-                              {/* Last Message and Age - Side by Side */}
-                              <div className="flex items-center justify-between gap-2">
-                                <p className={`text-xs truncate flex-1 ${
-                                  selectedChat === item.id ? 'text-white/80' : 'text-neutral-600 dark:text-neutral-300'
-                                }`}>
-                                  {item.last_message}
-                                </p>
-                                <span className={`text-xs flex-shrink-0 ${
-                                  selectedChat === item.id ? 'text-white/70' : 'text-neutral-500 dark:text-neutral-400'
-                                }`}>
-                                  {formatTimestamp(item.last_message_time)}
-                                </span>
-                              </div>
-                              
-                              {/* Bottom Row: Seller and Unread Count */}
-                              <div className="flex items-center justify-between mt-1">
+                              {/* Top Row: Username Pill and Selling/Looking For Pill */}
+                              <div className="flex items-center gap-2 mb-1">
+                                {/* Username Pill */}
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-all duration-200 ${
                                   selectedChat === item.id 
                                     ? 'bg-white/20 text-white border border-white/30'
@@ -624,16 +604,51 @@ export default function MessagesPage() {
                                   {item.other_user}
                                 </span>
                                 
-                                                             {item.unread_count > 0 && (
-                                   <span className={`text-xs px-2 py-0.5 rounded-full min-w-[18px] text-center font-medium ${
-                                     selectedChat === item.id 
-                                       ? 'bg-white/20 text-white'
-                                       : 'bg-red-500 text-white'
-                                   }`}>
-                                     {item.unread_count}
-                                   </span>
-                                 )}
+                                {/* Selling/Looking For Pill */}
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold text-white ${
+                                  item.listing_type === 'want' 
+                                    ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500' 
+                                    : 'bg-gradient-to-r from-emerald-500 to-teal-500'
+                                }`}>
+                                  {item.listing_type === 'want' ? 'Looking For' : 'Selling'}
+                                </span>
                               </div>
+                              
+                              {/* Listing Title */}
+                              <h3 className={`font-semibold text-sm truncate mb-1 ${
+                                selectedChat === item.id ? 'text-white' : 'text-neutral-900 dark:text-white'
+                              }`}>
+                                {item.listing_title}
+                              </h3>
+                              
+                              {/* Last Message */}
+                              <p className={`text-xs truncate mb-1 ${
+                                selectedChat === item.id ? 'text-white/80' : 'text-neutral-600 dark:text-neutral-300'
+                              }`}>
+                                {item.last_message}
+                              </p>
+                              
+                              {/* Bottom Row: Unread Count */}
+                              {item.unread_count > 0 && (
+                                <div className="flex justify-end">
+                                  <span className={`text-xs px-2 py-0.5 rounded-full min-w-[18px] text-center font-medium ${
+                                    selectedChat === item.id 
+                                      ? 'bg-white/20 text-white'
+                                      : 'bg-red-500 text-white'
+                                  }`}>
+                                    {item.unread_count}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Age of Most Recent Message - Top Right */}
+                            <div className="flex-shrink-0">
+                              <span className={`text-xs ${
+                                selectedChat === item.id ? 'text-white/70' : 'text-neutral-500 dark:text-neutral-400'
+                              }`}>
+                                {formatTimestamp(item.last_message_time)}
+                              </span>
                             </div>
                           </div>
                         )}
@@ -674,7 +689,7 @@ export default function MessagesPage() {
                         ) : (
                           <div className="w-full h-full bg-white/20 flex items-center justify-center">
                             <svg className="w-6 h-6 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 00-2-2V6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 00-2-2V6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                           </div>
                         )}
