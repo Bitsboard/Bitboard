@@ -17,6 +17,7 @@ interface Chat {
   listing_price?: number;
   listing_created_at?: number;
   seller_verified?: boolean;
+  listing_type?: 'sell' | 'want';
 }
 
 interface SystemNotification {
@@ -96,7 +97,8 @@ export default function MessagesPage() {
           listing_image: chat.listing_image,
           listing_price: chat.listing_price || chat.price_sats,
           listing_created_at: chat.listing_created_at || chat.created_at,
-          seller_verified: chat.seller_verified || false
+          seller_verified: chat.seller_verified || false,
+          listing_type: chat.listing_type || 'sell'
         }));
         setChats(transformedChats);
         
@@ -515,7 +517,7 @@ export default function MessagesPage() {
               <div className="p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 bg-gradient-to-r from-orange-500 to-orange-600 flex-shrink-0 rounded-tl-3xl">
                 <div className="flex items-start gap-4">
                   {/* Listing image */}
-                  <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-white/10">
+                  <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-white/10">
                     {chats.find(c => c.id === selectedChat)?.listing_image ? (
                       <img 
                         src={chats.find(c => c.id === selectedChat)?.listing_image} 
@@ -533,9 +535,16 @@ export default function MessagesPage() {
                   
                   {/* Listing details */}
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-lg font-bold text-white truncate">
-                      {chats.find(c => c.id === selectedChat)?.listing_title}
-                    </h2>
+                    <div className="flex items-center gap-3 mb-2">
+                      {/* Selling/Looking for pill */}
+                      <span className="flex-shrink-0 rounded-full bg-gradient-to-r from-orange-400 to-pink-500 px-3 py-1 text-xs font-semibold text-white">
+                        {chats.find(c => c.id === selectedChat)?.listing_type === 'want' ? 'Looking For' : 'Selling'}
+                      </span>
+                      {/* Listing title */}
+                      <h2 className="text-lg font-bold text-white truncate">
+                        {chats.find(c => c.id === selectedChat)?.listing_title}
+                      </h2>
+                    </div>
                     
                     {/* First row: Basic info */}
                     <div className="flex items-center gap-3 mt-1 text-orange-100 text-sm">
