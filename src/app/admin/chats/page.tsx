@@ -31,18 +31,20 @@ interface Chat {
 
 export default function AdminChatsPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const [chats, setChats] = useState<Chat[]>([]);
-  const [chatsLoading, setChatsLoading] = useState(false);
-  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
-  const [chatMessages, setChatMessages] = useState<any[]>([]);
-  const [messagesLoading, setMessagesLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'recent'>('all');
   const [sortBy, setSortBy] = useState<'createdAt' | 'lastMessage' | 'messageCount' | 'listingPrice'>('lastMessage');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage] = useState(100);
+  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
+  
   const router = useRouter();
   const lang = useLang();
 
@@ -51,42 +53,28 @@ export default function AdminChatsPage() {
     if (savedAuth === 'true') {
       setIsAuthenticated(true);
       loadChats();
+    } else {
+      router.push('/admin');
     }
-  }, []);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    try {
-      if (password === "admin123") {
-        setIsAuthenticated(true);
-        setPassword("");
-        localStorage.setItem('admin_authenticated', 'true');
-        loadChats();
-      } else {
-        setError("Incorrect password");
-      }
-    } catch (error) {
-      setError("Login failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [router]);
 
   const loadChats = async () => {
     try {
-      setChatsLoading(true);
-      const response = await fetch('/api/admin/chats');
+      setIsLoading(true);
+      console.log('🔍 Loading chats with limit:', itemsPerPage);
+      const response = await fetch(`/api/admin/chats?limit=${itemsPerPage}`);
       if (response.ok) {
         const data = await response.json() as { chats: Chat[] };
+        console.log('🔍 Chats API response:', data);
         setChats(data.chats || []);
+        setTotalPages(Math.ceil((data.chats?.length || 0) / itemsPerPage));
+      } else {
+        console.error('🔍 Chats API error:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Error loading chats:', error);
     } finally {
-      setChatsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -105,7 +93,13 @@ export default function AdminChatsPage() {
     }
   };
 
-  const formatDate = (timestamp: number) => new Date(timestamp * 1000).toLocaleString();
+  const openChatModal = (chat: Chat) => {
+    setSelectedChat(chat);
+    setShowChatModal(true);
+    loadChatMessages(chat.id);
+  };
+
+  const formatDate = (timestamp: number) => new Date(timestamp * 1000).toLocaleDateString();
   const formatSats = (sats: number) => new Intl.NumberFormat().format(sats);
   const formatRelativeTime = (timestamp: number) => {
     const now = Date.now();
@@ -152,48 +146,26 @@ export default function AdminChatsPage() {
     return sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
   });
 
+  const paginatedChats = sortedChats.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field as any);
+      setSortOrder('asc');
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">Admin Access</h1>
-            <p className="text-neutral-600 dark:text-neutral-400">Enter password to access chat management</p>
-          </div>
-          
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
-                className="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-400"
-                disabled={loading}
-              />
-            </div>
-            
-            {error && (
-              <div className="text-red-500 text-sm text-center">{error}</div>
-            )}
-            
-            <button
-              type="submit"
-              disabled={!password.trim() || loading}
-              className="w-full py-3 rounded-xl font-semibold transition-all duration-200 bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 disabled:bg-neutral-300 disabled:text-neutral-500 disabled:cursor-not-allowed"
-            >
-              {loading ? "Checking..." : "Access Admin"}
-            </button>
-          </form>
-          
-          <div className="mt-6 text-center">
-            <button
-              onClick={() => router.push('/admin')}
-              className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200 transition-colors"
-            >
-              ← Back to Admin Dashboard
-            </button>
-          </div>
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-neutral-600 dark:text-neutral-400">Checking authentication...</p>
         </div>
       </div>
     );
@@ -208,7 +180,10 @@ export default function AdminChatsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-lg font-semibold text-neutral-900 dark:text-white">Chat Management</h1>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400">Chats: {chats.length} | Messages: {chats.reduce((sum, chat) => sum + chat.messageCount, 0)} | Active Today: {chats.filter(chat => chat.last_message_at > Math.floor(Date.now() / 1000) - 86400).length}</p>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                  Total: {chats.length} | Messages: {chats.reduce((sum, chat) => sum + chat.messageCount, 0)} | 
+                  Active Today: {chats.filter(chat => chat.last_message_at > Math.floor(Date.now() / 1000) - 86400).length}
+                </p>
               </div>
               <button
                 onClick={() => router.push('/admin')}
@@ -240,203 +215,309 @@ export default function AdminChatsPage() {
                 <option value="active">Active Today</option>
                 <option value="recent">Recent Week</option>
               </select>
-              <select
-                value={`${sortBy}-${sortOrder}`}
-                onChange={(e) => {
-                  const [newSortBy, newSortOrder] = e.target.value.split('-');
-                  setSortBy(newSortBy as any);
-                  setSortOrder(newSortOrder as any);
-                }}
-                className="px-3 py-1.5 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-sm"
-              >
-                <option value="lastMessage-desc">Latest Message</option>
-                <option value="lastMessage-asc">Oldest Message</option>
-                <option value="createdAt-desc">Newest Chat</option>
-                <option value="messageCount-desc">Most Messages</option>
-                <option value="listingPrice-desc">Highest Price</option>
-              </select>
               <button
                 onClick={loadChats}
-                disabled={chatsLoading}
+                disabled={isLoading}
                 className="px-3 py-1.5 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 disabled:opacity-50"
               >
-                {chatsLoading ? 'Refreshing...' : 'Refresh'}
+                {isLoading ? 'Refreshing...' : 'Refresh'}
               </button>
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Chat List */}
-            <div className="lg:col-span-2">
-              <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden">
-                <div className="p-3 border-b border-neutral-200 dark:border-neutral-700">
-                  <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">All Chat Conversations</h2>
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400">Click on a chat to view details and messages</p>
+          {/* Enhanced Chats Table with Individual Stat Columns */}
+          <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden">
+            {/* Table Summary */}
+            <div className="px-4 py-3 bg-neutral-50 dark:bg-neutral-700 border-b border-neutral-200 dark:border-neutral-600">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-neutral-600 dark:text-neutral-400">
+                  <span className="font-medium">Total Chats:</span> {chats.length} of {Math.ceil((chats.length / itemsPerPage) * itemsPerPage)} 
+                  {totalPages > 1 && ` • Page ${currentPage} of ${totalPages}`}
                 </div>
-                
-                {chatsLoading ? (
-                  <div className="p-8 text-center">
-                    <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                    <p className="text-neutral-600 dark:text-neutral-400">Loading chats...</p>
-                  </div>
-                ) : sortedChats.length === 0 ? (
-                  <div className="p-8 text-center">
-                    <p className="text-neutral-500 dark:text-neutral-400">No chats found</p>
-                  </div>
-                ) : (
-                  <div className="divide-y divide-neutral-200 dark:divide-neutral-800">
-                    {sortedChats.map((chat) => (
-                      <div
-                        key={chat.id}
-                        onClick={() => {
-                          setSelectedChat(chat);
-                          loadChatMessages(chat.id);
-                        }}
-                        className={cn(
-                          "p-4 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-700",
-                          selectedChat?.id === chat.id && "bg-orange-50 dark:bg-orange-900/20 border-r-4 border-orange-500"
-                        )}
-                      >
-                        {/* Chat Header */}
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-neutral-900 dark:text-white mb-1">{chat.listing_title}</h3>
-                            <div className="text-sm font-bold text-green-600 dark:text-green-400">{formatSats(chat.listing_price)} sats</div>
-                          </div>
-                          <div className="text-right text-xs text-neutral-500 space-y-1">
-                            <div>Created: {formatDate(chat.created_at)}</div>
-                            <div>Last: {formatRelativeTime(chat.last_message_at)}</div>
-                          </div>
-                        </div>
-
-                        {/* User Info */}
-                        <div className="flex items-center gap-4 mb-3 text-sm">
-                          <div className="flex items-center gap-2">
-                            <span className="text-blue-600 dark:text-blue-400 font-medium">Buyer:</span>
-                            <span>{chat.buyer_username || chat.buyer_id.slice(0, 8)}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-green-600 dark:text-green-400 font-medium">Seller:</span>
-                            <span>{chat.seller_username || chat.seller_id.slice(0, 8)}</span>
-                          </div>
-                        </div>
-
-                        {/* Latest Message Preview */}
-                        {chat.latestMessage && (
-                          <div className="bg-neutral-50 dark:bg-neutral-800 rounded p-2 border border-neutral-200 dark:border-neutral-600">
-                            <div className="text-sm text-neutral-700 dark:text-neutral-300 mb-1">
-                              <span className="font-medium">
-                                {chat.latestMessage.from_id === chat.buyer_id ? 'Buyer' : 'Seller'}:
-                              </span>
-                            </div>
-                            <div className="text-sm text-neutral-600 dark:text-neutral-400 line-clamp-2 mb-1">
-                              {chat.latestMessage.text}
-                            </div>
-                            <div className="flex items-center justify-between text-xs text-neutral-500">
-                              <span>{chat.messageCount} messages</span>
-                              <span>{formatRelativeTime(chat.latestMessage.created_at)}</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div className="text-xs text-neutral-500 dark:text-neutral-500">
+                  Showing {itemsPerPage} chats per page
+                </div>
               </div>
             </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-neutral-50 dark:bg-neutral-700">
+                  <tr>
+                    <th 
+                      className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                      onClick={() => handleSort('createdAt')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Created
+                        {sortBy === 'createdAt' && (
+                          <span className="text-orange-500">
+                            {sortOrder === 'asc' ? '↑' : '↓'}
+                          </span>
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Listing</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Users</th>
+                    <th 
+                      className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                      onClick={() => handleSort('listingPrice')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Price
+                        {sortBy === 'listingPrice' && (
+                          <span className="text-orange-500">
+                            {sortOrder === 'asc' ? '↑' : '↓'}
+                          </span>
+                        )}
+                      </div>
+                    </th>
+                    <th 
+                      className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                      onClick={() => handleSort('messageCount')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Messages
+                        {sortBy === 'messageCount' && (
+                          <span className="text-orange-500">
+                            {sortOrder === 'asc' ? '↑' : '↓'}
+                          </span>
+                        )}
+                      </div>
+                    </th>
+                    <th 
+                      className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                      onClick={() => handleSort('lastMessage')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Last Activity
+                        {sortBy === 'lastMessage' && (
+                          <span className="text-orange-500">
+                            {sortOrder === 'asc' ? '↑' : '↓'}
+                          </span>
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={7} className="px-3 py-8 text-center">
+                        <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                        <p className="text-neutral-600 dark:text-neutral-400">Loading chats...</p>
+                      </td>
+                    </tr>
+                  ) : paginatedChats.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                        No chats found
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedChats.map((chat) => (
+                      <tr key={chat.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-700">
+                        <td className="px-3 py-2">
+                          <div className="text-xs text-neutral-600 dark:text-neutral-400">
+                            {formatDate(chat.created_at)}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="max-w-xs">
+                            <div className="font-medium text-neutral-900 dark:text-white text-sm">{chat.listing_title}</div>
+                            <div className="text-xs text-neutral-500 font-mono">
+                              ID: {chat.listing_id.slice(0, 8)}...
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="space-y-1">
+                            <div className="text-sm">
+                              <span className="text-blue-600 dark:text-blue-400 font-medium">Buyer:</span>
+                              <span className="ml-1 text-neutral-900 dark:text-white">
+                                {chat.buyer_username || chat.buyer_id.slice(0, 8)}...
+                              </span>
+                            </div>
+                            <div className="text-sm">
+                              <span className="text-green-600 dark:text-green-400 font-medium">Seller:</span>
+                              <span className="ml-1 text-neutral-900 dark:text-white">
+                                {chat.seller_username || chat.seller_id.slice(0, 8)}...
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="text-sm font-bold text-green-600">
+                            {formatSats(chat.listing_price)} sats
+                          </div>
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="text-sm text-neutral-900 dark:text-white">
+                            {chat.messageCount.toLocaleString()}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="text-sm text-neutral-900 dark:text-white">
+                            {formatRelativeTime(chat.last_message_at)}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2">
+                          <button
+                            onClick={() => openChatModal(chat)}
+                            className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
+                          >
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
 
-            {/* Chat Details & Messages */}
-            <div className="lg:col-span-1">
-              {selectedChat ? (
-                <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden sticky top-8">
-                  <div className="p-4 border-b border-neutral-200 dark:border-neutral-700">
-                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">Chat Details</h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="bg-neutral-50 dark:bg-neutral-700 rounded p-2">
-                        <div className="font-medium mb-1">Listing</div>
-                        <div className="text-neutral-600">{selectedChat.listing_title}</div>
-                        <div className="text-green-600 font-bold">{formatSats(selectedChat.listing_price)} sats</div>
-                      </div>
-                      <div className="bg-blue-50 dark:bg-blue-900/20 rounded p-2">
-                        <div className="font-medium mb-1">Buyer</div>
-                        <div className="text-neutral-600">{selectedChat.buyer_username || selectedChat.buyer_id.slice(0, 8)}</div>
-                      </div>
-                      <div className="bg-green-50 dark:bg-green-900/20 rounded p-2">
-                        <div className="font-medium mb-1">Seller</div>
-                        <div className="text-neutral-600">{selectedChat.seller_username || selectedChat.seller_id.slice(0, 8)}</div>
-                      </div>
-                      <div className="bg-neutral-50 dark:bg-neutral-700 rounded p-2">
-                        <div className="font-medium mb-1">Stats</div>
-                        <div className="text-neutral-600 space-y-1">
-                          <div>Created: {formatDate(selectedChat.created_at)}</div>
-                          <div>Last Activity: {formatDate(selectedChat.last_message_at)}</div>
-                          <div>Total Messages: {selectedChat.messageCount}</div>
-                        </div>
-                      </div>
+            {/* Compact Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-between items-center py-3 px-3 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
+                <div className="text-xs text-neutral-600">
+                  Page {currentPage} of {totalPages} | {filteredChats.length} chats
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setCurrentPage(1)}
+                    disabled={currentPage === 1}
+                    className="px-2 py-1 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
+                  >
+                    First
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="px-2 py-1 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
+                  >
+                    Prev
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-2 py-1 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(totalPages)}
+                    disabled={currentPage === totalPages}
+                    className="px-2 py-1 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
+                  >
+                    Last
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Chat Modal */}
+        {showChatModal && selectedChat && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+              {/* Modal Header */}
+              <div className="p-4 border-b border-neutral-200 dark:border-neutral-700">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Chat Details</h3>
+                  <button
+                    onClick={() => setShowChatModal(false)}
+                    className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  {/* Chat Info */}
+                  <div className="space-y-3">
+                    <div className="bg-neutral-50 dark:bg-neutral-700 rounded p-3">
+                      <div className="font-medium mb-2">Listing</div>
+                      <div className="text-neutral-600 dark:text-neutral-400">{selectedChat.listing_title}</div>
+                      <div className="text-green-600 font-bold">{formatSats(selectedChat.listing_price)} sats</div>
+                    </div>
+                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded p-3">
+                      <div className="font-medium mb-2">Buyer</div>
+                      <div className="text-neutral-600 dark:text-neutral-400">{selectedChat.buyer_username || selectedChat.buyer_id.slice(0, 8)}</div>
+                    </div>
+                    <div className="bg-green-50 dark:bg-green-900/20 rounded p-3">
+                      <div className="font-medium mb-2">Seller</div>
+                      <div className="text-neutral-600 dark:text-neutral-400">{selectedChat.seller_username || selectedChat.seller_id.slice(0, 8)}</div>
                     </div>
                   </div>
 
-                  <div className="p-4">
-                    <h4 className="font-semibold text-neutral-900 dark:text-white mb-3">Messages</h4>
-                    
-                    {messagesLoading ? (
-                      <div className="text-center py-4">
-                        <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                        <div className="text-neutral-600 dark:text-neutral-400">Loading messages...</div>
+                  {/* Stats */}
+                  <div className="space-y-3">
+                    <div className="bg-neutral-50 dark:bg-neutral-700 rounded p-3">
+                      <div className="font-medium mb-2">Stats</div>
+                      <div className="text-neutral-600 dark:text-neutral-400 space-y-1">
+                        <div>Created: {formatDate(selectedChat.created_at)}</div>
+                        <div>Last Activity: {formatDate(selectedChat.last_message_at)}</div>
+                        <div>Total Messages: {selectedChat.messageCount}</div>
                       </div>
-                    ) : chatMessages.length === 0 ? (
-                      <div className="text-center py-4">
-                        <div className="text-neutral-500 dark:text-neutral-400">No messages found</div>
-                      </div>
-                    ) : (
-                      <div className="space-y-2 max-h-80 overflow-y-auto">
-                        {chatMessages.map((message) => (
-                          <div
-                            key={message.id}
-                            className={cn(
-                              "p-2 rounded border-l-4",
+                    </div>
+                  </div>
+                </div>
+
+                {/* Messages */}
+                <div>
+                  <h4 className="font-semibold text-neutral-900 dark:text-white mb-3">Messages</h4>
+                  
+                  {messagesLoading ? (
+                    <div className="text-center py-4">
+                      <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                      <div className="text-neutral-600 dark:text-neutral-400">Loading messages...</div>
+                    </div>
+                  ) : chatMessages.length === 0 ? (
+                    <div className="text-center py-4">
+                      <div className="text-neutral-500 dark:text-neutral-400">No messages found</div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-80 overflow-y-auto">
+                      {chatMessages.map((message) => (
+                        <div
+                          key={message.id}
+                          className={cn(
+                            "p-3 rounded border-l-4",
+                            message.from_id === selectedChat.buyer_id
+                              ? "bg-blue-50 dark:bg-blue-900/20 border-blue-500"
+                              : "bg-green-50 dark:bg-green-900/20 border-green-500"
+                          )}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className={cn(
+                              "text-xs font-medium px-2 py-1 rounded",
                               message.from_id === selectedChat.buyer_id
-                                ? "bg-blue-50 dark:bg-blue-900/20 border-blue-500"
-                                : "bg-green-50 dark:bg-green-900/20 border-green-500"
-                            )}
-                          >
-                            <div className="flex items-center justify-between mb-1">
-                              <span className={cn(
-                                "text-xs font-medium px-2 py-1 rounded",
-                                message.from_id === selectedChat.buyer_id
-                                  ? "bg-blue-100 text-blue-700 dark:bg-blue-800 dark:text-blue-300"
-                                  : "bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-300"
-                              )}>
-                                {message.from_id === selectedChat.buyer_id ? 'Buyer' : 'Seller'}
-                              </span>
-                              <span className="text-xs text-neutral-500">
-                                {formatRelativeTime(message.created_at)}
-                              </span>
-                            </div>
-                            <div className="text-sm text-neutral-700 dark:text-neutral-300">
-                              {message.text}
-                            </div>
+                                ? "bg-blue-100 text-blue-700 dark:bg-blue-800 dark:text-blue-300"
+                                : "bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-300"
+                            )}>
+                              {message.from_id === selectedChat.buyer_id ? 'Buyer' : 'Seller'}
+                            </span>
+                            <span className="text-xs text-neutral-500">
+                              {formatRelativeTime(message.created_at)}
+                            </span>
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                          <div className="text-sm text-neutral-700 dark:text-neutral-300">
+                            {message.text}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 p-6 text-center">
-                  <div className="text-neutral-400 dark:text-neutral-500 mb-4">
-                    <svg className="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-2">Select a Chat</h3>
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400">Click on any chat from the list to view its details and messages</p>
-                </div>
-              )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </ErrorBoundary>
   );
