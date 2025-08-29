@@ -16,6 +16,32 @@ export async function GET(req: Request) {
     const db = await getAdminDb(req);
     console.log('🔍 Admin Listings API: getAdminDb successful, database connection established');
     
+    // Test basic database connectivity
+    console.log('🔍 Admin Listings API: Testing database connectivity...');
+    try {
+      const testResult = await db.prepare('SELECT 1 as test').all();
+      console.log('🔍 Admin Listings API: Database connectivity test successful:', testResult);
+    } catch (testError) {
+      console.error('🔍 Admin Listings API: Database connectivity test failed:', testError);
+      throw new Error(`Database connectivity test failed: ${testError}`);
+    }
+    
+    // Check if listings table exists and has data
+    console.log('🔍 Admin Listings API: Checking listings table...');
+    try {
+      const tableCheck = await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='listings'").all();
+      console.log('🔍 Admin Listings API: Listings table check:', tableCheck);
+      
+      if (tableCheck.results && tableCheck.results.length > 0) {
+        const countCheck = await db.prepare('SELECT COUNT(*) as count FROM listings').all();
+        console.log('🔍 Admin Listings API: Listings count check:', countCheck);
+      } else {
+        console.log('🔍 Admin Listings API: Listings table does not exist!');
+      }
+    } catch (tableError) {
+      console.error('🔍 Admin Listings API: Table check failed:', tableError);
+    }
+    
     const q = (url.searchParams.get('q') || '').trim();
     
     console.log('🔍 Admin Listings API: Request received with limit:', limit, 'offset:', offset, 'query:', q);
