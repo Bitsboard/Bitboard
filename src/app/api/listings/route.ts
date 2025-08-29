@@ -107,7 +107,7 @@ export async function GET(req: NextRequest) {
                          COALESCE(l.image_url, '') AS imageUrl,
                          l.price_sat AS priceSat,
                          COALESCE(u.username, 'unknown') AS postedBy,
-                         COALESCE(u.rating, 5.0) AS userRating,
+                         COALESCE(u.rating, 0) AS userRating,
                          COALESCE(u.deals, 0) AS userDeals,
                          COALESCE(u.verified, 0) AS userVerified,
                          COALESCE(l.boosted_until, 0) AS boostedUntil,
@@ -171,9 +171,9 @@ export async function GET(req: NextRequest) {
         // Create the seller object structure that the frontend expects
         seller: {
           name: r.postedBy || 'unknown',
-          score: r.userRating || 5.0,
+          score: r.userRating || 0, // Use thumbs-up count, default to 0
           deals: r.userDeals || 0,
-          rating: r.userRating || 5.0,
+          rating: r.userRating || 0, // Use thumbs-up count, default to 0
           verifications: {
             email: Boolean(r.userVerified),
             phone: false, // Not implemented yet

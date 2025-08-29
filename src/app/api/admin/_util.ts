@@ -22,7 +22,7 @@ export async function getAdminDb(req: Request): Promise<D1Database> {
   try { await db.prepare('ALTER TABLE users ADD COLUMN last_login_at INTEGER').run(); } catch { }
   try { await db.prepare('ALTER TABLE users ADD COLUMN ban_reason TEXT').run(); } catch { }
   try { await db.prepare('ALTER TABLE users ADD COLUMN ban_expires_at INTEGER').run(); } catch { }
-  try { await db.prepare('ALTER TABLE users ADD COLUMN rating REAL DEFAULT 0').run(); } catch { }
+  try { await db.prepare('ALTER TABLE users ADD COLUMN rating INTEGER DEFAULT 0').run(); } catch { } // Thumbs-up count, not 0-5 scale
   try { await db.prepare('ALTER TABLE users ADD COLUMN deals INTEGER DEFAULT 0').run(); } catch { }
   
   console.log('🔍 Admin Utility: Schema setup completed');
