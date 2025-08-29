@@ -177,7 +177,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                     </span>
                   )}
                   
-                  <span className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍</span>
+                  <span className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.rating} 👍</span>
                 </div>
                 {/* Row 1, Col 2: button */}
                 <div className="flex justify-end">

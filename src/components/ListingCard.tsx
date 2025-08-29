@@ -131,7 +131,7 @@ export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCard
               </span>
             )}
             
-            <span className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.score} 👍</span>
+            <span className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.rating} 👍</span>
           </div>
         </div>
       </div>

@@ -9,13 +9,14 @@ interface User {
   id: string;
   username: string;
   email: string;
-  createdAt: number;
-  lastLoginAt?: number;
   isVerified: boolean;
   isAdmin: boolean;
   isBanned: boolean;
   banReason?: string;
   banExpiresAt?: number;
+  createdAt: number;
+  lastLoginAt?: number;
+  image?: string;
   listingsCount: number;
   chatsCount: number;
   messagesCount: number;
@@ -211,11 +212,11 @@ export default function AdminUsersPage() {
       case 'createdAt': aValue = a.createdAt; bValue = b.createdAt; break;
       case 'lastLoginAt': aValue = a.lastLoginAt || 0; bValue = b.lastLoginAt || 0; break;
       case 'listingsCount': aValue = a.listingsCount; bValue = b.listingsCount; break;
+      case 'chatsCount': aValue = a.chatsCount; bValue = b.chatsCount; break;
       case 'rating': aValue = a.rating; bValue = b.rating; break;
       case 'deals': aValue = a.deals; bValue = b.deals; break;
       case 'totalListingsValue': aValue = a.totalListingsValue; bValue = b.totalListingsValue; break;
       case 'lastActivityAt': aValue = a.lastActivityAt || 0; bValue = b.lastActivityAt || 0; break;
-      default: aValue = a.createdAt; bValue = b.createdAt;
     }
     
     return sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
@@ -329,6 +330,9 @@ export default function AdminUsersPage() {
               <option value="lastLoginAt-desc">Last Login</option>
               <option value="listingsCount-desc">Most Listings</option>
               <option value="rating-desc">Highest Rating</option>
+              <option value="deals-desc">Most Deals</option>
+              <option value="totalListingsValue-desc">Highest Value</option>
+              <option value="lastActivityAt-desc">Most Recent Activity</option>
             </select>
           </div>
         </div>
@@ -379,8 +383,8 @@ export default function AdminUsersPage() {
                   </span>
                 </div>
                 <div className="text-sm">
-                  <span className="text-neutral-600 dark:text-neutral-400">Rating:</span>
-                  <span className="ml-2 text-neutral-900 dark:text-white">⭐ {selectedUser.rating.toFixed(1)}</span>
+                  <span className="text-neutral-600 dark:text-neutral-400">Thumbs Up:</span>
+                  <span className="ml-2 text-neutral-900 dark:text-white">👍 {selectedUser.rating}</span>
                 </div>
                 <div className="text-sm">
                   <span className="text-neutral-600 dark:text-neutral-400">Deals:</span>
@@ -586,7 +590,7 @@ export default function AdminUsersPage() {
                         {user.chatsCount}
                       </td>
                       <td className="px-3 py-2 text-xs text-neutral-600 dark:text-neutral-400">
-                        ⭐ {user.rating.toFixed(1)}
+                        👍 {user.rating}
                       </td>
                       <td className="px-3 py-2 text-xs text-neutral-600 dark:text-neutral-400">
                         {user.deals}
@@ -758,13 +762,13 @@ export default function AdminUsersPage() {
                         <div className="text-xs text-neutral-600 dark:text-neutral-400">Messages</div>
                       </div>
                       <div className="text-center p-3 bg-white dark:bg-neutral-600 rounded">
-                        <div className="text-2xl font-bold text-orange-600">{selectedUser.deals}</div>
+                        <div className="text-2xl font-bold text-orange-600">{selectedUser.deals || 0}</div>
                         <div className="text-xs text-neutral-600 dark:text-neutral-400">Deals</div>
                       </div>
-                    </div>
-                    <div className="mt-4 text-center p-3 bg-white dark:bg-neutral-600 rounded">
-                      <div className="text-2xl font-bold text-yellow-600">{selectedUser.rating.toFixed(1)}</div>
-                      <div className="text-xs text-neutral-600 dark:text-neutral-400">Rating</div>
+                      <div className="text-center p-3 bg-white dark:bg-neutral-600 rounded">
+                        <div className="text-2xl font-bold text-yellow-600">👍 {selectedUser.rating}</div>
+                        <div className="text-xs text-neutral-600 dark:text-neutral-400">Thumbs Up</div>
+                      </div>
                     </div>
                     {selectedUser.totalListingsValue > 0 && (
                       <div className="mt-4 text-center p-3 bg-white dark:bg-neutral-600 rounded">

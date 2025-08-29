@@ -10,18 +10,18 @@ import { useBtcRate } from '@/lib/hooks/useBtcRate';
 
 interface Chat {
   id: string;
-  listing_title: string;
   other_user: string;
+  other_user_verified: boolean;
+  listing_id: string;
+  listing_title: string;
+  listing_image: string;
+  listing_price_sats: number;
+  listing_created_at: number;
+  listing_location: string;
+  listing_ad_type: string;
   last_message: string;
   last_message_time: number;
   unread_count: number;
-  listing_id: string;
-  listing_image: string;
-  listing_price: number;
-  listing_created_at: number;
-  seller_verified: boolean;
-  listing_type: string;
-  location: string;
   seller_rating: number;
 }
 
@@ -106,18 +106,18 @@ export default function MessagesPage() {
         
         const transformedChats = data.chats.map((chat: any) => ({
             id: chat.id,
-            listing_title: chat.listing_title,
             other_user: chat.other_user_username,
+            other_user_verified: chat.other_user_verified || false,
+            listing_id: chat.listing_id,
+            listing_title: chat.listing_title,
+            listing_image: chat.listing_image,
+            listing_price_sats: chat.listing_price_sats || chat.price_sats,
+            listing_created_at: chat.listing_created_at || chat.created_at,
+            listing_location: chat.listing_location,
+            listing_ad_type: chat.listing_ad_type || 'sell',
             last_message: chat.latest_message_text || 'No messages yet',
             last_message_time: chat.latest_message_time || chat.last_message_at || chat.created_at,
             unread_count: chat.unread_count || 0,
-            listing_id: chat.listing_id,
-            listing_image: chat.listing_image,
-            listing_price: chat.listing_price || chat.price_sats,
-            listing_created_at: chat.listing_created_at || chat.created_at,
-            seller_verified: chat.seller_verified || false,
-            listing_type: chat.listing_type || 'sell',
-            location: chat.listing_location,
             seller_rating: chat.seller_rating || 0
         }));
         
@@ -126,7 +126,7 @@ export default function MessagesPage() {
           id: c.id,
           other_user: c.other_user,
           seller_rating: c.seller_rating,
-          seller_verified: c.seller_verified,
+          other_user_verified: c.other_user_verified,
           raw_data: data.chats.find(raw => raw.id === c.id)
         })));
         setChats(transformedChats);
@@ -664,7 +664,7 @@ export default function MessagesPage() {
                                 </span>
                                 
                                 {/* Verified Badge */}
-                                {item.seller_verified && (
+                                {item.other_user_verified && (
                                   <span 
                                     className="verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-bold shadow-md"
                                     style={{
@@ -757,11 +757,11 @@ export default function MessagesPage() {
                           <div className="flex items-center gap-2 mb-1">
                             {/* Selling/Looking For Tag */}
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold text-white ${
-                              chats.find(c => c.id === selectedChat)?.listing_type === 'want' 
+                              chats.find(c => c.id === selectedChat)?.listing_ad_type === 'want' 
                                 ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500' 
                                 : 'bg-gradient-to-r from-emerald-500 to-teal-500'
                             }`}>
-                              {chats.find(c => c.id === selectedChat)?.listing_type === 'want' ? 'Looking For' : 'Selling'}
+                              {chats.find(c => c.id === selectedChat)?.listing_ad_type === 'want' ? 'Looking For' : 'Selling'}
                             </span>
                             
                             {/* Listing Title - Directly to the right of selling tag */}
@@ -776,21 +776,21 @@ export default function MessagesPage() {
                             {unit === 'BTC' ? (
                               <div>
                                 <span className="text-lg font-semibold">
-                                  {(Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000).toFixed(8)} BTC
+                                  {(Number(chats.find(c => c.id === selectedChat)?.listing_price_sats || 0) / 100000000).toFixed(8)} BTC
                                 </span>
                                 {/* Dollar equivalent */}
                                 <div className="text-sm text-white/80">
-                                  {formatCADAmount((Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000) * (btcCad || 0))}
+                                  {formatCADAmount((Number(chats.find(c => c.id === selectedChat)?.listing_price_sats || 0) / 100000000) * (btcCad || 0))}
                                 </div>
                               </div>
                             ) : (
                               <div>
                                 <span className="text-lg font-semibold">
-                                  {chats.find(c => c.id === selectedChat)?.listing_price?.toLocaleString() || 0} sats
+                                  {chats.find(c => c.id === selectedChat)?.listing_price_sats?.toLocaleString() || 0} sats
                                 </span>
                                 {/* Dollar equivalent */}
                                 <div className="text-sm text-white/80">
-                                  {formatCADAmount((Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000) * (btcCad || 0))}
+                                  {formatCADAmount((Number(chats.find(c => c.id === selectedChat)?.listing_price_sats || 0) / 100000000) * (btcCad || 0))}
                                 </div>
                               </div>
                             )}
@@ -831,28 +831,16 @@ export default function MessagesPage() {
                           </div>
                           
                           {/* Verified Badge */}
-                          {chats.find(c => c.id === selectedChat)?.seller_verified && (
+                          {chats.find(c => c.id === selectedChat)?.other_user_verified && (
                             <span className="verified-badge inline-flex h-5 w-5 items-center justify-center rounded-full text-white font-bold shadow-md" style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }} aria-label="Verified" title="User has verified their identity">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                             </span>
                           )}
                           
                           {/* User Reputation - +x 👍 format */}
-                          <span className="text-white/80 text-xs">
-                            +{(() => {
-                              const selectedChatData = chats.find(c => c.id === selectedChat);
-                              const score = selectedChatData?.seller_rating || 0;
-                              console.log('🔍 Reputation display debug:', {
-                                chatId: selectedChat,
-                                other_user: selectedChatData?.other_user,
-                                seller_rating: selectedChatData?.seller_rating,
-                                final_score: score,
-                                all_available_fields: selectedChatData ? Object.keys(selectedChatData) : [],
-                                raw_chat_data: chats.find(c => c.id === selectedChat)
-                              });
-                              return score;
-                            })()} 👍
-                          </span>
+                          <div className="flex items-center space-x-1">
+                            <span className="text-sm text-white/80">+{chats.find(c => c.id === selectedChat)?.seller_rating || 0} 👍</span>
+                          </div>
                         </div>
                       </div>
                       
@@ -877,7 +865,7 @@ export default function MessagesPage() {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            {chats.find(c => c.id === selectedChat)?.location || 'Location N/A'}
+                            {chats.find(c => c.id === selectedChat)?.listing_location || 'Location N/A'}
                           </span>
                         </div>
                         

@@ -427,7 +427,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                 "text-xs font-medium",
                 dark ? "text-neutral-300" : "text-neutral-600"
               )}>
-                +{listing.seller.score} 👍
+                +{listing.seller.rating} 👍
               </span>
             </div>
           </div>
