@@ -59,7 +59,7 @@ export default function AdminUsersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<'all' | 'verified' | 'unverified' | 'banned' | 'admin'>('all');
-  const [sortBy, setSortBy] = useState<'createdAt' | 'lastLoginAt' | 'listingsCount' | 'rating' | 'deals' | 'totalListingsValue' | 'lastActivityAt'>('createdAt');
+  const [sortBy, setSortBy] = useState<'username' | 'createdAt' | 'lastLoginAt' | 'listingsCount' | 'chatsCount' | 'rating' | 'deals' | 'totalListingsValue' | 'lastActivityAt'>('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -253,6 +253,15 @@ export default function AdminUsersPage() {
     return 'Unverified';
   };
 
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field as any);
+      setSortOrder('asc');
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center">
@@ -410,29 +419,131 @@ export default function AdminUsersPage() {
           </div>
         )}
 
-        {/* Compact Users Table */}
+        {/* Enhanced Users Table with Individual Stat Columns */}
         <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-neutral-50 dark:bg-neutral-700">
                 <tr>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">User</th>
+                  <th 
+                    className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('username')}
+                  >
+                    <div className="flex items-center gap-1">
+                      User
+                      {sortBy === 'username' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('createdAt')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Created
+                      {sortBy === 'createdAt' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('lastLoginAt')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Last Login
+                      {sortBy === 'lastLoginAt' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('listingsCount')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Listings
+                      {sortBy === 'listingsCount' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('chatsCount')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Chats
+                      {sortBy === 'chatsCount' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('rating')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Rating
+                      {sortBy === 'rating' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('deals')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Deals
+                      {sortBy === 'deals' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('totalListingsValue')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Total Value
+                      {sortBy === 'totalListingsValue' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
                   <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Status</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Stats</th>
                   <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={4} className="px-3 py-4 text-center">
+                    <td colSpan={10} className="px-3 py-4 text-center">
                       <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
                       <p className="text-neutral-600 dark:text-neutral-400">Loading users...</p>
                     </td>
                   </tr>
                 ) : paginatedUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-3 py-4 text-center text-neutral-500 dark:text-neutral-400">
+                    <td colSpan={10} className="px-3 py-4 text-center text-neutral-500 dark:text-neutral-400">
                       No users found
                     </td>
                   </tr>
@@ -449,16 +560,31 @@ export default function AdminUsersPage() {
                           <div className="text-xs text-neutral-600 dark:text-neutral-400">{user.email}</div>
                         </div>
                       </td>
+                      <td className="px-3 py-2 text-xs text-neutral-600 dark:text-neutral-400">
+                        {formatDate(user.createdAt)}
+                      </td>
+                      <td className="px-3 py-2 text-xs text-neutral-600 dark:text-neutral-400">
+                        {user.lastLoginAt ? formatRelativeTime(user.lastLoginAt) : 'Never'}
+                      </td>
+                      <td className="px-3 py-2 text-xs text-neutral-600 dark:text-neutral-400">
+                        {user.listingsCount}
+                      </td>
+                      <td className="px-3 py-2 text-xs text-neutral-600 dark:text-neutral-400">
+                        {user.chatsCount}
+                      </td>
+                      <td className="px-3 py-2 text-xs text-neutral-600 dark:text-neutral-400">
+                        ⭐ {user.rating.toFixed(1)}
+                      </td>
+                      <td className="px-3 py-2 text-xs text-neutral-600 dark:text-neutral-400">
+                        {user.deals}
+                      </td>
+                      <td className="px-3 py-2 text-xs text-neutral-600 dark:text-neutral-400">
+                        {formatPrice(user.totalListingsValue)}
+                      </td>
                       <td className="px-3 py-2">
                         <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getStatusColor(user)}`}>
                           {getStatusText(user)}
                         </span>
-                      </td>
-                      <td className="px-3 py-2">
-                        <div className="text-xs space-y-0.5">
-                          <div>📋 {user.listingsCount} • 💬 {user.chatsCount} • ⭐ {user.rating.toFixed(1)}</div>
-                          <div>🤝 {user.deals} • 💰 {formatPrice(user.totalListingsValue)}</div>
-                        </div>
                       </td>
                       <td className="px-3 py-2">
                         <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
@@ -484,6 +610,7 @@ export default function AdminUsersPage() {
               </tbody>
             </table>
           </div>
+        </div>
 
           {/* Compact Pagination */}
           {totalPages > 1 && (
@@ -523,7 +650,6 @@ export default function AdminUsersPage() {
               </div>
             </div>
           )}
-        </div>
       </div>
 
       {/* User Details Modal */}
