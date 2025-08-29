@@ -673,13 +673,13 @@ export default function MessagesPage() {
               {selectedChat ? (
                 <>
                   {/* Chat Header */}
-                  <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-3 rounded-t-3xl">
+                  <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-2 rounded-t-3xl">
                     <div className="flex items-start gap-3">
                       {/* Listing Image - Larger Size */}
                       <img
                         src={chats.find(c => c.id === selectedChat)?.listing_image || '/placeholder-listing.jpg'}
                         alt="Listing"
-                        className="w-40 h-40 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        className="w-32 h-32 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
                         onClick={async () => {
                           const selectedChatData = chats.find(c => c.id === selectedChat);
                           console.log('🔍 Image clicked, selectedChatData:', selectedChatData);
@@ -695,7 +695,7 @@ export default function MessagesPage() {
                       {/* Content Section */}
                       <div className="flex-1 min-w-0">
                         {/* Top Row: Selling Tag + Title + Age + Location */}
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 mb-1">
                           {/* Selling/Looking For Tag */}
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold text-white ${
                             chats.find(c => c.id === selectedChat)?.listing_type === 'want' 
@@ -735,7 +735,7 @@ export default function MessagesPage() {
                         </div>
                         
                         {/* Price - Uses user's actual currency preference */}
-                        <div className="text-white/90 mb-2">
+                        <div className="text-white/90 mb-1">
                           {user?.currency === 'btc' ? (
                             <span className="text-lg font-semibold">
                               {(Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000).toFixed(8)} BTC
@@ -747,14 +747,14 @@ export default function MessagesPage() {
                           )}
                         </div>
                         
-                        {/* Username Pill - Clickable to navigate to profile */}
+                        {/* Username Pill - Clickable to open listing modal */}
                         <div className="flex items-center gap-2">
                           <div 
                             className="inline-flex items-center px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50 border border-neutral-300/60 dark:border-neutral-700/50 hover:scale-105 hover:shadow-md"
-                            onClick={() => {
+                            onClick={async () => {
                               const selectedChatData = chats.find(c => c.id === selectedChat);
-                              if (selectedChatData?.other_user) {
-                                router.push(`/profile/${selectedChatData.other_user}`);
+                              if (selectedChatData?.listing_id) {
+                                await openListingModal(selectedChatData.listing_id);
                               }
                             }}
                           >

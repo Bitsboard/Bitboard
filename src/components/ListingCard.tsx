@@ -32,7 +32,7 @@ function sanitizeTitle(raw: string, type: "sell" | "want"): string {
 }
 
 export function ListingCard({ listing, unit, btcCad, dark, onOpen }: ListingCardProps) {
-  const boosted = listing.boostedUntil && listing.boostedUntil > Date.now();
+  const boosted = listing.boostedUntil && listing.boostedUntil > 0 && listing.boostedUntil > Date.now();
   const a = accent(listing);
   const [sellerImageError, setSellerImageError] = React.useState(false);
   const lang = useLang();
