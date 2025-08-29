@@ -1,6 +1,6 @@
 export const runtime = 'edge';
 
-import { getAdminDb } from '../../_util';
+import { NextResponse } from 'next/server';
 
 export async function GET(req: Request) {
   try {
@@ -12,9 +12,44 @@ export async function GET(req: Request) {
     
     console.log('🔍 Admin Listings API: Parsed URL parameters - limit:', limit, 'offset:', offset);
     
-    console.log('🔍 Admin Listings API: About to call getAdminDb...');
-    const db = await getAdminDb(req);
-    console.log('🔍 Admin Listings API: getAdminDb successful, database connection established');
+    // Try to get database connection using different methods
+    let db: D1Database | null = null;
+    
+    try {
+      // Method 1: Try @cloudflare/next-on-pages
+      const mod = await import('@cloudflare/next-on-pages').catch(() => null);
+      if (mod && typeof mod.getRequestContext === 'function') {
+        const context = mod.getRequestContext();
+        if (context?.env?.DB) {
+          console.log('✅ Database found via @cloudflare/next-on-pages');
+          db = context.env.DB as D1Database;
+        }
+      }
+    } catch (error) {
+      console.log('⚠️ @cloudflare/next-on-pages method failed:', error);
+    }
+    
+    if (!db) {
+      try {
+        // Method 2: Try globalThis.__env__
+        if (typeof globalThis !== 'undefined' && (globalThis as any).__env__?.DB) {
+          console.log('✅ Database found via globalThis.__env__');
+          db = (globalThis as any).__env__.DB as D1Database;
+        }
+      } catch (error) {
+        console.log('⚠️ globalThis.__env__ method failed:', error);
+      }
+    }
+    
+    if (!db) {
+      console.error('❌ No database binding found via any method');
+      return NextResponse.json({ 
+        error: 'Database connection failed',
+        details: 'No D1 database binding found'
+      }, { status: 500 });
+    }
+    
+    console.log('✅ Database connection established successfully');
     
     // Test basic database connectivity
     console.log('🔍 Admin Listings API: Testing database connectivity...');
@@ -23,7 +58,10 @@ export async function GET(req: Request) {
       console.log('🔍 Admin Listings API: Database connectivity test successful:', testResult);
     } catch (testError) {
       console.error('🔍 Admin Listings API: Database connectivity test failed:', testError);
-      throw new Error(`Database connectivity test failed: ${testError}`);
+      return NextResponse.json({ 
+        error: 'Database connectivity test failed',
+        details: testError?.message || 'Unknown error'
+      }, { status: 500 });
     }
     
     // Check if listings table exists and has data
@@ -37,9 +75,17 @@ export async function GET(req: Request) {
         console.log('🔍 Admin Listings API: Listings count check:', countCheck);
       } else {
         console.log('🔍 Admin Listings API: Listings table does not exist!');
+        return NextResponse.json({ 
+          error: 'Listings table not found',
+          details: 'The listings table does not exist in the database'
+        }, { status: 500 });
       }
     } catch (tableError) {
       console.error('🔍 Admin Listings API: Table check failed:', tableError);
+      return NextResponse.json({ 
+        error: 'Table check failed',
+        details: tableError?.message || 'Unknown error'
+      }, { status: 500 });
     }
     
     const q = (url.searchParams.get('q') || '').trim();
@@ -56,6 +102,7 @@ export async function GET(req: Request) {
     console.log('🔍 Admin Listings API: Where clause:', where);
     console.log('🔍 Admin Listings API: Binds:', binds);
     
+    // Simplified query to avoid complex JOINs that might be causing issues
     const listingsQuery = `
       SELECT 
         l.id,
@@ -65,29 +112,14 @@ export async function GET(req: Request) {
         l.ad_type AS adType,
         l.category,
         l.posted_by AS postedBy,
-        u.username AS postedByUsername,
         l.created_at AS createdAt,
         l.updated_at AS updatedAt,
         l.status,
         l.image_url AS imageUrl,
         l.location,
         COALESCE(l.views, 0) AS views,
-        COALESCE(l.favorites, 0) AS favorites,
-        COALESCE(chat_stats.chats_count, 0) AS chatsCount,
-        COALESCE(chat_stats.messages_count, 0) AS messagesCount,
-        COALESCE(chat_stats.last_activity, 0) AS lastActivityAt
+        COALESCE(l.favorites, 0) AS favorites
       FROM listings l
-      LEFT JOIN users u ON l.posted_by = u.id
-      LEFT JOIN (
-        SELECT 
-          listing_id,
-          COUNT(DISTINCT c.id) AS chats_count,
-          COUNT(m.id) AS messages_count,
-          MAX(m.created_at) AS last_activity
-        FROM chats c
-        LEFT JOIN messages m ON c.id = m.chat_id
-        GROUP BY listing_id
-      ) chat_stats ON l.id = chat_stats.listing_id
       ${where}
       ORDER BY l.created_at DESC 
       LIMIT ? OFFSET ?
@@ -108,29 +140,24 @@ export async function GET(req: Request) {
     
     console.log('🔍 Admin Listings API: Total count:', total);
     
-    return new Response(JSON.stringify({ 
+    return NextResponse.json({ 
       success: true,
       listings: res.results ?? [], 
       total,
       page: Math.floor(offset / limit) + 1,
       limit
-    }), { 
-      status: 200, 
-      headers: { 'content-type': 'application/json' } 
     });
+    
   } catch (e: any) {
     console.error('🔍 Admin Listings API: Error occurred:', e);
     console.error('🔍 Admin Listings API: Error message:', e?.message);
     console.error('🔍 Admin Listings API: Error stack:', e?.stack);
     
-    const msg = e?.message || 'error';
-    const code = msg === 'unauthorized' ? 401 : msg === 'forbidden' ? 403 : 500;
-    
-    return new Response(JSON.stringify({ 
-      error: msg,
+    return NextResponse.json({ 
+      error: e?.message || 'Unknown error',
       details: e?.message,
       stack: e?.stack
-    }), { status: code });
+    }, { status: 500 });
   }
 }
 

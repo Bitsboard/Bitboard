@@ -13,7 +13,6 @@ interface Listing {
   adType: 'sell' | 'want';
   category: string;
   postedBy: string;
-  postedByUsername: string;
   createdAt: number;
   updatedAt: number;
   status: 'active' | 'sold' | 'expired';
@@ -21,9 +20,6 @@ interface Listing {
   location?: string;
   views: number;
   favorites: number;
-  chatsCount: number;
-  messagesCount: number;
-  lastActivityAt?: number;
 }
 
 interface ListingsResponse {
@@ -42,7 +38,7 @@ export default function AdminListingsPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'sold' | 'expired'>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | 'sell' | 'want'>('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [sortBy, setSortBy] = useState<'createdAt' | 'updatedAt' | 'priceSat' | 'views' | 'favorites' | 'chatsCount' | 'messagesCount' | 'lastActivityAt'>('createdAt');
+  const [sortBy, setSortBy] = useState<'createdAt' | 'updatedAt' | 'priceSat' | 'views' | 'favorites'>('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -108,7 +104,7 @@ export default function AdminListingsPage() {
   const filteredListings = listings.filter(listing => {
     const matchesSearch = listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          listing.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         listing.postedByUsername.toLowerCase().includes(searchTerm.toLowerCase());
+                         listing.postedBy.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || listing.status === statusFilter;
     const matchesType = typeFilter === 'all' || listing.adType === typeFilter;
     const matchesCategory = categoryFilter === 'all' || listing.category === categoryFilter;
@@ -125,9 +121,6 @@ export default function AdminListingsPage() {
       case 'priceSat': aValue = a.priceSat; bValue = b.priceSat; break;
       case 'views': aValue = a.views; bValue = b.views; break;
       case 'favorites': aValue = a.favorites; bValue = b.favorites; break;
-      case 'chatsCount': aValue = a.chatsCount; bValue = b.chatsCount; break;
-      case 'messagesCount': aValue = a.messagesCount; bValue = b.messagesCount; break;
-      case 'lastActivityAt': aValue = a.lastActivityAt || 0; bValue = b.lastActivityAt || 0; break;
       default: aValue = a.createdAt; bValue = b.createdAt;
     }
     
@@ -335,32 +328,6 @@ export default function AdminListingsPage() {
                       )}
                     </div>
                   </th>
-                  <th 
-                    className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
-                    onClick={() => handleSort('chatsCount')}
-                  >
-                    <div className="flex items-center gap-1">
-                      Chats
-                      {sortBy === 'chatsCount' && (
-                        <span className="text-orange-500">
-                          {sortOrder === 'asc' ? '↑' : '↓'}
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
-                    onClick={() => handleSort('messagesCount')}
-                  >
-                    <div className="flex items-center gap-1">
-                      Messages
-                      {sortBy === 'messagesCount' && (
-                        <span className="text-orange-500">
-                          {sortOrder === 'asc' ? '↑' : '↓'}
-                        </span>
-                      )}
-                    </div>
-                  </th>
                   <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Status</th>
                   <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Actions</th>
                 </tr>
@@ -408,10 +375,7 @@ export default function AdminListingsPage() {
                       </td>
                       <td className="px-3 py-2">
                         <div className="text-sm font-medium text-neutral-900 dark:text-white">
-                          {listing.postedByUsername}
-                        </div>
-                        <div className="text-xs text-neutral-500 font-mono">
-                          {listing.postedBy.slice(0, 8)}...
+                          {listing.postedBy}
                         </div>
                       </td>
                       <td className="px-3 py-2">
@@ -427,16 +391,6 @@ export default function AdminListingsPage() {
                       <td className="px-3 py-2">
                         <div className="text-sm text-neutral-900 dark:text-white">
                           {listing.favorites.toLocaleString()}
-                        </div>
-                      </td>
-                      <td className="px-3 py-2">
-                        <div className="text-sm text-neutral-900 dark:text-white">
-                          {listing.chatsCount.toLocaleString()}
-                        </div>
-                      </td>
-                      <td className="px-3 py-2">
-                        <div className="text-sm text-neutral-900 dark:text-white">
-                          {listing.messagesCount.toLocaleString()}
                         </div>
                       </td>
                       <td className="px-3 py-2">
