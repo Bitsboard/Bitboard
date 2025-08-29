@@ -73,9 +73,8 @@ export async function GET(req: Request) {
       // Continue with the request even if migration fails
     }
     
-    // Get all chats with latest messages and unread counts in a single efficient query
-    // ✅ FIXED: Eliminated N+1 problem by using JOINs instead of subqueries
-    const optimizedChatsQuery = `
+        // Get all chats with basic info first, then we'll fetch messages separately
+    const basicChatsQuery = `
       SELECT 
         c.id,
         c.listing_id,
@@ -99,41 +98,21 @@ export async function GET(req: Request) {
         CASE 
           WHEN c.buyer_id = ? THEN seller.username
           ELSE buyer.username
-        END as other_user_username,
-        -- ✅ Get latest message using efficient JOIN instead of subquery
-        latest_msg.text as latest_message_text,
-        latest_msg.created_at as latest_message_time,
-        latest_msg.from_id as latest_message_from,
-        -- ✅ Get unread count using efficient JOIN instead of subquery
-        COALESCE(unread_count.count, 0) as unread_count
+        END as other_user_username
       FROM chats c
       JOIN listings l ON c.listing_id = l.id
       LEFT JOIN users buyer ON c.buyer_id = buyer.id
       LEFT JOIN users seller ON c.seller_id = seller.id
-      -- ✅ Efficient JOIN for latest message (no more N+1 problem)
-      LEFT JOIN (
-        SELECT chat_id, text, created_at, from_id,
-               ROW_NUMBER() OVER (PARTITION BY chat_id ORDER BY created_at DESC) as rn
-        FROM messages
-      ) latest_msg ON c.id = latest_msg.chat_id AND latest_msg.rn = 1
-      -- ✅ Efficient JOIN for unread count (no more N+1 problem)
-      LEFT JOIN (
-        SELECT chat_id, COUNT(*) as count
-        FROM messages 
-        WHERE from_id != ? AND (read_at IS NULL OR read_at = 0)
-        GROUP BY chat_id
-      ) unread_count ON c.id = unread_count.chat_id
       WHERE c.buyer_id = ? OR c.seller_id = ?
       ORDER BY c.last_message_at DESC, c.created_at DESC
     `;
     
     console.log('🔍 Chat API: About to execute query with userId:', userId);
-    console.log('🔍 Chat API: Query:', optimizedChatsQuery);
+    console.log('🔍 Chat API: Query:', basicChatsQuery);
     
-    const chats = await db.prepare(optimizedChatsQuery).bind(
+    const chats = await db.prepare(basicChatsQuery).bind(
       userId, 
       userId, 
-      userId,  // for unread count
       userId, 
       userId
     ).all();
@@ -142,16 +121,35 @@ export async function GET(req: Request) {
     console.log('🔍 Chat API: Raw results:', chats);
     console.log('🔍 Chat API: Found chats:', chats.results?.length || 0, 'for user ID:', userId);
     
-    // Transform the results to match the expected format
-    const chatsWithMessages = (chats.results || []).map((chat: any) => ({
-      ...chat,
-      latestMessage: chat.latest_message_text ? {
-        id: 'latest',
-        from_id: chat.latest_message_from,
-        text: chat.latest_message_text,
-        created_at: chat.latest_message_time
-      } : null,
-      unreadCount: chat.unread_count || 0
+    // Now fetch latest messages and unread counts for each chat
+    const chatsWithMessages = await Promise.all((chats.results || []).map(async (chat: any) => {
+      // Get latest message for this chat
+      const latestMessageResult = await db.prepare(`
+        SELECT text, created_at, from_id 
+        FROM messages 
+        WHERE chat_id = ? 
+        ORDER BY created_at DESC 
+        LIMIT 1
+      `).bind(chat.id).all();
+      
+      const latestMessage = latestMessageResult.results?.[0];
+      
+      // Get unread count for this chat
+      const unreadResult = await db.prepare(`
+        SELECT COUNT(*) as count 
+        FROM messages 
+        WHERE chat_id = ? AND from_id != ? AND (read_at IS NULL OR read_at = 0)
+      `).bind(chat.id, userId).all();
+      
+      const unreadCount = unreadResult.results?.[0]?.count || 0;
+      
+      return {
+        ...chat,
+        latest_message_text: latestMessage?.text || null,
+        latest_message_time: latestMessage?.created_at || null,
+        latest_message_from: latestMessage?.from_id || null,
+        unread_count: unreadCount
+      };
     }));
     
     return NextResponse.json({ 
