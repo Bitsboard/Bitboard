@@ -57,7 +57,7 @@ export default function AdminListingsPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [itemsPerPage] = useState(20);
+  const [itemsPerPage] = useState(50);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -68,7 +68,6 @@ export default function AdminListingsPage() {
   const router = useRouter();
   const lang = useLang();
 
-  // Check admin authentication
   useEffect(() => {
     const savedAuth = localStorage.getItem('admin_authenticated');
     if (savedAuth === 'true') {
@@ -96,7 +95,7 @@ export default function AdminListingsPage() {
   };
 
   const loadListingChats = async (listingId: string) => {
-    if (listingChats[listingId]) return; // Already loaded
+    if (listingChats[listingId]) return;
     
     try {
       setLoadingChats(listingId);
@@ -142,8 +141,6 @@ export default function AdminListingsPage() {
           const { [listingId]: removed, ...rest } = prev;
           return rest;
         });
-      } else {
-        console.error('Failed to delete listing');
       }
     } catch (error) {
       console.error('Error deleting listing:', error);
@@ -167,40 +164,16 @@ export default function AdminListingsPage() {
     let aValue: any, bValue: any;
     
     switch (sortBy) {
-      case 'createdAt':
-        aValue = a.createdAt;
-        bValue = b.createdAt;
-        break;
-      case 'updatedAt':
-        aValue = a.updatedAt;
-        bValue = b.updatedAt;
-        break;
-      case 'priceSat':
-        aValue = a.priceSat;
-        bValue = b.priceSat;
-        break;
-      case 'views':
-        aValue = a.views;
-        bValue = b.views;
-        break;
-      case 'chatsCount':
-        aValue = a.chatsCount;
-        bValue = b.chatsCount;
-        break;
-      case 'lastActivityAt':
-        aValue = a.lastActivityAt || 0;
-        bValue = b.lastActivityAt || 0;
-        break;
-      default:
-        aValue = a.createdAt;
-        bValue = b.createdAt;
+      case 'createdAt': aValue = a.createdAt; bValue = b.createdAt; break;
+      case 'updatedAt': aValue = a.updatedAt; bValue = b.updatedAt; break;
+      case 'priceSat': aValue = a.priceSat; bValue = b.priceSat; break;
+      case 'views': aValue = a.views; bValue = b.views; break;
+      case 'chatsCount': aValue = a.chatsCount; bValue = b.chatsCount; break;
+      case 'lastActivityAt': aValue = a.lastActivityAt || 0; bValue = b.lastActivityAt || 0; break;
+      default: aValue = a.createdAt; bValue = b.createdAt;
     }
     
-    if (sortOrder === 'asc') {
-      return aValue > bValue ? 1 : -1;
-    } else {
-      return aValue < bValue ? 1 : -1;
-    }
+    return sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
   });
 
   const paginatedListings = sortedListings.slice(
@@ -208,14 +181,8 @@ export default function AdminListingsPage() {
     currentPage * itemsPerPage
   );
 
-  const formatPrice = (priceSat: number) => {
-    return `${priceSat.toLocaleString()} sats`;
-  };
-
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleDateString();
-  };
-
+  const formatPrice = (priceSat: number) => `${priceSat.toLocaleString()} sats`;
+  const formatDate = (timestamp: number) => new Date(timestamp * 1000).toLocaleDateString();
   const formatRelativeTime = (timestamp: number) => {
     const now = Date.now();
     const diff = now - timestamp * 1000;
@@ -258,304 +225,195 @@ export default function AdminListingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-950 dark:to-neutral-900">
-      {/* Header */}
-      <div className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm border-b border-neutral-200/50 dark:border-neutral-700/50">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
+      {/* Compact Header */}
+      <div className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700">
+        <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">Listings Management</h1>
-              <p className="text-lg text-neutral-600 dark:text-neutral-400 mt-2">Comprehensive overview of all platform listings with chat analytics</p>
+              <h1 className="text-lg font-semibold text-neutral-900 dark:text-white">Listings Management</h1>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">Listings: {listings.length} | Active: {listings.filter(l => l.status === 'active').length} | Sold: {listings.filter(l => l.status === 'sold').length}</p>
             </div>
             <button
               onClick={() => router.push('/admin')}
-              className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all duration-200 hover:scale-105 shadow-lg"
+              className="px-3 py-1.5 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded text-sm hover:bg-neutral-300 dark:hover:bg-neutral-600"
             >
-              ← Back to Admin
+              ← Admin
             </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Enhanced Filters and Search */}
-        <div className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm rounded-2xl border border-neutral-200/50 dark:border-neutral-700/50 p-6 mb-8 shadow-xl">
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-            {/* Search */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
-                Search Listings
-              </label>
-              <input
-                type="text"
-                placeholder="Search listings, descriptions, or usernames..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-xl bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm shadow-sm"
-              />
-            </div>
-
-            {/* Status Filter */}
-            <div>
-              <label className="block text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
-                Status
-              </label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-xl bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm shadow-sm"
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="sold">Sold</option>
-                <option value="expired">Expired</option>
-              </select>
-            </div>
-
-            {/* Type Filter */}
-            <div>
-              <label className="block text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
-                Type
-              </label>
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value as any)}
-                className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-xl bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm shadow-sm"
-              >
-                <option value="all">All Types</option>
-                <option value="sell">Sell</option>
-                <option value="want">Want</option>
-              </select>
-            </div>
-
-            {/* Sort Options */}
-            <div>
-              <label className="block text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
-                Sort By
-              </label>
-              <select
-                value={`${sortBy}-${sortOrder}`}
-                onChange={(e) => {
-                  const [newSortBy, newSortOrder] = e.target.value.split('-');
-                  setSortBy(newSortBy as any);
-                  setSortOrder(newSortOrder as any);
-                }}
-                className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-xl bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm shadow-sm"
-              >
-                <option value="createdAt-desc">Newest First</option>
-                <option value="createdAt-asc">Oldest First</option>
-                <option value="updatedAt-desc">Recently Updated</option>
-                <option value="priceSat-desc">Highest Price</option>
-                <option value="priceSat-asc">Lowest Price</option>
-                <option value="views-desc">Most Views</option>
-                <option value="chatsCount-desc">Most Chats</option>
-                <option value="lastActivityAt-desc">Most Active</option>
-              </select>
-            </div>
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        {/* Compact Filters */}
+        <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 p-3 mb-4">
+          <div className="flex gap-3 items-center">
+            <input
+              type="text"
+              placeholder="Search listings..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="px-3 py-1.5 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-sm flex-1"
+            />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as any)}
+              className="px-3 py-1.5 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-sm"
+            >
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="sold">Sold</option>
+              <option value="expired">Expired</option>
+            </select>
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value as any)}
+              className="px-3 py-1.5 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-sm"
+            >
+              <option value="all">All Types</option>
+              <option value="sell">Sell</option>
+              <option value="want">Want</option>
+            </select>
+            <select
+              value={`${sortBy}-${sortOrder}`}
+              onChange={(e) => {
+                const [newSortBy, newSortOrder] = e.target.value.split('-');
+                setSortBy(newSortBy as any);
+                setSortOrder(newSortOrder as any);
+              }}
+              className="px-3 py-1.5 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-sm"
+            >
+              <option value="createdAt-desc">Newest</option>
+              <option value="createdAt-asc">Oldest</option>
+              <option value="priceSat-desc">Highest Price</option>
+              <option value="views-desc">Most Views</option>
+              <option value="chatsCount-desc">Most Chats</option>
+            </select>
           </div>
         </div>
 
-        {/* Enhanced Listings Table */}
-        <div className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm rounded-2xl border border-neutral-200/50 dark:border-neutral-700/50 overflow-hidden shadow-xl">
+        {/* Compact Listings Table */}
+        <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gradient-to-r from-orange-500 to-amber-500">
+            <table className="w-full text-sm">
+              <thead className="bg-neutral-50 dark:bg-neutral-700">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">
-                    Listing Details
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">
-                    User & Stats
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">
-                    Engagement
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wider">
-                    Actions
-                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Listing</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">User & Price</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Stats</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200/50 dark:divide-neutral-700/50">
+              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center">
-                      <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                      <p className="text-neutral-600 dark:text-neutral-400 text-lg">Loading listings...</p>
+                    <td colSpan={4} className="px-3 py-8 text-center">
+                      <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                      <p className="text-neutral-600 dark:text-neutral-400">Loading listings...</p>
                     </td>
                   </tr>
                 ) : paginatedListings.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-neutral-500 dark:text-neutral-400 text-lg">
-                      No listings found matching your criteria
+                    <td colSpan={4} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                      No listings found
                     </td>
                   </tr>
                 ) : (
                   paginatedListings.map((listing) => (
                     <React.Fragment key={listing.id}>
-                      <tr className="hover:bg-neutral-50/50 dark:hover:bg-neutral-700/50 transition-colors duration-200">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-xl flex items-center justify-center overflow-hidden shadow-lg">
-                              {listing.imageUrl ? (
-                                <img 
-                                  src={listing.imageUrl} 
-                                  alt={listing.title}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <svg className="w-8 h-8 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                              )}
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="font-bold text-neutral-900 dark:text-white text-lg mb-2">
-                                {listing.title}
-                              </h4>
-                              <p className="text-sm text-neutral-600 dark:text-neutral-400 line-clamp-2 max-w-md mb-3">
-                                {listing.description}
-                              </p>
-                              <div className="flex items-center gap-3">
-                                <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold ${getTypeColor(listing.adType)}`}>
-                                  {listing.adType === 'want' ? '🔍 Looking For' : '💰 Selling'}
-                                </span>
-                                <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold ${getStatusColor(listing.status)}`}>
-                                  {listing.status === 'active' ? '✅ Active' : listing.status === 'sold' ? '🎯 Sold' : '⏰ Expired'}
-                                </span>
-                                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-neutral-100 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200">
-                                  📂 {listing.category}
-                                </span>
-                              </div>
+                      <tr className="hover:bg-neutral-50 dark:hover:bg-neutral-700">
+                        <td className="px-3 py-2">
+                          <div>
+                            <div className="font-medium text-neutral-900 dark:text-white">{listing.title}</div>
+                            <div className="text-xs text-neutral-600 dark:text-neutral-400 line-clamp-1 max-w-xs">{listing.description}</div>
+                            <div className="flex gap-2 mt-1">
+                              <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getTypeColor(listing.adType)}`}>
+                                {listing.adType === 'want' ? 'Looking For' : 'Selling'}
+                              </span>
+                              <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getStatusColor(listing.status)}`}>
+                                {listing.status}
+                              </span>
+                              <span className="text-xs text-neutral-500">{listing.category}</span>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg">
-                                {listing.postedByUsername.charAt(0).toUpperCase()}
-                              </div>
-                              <div>
-                                <p className="font-bold text-neutral-900 dark:text-white text-sm">
-                                  {listing.postedByUsername}
-                                </p>
-                                <p className="text-xs text-neutral-500 dark:text-neutral-500 font-mono">
-                                  ID: {listing.postedBy.slice(0, 8)}...
-                                </p>
-                              </div>
-                            </div>
-                            <div className="text-center">
-                              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                                {formatPrice(listing.priceSat)}
-                              </div>
-                              <div className="text-xs text-neutral-600 dark:text-neutral-400">Price</div>
-                            </div>
-                            <div className="text-xs text-neutral-500 dark:text-neutral-500 space-y-1">
-                              <p>📅 Created: {formatDate(listing.createdAt)}</p>
-                              {listing.updatedAt !== listing.createdAt && (
-                                <p>🔄 Updated: {formatDate(listing.updatedAt)}</p>
-                              )}
+                        <td className="px-3 py-2">
+                          <div className="space-y-1">
+                            <div className="font-medium text-neutral-900 dark:text-white">{listing.postedByUsername}</div>
+                            <div className="text-xs text-neutral-500">ID: {listing.postedBy.slice(0, 8)}...</div>
+                            <div className="text-sm font-bold text-green-600">{formatPrice(listing.priceSat)}</div>
+                            <div className="text-xs text-neutral-500">
+                              {formatDate(listing.createdAt)}
+                              {listing.updatedAt !== listing.createdAt && ` (updated: ${formatDate(listing.updatedAt)})`}
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-neutral-50 dark:bg-neutral-700/50 rounded-lg p-3 text-center">
-                              <div className="text-2xl font-bold text-neutral-900 dark:text-white">{listing.views}</div>
-                              <div className="text-xs text-neutral-600 dark:text-neutral-400">Views</div>
-                            </div>
-                            <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 text-center">
-                              <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{listing.favorites}</div>
-                              <div className="text-xs text-neutral-600 dark:text-neutral-400">Favorites</div>
-                            </div>
-                            <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 text-center">
-                              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">{listing.chatsCount}</div>
-                              <div className="text-xs text-neutral-600 dark:text-neutral-400">Chats</div>
-                            </div>
-                            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 text-center">
-                              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{listing.messagesCount}</div>
-                              <div className="text-xs text-neutral-600 dark:text-neutral-400">Messages</div>
-                            </div>
+                        <td className="px-3 py-2">
+                          <div className="text-xs space-y-1">
+                            <div>👁️ {listing.views} views</div>
+                            <div>⭐ {listing.favorites} favorites</div>
+                            <div>💬 {listing.chatsCount} chats</div>
+                            <div>📨 {listing.messagesCount} messages</div>
+                            {listing.lastActivityAt && (
+                              <div className="text-neutral-500">📍 {formatRelativeTime(listing.lastActivityAt)}</div>
+                            )}
                           </div>
-                          {listing.lastActivityAt && (
-                            <div className="mt-3 text-center">
-                              <div className="text-sm text-neutral-600 dark:text-neutral-400">
-                                📍 Last activity: {formatRelativeTime(listing.lastActivityAt)}
-                              </div>
-                            </div>
-                          )}
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="flex flex-col gap-3">
+                        <td className="px-3 py-2">
+                          <div className="flex flex-col gap-1">
                             <button
                               onClick={() => toggleListingExpansion(listing.id)}
-                              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-200 hover:scale-105 shadow-md"
+                              className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
                             >
-                              {expandedListing === listing.id ? '👁️ Hide' : '🔍 View'} Chats
+                              {expandedListing === listing.id ? 'Hide' : 'View'} Chats
                             </button>
                             <button
-                              onClick={() => {
-                                setSelectedListing(listing);
-                                setShowDeleteModal(true);
-                              }}
-                              className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg text-sm font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-200 hover:scale-105 shadow-md"
+                              onClick={() => { setSelectedListing(listing); setShowDeleteModal(true); }}
+                              className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200"
                             >
-                              🗑️ Delete
+                              Delete
                             </button>
                           </div>
                         </td>
                       </tr>
                       
-                      {/* Expanded Chat Information */}
+                      {/* Expanded Chat Data */}
                       {expandedListing === listing.id && (
                         <tr>
-                          <td colSpan={4} className="px-6 py-6 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20">
-                            <div className="border-l-4 border-orange-500 pl-6">
-                              <h5 className="font-bold text-neutral-900 dark:text-white text-lg mb-4 flex items-center gap-2">
-                                💬 Chat Conversations ({listing.chatsCount})
+                          <td colSpan={4} className="px-3 py-3 bg-neutral-50 dark:bg-neutral-700">
+                            <div className="border-l-4 border-orange-500 pl-3">
+                              <h5 className="font-medium text-neutral-900 dark:text-white text-sm mb-2">
+                                Chat Conversations ({listing.chatsCount})
                               </h5>
                               
                               {loadingChats === listing.id ? (
-                                <div className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
-                                  <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-                                  Loading chats...
-                                </div>
+                                <div className="text-xs text-neutral-600">Loading...</div>
                               ) : listingChats[listing.id]?.length > 0 ? (
-                                <div className="space-y-3 max-h-64 overflow-y-auto custom-scrollbar">
+                                <div className="space-y-2 max-h-32 overflow-y-auto">
                                   {listingChats[listing.id].map((chat) => (
-                                    <div key={chat.id} className="flex items-center justify-between p-4 bg-white dark:bg-neutral-700 rounded-xl border border-neutral-200 dark:border-neutral-600 shadow-sm">
-                                      <div className="flex-1">
-                                        <div className="flex items-center gap-4 mb-2">
-                                          <div className="flex items-center gap-2">
-                                            <span className="text-blue-600 dark:text-blue-400 font-semibold">👤 Buyer:</span>
-                                            <span className="font-medium">{chat.buyerUsername || chat.buyer_id}</span>
+                                    <div key={chat.id} className="text-xs bg-white dark:bg-neutral-600 p-2 rounded border">
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex-1">
+                                          <div className="flex gap-4 text-neutral-600">
+                                            <span><strong>Buyer:</strong> {chat.buyerUsername || chat.buyer_id.slice(0, 8)}</span>
+                                            <span><strong>Seller:</strong> {chat.sellerUsername || chat.seller_id.slice(0, 8)}</span>
                                           </div>
-                                          <div className="flex items-center gap-2">
-                                            <span className="text-green-600 dark:text-green-400 font-semibold">💬 Seller:</span>
-                                            <span className="font-medium">{chat.sellerUsername || chat.seller_id}</span>
+                                          <div className="text-neutral-500 mt-1">
+                                            {chat.messageCount} messages • {chat.unreadCount} unread • {formatRelativeTime(chat.lastMessageAt)}
                                           </div>
                                         </div>
-                                        <div className="flex items-center gap-4 text-sm text-neutral-600 dark:text-neutral-400">
-                                          <span>📨 {chat.messageCount} messages</span>
-                                          <span>🔴 {chat.unreadCount} unread</span>
-                                          <span>⏰ {formatRelativeTime(chat.lastMessageAt)}</span>
-                                        </div>
-                                      </div>
-                                      <div className="flex items-center gap-2">
                                         <a
                                           href={`/admin/chats?chatId=${chat.id}`}
-                                          className="px-3 py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg text-xs font-semibold hover:from-orange-600 hover:to-orange-700 transition-all duration-200 hover:scale-105 shadow-md"
+                                          className="text-orange-600 hover:underline ml-2"
                                         >
-                                          🔗 View Chat
+                                          View →
                                         </a>
                                       </div>
                                     </div>
                                   ))}
                                 </div>
                               ) : (
-                                <p className="text-sm text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-700 p-4 rounded-xl border border-neutral-200 dark:border-neutral-600">
-                                  No chat conversations for this listing yet.
-                                </p>
+                                <div className="text-xs text-neutral-500">No chat conversations</div>
                               )}
                             </div>
                           </td>
@@ -568,44 +426,38 @@ export default function AdminListingsPage() {
             </table>
           </div>
 
-          {/* Enhanced Pagination */}
+          {/* Compact Pagination */}
           {totalPages > 1 && (
-            <div className="flex justify-between items-center py-6 px-6 border-t border-neutral-200/50 dark:border-neutral-700/50 bg-gradient-to-r from-neutral-50 to-neutral-100 dark:from-neutral-700 dark:to-neutral-800">
-              <div className="text-sm text-neutral-600 dark:text-neutral-400">
-                Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredListings.length)} of {filteredListings.length} listings
+            <div className="flex justify-between items-center py-3 px-3 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
+              <div className="text-xs text-neutral-600">
+                Page {currentPage} of {totalPages} | {filteredListings.length} listings
               </div>
-              
-              <div className="flex items-center gap-3">
+              <div className="flex gap-2">
                 <button
                   onClick={() => setCurrentPage(1)}
                   disabled={currentPage === 1}
-                  className="px-3 py-2 rounded-lg text-sm font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  className="px-2 py-1 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
                 >
                   First
                 </button>
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 rounded-lg text-sm font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  className="px-2 py-1 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
                 >
-                  Previous
+                  Prev
                 </button>
-                
-                <span className="px-4 py-2 text-sm font-bold text-neutral-900 dark:text-white bg-white dark:bg-neutral-700 rounded-lg border border-neutral-200 dark:border-neutral-600">
-                  {currentPage} of {totalPages}
-                </span>
-                
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 rounded-lg text-sm font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  className="px-2 py-1 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
                 >
                   Next
                 </button>
                 <button
                   onClick={() => setCurrentPage(totalPages)}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-2 rounded-lg text-sm font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  className="px-2 py-1 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
                 >
                   Last
                 </button>
@@ -615,29 +467,27 @@ export default function AdminListingsPage() {
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* Compact Delete Modal */}
       {showDeleteModal && selectedListing && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-neutral-800 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
-            <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-4">
-              🗑️ Delete Listing
-            </h3>
-            <p className="text-neutral-600 dark:text-neutral-400 mb-8 text-lg">
-              Are you sure you want to delete &quot;{selectedListing.title}&quot;? This action cannot be undone.
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-neutral-800 rounded p-4 max-w-sm w-full mx-4">
+            <h3 className="font-semibold text-neutral-900 dark:text-white mb-3">Delete Listing</h3>
+            <p className="text-neutral-600 dark:text-neutral-400 mb-4 text-sm">
+              Delete &quot;{selectedListing.title}&quot;? This cannot be undone.
             </p>
-            <div className="flex gap-4">
+            <div className="flex gap-2">
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="flex-1 px-6 py-3 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-xl font-semibold hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-all duration-200"
+                className="flex-1 px-3 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded text-sm"
               >
                 Cancel
               </button>
               <button
                 onClick={() => deleteListing(selectedListing.id)}
                 disabled={isDeleting}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold hover:from-red-600 hover:to-red-700 disabled:opacity-50 transition-all duration-200 hover:scale-105 shadow-lg"
+                className="flex-1 px-3 py-2 bg-red-500 text-white rounded text-sm disabled:opacity-50"
               >
-                {isDeleting ? '🗑️ Deleting...' : '🗑️ Delete'}
+                {isDeleting ? 'Deleting...' : 'Delete'}
               </button>
             </div>
           </div>
