@@ -675,11 +675,11 @@ export default function MessagesPage() {
                   {/* Chat Header */}
                   <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-2 rounded-t-3xl">
                     <div className="flex items-start gap-3">
-                      {/* Listing Image - Larger Size */}
+                      {/* Listing Image - Larger Size with rounded top-left corner */}
                       <img
                         src={chats.find(c => c.id === selectedChat)?.listing_image || '/placeholder-listing.jpg'}
                         alt="Listing"
-                        className="w-32 h-32 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        className="w-32 h-32 rounded-t-3xl rounded-br-lg rounded-bl-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
                         onClick={async () => {
                           const selectedChatData = chats.find(c => c.id === selectedChat);
                           console.log('🔍 Image clicked, selectedChatData:', selectedChatData);
@@ -712,7 +712,7 @@ export default function MessagesPage() {
                           
                           {/* Age + Location - Right side */}
                           <div className="flex items-center gap-1 flex-shrink-0">
-                            {/* Posting Age - Format as "7d ago" */}
+                            {/* Posting Age - Use same logic as grid/list cards */}
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
                               {chats.find(c => c.id === selectedChat)?.listing_created_at ? 
                                 formatTimestamp(chats.find(c => c.id === selectedChat)?.listing_created_at!) : 
@@ -789,8 +789,8 @@ export default function MessagesPage() {
                         </div>
                       </div>
                       
-                      {/* View Listing Button - Moved Higher */}
-                      <div className="flex-shrink-0">
+                      {/* View Listing Button - Aligned vertically with username pill */}
+                      <div className="flex items-end">
                         <button
                           onClick={async () => {
                             const selectedChatData = chats.find(c => c.id === selectedChat);
