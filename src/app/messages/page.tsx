@@ -15,15 +15,14 @@ interface Chat {
   last_message: string;
   last_message_time: number;
   unread_count: number;
-  listing_id: number;
-  listing_image?: string;
-  listing_price?: number;
-  listing_created_at?: number;
-  seller_verified?: boolean;
-  listing_type?: 'sell' | 'want';
-  location?: string;
-  seller_score?: number;
-  seller_rating?: number;
+  listing_id: string;
+  listing_image: string;
+  listing_price: number;
+  listing_created_at: number;
+  seller_verified: boolean;
+  listing_type: string;
+  location: string;
+  seller_rating: number;
 }
 
 interface SystemNotification {
@@ -119,15 +118,13 @@ export default function MessagesPage() {
             seller_verified: chat.seller_verified || false,
             listing_type: chat.listing_type || 'sell',
             location: chat.listing_location,
-            seller_score: chat.seller_score || chat.seller_rating || chat.user_score || chat.user_rating || chat.reputation || chat.score || 0,
-            seller_rating: chat.seller_rating || chat.user_rating || chat.seller_score || chat.user_score || chat.reputation || chat.score || 0
+            seller_rating: chat.seller_rating || 0
         }));
         
         console.log('🔍 Raw chat API response:', data.chats);
         console.log('🔍 Transformed chats with reputation data:', transformedChats.map(c => ({
           id: c.id,
           other_user: c.other_user,
-          seller_score: c.seller_score,
           seller_rating: c.seller_rating,
           seller_verified: c.seller_verified,
           raw_data: data.chats.find(raw => raw.id === c.id)
@@ -745,7 +742,7 @@ export default function MessagesPage() {
                           console.log('🔍 Image clicked, selectedChatData:', selectedChatData);
                           if (selectedChatData?.listing_id) {
                             console.log('🔍 Calling openListingModal with ID:', selectedChatData.listing_id);
-                            await openListingModal(selectedChatData.listing_id);
+                            await openListingModal(Number(selectedChatData.listing_id));
                           } else {
                             console.log('🔍 No listing_id found in selectedChatData');
                           }
@@ -844,14 +841,14 @@ export default function MessagesPage() {
                           <span className="text-white/80 text-xs">
                             +{(() => {
                               const selectedChatData = chats.find(c => c.id === selectedChat);
-                              const score = selectedChatData?.seller_score || selectedChatData?.seller_rating || 0;
+                              const score = selectedChatData?.seller_rating || 0;
                               console.log('🔍 Reputation display debug:', {
                                 chatId: selectedChat,
                                 other_user: selectedChatData?.other_user,
-                                seller_score: selectedChatData?.seller_score,
                                 seller_rating: selectedChatData?.seller_rating,
                                 final_score: score,
-                                all_available_fields: selectedChatData ? Object.keys(selectedChatData) : []
+                                all_available_fields: selectedChatData ? Object.keys(selectedChatData) : [],
+                                raw_chat_data: chats.find(c => c.id === selectedChat)
                               });
                               return score;
                             })()} 👍
@@ -891,7 +888,7 @@ export default function MessagesPage() {
                             console.log('🔍 Button clicked, selectedChatData:', selectedChatData);
                             if (selectedChatData?.listing_id) {
                               console.log('🔍 Calling openListingModal with ID:', selectedChatData.listing_id);
-                              await openListingModal(selectedChatData.listing_id);
+                              await openListingModal(Number(selectedChatData.listing_id));
                             } else {
                               console.log('🔍 No listing_id found in selectedChatData');
                             }
