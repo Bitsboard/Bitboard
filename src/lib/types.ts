@@ -23,9 +23,8 @@ export type Place = {
 
 export type Seller = {
   name: string;
-  score: number;
+  rating: number; // Single metric: thumbs-up count
   deals: number;
-  rating: number;
   verifications: {
     email?: boolean;
     phone?: boolean;

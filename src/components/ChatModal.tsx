@@ -423,12 +423,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
               </Link>
               
               {/* User reputation - now simple text without pill styling */}
-              <span className={cn(
-                "text-xs font-medium",
-                dark ? "text-neutral-300" : "text-neutral-600"
-              )}>
-                +{listing.seller.rating} 👍
-              </span>
+              <span className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.rating} 👍</span>
             </div>
           </div>
 

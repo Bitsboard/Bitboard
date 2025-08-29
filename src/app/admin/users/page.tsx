@@ -589,7 +589,7 @@ export default function AdminUsersPage() {
                       <td className="px-3 py-2 text-xs text-neutral-600 dark:text-neutral-400">
                         {user.chatsCount}
                       </td>
-                      <td className="px-3 py-2 text-xs text-neutral-600 dark:text-neutral-400">
+                      <td className="px-3 py-2 text-sm text-center">
                         👍 {user.rating}
                       </td>
                       <td className="px-3 py-2 text-xs text-neutral-600 dark:text-neutral-400">
@@ -766,7 +766,9 @@ export default function AdminUsersPage() {
                         <div className="text-xs text-neutral-600 dark:text-neutral-400">Deals</div>
                       </div>
                       <div className="text-center p-3 bg-white dark:bg-neutral-600 rounded">
-                        <div className="text-2xl font-bold text-yellow-600">👍 {selectedUser.rating}</div>
+                        <div className="text-2xl font-bold text-neutral-900 dark:text-white">
+                          👍 {selectedUser.rating}
+                        </div>
                         <div className="text-xs text-neutral-600 dark:text-neutral-400">Thumbs Up</div>
                       </div>
                     </div>

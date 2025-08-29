@@ -171,9 +171,8 @@ export async function GET(req: NextRequest) {
         // Create the seller object structure that the frontend expects
         seller: {
           name: r.postedBy || 'unknown',
-          score: r.userRating || 0, // Use thumbs-up count, default to 0
+          rating: r.userRating || 0, // Single metric: thumbs-up count
           deals: r.userDeals || 0,
-          rating: r.userRating || 0, // Use thumbs-up count, default to 0
           verifications: {
             email: Boolean(r.userVerified),
             phone: false, // Not implemented yet

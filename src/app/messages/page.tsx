@@ -838,7 +838,7 @@ export default function MessagesPage() {
                           )}
                           
                           {/* User Reputation - +x 👍 format */}
-                          <div className="flex items-center space-x-1">
+                          <div className="flex items-center gap-1">
                             <span className="text-sm text-white/80">+{chats.find(c => c.id === selectedChat)?.seller_rating || 0} 👍</span>
                           </div>
                         </div>
