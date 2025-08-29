@@ -275,36 +275,36 @@ export default function MessagesPage() {
       <div className="flex-1 flex overflow-hidden rounded-3xl">
         {/* Left Panel - Conversations & Notifications */}
         <div className="w-80 bg-white/80 dark:bg-neutral-900/90 backdrop-blur-sm border-r border-neutral-200/50 dark:border-neutral-800/50 flex flex-col rounded-r-3xl shadow-xl">
-          {/* Header - Shorter */}
+          {/* Header - Compact */}
           <div className="p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 bg-gradient-to-r from-neutral-500 via-neutral-600 to-neutral-700 flex-shrink-0 rounded-tr-3xl shadow-lg">
-            <div className="mb-3">
+            <div className="flex items-center justify-between">
               <h1 className="text-lg font-bold text-white drop-shadow-sm">
                 Messages
               </h1>
-            </div>
-            
-            {/* Filter Toggle */}
-            <div className="flex bg-white/20 rounded-xl p-1">
-              <button
-                onClick={() => setFilter('all')}
-                className={`flex-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  filter === 'all'
-                    ? 'bg-white text-neutral-600 shadow-md'
-                    : 'text-white/80 hover:text-white'
-                }`}
-              >
-                All ({combinedItems.length})
-              </button>
-              <button
-                onClick={() => setFilter('unread')}
-                className={`flex-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  filter === 'unread'
-                    ? 'bg-white text-neutral-600 shadow-md'
-                    : 'text-white/80 hover:text-white'
-                }`}
-              >
-                Unread ({(chats.filter(c => c.unread_count > 0).length + systemNotifications.filter(n => !n.read).length)})
-              </button>
+              
+              {/* Filter Toggle */}
+              <div className="flex bg-white/20 rounded-xl p-1">
+                <button
+                  onClick={() => setFilter('all')}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    filter === 'all'
+                      ? 'bg-white text-neutral-600 shadow-md'
+                      : 'text-white/80 hover:text-white'
+                  }`}
+                >
+                  All ({combinedItems.length})
+                </button>
+                <button
+                  onClick={() => setFilter('unread')}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    filter === 'unread'
+                      ? 'bg-white text-neutral-600 shadow-md'
+                      : 'text-white/80 hover:text-white'
+                  }`}
+                >
+                  Unread ({(chats.filter(c => c.unread_count > 0).length + systemNotifications.filter(n => !n.read).length)})
+                </button>
+              </div>
             </div>
           </div>
           
@@ -511,7 +511,7 @@ export default function MessagesPage() {
         <div className="flex-1 bg-white/80 dark:bg-neutral-900/90 backdrop-blur-sm flex flex-col rounded-l-3xl shadow-xl">
           {selectedChat ? (
             <>
-              {/* Chat Header - Essential listing information */}
+              {/* Chat Header - Comprehensive listing information */}
               <div className="p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 bg-gradient-to-r from-orange-500 to-orange-600 flex-shrink-0 rounded-tl-3xl">
                 <div className="flex items-start gap-4">
                   {/* Listing image */}
@@ -536,32 +536,60 @@ export default function MessagesPage() {
                     <h2 className="text-lg font-bold text-white truncate">
                       {chats.find(c => c.id === selectedChat)?.listing_title}
                     </h2>
+                    
+                    {/* First row: Basic info */}
                     <div className="flex items-center gap-3 mt-1 text-orange-100 text-sm">
                       <span>Chat with {chats.find(c => c.id === selectedChat)?.other_user}</span>
                       <span>•</span>
                       <span>Listing #{chats.find(c => c.id === selectedChat)?.listing_id}</span>
-                      <span>•</span>
-                      <span>
+                    </div>
+                    
+                    {/* Second row: Price and age */}
+                    <div className="flex items-center gap-3 mt-1 text-orange-100/90 text-sm">
+                      <span className="font-medium">
                         {chats.find(c => c.id === selectedChat)?.listing_price ? 
                           `${(chats.find(c => c.id === selectedChat)?.listing_price! / 100000000).toFixed(8)} BTC` : 
                           'Price N/A'
                         }
                       </span>
+                      <span>•</span>
+                      <span>
+                        {chats.find(c => c.id === selectedChat)?.listing_created_at ? 
+                          formatTimestamp(chats.find(c => c.id === selectedChat)?.listing_created_at!) : 
+                          'Age N/A'
+                        }
+                      </span>
+                      <span>•</span>
+                      <a 
+                        href={`/listing/${chats.find(c => c.id === selectedChat)?.listing_id}`}
+                        className="text-orange-200 hover:text-white underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        View Listing →
+                      </a>
                     </div>
                   </div>
                   
                   {/* Seller info with verified badge */}
                   <div className="flex items-center gap-2">
-                    <span className="text-orange-100 text-sm font-medium">
-                      {chats.find(c => c.id === selectedChat)?.other_user}
-                    </span>
-                    {chats.find(c => c.id === selectedChat)?.seller_verified && (
-                      <span className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                        <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                        </svg>
+                    <div className="flex items-center gap-2 px-2 py-1 bg-white/20 rounded-full">
+                      <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
+                        <span className="text-xs font-bold text-white">
+                          {chats.find(c => c.id === selectedChat)?.other_user?.charAt(0)?.toUpperCase() || 'U'}
+                        </span>
+                      </div>
+                      <span className="text-white text-sm font-medium">
+                        {chats.find(c => c.id === selectedChat)?.other_user}
                       </span>
-                    )}
+                      {chats.find(c => c.id === selectedChat)?.seller_verified && (
+                        <span className="w-3.5 h-3.5 bg-blue-500 rounded-full flex items-center justify-center">
+                          <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                          </svg>
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
