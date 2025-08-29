@@ -569,39 +569,27 @@ export default function MessagesPage() {
                         ) : (
                           /* Chat Layout */
                           <div className="flex items-start gap-3">
-                            {/* Listing Image/Icon */}
-                            <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden shadow-sm">
-                              {item.listing_image ? (
-                                <img 
-                                  src={item.listing_image} 
-                                  alt={item.listing_title}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    // Fallback to icon if image fails to load
-                                    const target = e.target as HTMLImageElement;
-                                    target.style.display = 'none';
-                                    target.nextElementSibling?.classList.remove('hidden');
-                                  }}
-                                />
-                              ) : null}
-                              <div className={`w-full h-full bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-700 dark:to-neutral-800 flex items-center justify-center ${item.listing_image ? 'hidden' : ''}`}>
-                                <svg className="w-6 h-6 text-neutral-500 dark:text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 00-2-2V6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                              </div>
-                            </div>
-                            
                             {/* Content - New Layout */}
                             <div className="flex-1 min-w-0">
                               {/* Top Row: Username Pill and Selling/Looking For Pill */}
                               <div className="flex items-center gap-2 mb-1">
-                                {/* Username Pill */}
+                                {/* Username Pill with Profile Icon */}
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-all duration-200 ${
                                   selectedChat === item.id 
                                     ? 'bg-white/20 text-white border border-white/30'
                                     : 'bg-white/10 dark:bg-neutral-800/50 text-neutral-700 dark:text-neutral-300 border border-neutral-300/60 dark:border-neutral-700/50 hover:bg-white/20 dark:hover:bg-neutral-700/50'
                                 }`}>
-                                  {item.other_user}
+                                  {/* Profile Icon */}
+                                  <div className="flex-shrink-0 -ml-1.5">
+                                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
+                                      <span className="text-xs font-bold text-white">
+                                        {item.other_user?.charAt(0)?.toUpperCase() || 'U'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Username */}
+                                  <span className="ml-1">{item.other_user}</span>
                                 </span>
                               </div>
                               
@@ -614,11 +602,12 @@ export default function MessagesPage() {
                               
                               {/* Last Message with Age */}
                               <div className="flex items-center gap-2 mb-1">
-                                <span className={`text-xs flex-shrink-0 ${
+                                <span className={`text-xs flex-shrink-0 font-bold ${
                                   selectedChat === item.id ? 'text-white/70' : 'text-neutral-500 dark:text-neutral-400'
                                 }`}>
-                                  {formatTimestamp(item.last_message_time)}
+                                  {formatTimestamp(item.last_message_time).replace(' ago', '')}
                                 </span>
+                                <span className="text-xs text-neutral-400">•</span>
                                 <p className={`text-xs truncate flex-1 ${
                                   selectedChat === item.id ? 'text-white/80' : 'text-neutral-600 dark:text-neutral-300'
                                 }`}>
