@@ -329,23 +329,32 @@ export default function MessagesPage() {
     const selectedChatData = chats.find(c => c.id === selectedChat);
     if (!selectedChatData) return;
     
-    // Create a listing object that matches the ListingModal interface
+    // Create a listing object that matches the Listing interface
     const listing = {
       id: listingId.toString(),
       title: selectedChatData.listing_title,
-      type: selectedChatData.listing_type || 'sell',
-      priceSats: selectedChatData.listing_price || 0,
-      images: selectedChatData.listing_image ? [selectedChatData.listing_image] : [],
       description: 'Listing from chat',
-      category: 'Other',
+      priceSats: selectedChatData.listing_price || 0,
+      category: 'Featured' as const,
       location: 'Unknown',
-      createdAt: selectedChatData.listing_created_at || Date.now(),
+      lat: 0,
+      lng: 0,
+      type: selectedChatData.listing_type || 'sell',
+      images: selectedChatData.listing_image ? [selectedChatData.listing_image] : [],
+      boostedUntil: null,
       seller: {
-        username: selectedChatData.other_user,
-        verified: selectedChatData.seller_verified || false,
-        image: null
+        name: selectedChatData.other_user,
+        score: 0,
+        deals: 0,
+        rating: 0,
+        verifications: {
+          email: false,
+          phone: false,
+          lnurl: false
+        },
+        onTimeRelease: 0
       },
-      boostedUntil: null
+      createdAt: selectedChatData.listing_created_at || Date.now()
     };
     
     setModal('active', listing);
@@ -485,7 +494,9 @@ export default function MessagesPage() {
                           (item.itemType === 'chat' && selectedChat === item.id) ||
                           (item.itemType === 'notification' && selectedNotification === item.id)
                             ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white'
-                            : 'bg-white dark:bg-neutral-900'
+                            : item.itemType === 'notification'
+                            ? 'bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20'
+                            : 'bg-white/60 dark:bg-neutral-900/60'
                         }`}
                       >
                         {item.itemType === 'notification' ? (
@@ -895,7 +906,7 @@ export default function MessagesPage() {
                   <div className="text-center">
                     <div className="w-24 h-24 mx-auto mb-6 bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center">
                       <svg className="w-12 h-12 text-neutral-500 dark:text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12h.01M16h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12h.01M16h.01M16h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                       </svg>
                     </div>
                     <h2 className="text-xl font-bold text-neutral-900 dark:text-white mb-2">
