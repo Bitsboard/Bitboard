@@ -23,6 +23,7 @@ interface SystemNotification {
   timestamp: number;
   read: boolean;
   type: 'system' | 'welcome' | 'update';
+  icon?: 'info' | 'success' | 'warning' | 'error' | 'system';
 }
 
 interface Message {
@@ -123,7 +124,8 @@ export default function MessagesPage() {
             message: 'Your account has been verified. Start trading with Bitcoin today!',
             timestamp: Date.now() - 86400000, // 24 hours ago
             read: true,
-            type: 'welcome'
+            type: 'welcome',
+            icon: 'success'
           }
         ];
         setSystemNotifications(defaultNotifications);
@@ -263,7 +265,7 @@ export default function MessagesPage() {
         {/* Left Panel - Conversations & Notifications */}
         <div className="w-80 bg-white/80 dark:bg-neutral-900/90 backdrop-blur-sm border-r border-neutral-200/50 dark:border-neutral-800/50 flex flex-col rounded-r-3xl shadow-xl">
           {/* Header - Shorter */}
-          <div className="p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 flex-shrink-0 rounded-tr-3xl shadow-lg">
+          <div className="p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 bg-gradient-to-r from-neutral-500 via-neutral-600 to-neutral-700 flex-shrink-0 rounded-tr-3xl shadow-lg">
             <div className="flex items-center justify-between mb-3">
               <h1 className="text-lg font-bold text-white drop-shadow-sm">
                 Messages & Notifications
@@ -289,7 +291,7 @@ export default function MessagesPage() {
                 onClick={() => setFilter('all')}
                 className={`flex-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                   filter === 'all'
-                    ? 'bg-white text-orange-600 shadow-md'
+                    ? 'bg-white text-neutral-600 shadow-md'
                     : 'text-white/80 hover:text-white'
                 }`}
               >
@@ -299,7 +301,7 @@ export default function MessagesPage() {
                 onClick={() => setFilter('unread')}
                 className={`flex-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                   filter === 'unread'
-                    ? 'bg-white text-orange-600 shadow-md'
+                    ? 'bg-white text-neutral-600 shadow-md'
                     : 'text-white/80 hover:text-white'
                 }`}
               >
@@ -358,10 +360,38 @@ export default function MessagesPage() {
                     {item.itemType === 'notification' ? (
                       /* System Notification Layout */
                       <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-800 dark:to-purple-900 flex items-center justify-center shadow-sm">
-                          <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19h6a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
+                        <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center shadow-sm ${
+                          item.icon === 'info' ? 'bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-900' :
+                          item.icon === 'success' ? 'bg-gradient-to-br from-green-100 to-green-200 dark:from-green-800 dark:to-green-900' :
+                          item.icon === 'warning' ? 'bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-800 dark:to-yellow-900' :
+                          item.icon === 'error' ? 'bg-gradient-to-br from-red-100 to-red-200 dark:from-red-800 dark:to-red-900' :
+                          'bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-800 dark:to-purple-900'
+                        }`}>
+                          {item.icon === 'info' && (
+                            <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          )}
+                          {item.icon === 'success' && (
+                            <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          )}
+                          {item.icon === 'warning' && (
+                            <svg className="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                          )}
+                          {item.icon === 'error' && (
+                            <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          )}
+                          {(!item.icon || item.icon === 'system') && (
+                            <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19h6a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                          )}
                         </div>
                         
                         <div className="flex-1 min-w-0">
@@ -389,7 +419,11 @@ export default function MessagesPage() {
                               <span className={`text-xs px-2 py-0.5 rounded-full min-w-[18px] text-center font-medium ${
                                 selectedNotification === item.id 
                                   ? 'bg-white/20 text-white'
-                                  : 'bg-purple-500 text-white'
+                                  : item.icon === 'info' ? 'bg-blue-500 text-white' :
+                                    item.icon === 'success' ? 'bg-green-500 text-white' :
+                                    item.icon === 'warning' ? 'bg-yellow-500 text-white' :
+                                    item.icon === 'error' ? 'bg-red-500 text-white' :
+                                    'bg-purple-500 text-white'
                               }`}>
                                 New
                               </span>
@@ -480,12 +514,12 @@ export default function MessagesPage() {
           {selectedChat ? (
             <>
               {/* Chat Header - No Close Button */}
-              <div className="p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 bg-gradient-to-r from-blue-500 to-blue-600 flex-shrink-0 rounded-tl-3xl">
+              <div className="p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 bg-gradient-to-r from-orange-500 to-orange-600 flex-shrink-0 rounded-tl-3xl">
                 <div>
                   <h2 className="text-lg font-bold text-white">
                     {chats.find(c => c.id === selectedChat)?.listing_title}
                   </h2>
-                  <p className="text-blue-100 text-sm">
+                  <p className="text-orange-100 text-sm">
                     Chat with {chats.find(c => c.id === selectedChat)?.other_user}
                   </p>
                 </div>
@@ -513,13 +547,13 @@ export default function MessagesPage() {
                       <div
                         className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-sm ${
                           message.is_from_current_user
-                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                            ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white'
                             : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100'
                         }`}
                       >
                         <p className="text-sm">{message.content}</p>
                         <p className={`text-xs mt-1 ${
-                          message.is_from_current_user ? 'text-blue-100' : 'text-neutral-500 dark:text-neutral-400'
+                          message.is_from_current_user ? 'text-orange-100' : 'text-neutral-500 dark:text-neutral-400'
                         }`}>
                           {formatTimestamp(message.timestamp)}
                         </p>
@@ -544,7 +578,7 @@ export default function MessagesPage() {
                   <button
                     onClick={sendMessage}
                     disabled={!newMessage.trim() || isSending}
-                    className="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-medium hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 shadow-md"
+                    className="px-6 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl font-medium hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 shadow-md"
                   >
                     {isSending ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
