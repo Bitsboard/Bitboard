@@ -6,6 +6,7 @@ import { useTheme } from '@/lib/contexts/ThemeContext';
 import { useUser, useSettings } from '@/lib/settings';
 import { ListingModal } from '@/components/ListingModal';
 import { generateProfilePicture, getInitials, formatPostAge } from "@/lib/utils";
+import { useBtcRate } from '@/lib/hooks/useBtcRate';
 
 interface Chat {
   id: string;
@@ -46,6 +47,7 @@ export default function MessagesPage() {
   const { isDark: dark } = useTheme();
   const { user } = useUser();
   const { modals, setModal, unit } = useSettings();
+  const btcCad = useBtcRate();
   
   const [chats, setChats] = useState<Chat[]>([]);
   const [systemNotifications, setSystemNotifications] = useState<SystemNotification[]>([]);
@@ -339,11 +341,41 @@ export default function MessagesPage() {
         return;
       }
       
-      const listing = await response.json();
-      console.log('🔍 Fetched listing data:', listing);
+      const dbListing = await response.json() as any;
+      console.log('🔍 Fetched listing data:', dbListing);
       
-      // Set the modal with the real listing data
-      setModal('active', listing);
+      // Transform the database listing to match the expected Listing interface
+      const transformedListing = {
+        id: String(dbListing.id),
+        title: dbListing.title || 'Untitled Listing',
+        description: dbListing.description || 'No description available',
+        priceSats: Number(dbListing.price_sats) || 0,
+        category: dbListing.category || 'Featured',
+        location: dbListing.location || 'Location Unknown',
+        lat: Number(dbListing.lat) || 0,
+        lng: Number(dbListing.lng) || 0,
+        type: dbListing.type || 'sell',
+        images: dbListing.images ? (Array.isArray(dbListing.images) ? dbListing.images : [dbListing.images]) : [],
+        boostedUntil: dbListing.boosted_until ? Number(dbListing.boosted_until) : null,
+        seller: {
+          name: dbListing.seller_name || dbListing.posted_by || 'Unknown Seller',
+          score: Number(dbListing.seller_score) || 0,
+          deals: Number(dbListing.seller_deals) || 0,
+          rating: Number(dbListing.seller_rating) || 0,
+          verifications: {
+            email: Boolean(dbListing.seller_verified_email),
+            phone: Boolean(dbListing.seller_verified_phone),
+            lnurl: Boolean(dbListing.seller_verified_lnurl)
+          },
+          onTimeRelease: Number(dbListing.seller_on_time_release) || 0
+        },
+        createdAt: Number(dbListing.created_at) || Date.now()
+      };
+      
+      console.log('🔍 Transformed listing:', transformedListing);
+      
+      // Set the modal with the transformed listing data
+      setModal('active', transformedListing);
       console.log('🔍 Modal set to active with listing');
       console.log('🔍 Modal state after setModal:', modals);
       
@@ -675,11 +707,11 @@ export default function MessagesPage() {
                   {/* Chat Header */}
                   <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-2 rounded-t-3xl">
                     <div className="flex items-start gap-3">
-                      {/* Listing Image - Only round top-left corner to match header */}
+                      {/* Listing Image - Fix top-left corner rounding */}
                       <img
                         src={chats.find(c => c.id === selectedChat)?.listing_image || '/placeholder-listing.jpg'}
                         alt="Listing"
-                        className="w-32 h-32 rounded-tl-3xl rounded-tr-lg rounded-br-lg rounded-bl-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        className="w-32 h-32 rounded-tl-2xl rounded-tr-lg rounded-br-lg rounded-bl-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
                         onClick={async () => {
                           const selectedChatData = chats.find(c => c.id === selectedChat);
                           console.log('🔍 Image clicked, selectedChatData:', selectedChatData);
@@ -711,103 +743,116 @@ export default function MessagesPage() {
                           </h2>
                         </div>
                         
-                        {/* Price - Uses global BTC/sat toggle setting from hamburger menu */}
+                        {/* Price + Dollar Equivalent */}
                         <div className="text-white/90 mb-1">
+                          {/* Primary Price */}
                           {unit === 'BTC' ? (
-                            <span className="text-lg font-semibold">
-                              {(Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000).toFixed(8)} BTC
-                            </span>
-                          ) : (
-                            <span className="text-lg font-semibold">
-                              {chats.find(c => c.id === selectedChat)?.listing_price?.toLocaleString() || 0} sats
-                            </span>
-                          )}
-                        </div>
-                        
-                        {/* Username Pill - Clickable to open listing modal */}
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="inline-flex items-center px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50 border border-neutral-300/60 dark:border-neutral-700/50 hover:scale-105 hover:shadow-md"
-                            onClick={async () => {
-                              const selectedChatData = chats.find(c => c.id === selectedChat);
-                              if (selectedChatData?.listing_id) {
-                                await openListingModal(selectedChatData.listing_id);
-                              }
-                            }}
-                          >
-                            <div className="flex-shrink-0 -ml-1">
-                              <img
-                                src={generateProfilePicture(chats.find(c => c.id === selectedChat)?.other_user || '')}
-                                alt={`${chats.find(c => c.id === selectedChat)?.other_user}'s profile picture`}
-                                className="w-5 h-5 rounded-full object-cover"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.display = 'none';
-                                  const parent = target.parentElement;
-                                  if (parent) {
-                                    const fallback = parent.querySelector('div') as HTMLDivElement;
-                                    if (fallback) fallback.classList.remove('hidden');
-                                  }
-                                }}
-                              />
-                              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center hidden">
-                                <span className="text-xs font-bold text-white">{getInitials(chats.find(c => c.id === selectedChat)?.other_user || '')}</span>
+                            <div>
+                              <span className="text-lg font-semibold">
+                                {(Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000).toFixed(8)} BTC
+                              </span>
+                              {/* Dollar equivalent */}
+                              <div className="text-sm text-white/80">
+                                ${((Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000) * (btcCad || 0)).toFixed(2)} USD
                               </div>
                             </div>
-                            <span className="text-sm ml-1 text-white">{chats.find(c => c.id === selectedChat)?.other_user}</span>
-                          </div>
-                          
-                          {/* Verified Badge */}
-                          {chats.find(c => c.id === selectedChat)?.seller_verified && (
-                            <span className="verified-badge inline-flex h-5 w-5 items-center justify-center rounded-full text-white font-bold shadow-md" style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }} aria-label="Verified" title="User has verified their identity">
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                            </span>
+                          ) : (
+                            <div>
+                              <span className="text-lg font-semibold">
+                                {chats.find(c => c.id === selectedChat)?.listing_price?.toLocaleString() || 0} sats
+                              </span>
+                              {/* Dollar equivalent */}
+                              <div className="text-sm text-white/80">
+                                ${((Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000) * (btcCad || 0)).toFixed(2)} USD
+                              </div>
+                            </div>
                           )}
                         </div>
                       </div>
                       
-                      {/* Right Side: Age + Location + View Listing Button */}
-                      <div className="flex flex-col items-end gap-2">
-                        {/* Age + Location - Right aligned with header edge */}
-                        <div className="flex items-center gap-1">
-                          {/* Posting Age - Use same logic as grid/list cards */}
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
-                            {chats.find(c => c.id === selectedChat)?.listing_created_at ? 
-                              formatPostAge(chats.find(c => c.id === selectedChat)?.listing_created_at!) : 
-                              'Unknown'
-                            }
-                          </span>
-                          
-                          {/* "in" text */}
-                          <span className="text-white/80 text-xs">in</span>
-                          
-                          {/* Location Tag */}
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            {chats.find(c => c.id === selectedChat)?.location || 'Location N/A'}
-                          </span>
-                        </div>
+                      {/* Right Side: Age + Location */}
+                      <div className="flex items-center gap-1">
+                        {/* Posting Age - Use same logic as grid/list cards */}
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
+                          {chats.find(c => c.id === selectedChat)?.listing_created_at ? 
+                            formatPostAge(chats.find(c => c.id === selectedChat)?.listing_created_at!) : 
+                            'Unknown'
+                          }
+                        </span>
                         
-                        {/* View Listing Button - Aligned with username pill */}
-                        <button
-                          onClick={async () => {
+                        {/* "in" text */}
+                        <span className="text-white/80 text-xs">in</span>
+                        
+                        {/* Location Tag */}
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          {chats.find(c => c.id === selectedChat)?.location || 'Location N/A'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Bottom Row: Username (left) + View Listing Button (right) */}
+                    <div className="flex items-center justify-between mt-2">
+                      {/* Username Pill - Bottom Left */}
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="inline-flex items-center px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50 border border-neutral-300/60 dark:border-neutral-700/50 hover:scale-105 hover:shadow-md"
+                          onClick={() => {
                             const selectedChatData = chats.find(c => c.id === selectedChat);
-                            console.log('🔍 Button clicked, selectedChatData:', selectedChatData);
-                            if (selectedChatData?.listing_id) {
-                              console.log('🔍 Calling openListingModal with ID:', selectedChatData.listing_id);
-                              await openListingModal(selectedChatData.listing_id);
-                            } else {
-                              console.log('🔍 No listing_id found in selectedChatData');
+                            if (selectedChatData?.other_user) {
+                              router.push(`/profile/${selectedChatData.other_user}`);
                             }
                           }}
-                          className="px-3 py-1.5 text-xs font-medium text-orange-600 bg-white hover:bg-orange-50 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-md"
                         >
-                          View Listing
-                        </button>
+                          <div className="flex-shrink-0 -ml-1">
+                            <img
+                              src={generateProfilePicture(chats.find(c => c.id === selectedChat)?.other_user || '')}
+                              alt={`${chats.find(c => c.id === selectedChat)?.other_user}'s profile picture`}
+                              className="w-5 h-5 rounded-full object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                const parent = target.parentElement;
+                                if (parent) {
+                                  const fallback = parent.querySelector('div') as HTMLDivElement;
+                                  if (fallback) fallback.classList.remove('hidden');
+                                }
+                              }}
+                            />
+                            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center hidden">
+                              <span className="text-xs font-bold text-white">{getInitials(chats.find(c => c.id === selectedChat)?.other_user || '')}</span>
+                            </div>
+                          </div>
+                          <span className="text-sm ml-1 text-white">{chats.find(c => c.id === selectedChat)?.other_user}</span>
+                        </div>
+                        
+                        {/* Verified Badge */}
+                        {chats.find(c => c.id === selectedChat)?.seller_verified && (
+                          <span className="verified-badge inline-flex h-5 w-5 items-center justify-center rounded-full text-white font-bold shadow-md" style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }} aria-label="Verified" title="User has verified their identity">
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          </span>
+                        )}
                       </div>
+                      
+                      {/* View Listing Button - Bottom Right */}
+                      <button
+                        onClick={async () => {
+                          const selectedChatData = chats.find(c => c.id === selectedChat);
+                          console.log('🔍 Button clicked, selectedChatData:', selectedChatData);
+                          if (selectedChatData?.listing_id) {
+                            console.log('🔍 Calling openListingModal with ID:', selectedChatData.listing_id);
+                            await openListingModal(selectedChatData.listing_id);
+                          } else {
+                            console.log('🔍 No listing_id found in selectedChatData');
+                          }
+                        }}
+                        className="px-3 py-1.5 text-xs font-medium text-orange-600 bg-white hover:bg-orange-50 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-md"
+                      >
+                        View Listing
+                      </button>
                     </div>
                   </div>
 
@@ -979,7 +1024,7 @@ export default function MessagesPage() {
           open={!!modals.active}
           onClose={() => setModal('active', null)}
           unit="sats"
-          btcCad={null}
+          btcCad={btcCad}
           dark={dark}
           user={user}
           onShowAuth={() => setModal('showAuth', true)}
