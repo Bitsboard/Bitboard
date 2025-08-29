@@ -69,14 +69,14 @@ export async function GET(req: Request) {
     let where = '';
     let binds: any[] = [];
     if (q) {
-      where = 'WHERE l.title LIKE ? OR l.description LIKE ? OR u.username LIKE ?';
+      where = 'WHERE l.title LIKE ? OR l.description LIKE ? OR l.posted_by LIKE ?';
       binds.push(`%${q}%`, `%${q}%`, `%${q}%`);
     }
     
     console.log('🔍 Admin Listings API: Where clause:', where);
     console.log('🔍 Admin Listings API: Binds:', binds);
     
-    // Enhanced query with user information and chat counts
+    // Simplified query that focuses on core functionality first
     const listingsQuery = `
       SELECT 
         l.id,
@@ -86,7 +86,7 @@ export async function GET(req: Request) {
         l.ad_type AS adType,
         l.category,
         l.posted_by AS postedBy,
-        u.username AS username,
+        l.posted_by AS username,
         l.created_at AS createdAt,
         l.updated_at AS updatedAt,
         l.status,
@@ -94,14 +94,8 @@ export async function GET(req: Request) {
         l.location,
         COALESCE(l.views, 0) AS views,
         COALESCE(l.favorites, 0) AS favorites,
-        COALESCE(chat_counts.chat_count, 0) AS replies
+        0 AS replies
       FROM listings l
-      LEFT JOIN users u ON l.posted_by = u.id
-      LEFT JOIN (
-        SELECT listing_id, COUNT(*) as chat_count 
-        FROM chats 
-        GROUP BY listing_id
-      ) chat_counts ON l.id = chat_counts.listing_id
       ${where}
       ORDER BY l.created_at DESC 
       LIMIT ? OFFSET ?

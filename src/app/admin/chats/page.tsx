@@ -315,17 +315,12 @@ export default function AdminChatsPage() {
                         </div>
                       </td>
                       <td className="px-3 py-2">
-                        <div className="max-w-xs">
-                          <button
-                            onClick={() => router.push(`/admin/listings?search=${chat.listing_title}`)}
-                            className="text-left hover:text-orange-600 transition-colors"
-                          >
-                            <div className="font-medium text-neutral-900 dark:text-white text-sm">{chat.listing_title}</div>
-                            <div className="text-xs text-neutral-500 font-mono">
-                              ID: {String(chat.listing_id).slice(0, 8)}...
-                            </div>
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => router.push(`/admin/listings?search=${chat.listing_title}`)}
+                          className="text-left hover:text-orange-600 transition-colors"
+                        >
+                          <div className="font-medium text-neutral-900 dark:text-white text-sm">{chat.listing_title}</div>
+                        </button>
                       </td>
                       <td className="px-3 py-2">
                         <button
@@ -335,7 +330,6 @@ export default function AdminChatsPage() {
                           <div className="text-sm font-medium text-neutral-900 dark:text-white">
                             {chat.seller_username || chat.seller_id.slice(0, 8) + '...'}
                           </div>
-                          <div className="text-xs text-neutral-500">Seller</div>
                         </button>
                       </td>
                       <td className="px-3 py-2">
@@ -346,7 +340,6 @@ export default function AdminChatsPage() {
                           <div className="text-sm font-medium text-neutral-900 dark:text-white">
                             {chat.buyer_username || chat.buyer_id.slice(0, 8) + '...'}
                           </div>
-                          <div className="text-xs text-neutral-500">Buyer</div>
                         </button>
                       </td>
                       <td className="px-3 py-2">
