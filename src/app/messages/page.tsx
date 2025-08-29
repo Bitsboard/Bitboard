@@ -22,6 +22,7 @@ interface Chat {
   seller_verified?: boolean;
   listing_type?: 'sell' | 'want';
   location?: string;
+  seller_score?: number;
 }
 
 interface SystemNotification {
@@ -115,8 +116,9 @@ export default function MessagesPage() {
             listing_price: chat.listing_price || chat.price_sats,
             listing_created_at: chat.listing_created_at || chat.created_at,
             seller_verified: chat.seller_verified || false,
-                      listing_type: chat.listing_type || 'sell',
-                      location: chat.listing_location
+            listing_type: chat.listing_type || 'sell',
+            location: chat.listing_location,
+            seller_score: chat.seller_score || 0
         }));
         setChats(transformedChats);
         
@@ -755,7 +757,7 @@ export default function MessagesPage() {
                               </span>
                               {/* Dollar equivalent */}
                               <div className="text-sm text-white/80">
-                                ${((Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000) * (btcCad || 0)).toFixed(2)} USD
+                                ~${((Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000) * (btcCad || 0)).toFixed(2)} CAD
                               </div>
                             </div>
                           ) : (
@@ -765,7 +767,7 @@ export default function MessagesPage() {
                               </span>
                               {/* Dollar equivalent */}
                               <div className="text-sm text-white/80">
-                                ${((Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000) * (btcCad || 0)).toFixed(2)} USD
+                                ~${((Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000) * (btcCad || 0)).toFixed(2)} CAD
                               </div>
                             </div>
                           )}
@@ -837,6 +839,9 @@ export default function MessagesPage() {
                             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                           </span>
                         )}
+                        
+                        {/* User Reputation - +x 👍 format */}
+                        <span className="text-white/80 text-xs">+{chats.find(c => c.id === selectedChat)?.seller_score || 0} 👍</span>
                       </div>
                       
                       {/* View Listing Button - Right aligned with header edge */}
