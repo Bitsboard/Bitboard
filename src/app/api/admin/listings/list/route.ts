@@ -10,12 +10,17 @@ export async function GET(req: Request) {
     const db = await getAdminDb(req);
     const q = (url.searchParams.get('q') || '').trim();
     
+    console.log('🔍 Admin Listings API: Request received with limit:', limit, 'offset:', offset, 'query:', q);
+    
     let where = '';
     let binds: any[] = [];
     if (q) {
       where = 'WHERE l.title LIKE ? OR l.description LIKE ? OR u.username LIKE ?';
       binds.push(`%${q}%`, `%${q}%`, `%${q}%`);
     }
+    
+    console.log('🔍 Admin Listings API: Where clause:', where);
+    console.log('🔍 Admin Listings API: Binds:', binds);
     
     const listingsQuery = `
       SELECT 
@@ -54,9 +59,19 @@ export async function GET(req: Request) {
       LIMIT ? OFFSET ?
     `;
     
+    console.log('🔍 Admin Listings API: Query:', listingsQuery);
+    
     const res = await db.prepare(listingsQuery).bind(...binds, limit, offset).all();
+    console.log('🔍 Admin Listings API: Query result:', {
+      success: res.success,
+      resultsCount: res.results?.length || 0,
+      firstResult: res.results?.[0] || null
+    });
+    
     const count = await db.prepare(`SELECT COUNT(*) AS c FROM listings l ${where}`).bind(...binds).all();
     const total = count.results?.[0]?.c ?? 0;
+    
+    console.log('🔍 Admin Listings API: Total count:', total);
     
     return new Response(JSON.stringify({ 
       success: true,
