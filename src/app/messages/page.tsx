@@ -45,7 +45,7 @@ export default function MessagesPage() {
   const router = useRouter();
   const { isDark: dark } = useTheme();
   const { user } = useUser();
-  const { modals, setModal } = useSettings();
+  const { modals, setModal, unit } = useSettings();
   
   const [chats, setChats] = useState<Chat[]>([]);
   const [systemNotifications, setSystemNotifications] = useState<SystemNotification[]>([]);
@@ -709,34 +709,11 @@ export default function MessagesPage() {
                           <h2 className="text-lg font-bold text-white truncate flex-1">
                             {chats.find(c => c.id === selectedChat)?.listing_title || 'Untitled Listing'}
                           </h2>
-                          
-                          {/* Age + Location - Right side */}
-                          <div className="flex items-center gap-1 flex-shrink-0">
-                            {/* Posting Age - Use same logic as grid/list cards */}
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
-                              {chats.find(c => c.id === selectedChat)?.listing_created_at ? 
-                                formatPostAge(chats.find(c => c.id === selectedChat)?.listing_created_at!) : 
-                                'Unknown'
-                              }
-                            </span>
-                            
-                            {/* "in" text */}
-                            <span className="text-white/80 text-xs">in</span>
-                            
-                            {/* Location Tag */}
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
-                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                              {chats.find(c => c.id === selectedChat)?.location || 'Location N/A'}
-                            </span>
-                          </div>
                         </div>
                         
                         {/* Price - Uses global BTC/sat toggle setting from hamburger menu */}
                         <div className="text-white/90 mb-1">
-                          {dark ? (
+                          {unit === 'BTC' ? (
                             <span className="text-lg font-semibold">
                               {(Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000).toFixed(8)} BTC
                             </span>
@@ -789,8 +766,32 @@ export default function MessagesPage() {
                         </div>
                       </div>
                       
-                      {/* View Listing Button - Moved down to align with username pill */}
-                      <div className="flex items-end self-end">
+                      {/* Right Side: Age + Location + View Listing Button */}
+                      <div className="flex flex-col items-end gap-2">
+                        {/* Age + Location - Right aligned with header edge */}
+                        <div className="flex items-center gap-1">
+                          {/* Posting Age - Use same logic as grid/list cards */}
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
+                            {chats.find(c => c.id === selectedChat)?.listing_created_at ? 
+                              formatPostAge(chats.find(c => c.id === selectedChat)?.listing_created_at!) : 
+                              'Unknown'
+                            }
+                          </span>
+                          
+                          {/* "in" text */}
+                          <span className="text-white/80 text-xs">in</span>
+                          
+                          {/* Location Tag */}
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {chats.find(c => c.id === selectedChat)?.location || 'Location N/A'}
+                          </span>
+                        </div>
+                        
+                        {/* View Listing Button - Aligned with username pill */}
                         <button
                           onClick={async () => {
                             const selectedChatData = chats.find(c => c.id === selectedChat);
