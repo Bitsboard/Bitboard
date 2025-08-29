@@ -252,19 +252,22 @@ export default function MessagesPage() {
 
 
   // Filter chats and notifications based on unread status
-  const filteredChats = filter === 'unread' 
-    ? chats.filter(chat => chat.unread_count > 0)
-    : chats;
+  // Memoize filtered and combined items to prevent unnecessary re-renders
+  const filteredChats = React.useMemo(() => 
+    filter === 'unread' ? chats.filter(chat => chat.unread_count > 0) : chats,
+    [filter, chats]
+  );
   
-  const filteredNotifications = filter === 'unread'
-    ? systemNotifications.filter(notification => !notification.read)
-    : systemNotifications;
+  const filteredNotifications = React.useMemo(() =>
+    filter === 'unread' ? systemNotifications.filter(notification => !notification.read) : systemNotifications,
+    [filter, systemNotifications]
+  );
 
   // Combine notifications and chats with notifications at top
-  const combinedItems = [
+  const combinedItems = React.useMemo(() => [
     ...filteredNotifications.map(notification => ({ ...notification, itemType: 'notification' as const })),
     ...filteredChats.map(chat => ({ ...chat, itemType: 'chat' as const }))
-  ];
+  ], [filteredNotifications, filteredChats]);
 
   return (
     <div className="h-[calc(100vh-4rem)] bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-950 dark:to-neutral-900 flex flex-col overflow-hidden rounded-3xl">
@@ -508,20 +511,47 @@ export default function MessagesPage() {
         <div className="flex-1 bg-white/80 dark:bg-neutral-900/90 backdrop-blur-sm flex flex-col rounded-l-3xl shadow-xl">
           {selectedChat ? (
             <>
-              {/* Chat Header - Clean and simple */}
+              {/* Chat Header - Essential listing information */}
               <div className="p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 bg-gradient-to-r from-orange-500 to-orange-600 flex-shrink-0 rounded-tl-3xl">
-                <div className="flex items-center justify-between">
+                <div className="flex items-start gap-4">
+                  {/* Listing image */}
+                  <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-white/10">
+                    {chats.find(c => c.id === selectedChat)?.listing_image ? (
+                      <img 
+                        src={chats.find(c => c.id === selectedChat)?.listing_image} 
+                        alt={chats.find(c => c.id === selectedChat)?.listing_title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-white/20 flex items-center justify-center">
+                        <svg className="w-6 h-6 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 00-2-2V6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Listing details */}
                   <div className="flex-1 min-w-0">
                     <h2 className="text-lg font-bold text-white truncate">
                       {chats.find(c => c.id === selectedChat)?.listing_title}
                     </h2>
-                    <p className="text-orange-100 text-sm mt-1">
-                      Chat with {chats.find(c => c.id === selectedChat)?.other_user} • Listing #{chats.find(c => c.id === selectedChat)?.listing_id}
-                    </p>
+                    <div className="flex items-center gap-3 mt-1 text-orange-100 text-sm">
+                      <span>Chat with {chats.find(c => c.id === selectedChat)?.other_user}</span>
+                      <span>•</span>
+                      <span>Listing #{chats.find(c => c.id === selectedChat)?.listing_id}</span>
+                      <span>•</span>
+                      <span>
+                        {chats.find(c => c.id === selectedChat)?.listing_price ? 
+                          `${(chats.find(c => c.id === selectedChat)?.listing_price! / 100000000).toFixed(8)} BTC` : 
+                          'Price N/A'
+                        }
+                      </span>
+                    </div>
                   </div>
                   
-                  {/* Simple seller info */}
-                  <div className="flex items-center gap-2 ml-4">
+                  {/* Seller info with verified badge */}
+                  <div className="flex items-center gap-2">
                     <span className="text-orange-100 text-sm font-medium">
                       {chats.find(c => c.id === selectedChat)?.other_user}
                     </span>
@@ -571,37 +601,28 @@ export default function MessagesPage() {
                       prevMessage.is_from_current_user === message.is_from_current_user &&
                       (message.timestamp - prevMessage.timestamp) <= 300000;
                     
-                    const isGroupedWithNext = nextMessage && 
-                      nextMessage.is_from_current_user === message.is_from_current_user &&
-                      (nextMessage.timestamp - message.timestamp) <= 300000;
-                    
                     return (
                       <div key={message.id}>
+                        {/* Timestamp above message if needed - with proper spacing */}
+                        {shouldShowTimestamp && (
+                          <div className="w-full mb-3">
+                            <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                              {formatTimestamp(message.timestamp)}
+                            </span>
+                          </div>
+                        )}
+                        
                         {/* Message bubble */}
                         <div
                           className={`flex ${message.is_from_current_user ? 'justify-end' : 'justify-start'} ${
                             isGroupedWithPrev ? 'mt-1' : 'mt-3'
                           }`}
                         >
-                          {/* Timestamp above message if needed - with proper spacing */}
-                          {shouldShowTimestamp && (
-                            <div className="w-full mb-3">
-                              <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                                {formatTimestamp(message.timestamp)}
-                              </span>
-                            </div>
-                          )}
                           <div
                             className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-sm ${
                               message.is_from_current_user
                                 ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white'
                                 : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100'
-                            } ${
-                              // Adjust border radius for grouped messages
-                              isGroupedWithPrev && isGroupedWithNext ? 'rounded-2xl' :
-                              isGroupedWithPrev ? 'rounded-tr-2xl rounded-bl-2xl rounded-br-2xl' :
-                              isGroupedWithNext ? 'rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl' :
-                              'rounded-2xl'
                             }`}
                           >
                             <p className="text-sm">{message.content}</p>
