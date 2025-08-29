@@ -355,17 +355,19 @@ export default function MessagesPage() {
         lat: Number(dbListing.lat) || 0,
         lng: Number(dbListing.lng) || 0,
         type: dbListing.type || 'sell',
-        images: dbListing.images ? (Array.isArray(dbListing.images) ? dbListing.images : [dbListing.images]) : [],
+        images: dbListing.images ? (Array.isArray(dbListing.images) ? dbListing.images : [dbListing.images]) : 
+                dbListing.listing_image ? [dbListing.listing_image] : 
+                dbListing.image ? [dbListing.image] : [],
         boostedUntil: dbListing.boosted_until ? Number(dbListing.boosted_until) : null,
         seller: {
-          name: dbListing.seller_name || dbListing.posted_by || 'Unknown Seller',
+          name: dbListing.seller_name || dbListing.posted_by || dbListing.username || 'Unknown Seller',
           score: Number(dbListing.seller_score) || 0,
           deals: Number(dbListing.seller_deals) || 0,
           rating: Number(dbListing.seller_rating) || 0,
           verifications: {
-            email: Boolean(dbListing.seller_verified_email),
-            phone: Boolean(dbListing.seller_verified_phone),
-            lnurl: Boolean(dbListing.seller_verified_lnurl)
+            email: Boolean(dbListing.seller_verified_email || dbListing.verified_email),
+            phone: Boolean(dbListing.seller_verified_phone || dbListing.verified_phone),
+            lnurl: Boolean(dbListing.seller_verified_lnurl || dbListing.verified_lnurl)
           },
           onTimeRelease: Number(dbListing.seller_on_time_release) || 0
         },
@@ -794,10 +796,10 @@ export default function MessagesPage() {
                       </div>
                     </div>
                     
-                    {/* Bottom Row: Username (left) + View Listing Button (right) */}
-                    <div className="flex items-center justify-between mt-2">
-                      {/* Username Pill - Bottom Left */}
-                      <div className="flex items-center gap-2">
+                    {/* Bottom Row: Username (right of image) + View Listing Button (right edge) */}
+                    <div className="flex items-end justify-between mt-2">
+                      {/* Username Pill - Aligned with bottom of image, to the right of it */}
+                      <div className="ml-36 flex items-center gap-2">
                         <div 
                           className="inline-flex items-center px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50 border border-neutral-300/60 dark:border-neutral-700/50 hover:scale-105 hover:shadow-md"
                           onClick={() => {
@@ -837,7 +839,7 @@ export default function MessagesPage() {
                         )}
                       </div>
                       
-                      {/* View Listing Button - Bottom Right */}
+                      {/* View Listing Button - Right aligned with header edge */}
                       <button
                         onClick={async () => {
                           const selectedChatData = chats.find(c => c.id === selectedChat);
