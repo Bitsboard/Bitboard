@@ -243,6 +243,21 @@ export default function MessagesPage() {
     }
   }, [messages]);
 
+  // Auto-refresh chats and messages every 10 seconds
+  useEffect(() => {
+    if (!user?.email) return;
+
+    const interval = setInterval(() => {
+      loadChats();
+      // If there's a selected chat, also refresh its messages
+      if (selectedChat) {
+        loadMessages(selectedChat);
+      }
+    }, 10000); // 10 seconds
+
+    return () => clearInterval(interval);
+  }, [user?.email, selectedChat]);
+
   // Filter chats and notifications based on unread status
   const filteredChats = filter === 'unread' 
     ? chats.filter(chat => chat.unread_count > 0)
@@ -266,23 +281,10 @@ export default function MessagesPage() {
         <div className="w-80 bg-white/80 dark:bg-neutral-900/90 backdrop-blur-sm border-r border-neutral-200/50 dark:border-neutral-800/50 flex flex-col rounded-r-3xl shadow-xl">
           {/* Header - Shorter */}
           <div className="p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 bg-gradient-to-r from-neutral-500 via-neutral-600 to-neutral-700 flex-shrink-0 rounded-tr-3xl shadow-lg">
-            <div className="flex items-center justify-between mb-3">
+            <div className="mb-3">
               <h1 className="text-lg font-bold text-white drop-shadow-sm">
                 Messages
               </h1>
-              <button
-                onClick={loadChats}
-                disabled={isLoading}
-                className="p-2 bg-white/20 text-white rounded-xl hover:bg-white/30 disabled:opacity-50 transition-all duration-200 hover:scale-105 shadow-md"
-              >
-                {isLoading ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                ) : (
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                )}
-              </button>
             </div>
             
             {/* Filter Toggle */}
