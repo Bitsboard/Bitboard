@@ -63,7 +63,7 @@ export default function AdminUsersPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [itemsPerPage] = useState(50);
+  const [itemsPerPage] = useState(100);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showBanModal, setShowBanModal] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
@@ -91,7 +91,7 @@ export default function AdminUsersPage() {
   const loadUsers = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/admin/users/list');
+      const response = await fetch(`/api/admin/users/list?limit=${itemsPerPage}`);
       if (response.ok) {
         const data: UsersResponse = await response.json();
         setUsers(data.users || []);
@@ -421,6 +421,19 @@ export default function AdminUsersPage() {
 
         {/* Enhanced Users Table with Individual Stat Columns */}
         <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden">
+          {/* Table Summary */}
+          <div className="px-4 py-3 bg-neutral-50 dark:bg-neutral-700 border-b border-neutral-200 dark:border-neutral-600">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-neutral-600 dark:text-neutral-400">
+                <span className="font-medium">Total Users:</span> {users.length} of {Math.ceil((users.length / itemsPerPage) * itemsPerPage)} 
+                {totalPages > 1 && ` • Page ${currentPage} of ${totalPages}`}
+              </div>
+              <div className="text-xs text-neutral-500 dark:text-neutral-500">
+                Showing {itemsPerPage} users per page
+              </div>
+            </div>
+          </div>
+          
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-neutral-50 dark:bg-neutral-700">
@@ -616,7 +629,7 @@ export default function AdminUsersPage() {
           {totalPages > 1 && (
             <div className="flex justify-between items-center py-3 px-3 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
               <div className="text-xs text-neutral-600">
-                Page {currentPage} of {totalPages} | {filteredUsers.length} users
+                Showing {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, users.length)} of {users.length} users
               </div>
               <div className="flex gap-2">
                 <button
@@ -633,6 +646,9 @@ export default function AdminUsersPage() {
                 >
                   Prev
                 </button>
+                <span className="px-2 py-1 text-xs text-neutral-600">
+                  {currentPage} of {totalPages}
+                </span>
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages}
