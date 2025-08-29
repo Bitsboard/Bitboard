@@ -83,12 +83,19 @@ export default function MessagesPage() {
       return;
     }
     
+    console.log('🔍 Messages Page: Starting loadChats for user:', user.email);
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/chat/list?userEmail=${encodeURIComponent(user.email)}`);
+      const url = `/api/chat/list?userEmail=${encodeURIComponent(user.email)}`;
+      console.log('🔍 Messages Page: Fetching from URL:', url);
+      
+      const response = await fetch(url);
+      console.log('🔍 Messages Page: Response status:', response.status);
+      console.log('🔍 Messages Page: Response headers:', response.headers);
+      
       if (response.ok) {
         const data = await response.json() as { chats: any[] };
-        console.log('Chat API response:', data); // Debug log
+        console.log('🔍 Messages Page: Chat API response:', data); // Debug log
         
         const transformedChats = data.chats.map((chat: any) => ({
             id: chat.id,
@@ -112,10 +119,16 @@ export default function MessagesPage() {
           loadMessages(transformedChats[0].id);
         }
       } else {
-        console.error('Chat API error:', response.status, response.statusText);
+        console.error('🔍 Messages Page: Chat API error:', response.status, response.statusText);
+        try {
+          const errorText = await response.text();
+          console.error('🔍 Messages Page: Error response body:', errorText);
+        } catch (e) {
+          console.error('🔍 Messages Page: Could not read error response body');
+        }
       }
     } catch (error) {
-      console.error('Error loading chats:', error);
+      console.error('🔍 Messages Page: Error loading chats:', error);
     } finally {
       setIsLoading(false);
     }

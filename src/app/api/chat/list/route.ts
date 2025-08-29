@@ -127,6 +127,9 @@ export async function GET(req: Request) {
       ORDER BY c.last_message_at DESC, c.created_at DESC
     `;
     
+    console.log('🔍 Chat API: About to execute query with userId:', userId);
+    console.log('🔍 Chat API: Query:', optimizedChatsQuery);
+    
     const chats = await db.prepare(optimizedChatsQuery).bind(
       userId, 
       userId, 
@@ -135,7 +138,9 @@ export async function GET(req: Request) {
       userId
     ).all();
     
-    console.log('Found chats:', chats.results?.length || 0, 'for user ID:', userId);
+    console.log('🔍 Chat API: Query executed successfully');
+    console.log('🔍 Chat API: Raw results:', chats);
+    console.log('🔍 Chat API: Found chats:', chats.results?.length || 0, 'for user ID:', userId);
     
     // Transform the results to match the expected format
     const chatsWithMessages = (chats.results || []).map((chat: any) => ({
