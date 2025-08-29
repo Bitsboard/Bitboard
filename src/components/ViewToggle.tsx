@@ -4,6 +4,9 @@ import { useLayout } from "@/lib/settings";
 
 export function ViewToggle() {
   const { layout, setLayout } = useLayout();
+  
+  // Debug logging
+  console.log('ViewToggle render - current layout:', layout);
 
   return (
     <div className="relative inline-flex rounded-2xl p-1 shadow-lg border backdrop-blur-sm bg-white/70 dark:bg-neutral-800/60 dark:border-neutral-700/50 w-32">
