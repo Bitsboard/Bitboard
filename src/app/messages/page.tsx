@@ -20,6 +20,7 @@ interface Chat {
   listing_created_at?: number;
   seller_verified?: boolean;
   listing_type?: 'sell' | 'want';
+  location?: string;
 }
 
 interface SystemNotification {
@@ -115,7 +116,8 @@ export default function MessagesPage() {
             listing_price: chat.listing_price || chat.price_sats,
             listing_created_at: chat.listing_created_at || chat.created_at,
             seller_verified: chat.seller_verified || false,
-                      listing_type: chat.listing_type || 'sell'
+                      listing_type: chat.listing_type || 'sell',
+                      location: chat.location
         }));
         setChats(transformedChats);
         
@@ -695,20 +697,49 @@ export default function MessagesPage() {
                       
                       {/* Content Section */}
                       <div className="flex-1 min-w-0">
+                        {/* Top Row: Selling/Looking For Tag + Location */}
+                        <div className="flex items-center gap-2 mb-2">
+                          {/* Selling/Looking For Tag */}
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold text-white ${
+                            chats.find(c => c.id === selectedChat)?.listing_type === 'want' 
+                              ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500' 
+                              : 'bg-gradient-to-r from-emerald-500 to-teal-500'
+                          }`}>
+                            {chats.find(c => c.id === selectedChat)?.listing_type === 'want' ? 'Looking For' : 'Selling'}
+                          </span>
+                          
+                          {/* Location Tag - Top Right */}
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {chats.find(c => c.id === selectedChat)?.location || 'Unknown Location'}
+                          </span>
+                        </div>
+                        
                         {/* Listing Title */}
                         <h2 className="text-lg font-bold text-white mb-1 truncate">
                           {chats.find(c => c.id === selectedChat)?.listing_title || 'Untitled Listing'}
                         </h2>
                         
-                        {/* Price - Adheres to sat/BTC setting */}
+                        {/* Posting Age - Right after title */}
+                        <div className="text-white/80 text-sm mb-2">
+                          Posted {chats.find(c => c.id === selectedChat)?.listing_created_at ? 
+                            formatTimestamp(chats.find(c => c.id === selectedChat)?.listing_created_at!) : 
+                            'Unknown time'
+                          }
+                        </div>
+                        
+                        {/* Price - Uses user's actual settings */}
                         <div className="text-white/90 mb-2">
-                          {settings.currency === 'sats' ? (
+                          {user?.currency === 'btc' ? (
                             <span className="text-lg font-semibold">
-                              {chats.find(c => c.id === selectedChat)?.listing_price?.toLocaleString() || 0} sats
+                              {(Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000).toFixed(8)} BTC
                             </span>
                           ) : (
                             <span className="text-lg font-semibold">
-                              {(Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000).toFixed(8)} BTC
+                              {chats.find(c => c.id === selectedChat)?.listing_price?.toLocaleString() || 0} sats
                             </span>
                           )}
                         </div>
@@ -720,7 +751,7 @@ export default function MessagesPage() {
                             onClick={() => {
                               const selectedChatData = chats.find(c => c.id === selectedChat);
                               if (selectedChatData?.other_user) {
-                                router.push(`/en/${selectedChatData.other_user}`);
+                                router.push(`/profile/${selectedChatData.other_user}`);
                               }
                             }}
                           >
