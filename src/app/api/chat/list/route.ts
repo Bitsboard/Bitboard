@@ -87,8 +87,11 @@ export async function GET(req: Request) {
         l.price_sat as listing_price,
         l.image_url as listing_image,
         l.category as listing_category,
+        l.type as listing_type,
+        l.created_at as listing_created_at,
         buyer.username as buyer_username,
         seller.username as seller_username,
+        seller.verifications as seller_verifications,
         CASE 
           WHEN c.buyer_id = ? THEN 'buyer'
           ELSE 'seller'
