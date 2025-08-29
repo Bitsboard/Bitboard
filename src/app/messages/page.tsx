@@ -515,7 +515,7 @@ export default function MessagesPage() {
               <div className="p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 bg-gradient-to-r from-orange-500 to-orange-600 flex-shrink-0 rounded-tl-3xl">
                 <div className="flex items-start gap-4">
                   {/* Listing image */}
-                  <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-white/10">
+                  <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-white/10">
                     {chats.find(c => c.id === selectedChat)?.listing_image ? (
                       <img 
                         src={chats.find(c => c.id === selectedChat)?.listing_image} 
@@ -631,9 +631,11 @@ export default function MessagesPage() {
                     
                     return (
                       <div key={message.id}>
-                        {/* Timestamp above message if needed - with proper spacing */}
+                        {/* Timestamp above message if needed - positioned above the message side */}
                         {shouldShowTimestamp && (
-                          <div className="w-full mb-3">
+                          <div className={`mb-3 ${
+                            message.is_from_current_user ? 'text-right' : 'text-left'
+                          }`}>
                             <span className="text-xs text-neutral-500 dark:text-neutral-400">
                               {formatTimestamp(message.timestamp)}
                             </span>
