@@ -1,6 +1,7 @@
 export const runtime = 'edge';
 
 import { NextResponse } from 'next/server';
+import { getD1 } from '@/lib/cf';
 
 export async function GET(req: Request) {
   try {
@@ -8,41 +9,14 @@ export async function GET(req: Request) {
     
     const url = new URL(req.url);
     const limit = Math.min(100, parseInt(url.searchParams.get('limit') ?? '20', 10) || 20);
-    const offset = Math.max(0, parseInt(url.searchParams.get('offset') ?? '0', 10) || 0);
+    const offset = Math.max(0, parseInt(url.searchParams.get('offset') ?? '0', 10) || 20);
     
     console.log('🔍 Admin Listings API: Parsed URL parameters - limit:', limit, 'offset:', offset);
     
-    // Try to get database connection using different methods
-    let db: D1Database | null = null;
-    
-    try {
-      // Method 1: Try @cloudflare/next-on-pages
-      const mod = await import('@cloudflare/next-on-pages').catch(() => null);
-      if (mod && typeof mod.getRequestContext === 'function') {
-        const context = mod.getRequestContext();
-        if (context?.env?.DB) {
-          console.log('✅ Database found via @cloudflare/next-on-pages');
-          db = context.env.DB as D1Database;
-        }
-      }
-    } catch (error) {
-      console.log('⚠️ @cloudflare/next-on-pages method failed:', error);
-    }
-    
+    // Get database connection using the standard cf library
+    const db = await getD1();
     if (!db) {
-      try {
-        // Method 2: Try globalThis.__env__
-        if (typeof globalThis !== 'undefined' && (globalThis as any).__env__?.DB) {
-          console.log('✅ Database found via globalThis.__env__');
-          db = (globalThis as any).__env__.DB as D1Database;
-        }
-      } catch (error) {
-        console.log('⚠️ globalThis.__env__ method failed:', error);
-      }
-    }
-    
-    if (!db) {
-      console.error('❌ No database binding found via any method');
+      console.error('❌ No database binding found');
       return NextResponse.json({ 
         error: 'Database connection failed',
         details: 'No D1 database binding found'
@@ -95,7 +69,7 @@ export async function GET(req: Request) {
     let where = '';
     let binds: any[] = [];
     if (q) {
-      where = 'WHERE l.title LIKE ? OR l.description LIKE ? OR u.username LIKE ?';
+      where = 'WHERE l.title LIKE ? OR l.description LIKE ? OR l.posted_by LIKE ?';
       binds.push(`%${q}%`, `%${q}%`, `%${q}%`);
     }
     
@@ -117,8 +91,8 @@ export async function GET(req: Request) {
         l.status,
         l.image_url AS imageUrl,
         l.location,
-        COALESCE(l.views, 0) AS views,
-        COALESCE(l.favorites, 0) AS favorites
+        0 AS views,
+        0 AS favorites
       FROM listings l
       ${where}
       ORDER BY l.created_at DESC 

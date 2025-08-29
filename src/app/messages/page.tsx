@@ -849,11 +849,11 @@ export default function MessagesPage() {
                       </div>
                       
                       {/* Right Side: Age + Location + View Listing Button */}
-                      <div className="flex flex-col justify-between h-32">
+                      <div className="flex flex-col justify-between h-32 -ml-2">
                         {/* Top Section: Age + Location - Aligned with top of header */}
                         <div className="flex items-center gap-1 mt-2">
                           {/* Posting Age - Use same logic as grid/list cards */}
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium text-white bg-white/20 backdrop-blur-sm">
                             {chats.find(c => c.id === selectedChat)?.listing_created_at ? 
                               `${formatPostAge(chats.find(c => c.id === selectedChat)?.listing_created_at!)} ago` : 
                               'Unknown'
@@ -861,10 +861,10 @@ export default function MessagesPage() {
                           </span>
                           
                           {/* "in" text */}
-                          <span className="text-white/80 text-xs">in</span>
+                          <span className="text-white/80 text-sm">in</span>
                           
                           {/* Location Tag - No pin icon */}
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium text-white bg-white/20 backdrop-blur-sm">
                             {chats.find(c => c.id === selectedChat)?.listing_location || 'Location N/A'}
                           </span>
                         </div>
@@ -881,7 +881,7 @@ export default function MessagesPage() {
                               console.log('🔍 No listing_id found in selectedChatData');
                             }
                           }}
-                          className="px-3 py-1.5 text-xs font-medium text-orange-600 bg-white hover:bg-orange-50 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-md"
+                          className="px-2 py-1.5 text-sm font-medium text-orange-600 bg-white hover:bg-orange-50 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-md w-fit"
                         >
                           View Listing
                         </button>
