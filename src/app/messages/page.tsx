@@ -90,20 +90,23 @@ export default function MessagesPage() {
         const data = await response.json() as { chats: any[] };
         console.log('Chat API response:', data); // Debug log
         
-        const transformedChats = data.chats.map((chat: any) => ({
-          id: chat.id,
-          listing_title: chat.listing_title,
-          other_user: chat.other_user_username,
-          last_message: chat.latest_message_text || 'No messages yet',
-          last_message_time: chat.latest_message_time || chat.last_message_at || chat.created_at,
-          unread_count: chat.unread_count || 0,
-          listing_id: chat.listing_id,
-          listing_image: chat.listing_image,
-          listing_price: chat.listing_price || chat.price_sats,
-          listing_created_at: chat.listing_created_at || chat.created_at,
-          seller_verified: chat.seller_verified || false,
-          listing_type: chat.listing_type || 'sell'
-        }));
+        const transformedChats = data.chats.map((chat: any) => {
+          console.log('Raw chat data:', chat); // Debug log
+          return {
+            id: chat.id,
+            listing_title: chat.listing_title,
+            other_user: chat.other_user_username,
+            last_message: chat.latest_message_text || 'No messages yet',
+            last_message_time: chat.latest_message_time || chat.last_message_at || chat.created_at,
+            unread_count: chat.unread_count || 0,
+            listing_id: chat.listing_id,
+            listing_image: chat.listing_image,
+            listing_price: chat.listing_price || chat.price_sats,
+            listing_created_at: chat.listing_created_at || chat.created_at,
+            seller_verified: chat.seller_verified || false,
+            listing_type: chat.listing_type || 'sell'
+          };
+        });
         setChats(transformedChats);
         
         // Auto-select the most recent chat
@@ -617,13 +620,17 @@ export default function MessagesPage() {
                   {/* Listing details */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">
-                      {/* Selling/Looking for pill - consistent with TypePill */}
-                      <span className={`flex-shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow ${
+                      {/* Selling/Looking for pill - consistent with ListingModal */}
+                      <span className={`flex-shrink-0 rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white ${
                         chats.find(c => c.id === selectedChat)?.listing_type === 'want' 
-                          ? 'bg-fuchsia-600/90' 
-                          : 'bg-emerald-600/90'
+                          ? 'from-fuchsia-500 to-violet-500' 
+                          : 'from-emerald-500 to-teal-500'
                       }`}>
                         {chats.find(c => c.id === selectedChat)?.listing_type === 'want' ? 'Looking For' : 'Selling'}
+                        {/* Debug: Show actual type value */}
+                        <span className="ml-2 text-xs opacity-70">
+                          (type: {chats.find(c => c.id === selectedChat)?.listing_type || 'undefined'})
+                        </span>
                       </span>
                       {/* Listing title */}
                       <h2 className="text-lg font-bold text-white truncate">
