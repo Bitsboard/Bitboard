@@ -749,7 +749,7 @@ export default function AdminPage() {
                   ) : (
                     <div className="space-y-0 font-mono text-sm">
                       {paginatedActivity.map((activity, index) => (
-                        <div key={index} className="flex items-start gap-3 py-0.5 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded px-2 -mx-2 transition-colors">
+                        <div key={index} className="flex items-center gap-3 py-0.5 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded px-2 -mx-2 transition-colors">
                           <span className="text-neutral-400 dark:text-neutral-500 text-xs font-mono flex-shrink-0 w-36">
                             {new Date(activity.timestamp * 1000).toLocaleString([], { 
                               month: '2-digit', 

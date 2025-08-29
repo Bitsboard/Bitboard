@@ -67,10 +67,10 @@ export default function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showBanModal, setShowBanModal] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
   const [banReason, setBanReason] = useState("");
   const [banDuration, setBanDuration] = useState(7);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [expandedUser, setExpandedUser] = useState<string | null>(null);
   const [userListings, setUserListings] = useState<{ [key: string]: UserListing[] }>({});
   const [userChats, setUserChats] = useState<{ [key: string]: UserChat[] }>({});
   const [loadingUserData, setLoadingUserData] = useState<string | null>(null);
@@ -134,13 +134,10 @@ export default function AdminUsersPage() {
     }
   };
 
-  const toggleUserExpansion = (userId: string) => {
-    if (expandedUser === userId) {
-      setExpandedUser(null);
-    } else {
-      setExpandedUser(userId);
-      loadUserData(userId);
-    }
+  const openUserModal = (user: User) => {
+    setSelectedUser(user);
+    setShowUserModal(true);
+    loadUserData(user.id);
   };
 
   const banUser = async (userId: string, reason: string, durationDays: number) => {
@@ -327,6 +324,92 @@ export default function AdminUsersPage() {
           </div>
         </div>
 
+        {/* User Details Section - Appears when user is selected */}
+        {selectedUser && (
+          <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 p-4 mb-4">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-bold text-neutral-900 dark:text-white">{selectedUser.username}</h2>
+                <p className="text-neutral-600 dark:text-neutral-400">{selectedUser.email}</p>
+              </div>
+              <button
+                onClick={() => setSelectedUser(null)}
+                className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 p-1"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* User Info */}
+              <div className="space-y-2">
+                <div className="text-sm">
+                  <span className="text-neutral-600 dark:text-neutral-400">User ID:</span>
+                  <span className="ml-2 font-mono text-neutral-900 dark:text-white">{selectedUser.id}</span>
+                </div>
+                <div className="text-sm">
+                  <span className="text-neutral-600 dark:text-neutral-400">Created:</span>
+                  <span className="ml-2 text-neutral-900 dark:text-white">{formatDate(selectedUser.createdAt)}</span>
+                </div>
+                <div className="text-sm">
+                  <span className="text-neutral-600 dark:text-neutral-400">Last Login:</span>
+                  <span className="ml-2 text-neutral-900 dark:text-white">
+                    {selectedUser.lastLoginAt ? formatRelativeTime(selectedUser.lastLoginAt) : 'Never'}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Status & Stats */}
+              <div className="space-y-2">
+                <div className="text-sm">
+                  <span className="text-neutral-600 dark:text-neutral-400">Status:</span>
+                  <span className={`ml-2 inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getStatusColor(selectedUser)}`}>
+                    {getStatusText(selectedUser)}
+                  </span>
+                </div>
+                <div className="text-sm">
+                  <span className="text-neutral-600 dark:text-neutral-400">Rating:</span>
+                  <span className="ml-2 text-neutral-900 dark:text-white">⭐ {selectedUser.rating.toFixed(1)}</span>
+                </div>
+                <div className="text-sm">
+                  <span className="text-neutral-600 dark:text-neutral-400">Deals:</span>
+                  <span className="ml-2 text-neutral-900 dark:text-white">🤝 {selectedUser.deals}</span>
+                </div>
+              </div>
+              
+              {/* Actions */}
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setShowVerifyModal(true); }}
+                    disabled={selectedUser.isVerified}
+                    className="px-3 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200 disabled:opacity-50 transition-colors"
+                  >
+                    {selectedUser.isVerified ? 'Verified' : 'Verify'}
+                  </button>
+                  <button
+                    onClick={() => { setShowBanModal(true); }}
+                    disabled={selectedUser.isBanned}
+                    className="px-3 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200 disabled:opacity-50 transition-colors"
+                  >
+                    {selectedUser.isBanned ? 'Banned' : 'Ban'}
+                  </button>
+                </div>
+                <div className="text-sm">
+                  <span className="text-neutral-600 dark:text-neutral-400">Listings:</span>
+                  <span className="ml-2 text-neutral-900 dark:text-white">📋 {selectedUser.listingsCount}</span>
+                </div>
+                <div className="text-sm">
+                  <span className="text-neutral-600 dark:text-neutral-400">Total Value:</span>
+                  <span className="ml-2 text-neutral-900 dark:text-white">💰 {formatPrice(selectedUser.totalListingsValue)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Compact Users Table */}
         <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden">
           <div className="overflow-x-auto">
@@ -342,136 +425,60 @@ export default function AdminUsersPage() {
               <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={4} className="px-3 py-8 text-center">
+                    <td colSpan={4} className="px-3 py-4 text-center">
                       <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
                       <p className="text-neutral-600 dark:text-neutral-400">Loading users...</p>
                     </td>
                   </tr>
                 ) : paginatedUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                    <td colSpan={4} className="px-3 py-4 text-center text-neutral-500 dark:text-neutral-400">
                       No users found
                     </td>
                   </tr>
                 ) : (
                   paginatedUsers.map((user) => (
-                    <React.Fragment key={user.id}>
-                      <tr className="hover:bg-neutral-50 dark:hover:bg-neutral-700">
-                        <td className="px-3 py-2">
-                          <div>
-                            <div className="font-medium text-neutral-900 dark:text-white">{user.username}</div>
-                            <div className="text-xs text-neutral-600 dark:text-neutral-400">{user.email}</div>
-                            <div className="text-xs text-neutral-500">ID: {user.id.slice(0, 8)}... | {formatDate(user.createdAt)}</div>
-                          </div>
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="space-y-1">
-                            <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getStatusColor(user)}`}>
-                              {getStatusText(user)}
-                            </span>
-                            {user.isBanned && user.banReason && (
-                              <div className="text-xs text-red-600 dark:text-red-400">{user.banReason}</div>
-                            )}
-                            {user.lastLoginAt && (
-                              <div className="text-xs text-neutral-500">Login: {formatRelativeTime(user.lastLoginAt)}</div>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="text-xs space-y-1">
-                            <div>📋 {user.listingsCount} listings</div>
-                            <div>💬 {user.chatsCount} chats</div>
-                            <div>📨 {user.messagesCount} messages</div>
-                            <div>⭐ {user.rating.toFixed(1)} rating</div>
-                            <div>🤝 {user.deals} deals</div>
-                            {user.totalListingsValue > 0 && (
-                              <div className="text-green-600">💰 {formatPrice(user.totalListingsValue)}</div>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="flex flex-col gap-1">
-                            <button
-                              onClick={() => toggleUserExpansion(user.id)}
-                              className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
-                            >
-                              {expandedUser === user.id ? 'Hide' : 'Details'}
-                            </button>
-                            <button
-                              onClick={() => { setSelectedUser(user); setShowVerifyModal(true); }}
-                              disabled={user.isVerified}
-                              className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200 disabled:opacity-50"
-                            >
-                              Verify
-                            </button>
-                            <button
-                              onClick={() => { setSelectedUser(user); setShowBanModal(true); }}
-                              disabled={user.isBanned}
-                              className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200 disabled:opacity-50"
-                            >
-                              Ban
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                      
-                      {/* Expanded User Data */}
-                      {expandedUser === user.id && (
-                        <tr>
-                          <td colSpan={4} className="px-3 py-3 bg-neutral-50 dark:bg-neutral-700">
-                            <div className="border-l-4 border-orange-500 pl-3">
-                              <div className="grid grid-cols-2 gap-4">
-                                {/* User Listings */}
-                                <div>
-                                  <h5 className="font-medium text-neutral-900 dark:text-white text-sm mb-2">
-                                    Listings ({user.listingsCount})
-                                  </h5>
-                                  {loadingUserData === user.id ? (
-                                    <div className="text-xs text-neutral-600">Loading...</div>
-                                  ) : userListings[user.id]?.length > 0 ? (
-                                    <div className="space-y-1 max-h-32 overflow-y-auto">
-                                      {userListings[user.id].map((listing) => (
-                                        <div key={listing.id} className="text-xs bg-white dark:bg-neutral-600 p-2 rounded border">
-                                          <div className="font-medium">{listing.title}</div>
-                                          <div className="text-neutral-600">{formatPrice(listing.priceSat)} • {listing.status} • {listing.views} views</div>
-                                          <div className="text-neutral-500">{formatDate(listing.createdAt)} • {listing.chatsCount} chats</div>
-                                          <a href={`/admin/listings?listingId=${listing.id}`} className="text-blue-600 hover:underline">View →</a>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  ) : (
-                                    <div className="text-xs text-neutral-500">No listings</div>
-                                  )}
-                                </div>
-
-                                {/* User Chats */}
-                                <div>
-                                  <h5 className="font-medium text-neutral-900 dark:text-white text-sm mb-2">
-                                    Chats ({user.chatsCount})
-                                  </h5>
-                                  {loadingUserData === user.id ? (
-                                    <div className="text-xs text-neutral-600">Loading...</div>
-                                  ) : userChats[user.id]?.length > 0 ? (
-                                    <div className="space-y-1 max-h-32 overflow-y-auto">
-                                      {userChats[user.id].map((chat) => (
-                                        <div key={chat.id} className="text-xs bg-white dark:bg-neutral-600 p-2 rounded border">
-                                          <div className="font-medium">{chat.listingTitle}</div>
-                                          <div className="text-neutral-600">With: {chat.otherUsername}</div>
-                                          <div className="text-neutral-500">{chat.messageCount} msgs • {chat.unreadCount} unread</div>
-                                          <a href={`/admin/chats?chatId=${chat.id}`} className="text-orange-600 hover:underline">View →</a>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  ) : (
-                                    <div className="text-xs text-neutral-500">No chats</div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
+                    <tr 
+                      key={user.id} 
+                      className="hover:bg-neutral-50 dark:hover:bg-neutral-700 cursor-pointer"
+                      onClick={() => setSelectedUser(user)}
+                    >
+                      <td className="px-3 py-2">
+                        <div className="text-left">
+                          <div className="font-medium text-neutral-900 dark:text-white">{user.username}</div>
+                          <div className="text-xs text-neutral-600 dark:text-neutral-400">{user.email}</div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2">
+                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getStatusColor(user)}`}>
+                          {getStatusText(user)}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2">
+                        <div className="text-xs space-y-0.5">
+                          <div>📋 {user.listingsCount} • 💬 {user.chatsCount} • ⭐ {user.rating.toFixed(1)}</div>
+                          <div>🤝 {user.deals} • 💰 {formatPrice(user.totalListingsValue)}</div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2">
+                        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            onClick={() => { setSelectedUser(user); setShowVerifyModal(true); }}
+                            disabled={user.isVerified}
+                            className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200 disabled:opacity-50"
+                          >
+                            Verify
+                          </button>
+                          <button
+                            onClick={() => { setSelectedUser(user); setShowBanModal(true); }}
+                            disabled={user.isBanned}
+                            className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200 disabled:opacity-50"
+                          >
+                            Ban
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
                   ))
                 )}
               </tbody>
@@ -518,6 +525,213 @@ export default function AdminUsersPage() {
           )}
         </div>
       </div>
+
+      {/* User Details Modal */}
+      {showUserModal && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-neutral-900 dark:text-white">{selectedUser.username}</h2>
+                  <p className="text-neutral-600 dark:text-neutral-400">{selectedUser.email}</p>
+                </div>
+                <button
+                  onClick={() => setShowUserModal(false)}
+                  className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* User Info */}
+                <div className="space-y-4">
+                  <div className="bg-neutral-50 dark:bg-neutral-700 rounded-lg p-4">
+                    <h3 className="font-semibold text-neutral-900 dark:text-white mb-3">User Information</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-neutral-600 dark:text-neutral-400">User ID:</span>
+                        <span className="font-mono text-neutral-900 dark:text-white">{selectedUser.id}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-neutral-600 dark:text-neutral-400">Created:</span>
+                        <span className="text-neutral-900 dark:text-white">{formatDate(selectedUser.createdAt)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-neutral-600 dark:text-neutral-400">Last Login:</span>
+                        <span className="text-neutral-900 dark:text-white">
+                          {selectedUser.lastLoginAt ? formatRelativeTime(selectedUser.lastLoginAt) : 'Never'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-neutral-600 dark:text-neutral-400">Last Activity:</span>
+                        <span className="text-neutral-900 dark:text-white">
+                          {selectedUser.lastActivityAt ? formatRelativeTime(selectedUser.lastActivityAt) : 'Unknown'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-neutral-50 dark:bg-neutral-700 rounded-lg p-4">
+                    <h3 className="font-semibold text-neutral-900 dark:text-white mb-3">Status & Permissions</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-neutral-600 dark:text-neutral-400">Status:</span>
+                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getStatusColor(selectedUser)}`}>
+                          {getStatusText(selectedUser)}
+                        </span>
+                      </div>
+                      {selectedUser.isBanned && selectedUser.banReason && (
+                        <div className="text-red-600 dark:text-red-400 text-xs">
+                          Ban Reason: {selectedUser.banReason}
+                        </div>
+                      )}
+                      {selectedUser.isBanned && selectedUser.banExpiresAt && (
+                        <div className="text-red-600 dark:text-red-400 text-xs">
+                          Ban Expires: {formatDate(selectedUser.banExpiresAt)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* User Stats */}
+                <div className="space-y-4">
+                  <div className="bg-neutral-50 dark:bg-neutral-700 rounded-lg p-4">
+                    <h3 className="font-semibold text-neutral-900 dark:text-white mb-3">Statistics</h3>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="text-center p-3 bg-white dark:bg-neutral-600 rounded">
+                        <div className="text-2xl font-bold text-blue-600">{selectedUser.listingsCount}</div>
+                        <div className="text-xs text-neutral-600 dark:text-neutral-400">Listings</div>
+                      </div>
+                      <div className="text-center p-3 bg-white dark:bg-neutral-600 rounded">
+                        <div className="text-2xl font-bold text-green-600">{selectedUser.chatsCount}</div>
+                        <div className="text-xs text-neutral-600 dark:text-neutral-400">Chats</div>
+                      </div>
+                      <div className="text-center p-3 bg-white dark:bg-neutral-600 rounded">
+                        <div className="text-2xl font-bold text-purple-600">{selectedUser.messagesCount}</div>
+                        <div className="text-xs text-neutral-600 dark:text-neutral-400">Messages</div>
+                      </div>
+                      <div className="text-center p-3 bg-white dark:bg-neutral-600 rounded">
+                        <div className="text-2xl font-bold text-orange-600">{selectedUser.deals}</div>
+                        <div className="text-xs text-neutral-600 dark:text-neutral-400">Deals</div>
+                      </div>
+                    </div>
+                    <div className="mt-4 text-center p-3 bg-white dark:bg-neutral-600 rounded">
+                      <div className="text-2xl font-bold text-yellow-600">{selectedUser.rating.toFixed(1)}</div>
+                      <div className="text-xs text-neutral-600 dark:text-neutral-400">Rating</div>
+                    </div>
+                    {selectedUser.totalListingsValue > 0 && (
+                      <div className="mt-4 text-center p-3 bg-white dark:bg-neutral-600 rounded">
+                        <div className="text-2xl font-bold text-green-600">{formatPrice(selectedUser.totalListingsValue)}</div>
+                        <div className="text-xs text-neutral-600 dark:text-neutral-400">Total Value</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* User Listings & Chats */}
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* User Listings */}
+                <div className="bg-neutral-50 dark:bg-neutral-700 rounded-lg p-4">
+                  <h3 className="font-semibold text-neutral-900 dark:text-white mb-3">
+                    Listings ({selectedUser.listingsCount})
+                  </h3>
+                  {loadingUserData === selectedUser.id ? (
+                    <div className="text-center py-4">
+                      <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">Loading listings...</p>
+                    </div>
+                  ) : userListings[selectedUser.id]?.length > 0 ? (
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {userListings[selectedUser.id].map((listing) => (
+                        <div key={listing.id} className="bg-white dark:bg-neutral-600 p-3 rounded border">
+                          <div className="font-medium text-sm text-neutral-900 dark:text-white">{listing.title}</div>
+                          <div className="text-xs text-neutral-600 dark:text-neutral-400 mt-1">
+                            {formatPrice(listing.priceSat)} • {listing.status} • {listing.views} views
+                          </div>
+                          <div className="text-xs text-neutral-500 mt-1">
+                            {formatDate(listing.createdAt)} • {listing.chatsCount} chats
+                          </div>
+                          <a 
+                            href={`/admin/listings?listingId=${listing.id}`}
+                            className="text-blue-600 hover:underline text-xs mt-2 inline-block"
+                          >
+                            View in Admin →
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-neutral-500 dark:text-neutral-400 text-sm">
+                      No listings found
+                    </div>
+                  )}
+                </div>
+
+                {/* User Chats */}
+                <div className="bg-neutral-50 dark:bg-neutral-700 rounded-lg p-4">
+                  <h3 className="font-semibold text-neutral-900 dark:text-white mb-3">
+                    Chats ({selectedUser.chatsCount})
+                  </h3>
+                  {loadingUserData === selectedUser.id ? (
+                    <div className="text-center py-4">
+                      <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">Loading chats...</p>
+                    </div>
+                  ) : userChats[selectedUser.id]?.length > 0 ? (
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {userChats[selectedUser.id].map((chat) => (
+                        <div key={chat.id} className="bg-white dark:bg-neutral-600 p-3 rounded border">
+                          <div className="font-medium text-sm text-neutral-900 dark:text-white">{chat.listingTitle}</div>
+                          <div className="text-xs text-neutral-600 dark:text-neutral-400 mt-1">
+                            With: {chat.otherUsername}
+                          </div>
+                          <div className="text-xs text-neutral-500 mt-1">
+                            {chat.messageCount} messages • {chat.unreadCount} unread
+                          </div>
+                          <a 
+                            href={`/admin/chats?chatId=${chat.id}`}
+                            className="text-orange-600 hover:underline text-xs mt-2 inline-block"
+                          >
+                            View in Admin →
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-neutral-500 dark:text-neutral-400 text-sm">
+                      No chats found
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="mt-6 flex gap-3 justify-end">
+                <button
+                  onClick={() => { setShowUserModal(false); setShowVerifyModal(true); }}
+                  disabled={selectedUser.isVerified}
+                  className="px-4 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600 disabled:opacity-50"
+                >
+                  Verify User
+                </button>
+                <button
+                  onClick={() => { setShowUserModal(false); setShowBanModal(true); }}
+                  disabled={selectedUser.isBanned}
+                  className="px-4 py-2 bg-red-500 text-white rounded text-sm hover:bg-red-600 disabled:opacity-50"
+                >
+                  Ban User
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Compact Modals */}
       {showBanModal && selectedUser && (
