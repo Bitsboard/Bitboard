@@ -400,11 +400,11 @@ export default function MessagesPage() {
   const unreadCount = chats.filter(c => c.unread_count > 0).length + systemNotifications.filter(n => !n.read).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-950 dark:to-neutral-900">
-      {/* Container with max-width and centering like other pages */}
-      <div className="mx-auto max-w-7xl px-4 py-6">
-        <div className="h-[calc(100vh-8rem)] bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-950 dark:to-neutral-900 flex flex-col overflow-hidden rounded-3xl">
-          {/* Main Container - Fixed Height */}
+    <div className="h-[calc(100vh-4rem)] bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-950 dark:to-neutral-900">
+      {/* Container with max-width and centering like other pages - only horizontal inset */}
+      <div className="mx-auto max-w-7xl px-4">
+        <div className="h-full bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-950 dark:to-neutral-900 flex flex-col overflow-hidden rounded-3xl">
+          {/* Main Container - Full Height */}
           <div className="flex-1 flex overflow-hidden rounded-3xl">
             {/* Left Panel - Conversations & Notifications */}
             <div className="w-80 bg-white/80 dark:bg-neutral-900/90 backdrop-blur-sm border-r border-neutral-200/50 dark:border-neutral-800/50 flex flex-col rounded-r-3xl shadow-xl">
