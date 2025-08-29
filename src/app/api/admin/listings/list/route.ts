@@ -56,11 +56,11 @@ export async function GET(req: Request) {
     try {
       const testResult = await db.prepare('SELECT 1 as test').all();
       console.log('🔍 Admin Listings API: Database connectivity test successful:', testResult);
-    } catch (testError) {
+    } catch (testError: any) {
       console.error('🔍 Admin Listings API: Database connectivity test failed:', testError);
       return NextResponse.json({ 
         error: 'Database connectivity test failed',
-        details: testError?.message || 'Unknown error'
+        details: testError?.message || String(testError) || 'Unknown error'
       }, { status: 500 });
     }
     
@@ -80,11 +80,11 @@ export async function GET(req: Request) {
           details: 'The listings table does not exist in the database'
         }, { status: 500 });
       }
-    } catch (tableError) {
+    } catch (tableError: any) {
       console.error('🔍 Admin Listings API: Table check failed:', tableError);
       return NextResponse.json({ 
         error: 'Table check failed',
-        details: tableError?.message || 'Unknown error'
+        details: tableError?.message || String(tableError) || 'Unknown error'
       }, { status: 500 });
     }
     
@@ -154,9 +154,9 @@ export async function GET(req: Request) {
     console.error('🔍 Admin Listings API: Error stack:', e?.stack);
     
     return NextResponse.json({ 
-      error: e?.message || 'Unknown error',
-      details: e?.message,
-      stack: e?.stack
+      error: e?.message || String(e) || 'Unknown error',
+      details: e?.message || String(e) || 'Unknown error',
+      stack: e?.stack || 'No stack trace available'
     }, { status: 500 });
   }
 }
