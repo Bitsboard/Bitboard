@@ -581,7 +581,7 @@ export default function MessagesPage() {
                                     : 'bg-white/10 dark:bg-neutral-800/50 text-neutral-700 dark:text-neutral-300 border border-neutral-300/60 dark:border-neutral-700/50 hover:bg-white/20 dark:hover:bg-neutral-700/50'
                                 }`}>
                                   {/* Profile Icon */}
-                                  <div className="flex-shrink-0 -ml-1.5">
+                                  <div className="flex-shrink-0 -ml-1">
                                     <img
                                       src={generateProfilePicture(item.other_user)}
                                       alt={`${item.other_user}'s profile picture`}
@@ -603,6 +603,22 @@ export default function MessagesPage() {
                                   {/* Username */}
                                   <span className="ml-1">{item.other_user}</span>
                                 </span>
+                                
+                                {/* Verified Badge */}
+                                {item.seller_verified && (
+                                  <span 
+                                    className="verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-bold shadow-md"
+                                    style={{
+                                      background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
+                                    }}
+                                    aria-label="Verified"
+                                    title="User has verified their identity"
+                                  >
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                  </span>
+                                )}
                               </div>
                               
                               {/* Listing Title */}
@@ -722,32 +738,44 @@ export default function MessagesPage() {
                       <div className="flex items-center gap-2">
                         <div className="inline-flex items-center px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50 border border-neutral-300/60 dark:border-neutral-700/50 hover:scale-105 hover:shadow-md">
                           {/* Profile Icon - Positioned so its center aligns with the left edge radius */}
-                          <div className="flex-shrink-0 -ml-2">
-                            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
+                          <div className="flex-shrink-0 -ml-1">
+                            <img
+                              src={generateProfilePicture(chats.find(c => c.id === selectedChat)?.other_user || '')}
+                              alt={`${chats.find(c => c.id === selectedChat)?.other_user}'s profile picture`}
+                              className="w-5 h-5 rounded-full object-cover"
+                              onError={(e) => {
+                                // Fallback to initials if image fails to load
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                target.nextElementSibling?.classList.remove('hidden');
+                              }}
+                            />
+                            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center hidden">
                               <span className="text-xs font-bold text-white">
-                                {chats.find(c => c.id === selectedChat)?.other_user?.charAt(0)?.toUpperCase() || 'U'}
+                                {getInitials(chats.find(c => c.id === selectedChat)?.other_user || '')}
                               </span>
                             </div>
                           </div>
                           
                           {/* Username - Right side of pill with proper spacing */}
                           <span className="text-sm ml-1 text-white">{chats.find(c => c.id === selectedChat)?.other_user}</span>
-                          
-                          {chats.find(c => c.id === selectedChat)?.seller_verified && (
-                            <span 
-                              className="verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-bold shadow-md ml-1"
-                              style={{
-                                background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
-                              }}
-                              aria-label="Verified"
-                              title="User has verified their identity"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            </span>
-                          )}
                         </div>
+                        
+                        {/* Verified Badge */}
+                        {chats.find(c => c.id === selectedChat)?.seller_verified && (
+                          <span 
+                            className="verified-badge inline-flex h-5 w-5 items-center justify-center rounded-full text-white font-bold shadow-md"
+                            style={{
+                              background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
+                            }}
+                            aria-label="Verified"
+                            title="User has verified their identity"
+                          >
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </span>
+                        )}
                       </div>
                     </div>
                     
