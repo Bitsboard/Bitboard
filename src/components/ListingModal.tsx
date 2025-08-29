@@ -46,7 +46,8 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
     console.log('ListingModal btcCad:', btcCad, 'unit:', unit, 'listing.priceSats:', listing.priceSats);
     console.log('ListingModal listing.title:', listing.title, 'type:', typeof listing.title, 'length:', listing.title?.length);
     console.log('ListingModal listing object:', listing);
-  }, [btcCad, unit, listing.priceSats, listing.title, listing]);
+    console.log('ListingModal images:', listing.images, 'count:', listing.images?.length);
+  }, [btcCad, unit, listing.priceSats, listing.title, listing, listing.images]);
 
   function sanitizeTitle(raw: string, type: "sell" | "want"): string {
     if (type !== "want") return raw;

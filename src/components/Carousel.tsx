@@ -21,6 +21,10 @@ export function Carousel({ images, alt, dark, className, showDots = true, showAr
     const validImages = images && images.length > 0 ? images : [
         "https://images.unsplash.com/photo-1555617117-08d3a8fef16c?w=1200&q=80&auto=format&fit=crop",
     ];
+    
+    // Debug logging
+    console.log('Carousel props:', { images, validImages, showDots, showArrows, showThumbnails, imagesLength: images?.length });
+    
     const [index, setIndex] = useState(0);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const touchStartX = useRef<number | null>(null);
