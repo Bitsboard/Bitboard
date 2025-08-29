@@ -53,6 +53,10 @@ export default function MessagesPage() {
   const [newMessage, setNewMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   
+  // Cache for messages to avoid re-fetching
+  const [messagesCache, setMessagesCache] = useState<Record<string, Message[]>>({});
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const formatTimestamp = (timestamp: number) => {
@@ -150,6 +154,16 @@ export default function MessagesPage() {
       return;
     }
     
+    // Check cache first
+    if (messagesCache[chatId]) {
+      console.log('Loading messages from cache for chat:', chatId);
+      setMessages(messagesCache[chatId]);
+      setSelectedChat(chatId);
+      setSelectedNotification(null);
+      return;
+    }
+    
+    setIsLoadingMessages(true);
     try {
       const response = await fetch(`/api/chat/${chatId}?userEmail=${encodeURIComponent(user.email)}`);
       if (response.ok) {
@@ -164,6 +178,13 @@ export default function MessagesPage() {
           is_from_current_user: msg.is_from_current_user, // API already provides this
           sender_name: msg.is_from_current_user ? 'You' : 'Other User' // Simplified sender name
         }));
+        
+        // Cache the messages
+        setMessagesCache(prev => ({
+          ...prev,
+          [chatId]: transformedMessages
+        }));
+        
         setMessages(transformedMessages);
         setSelectedChat(chatId);
         setSelectedNotification(null);
@@ -172,6 +193,8 @@ export default function MessagesPage() {
       }
     } catch (error) {
       console.error('Error loading messages:', error);
+    } finally {
+      setIsLoadingMessages(false);
     }
   };
 
@@ -201,8 +224,23 @@ export default function MessagesPage() {
       
       if (response.ok) {
         setNewMessage('');
-        // Reload messages to show the new one
-        await loadMessages(selectedChat);
+        // Add new message to cache and state immediately for better UX
+        const newMessageObj: Message = {
+          id: Date.now().toString(), // Temporary ID
+          content: newMessage.trim(),
+          timestamp: Date.now(),
+          is_from_current_user: true,
+          sender_name: 'You'
+        };
+        
+        // Update cache
+        setMessagesCache(prev => ({
+          ...prev,
+          [selectedChat]: [...(prev[selectedChat] || []), newMessageObj]
+        }));
+        
+        // Update current messages
+        setMessages(prev => [...prev, newMessageObj]);
       } else {
         console.error('Send message error:', response.status, response.statusText);
         const errorData = await response.json();
@@ -237,6 +275,38 @@ export default function MessagesPage() {
       });
     }
   };
+  
+  // Function to refresh messages for a specific chat (for real-time updates)
+  const refreshMessages = async (chatId: string) => {
+    if (!user?.email) return;
+    
+    try {
+      const response = await fetch(`/api/chat/${chatId}?userEmail=${encodeURIComponent(user.email)}`);
+      if (response.ok) {
+        const data = await response.json() as { messages: any[]; current_user_id: string };
+        
+        const transformedMessages = data.messages.map((msg: any) => ({
+          id: msg.id,
+          content: msg.text,
+          timestamp: msg.created_at,
+          is_from_current_user: msg.is_from_current_user,
+          sender_name: msg.is_from_current_user ? 'You' : 'Other User'
+        }));
+        
+        // Update cache and current messages if this chat is selected
+        setMessagesCache(prev => ({
+          ...prev,
+          [chatId]: transformedMessages
+        }));
+        
+        if (selectedChat === chatId) {
+          setMessages(transformedMessages);
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing messages:', error);
+    }
+  };
 
   useEffect(() => {
     if (user?.email) {
@@ -250,6 +320,17 @@ export default function MessagesPage() {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
+  
+  // Periodic refresh of selected chat messages (every 30 seconds)
+  useEffect(() => {
+    if (!selectedChat) return;
+    
+    const interval = setInterval(() => {
+      refreshMessages(selectedChat);
+    }, 30000); // 30 seconds
+    
+    return () => clearInterval(interval);
+  }, [selectedChat]);
 
 
 
@@ -605,11 +686,18 @@ export default function MessagesPage() {
 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-1">
-                {messages.length === 0 ? (
+                {isLoadingMessages ? (
+                  <div className="text-center py-8">
+                    <div className="w-8 h-8 mx-auto mb-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-neutral-600 dark:text-neutral-400 text-sm">
+                      Loading messages...
+                    </p>
+                  </div>
+                ) : messages.length === 0 ? (
                   <div className="text-center py-8">
                     <div className="w-16 h-16 mx-auto mb-4 bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center">
                       <svg className="w-8 h-8 text-neutral-500 dark:text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12h.01M16h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12h.01M16h.01M16h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                       </svg>
                     </div>
                     <p className="text-neutral-600 dark:text-neutral-400 text-sm">
