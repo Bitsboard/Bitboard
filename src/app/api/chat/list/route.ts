@@ -88,6 +88,7 @@ export async function GET(req: Request) {
         l.category as listing_category,
         l.ad_type as listing_type,
         l.created_at as listing_created_at,
+        l.location as listing_location,
         buyer.username as buyer_username,
         seller.username as seller_username,
         seller.verified as seller_verified,
