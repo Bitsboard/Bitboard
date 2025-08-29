@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTheme } from '@/lib/contexts/ThemeContext';
 import { useUser, useSettings } from '@/lib/settings';
 import { ListingModal } from '@/components/ListingModal';
+import { generateProfilePicture, getInitials } from '@/lib/utils';
 
 interface Chat {
   id: string;
@@ -571,8 +572,17 @@ export default function MessagesPage() {
                           <div className="flex items-start gap-3">
                             {/* Content - New Layout */}
                             <div className="flex-1 min-w-0">
-                              {/* Top Row: Username Pill and Selling/Looking For Pill */}
+                              {/* Top Row: Selling/Looking For Pill and Username Pill */}
                               <div className="flex items-center gap-2 mb-1">
+                                {/* Selling/Looking For Pill */}
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold text-white ${
+                                  item.listing_type === 'want' 
+                                    ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500' 
+                                    : 'bg-gradient-to-r from-emerald-500 to-teal-500'
+                                }`}>
+                                  {item.listing_type === 'want' ? 'Looking For' : 'Selling'}
+                                </span>
+                                
                                 {/* Username Pill with Profile Icon */}
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-all duration-200 ${
                                   selectedChat === item.id 
@@ -581,9 +591,20 @@ export default function MessagesPage() {
                                 }`}>
                                   {/* Profile Icon */}
                                   <div className="flex-shrink-0 -ml-1.5">
-                                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
+                                    <img
+                                      src={generateProfilePicture(item.other_user)}
+                                      alt={`${item.other_user}'s profile picture`}
+                                      className="w-4 h-4 rounded-full object-cover"
+                                      onError={(e) => {
+                                        // Fallback to initials if image fails to load
+                                        const target = e.target as HTMLImageElement;
+                                        target.style.display = 'none';
+                                        target.nextElementSibling?.classList.remove('hidden');
+                                      }}
+                                    />
+                                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center hidden">
                                       <span className="text-xs font-bold text-white">
-                                        {item.other_user?.charAt(0)?.toUpperCase() || 'U'}
+                                        {getInitials(item.other_user)}
                                       </span>
                                     </div>
                                   </div>
@@ -607,7 +628,9 @@ export default function MessagesPage() {
                                 }`}>
                                   {formatTimestamp(item.last_message_time).replace(' ago', '')}
                                 </span>
-                                <span className="text-xs text-neutral-400">•</span>
+                                <span className={`text-xs font-bold ${
+                                  selectedChat === item.id ? 'text-white/70' : 'text-neutral-500 dark:text-neutral-400'
+                                }`}>•</span>
                                 <p className={`text-xs truncate flex-1 ${
                                   selectedChat === item.id ? 'text-white/80' : 'text-neutral-600 dark:text-neutral-300'
                                 }`}>
@@ -629,16 +652,8 @@ export default function MessagesPage() {
                               )}
                             </div>
                             
-                            {/* Selling/Looking For Pill - Top Right */}
-                            <div className="flex-shrink-0">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold text-white ${
-                                item.listing_type === 'want' 
-                                  ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500' 
-                                  : 'bg-gradient-to-r from-emerald-500 to-teal-500'
-                              }`}>
-                                {item.listing_type === 'want' ? 'Looking For' : 'Selling'}
-                              </span>
-                            </div>
+                            {/* Empty space where selling/looking for pill used to be */}
+                            <div className="flex-shrink-0 w-0"></div>
                           </div>
                         )}
                       </div>
