@@ -470,7 +470,7 @@ export default function MessagesPage() {
                   <div className="text-center py-8">
                     <div className="w-16 h-16 mx-auto mb-4 bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center">
                       <svg className="w-8 h-8 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12h.01M16h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12h.01M16h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                       </svg>
                     </div>
                     <p className="text-neutral-600 dark:text-neutral-400 text-sm">
@@ -677,7 +677,7 @@ export default function MessagesPage() {
                 <>
                   {/* Chat Header */}
                   <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-3 rounded-t-3xl">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-start gap-3">
                       {/* Listing Image - Increased Size */}
                       <img
                         src={chats.find(c => c.id === selectedChat)?.listing_image || '/placeholder-listing.jpg'}
@@ -697,8 +697,8 @@ export default function MessagesPage() {
                       
                       {/* Content Section */}
                       <div className="flex-1 min-w-0">
-                        {/* Top Row: Selling/Looking For Tag + Location */}
-                        <div className="flex items-center gap-2 mb-2">
+                        {/* Top Row: Selling/Looking For Tag + Location (far right) */}
+                        <div className="flex items-center justify-between mb-2">
                           {/* Selling/Looking For Tag */}
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold text-white ${
                             chats.find(c => c.id === selectedChat)?.listing_type === 'want' 
@@ -708,32 +708,34 @@ export default function MessagesPage() {
                             {chats.find(c => c.id === selectedChat)?.listing_type === 'want' ? 'Looking For' : 'Selling'}
                           </span>
                           
-                          {/* Location Tag - Top Right */}
+                          {/* Location Tag - Far Top Right */}
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            {chats.find(c => c.id === selectedChat)?.location || 'Unknown Location'}
+                            {chats.find(c => c.id === selectedChat)?.location || 'Location N/A'}
                           </span>
                         </div>
                         
-                        {/* Listing Title */}
-                        <h2 className="text-lg font-bold text-white mb-1 truncate">
-                          {chats.find(c => c.id === selectedChat)?.listing_title || 'Untitled Listing'}
-                        </h2>
-                        
-                        {/* Posting Age - Right after title */}
-                        <div className="text-white/80 text-sm mb-2">
-                          Posted {chats.find(c => c.id === selectedChat)?.listing_created_at ? 
-                            formatTimestamp(chats.find(c => c.id === selectedChat)?.listing_created_at!) : 
-                            'Unknown time'
-                          }
+                        {/* Title Row: Listing Title + Posting Age Pill */}
+                        <div className="flex items-center gap-2 mb-2">
+                          <h2 className="text-lg font-bold text-white truncate flex-1">
+                            {chats.find(c => c.id === selectedChat)?.listing_title || 'Untitled Listing'}
+                          </h2>
+                          
+                          {/* Posting Age Pill - Right of title */}
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm flex-shrink-0">
+                            {chats.find(c => c.id === selectedChat)?.listing_created_at ? 
+                              formatTimestamp(chats.find(c => c.id === selectedChat)?.listing_created_at!).replace(' ago', '') : 
+                              'Unknown'
+                            }
+                          </span>
                         </div>
                         
-                        {/* Price - Uses user's actual settings */}
+                        {/* Price - Uses global currency setting from hamburger menu */}
                         <div className="text-white/90 mb-2">
-                          {user?.currency === 'btc' ? (
+                          {dark ? (
                             <span className="text-lg font-semibold">
                               {(Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000).toFixed(8)} BTC
                             </span>
@@ -772,38 +774,37 @@ export default function MessagesPage() {
                               />
                               <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center hidden">
                                 <span className="text-xs font-bold text-white">{getInitials(chats.find(c => c.id === selectedChat)?.other_user || '')}</span>
-                              </div>
                             </div>
-                            <span className="text-sm ml-1 text-white">{chats.find(c => c.id === selectedChat)?.other_user}</span>
                           </div>
-                          
-                          {/* Verified Badge */}
-                          {chats.find(c => c.id === selectedChat)?.seller_verified && (
-                            <span className="verified-badge inline-flex h-5 w-5 items-center justify-center rounded-full text-white font-bold shadow-md" style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }} aria-label="Verified" title="User has verified their identity">
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                            </span>
-                          )}
+                          <span className="text-sm ml-1 text-white">{chats.find(c => c.id === selectedChat)?.other_user}</span>
                         </div>
+                        
+                        {/* Verified Badge */}
+                        {chats.find(c => c.id === selectedChat)?.seller_verified && (
+                          <span className="verified-badge inline-flex h-5 w-5 items-center justify-center rounded-full text-white font-bold shadow-md" style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }} aria-label="Verified" title="User has verified their identity">
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          </span>
+                        )}
                       </div>
-                      
-                      {/* View Listing Button - Moved Higher */}
-                      <div className="flex-shrink-0">
-                        <button
-                          onClick={async () => {
-                            const selectedChatData = chats.find(c => c.id === selectedChat);
-                            console.log('🔍 Button clicked, selectedChatData:', selectedChatData);
-                            if (selectedChatData?.listing_id) {
-                              console.log('🔍 Calling openListingModal with ID:', selectedChatData.listing_id);
-                              await openListingModal(selectedChatData.listing_id);
-                            } else {
-                              console.log('🔍 No listing_id found in selectedChatData');
-                            }
-                          }}
-                          className="px-3 py-1.5 text-xs font-medium text-orange-600 bg-white hover:bg-orange-50 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-md"
-                        >
-                          View Listing
-                        </button>
-                      </div>
+                    </div>
+                    
+                    {/* View Listing Button - Moved Higher */}
+                    <div className="flex justify-end mt-2">
+                      <button
+                        onClick={async () => {
+                          const selectedChatData = chats.find(c => c.id === selectedChat);
+                          console.log('🔍 Button clicked, selectedChatData:', selectedChatData);
+                          if (selectedChatData?.listing_id) {
+                            console.log('🔍 Calling openListingModal with ID:', selectedChatData.listing_id);
+                            await openListingModal(selectedChatData.listing_id);
+                          } else {
+                            console.log('🔍 No listing_id found in selectedChatData');
+                          }
+                        }}
+                        className="px-3 py-1.5 text-xs font-medium text-orange-600 bg-white hover:bg-orange-50 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-md"
+                      >
+                        View Listing
+                      </button>
                     </div>
                   </div>
 
