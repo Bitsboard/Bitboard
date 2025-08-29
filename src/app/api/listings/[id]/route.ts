@@ -18,26 +18,19 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   }
   
   try {
+    console.log('🔍 Fetching listing with ID:', id);
+    
+    // First, try to get just the basic listing data
     const listing = await db.prepare(`
-      SELECT 
-        l.*,
-        u.username as seller_name,
-        u.verified as seller_verified,
-        u.score as seller_score,
-        u.deals as seller_deals,
-        u.rating as seller_rating,
-        u.email_verified,
-        u.phone_verified,
-        u.lnurl_verified,
-        u.on_time_release
-      FROM listings l
-      LEFT JOIN users u ON l.seller_id = u.id
-      WHERE l.id = ?
+      SELECT * FROM listings WHERE id = ?
     `).bind(id).first();
     
     if (!listing) {
+      console.log('🔍 No listing found with ID:', id);
       return NextResponse.json({ error: "listing not found" }, { status: 404 });
     }
+    
+    console.log('🔍 Raw listing data:', listing);
     
     // Type assertion for the database result
     const dbListing = listing as any;
@@ -45,8 +38,8 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     // Transform the data to match the expected Listing interface
     const transformedListing = {
       id: String(dbListing.id),
-      title: dbListing.title || '',
-      description: dbListing.description || '',
+      title: dbListing.title || 'Untitled',
+      description: dbListing.description || 'No description available',
       priceSats: Number(dbListing.price_sats) || 0,
       category: dbListing.category || 'Featured',
       location: dbListing.location || 'Unknown',
@@ -56,24 +49,28 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
       images: dbListing.images ? JSON.parse(dbListing.images) : [],
       boostedUntil: dbListing.boosted_until || null,
       seller: {
-        name: dbListing.seller_name || 'Unknown',
-        score: Number(dbListing.seller_score) || 0,
-        deals: Number(dbListing.seller_deals) || 0,
-        rating: Number(dbListing.seller_rating) || 0,
+        name: dbListing.seller_username || dbListing.username || 'Unknown',
+        score: 0,
+        deals: 0,
+        rating: 0,
         verifications: {
-          email: Boolean(dbListing.email_verified) || false,
-          phone: Boolean(dbListing.phone_verified) || false,
-          lnurl: Boolean(dbListing.lnurl_verified) || false
+          email: false,
+          phone: false,
+          lnurl: false
         },
-        onTimeRelease: Number(dbListing.on_time_release) || 0
+        onTimeRelease: 0
       },
       createdAt: Number(dbListing.created_at) || Date.now()
     };
     
+    console.log('🔍 Transformed listing:', transformedListing);
     return NextResponse.json(transformedListing);
   } catch (error) {
-    console.error('Error fetching listing:', error);
-    return NextResponse.json({ error: "internal server error" }, { status: 500 });
+    console.error('🔍 Error fetching listing:', error);
+    return NextResponse.json({ 
+      error: "internal server error", 
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
 
