@@ -249,20 +249,7 @@ export default function MessagesPage() {
     }
   }, [messages]);
 
-  // Auto-refresh chats and messages every 10 seconds
-  useEffect(() => {
-    if (!user?.email) return;
 
-    const interval = setInterval(() => {
-      loadChats();
-      // If there's a selected chat, also refresh its messages
-      if (selectedChat) {
-        loadMessages(selectedChat);
-      }
-    }, 10000); // 10 seconds
-
-    return () => clearInterval(interval);
-  }, [user?.email, selectedChat]);
 
   // Filter chats and notifications based on unread status
   const filteredChats = filter === 'unread' 
@@ -521,87 +508,30 @@ export default function MessagesPage() {
         <div className="flex-1 bg-white/80 dark:bg-neutral-900/90 backdrop-blur-sm flex flex-col rounded-l-3xl shadow-xl">
           {selectedChat ? (
             <>
-              {/* Chat Header - Comprehensive listing information */}
+              {/* Chat Header - Clean and simple */}
               <div className="p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 bg-gradient-to-r from-orange-500 to-orange-600 flex-shrink-0 rounded-tl-3xl">
-                <div className="flex items-start gap-4">
-                  {/* Listing image */}
-                  <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-white/10">
-                    {chats.find(c => c.id === selectedChat)?.listing_image ? (
-                      <img 
-                        src={chats.find(c => c.id === selectedChat)?.listing_image} 
-                        alt={chats.find(c => c.id === selectedChat)?.listing_title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-white/20 flex items-center justify-center">
-                        <svg className="w-8 h-8 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 00-2-2V6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Listing details */}
+                <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-lg font-bold text-white truncate mb-2">
+                    <h2 className="text-lg font-bold text-white truncate">
                       {chats.find(c => c.id === selectedChat)?.listing_title}
                     </h2>
-                    
-                    {/* Listing metadata row */}
-                    <div className="flex items-center gap-4 text-orange-100 text-sm mb-2">
-                      <span>Chat with {chats.find(c => c.id === selectedChat)?.other_user}</span>
-                      <span>•</span>
-                      <span>Listing #{chats.find(c => c.id === selectedChat)?.listing_id}</span>
-                    </div>
-                    
-                    {/* Price and listing info */}
-                    <div className="flex items-center gap-4 text-orange-100/90 text-sm">
-                      <span className="font-medium">
-                        Price: {chats.find(c => c.id === selectedChat)?.listing_price ? 
-                          `${(chats.find(c => c.id === selectedChat)?.listing_price! / 100000000).toFixed(8)} BTC` : 
-                          'Price not available'
-                        }
-                      </span>
-                      <span>•</span>
-                      <span>
-                        Age: {chats.find(c => c.id === selectedChat)?.listing_created_at ? 
-                          formatTimestamp(chats.find(c => c.id === selectedChat)?.listing_created_at!) : 
-                          'Unknown'
-                        }
-                      </span>
-                      <span>•</span>
-                      <a 
-                        href={`/listing/${chats.find(c => c.id === selectedChat)?.listing_id}`}
-                        className="text-orange-200 hover:text-white underline"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        View Listing →
-                      </a>
-                    </div>
+                    <p className="text-orange-100 text-sm mt-1">
+                      Chat with {chats.find(c => c.id === selectedChat)?.other_user} • Listing #{chats.find(c => c.id === selectedChat)?.listing_id}
+                    </p>
                   </div>
                   
-                  {/* Seller information */}
-                  <div className="flex items-center gap-3">
-                    {/* Seller pill with profile picture */}
-                    <div className="flex items-center gap-2 px-3 py-2 bg-white/20 rounded-full">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
-                        <span className="text-xs font-bold text-white">
-                          {chats.find(c => c.id === selectedChat)?.other_user?.charAt(0)?.toUpperCase() || 'U'}
-                        </span>
-                      </div>
-                      <span className="text-white text-sm font-medium">
-                        {chats.find(c => c.id === selectedChat)?.other_user}
+                  {/* Simple seller info */}
+                  <div className="flex items-center gap-2 ml-4">
+                    <span className="text-orange-100 text-sm font-medium">
+                      {chats.find(c => c.id === selectedChat)?.other_user}
+                    </span>
+                    {chats.find(c => c.id === selectedChat)?.seller_verified && (
+                      <span className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                        <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                        </svg>
                       </span>
-                      {/* Verified badge - only show if verified */}
-                      {chats.find(c => c.id === selectedChat)?.seller_verified && (
-                        <span className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                          <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                          </svg>
-                        </span>
-                      )}
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -655,7 +585,7 @@ export default function MessagesPage() {
                         >
                           {/* Timestamp above message if needed - with proper spacing */}
                           {shouldShowTimestamp && (
-                            <div className="w-full text-center mb-3">
+                            <div className="w-full mb-3">
                               <span className="text-xs text-neutral-500 dark:text-neutral-400">
                                 {formatTimestamp(message.timestamp)}
                               </span>
