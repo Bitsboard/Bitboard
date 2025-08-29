@@ -91,7 +91,7 @@ export async function GET(req: Request) {
         l.created_at as listing_created_at,
         buyer.username as buyer_username,
         seller.username as seller_username,
-        seller.verifications as seller_verifications,
+        seller.verified as seller_verified,
         CASE 
           WHEN c.buyer_id = ? THEN 'buyer'
           ELSE 'seller'
