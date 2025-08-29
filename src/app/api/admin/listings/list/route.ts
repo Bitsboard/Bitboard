@@ -4,10 +4,18 @@ import { getAdminDb } from '../../_util';
 
 export async function GET(req: Request) {
   try {
+    console.log('🔍 Admin Listings API: Request started');
+    
     const url = new URL(req.url);
     const limit = Math.min(100, parseInt(url.searchParams.get('limit') ?? '20', 10) || 20);
     const offset = Math.max(0, parseInt(url.searchParams.get('offset') ?? '0', 10) || 0);
+    
+    console.log('🔍 Admin Listings API: Parsed URL parameters - limit:', limit, 'offset:', offset);
+    
+    console.log('🔍 Admin Listings API: About to call getAdminDb...');
     const db = await getAdminDb(req);
+    console.log('🔍 Admin Listings API: getAdminDb successful, database connection established');
+    
     const q = (url.searchParams.get('q') || '').trim();
     
     console.log('🔍 Admin Listings API: Request received with limit:', limit, 'offset:', offset, 'query:', q);
@@ -60,6 +68,7 @@ export async function GET(req: Request) {
     `;
     
     console.log('🔍 Admin Listings API: Query:', listingsQuery);
+    console.log('🔍 Admin Listings API: About to execute query with binds:', [...binds, limit, offset]);
     
     const res = await db.prepare(listingsQuery).bind(...binds, limit, offset).all();
     console.log('🔍 Admin Listings API: Query result:', {
@@ -84,9 +93,18 @@ export async function GET(req: Request) {
       headers: { 'content-type': 'application/json' } 
     });
   } catch (e: any) {
+    console.error('🔍 Admin Listings API: Error occurred:', e);
+    console.error('🔍 Admin Listings API: Error message:', e?.message);
+    console.error('🔍 Admin Listings API: Error stack:', e?.stack);
+    
     const msg = e?.message || 'error';
     const code = msg === 'unauthorized' ? 401 : msg === 'forbidden' ? 403 : 500;
-    return new Response(JSON.stringify({ error: msg }), { status: code });
+    
+    return new Response(JSON.stringify({ 
+      error: msg,
+      details: e?.message,
+      stack: e?.stack
+    }), { status: code });
   }
 }
 
