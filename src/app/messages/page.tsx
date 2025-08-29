@@ -761,7 +761,11 @@ export default function MessagesPage() {
                                 ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500' 
                                 : 'bg-gradient-to-r from-emerald-500 to-teal-500'
                             }`}>
-                              {chats.find(c => c.id === selectedChat)?.listing_ad_type === 'want' ? 'Looking For' : 'Selling'}
+                              {(() => {
+                                const adType = chats.find(c => c.id === selectedChat)?.listing_ad_type;
+                                console.log('🔍 Debug - listing_ad_type:', adType, 'for chat:', selectedChat);
+                                return adType === 'want' ? 'Looking For' : 'Selling';
+                              })()}
                             </span>
                             
                             {/* Listing Title - Directly to the right of selling tag */}
@@ -851,7 +855,7 @@ export default function MessagesPage() {
                           {/* Posting Age - Use same logic as grid/list cards */}
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
                             {chats.find(c => c.id === selectedChat)?.listing_created_at ? 
-                              formatPostAge(chats.find(c => c.id === selectedChat)?.listing_created_at!) : 
+                              `${formatPostAge(chats.find(c => c.id === selectedChat)?.listing_created_at!)} ago` : 
                               'Unknown'
                             }
                           </span>
@@ -859,12 +863,8 @@ export default function MessagesPage() {
                           {/* "in" text */}
                           <span className="text-white/80 text-xs">in</span>
                           
-                          {/* Location Tag - Fixed SVG path */}
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
+                          {/* Location Tag - No pin icon */}
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
                             {chats.find(c => c.id === selectedChat)?.listing_location || 'Location N/A'}
                           </span>
                         </div>
