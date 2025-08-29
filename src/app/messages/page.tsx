@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTheme } from '@/lib/contexts/ThemeContext';
 import { useUser, useSettings } from '@/lib/settings';
 import { ListingModal } from '@/components/ListingModal';
-import { generateProfilePicture, getInitials } from '@/lib/utils';
+import { generateProfilePicture, getInitials, formatPostAge } from "@/lib/utils";
 
 interface Chat {
   id: string;
@@ -656,7 +656,7 @@ export default function MessagesPage() {
                               <span className={`text-xs font-bold ${
                                 selectedChat === item.id ? 'text-white/70' : 'text-neutral-500 dark:text-neutral-400'
                               }`}>
-                                {formatTimestamp(item.last_message_time).replace(' ago', '')}
+                                {formatPostAge(item.last_message_time)}
                               </span>
                             </div>
                           </div>
@@ -675,11 +675,11 @@ export default function MessagesPage() {
                   {/* Chat Header */}
                   <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-2 rounded-t-3xl">
                     <div className="flex items-start gap-3">
-                      {/* Listing Image - Larger Size with rounded top-left corner */}
+                      {/* Listing Image - Only round top-left corner to match header */}
                       <img
                         src={chats.find(c => c.id === selectedChat)?.listing_image || '/placeholder-listing.jpg'}
                         alt="Listing"
-                        className="w-32 h-32 rounded-t-3xl rounded-br-lg rounded-bl-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        className="w-32 h-32 rounded-tl-3xl rounded-tr-lg rounded-br-lg rounded-bl-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
                         onClick={async () => {
                           const selectedChatData = chats.find(c => c.id === selectedChat);
                           console.log('🔍 Image clicked, selectedChatData:', selectedChatData);
@@ -715,7 +715,7 @@ export default function MessagesPage() {
                             {/* Posting Age - Use same logic as grid/list cards */}
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
                               {chats.find(c => c.id === selectedChat)?.listing_created_at ? 
-                                formatTimestamp(chats.find(c => c.id === selectedChat)?.listing_created_at!) : 
+                                formatPostAge(chats.find(c => c.id === selectedChat)?.listing_created_at!) : 
                                 'Unknown'
                               }
                             </span>
@@ -728,15 +728,15 @@ export default function MessagesPage() {
                               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                              </svg>
+                            </svg>
                               {chats.find(c => c.id === selectedChat)?.location || 'Location N/A'}
                             </span>
                           </div>
                         </div>
                         
-                        {/* Price - Uses user's actual currency preference */}
+                        {/* Price - Uses global BTC/sat toggle setting from hamburger menu */}
                         <div className="text-white/90 mb-1">
-                          {user?.currency === 'btc' ? (
+                          {dark ? (
                             <span className="text-lg font-semibold">
                               {(Number(chats.find(c => c.id === selectedChat)?.listing_price || 0) / 100000000).toFixed(8)} BTC
                             </span>
@@ -789,8 +789,8 @@ export default function MessagesPage() {
                         </div>
                       </div>
                       
-                      {/* View Listing Button - Aligned vertically with username pill */}
-                      <div className="flex items-end">
+                      {/* View Listing Button - Moved down to align with username pill */}
+                      <div className="flex items-end self-end">
                         <button
                           onClick={async () => {
                             const selectedChatData = chats.find(c => c.id === selectedChat);
