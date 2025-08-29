@@ -23,6 +23,7 @@ interface Chat {
   listing_type?: 'sell' | 'want';
   location?: string;
   seller_score?: number;
+  seller_rating?: number;
 }
 
 interface SystemNotification {
@@ -118,7 +119,8 @@ export default function MessagesPage() {
             seller_verified: chat.seller_verified || false,
             listing_type: chat.listing_type || 'sell',
             location: chat.listing_location,
-            seller_score: chat.seller_score || 0
+            seller_score: chat.seller_score || 0,
+            seller_rating: chat.seller_rating || 0
         }));
         setChats(transformedChats);
         
@@ -359,7 +361,10 @@ export default function MessagesPage() {
         type: dbListing.type || 'sell',
         images: dbListing.images ? (Array.isArray(dbListing.images) ? dbListing.images : [dbListing.images]) : 
                 dbListing.listing_image ? [dbListing.listing_image] : 
-                dbListing.image ? [dbListing.image] : [],
+                dbListing.image ? [dbListing.image] : 
+                dbListing.photo ? [dbListing.photo] :
+                dbListing.photo_url ? [dbListing.photo_url] :
+                dbListing.image_url ? [dbListing.image_url] : [],
         boostedUntil: dbListing.boosted_until ? Number(dbListing.boosted_until) : null,
         seller: {
           name: dbListing.seller_name || dbListing.posted_by || dbListing.username || 'Unknown Seller',
@@ -377,6 +382,15 @@ export default function MessagesPage() {
       };
       
       console.log('🔍 Transformed listing:', transformedListing);
+      console.log('🔍 Images array:', transformedListing.images);
+      console.log('🔍 Original image fields:', {
+        images: dbListing.images,
+        listing_image: dbListing.listing_image,
+        image: dbListing.image,
+        photo: dbListing.photo,
+        photo_url: dbListing.photo_url,
+        image_url: dbListing.image_url
+      });
       
       // Set the modal with the transformed listing data
       setModal('active', transformedListing);
@@ -799,7 +813,7 @@ export default function MessagesPage() {
                     </div>
                     
                     {/* Bottom Row: Username (right of image) + View Listing Button (right edge) */}
-                    <div className="flex items-end justify-between mt-2">
+                    <div className="flex items-end justify-between mt-1">
                       {/* Username Pill - Aligned with bottom of image, to the right of it */}
                       <div className="ml-36 flex items-center gap-2">
                         <div 
@@ -841,7 +855,7 @@ export default function MessagesPage() {
                         )}
                         
                         {/* User Reputation - +x 👍 format */}
-                        <span className="text-white/80 text-xs">+{chats.find(c => c.id === selectedChat)?.seller_score || 0} 👍</span>
+                        <span className="text-white/80 text-xs">+{chats.find(c => c.id === selectedChat)?.seller_score || chats.find(c => c.id === selectedChat)?.seller_rating || 0} 👍</span>
                       </div>
                       
                       {/* View Listing Button - Right aligned with header edge */}
