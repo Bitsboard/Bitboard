@@ -91,9 +91,21 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
             {listing.type === 'want' ? t('looking_for', lang) : t('selling', lang)}
           </span>
           <ModalTitle>{listing.title}</ModalTitle>
+          {/* Debug: Log what's being rendered */}
+          {(() => {
+            console.log('Rendering boosted section - boosted:', boosted, 'boostedUntil:', listing.boostedUntil);
+            return null;
+          })()}
           {boosted && (
             <span className="rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2 py-0.5 text-[10px] font-bold text-neutral-950">BOOSTED</span>
           )}
+          {/* Debug: Check if there's anything after the boosted tag */}
+          {(() => {
+            console.log('After boosted tag - checking for any unexpected content');
+            return null;
+          })()}
+          {/* Debug: Render boosted value to see if it's somehow being displayed */}
+          {/* DEBUG: boosted = {String(boosted)} */}
         </div>
         <div className="flex items-center gap-2">
           <button
