@@ -8,6 +8,7 @@ import { useTheme } from '@/lib/contexts/ThemeContext';
 import { useLang } from '@/lib/i18n-client';
 import { t } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
+import { formatCADAmount } from "@/lib/utils";
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import type { Session, ProfileData, SortOptionProfile } from '@/lib/types';
 import { CONFIG } from '@/lib/dataService';
@@ -325,7 +326,7 @@ export default function PublicProfilePage() {
                         {listing.priceSat.toLocaleString()} sats
                       </div>
                       <div className="text-xs text-neutral-500 dark:text-neutral-400">
-                        ~${(listing.priceSat / 100000000 * 45000).toFixed(2)} CAD
+                        {formatCADAmount(listing.priceSat / 100000000 * 45000)}
                       </div>
                     </div>
                   </div>

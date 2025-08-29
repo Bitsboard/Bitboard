@@ -18,6 +18,16 @@ export function formatCurrency(amount: number, currency = "CAD", locale?: string
   }).format(amount);
 }
 
+// Format CAD amount with tilde and thousand separators
+export function formatCADAmount(amount: number): string {
+  return `~${amount.toLocaleString('en-CA', {
+    style: 'currency',
+    currency: 'CAD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`;
+}
+
 // Format numbers with proper locale support
 export function formatNumber(num: number, locale?: string): string {
   return new Intl.NumberFormat(locale).format(num);
