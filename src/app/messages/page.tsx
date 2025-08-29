@@ -119,16 +119,18 @@ export default function MessagesPage() {
             seller_verified: chat.seller_verified || false,
             listing_type: chat.listing_type || 'sell',
             location: chat.listing_location,
-            seller_score: chat.seller_score || chat.seller_rating || chat.user_score || chat.user_rating || 0,
-            seller_rating: chat.seller_rating || chat.user_rating || chat.seller_score || chat.user_score || 0
+            seller_score: chat.seller_score || chat.seller_rating || chat.user_score || chat.user_rating || chat.reputation || chat.score || 0,
+            seller_rating: chat.seller_rating || chat.user_rating || chat.seller_score || chat.user_score || chat.reputation || chat.score || 0
         }));
         
+        console.log('🔍 Raw chat API response:', data.chats);
         console.log('🔍 Transformed chats with reputation data:', transformedChats.map(c => ({
           id: c.id,
           other_user: c.other_user,
           seller_score: c.seller_score,
           seller_rating: c.seller_rating,
-          seller_verified: c.seller_verified
+          seller_verified: c.seller_verified,
+          raw_data: data.chats.find(raw => raw.id === c.id)
         })));
         setChats(transformedChats);
         
@@ -843,12 +845,13 @@ export default function MessagesPage() {
                             +{(() => {
                               const selectedChatData = chats.find(c => c.id === selectedChat);
                               const score = selectedChatData?.seller_score || selectedChatData?.seller_rating || 0;
-                              console.log('🔍 Reputation debug:', {
+                              console.log('🔍 Reputation display debug:', {
                                 chatId: selectedChat,
                                 other_user: selectedChatData?.other_user,
                                 seller_score: selectedChatData?.seller_score,
                                 seller_rating: selectedChatData?.seller_rating,
-                                final_score: score
+                                final_score: score,
+                                all_available_fields: selectedChatData ? Object.keys(selectedChatData) : []
                               });
                               return score;
                             })()} 👍
@@ -859,7 +862,7 @@ export default function MessagesPage() {
                       {/* Right Side: Age + Location + View Listing Button */}
                       <div className="flex flex-col justify-between h-32">
                         {/* Top Section: Age + Location - Aligned with top of header */}
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 mt-2">
                           {/* Posting Age - Use same logic as grid/list cards */}
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
                             {chats.find(c => c.id === selectedChat)?.listing_created_at ? 
@@ -871,7 +874,7 @@ export default function MessagesPage() {
                           {/* "in" text */}
                           <span className="text-white/80 text-xs">in</span>
                           
-                          {/* Location Tag */}
+                          {/* Location Tag - Fixed SVG path */}
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-white bg-white/20 backdrop-blur-sm">
                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
