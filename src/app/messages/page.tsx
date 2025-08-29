@@ -145,12 +145,14 @@ export default function MessagesPage() {
       if (response.ok) {
         const data = await response.json() as { messages: any[]; current_user_id: string };
         console.log('Messages API response:', data); // Debug log
+        
+        // Transform messages to match the expected format
         const transformedMessages = data.messages.map((msg: any) => ({
           id: msg.id,
-          content: msg.content,
+          content: msg.text, // API returns 'text', not 'content'
           timestamp: msg.created_at,
-          is_from_current_user: msg.from_id === data.current_user_id,
-          sender_name: msg.sender_name
+          is_from_current_user: msg.is_from_current_user, // API already provides this
+          sender_name: msg.is_from_current_user ? 'You' : 'Other User' // Simplified sender name
         }));
         setMessages(transformedMessages);
         setSelectedChat(chatId);
@@ -166,14 +168,23 @@ export default function MessagesPage() {
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedChat || isSending || !user?.email) return;
     
+    // Get the selected chat details to extract listing_id and other_user_id
+    const selectedChatData = chats.find(c => c.id === selectedChat);
+    if (!selectedChatData) {
+      console.error('Selected chat not found');
+      return;
+    }
+    
     setIsSending(true);
     try {
       const response = await fetch('/api/chat/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          chat_id: selectedChat,
-          content: newMessage.trim(),
+          chatId: selectedChat,
+          text: newMessage.trim(), // API expects 'text', not 'content'
+          listingId: selectedChatData.listing_id.toString(), // API expects listingId
+          otherUserId: selectedChatData.other_user, // API expects otherUserId
           userEmail: user.email
         })
       });
@@ -182,6 +193,10 @@ export default function MessagesPage() {
         setNewMessage('');
         // Reload messages to show the new one
         await loadMessages(selectedChat);
+      } else {
+        console.error('Send message error:', response.status, response.statusText);
+        const errorData = await response.json();
+        console.error('Error details:', errorData);
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -294,7 +309,7 @@ export default function MessagesPage() {
           </div>
           
           {/* Content List with Custom Scrollbar */}
-          <div className="flex-1 overflow-y-auto rounded-br-3xl scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-600 scrollbar-track-transparent hover:scrollbar-thumb-neutral-400 dark:hover:scrollbar-thumb-neutral-500">
+          <div className="flex-1 overflow-y-auto rounded-br-3xl custom-scrollbar">
             {!user?.email ? (
               <div className="text-center py-8">
                 <div className="w-16 h-16 mx-auto mb-4 bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center">
