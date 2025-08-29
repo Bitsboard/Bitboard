@@ -119,11 +119,53 @@ export async function POST(req: Request) {
       AND verified = 0
     `).run();
     
+    // Additional seeded users with realistic reputation
+    await db.prepare(`
+      UPDATE users 
+      SET rating = 8 
+      WHERE username IN ('btcmerchant', 'btceducator', 'btcconsult') 
+      AND verified = 1
+    `).run();
+    
+    await db.prepare(`
+      UPDATE users 
+      SET rating = 11 
+      WHERE username IN ('bitcoinwhale', 'blockchaindev', 'btcblogger') 
+      AND verified = 1
+    `).run();
+    
+    await db.prepare(`
+      UPDATE users 
+      SET rating = 4 
+      WHERE username IN ('btcpodcast', 'asicivan', 'apiaustin') 
+      AND verified = 0
+    `).run();
+    
+    await db.prepare(`
+      UPDATE users 
+      SET rating = 13 
+      WHERE username IN ('blockchainb') 
+      AND verified = 1
+    `).run();
+    
     // Set remaining users to have at least 1 thumbs up (new users)
+    // BUT ONLY if they haven't been set to a specific value above
     await db.prepare(`
       UPDATE users 
       SET rating = 1 
       WHERE rating = 0
+      AND username NOT IN (
+        'alice', 'bob', 'charlie', 'diana', 'emma',
+        'frank', 'grace', 'henry', 'iris', 'jack',
+        'kate', 'liam', 'maya', 'nathan', 'olivia',
+        'paul', 'quinn', 'rachel', 'sam', 'taylor',
+        'uma', 'victor', 'willa', 'xander', 'yara',
+        'zoe', 'adam', 'bella', 'carlos', 'daisy',
+        'eddie', 'fiona', 'george', 'hannah', 'ian',
+        'btcmerchant', 'btceducator', 'btcconsult',
+        'bitcoinwhale', 'blockchaindev', 'btcblogger',
+        'btcpodcast', 'asicivan', 'apiaustin', 'blockchainb'
+      )
     `).run();
     
     console.log('✅ Reputation seeding completed');
