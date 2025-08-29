@@ -41,10 +41,12 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
   const [sellerImageError, setSellerImageError] = React.useState(false);
   const [showChat, setShowChat] = React.useState(false);
   
-  // Debug: Log btcCad value
+  // Debug: Log btcCad value and listing title
   React.useEffect(() => {
     console.log('ListingModal btcCad:', btcCad, 'unit:', unit, 'listing.priceSats:', listing.priceSats);
-  }, [btcCad, unit, listing.priceSats]);
+    console.log('ListingModal listing.title:', listing.title, 'type:', typeof listing.title, 'length:', listing.title?.length);
+    console.log('ListingModal listing object:', listing);
+  }, [btcCad, unit, listing.priceSats, listing.title, listing]);
 
   function sanitizeTitle(raw: string, type: "sell" | "want"): string {
     if (type !== "want") return raw;
