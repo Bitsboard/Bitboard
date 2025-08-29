@@ -507,24 +507,7 @@ export default function AdminPage() {
                   >
                     View analytics
                   </button>
-                  <button 
-                    onClick={async () => {
-                      try {
-                        const response = await fetch('/api/admin/seed-reputation', { method: 'POST' });
-                        if (response.ok) {
-                          setNotificationSuccess('Reputation seeded successfully!');
-                          loadStats();
-                        } else {
-                          setNotificationError('Failed to seed reputation');
-                        }
-                      } catch (error) {
-                        setNotificationError('Error seeding reputation');
-                      }
-                    }}
-                    className="w-full px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors"
-                  >
-                    Seed Realistic Reputation
-                  </button>
+
                 </div>
               </div>
             </div>
