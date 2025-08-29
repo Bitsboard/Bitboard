@@ -515,39 +515,28 @@ export default function MessagesPage() {
         <div className="flex-1 bg-white/80 dark:bg-neutral-900/90 backdrop-blur-sm flex flex-col rounded-l-3xl shadow-xl">
           {selectedChat ? (
             <>
-              {/* Chat Header - Enhanced with listing details */}
+              {/* Chat Header - Clean and informative */}
               <div className="p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 bg-gradient-to-r from-orange-500 to-orange-600 flex-shrink-0 rounded-tl-3xl">
-                <div className="flex items-start gap-4">
-                  {/* Listing image */}
-                  <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-white/10">
-                    {chats.find(c => c.id === selectedChat)?.listing_image ? (
-                      <img 
-                        src={chats.find(c => c.id === selectedChat)?.listing_image} 
-                        alt={chats.find(c => c.id === selectedChat)?.listing_title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-white/20 flex items-center justify-center">
-                        <svg className="w-8 h-8 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 00-2-2V6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Listing details */}
+                <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
                     <h2 className="text-lg font-bold text-white truncate">
                       {chats.find(c => c.id === selectedChat)?.listing_title}
                     </h2>
-                    <div className="flex items-center gap-3 mt-1">
-                      <span className="text-orange-100 text-sm font-medium">
-                        Chat with {chats.find(c => c.id === selectedChat)?.other_user}
-                      </span>
-                      <span className="text-orange-100/80 text-xs">
-                        ID: {chats.find(c => c.id === selectedChat)?.listing_id}
-                      </span>
+                    <div className="flex items-center gap-4 mt-1 text-orange-100 text-sm">
+                      <span>Chat with {chats.find(c => c.id === selectedChat)?.other_user}</span>
+                      <span>•</span>
+                      <span>Listing #{chats.find(c => c.id === selectedChat)?.listing_id}</span>
                     </div>
+                  </div>
+                  
+                  {/* Quick action buttons */}
+                  <div className="flex items-center gap-2 ml-4">
+                    <button className="p-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 0c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -597,14 +586,14 @@ export default function MessagesPage() {
                         <div
                           className={`flex ${message.is_from_current_user ? 'justify-end' : 'justify-start'} ${
                             isGroupedWithPrev ? 'mt-1' : 'mt-3'
-                          } relative`}
+                          }`}
                         >
-                          {/* Timestamp above message if needed - positioned closer to the message */}
+                          {/* Timestamp above message if needed - with proper spacing */}
                           {shouldShowTimestamp && (
-                            <div className={`absolute -top-6 ${
-                              message.is_from_current_user ? 'right-0' : 'left-0'
+                            <div className={`w-full text-center mb-3 ${
+                              message.is_from_current_user ? 'text-right' : 'text-left'
                             }`}>
-                              <span className="text-xs text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-2 py-1 rounded-full">
+                              <span className="text-xs text-neutral-500 dark:text-neutral-400">
                                 {formatTimestamp(message.timestamp)}
                               </span>
                             </div>
