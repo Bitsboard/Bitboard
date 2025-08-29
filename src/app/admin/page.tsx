@@ -74,10 +74,6 @@ export default function AdminPage() {
   const [notificationSuccess, setNotificationSuccess] = useState<string | null>(null);
   const [notificationError, setNotificationError] = useState<string | null>(null);
   
-  // Database fix state
-  const [isFixingDatabase, setIsFixingDatabase] = useState(false);
-  const [databaseFixResult, setDatabaseFixResult] = useState<any>(null);
-  
   const router = useRouter();
   const lang = useLang();
 
@@ -184,34 +180,6 @@ export default function AdminPage() {
       console.error('Error loading admin stats:', error);
     } finally {
       setStatsLoading(false);
-    }
-  };
-
-  const fixDatabaseRating = async () => {
-    setIsFixingDatabase(true);
-    setDatabaseFixResult(null);
-    setNotificationError(null);
-
-    try {
-      const response = await fetch('/api/admin/fix-rating', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-
-      const result = await response.json() as any;
-      
-      if (response.ok) {
-        setDatabaseFixResult(result);
-        setNotificationSuccess('Database rating schema fixed successfully!');
-        // Refresh stats to show updated data
-        loadStats();
-      } else {
-        setNotificationError(result.error || 'Failed to fix database rating');
-      }
-    } catch (error) {
-      setNotificationError('Network error while fixing database');
-    } finally {
-      setIsFixingDatabase(false);
     }
   };
 
@@ -540,11 +508,22 @@ export default function AdminPage() {
                     View analytics
                   </button>
                   <button 
-                    onClick={fixDatabaseRating}
-                    disabled={isFixingDatabase}
-                    className="w-full px-3 py-1.5 bg-purple-500 hover:bg-purple-600 disabled:bg-purple-400 text-white text-sm font-medium rounded-lg transition-colors"
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('/api/admin/seed-reputation', { method: 'POST' });
+                        if (response.ok) {
+                          setNotificationSuccess('Reputation seeded successfully!');
+                          loadStats();
+                        } else {
+                          setNotificationError('Failed to seed reputation');
+                        }
+                      } catch (error) {
+                        setNotificationError('Error seeding reputation');
+                      }
+                    }}
+                    className="w-full px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors"
                   >
-                    {isFixingDatabase ? 'Fixing Database...' : 'Fix Rating Schema'}
+                    Seed Realistic Reputation
                   </button>
                 </div>
               </div>
@@ -852,29 +831,6 @@ export default function AdminPage() {
                   </div>
                 )}
               </div>
-              
-              {/* Database Fix Results */}
-              {databaseFixResult && (
-                <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                  <h3 className="text-lg font-semibold text-green-800 dark:text-green-200 mb-3">
-                    ✅ Database Rating Schema Fixed Successfully!
-                  </h3>
-                  <div className="space-y-2 text-sm text-green-700 dark:text-green-300">
-                    <div><strong>Total Users:</strong> {databaseFixResult.summary?.totalUsers || 0}</div>
-                    <div><strong>Users with 0 Rating:</strong> {databaseFixResult.summary?.usersWithZeroRating || 0}</div>
-                    <div><strong>Rows Updated:</strong> {databaseFixResult.summary?.rowsUpdated || 0}</div>
-                    <div><strong>Column Modified:</strong> {databaseFixResult.summary?.columnModified ? 'Yes' : 'No'}</div>
-                    {databaseFixResult.summary?.columnInfo && (
-                      <div><strong>Column Type:</strong> {databaseFixResult.summary.columnInfo.type}</div>
-                    )}
-                  </div>
-                  <div className="mt-3 p-3 bg-green-100 dark:bg-green-800/30 rounded border border-green-200 dark:border-green-700">
-                    <p className="text-green-800 dark:text-green-200 font-medium">
-                      🎉 All reputation displays should now show +0 👍 instead of +5 👍
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>
