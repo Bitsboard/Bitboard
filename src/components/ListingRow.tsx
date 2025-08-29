@@ -52,11 +52,11 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
       )}
     >
       <div className={cn("absolute right-0 top-0 h-full w-1 bg-gradient-to-b", a.stripe)} />
-      {boosted && (
+      {boosted ? (
         <div className="absolute right-4 top-3 z-10 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1 text-xs font-bold text-neutral-950 shadow-lg">
           BOOSTED
         </div>
-      )}
+      ) : null}
 
       {/* Images */}
       <div className="col-span-3 overflow-hidden rounded-l-2xl -ml-4 -my-4 mr-0 h-[10rem] sm:h-[11rem] md:h-[12rem]">
