@@ -774,17 +774,18 @@ export default function MessagesPage() {
                               />
                               <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center hidden">
                                 <span className="text-xs font-bold text-white">{getInitials(chats.find(c => c.id === selectedChat)?.other_user || '')}</span>
+                              </div>
                             </div>
+                            <span className="text-sm ml-1 text-white">{chats.find(c => c.id === selectedChat)?.other_user}</span>
                           </div>
-                          <span className="text-sm ml-1 text-white">{chats.find(c => c.id === selectedChat)?.other_user}</span>
+                          
+                          {/* Verified Badge */}
+                          {chats.find(c => c.id === selectedChat)?.seller_verified && (
+                            <span className="verified-badge inline-flex h-5 w-5 items-center justify-center rounded-full text-white font-bold shadow-md" style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }} aria-label="Verified" title="User has verified their identity">
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </span>
+                          )}
                         </div>
-                        
-                        {/* Verified Badge */}
-                        {chats.find(c => c.id === selectedChat)?.seller_verified && (
-                          <span className="verified-badge inline-flex h-5 w-5 items-center justify-center rounded-full text-white font-bold shadow-md" style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }} aria-label="Verified" title="User has verified their identity">
-                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                          </span>
-                        )}
                       </div>
                     </div>
                     
