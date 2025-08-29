@@ -803,19 +803,29 @@ export default function MessagesPage() {
                         // Show timestamp if:
                         // 1. It's the first message
                         // 2. Previous message is from different user
-                        // 3. Previous message is more than 5 minutes old
+                        // 3. There's a significant time gap (1 hour, 1 day, etc.)
                         // 4. It's the last message
+                        const getTimeDifference = (current: number, previous: number) => {
+                          const diff = current - previous;
+                          const hours = Math.floor(diff / (1000 * 60 * 60));
+                          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                          
+                          if (days > 0) return days;
+                          if (hours > 0) return hours;
+                          return 0;
+                        };
+                        
                         const shouldShowTimestamp = 
                           index === 0 || 
                           !prevMessage || 
                           prevMessage.is_from_current_user !== message.is_from_current_user ||
-                          (message.timestamp - prevMessage.timestamp) > 300000 || // 5 minutes in ms
+                          getTimeDifference(message.timestamp, prevMessage.timestamp) > 0 || // Show timestamp for any hour/day change
                           index === messages.length - 1;
                         
                         // Group messages from same user with smaller spacing
                         const isGroupedWithPrev = prevMessage && 
                           prevMessage.is_from_current_user === message.is_from_current_user &&
-                          (message.timestamp - prevMessage.timestamp) <= 300000;
+                          (message.timestamp - prevMessage.timestamp) <= 300000; // 5 minutes for grouping
                         
                         return (
                           <div key={message.id}>
