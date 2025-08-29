@@ -107,16 +107,16 @@ export default function MessagesPage() {
         const transformedChats = data.chats.map((chat: any) => ({
             id: chat.id,
             other_user: chat.other_user_username,
-            other_user_verified: chat.other_user_verified || false,
+            other_user_verified: chat.seller_verified || false,
             listing_id: chat.listing_id,
             listing_title: chat.listing_title,
             listing_image: chat.listing_image,
-            listing_price_sats: chat.listing_price_sats || chat.price_sats,
-            listing_created_at: chat.listing_created_at || chat.created_at,
-            listing_location: chat.listing_location,
-            listing_ad_type: chat.listing_ad_type || 'sell',
+            listing_price_sats: chat.listing_price || 0,
+            listing_created_at: chat.listing_created_at || 0,
+            listing_location: chat.listing_location || 'Location N/A',
+            listing_ad_type: chat.listing_type || 'sell',
             last_message: chat.latest_message_text || 'No messages yet',
-            last_message_time: chat.latest_message_time || chat.last_message_at || chat.created_at,
+            last_message_time: chat.latest_message_time || chat.last_message_at || chat.created_at || 0,
             unread_count: chat.unread_count || 0,
             seller_rating: chat.seller_rating || 0
         }));
