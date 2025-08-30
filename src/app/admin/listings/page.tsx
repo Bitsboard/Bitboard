@@ -139,14 +139,25 @@ export default function AdminListingsPage() {
       
       if (response.ok) {
         const data: any = await response.json();
-        if (data.success && data.chats) {
+        
+        // Add comprehensive validation of the response structure
+        if (data && typeof data === 'object' && data.success === true && Array.isArray(data.chats)) {
+          console.log('✅ Chats loaded successfully:', data.chats.length);
+          setListingChats(data.chats);
+        } else if (data && Array.isArray(data)) {
+          // Handle case where API returns array directly
+          console.log('✅ Chats loaded (direct array):', data.length);
+          setListingChats(data);
+        } else if (data && data.chats && Array.isArray(data.chats)) {
+          // Handle case where success field might be missing
+          console.log('✅ Chats loaded (no success field):', data.chats.length);
           setListingChats(data.chats);
         } else {
-          console.log('No chats found for listing:', listingId);
+          console.log('No chats found for listing:', listingId, 'Response structure:', data);
           setListingChats([]);
         }
       } else {
-        console.error('Failed to load listing chats:', response.status);
+        console.error('Failed to load listing chats:', response.status, response.statusText);
         setListingChats([]);
       }
     } catch (error) {
@@ -323,7 +334,9 @@ export default function AdminListingsPage() {
                     {isLoadingChats ? (
                       <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading chats...</div>
                     ) : listingChats && listingChats.length > 0 ? (
-                      listingChats.map((chat) => (
+                      listingChats
+                        .filter(chat => chat && typeof chat === 'object' && chat.id && chat.buyerId && chat.sellerId)
+                        .map((chat) => (
                         <div key={chat.id} className="bg-white dark:bg-neutral-800 rounded p-2 border border-neutral-200 dark:border-neutral-600">
                           <div className="flex items-center justify-between mb-1">
                             <a 
@@ -340,8 +353,8 @@ export default function AdminListingsPage() {
                             </a>
                           </div>
                           <div className="flex items-center justify-between text-xs text-neutral-600 dark:text-neutral-400">
-                            <span>{chat.messages.length} messages</span>
-                            <span>{formatDate(chat.lastMessageAt)}</span>
+                            <span>{chat.messages?.length || 0} messages</span>
+                            <span>{chat.lastMessageAt ? formatDate(chat.lastMessageAt) : 'No activity'}</span>
                           </div>
                         </div>
                       ))
