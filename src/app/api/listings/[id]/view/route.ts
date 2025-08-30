@@ -25,7 +25,8 @@ export async function POST(
     // Generate a session ID from headers (user agent + some other identifiable info)
     const userAgent = request.headers.get('user-agent') || 'unknown';
     const acceptLanguage = request.headers.get('accept-language') || 'unknown';
-    const sessionId = Buffer.from(`${userAgent}:${acceptLanguage}`).toString('base64').substring(0, 16);
+    // Use simple string manipulation instead of Buffer.from() for Edge Runtime compatibility
+    const sessionId = btoa(`${userAgent}:${acceptLanguage}`).substring(0, 16);
 
     const db = await getD1();
     
@@ -89,8 +90,18 @@ export async function POST(
 
   } catch (error) {
     console.error('Error recording listing view:', error);
+    
+    // Log more details about the error
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+    }
+    
     return NextResponse.json(
-      { success: false, error: 'Failed to record view' },
+      { success: false, error: 'Failed to record view', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
