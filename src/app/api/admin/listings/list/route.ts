@@ -14,8 +14,10 @@ export async function GET(req: Request) {
     const offset = Math.max(0, parseInt(url.searchParams.get('offset') ?? '0', 10));
     const sortBy = url.searchParams.get('sortBy') ?? 'createdAt';
     const sortOrder = url.searchParams.get('sortOrder') ?? 'desc';
+    const searchQuery = url.searchParams.get('q') || '';
+    const searchById = url.searchParams.get('id') || '';
     
-    console.log('🔍 Admin Listings API: Parsed URL parameters - limit:', limit, 'offset:', offset, 'sortBy:', sortBy, 'sortOrder:', sortOrder);
+    console.log('🔍 Admin Listings API: Parsed URL parameters - limit:', limit, 'offset:', offset, 'sortBy:', sortBy, 'sortOrder:', sortOrder, 'searchQuery:', searchQuery, 'searchById:', searchById);
     console.log('🔍 Admin Listings API: Raw limit param:', url.searchParams.get('limit'));
     console.log('🔍 Admin Listings API: Raw offset param:', url.searchParams.get('offset'));
     console.log('🔍 Admin Listings API: Raw sortBy param:', url.searchParams.get('sortBy'));
@@ -173,6 +175,18 @@ export async function GET(req: Request) {
     const sortColumn = sortColumnMap[sortBy] || 'l.created_at';
     const orderDirection = sortOrder === 'asc' ? 'ASC' : 'DESC';
     
+    // Build WHERE clause for search
+    let whereClause = '';
+    let bindParams: any[] = [];
+    
+    if (searchById) {
+      whereClause = 'WHERE l.id = ?';
+      bindParams.push(searchById);
+    } else if (searchQuery) {
+      whereClause = 'WHERE l.title LIKE ? OR l.description LIKE ?';
+      bindParams.push(`%${searchQuery}%`, `%${searchQuery}%`);
+    }
+    
     const listingsQuery = `
       SELECT 
         l.id,
@@ -200,21 +214,30 @@ export async function GET(req: Request) {
         FROM chats
         GROUP BY listing_id
       ) chat_counts ON l.id = chat_counts.listing_id
+      ${whereClause}
       ORDER BY ${sortColumn} ${orderDirection}
       LIMIT ? OFFSET ?
     `;
     
     console.log('🔍 Admin Listings API: Executing query with limit:', limit, 'offset:', offset);
     console.log('🔍 Admin Listings API: Query:', listingsQuery);
+    console.log('🔍 Admin Listings API: Bind params:', bindParams);
     
     try {
-      const res = await db.prepare(listingsQuery).bind(limit, offset).all();
+      const res = await db.prepare(listingsQuery).bind(...bindParams, limit, offset).all();
       console.log('🔍 Admin Listings API: Query result count:', res.results?.length || 0);
       console.log('🔍 Admin Listings API: Query success:', res.success);
       console.log('🔍 Admin Listings API: First result sample:', res.results?.[0] || 'No results');
       
-      // Get total count
-      const countResult = await db.prepare('SELECT COUNT(*) AS total FROM listings').all();
+      // Get total count with same search conditions
+      let countQuery = 'SELECT COUNT(*) AS total FROM listings l';
+      if (searchById) {
+        countQuery += ' WHERE l.id = ?';
+      } else if (searchQuery) {
+        countQuery += ' WHERE l.title LIKE ? OR l.description LIKE ?';
+      }
+      
+      const countResult = await db.prepare(countQuery).bind(...bindParams).all();
       const total = countResult.results?.[0]?.total || 0;
       
       console.log('🔍 Admin Listings API: Total listings in database:', total);

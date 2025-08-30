@@ -76,9 +76,19 @@ export default function AdminListingsPage() {
     
     setIsSearchingForListing(true);
     try {
-      // Search for the listing by title or ID
-      const searchParam = title || id || '';
-      const response = await fetch(`/api/admin/listings/list?limit=1000&search=${encodeURIComponent(searchParam)}`);
+      // Build search parameters
+      const params = new URLSearchParams();
+      params.append('limit', '1000');
+      
+      if (id) {
+        // Search by ID for exact match
+        params.append('id', id);
+      } else if (title) {
+        // Search by title
+        params.append('q', title);
+      }
+      
+      const response = await fetch(`/api/admin/listings/list?${params.toString()}`);
       
       if (response.ok) {
         const data = await response.json() as { 
@@ -92,7 +102,7 @@ export default function AdminListingsPage() {
           let targetListing = null;
           
           if (id) {
-            // Search by ID first
+            // Search by ID first - should be exact match
             targetListing = data.listings.find((l: any) => l.id === id);
           }
           
