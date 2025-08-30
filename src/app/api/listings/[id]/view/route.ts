@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getD1 } from '@/lib/cf';
 
+// Configure for Edge Runtime (required for Cloudflare Pages)
+export const runtime = 'edge';
+
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
