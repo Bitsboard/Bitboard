@@ -175,6 +175,16 @@ export default function AdminChatsPage() {
 
 
       <div className="max-w-7xl mx-auto px-4 py-4">
+        {/* Back to Dashboard Button */}
+        <div className="mb-3">
+          <button
+            onClick={() => router.push('/admin')}
+            className="px-3 py-1.5 bg-orange-500 text-white rounded text-sm hover:bg-orange-600 transition-colors"
+          >
+            ← Back to dashboard
+          </button>
+        </div>
+
         {/* Condensed Filters */}
         <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 p-2 mb-3">
           <div className="flex gap-2 items-center">
@@ -200,12 +210,6 @@ export default function AdminChatsPage() {
               className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 disabled:opacity-50"
             >
               {isLoading ? 'Refreshing...' : 'Refresh'}
-            </button>
-            <button
-              onClick={() => router.push('/admin')}
-              className="px-2 py-1 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded text-xs hover:bg-neutral-300 dark:hover:bg-neutral-600"
-            >
-              Admin dashboard
             </button>
           </div>
         </div>
@@ -403,12 +407,7 @@ export default function AdminChatsPage() {
           {/* Right Panel - Conversation Preview (30%) */}
           <div className="flex-[0.3] min-w-0">
             <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden">
-              <div className="px-4 py-3 bg-neutral-50 dark:bg-neutral-700 border-b border-neutral-200 dark:border-neutral-600">
-                <h3 className="text-sm font-medium text-neutral-900 dark:text-white">Conversation Preview</h3>
-                <p className="text-xs text-neutral-600 dark:text-neutral-400">
-                  Click on a chat row to view messages
-                </p>
-              </div>
+
               
               {selectedChat ? (
                 <div className="p-2">
@@ -436,9 +435,7 @@ export default function AdminChatsPage() {
                         </span>
                       </div>
                     </div>
-                    <div className="mt-1.5 text-xs text-neutral-500">
-                      {formatDate(selectedChat.created_at)}
-                    </div>
+
                   </div>
 
                   {/* Messages - Condensed */}
@@ -465,7 +462,7 @@ export default function AdminChatsPage() {
                                 {username || userId.slice(0, 8) + '...'}
                               </span>
                               <span className="text-xs text-neutral-500">
-                                {new Date(message.created_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                {new Date(message.created_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                               </span>
                             </div>
                             <div className={`max-w-full rounded px-1.5 py-1 text-xs ${
