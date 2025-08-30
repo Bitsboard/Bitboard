@@ -17,6 +17,56 @@ export async function GET(req: Request) {
     const db = await getD1();
     if (!db) {
       console.error('❌ No database binding found');
+      
+      // For local development, return mock data instead of failing
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔍 Admin Listings API: Development mode - returning mock data');
+        return NextResponse.json({ 
+          success: true,
+          listings: [
+            {
+              id: 'mock-1',
+              title: 'Mock Listing 1',
+              description: 'This is a mock listing for development',
+              priceSat: 100000,
+              adType: 'wanted',
+              category: 'electronics',
+              postedBy: 'mock-user-1',
+              username: 'mock-user-1',
+              createdAt: Math.floor(Date.now() / 1000) - 86400,
+              updatedAt: Math.floor(Date.now() / 1000),
+              status: 'active',
+              imageUrl: null,
+              location: 'Mock City, MC',
+              views: 0,
+              favorites: 0,
+              replies: 0
+            },
+            {
+              id: 'mock-2',
+              title: 'Mock Listing 2',
+              description: 'Another mock listing for development',
+              priceSat: 250000,
+              adType: 'offered',
+              category: 'books',
+              postedBy: 'mock-user-2',
+              username: 'mock-user-2',
+              createdAt: Math.floor(Date.now() / 1000) - 172800,
+              updatedAt: Math.floor(Date.now() / 1000),
+              status: 'active',
+              imageUrl: null,
+              location: 'Mock Town, MT',
+              views: 5,
+              favorites: 2,
+              replies: 1
+            }
+          ], 
+          total: 2,
+          page: 1,
+          limit
+        });
+      }
+      
       return NextResponse.json({ 
         error: 'Database connection failed',
         details: 'No D1 database binding found'
