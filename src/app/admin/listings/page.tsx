@@ -113,6 +113,26 @@ export default function AdminListingsPage() {
 
   const formatDate = (timestamp: number) => new Date(timestamp * 1000).toLocaleDateString();
   const formatTime = (timestamp: number) => new Date(timestamp * 1000).toLocaleTimeString();
+  
+  const getTimeAgo = (timestamp: number) => {
+    const now = Date.now();
+    const diff = now - (timestamp * 1000);
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(hours / 24);
+    
+    if (days > 0) {
+      return `${days} day${days > 1 ? 's' : ''} ago`;
+    } else if (hours > 0) {
+      return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else {
+      const minutes = Math.floor(diff / (1000 * 60));
+      if (minutes > 0) {
+        return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+      } else {
+        return 'just now';
+      }
+    }
+  };
 
   const handleSort = (column: 'createdAt' | 'priceSat' | 'views' | 'replies' | 'username' | 'adType' | 'title' | 'location') => {
     if (sortBy === column) {
@@ -357,10 +377,16 @@ export default function AdminListingsPage() {
                         .map((chat: any) => (
                         <div 
                           key={chat.id} 
-                          className="bg-white dark:bg-neutral-800 rounded p-2 border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors cursor-pointer"
+                          className="bg-purple-200 dark:bg-purple-800 rounded p-3 border border-purple-300 dark:border-purple-600 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors cursor-pointer relative"
                           onClick={() => window.location.href = `/admin/chats?search=${encodeURIComponent(selectedListing.title || '')}`}
                         >
-                          <div className="flex items-center justify-between mb-1">
+                          {/* External Link Icon - Top Right */}
+                          <svg className="absolute top-2 right-2 w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                          
+                          {/* User Box - Top Left */}
+                          <div className="mb-3">
                             <a 
                               href={`/admin/users?search=${chat.buyerUsername || chat.buyerId}`}
                               className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors border border-blue-300 dark:border-blue-600"
@@ -371,20 +397,12 @@ export default function AdminListingsPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                               </svg>
                             </a>
-                            <a 
-                              href={`/admin/chats?search=${encodeURIComponent(selectedListing.title || '')}`}
-                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-purple-200 dark:bg-purple-800 text-purple-900 dark:text-purple-100 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors border border-purple-300 dark:border-purple-600"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              View Chat
-                              <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                              </svg>
-                            </a>
                           </div>
-                          <div className="flex items-center justify-between text-xs text-neutral-600 dark:text-neutral-400">
-                            <span>{chat.messageCount || chat.messages?.length || 0} messages</span>
-                            <span>{chat.lastMessageAt ? formatDate(chat.lastMessageAt) : 'No activity'}</span>
+                          
+                          {/* Bottom Row - Messages & Last Activity */}
+                          <div className="flex items-center justify-between text-xs text-purple-800 dark:text-purple-200">
+                            <span>{chat.messageCount || chat.messages?.length || 0} total messages</span>
+                            <span>last activity: {getTimeAgo(chat.lastMessageAt)}</span>
                           </div>
                         </div>
                       ))
@@ -413,16 +431,25 @@ export default function AdminListingsPage() {
               </div>
               
               {/* Right Column - Placeholder (1/3 width) */}
-              <div className="lg:col-span-1 text-center py-8">
-                <div className="text-neutral-400 dark:text-neutral-500 mb-2">
-                  <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
+              <div className="lg:col-span-1">
+                <div className="bg-neutral-50 dark:bg-neutral-700 rounded border border-neutral-200 dark:border-neutral-600 p-3 h-full">
+                  <h3 className="text-md font-semibold text-neutral-900 dark:text-white mb-3">
+                    No Conversations
+                  </h3>
+                  <div className="h-[calc(100%-3rem)] flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-neutral-400 dark:text-neutral-500 mb-2">
+                        <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-medium text-neutral-600 dark:text-neutral-400 mb-1">No Conversations</h3>
+                      <p className="text-sm text-neutral-500 dark:text-neutral-500">
+                        Conversations will appear here when a listing is selected
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-lg font-medium text-neutral-600 dark:text-neutral-400 mb-1">No Conversations</h3>
-                <p className="text-sm text-neutral-500 dark:text-neutral-500">
-                  Conversations will appear here when a listing is selected
-                </p>
               </div>
             </div>
           )}
