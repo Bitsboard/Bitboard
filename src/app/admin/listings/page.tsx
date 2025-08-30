@@ -359,12 +359,12 @@ export default function AdminListingsPage() {
               
               {/* Right Column - Active Conversations (1/3 width) */}
               <div className="lg:col-span-1">
-                <div className="bg-neutral-50 dark:bg-neutral-700 rounded border border-neutral-200 dark:border-neutral-600 p-3">
+                <div className="bg-neutral-50 dark:bg-neutral-700 rounded border border-neutral-200 dark:border-neutral-600 p-3 h-full">
                   <h3 className="text-md font-semibold text-neutral-900 dark:text-white mb-3">
                     Active Conversations ({listingChats?.length || 0})
                   </h3>
                   
-                  <div className="max-h-80 overflow-y-auto space-y-2">
+                  <div className="h-[calc(100%-3rem)] overflow-y-auto space-y-2">
                     {isLoadingChats ? (
                       <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading chats...</div>
                     ) : listingChats && listingChats.length > 0 ? (
@@ -379,14 +379,24 @@ export default function AdminListingsPage() {
                           <div className="flex items-center justify-between mb-1">
                             <a 
                               href={`/admin/users?search=${chat.buyerUsername || chat.buyerId}`}
-                              className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors border border-blue-300 dark:border-blue-600"
                               onClick={(e) => e.stopPropagation()}
                             >
                               {chat.buyerUsername || chat.buyerId}
+                              <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
                             </a>
-                            <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                              View →
-                            </span>
+                            <a 
+                              href={`/admin/chats?search=${encodeURIComponent(selectedListing.title || '')}`}
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-purple-200 dark:bg-purple-800 text-purple-900 dark:text-purple-100 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors border border-purple-300 dark:border-purple-600"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              View Chat
+                              <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </a>
                           </div>
                           <div className="flex items-center justify-between text-xs text-neutral-600 dark:text-neutral-400">
                             <span>{chat.messageCount || chat.messages?.length || 0} messages</span>
