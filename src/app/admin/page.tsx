@@ -262,7 +262,7 @@ export default function AdminPage() {
         className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors border border-blue-300 dark:border-blue-600"
       >
         {username}
-        <svg className="w-3 h-3 flex-shrink-0 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2v-4M14 4h6m0 0v6m0-6L10 14" />
         </svg>
       </a>
@@ -274,7 +274,7 @@ export default function AdminPage() {
         className="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded text-xs font-medium bg-green-200 dark:bg-green-800 text-green-900 dark:text-green-100 hover:bg-green-300 dark:hover:bg-green-700 transition-colors border border-green-300 dark:border-green-600"
       >
         <span>{title || 'Unknown Listing'}</span>
-        <svg className="w-3 h-3 flex-shrink-0 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2v-4M14 4h6m0 0v6m0-6L10 14" />
         </svg>
       </a>
@@ -331,7 +331,7 @@ export default function AdminPage() {
               className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-purple-200 dark:bg-purple-800 text-purple-900 dark:text-purple-100 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors border border-purple-300 dark:border-purple-600"
             >
               {activity.message_count || 1} messages
-              <svg className="w-3 h-3 flex-shrink-0 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
             </a>
