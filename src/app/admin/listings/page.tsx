@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useLang } from "@/lib/i18n-client";
-import { t } from "@/lib/i18n";
 
 interface Listing {
   id: string;
@@ -53,7 +51,6 @@ export default function AdminListingsPage() {
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   
   const router = useRouter();
-  const lang = useLang();
 
   useEffect(() => {
     const savedAuth = localStorage.getItem('admin_authenticated');
@@ -70,13 +67,6 @@ export default function AdminListingsPage() {
       loadListings();
     }
   }, [currentPage, isAuthenticated]);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      setCurrentPage(1); // Reset to first page when filters change
-      loadListings();
-    }
-  }, [searchTerm, statusFilter, typeFilter, categoryFilter, sortBy, sortOrder, isAuthenticated]);
 
   const loadListings = async () => {
     try {
@@ -106,9 +96,15 @@ export default function AdminListingsPage() {
         setTotalPages(Math.ceil((data.total || 0) / itemsPerPage));
       } else {
         console.error('🔍 Listings API error:', response.status, response.statusText);
+        // Fallback to empty state
+        setListings([]);
+        setTotalPages(1);
       }
     } catch (error) {
       console.error('Error loading listings:', error);
+      // Fallback to empty state
+      setListings([]);
+      setTotalPages(1);
     } finally {
       setIsLoading(false);
     }
@@ -127,11 +123,8 @@ export default function AdminListingsPage() {
         setListings(prev => prev.filter(l => l.id !== listingId));
         setShowDeleteModal(false);
         setSelectedListing(null);
-        setSelectedListings(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(listingId);
-          return newSet;
-        });
+      } else {
+        console.error('Failed to delete listing');
       }
     } catch (error) {
       console.error('Error deleting listing:', error);
@@ -147,7 +140,6 @@ export default function AdminListingsPage() {
       setIsBulkDeleting(true);
       const listingIds = Array.from(selectedListings);
       
-      // Delete each listing
       for (const listingId of listingIds) {
         const response = await fetch('/api/admin/listings/delete', {
           method: 'POST',
@@ -161,7 +153,6 @@ export default function AdminListingsPage() {
       }
       
       setSelectedListings(new Set());
-      setShowDeleteModal(false);
     } catch (error) {
       console.error('Error bulk deleting listings:', error);
     } finally {
@@ -188,8 +179,6 @@ export default function AdminListingsPage() {
       setSelectedListings(new Set(listings.map(l => l.id)));
     }
   };
-
-
 
   const formatPrice = (priceSat: number) => `${priceSat.toLocaleString()} sats`;
   const formatDate = (timestamp: number) => new Date(timestamp * 1000).toLocaleDateString();
@@ -245,55 +234,28 @@ export default function AdminListingsPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
-      {/* Compact Header */}
+      {/* Header */}
       <div className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-lg font-semibold text-neutral-900 dark:text-white">Listings Management</h1>
               <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                Total: {listings.length} | Active: {listings.filter(l => l.status === 'active').length} | 
-                Sold: {listings.filter(l => l.status === 'sold').length} | Expired: {listings.filter(l => l.status === 'expired').length}
+                Total: {listings.length} | Page {currentPage} of {totalPages}
               </p>
             </div>
             <button
               onClick={() => router.push('/admin')}
               className="px-3 py-1.5 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded text-sm hover:bg-neutral-300 dark:hover:bg-neutral-600"
             >
-              ← Admin
+              Admin dashboard
             </button>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-4">
-        {/* Bulk Action Buttons */}
-        {selectedListings.size > 0 && (
-          <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4 mb-4">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-orange-800 dark:text-orange-200">
-                <strong>{selectedListings.size}</strong> listing{selectedListings.size !== 1 ? 's' : ''} selected
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setShowDeleteModal(true)}
-                  disabled={isBulkDeleting}
-                  className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 disabled:opacity-50"
-                >
-                  {isBulkDeleting ? 'Deleting...' : `Delete ${selectedListings.size} Listing${selectedListings.size !== 1 ? 's' : ''}`}
-                </button>
-                <button
-                  onClick={() => setSelectedListings(new Set())}
-                  className="px-4 py-2 bg-neutral-500 text-white rounded-lg text-sm hover:bg-neutral-600"
-                >
-                  Clear Selection
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Compact Filters */}
+        {/* Filters */}
         <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 p-3 mb-4">
           <div className="flex gap-3 items-center">
             <input
@@ -328,38 +290,49 @@ export default function AdminListingsPage() {
               className="px-3 py-1.5 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-sm"
             >
               <option value="all">All Categories</option>
-              <option value="Electronics">Electronics</option>
-              <option value="Mining Gear">Mining Gear</option>
-              <option value="Home & Garden">Home & Garden</option>
-              <option value="Sports & Bikes">Sports & Bikes</option>
-              <option value="Tools">Tools</option>
-              <option value="Games & Hobbies">Games & Hobbies</option>
-              <option value="Furniture">Furniture</option>
-              <option value="Services">Services</option>
+              <option value="electronics">Electronics</option>
+              <option value="books">Books</option>
+              <option value="clothing">Clothing</option>
+              <option value="home">Home & Garden</option>
+              <option value="sports">Sports</option>
+              <option value="vehicles">Vehicles</option>
+              <option value="other">Other</option>
             </select>
+            <button
+              onClick={loadListings}
+              disabled={isLoading}
+              className="px-3 py-1.5 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 disabled:opacity-50"
+            >
+              {isLoading ? 'Loading...' : 'Refresh'}
+            </button>
           </div>
         </div>
 
-        {/* Enhanced Listings Table with Individual Stat Columns */}
-        <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden">
-          {/* Table Summary */}
-          <div className="px-4 py-3 bg-neutral-50 dark:bg-neutral-700 border-b border-neutral-200 dark:border-neutral-600">
+        {/* Bulk Actions */}
+        {selectedListings.size > 0 && (
+          <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded p-3 mb-4">
             <div className="flex items-center justify-between">
-              <div className="text-sm text-neutral-600 dark:text-neutral-400">
-                <span className="font-medium">Total Listings:</span> {listings.length} of {Math.ceil((listings.length / itemsPerPage) * itemsPerPage)} 
-                {totalPages > 1 && ` • Page ${currentPage} of ${totalPages}`}
-              </div>
-              <div className="text-xs text-neutral-500 dark:text-neutral-500">
-                Showing {itemsPerPage} listings per page
-              </div>
+              <span className="text-sm text-orange-800 dark:text-orange-200">
+                {selectedListings.size} listing(s) selected
+              </span>
+              <button
+                onClick={bulkDeleteListings}
+                disabled={isBulkDeleting}
+                className="px-3 py-1.5 bg-red-500 text-white rounded text-sm hover:bg-red-600 disabled:opacity-50"
+              >
+                {isBulkDeleting ? 'Deleting...' : `Delete ${selectedListings.size} Selected`}
+              </button>
             </div>
           </div>
-          
+        )}
+
+        {/* Listings Table */}
+        <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-neutral-50 dark:bg-neutral-700">
-                <tr>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-neutral-50 dark:bg-neutral-700">
+                  <th className="px-3 py-2 text-left">
                     <input
                       type="checkbox"
                       checked={selectedListings.size === listings.length && listings.length > 0}
@@ -367,73 +340,67 @@ export default function AdminListingsPage() {
                       className="rounded border-neutral-300 text-orange-500 focus:ring-orange-500"
                     />
                   </th>
-                  <th 
-                    className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
-                    onClick={() => handleSort('createdAt')}
-                  >
-                    <div className="flex items-center gap-1">
-                      Timestamp
+                  <th className="px-3 py-2 text-left">
+                    <button
+                      onClick={() => handleSort('createdAt')}
+                      className="flex items-center gap-1 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white"
+                    >
+                      Date
                       {sortBy === 'createdAt' && (
-                        <span className="text-orange-500">
-                          {sortOrder === 'asc' ? '↑' : '↓'}
-                        </span>
+                        <span>{sortOrder === 'asc' ? '↑' : '↓'}</span>
                       )}
-                    </div>
+                    </button>
                   </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Username</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Type</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Listing Name</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Category</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Location</th>
-                  <th 
-                    className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
-                    onClick={() => handleSort('priceSat')}
-                  >
-                    <div className="flex items-center gap-1">
+                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">User</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Type</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Title</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Category</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Location</th>
+                  <th className="px-3 py-2 text-left">
+                    <button
+                      onClick={() => handleSort('priceSat')}
+                      className="flex items-center gap-1 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white"
+                    >
                       Price
                       {sortBy === 'priceSat' && (
-                        <span className="text-orange-500">
-                          {sortOrder === 'asc' ? '↑' : '↓'}
-                        </span>
+                        <span>{sortOrder === 'asc' ? '↑' : '↓'}</span>
                       )}
-                    </div>
+                    </button>
                   </th>
-                  <th 
-                    className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
-                    onClick={() => handleSort('views')}
-                  >
-                    <div className="flex items-center gap-1">
+                  <th className="px-3 py-2 text-left">
+                    <button
+                      onClick={() => handleSort('views')}
+                      className="flex items-center gap-1 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white"
+                    >
                       Views
                       {sortBy === 'views' && (
-                        <span className="text-orange-500">
-                          {sortOrder === 'asc' ? '↑' : '↓'}
-                        </span>
+                        <span>{sortOrder === 'asc' ? '↑' : '↓'}</span>
                       )}
-                    </div>
+                    </button>
                   </th>
-                  <th 
-                    className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
-                    onClick={() => handleSort('replies')}
-                  >
-                    <div className="flex items-center gap-1">
+                  <th className="px-3 py-2 text-left">
+                    <button
+                      onClick={() => handleSort('replies')}
+                      className="flex items-center gap-1 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white"
+                    >
                       Replies
                       {sortBy === 'replies' && (
-                        <span className="text-orange-500">
-                          {sortOrder === 'asc' ? '↑' : '↓'}
-                        </span>
+                        <span>{sortOrder === 'asc' ? '↑' : '↓'}</span>
                       )}
-                    </div>
+                    </button>
                   </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Status</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Actions</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Status</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+              <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan={13} className="px-3 py-8 text-center">
-                      <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                      <p className="text-neutral-600 dark:text-neutral-400">Loading listings...</p>
+                    <td colSpan={13} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                      <div className="flex items-center justify-center">
+                        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+                        Loading listings...
+                      </div>
                     </td>
                   </tr>
                 ) : listings.length === 0 ? (
@@ -530,7 +497,7 @@ export default function AdminListingsPage() {
             </table>
           </div>
 
-          {/* Compact Pagination */}
+          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-between items-center py-3 px-3 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
               <div className="text-xs text-neutral-600">
@@ -629,55 +596,50 @@ export default function AdminListingsPage() {
                 </div>
               </div>
               
-              {/* Right Column - Description and Stats */}
+              {/* Right Column - Details */}
               <div>
-                <h4 className="font-semibold text-neutral-900 dark:text-white mb-3">Description</h4>
-                <p className="text-neutral-700 dark:text-neutral-300 mb-4 whitespace-pre-wrap">
-                  {selectedListing.description || 'No description provided'}
-                </p>
-                
+                <h4 className="font-semibold text-neutral-900 dark:text-white mb-3">Details</h4>
                 <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Price:</span>
-                    <span className="font-bold text-green-600">{formatPrice(selectedListing.priceSat)}</span>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Title</label>
+                    <p className="text-neutral-900 dark:text-white">{selectedListing.title}</p>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Views:</span>
-                    <span className="text-neutral-900 dark:text-white">{selectedListing.views.toLocaleString()}</span>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</label>
+                    <p className="text-neutral-900 dark:text-white text-sm">{selectedListing.description}</p>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Replies:</span>
-                    <span className="text-neutral-900 dark:text-white">{selectedListing.replies.toLocaleString()}</span>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Price</label>
+                    <p className="text-2xl font-bold text-green-600">{formatPrice(selectedListing.priceSat)}</p>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Posted by:</span>
-                    <span className="text-neutral-900 dark:text-white">{selectedListing.username || selectedListing.postedBy}</span>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Views</label>
+                      <p className="text-neutral-900 dark:text-white">{selectedListing.views.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Replies</label>
+                      <p className="text-neutral-900 dark:text-white">{selectedListing.replies.toLocaleString()}</p>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Created:</span>
-                    <span className="text-neutral-900 dark:text-white">{formatDate(selectedListing.createdAt)}</span>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Posted By</label>
+                    <p className="text-neutral-900 dark:text-white">{selectedListing.username || selectedListing.postedBy}</p>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Updated:</span>
-                    <span className="text-neutral-900 dark:text-white">{formatDate(selectedListing.updatedAt)}</span>
-                  </div>
-                </div>
-                
-                <div className="mt-6">
-                  <h4 className="font-semibold text-neutral-900 dark:text-white mb-3">Chats</h4>
-                  <div className="bg-neutral-50 dark:bg-neutral-700 rounded-lg p-3">
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                      This listing has <strong>{selectedListing.replies}</strong> chat{selectedListing.replies !== 1 ? 's' : ''}.
-                    </p>
-                    <button
-                      onClick={() => {
-                        setShowDetailsModal(false);
-                        router.push('/admin/chats');
-                      }}
-                      className="mt-2 px-3 py-1 bg-orange-500 text-white rounded text-sm hover:bg-orange-600"
-                    >
-                      View All Chats
-                    </button>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Created</label>
+                      <p className="text-neutral-900 dark:text-white">{formatDate(selectedListing.createdAt)}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Updated</label>
+                      <p className="text-neutral-900 dark:text-white">{formatDate(selectedListing.updatedAt)}</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -686,38 +648,27 @@ export default function AdminListingsPage() {
         </div>
       )}
 
-      {/* Delete Modal */}
-      {showDeleteModal && (
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && selectedListing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-neutral-800 rounded p-4 max-w-sm w-full mx-4">
-            <h3 className="font-semibold text-neutral-900 dark:text-white mb-3">
-              {selectedListing ? 'Delete Listing' : `Delete ${selectedListings.size} Listing${selectedListings.size !== 1 ? 's' : ''}`}
-            </h3>
-            <p className="text-neutral-600 dark:text-neutral-400 mb-4 text-sm">
-              {selectedListing 
-                ? `Delete "${selectedListing.title}"? This cannot be undone.`
-                : `Are you sure you want to delete ${selectedListings.size} listing${selectedListings.size !== 1 ? 's' : ''}? This action cannot be undone.`
-              }
+          <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Delete Listing</h3>
+            <p className="text-neutral-600 dark:text-neutral-400 mb-6">
+              Are you sure you want to delete "{selectedListing.title}"? This action cannot be undone.
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="flex-1 px-3 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded text-sm"
+                className="px-4 py-2 text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white"
               >
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  if (selectedListing) {
-                    deleteListing(selectedListing.id);
-                  } else {
-                    bulkDeleteListings();
-                  }
-                }}
-                disabled={isDeleting || isBulkDeleting}
-                className="flex-1 px-3 py-2 bg-red-500 text-white rounded text-sm disabled:opacity-50"
+                onClick={() => deleteListing(selectedListing.id)}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
               >
-                {isDeleting || isBulkDeleting ? 'Deleting...' : 'Delete'}
+                {isDeleting ? 'Deleting...' : 'Delete'}
               </button>
             </div>
           </div>
