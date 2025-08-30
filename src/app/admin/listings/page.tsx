@@ -570,7 +570,7 @@ export default function AdminListingsPage() {
                         <div 
                           key={chat.id} 
                           className="bg-purple-200 dark:bg-purple-800 rounded p-2 border border-purple-300 dark:border-purple-600 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors cursor-pointer relative"
-                          onClick={() => window.location.href = `/admin/chats?search=${encodeURIComponent(selectedListing.title || '')}`}
+                          onClick={() => window.location.href = `/admin/chats?chatId=${encodeURIComponent(chat.id)}&search=${encodeURIComponent(selectedListing.title || '')}`}
                         >
                           {/* External Link Icon - Top Right */}
                           <svg className="absolute top-1.5 right-1.5 w-3 h-3 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -42,6 +42,7 @@ export default function AdminChatsPage() {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
+  const [isSearchingForChat, setIsSearchingForChat] = useState(false);
   
   const router = useRouter();
   const lang = useLang();
@@ -55,6 +56,61 @@ export default function AdminChatsPage() {
       router.push('/admin');
     }
   }, [router]);
+
+  // Check if we need to search for a specific chat (e.g., from activity feed or admin listings)
+  useEffect(() => {
+    if (!isAuthenticated || chats.length === 0) return;
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+    const chatIdParam = urlParams.get('chatId');
+    
+    if (searchParam || chatIdParam) {
+      searchAndSelectChat(searchParam, chatIdParam);
+    }
+  }, [isAuthenticated, chats]);
+
+  const searchAndSelectChat = async (searchTerm?: string | null, chatId?: string | null) => {
+    if (!searchTerm && !chatId) return;
+    
+    setIsSearchingForChat(true);
+    
+    try {
+      // First try to find by chat ID if provided
+      if (chatId) {
+        const chat = chats.find(c => c.id === chatId);
+        if (chat) {
+          selectChat(chat);
+          // Clear URL parameters
+          window.history.pushState({}, '', '/admin/chats');
+          return;
+        }
+      }
+      
+      // If no chat ID or not found, search by listing title
+      if (searchTerm) {
+        const chat = chats.find(c => 
+          c.listing_title?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        if (chat) {
+          selectChat(chat);
+          // Clear URL parameters
+          window.history.pushState({}, '', '/admin/chats');
+          return;
+        }
+      }
+      
+      // If still not found, try to search in all chats with a broader search
+      if (searchTerm) {
+        setSearchTerm(searchTerm);
+        // The search will be applied when chats are filtered
+      }
+    } catch (error) {
+      console.error('Error searching for chat:', error);
+    } finally {
+      setIsSearchingForChat(false);
+    }
+  };
 
   const loadChats = async () => {
     try {

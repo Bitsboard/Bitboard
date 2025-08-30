@@ -326,7 +326,7 @@ export default function AdminPage() {
             <ListingTag title={activity.listing_title} id={activity.listing_id} />
             {' '}
             <a 
-              href={`/admin/chats?search=${encodeURIComponent(activity.listing_title || '')}`}
+              href={`/admin/chats?chatId=${encodeURIComponent(activity.chat_id || '')}&search=${encodeURIComponent(activity.listing_title || '')}`}
               className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-purple-200 dark:bg-purple-800 text-purple-900 dark:text-purple-100 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors border border-purple-300 dark:border-purple-600"
             >
               {activity.message_count || 1} messages
