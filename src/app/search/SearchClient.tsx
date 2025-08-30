@@ -467,7 +467,7 @@ export default function SearchClient() {
                         {/* Results */}
                         <section className="lg:col-span-9">
                             {layout === "grid" ? (
-                                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+                                <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2">
                                     {listings.map((l) => (
                                         <ListingCard key={l.id} listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => setModal('active', l)} />
                                     ))}

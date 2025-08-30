@@ -63,7 +63,7 @@ export function ItemsCarousel({ listings, unit, btcCad, dark, onOpen }: ItemsCar
                 )}
             >
                 {items.map((l) => (
-                    <div key={l.id} className="snap-center shrink-0 grow-0 basis-[260px] sm:basis-[280px] md:basis-[300px]" style={{ willChange: "transform" }}>
+                    <div key={l.id} className="snap-center shrink-0 grow-0 basis-[312px] sm:basis-[336px] md:basis-[360px]" style={{ willChange: "transform" }}>
                         <ListingCard listing={l} unit={unit} btcCad={btcCad} dark={dark} onOpen={() => onOpen(l)} />
                     </div>
                 ))}
