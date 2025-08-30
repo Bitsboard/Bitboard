@@ -159,24 +159,25 @@ export async function GET(req: Request) {
     console.log('🔍 Admin Listings API: Executing corrected query...');
     const listingsQuery = `
       SELECT 
-        id,
-        title,
-        description,
-        price_sat AS priceSat,
-        ad_type AS adType,
-        category,
-        posted_by AS postedBy,
-        posted_by AS username,
-        created_at AS createdAt,
-        updated_at AS updatedAt,
-        status,
-        image_url AS imageUrl,
-        location,
+        l.id,
+        l.title,
+        l.description,
+        l.price_sat AS priceSat,
+        l.ad_type AS adType,
+        l.category,
+        l.posted_by AS postedBy,
+        COALESCE(u.username, l.posted_by) AS username,
+        l.created_at AS createdAt,
+        l.updated_at AS updatedAt,
+        l.status,
+        l.image_url AS imageUrl,
+        l.location,
         0 AS views,
         0 AS favorites,
         0 AS replies
-      FROM listings
-      ORDER BY created_at DESC 
+      FROM listings l
+      LEFT JOIN users u ON l.posted_by = u.id
+      ORDER BY l.created_at DESC 
       LIMIT ? OFFSET ?
     `;
     
