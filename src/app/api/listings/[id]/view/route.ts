@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDB } from '@/lib/cf';
+import { getD1 } from '@/lib/cf';
 
 export async function POST(
   request: NextRequest,
@@ -24,7 +24,14 @@ export async function POST(
     const acceptLanguage = request.headers.get('accept-language') || 'unknown';
     const sessionId = Buffer.from(`${userAgent}:${acceptLanguage}`).toString('base64').substring(0, 16);
 
-    const db = getDB();
+    const db = await getD1();
+    
+    if (!db) {
+      return NextResponse.json(
+        { success: false, error: 'Database connection failed' },
+        { status: 500 }
+      );
+    }
 
     // Check if this IP/session has already viewed this listing recently (within 1 hour)
     const oneHourAgo = Math.floor(Date.now() / 1000) - (60 * 60);
@@ -101,7 +108,14 @@ export async function GET(
       );
     }
 
-    const db = getDB();
+    const db = await getD1();
+    
+    if (!db) {
+      return NextResponse.json(
+        { success: false, error: 'Database connection failed' },
+        { status: 500 }
+      );
+    }
     
     const listing = await db.prepare(`
       SELECT views FROM listings WHERE id = ?
