@@ -44,6 +44,8 @@ interface UserListing {
   views: number;
   status: string;
   replies?: number; // Added for new_listing_count
+  imageUrl?: string; // Main listing image
+  images?: string[]; // Array of listing images
 }
 
 interface UserChat {
@@ -567,6 +569,21 @@ export default function AdminUsersPage() {
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Row 5: Profile Button */}
+                  <div className="pt-2">
+                    <a
+                      href={`/en/${selectedUser.username}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      View Profile
+                    </a>
+                  </div>
                 </div>
               </div>
               
@@ -593,28 +610,55 @@ export default function AdminUsersPage() {
                             className="absolute top-1.5 right-1.5 text-green-600 dark:text-green-400" 
                           />
                           
-                          {/* Listing Title - Top Left */}
-                          <div className="mb-2">
-                            <div className="text-xs font-medium text-green-800 dark:text-green-200 truncate">
-                              {listing.title}
+                          {/* Content with Thumbnail */}
+                          <div className="flex gap-2">
+                            {/* Thumbnail Image */}
+                            <div className="flex-shrink-0">
+                              {listing.imageUrl || (listing.images && listing.images.length > 0) ? (
+                                <img 
+                                  src={listing.imageUrl || listing.images![0]} 
+                                  alt={`${listing.title} thumbnail`}
+                                  className="w-12 h-12 object-cover rounded border border-green-400 dark:border-green-500"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                  }}
+                                />
+                              ) : (
+                                <div className="w-12 h-12 bg-green-300 dark:bg-green-600 rounded border border-green-400 dark:border-green-500 flex items-center justify-center">
+                                  <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                </div>
+                              )}
                             </div>
-                          </div>
-                          
-                          {/* Bottom Row - Price, Type, Age, Stats */}
-                          <div className="flex items-center justify-between text-xs text-green-800 dark:text-green-200">
-                            <div className="flex items-center gap-2">
-                              <span className={`inline-flex items-center px-1 py-0.5 rounded text-xs font-medium ${
-                                listing.adType === 'want' 
-                                  ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
-                                  : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
-                              }`}>
-                                {listing.adType === 'want' ? 'Want' : 'Sell'}
-                              </span>
-                              <span>{listing.priceSat.toLocaleString()} sats</span>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-xs">{getTimeAgo(listing.createdAt)}</div>
-                              <div className="text-xs">{listing.views || 0} views • {listing.replies || 0} replies</div>
+                            
+                            {/* Listing Details */}
+                            <div className="flex-1 min-w-0">
+                              {/* Listing Title */}
+                              <div className="mb-2">
+                                <div className="text-xs font-medium text-green-800 dark:text-green-200 truncate">
+                                  {listing.title}
+                                </div>
+                              </div>
+                              
+                              {/* Bottom Row - Price, Type, Age, Stats */}
+                              <div className="flex items-center justify-between text-xs text-green-800 dark:text-green-200">
+                                <div className="flex items-center gap-2">
+                                  <span className={`inline-flex items-center px-1 py-0.5 rounded text-xs font-medium ${
+                                    listing.adType === 'want' 
+                                      ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
+                                      : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+                                  }`}>
+                                    {listing.adType === 'want' ? 'Want' : 'Sell'}
+                                  </span>
+                                  <span>{listing.priceSat.toLocaleString()} sats</span>
+                                </div>
+                                <div className="text-right">
+                                  <div className="text-xs">{getTimeAgo(listing.createdAt)}</div>
+                                  <div className="text-xs">{listing.views || 0} views • {listing.replies || 0} replies</div>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
