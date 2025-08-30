@@ -8,13 +8,13 @@ interface Listing {
   title: string;
   description: string;
   priceSat: number;
-  adType: 'sell' | 'want';
+  adType: string;
   category: string;
   postedBy: string;
   username: string;
   createdAt: number;
   updatedAt: number;
-  status: 'active' | 'sold' | 'expired';
+  status: string;
   imageUrl?: string;
   location?: string;
   views: number;
