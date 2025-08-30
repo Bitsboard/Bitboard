@@ -335,25 +335,27 @@ export default function AdminListingsPage() {
                       <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading chats...</div>
                     ) : listingChats && listingChats.length > 0 ? (
                       listingChats
-                        .filter(chat => chat && typeof chat === 'object' && chat.id && chat.buyerId && chat.sellerId)
-                        .map((chat) => (
-                        <div key={chat.id} className="bg-white dark:bg-neutral-800 rounded p-2 border border-neutral-200 dark:border-neutral-600">
+                        .filter(chat => chat && typeof chat === 'object' && chat.id)
+                        .map((chat: any) => (
+                        <div 
+                          key={chat.id} 
+                          className="bg-white dark:bg-neutral-800 rounded p-2 border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors cursor-pointer"
+                          onClick={() => window.location.href = `/admin/chats?search=${encodeURIComponent(selectedListing.title || '')}`}
+                        >
                           <div className="flex items-center justify-between mb-1">
                             <a 
-                              href={`/admin/users?search=${chat.buyerId === selectedListing.postedBy ? chat.sellerId : chat.buyerId}`}
+                              href={`/admin/users?search=${chat.buyerUsername || chat.buyerId}`}
                               className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                              onClick={(e) => e.stopPropagation()}
                             >
-                              {chat.buyerId === selectedListing.postedBy ? chat.sellerId : chat.buyerId}
+                              {chat.buyerUsername || chat.buyerId}
                             </a>
-                            <a 
-                              href={`/admin/chats?search=${encodeURIComponent(selectedListing.title || '')}`}
-                              className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300"
-                            >
+                            <span className="text-xs text-neutral-500 dark:text-neutral-400">
                               View →
-                            </a>
+                            </span>
                           </div>
                           <div className="flex items-center justify-between text-xs text-neutral-600 dark:text-neutral-400">
-                            <span>{chat.messages?.length || 0} messages</span>
+                            <span>{chat.messageCount || chat.messages?.length || 0} messages</span>
                             <span>{chat.lastMessageAt ? formatDate(chat.lastMessageAt) : 'No activity'}</span>
                           </div>
                         </div>
