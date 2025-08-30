@@ -158,8 +158,10 @@ export default function AdminListingsPage() {
   };
 
   const handleListingClick = (listing: Listing) => {
-    setSelectedListing(listing);
-    loadListingChats(listing.id);
+    if (isAuthenticated && listing) {
+      setSelectedListing(listing);
+      loadListingChats(listing.id);
+    }
   };
 
   const clearSelectedListing = () => {
@@ -314,13 +316,13 @@ export default function AdminListingsPage() {
               <div className="lg:col-span-1">
                 <div className="bg-neutral-50 dark:bg-neutral-700 rounded border border-neutral-200 dark:border-neutral-600 p-3">
                   <h3 className="text-md font-semibold text-neutral-900 dark:text-white mb-3">
-                    Active Conversations ({listingChats.length})
+                    Active Conversations ({listingChats?.length || 0})
                   </h3>
                   
                   <div className="max-h-80 overflow-y-auto space-y-2">
                     {isLoadingChats ? (
                       <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading chats...</div>
-                    ) : listingChats.length > 0 ? (
+                    ) : listingChats && listingChats.length > 0 ? (
                       listingChats.map((chat) => (
                         <div key={chat.id} className="bg-white dark:bg-neutral-800 rounded p-2 border border-neutral-200 dark:border-neutral-600">
                           <div className="flex items-center justify-between mb-1">
