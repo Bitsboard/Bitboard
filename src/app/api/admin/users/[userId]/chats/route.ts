@@ -14,13 +14,13 @@ export async function GET(
     const chatsQuery = `
       SELECT 
         c.id,
-        c.listing_id AS listingId,
-        l.title AS listingTitle,
+        c.listing_id AS listing_id,
+        l.title AS listing_title,
         CASE 
           WHEN c.buyer_id = ? THEN c.seller_id
           ELSE c.buyer_id
         END AS other_user_id,
-        other.username AS otherUsername,
+        other.username AS other_username,
         c.created_at AS createdAt,
         c.last_message_at AS lastMessageAt,
         COALESCE(message_stats.message_count, 0) AS messageCount,

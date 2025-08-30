@@ -42,6 +42,7 @@ interface AdminStats {
     listing_title: string | null;
     listing_id: string | null; // Now 10 alphanumeric characters
     other_username: string | null;
+    other_user_id: string | null; // Now 8 alphanumeric characters or null
     chat_id: string | null; // Now 10 alphanumeric characters
     message_count?: number; // Added for message activity
   }>;
@@ -255,14 +256,14 @@ export default function AdminPage() {
 
   // Format activity description based on type
   const formatActivityDescription = (activity: AdminStats['recentActivity'][0]) => {
-    const UserTag = ({ username }: { username: string }) => (
+    const UserTag = ({ username, userId }: { username: string; userId: string }) => (
       <a 
-        href={`/admin/users?search=${encodeURIComponent(username)}`}
+        href={`/admin/users?search=${encodeURIComponent(username)}&userId=${encodeURIComponent(userId)}`}
         className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors border border-blue-300 dark:border-blue-600"
       >
         {username}
         <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2v-4M14 4h6m0 0v6m0-6L10 14" />
         </svg>
       </a>
     );
@@ -283,7 +284,7 @@ export default function AdminPage() {
       case 'user':
         return (
           <>
-            <UserTag username={activity.username} />
+            <UserTag username={activity.username} userId={activity.user_id} />
             {' '}has{' '}
             <span className="text-neutral-600 dark:text-neutral-400">{activity.action}</span>
             {' '}an account.
@@ -293,7 +294,7 @@ export default function AdminPage() {
         if (activity.action === 'listed') {
           return (
             <>
-              <UserTag username={activity.username} />
+              <UserTag username={activity.username} userId={activity.user_id} />
               {' '}has listed{' '}
               <ListingTag title={activity.listing_title} id={activity.listing_id} />
             </>
@@ -301,7 +302,7 @@ export default function AdminPage() {
         } else if (activity.action === 'updated') {
           return (
             <>
-              <UserTag username={activity.username} />
+              <UserTag username={activity.username} userId={activity.user_id} />
               {' '}has updated{' '}
               <ListingTag title={activity.listing_title} id={activity.listing_id} />
             </>
@@ -309,7 +310,7 @@ export default function AdminPage() {
         }
         return (
           <>
-            <UserTag username={activity.username} />
+            <UserTag username={activity.username} userId={activity.user_id} />
             {' '}has{' '}
             <span className="text-neutral-600 dark:text-neutral-400">{activity.action}</span>
             {' '}
@@ -319,9 +320,9 @@ export default function AdminPage() {
       case 'message':
         return (
           <>
-            <UserTag username={activity.username} />
+            <UserTag username={activity.username} userId={activity.user_id} />
             {' '}messaged{' '}
-            <UserTag username={activity.other_username || 'Unknown User'} />
+            <UserTag username={activity.other_username || 'Unknown User'} userId={activity.other_user_id || ''} />
             {' '}for{' '}
             <ListingTag title={activity.listing_title} id={activity.listing_id} />
             {' '}
@@ -339,7 +340,7 @@ export default function AdminPage() {
       default:
         return (
           <>
-            <UserTag username={activity.username} />
+            <UserTag username={activity.username} userId={activity.user_id} />
             {' '}
             <span className="text-neutral-600 dark:text-neutral-400">{activity.action}</span>
           </>

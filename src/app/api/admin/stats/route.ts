@@ -114,6 +114,10 @@ export async function GET(req: Request) {
           ELSE 
             (SELECT username FROM users WHERE id = c.buyer_id)
         END as other_username,
+        CASE 
+          WHEN c.buyer_id = m.from_id THEN c.seller_id
+          ELSE c.buyer_id
+        END as other_user_id,
         m.chat_id as chat_id,
         (SELECT COUNT(*) FROM messages WHERE chat_id = m.chat_id AND created_at <= m.created_at) as message_count
       FROM messages m

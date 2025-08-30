@@ -101,6 +101,53 @@ export default function AdminUsersPage() {
     }
   }, [searchQuery, statusFilter]);
 
+  // Check if we need to search for a specific user (e.g., from activity feed or admin listings)
+  useEffect(() => {
+    if (!isAuthenticated || users.length === 0) return;
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+    const userIdParam = urlParams.get('userId');
+    
+    if (searchParam || userIdParam) {
+      console.log('🔍 User admin: Found URL parameters - search:', searchParam, 'userId:', userIdParam);
+      searchAndSelectUser(searchParam, userIdParam);
+    }
+  }, [isAuthenticated, users, searchQuery, statusFilter]);
+
+  const searchAndSelectUser = async (searchTerm?: string | null, userId?: string | null) => {
+    if (!searchTerm && !userId) return;
+    
+    try {
+      // First try to find by user ID if provided
+      if (userId) {
+        const user = users.find(u => u.id === userId);
+        if (user) {
+          handleUserClick(user);
+          // Clear URL parameters
+          window.history.pushState({}, '', '/admin/users');
+          return;
+        }
+      }
+      
+      // If no user ID or not found, search by username
+      if (searchTerm) {
+        const user = users.find(u => 
+          u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          u.email.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        if (user) {
+          handleUserClick(user);
+          // Clear URL parameters
+          window.history.pushState({}, '', '/admin/users');
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Error searching for user:', error);
+    }
+  };
+
   const loadUsers = async () => {
     try {
       setIsLoading(true);
@@ -539,8 +586,18 @@ export default function AdminUsersPage() {
                             </div>
                           </div>
                           
+                          {/* Username in Blue Box - Bottom Left */}
+                          <div className="flex items-center gap-2">
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-700">
+                              {chat.other_username}
+                              <svg className="ml-1 w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </span>
+                          </div>
+                          
                           {/* Bottom Row - Messages & Last Activity */}
-                          <div className="flex items-center justify-between text-xs text-purple-800 dark:text-purple-200">
+                          <div className="flex items-center justify-between text-xs text-purple-800 dark:text-purple-200 mt-2">
                             <span>{chat.messageCount} messages</span>
                             <span>{getTimeAgo(chat.lastMessageAt)}</span>
                           </div>
