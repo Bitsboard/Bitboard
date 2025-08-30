@@ -193,120 +193,123 @@ export default function AdminListingsPage() {
         )}
 
         {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
-                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Timestamp</th>
-                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">ID</th>
-                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Username</th>
-                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Type</th>
-                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Title</th>
-                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Location</th>
-                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Price</th>
-                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Views</th>
-                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Chats</th>
-              </tr>
-            </thead>
-            <tbody className="space-y-0">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={9} className="px-1.5 py-4 text-center">
-                    <div className="flex items-center justify-center">
-                      <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2"></div>
-                      <span className="text-neutral-600 dark:text-neutral-400">Loading listings...</span>
-                    </div>
-                  </td>
+        <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full space-y-0 font-mono text-xs">
+              <thead className="bg-neutral-50 dark:bg-neutral-700">
+                <tr className="h-6">
+                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Timestamp</th>
+                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">ID</th>
+                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Username</th>
+                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Type</th>
+                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Title</th>
+                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Location</th>
+                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Price</th>
+                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Views</th>
+                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Chats</th>
                 </tr>
-              ) : error ? (
-                <tr>
-                  <td colSpan={9} className="px-1.5 py-4 text-center text-red-600 dark:text-red-400">
-                    {error}
-                  </td>
-                </tr>
-              ) : listings.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="px-1.5 py-4 text-center text-neutral-600 dark:text-neutral-400">
-                    No listings found
-                  </td>
-                </tr>
-              ) : (
-                <>
-                  {listings.map((listing) => (
-                    <tr 
-                      key={listing.id} 
-                      className="hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
-                      onClick={() => handleListingClick(listing)}
-                    >
-                      <td className="px-1.5 py-1">
-                        <div className="text-xs text-neutral-900 dark:text-white">
-                          {formatDate(listing.createdAt)}
-                        </div>
-                      </td>
-                      <td className="px-1.5 py-1">
-                        <div className="text-xs text-neutral-500 dark:text-neutral-400 font-mono">
-                          {listing.id}
-                        </div>
-                      </td>
-                      <td className="px-1.5 py-1">
-                        <a 
-                          href={`/admin/users?search=${listing.username || listing.postedBy}`}
-                          className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded text-xs font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
-                        >
-                          <span>{listing.username || listing.postedBy}</span>
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                        </a>
-                      </td>
-                      <td className="px-1.5 py-1">
-                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                          listing.adType === 'want' 
-                            ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
-                            : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
-                        }`}>
-                          {listing.adType === 'want' ? 'Want' : 'Sell'}
-                        </span>
-                      </td>
-                      <td className="px-1.5 py-1">
-                        <div className="max-w-xs">
-                          <div className="font-medium text-neutral-900 dark:text-white text-xs">{listing.title}</div>
-                        </div>
-                      </td>
-                      <td className="px-1.5 py-1">
-                        <div className="text-xs text-neutral-900 dark:text-white">
-                          {listing.location || 'N/A'}
-                        </div>
-                      </td>
-                      <td className="px-1.5 py-1">
-                        <div className="text-xs font-bold text-green-600">
-                          {listing.priceSat.toLocaleString()}
-                        </div>
-                      </td>
-                      <td className="px-1.5 py-1">
-                        <div className="text-xs text-neutral-900 dark:text-white">
-                          {listing.views.toLocaleString()}
-                        </div>
-                      </td>
-                      <td className="px-1.5 py-1">
-                        <div className="text-xs text-neutral-900 dark:text-white">
-                          {listing.replies.toLocaleString()}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                  {/* Fill remaining rows to maintain 20 row height */}
-                  {Array.from({ length: Math.max(0, 20 - listings.length) }).map((_, index) => (
-                    <tr key={`empty-${index}`} className="h-6">
-                      <td colSpan={9} className="px-1.5 py-1">
-                        <div className="h-6"></div>
-                      </td>
-                    </tr>
-                  ))}
-                </>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="space-y-0 font-mono text-xs">
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={9} className="px-3 py-8 text-center">
+                      <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                      <p className="text-neutral-600 dark:text-neutral-400">Loading listings...</p>
+                    </td>
+                  </tr>
+                ) : error ? (
+                  <tr>
+                    <td colSpan={9} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                      {error}
+                    </td>
+                  </tr>
+                ) : listings.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                      No listings found
+                    </td>
+                  </tr>
+                ) : (
+                  <>
+                    {listings.map((listing) => (
+                      <tr 
+                        key={listing.id} 
+                        className="hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded px-1.5 -mx-1.5 transition-colors cursor-pointer"
+                        onClick={() => handleListingClick(listing)}
+                      >
+                        <td className="px-1.5 py-0.5">
+                          <div className="text-neutral-600 dark:text-neutral-400">
+                            {formatDate(listing.createdAt)}
+                          </div>
+                        </td>
+                        <td className="px-1.5 py-0.5">
+                          <div className="text-neutral-500 dark:text-neutral-400 font-mono">
+                            {listing.id}
+                          </div>
+                        </td>
+                        <td className="px-1.5 py-0.5">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/admin/users?search=${listing.username || listing.postedBy}`);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-1.5 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded-full font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                          >
+                            {listing.username || listing.postedBy}
+                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </button>
+                        </td>
+                        <td className="px-1.5 py-0.5">
+                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${
+                            listing.adType === 'want' 
+                              ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
+                              : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+                          }`}>
+                            {listing.adType === 'want' ? 'Want' : 'Sell'}
+                          </span>
+                        </td>
+                        <td className="px-1.5 py-0.5">
+                          <div className="max-w-xs">
+                            <div className="font-medium text-neutral-900 dark:text-white text-xs">{listing.title}</div>
+                          </div>
+                        </td>
+                        <td className="px-1.5 py-0.5">
+                          <div className="text-neutral-900 dark:text-white">
+                            {listing.location || 'N/A'}
+                          </div>
+                        </td>
+                        <td className="px-1.5 py-0.5">
+                          <div className="text-neutral-900 dark:text-white font-bold text-green-600">
+                            {listing.priceSat.toLocaleString()}
+                          </div>
+                        </td>
+                        <td className="px-1.5 py-0.5">
+                          <div className="text-neutral-900 dark:text-white">
+                            {listing.views.toLocaleString()}
+                          </div>
+                        </td>
+                        <td className="px-1.5 py-0.5">
+                          <div className="text-neutral-900 dark:text-white">
+                            {listing.replies.toLocaleString()}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {/* Fill remaining rows to maintain 20 row height */}
+                    {Array.from({ length: Math.max(0, 20 - listings.length) }).map((_, index) => (
+                      <tr key={`empty-${index}`} className="h-6">
+                        <td colSpan={9} className="px-1.5 py-0.5">
+                          <div className="h-6"></div>
+                        </td>
+                      </tr>
+                    ))}
+                  </>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Pagination */}
