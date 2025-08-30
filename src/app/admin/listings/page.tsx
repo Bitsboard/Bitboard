@@ -208,25 +208,25 @@ export default function AdminListingsPage() {
                 <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Chats</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="space-y-0">
               {isLoading ? (
                 <tr>
-                  <td colSpan={9} className="px-1.5 py-8 text-center">
+                  <td colSpan={9} className="px-1.5 py-4 text-center">
                     <div className="flex items-center justify-center">
-                      <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+                      <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2"></div>
                       <span className="text-neutral-600 dark:text-neutral-400">Loading listings...</span>
                     </div>
                   </td>
                 </tr>
               ) : error ? (
                 <tr>
-                  <td colSpan={9} className="px-1.5 py-8 text-center text-red-600 dark:text-red-400">
+                  <td colSpan={9} className="px-1.5 py-4 text-center text-red-600 dark:text-red-400">
                     {error}
                   </td>
                 </tr>
               ) : listings.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-1.5 py-8 text-center text-neutral-600 dark:text-neutral-400">
+                  <td colSpan={9} className="px-1.5 py-4 text-center text-neutral-600 dark:text-neutral-400">
                     No listings found
                   </td>
                 </tr>
@@ -239,11 +239,8 @@ export default function AdminListingsPage() {
                       onClick={() => handleListingClick(listing)}
                     >
                       <td className="px-1.5 py-1">
-                        <div className="text-xs text-neutral-600 dark:text-neutral-400">
+                        <div className="text-xs text-neutral-900 dark:text-white">
                           {formatDate(listing.createdAt)}
-                        </div>
-                        <div className="text-xs text-neutral-500 dark:text-neutral-500">
-                          {formatTime(listing.createdAt)}
                         </div>
                       </td>
                       <td className="px-1.5 py-1">
@@ -314,7 +311,7 @@ export default function AdminListingsPage() {
 
         {/* Pagination */}
         <div className="flex justify-between items-center py-2 px-3 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
-          <div className="text-xs text-neutral-600">
+          <div className="text-xs text-neutral-600 dark:text-neutral-400">
             {listings.length} listings • Page {currentPage} of {totalPages}
           </div>
           {totalPages > 1 && (
@@ -322,28 +319,28 @@ export default function AdminListingsPage() {
               <button
                 onClick={() => setCurrentPage(1)}
                 disabled={currentPage === 1}
-                className="px-1.5 py-0.5 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
+                className="px-1.5 py-0.5 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 First
               </button>
               <button
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
-                className="px-1.5 py-0.5 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
+                className="px-1.5 py-0.5 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Prev
               </button>
               <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
-                className="px-1.5 py-0.5 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
+                className="px-1.5 py-0.5 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
               </button>
               <button
                 onClick={() => setCurrentPage(totalPages)}
                 disabled={currentPage === totalPages}
-                className="px-1.5 py-0.5 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
+                className="px-1.5 py-0.5 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Last
               </button>
