@@ -22,7 +22,7 @@ interface Chat {
   last_message: string;
   last_message_time: number;
   unread_count: number;
-  seller_rating: number;
+  seller_thumbsUp: number;
 }
 
 interface SystemNotification {
@@ -118,14 +118,14 @@ export default function MessagesPage() {
             last_message: chat.latest_message_text || 'No messages yet',
             last_message_time: chat.latest_message_time || chat.last_message_at || chat.created_at || 0,
             unread_count: chat.unread_count || 0,
-            seller_rating: chat.seller_rating || 0
+            seller_thumbsUp: chat.seller_rating || 0
         }));
         
         console.log('🔍 Raw chat API response:', data.chats);
         console.log('🔍 Transformed chats with reputation data:', transformedChats.map(c => ({
           id: c.id,
           other_user: c.other_user,
-          seller_rating: c.seller_rating,
+          seller_thumbsUp: c.seller_thumbsUp,
           other_user_verified: c.other_user_verified,
           raw_data: data.chats.find(raw => raw.id === c.id)
         })));
@@ -855,7 +855,7 @@ export default function MessagesPage() {
                           
                           {/* User Reputation - +x 👍 format */}
                           <div className="flex items-center gap-1">
-                            <span className="text-sm text-white/80">+{chats.find(c => c.id === selectedChat)?.seller_rating || 0} 👍</span>
+                            <span className="text-sm text-white/80">+{chats.find(c => c.id === selectedChat)?.seller_thumbsUp || 0} 👍</span>
                           </div>
                         </div>
                       </div>

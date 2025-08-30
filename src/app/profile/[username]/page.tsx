@@ -35,7 +35,7 @@ export default function PublicProfilePage() {
   // State for user data
   const [userListings, setUserListings] = useState<Listing[]>([]);
   const [allUserListings, setAllUserListings] = useState<Listing[]>([]); // Store all loaded listings for sorting
-  const [userProfile, setUserProfile] = useState<{ username: string; verified: boolean; registeredAt: number; profilePhoto: string; rating?: number; deals?: number } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ username: string; verified: boolean; registeredAt: number; profilePhoto: string; thumbsUp?: number; deals?: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -271,7 +271,7 @@ export default function PublicProfilePage() {
 
   // Get user info from API response or fallback to default values
   const userVerified = userProfile?.verified || false;
-  const userScore = userProfile?.rating || 0; // Rating is already the thumbs up count, no conversion needed
+  const userScore = userProfile?.thumbsUp || 0; // Rating is already the thumbs up count, no conversion needed
   const oldestListing = userListings.length > 0 ? userListings.reduce((oldest, current) => 
     current.createdAt < oldest.createdAt ? current : oldest
   ) : null;
@@ -546,7 +546,7 @@ export default function PublicProfilePage() {
                 </div>
                 <div>
                   <div className="text-sm text-white mb-1 font-medium">Reputation</div>
-                  <div className="text-lg font-semibold text-white">+{userProfile?.rating || 0}</div>
+                  <div className="text-lg font-semibold text-white">+{userProfile?.thumbsUp || 0}</div>
                 </div>
               </div>
             </div>

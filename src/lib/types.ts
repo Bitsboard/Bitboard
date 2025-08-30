@@ -23,7 +23,7 @@ export type Place = {
 
 export type Seller = {
   name: string;
-  rating: number; // Single metric: thumbs-up count
+  thumbsUp: number; // Number of thumbs up received (not 0-5 rating)
   deals: number;
   verifications: {
     email?: boolean;
@@ -70,7 +70,7 @@ export type User = {
   handle?: string | null;
   hasChosenUsername: boolean;
   image?: string;
-  rating?: number;
+  thumbsUp?: number; // Number of thumbs up received (not 0-5 rating)
   deals?: number;
 };
 

@@ -140,7 +140,7 @@ export function ListingRow({ listing, unit, btcCad, dark, onOpen }: ListingRowPr
                 </span>
               )}
               
-              <span className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.rating} 👍</span>
+              <span className={cn(dark ? "text-neutral-400" : "text-neutral-600")}>+{listing.seller.thumbsUp} 👍</span>
             </div>
           </div>
         </div>

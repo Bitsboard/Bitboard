@@ -40,7 +40,7 @@ export const createMockListing = (overrides = {}) => ({
         name: 'Test Seller',
         score: 100,
         deals: 50,
-        rating: 4.5,
+        thumbsUp: 10,
         verifications: {
             email: true,
             phone: false,
@@ -57,7 +57,7 @@ export const createMockUser = (overrides = {}) => ({
     email: 'test@example.com',
     handle: 'testuser',
     image: 'https://example.com/avatar.jpg',
-    rating: 4.5,
+    thumbsUp: 10,
     deals: 50,
     ...overrides,
 })

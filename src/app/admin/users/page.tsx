@@ -13,7 +13,7 @@ interface User {
   banned: boolean;
   created_at: number;
   image?: string;
-  rating: number;
+  thumbsUp: number; // Number of thumbs up received (not 0-5 rating)
   deals: number;
   last_active: number;
   has_chosen_username: boolean;
@@ -67,7 +67,7 @@ export default function AdminUsersPage() {
   const [itemsPerPage] = useState(20);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<'all' | 'verified' | 'unverified' | 'banned' | 'admin'>('all');
-  const [sortBy, setSortBy] = useState<'createdAt' | 'username' | 'email' | 'listingsCount' | 'chatsCount' | 'rating' | 'lastActivityAt'>('createdAt');
+  const [sortBy, setSortBy] = useState<'createdAt' | 'username' | 'email' | 'listingsCount' | 'chatsCount' | 'thumbsUp' | 'lastActivityAt'>('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userListings, setUserListings] = useState<UserListing[]>([]);
@@ -438,7 +438,7 @@ export default function AdminUsersPage() {
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2">
                         <span className="text-neutral-500 dark:text-neutral-400">Reputation:</span>
-                        <span className="text-neutral-900 dark:text-white font-medium">{selectedUser.rating.toFixed(1)}</span>
+                        <span className="text-neutral-900 dark:text-white font-medium">{selectedUser.thumbsUp}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-neutral-500 dark:text-neutral-400">Deals:</span>
@@ -649,11 +649,11 @@ export default function AdminUsersPage() {
                   </th>
                   <th 
                     className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
-                    onClick={() => handleSort('rating')}
+                    onClick={() => handleSort('thumbsUp')}
                   >
                     <div className="flex items-center gap-1">
                       Reputation
-                      {sortBy === 'rating' && (
+                      {sortBy === 'thumbsUp' && (
                         <span className="text-orange-500">
                           {sortOrder === 'asc' ? '↑' : '↓'}
                         </span>
@@ -755,7 +755,7 @@ export default function AdminUsersPage() {
                         </td>
                         <td className="px-1.5 py-0.5">
                           <div className="text-neutral-900 dark:text-white">
-                            {user.rating.toFixed(1)}
+                            {user.thumbsUp}
                           </div>
                         </td>
                         <td className="px-1.5 py-0.5">
