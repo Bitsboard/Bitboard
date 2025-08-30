@@ -72,13 +72,39 @@ export async function GET(
 
     const listings = listingsResult.results || [];
 
+    // Fetch all images for all listings in one efficient query
+    let allImages: any[] = [];
+    try {
+      if (listings.length > 0) {
+        const imageResults = await db
+          .prepare(`SELECT listing_id, image_url, image_order 
+                    FROM listing_images 
+                    WHERE listing_id IN (${listings.map(() => '?').join(',')})
+                    ORDER BY listing_id, image_order`)
+          .bind(...listings.map((l: any) => l.id))
+          .all();
+        allImages = imageResults.results ?? [];
+      }
+    } catch (error) {
+      console.error('🔍 User listings API: Images query failed:', error);
+      allImages = [];
+    }
+
+    // Group images by listing_id
+    const imagesByListing = allImages.reduce((acc: any, img: any) => {
+      if (!acc[img.listing_id]) {
+        acc[img.listing_id] = [];
+      }
+      acc[img.listing_id].push(img.image_url);
+      return acc;
+    }, {});
+
     // Transform listings to match expected format
     const transformedListings = listings.map((listing: any, index: number) => {
-      // Use only real images from the database
-      let images = [];
-      if (listing.imageUrl && listing.imageUrl.trim()) {
-        images.push(listing.imageUrl);
-      }
+      // Get real images for this listing, fallback to single image if none found
+      const realImages = imagesByListing[listing.id] || [];
+      const fallbackImages = listing.imageUrl && listing.imageUrl.trim() ? [listing.imageUrl] : [];
+      const finalImages = realImages.length > 0 ? realImages : fallbackImages;
 
       return {
         id: listing.id,
@@ -91,7 +117,7 @@ export async function GET(
         location: listing.location || '',
         lat: listing.lat || 0,
         lng: listing.lng || 0,
-        images: images, // Now we have only real images
+        images: finalImages, // Now we have real multiple images
         boostedUntil: listing.boostedUntil,
         status: listing.status || 'active',
         seller: {

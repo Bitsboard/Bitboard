@@ -142,6 +142,31 @@ export async function GET(req: NextRequest) {
     }
     const total = (totalRow.results?.[0]?.c ?? 0);
 
+    // Fetch all images for all listings in one efficient query
+    let allImages: any[] = [];
+    try {
+      const imageResults = await db
+        .prepare(`SELECT listing_id, image_url, image_order 
+                  FROM listing_images 
+                  WHERE listing_id IN (${results.map(() => '?').join(',')})
+                  ORDER BY listing_id, image_order`)
+        .bind(...results.map(r => r.id))
+        .all();
+      allImages = imageResults.results ?? [];
+    } catch (error) {
+      console.error('🔍 Listings API: Images query failed:', error);
+      allImages = [];
+    }
+
+    // Group images by listing_id
+    const imagesByListing = allImages.reduce((acc: any, img: any) => {
+      if (!acc[img.listing_id]) {
+        acc[img.listing_id] = [];
+      }
+      acc[img.listing_id].push(img.image_url);
+      return acc;
+    }, {});
+
     const listings = results.map((r: any, i: any) => {
       // Debug: Log the raw title values from database
       if (i < 3) { // Only log first 3 to avoid spam
@@ -155,6 +180,11 @@ export async function GET(req: NextRequest) {
           postedBy: r.postedBy
         });
       }
+      
+      // Get real images for this listing, fallback to single image if none found
+      const realImages = imagesByListing[r.id] || [];
+      const fallbackImages = r.imageUrl && r.imageUrl.trim() ? [r.imageUrl] : [];
+      const finalImages = realImages.length > 0 ? realImages : fallbackImages;
       
       return {
         ...r,
@@ -171,8 +201,8 @@ export async function GET(req: NextRequest) {
           },
           onTimeRelease: 100 // Default value
         },
-        // Return only real images from the database
-        images: r.imageUrl && r.imageUrl.trim() ? [r.imageUrl] : [],
+        // Return real multiple images from listing_images table
+        images: finalImages,
         type: r.adType === 'want' ? 'want' : 'sell',
         priceSats: r.priceSat || 0,
         createdAt: r.createdAt || Date.now()
