@@ -77,25 +77,26 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       // First, try to find existing chat
       const chatResponse = await fetch(`/api/chat/list?userEmail=${encodeURIComponent(user.email)}`);
       if (chatResponse.ok) {
-        const chatData = await chatResponse.json() as { chats?: any[] };
+        const chatData = await chatResponse.json() as { chats?: any[]; userId?: string };
         console.log('🔍 ChatModal: Found chats:', chatData.chats?.length || 0);
         console.log('🔍 ChatModal: All chats:', chatData.chats);
+        console.log('🔍 ChatModal: User ID from API:', chatData.userId);
         
         // Look for chat that matches this listing AND involves the current user
         const existingChat = chatData.chats?.find((c: any) => {
           console.log('🔍 ChatModal: Checking chat:', c.id, 'listing_id:', c.listing_id, 'vs listing.id:', listing.id);
-          console.log('🔍 ChatModal: User ID:', user.id, 'buyer_id:', c.buyer_id, 'seller_id:', c.seller_id);
+          console.log('🔍 ChatModal: User ID from API:', chatData.userId, 'buyer_id:', c.buyer_id, 'seller_id:', c.seller_id);
           console.log('🔍 ChatModal: Data types - listing_id:', typeof c.listing_id, 'listing.id:', typeof listing.id);
-          console.log('🔍 ChatModal: Data types - user.id:', typeof user.id, 'buyer_id:', typeof c.buyer_id, 'seller_id:', typeof c.seller_id);
+          console.log('🔍 ChatModal: Data types - user ID from API:', typeof chatData.userId, 'buyer_id:', typeof c.buyer_id, 'seller_id:', typeof c.seller_id);
           
           // Check both listing ID and user involvement
-          const listingMatches = c.listing_id == listing.id;
-          const userInvolved = c.buyer_id === user.id || c.seller_id === user.id;
+          const listingMatches = c.listing_id === listing.id;
+          const userInvolved = c.buyer_id === chatData.userId || c.seller_id === chatData.userId;
           
           console.log('🔍 ChatModal: Listing matches:', listingMatches, 'User involved:', userInvolved);
           console.log('🔍 ChatModal: Raw comparison - listing_id === listing.id:', c.listing_id === listing.id);
-          console.log('🔍 ChatModal: Raw comparison - buyer_id === user.id:', c.buyer_id === user.id);
-          console.log('🔍 ChatModal: Raw comparison - seller_id === user.id:', c.seller_id === user.id);
+          console.log('🔍 ChatModal: Raw comparison - buyer_id === user ID from API:', c.buyer_id === chatData.userId);
+          console.log('🔍 ChatModal: Raw comparison - seller_id === user ID from API:', c.seller_id === chatData.userId);
           
           return listingMatches && userInvolved;
         });
@@ -157,18 +158,34 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
   };
 
   const sendMessage = async () => {
-    if (!text.trim() || !user?.id || isSending) return;
+    if (!text.trim() || !user?.email || isSending) return;
     
     const messageText = text.trim();
     
     try {
       setIsSending(true);
       
+      // Get the user ID from the chat API response
+      let userId: string | undefined = user.id;
+      if (!userId) {
+        const chatResponse = await fetch(`/api/chat/list?userEmail=${encodeURIComponent(user.email)}`);
+        if (chatResponse.ok) {
+          const chatData = await chatResponse.json() as { userId?: string };
+          userId = chatData.userId;
+        }
+      }
+      
+      if (!userId) {
+        console.error('Could not determine user ID');
+        setIsSending(false);
+        return;
+      }
+      
       // Create optimistic message that appears instantly
       const optimisticMessage: Message = {
         id: `temp-${Date.now()}`,
         chat_id: chat?.id || 'temp',
-        from_id: user.id, // ✅ Use user.id instead of user.email
+        from_id: userId,
         text: messageText,
         created_at: Math.floor(Date.now() / 1000)
       };
@@ -210,11 +227,11 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         }
         
         // Update chat if this is a new chat
-        if (data.chatId && !chat) {
+        if (data.chatId && !chat && userId) {
           setChat({
             id: data.chatId,
             listing_id: listing.id,
-            buyer_id: user.id, // ✅ Use user.id instead of user.email
+            buyer_id: userId,
             seller_id: listing.postedBy || listing.seller.name,
             created_at: Math.floor(Date.now() / 1000),
             last_message_at: Math.floor(Date.now() / 1000),
