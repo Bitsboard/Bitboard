@@ -692,6 +692,8 @@ export default function MessagesPage() {
                                 }`}
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  // First select the chat, then open the listing modal
+                                  loadMessages(item.id);
                                   handleListingClick(item.listing_id, item.listing_title);
                                 }}
                                 title="Click to view listing details"
