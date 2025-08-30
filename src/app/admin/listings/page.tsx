@@ -128,15 +128,30 @@ export default function AdminListingsPage() {
     }
   }, [isAuthenticated, listings, searchQuery, selectedListing]);
 
+  // Handle initial URL parameters when component mounts
+  useEffect(() => {
+    if (isAuthenticated) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const listingTitle = urlParams.get('title');
+      
+      if (listingTitle) {
+        console.log('🔍 Initial URL parameter detected, setting search query:', listingTitle);
+        setSearchQuery(listingTitle);
+        // This will trigger loadListings with the search query
+      }
+    }
+  }, [isAuthenticated]);
+
   const loadListings = async () => {
     try {
       setIsLoading(true);
       setError(null);
       
       const offset = (currentPage - 1) * itemsPerPage;
-      console.log('🔍 Loading listings - Page:', currentPage, 'Items per page:', itemsPerPage, 'Offset:', offset);
-      
       const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
+      
+      console.log('🔍 Loading listings - Page:', currentPage, 'Items per page:', itemsPerPage, 'Offset:', offset, 'Search:', searchQuery || 'none');
+      
       const response = await fetch(`/api/admin/listings/list?limit=${itemsPerPage}&offset=${offset}&sortBy=${sortBy}&sortOrder=${sortOrder}${searchParam}`);
       
       if (response.ok) {
@@ -147,6 +162,24 @@ export default function AdminListingsPage() {
           setListings(data.listings);
           setTotalPages(Math.ceil((data.total || 0) / itemsPerPage));
           console.log('✅ Set listings:', data.listings.length, 'Total pages:', Math.ceil((data.total || 0) / itemsPerPage));
+          
+          // If we have a search query and found listings, try to auto-select the matching one
+          if (searchQuery && data.listings.length > 0) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const listingTitle = urlParams.get('title');
+            
+            if (listingTitle && listingTitle === searchQuery) {
+              const foundListing = data.listings.find((listing: any) => 
+                listing.title === listingTitle
+              );
+              
+              if (foundListing && foundListing !== selectedListing) {
+                console.log('✅ Auto-selecting listing from search results:', foundListing.title);
+                setSelectedListing(foundListing);
+                loadListingChats(foundListing.id);
+              }
+            }
+          }
         } else {
           console.error('❌ API returned success but no listings:', data);
           setError('No listings data received');
