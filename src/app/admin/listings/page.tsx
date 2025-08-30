@@ -71,77 +71,6 @@ export default function AdminListingsPage() {
     }
   }, [currentPage, isAuthenticated, sortBy, sortOrder, searchQuery]);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      setCurrentPage(1); // Reset to first page when sorting changes
-      loadListings();
-    }
-  }, [sortBy, sortOrder]);
-
-  // Handle navigation from other admin pages
-  useEffect(() => {
-    if (isAuthenticated && listings.length > 0) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const listingId = urlParams.get('listing');
-      const listingTitle = urlParams.get('title');
-      
-      if (listingId || listingTitle) {
-        const foundListing = listings.find(listing => 
-          listing.id === listingId || listing.title === listingTitle
-        );
-        
-        if (foundListing && foundListing !== selectedListing) {
-          setSelectedListing(foundListing);
-          loadListingChats(foundListing.id);
-        } else if (listingTitle && !foundListing) {
-          // If listing not found on current page, search for it
-          console.log('🔍 Listing not found on current page, searching for:', listingTitle);
-          setSearchQuery(listingTitle);
-          // The search will trigger loadListings via useEffect dependency
-        }
-      }
-      
-      // Set search query if title parameter is present
-      if (listingTitle) {
-        setSearchQuery(listingTitle);
-      }
-    }
-  }, [isAuthenticated, listings, selectedListing]);
-
-  // Auto-select listing when search results come back with URL parameter
-  useEffect(() => {
-    if (isAuthenticated && listings.length > 0 && searchQuery) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const listingTitle = urlParams.get('title');
-      
-      if (listingTitle && listingTitle === searchQuery) {
-        const foundListing = listings.find(listing => 
-          listing.title === listingTitle
-        );
-        
-        if (foundListing && foundListing !== selectedListing) {
-          console.log('✅ Found listing from search, selecting:', foundListing.title);
-          setSelectedListing(foundListing);
-          loadListingChats(foundListing.id);
-        }
-      }
-    }
-  }, [isAuthenticated, listings, searchQuery, selectedListing]);
-
-  // Handle initial URL parameters when component mounts
-  useEffect(() => {
-    if (isAuthenticated) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const listingTitle = urlParams.get('title');
-      
-      if (listingTitle) {
-        console.log('🔍 Initial URL parameter detected, setting search query:', listingTitle);
-        setSearchQuery(listingTitle);
-        // This will trigger loadListings with the search query
-      }
-    }
-  }, [isAuthenticated]);
-
   const loadListings = async () => {
     try {
       setIsLoading(true);
@@ -162,24 +91,6 @@ export default function AdminListingsPage() {
           setListings(data.listings);
           setTotalPages(Math.ceil((data.total || 0) / itemsPerPage));
           console.log('✅ Set listings:', data.listings.length, 'Total pages:', Math.ceil((data.total || 0) / itemsPerPage));
-          
-          // If we have a search query and found listings, try to auto-select the matching one
-          if (searchQuery && data.listings.length > 0) {
-            const urlParams = new URLSearchParams(window.location.search);
-            const listingTitle = urlParams.get('title');
-            
-            if (listingTitle && listingTitle === searchQuery) {
-              const foundListing = data.listings.find((listing: any) => 
-                listing.title === listingTitle
-              );
-              
-              if (foundListing && foundListing !== selectedListing) {
-                console.log('✅ Auto-selecting listing from search results:', foundListing.title);
-                setSelectedListing(foundListing);
-                loadListingChats(foundListing.id);
-              }
-            }
-          }
         } else {
           console.error('❌ API returned success but no listings:', data);
           setError('No listings data received');
@@ -201,24 +112,6 @@ export default function AdminListingsPage() {
 
   const formatDate = (timestamp: number) => new Date(timestamp * 1000).toLocaleDateString();
   const formatTime = (timestamp: number) => new Date(timestamp * 1000).toLocaleTimeString();
-
-  const handleListingClick = (listing: Listing) => {
-    setSelectedListing(listing);
-    loadListingChats(listing.id);
-    
-    // Update URL to reflect the selected listing
-    const newUrl = `/admin/listings?title=${encodeURIComponent(listing.title)}`;
-    window.history.pushState({}, '', newUrl);
-  };
-
-  const clearSelectedListing = () => {
-    setSelectedListing(null);
-    setListingChats([]);
-    
-    // Clear URL parameters
-    const newUrl = '/admin/listings';
-    window.history.pushState({}, '', newUrl);
-  };
 
   const handleSort = (column: 'createdAt' | 'priceSat' | 'views' | 'replies' | 'username' | 'adType' | 'title' | 'location') => {
     if (sortBy === column) {
@@ -262,6 +155,16 @@ export default function AdminListingsPage() {
     } finally {
       setIsLoadingChats(false);
     }
+  };
+
+  const handleListingClick = (listing: Listing) => {
+    setSelectedListing(listing);
+    loadListingChats(listing.id);
+  };
+
+  const clearSelectedListing = () => {
+    setSelectedListing(null);
+    setListingChats([]);
   };
 
   if (!isAuthenticated) {
