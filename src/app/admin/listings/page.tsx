@@ -169,13 +169,12 @@ export default function AdminListingsPage() {
                 <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Price</th>
                 <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Views</th>
                 <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Chats</th>
-                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Status</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={10} className="px-1.5 py-8 text-center">
+                  <td colSpan={9} className="px-1.5 py-8 text-center">
                     <div className="flex items-center justify-center">
                       <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2"></div>
                       <span className="text-neutral-600 dark:text-neutral-400">Loading listings...</span>
@@ -184,13 +183,13 @@ export default function AdminListingsPage() {
                 </tr>
               ) : error ? (
                 <tr>
-                  <td colSpan={10} className="px-1.5 py-8 text-center text-red-600 dark:text-red-400">
+                  <td colSpan={9} className="px-1.5 py-8 text-center text-red-600 dark:text-red-400">
                     {error}
                   </td>
                 </tr>
               ) : listings.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-1.5 py-8 text-center text-neutral-600 dark:text-neutral-400">
+                  <td colSpan={9} className="px-1.5 py-8 text-center text-neutral-600 dark:text-neutral-400">
                     No listings found
                   </td>
                 </tr>
@@ -237,7 +236,6 @@ export default function AdminListingsPage() {
                       <td className="px-1.5 py-1">
                         <div className="max-w-xs">
                           <div className="font-medium text-neutral-900 dark:text-white text-xs">{listing.title}</div>
-                          <div className="text-xs text-neutral-600 dark:text-neutral-400 line-clamp-1">{listing.description}</div>
                         </div>
                       </td>
                       <td className="px-1.5 py-1">
@@ -260,23 +258,12 @@ export default function AdminListingsPage() {
                           {listing.replies.toLocaleString()}
                         </div>
                       </td>
-                      <td className="px-1.5 py-1">
-                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                          listing.status === 'active' 
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                            : listing.status === 'sold'
-                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
-                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                        }`}>
-                          {listing.status}
-                        </span>
-                      </td>
                     </tr>
                   ))}
                   {/* Fill remaining rows to maintain 20 row height */}
                   {Array.from({ length: Math.max(0, 20 - listings.length) }).map((_, index) => (
                     <tr key={`empty-${index}`} className="h-6">
-                      <td colSpan={10} className="px-1.5 py-1">
+                      <td colSpan={9} className="px-1.5 py-1">
                         <div className="h-6"></div>
                       </td>
                     </tr>
