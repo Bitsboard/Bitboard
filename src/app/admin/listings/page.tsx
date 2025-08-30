@@ -51,6 +51,7 @@ export default function AdminListingsPage() {
   const [isLoadingChats, setIsLoadingChats] = useState(false);
   const [sortBy, setSortBy] = useState<'createdAt' | 'priceSat' | 'views' | 'replies' | 'username' | 'adType' | 'title' | 'location'>('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [searchQuery, setSearchQuery] = useState('');
   
   const router = useRouter();
 
@@ -66,10 +67,9 @@ export default function AdminListingsPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      setCurrentPage(1); // Reset to first page when sorting changes
       loadListings();
     }
-  }, [currentPage, isAuthenticated, sortBy, sortOrder]);
+  }, [currentPage, isAuthenticated, sortBy, sortOrder, searchQuery]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -95,6 +95,11 @@ export default function AdminListingsPage() {
           loadListingChats(foundListing.id);
         }
       }
+      
+      // Set search query if title parameter is present
+      if (listingTitle) {
+        setSearchQuery(listingTitle);
+      }
     }
   }, [isAuthenticated, listings, selectedListing]);
 
@@ -106,7 +111,8 @@ export default function AdminListingsPage() {
       const offset = (currentPage - 1) * itemsPerPage;
       console.log('🔍 Loading listings - Page:', currentPage, 'Items per page:', itemsPerPage, 'Offset:', offset);
       
-      const response = await fetch(`/api/admin/listings/list?limit=${itemsPerPage}&offset=${offset}&sortBy=${sortBy}&sortOrder=${sortOrder}`);
+      const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
+      const response = await fetch(`/api/admin/listings/list?limit=${itemsPerPage}&offset=${offset}&sortBy=${sortBy}&sortOrder=${sortOrder}${searchParam}`);
       
       if (response.ok) {
         const data: any = await response.json();
@@ -194,6 +200,11 @@ export default function AdminListingsPage() {
     }
   };
 
+  const handleSearch = async () => {
+    setCurrentPage(1); // Reset to first page when searching
+    loadListings();
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center">
@@ -224,8 +235,18 @@ export default function AdminListingsPage() {
               <input
                 type="text"
                 placeholder="Search listings..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 className="px-2 py-1 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-xs flex-1"
               />
+              <button
+                onClick={handleSearch}
+                disabled={isLoading}
+                className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 disabled:opacity-50"
+              >
+                Search
+              </button>
               <select className="px-2 py-1 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-xs">
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
@@ -261,99 +282,113 @@ export default function AdminListingsPage() {
         )}
 
         {/* Selected Listing Details Section */}
-        {selectedListing && (
-          <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 p-4 mb-3">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
-                Selected Listing: {selectedListing.title}
-              </h2>
-              <button
-                onClick={() => {
-                  setSelectedListing(null);
-                  setListingChats([]);
-                }}
-                className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            {/* Basic Info Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-              <div>
-                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Listing ID</label>
-                <div className="text-sm text-neutral-900 dark:text-white font-mono">{selectedListing.id}</div>
+        <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 p-4 mb-3">
+          {selectedListing ? (
+            <>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
+                  Selected Listing: {selectedListing.title}
+                </h2>
+                <button
+                  onClick={() => {
+                    setSelectedListing(null);
+                    setListingChats([]);
+                  }}
+                  className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-              <div>
-                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Posted By</label>
-                <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.username || selectedListing.postedBy}</div>
+              
+              {/* Basic Info Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div>
+                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Listing ID</label>
+                  <div className="text-sm text-neutral-900 dark:text-white font-mono">{selectedListing.id}</div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Posted By</label>
+                  <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.username || selectedListing.postedBy}</div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Type</label>
+                  <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                    selectedListing.adType === 'want' 
+                      ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
+                      : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+                  }`}>
+                    {selectedListing.adType === 'want' ? 'Want' : 'Sell'}
+                  </span>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Category</label>
+                  <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.category}</div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Price</label>
+                  <div className="text-sm font-bold text-green-600">{selectedListing.priceSat.toLocaleString()} sats</div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Location</label>
+                  <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.location || 'N/A'}</div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Views</label>
+                  <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.views.toLocaleString()}</div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Chats</label>
+                  <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.replies.toLocaleString()}</div>
+                </div>
               </div>
-              <div>
-                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Type</label>
-                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                  selectedListing.adType === 'want' 
-                    ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
-                    : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
-                }`}>
-                  {selectedListing.adType === 'want' ? 'Want' : 'Sell'}
-                </span>
+              
+              {/* Description */}
+              <div className="mb-4">
+                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Description</label>
+                <div className="text-sm text-neutral-900 dark:text-white mt-1">{selectedListing.description || 'No description provided'}</div>
               </div>
+              
+              {/* Listing Chats */}
               <div>
-                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Category</label>
-                <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.category}</div>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Price</label>
-                <div className="text-sm font-bold text-green-600">{selectedListing.priceSat.toLocaleString()} sats</div>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Location</label>
-                <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.location || 'N/A'}</div>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Views</label>
-                <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.views.toLocaleString()}</div>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Chats</label>
-                <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.replies.toLocaleString()}</div>
-              </div>
-            </div>
-            
-            {/* Description */}
-            <div className="mb-4">
-              <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Description</label>
-              <div className="text-sm text-neutral-900 dark:text-white mt-1">{selectedListing.description || 'No description provided'}</div>
-            </div>
-            
-            {/* Listing Chats */}
-            <div>
-              <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Recent Chats ({listingChats.length})</label>
-              <div className="mt-2 space-y-2">
-                {isLoadingChats ? (
-                  <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading chats...</div>
-                ) : listingChats.length > 0 ? (
-                  listingChats.map((chat) => (
-                    <div key={chat.id} className="bg-neutral-50 dark:bg-neutral-700 rounded p-2 text-xs">
-                      <div className="flex justify-between items-center">
-                        <span className="text-neutral-900 dark:text-white">
-                          Chat with {chat.buyerId === selectedListing.postedBy ? 'buyer' : 'seller'}
-                        </span>
-                        <span className="text-neutral-500 dark:text-neutral-400">
-                          {chat.messages.length} messages
-                        </span>
+                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Recent Chats ({listingChats.length})</label>
+                <div className="mt-2 space-y-2">
+                  {isLoadingChats ? (
+                    <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading chats...</div>
+                  ) : listingChats.length > 0 ? (
+                    listingChats.map((chat) => (
+                      <div key={chat.id} className="bg-neutral-50 dark:bg-neutral-700 rounded p-2 text-xs">
+                        <div className="flex justify-between items-center">
+                          <span className="text-neutral-900 dark:text-white">
+                            Chat with {chat.buyerId === selectedListing.postedBy ? 'buyer' : 'seller'}
+                          </span>
+                          <span className="text-neutral-500 dark:text-neutral-400">
+                            {chat.messages.length} messages
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-sm text-neutral-500 dark:text-neutral-400">No chats yet</div>
-                )}
+                    ))
+                  ) : (
+                    <div className="text-sm text-neutral-500 dark:text-neutral-400">No chats yet</div>
+                  )}
+                </div>
               </div>
+            </>
+          ) : (
+            <div className="text-center py-8">
+              <div className="text-neutral-400 dark:text-neutral-500 mb-2">
+                <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-neutral-600 dark:text-neutral-400 mb-1">No Listing Selected</h3>
+              <p className="text-sm text-neutral-500 dark:text-neutral-500">
+                Click on any listing row below to view its details here
+              </p>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Table */}
         <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden">

@@ -259,8 +259,6 @@ export default function AdminPage() {
       <a 
         href={`/admin/users?search=${encodeURIComponent(username)}`}
         className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors border border-blue-300 dark:border-blue-600"
-        target="_blank"
-        rel="noopener noreferrer"
       >
         {username}
         <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -271,10 +269,8 @@ export default function AdminPage() {
 
     const ListingTag = ({ title, id }: { title: string | null; id: string | null }) => (
       <a 
-        href={`/admin/listings?search=${encodeURIComponent(title || '')}`}
+        href={`/admin/listings?title=${encodeURIComponent(title || '')}`}
         className="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded text-xs font-medium bg-green-200 dark:bg-green-800 text-green-900 dark:text-green-100 hover:bg-green-300 dark:hover:bg-green-700 transition-colors border border-green-300 dark:border-green-600"
-        target="_blank"
-        rel="noopener noreferrer"
       >
         <span>{title || 'Unknown Listing'}</span>
         <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -332,8 +328,6 @@ export default function AdminPage() {
             <a 
               href={`/admin/chats?search=${encodeURIComponent(activity.listing_title || '')}`}
               className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-purple-200 dark:bg-purple-800 text-purple-900 dark:text-purple-100 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors border border-purple-300 dark:border-purple-600"
-              target="_blank"
-              rel="noopener noreferrer"
             >
               {activity.message_count || 1} messages
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
