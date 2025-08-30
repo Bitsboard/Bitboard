@@ -270,12 +270,20 @@ export default function AdminPage() {
     );
 
     const ListingTag = ({ title, id }: { title: string | null; id: string | null }) => (
-      <div className="flex items-center gap-1.5 px-1.5 py-0.5 rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs font-medium">
+      <a 
+        href={`/admin/listings?search=${encodeURIComponent(title || '')}`}
+        className="inline-flex items-center gap-1 px-1 py-0.5 rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs font-medium hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
           <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
         </svg>
-        <span className="truncate max-w-24">{title || 'Unknown Listing'}</span>
-      </div>
+        <span className="truncate max-w-20">{title || 'Unknown Listing'}</span>
+        <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2v-4M14 4h6m0 0v6m0-6L10 14" />
+        </svg>
+      </a>
     );
 
     switch (activity.type) {
@@ -757,7 +765,7 @@ export default function AdminPage() {
                   ) : (
                     <div className="space-y-0 font-mono text-sm">
                       {paginatedActivity.map((activity, index) => (
-                        <div key={index} className="flex items-center gap-3 py-0.5 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded px-2 -mx-2 transition-colors">
+                        <div key={index} className="flex items-center gap-3 py-0.5 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded px-2 -mx-2 transition-colors flex-nowrap min-w-0">
                           <span className="text-neutral-400 dark:text-neutral-500 text-xs font-mono flex-shrink-0 w-36">
                             {new Date(activity.timestamp * 1000).toLocaleString([], { 
                               month: '2-digit', 
@@ -767,7 +775,7 @@ export default function AdminPage() {
                               second: '2-digit'
                             })}
                           </span>
-                          <span className="text-neutral-600 dark:text-neutral-400">
+                          <span className="text-neutral-600 dark:text-neutral-400 flex-1 min-w-0 overflow-hidden">
                             {formatActivityDescription(activity)}
                           </span>
                         </div>

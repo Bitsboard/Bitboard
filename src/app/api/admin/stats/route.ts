@@ -108,9 +108,20 @@ export async function GET(req: Request) {
         m.created_at as timestamp,
         l.title as listing_title,
         l.id as listing_id,
-        NULL as other_username,
+        CASE 
+          WHEN m.from_id = u.id THEN 
+            (SELECT username FROM users WHERE id = (
+              SELECT CASE 
+                WHEN c.buyer_id = m.from_id THEN c.seller_id 
+                ELSE c.buyer_id 
+              END 
+              FROM chats c WHERE c.id = m.chat_id
+            ))
+          ELSE 
+            (SELECT username FROM users WHERE id = m.from_id)
+        END as other_username,
         m.chat_id as chat_id,
-        NULL as message_count
+        (SELECT COUNT(*) FROM messages WHERE chat_id = m.chat_id AND created_at <= m.created_at) as message_count
       FROM messages m
       JOIN users u ON m.from_id = u.id
       JOIN chats c ON m.chat_id = c.id
