@@ -309,108 +309,129 @@ export default function AdminListingsPage() {
         {/* Selected Listing Details Section */}
         <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 p-4 mb-3">
           {selectedListing ? (
-            <>
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
-                  Selected Listing: {selectedListing.title}
-                </h2>
-                <button
-                  onClick={() => {
-                    setSelectedListing(null);
-                    setListingChats([]);
-                  }}
-                  className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              
-              {/* Basic Info Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Listing ID</label>
-                  <div className="text-sm text-neutral-900 dark:text-white font-mono">{selectedListing.id}</div>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Posted By</label>
-                  <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.username || selectedListing.postedBy}</div>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Type</label>
-                  <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                    selectedListing.adType === 'want' 
-                      ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
-                      : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
-                  }`}>
-                    {selectedListing.adType === 'want' ? 'Want' : 'Sell'}
-                  </span>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Category</label>
-                  <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.category}</div>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Price</label>
-                  <div className="text-sm font-bold text-green-600">{selectedListing.priceSat.toLocaleString()} sats</div>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Location</label>
-                  <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.location || 'N/A'}</div>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Views</label>
-                  <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.views.toLocaleString()}</div>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Chats</label>
-                  <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.replies.toLocaleString()}</div>
-                </div>
-              </div>
-              
-              {/* Description */}
-              <div className="mb-4">
-                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Description</label>
-                <div className="text-sm text-neutral-900 dark:text-white mt-1">{selectedListing.description || 'No description provided'}</div>
-              </div>
-              
-              {/* Listing Chats */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column - Listing Details */}
               <div>
-                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Recent Chats ({listingChats.length})</label>
-                <div className="mt-2 space-y-2">
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">
+                  {selectedListing.title}
+                </h2>
+                
+                {/* Basic Info Grid */}
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Listing ID</label>
+                    <div className="text-sm text-neutral-900 dark:text-white font-mono">{selectedListing.id}</div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Posted By</label>
+                    <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.username || selectedListing.postedBy}</div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Type</label>
+                    <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                      selectedListing.adType === 'want' 
+                        ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
+                        : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+                    }`}>
+                      {selectedListing.adType === 'want' ? 'Want' : 'Sell'}
+                    </span>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Category</label>
+                    <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.category}</div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Price</label>
+                    <div className="text-sm font-bold text-green-600">{selectedListing.priceSat.toLocaleString()} sats</div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Location</label>
+                    <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.location || 'N/A'}</div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Views</label>
+                    <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.views.toLocaleString()}</div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Chats</label>
+                    <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.replies.toLocaleString()}</div>
+                  </div>
+                </div>
+                
+                {/* Description */}
+                <div>
+                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Description</label>
+                  <div className="text-sm text-neutral-900 dark:text-white mt-1">{selectedListing.description || 'No description provided'}</div>
+                </div>
+              </div>
+              
+              {/* Right Column - Active Conversations */}
+              <div>
+                <h3 className="text-md font-semibold text-neutral-900 dark:text-white mb-3">
+                  Active Conversations ({listingChats.length})
+                </h3>
+                
+                <div className="max-h-80 overflow-y-auto space-y-2 pr-2">
                   {isLoadingChats ? (
                     <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading chats...</div>
                   ) : listingChats.length > 0 ? (
                     listingChats.map((chat) => (
-                      <div key={chat.id} className="bg-neutral-50 dark:bg-neutral-700 rounded p-2 text-xs">
-                        <div className="flex justify-between items-center">
-                          <span className="text-neutral-900 dark:text-white">
-                            Chat with {chat.buyerId === selectedListing.postedBy ? 'buyer' : 'seller'}
-                          </span>
-                          <span className="text-neutral-500 dark:text-neutral-400">
-                            {chat.messages.length} messages
-                          </span>
+                      <div key={chat.id} className="bg-neutral-50 dark:bg-neutral-700 rounded p-3 border border-neutral-200 dark:border-neutral-600">
+                        <div className="flex items-center justify-between mb-2">
+                          <a 
+                            href={`/admin/users?search=${chat.buyerId === selectedListing.postedBy ? chat.sellerId : chat.buyerId}`}
+                            className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                          >
+                            {chat.buyerId === selectedListing.postedBy ? chat.sellerId : chat.buyerId}
+                          </a>
+                          <a 
+                            href={`/admin/chats?search=${encodeURIComponent(selectedListing.title || '')}`}
+                            className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300"
+                          >
+                            View Chat →
+                          </a>
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-neutral-600 dark:text-neutral-400">
+                          <span>{chat.messages.length} messages</span>
+                          <span>{formatDate(chat.lastMessageAt)}</span>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="text-sm text-neutral-500 dark:text-neutral-400">No chats yet</div>
+                    <div className="text-sm text-neutral-500 dark:text-neutral-400 text-center py-4">
+                      No active conversations yet
+                    </div>
                   )}
                 </div>
               </div>
-            </>
+            </div>
           ) : (
-            <div className="text-center py-8">
-              <div className="text-neutral-400 dark:text-neutral-500 mb-2">
-                <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column - Placeholder */}
+              <div className="text-center py-8">
+                <div className="text-neutral-400 dark:text-neutral-500 mb-2">
+                  <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-neutral-600 dark:text-neutral-400 mb-1">No Listing Selected</h3>
+                <p className="text-sm text-neutral-500 dark:text-neutral-500">
+                  Click on any listing row below to view its details here
+                </p>
               </div>
-              <h3 className="text-lg font-medium text-neutral-600 dark:text-neutral-400 mb-1">No Listing Selected</h3>
-              <p className="text-sm text-neutral-500 dark:text-neutral-500">
-                Click on any listing row below to view its details here
-              </p>
+              
+              {/* Right Column - Placeholder */}
+              <div className="text-center py-8">
+                <div className="text-neutral-400 dark:text-neutral-500 mb-2">
+                  <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-neutral-600 dark:text-neutral-400 mb-1">No Conversations</h3>
+                <p className="text-sm text-neutral-500 dark:text-neutral-500">
+                  Conversations will appear here when a listing is selected
+                </p>
+              </div>
             </div>
           )}
         </div>
