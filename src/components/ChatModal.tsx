@@ -6,6 +6,7 @@ import { Modal } from "./Modal";
 import { generateProfilePicture, getInitials, cn } from "@/lib/utils";
 import type { Listing, Category, Unit, Seller, Message, Chat } from "@/lib/types";
 import Link from "next/link";
+import { useLang } from "@/lib/i18n-client";
 
 interface ChatModalProps {
   listing: Listing;
@@ -27,6 +28,13 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
   const [sellerImageError, setSellerImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
+  const [isSearchingForChat, setIsSearchingForChat] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
+  
+  const lang = useLang();
   
   // Ref for the chat container to enable auto-scrolling
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -82,6 +90,11 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         console.log('🔍 ChatModal: All chats:', chatData.chats);
         console.log('🔍 ChatModal: User ID from API:', chatData.userId);
         
+        // Store the user ID for message identification
+        if (chatData.userId) {
+          setCurrentUserId(chatData.userId);
+        }
+        
         // Look for chat that matches this listing AND involves the current user
         const existingChat = chatData.chats?.find((c: any) => {
           console.log('🔍 ChatModal: Checking chat:', c.id, 'listing_id:', c.listing_id, 'vs listing.id:', listing.id);
@@ -133,12 +146,17 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
       
       if (response.ok) {
-        const data = await response.json() as { success: boolean; messages?: Message[] };
+        const data = await response.json() as { success: boolean; messages?: Message[]; userId?: string };
         console.log('🔍 ChatModal: Messages response:', data);
         
         if (data.success && data.messages) {
           setMessages(data.messages);
           console.log('🔍 ChatModal: Loaded', data.messages.length, 'messages');
+          
+          // Store user ID if provided in the response
+          if (data.userId && !currentUserId) {
+            setCurrentUserId(data.userId);
+          }
         } else {
           console.log('🔍 ChatModal: No messages found or API error');
           setMessages([]);
@@ -478,7 +496,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
             ) : (
               messages.map((m) => {
                 const isOptimistic = m.id.startsWith('temp-');
-                const isOwnMessage = m.from_id === user?.id;
+                const isOwnMessage = m.from_id === currentUserId;
                 
                 return (
                   <div
