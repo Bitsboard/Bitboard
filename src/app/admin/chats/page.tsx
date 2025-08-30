@@ -66,9 +66,10 @@ export default function AdminChatsPage() {
     const chatIdParam = urlParams.get('chatId');
     
     if (searchParam || chatIdParam) {
+      console.log('🔍 Chat admin: Found URL parameters - search:', searchParam, 'chatId:', chatIdParam);
       searchAndSelectChat(searchParam, chatIdParam);
     }
-  }, [isAuthenticated, chats]);
+  }, [isAuthenticated, chats, searchTerm, statusFilter]);
 
   const searchAndSelectChat = async (searchTerm?: string | null, chatId?: string | null) => {
     if (!searchTerm && !chatId) return;

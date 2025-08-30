@@ -42,6 +42,7 @@ interface UserListing {
   createdAt: number;
   views: number;
   status: string;
+  replies?: number; // Added for new_listing_count
 }
 
 interface UserChat {
@@ -234,10 +235,10 @@ export default function AdminUsersPage() {
     const diff = now - timestamp;
     
     if (diff < 60) return 'just now';
-    if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
-    if (diff < 2592000) return `${Math.floor(diff / 86400)} days ago`;
-    return `${Math.floor(diff / 2592000)} months ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    if (diff < 2592000) return `${Math.floor(diff / 86400)}d ago`;
+    return `${Math.floor(diff / 2592000)}mo ago`;
   };
 
   const getStatusBadge = (user: User) => {
@@ -348,8 +349,8 @@ export default function AdminUsersPage() {
         {/* Top Section - Always Visible */}
         <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 p-4 mb-4">
           {selectedUser ? (
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              {/* Left Column - User Details (1/4 width) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column - User Details (1/3 width) */}
               <div className="lg:col-span-1">
                 <div className="space-y-4">
                   {/* Row 1: Username and Status */}
@@ -405,14 +406,14 @@ export default function AdminUsersPage() {
                 </div>
               </div>
               
-              {/* Middle Column - User Listings (2/4 width) */}
-              <div className="lg:col-span-2">
+              {/* Middle Column - User Listings (1/3 width) */}
+              <div className="lg:col-span-1">
                 <div className="bg-neutral-50 dark:bg-neutral-700 rounded border border-neutral-200 dark:border-neutral-600 p-3 h-full">
                   <h3 className="text-md font-semibold text-neutral-900 dark:text-white mb-3">
                     User Listings ({userListings?.length || 0})
                   </h3>
                   
-                  <div className="h-[calc(100%-3rem)] overflow-y-auto space-y-2">
+                  <div className="h-[calc(100%-3rem)] overflow-y-auto space-y-2 max-h-32">
                     {isLoadingUserData ? (
                       <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading listings...</div>
                     ) : userListings && userListings.length > 0 ? (
@@ -434,16 +435,22 @@ export default function AdminUsersPage() {
                             </div>
                           </div>
                           
-                          {/* Bottom Row - Price & Type */}
+                          {/* Bottom Row - Price, Type, Age, Stats */}
                           <div className="flex items-center justify-between text-xs text-green-800 dark:text-green-200">
-                            <span className={`inline-flex items-center px-1 py-0.5 rounded text-xs font-medium ${
-                              listing.adType === 'want' 
-                                ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
-                                : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
-                            }`}>
-                              {listing.adType === 'want' ? 'Want' : 'Sell'}
-                            </span>
-                            <span>{listing.priceSat.toLocaleString()} sats</span>
+                            <div className="flex items-center gap-2">
+                              <span className={`inline-flex items-center px-1 py-0.5 rounded text-xs font-medium ${
+                                listing.adType === 'want' 
+                                  ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
+                                  : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+                              }`}>
+                                {listing.adType === 'want' ? 'Want' : 'Sell'}
+                              </span>
+                              <span>{listing.priceSat.toLocaleString()} sats</span>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-xs">{getTimeAgo(listing.createdAt)}</div>
+                              <div className="text-xs">{listing.views || 0} views • {listing.replies || 0} replies</div>
+                            </div>
                           </div>
                         </div>
                       ))
@@ -454,14 +461,14 @@ export default function AdminUsersPage() {
                 </div>
               </div>
               
-              {/* Right Column - Active Chats (1/4 width) */}
+              {/* Right Column - Active Chats (1/3 width) */}
               <div className="lg:col-span-1">
                 <div className="bg-neutral-50 dark:bg-neutral-700 rounded border border-neutral-200 dark:border-neutral-600 p-3 h-full">
                   <h3 className="text-md font-semibold text-neutral-900 dark:text-white mb-3">
                     Active Chats ({userChats?.length || 0})
                   </h3>
                   
-                  <div className="h-[calc(100%-3rem)] overflow-y-auto space-y-2">
+                  <div className="h-[calc(100%-3rem)] overflow-y-auto space-y-2 max-h-32">
                     {isLoadingUserData ? (
                       <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading chats...</div>
                     ) : userChats && userChats.length > 0 ? (
@@ -486,7 +493,7 @@ export default function AdminUsersPage() {
                           {/* Bottom Row - Messages & Last Activity */}
                           <div className="flex items-center justify-between text-xs text-purple-800 dark:text-purple-200">
                             <span>{chat.messageCount} messages</span>
-                            <span>last: {getTimeAgo(chat.lastMessageAt)}</span>
+                            <span>{getTimeAgo(chat.lastMessageAt)}</span>
                           </div>
                         </div>
                       ))
