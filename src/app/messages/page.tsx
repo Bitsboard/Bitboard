@@ -686,8 +686,8 @@ export default function MessagesPage() {
                               </div>
                               
                               {/* Listing Title */}
-                              <h3 
-                                className={`font-semibold text-sm truncate mb-1 cursor-pointer hover:underline ${
+                              <h3
+                                className={`font-semibold text-sm truncate mb-1 cursor-pointer ${
                                   selectedChat === item.id ? 'text-white' : 'text-neutral-900 dark:text-white'
                                 }`}
                                 onClick={(e) => {
