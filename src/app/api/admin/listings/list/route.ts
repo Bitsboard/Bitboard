@@ -9,17 +9,14 @@ export async function GET(req: Request) {
     
     const url = new URL(req.url);
     const limit = Math.min(100, parseInt(url.searchParams.get('limit') ?? '20', 10) || 20);
-    const offset = Math.max(0, parseInt(url.searchParams.get('offset') ?? '0', 10) || 20);
+    const offset = Math.max(0, parseInt(url.searchParams.get('offset') ?? '0', 10));
     
     console.log('🔍 Admin Listings API: Parsed URL parameters - limit:', limit, 'offset:', offset);
     
-    // Get database connection using the standard cf library
+    // Get database connection
     const db = await getD1();
     if (!db) {
-      console.error('❌ No database binding found');
-      
-      // For local development or when database fails, return mock data
-      console.log('🔍 Admin Listings API: Database connection failed - returning mock data');
+      console.log('🔍 Admin Listings API: No database binding - returning mock data');
       return NextResponse.json({ 
         success: true,
         listings: [
@@ -66,98 +63,42 @@ export async function GET(req: Request) {
       });
     }
     
-    console.log('✅ Database connection established successfully');
+    console.log('✅ Database connection established');
     
-    // Test basic database connectivity
-    console.log('🔍 Admin Listings API: Testing database connectivity...');
-    try {
-      const testResult = await db.prepare('SELECT 1 as test').all();
-      console.log('🔍 Admin Listings API: Database connectivity test successful:', testResult);
-    } catch (testError: any) {
-      console.error('🔍 Admin Listings API: Database connectivity test failed:', testError);
-      return NextResponse.json({ 
-        error: 'Database connectivity test failed',
-        details: testError?.message || String(testError) || 'Unknown error'
-      }, { status: 500 });
-    }
-    
-    // Check if listings table exists and has data
-    console.log('🔍 Admin Listings API: Checking listings table...');
-    try {
-      const tableCheck = await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='listings'").all();
-      console.log('🔍 Admin Listings API: Listings table check:', tableCheck);
-      
-      if (tableCheck.results && tableCheck.results.length > 0) {
-        const countCheck = await db.prepare('SELECT COUNT(*) as count FROM listings').all();
-        console.log('🔍 Admin Listings API: Listings count check:', countCheck);
-      } else {
-        console.log('🔍 Admin Listings API: Listings table does not exist!');
-        return NextResponse.json({ 
-          error: 'Listings table not found',
-          details: 'The listings table does not exist in the database'
-        }, { status: 500 });
-      }
-    } catch (tableError: any) {
-      console.error('🔍 Admin Listings API: Table check failed:', tableError);
-      return NextResponse.json({ 
-        error: 'Table check failed',
-        details: tableError?.message || String(tableError) || 'Unknown error'
-      }, { status: 500 });
-    }
-    
-    const q = (url.searchParams.get('q') || '').trim();
-    
-    console.log('🔍 Admin Listings API: Request received with limit:', limit, 'offset:', offset, 'query:', q);
-    
-    let where = '';
-    let binds: any[] = [];
-    if (q) {
-      where = 'WHERE l.title LIKE ? OR l.description LIKE ? OR l.posted_by LIKE ?';
-      binds.push(`%${q}%`, `%${q}%`, `%${q}%`);
-    }
-    
-    console.log('🔍 Admin Listings API: Where clause:', where);
-    console.log('🔍 Admin Listings API: Binds:', binds);
-    
-    // Simplified query that focuses on core functionality first
+    // Simple query to get listings
     const listingsQuery = `
       SELECT 
-        l.id,
-        l.title,
-        l.description,
-        l.price_sat AS priceSat,
-        l.ad_type AS adType,
-        l.category,
-        l.posted_by AS postedBy,
-        l.posted_by AS username,
-        l.created_at AS createdAt,
-        l.updated_at AS updatedAt,
-        l.status,
-        l.image_url AS imageUrl,
-        l.location,
-        COALESCE(l.views, 0) AS views,
-        COALESCE(l.favorites, 0) AS favorites,
+        id,
+        title,
+        description,
+        price_sat AS priceSat,
+        ad_type AS adType,
+        category,
+        posted_by AS postedBy,
+        posted_by AS username,
+        created_at AS createdAt,
+        updated_at AS updatedAt,
+        status,
+        image_url AS imageUrl,
+        location,
+        COALESCE(views, 0) AS views,
+        COALESCE(favorites, 0) AS favorites,
         0 AS replies
-      FROM listings l
-      ${where}
-      ORDER BY l.created_at DESC 
+      FROM listings
+      ORDER BY created_at DESC 
       LIMIT ? OFFSET ?
     `;
     
-    console.log('🔍 Admin Listings API: Query:', listingsQuery);
-    console.log('🔍 Admin Listings API: About to execute query with binds:', [...binds, limit, offset]);
+    console.log('🔍 Admin Listings API: Executing query with limit:', limit, 'offset:', offset);
     
-    const res = await db.prepare(listingsQuery).bind(...binds, limit, offset).all();
-    console.log('🔍 Admin Listings API: Query result:', {
-      success: res.success,
-      resultsCount: res.results?.length || 0,
-      firstResult: res.results?.[0] || null
-    });
+    const res = await db.prepare(listingsQuery).bind(limit, offset).all();
+    console.log('🔍 Admin Listings API: Query result count:', res.results?.length || 0);
     
-    const count = await db.prepare(`SELECT COUNT(*) AS c FROM listings l ${where}`).bind(...binds).all();
-    const total = count.results?.[0]?.c ?? 0;
+    // Get total count
+    const countResult = await db.prepare('SELECT COUNT(*) AS total FROM listings').all();
+    const total = countResult.results?.[0]?.total || 0;
     
-    console.log('🔍 Admin Listings API: Total count:', total);
+    console.log('🔍 Admin Listings API: Total listings in database:', total);
     
     return NextResponse.json({ 
       success: true,
@@ -170,12 +111,10 @@ export async function GET(req: Request) {
   } catch (e: any) {
     console.error('🔍 Admin Listings API: Error occurred:', e);
     console.error('🔍 Admin Listings API: Error message:', e?.message);
-    console.error('🔍 Admin Listings API: Error stack:', e?.stack);
     
     return NextResponse.json({ 
-      error: e?.message || String(e) || 'Unknown error',
-      details: e?.message || String(e) || 'Unknown error',
-      stack: e?.stack || 'No stack trace available'
+      error: 'Failed to load listings',
+      details: e?.message || String(e) || 'Unknown error'
     }, { status: 500 });
   }
 }
