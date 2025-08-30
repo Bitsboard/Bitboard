@@ -16,10 +16,13 @@ export async function GET(
         l.id,
         l.title,
         l.price_sat AS priceSat,
+        l.ad_type AS adType,
+        l.location,
+        l.category,
         l.status,
         l.created_at AS createdAt,
         COALESCE(l.views, 0) AS views,
-        COALESCE(chat_stats.chats_count, 0) AS chatsCount
+        COALESCE(chat_stats.chats_count, 0) AS replies
       FROM listings l
       LEFT JOIN (
         SELECT 

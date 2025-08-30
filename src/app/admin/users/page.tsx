@@ -413,7 +413,7 @@ export default function AdminUsersPage() {
                     User Listings ({userListings?.length || 0})
                   </h3>
                   
-                  <div className="h-[calc(100%-3rem)] overflow-y-auto space-y-2 max-h-32">
+                  <div className="h-[calc(100%-3rem)] overflow-y-auto space-y-2">
                     {isLoadingUserData ? (
                       <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading listings...</div>
                     ) : userListings && userListings.length > 0 ? (
@@ -468,7 +468,7 @@ export default function AdminUsersPage() {
                     Active Chats ({userChats?.length || 0})
                   </h3>
                   
-                  <div className="h-[calc(100%-3rem)] overflow-y-auto space-y-2 max-h-32">
+                  <div className="h-[calc(100%-3rem)] overflow-y-auto space-y-2">
                     {isLoadingUserData ? (
                       <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading chats...</div>
                     ) : userChats && userChats.length > 0 ? (
