@@ -245,11 +245,11 @@ export default function AdminChatsPage() {
           </div>
           
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full space-y-0 font-mono text-sm">
                               <thead className="bg-neutral-50 dark:bg-neutral-700">
-                  <tr className="h-10">
+                  <tr className="h-8">
                     <th 
-                      className="px-2 py-1.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                      className="px-2 py-1 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
                       onClick={() => handleSort('createdAt')}
                     >
                       <div className="flex items-center gap-1">
@@ -261,11 +261,11 @@ export default function AdminChatsPage() {
                         )}
                       </div>
                     </th>
-                    <th className="px-2 py-1.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Listing</th>
-                    <th className="px-2 py-1.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Lister</th>
-                    <th className="px-2 py-1.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Replier</th>
+                    <th className="px-2 py-1 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Listing</th>
+                    <th className="px-2 py-1 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Lister</th>
+                    <th className="px-2 py-1 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Replier</th>
                     <th 
-                      className="px-2 py-1.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                      className="px-2 py-1 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
                       onClick={() => handleSort('messageCount')}
                     >
                       <div className="flex items-center gap-1">
@@ -274,7 +274,7 @@ export default function AdminChatsPage() {
                       </div>
                     </th>
                     <th 
-                      className="px-2 py-1.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                      className="px-2 py-1 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
                       onClick={() => handleSort('lastMessage')}
                     >
                       <div className="flex items-center gap-1">
@@ -288,7 +288,7 @@ export default function AdminChatsPage() {
                     </th>
                   </tr>
                 </thead>
-              <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+              <tbody className="space-y-0 font-mono text-sm">
                 {isLoading ? (
                   <tr>
                     <td colSpan={6} className="px-3 py-8 text-center">
@@ -306,23 +306,23 @@ export default function AdminChatsPage() {
                   paginatedChats.map((chat) => (
                     <tr 
                       key={chat.id} 
-                      className={`hover:bg-neutral-50 dark:hover:bg-neutral-700 h-12 cursor-pointer transition-colors ${
+                      className={`hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded px-2 -mx-2 transition-colors cursor-pointer ${
                         selectedChat?.id === chat.id ? 'bg-blue-50 dark:bg-blue-900/20 border-r-2 border-blue-500' : ''
                       }`}
                       onClick={() => selectChat(chat)}
                     >
-                      <td className="px-2 py-1.5">
-                        <div className="text-xs text-neutral-600 dark:text-neutral-400">
+                      <td className="px-2 py-0.5">
+                        <div className="text-neutral-600 dark:text-neutral-400">
                           {formatDate(chat.created_at)}
                         </div>
                       </td>
-                      <td className="px-2 py-1.5">
+                      <td className="px-2 py-0.5">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             router.push(`/admin/listings?search=${chat.listing_title}`);
                           }}
-                          className="inline-flex items-center gap-2 px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded-full text-xs font-medium hover:bg-green-200 dark:hover:bg-green-900/50 transition-all duration-200 hover:scale-105"
+                          className="inline-flex items-center gap-2 px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded-full font-medium hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
                         >
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -330,13 +330,13 @@ export default function AdminChatsPage() {
                           {chat.listing_title}
                         </button>
                       </td>
-                      <td className="px-2 py-1.5">
+                      <td className="px-2 py-0.5">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             router.push(`/admin/users?search=${chat.seller_username || chat.seller_id}`);
                           }}
-                          className="inline-flex items-center gap-2 px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded-full text-xs font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all duration-200 hover:scale-105"
+                          className="inline-flex items-center gap-2 px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded-full font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
                         >
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -344,13 +344,13 @@ export default function AdminChatsPage() {
                           {chat.seller_username || chat.seller_id.slice(0, 8) + '...'}
                         </button>
                       </td>
-                      <td className="px-2 py-1.5">
+                      <td className="px-2 py-0.5">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             router.push(`/admin/users?search=${chat.buyer_username || chat.buyer_id}`);
                           }}
-                          className="inline-flex items-center gap-2 px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded-full text-xs font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all duration-200 hover:scale-105"
+                          className="inline-flex items-center gap-2 px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded-full font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
                         >
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -358,13 +358,13 @@ export default function AdminChatsPage() {
                           {chat.buyer_username || chat.buyer_id.slice(0, 8) + '...'}
                         </button>
                       </td>
-                      <td className="px-2 py-1.5">
-                        <div className="text-xs text-neutral-900 dark:text-white">
+                      <td className="px-2 py-0.5">
+                        <div className="text-neutral-900 dark:text-white">
                           {chat.messageCount.toLocaleString()}
                         </div>
                       </td>
-                      <td className="px-2 py-1.5">
-                        <div className="text-xs text-neutral-900 dark:text-white">
+                      <td className="px-2 py-0.5">
+                        <div className="text-neutral-900 dark:text-white">
                           {formatRelativeTime(chat.last_message_at)}
                         </div>
                       </td>
