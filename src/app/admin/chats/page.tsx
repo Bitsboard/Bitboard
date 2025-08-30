@@ -172,28 +172,7 @@ export default function AdminChatsPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
-      {/* Condensed Header */}
-      <div className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700">
-        <div className="max-w-7xl mx-auto px-4 py-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <h1 className="text-base font-semibold text-neutral-900 dark:text-white">Chats Management</h1>
-              <span className="text-xs text-neutral-600 dark:text-neutral-400">
-                {chats.length} total • {chats.filter(c => {
-                  const oneDayAgo = Math.floor(Date.now() / 1000) - (24 * 60 * 60);
-                  return c.last_message_at >= oneDayAgo;
-                }).length} active today
-              </span>
-            </div>
-            <button
-              onClick={() => router.push('/admin')}
-              className="px-2 py-1 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded text-xs hover:bg-neutral-300 dark:hover:bg-neutral-600"
-            >
-              Admin dashboard
-            </button>
-          </div>
-        </div>
-      </div>
+
 
       <div className="max-w-7xl mx-auto px-4 py-4">
         {/* Condensed Filters */}
@@ -222,6 +201,12 @@ export default function AdminChatsPage() {
             >
               {isLoading ? 'Refreshing...' : 'Refresh'}
             </button>
+            <button
+              onClick={() => router.push('/admin')}
+              className="px-2 py-1 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded text-xs hover:bg-neutral-300 dark:hover:bg-neutral-600"
+            >
+              Admin dashboard
+            </button>
           </div>
         </div>
 
@@ -231,17 +216,7 @@ export default function AdminChatsPage() {
           <div className="flex-[0.7]">
             {/* Enhanced Chats Table with Individual Stat Columns */}
             <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden">
-                      {/* Table Summary */}
-            <div className="px-3 py-2 bg-neutral-50 dark:bg-neutral-700 border-b border-neutral-200 dark:border-neutral-600">
-              <div className="flex items-center justify-between">
-                <div className="text-xs text-neutral-600 dark:text-neutral-400">
-                  <span className="font-medium">{chats.length}</span> chats • Page {currentPage} of {totalPages}
-                </div>
-                <div className="text-xs text-neutral-500 dark:text-neutral-500">
-                  {itemsPerPage} per page
-                </div>
-              </div>
-            </div>
+          
           
                     <div className="overflow-x-auto">
             <table className="w-full space-y-0 font-mono text-xs">
