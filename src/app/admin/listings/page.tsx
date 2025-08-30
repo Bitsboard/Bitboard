@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import ExternalLinkIcon from "@/components/ExternalLinkIcon";
 
 interface Listing {
   id: string; // Now 10 alphanumeric characters
@@ -519,9 +520,7 @@ export default function AdminListingsPage() {
                       className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors border border-blue-300 dark:border-blue-600"
                     >
                       {selectedListing.username || selectedListing.postedBy}
-                      <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
+                      <ExternalLinkIcon size="sm" />
                     </a>
                     <span className="text-neutral-500 dark:text-neutral-400">on</span>
                     <span className="text-neutral-900 dark:text-white">{formatDate(selectedListing.createdAt)}</span>
@@ -592,9 +591,10 @@ export default function AdminListingsPage() {
                           onClick={() => window.location.href = `/admin/chats?chatId=${encodeURIComponent(chat.id)}&search=${encodeURIComponent(selectedListing.title || '')}`}
                         >
                           {/* External Link Icon - Top Right */}
-                          <svg className="absolute top-1.5 right-1.5 w-3 h-3 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
+                          <ExternalLinkIcon 
+                            size="sm" 
+                            className="absolute top-1.5 right-1.5 text-purple-600 dark:text-purple-400" 
+                          />
                           
                           {/* User Box - Top Left */}
                           <div className="mb-2">
@@ -604,9 +604,7 @@ export default function AdminListingsPage() {
                               onClick={(e) => e.stopPropagation()}
                             >
                               {chat.buyerUsername || chat.buyerId}
-                              <svg className="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                              </svg>
+                              <ExternalLinkIcon size="xs" />
                             </a>
                           </div>
                           
@@ -842,9 +840,7 @@ export default function AdminListingsPage() {
                             className="inline-flex items-center gap-1.5 px-1.5 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded-full font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
                           >
                             {listing.username || listing.postedBy}
-                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
+                            <ExternalLinkIcon size="sm" />
                           </button>
                         </td>
                         <td className="px-1.5 py-0.5">

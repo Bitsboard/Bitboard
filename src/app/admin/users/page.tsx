@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import ExternalLinkIcon from "@/components/ExternalLinkIcon";
 
 interface User {
   id: string;
@@ -587,9 +588,10 @@ export default function AdminUsersPage() {
                           onClick={() => window.location.href = `/admin/listings?title=${encodeURIComponent(listing.title)}&id=${encodeURIComponent(listing.id)}`}
                         >
                           {/* External Link Icon - Top Right */}
-                          <svg className="absolute top-1.5 right-1.5 w-3 h-3 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
+                          <ExternalLinkIcon 
+                            size="sm" 
+                            className="absolute top-1.5 right-1.5 text-green-600 dark:text-green-400" 
+                          />
                           
                           {/* Listing Title - Top Left */}
                           <div className="mb-2">
@@ -642,9 +644,10 @@ export default function AdminUsersPage() {
                           onClick={() => window.location.href = `/admin/chats?chatId=${encodeURIComponent(chat.id)}&search=${encodeURIComponent(chat.listing_title || '')}`}
                         >
                           {/* External Link Icon - Top Right */}
-                          <svg className="absolute top-1.5 right-1.5 w-3 h-3 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
+                          <ExternalLinkIcon 
+                            size="sm" 
+                            className="absolute top-1.5 right-1.5 text-purple-600 dark:text-purple-400" 
+                          />
                           
                           {/* Listing Title - Top Left */}
                           <div className="mb-2">
@@ -663,9 +666,7 @@ export default function AdminUsersPage() {
                               }}
                             >
                               {chat.other_username}
-                              <svg className="ml-1 w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                              </svg>
+                              <ExternalLinkIcon size="sm" className="ml-1" />
                             </span>
                           </div>
                           
