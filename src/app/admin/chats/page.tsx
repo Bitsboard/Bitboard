@@ -57,6 +57,20 @@ export default function AdminChatsPage() {
     }
   }, [router]);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadChats();
+    }
+  }, [currentPage, isAuthenticated]);
+
+  // Handle sorting changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      setCurrentPage(1); // Reset to first page when sorting changes
+      loadChats();
+    }
+  }, [sortBy, sortOrder]);
+
   // Check if we need to search for a specific chat (e.g., from activity feed or admin listings)
   useEffect(() => {
     if (!isAuthenticated || chats.length === 0) return;
@@ -117,12 +131,20 @@ export default function AdminChatsPage() {
     try {
       setIsLoading(true);
       console.log('🔍 Loading chats with limit:', itemsPerPage);
-      const response = await fetch(`/api/admin/chats?limit=${itemsPerPage}`);
+      
+      const offset = (currentPage - 1) * itemsPerPage;
+      const params = new URLSearchParams();
+      params.append('limit', itemsPerPage.toString());
+      params.append('offset', offset.toString());
+      params.append('sortBy', sortBy);
+      params.append('sortOrder', sortOrder);
+      
+      const response = await fetch(`/api/admin/chats?${params.toString()}`);
       if (response.ok) {
-        const data = await response.json() as { chats: Chat[] };
+        const data = await response.json() as { chats: Chat[]; total: number; page: number; limit: number };
         console.log('🔍 Chats API response:', data);
         setChats(data.chats || []);
-        setTotalPages(Math.ceil((data.chats?.length || 0) / itemsPerPage));
+        setTotalPages(Math.ceil((data.total || 0) / itemsPerPage));
       } else {
         console.error('🔍 Chats API error:', response.status, response.statusText);
       }
@@ -155,40 +177,10 @@ export default function AdminChatsPage() {
     loadChatMessages(chat.id);
   };
 
-  const filteredChats = chats.filter(chat => {
-    const matchesSearch = chat.listing_title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         chat.buyer_username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         chat.seller_username?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    let matchesStatus = true;
-    if (statusFilter === 'active') {
-      const oneDayAgo = Math.floor(Date.now() / 1000) - (24 * 60 * 60);
-      matchesStatus = chat.last_message_at >= oneDayAgo;
-    } else if (statusFilter === 'recent') {
-      const oneWeekAgo = Math.floor(Date.now() / 1000) - (7 * 24 * 60 * 60);
-      matchesStatus = chat.last_message_at >= oneWeekAgo;
-    }
-    
-    return matchesSearch && matchesStatus;
-  });
-
-  const sortedChats = [...filteredChats].sort((a, b) => {
-    let aValue: any, bValue: any;
-    
-    switch (sortBy) {
-      case 'createdAt': aValue = a.created_at; bValue = b.created_at; break;
-      case 'lastMessage': aValue = a.last_message_at; bValue = b.last_message_at; break;
-      case 'messageCount': aValue = a.messageCount; bValue = b.messageCount; break;
-      default: aValue = a.last_message_at; bValue = b.last_message_at;
-    }
-    
-    return sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
-  });
-
-  const paginatedChats = sortedChats.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // Remove client-side filtering and sorting since API handles it now
+  // const filteredChats = chats.filter(chat => { ... });
+  // const sortedChats = [...filteredChats].sort((a, b) => { ... });
+  // const paginatedChats = sortedChats.slice(...);
 
   const formatDate = (timestamp: number) => new Date(timestamp * 1000).toLocaleDateString();
   const formatRelativeTime = (timestamp: number) => {
@@ -331,7 +323,7 @@ export default function AdminChatsPage() {
                       <p className="text-neutral-600 dark:text-neutral-400">Loading chats...</p>
                     </td>
                   </tr>
-                ) : paginatedChats.length === 0 ? (
+                ) : chats.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
                       No chats found
@@ -339,7 +331,7 @@ export default function AdminChatsPage() {
                   </tr>
                 ) : (
                   <>
-                    {paginatedChats.map((chat) => (
+                    {chats.map((chat) => (
                       <tr 
                         key={chat.id} 
                         className={`hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded px-1.5 -mx-1.5 transition-colors cursor-pointer ${
@@ -407,7 +399,7 @@ export default function AdminChatsPage() {
                       </tr>
                     ))}
                     {/* Fill remaining rows to maintain 20 row height */}
-                    {Array.from({ length: Math.max(0, 20 - paginatedChats.length) }).map((_, index) => (
+                    {Array.from({ length: Math.max(0, 20 - chats.length) }).map((_, index) => (
                       <tr key={`empty-${index}`} className="h-6">
                         <td colSpan={6} className="px-1.5 py-0.5">
                           <div className="h-6"></div>
@@ -423,7 +415,7 @@ export default function AdminChatsPage() {
           {/* Compact Pagination */}
           <div className="flex justify-between items-center py-2 px-3 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
             <div className="text-xs text-neutral-600">
-              {filteredChats.length} chats • Page {currentPage} of {totalPages}
+              {chats.length} chats • Page {currentPage} of {totalPages}
             </div>
             {totalPages > 1 && (
               <div className="flex gap-1">

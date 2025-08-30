@@ -101,6 +101,14 @@ export default function AdminUsersPage() {
     }
   }, [searchQuery, statusFilter]);
 
+  // Handle sorting changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      setCurrentPage(1); // Reset to first page when sorting changes
+      loadUsers();
+    }
+  }, [sortBy, sortOrder]);
+
   // Check if we need to search for a specific user (e.g., from activity feed or admin listings)
   useEffect(() => {
     if (!isAuthenticated || users.length === 0) return;
@@ -160,6 +168,8 @@ export default function AdminUsersPage() {
       const params = new URLSearchParams();
       params.append('limit', itemsPerPage.toString());
       params.append('offset', offset.toString());
+      params.append('sortBy', sortBy);
+      params.append('sortOrder', sortOrder);
       if (searchQuery) params.append('q', searchQuery);
       
       const response = await fetch(`/api/admin/users/list?${params.toString()}`);
@@ -588,7 +598,13 @@ export default function AdminUsersPage() {
                           
                           {/* Username in Blue Box - Bottom Left */}
                           <div className="flex items-center gap-2">
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-700">
+                            <span 
+                              className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-700 cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.location.href = `/admin/users?userId=${encodeURIComponent(chat.other_user_id)}&search=${encodeURIComponent(chat.other_username || '')}`;
+                              }}
+                            >
                               {chat.other_username}
                               <svg className="ml-1 w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />

@@ -7,6 +7,8 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const limit = Math.min(100, parseInt(url.searchParams.get('limit') ?? '20', 10) || 20);
     const offset = Math.max(0, parseInt(url.searchParams.get('offset') ?? '0', 10) || 0);
+    const sortBy = url.searchParams.get('sortBy') || 'createdAt';
+    const sortOrder = url.searchParams.get('sortOrder') || 'desc';
     const db = await getAdminDb(req);
     const q = (url.searchParams.get('q') || '').trim();
     
@@ -15,6 +17,33 @@ export async function GET(req: Request) {
     if (q) {
       where = 'WHERE u.email LIKE ? OR u.username LIKE ?';
       binds.push(`%${q}%`, `%${q}%`);
+    }
+    
+    // Build ORDER BY clause based on sortBy parameter
+    let orderBy = 'u.created_at DESC'; // default
+    switch (sortBy) {
+      case 'username':
+        orderBy = `u.username ${sortOrder.toUpperCase()}`;
+        break;
+      case 'email':
+        orderBy = `u.email ${sortOrder.toUpperCase()}`;
+        break;
+      case 'listingsCount':
+        orderBy = `listings_count ${sortOrder.toUpperCase()}`;
+        break;
+      case 'chatsCount':
+        orderBy = `chats_count ${sortOrder.toUpperCase()}`;
+        break;
+      case 'thumbsUp':
+        orderBy = `u.rating ${sortOrder.toUpperCase()}`;
+        break;
+      case 'lastActivityAt':
+        orderBy = `last_activity ${sortOrder.toUpperCase()}`;
+        break;
+      case 'createdAt':
+      default:
+        orderBy = `u.created_at ${sortOrder.toUpperCase()}`;
+        break;
     }
     
     const usersQuery = `
@@ -77,7 +106,7 @@ export async function GET(req: Request) {
         GROUP BY user_id
       ) activity_stats ON u.id = activity_stats.user_id
       ${where}
-      ORDER BY u.created_at DESC 
+      ORDER BY ${orderBy}
       LIMIT ? OFFSET ?
     `;
     

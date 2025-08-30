@@ -14,10 +14,33 @@ export async function GET(req: Request) {
     console.log('🔍 Admin Chats API: Database connection established, fetching chats...');
     
     const url = new URL(req.url);
-    const limit = Math.min(100, parseInt(url.searchParams.get('limit') ?? '100', 10) || 100);
+    const limit = Math.min(100, parseInt(url.searchParams.get('limit') ?? '20', 10) || 20);
     const offset = Math.max(0, parseInt(url.searchParams.get('offset') ?? '0', 10) || 0);
+    const sortBy = url.searchParams.get('sortBy') || 'lastMessageAt';
+    const sortOrder = url.searchParams.get('sortOrder') || 'desc';
     
-    console.log('🔍 Admin Chats API: Limit:', limit, 'Offset:', offset);
+    console.log('🔍 Admin Chats API: Limit:', limit, 'Offset:', offset, 'SortBy:', sortBy, 'SortOrder:', sortOrder);
+    
+    // Build ORDER BY clause based on sortBy parameter
+    let orderBy = 'c.last_message_at DESC, c.created_at DESC'; // default
+    switch (sortBy) {
+      case 'createdAt':
+        orderBy = `c.created_at ${sortOrder.toUpperCase()}`;
+        break;
+      case 'listingTitle':
+        orderBy = `l.title ${sortOrder.toUpperCase()}`;
+        break;
+      case 'buyerUsername':
+        orderBy = `buyer.username ${sortOrder.toUpperCase()}`;
+        break;
+      case 'sellerUsername':
+        orderBy = `seller.username ${sortOrder.toUpperCase()}`;
+        break;
+      case 'lastMessageAt':
+      default:
+        orderBy = `c.last_message_at ${sortOrder.toUpperCase()}`;
+        break;
+    }
     
     // Get all chats with listing and user details
     const chats = await db.prepare(`
@@ -38,7 +61,7 @@ export async function GET(req: Request) {
       JOIN listings l ON c.listing_id = l.id
       LEFT JOIN users buyer ON c.buyer_id = buyer.id
       LEFT JOIN users seller ON c.seller_id = seller.id
-      ORDER BY c.last_message_at DESC, c.created_at DESC
+      ORDER BY ${orderBy}
       LIMIT ? OFFSET ?
     `).bind(limit, offset).all();
     
