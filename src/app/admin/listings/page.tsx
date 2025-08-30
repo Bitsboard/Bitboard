@@ -202,49 +202,22 @@ export default function AdminListingsPage() {
   const formatDate = (timestamp: number) => new Date(timestamp * 1000).toLocaleDateString();
   const formatTime = (timestamp: number) => new Date(timestamp * 1000).toLocaleTimeString();
 
-  const loadListingChats = async (listingId: string) => {
-    try {
-      setIsLoadingChats(true);
-      setListingChats([]);
-      
-      // For now, we'll create mock chat data since the API structure has changed
-      // In a real implementation, you'd fetch from /api/admin/listings/[listingId]/chats
-      const mockChats: Chat[] = [
-        {
-          id: 'chat1234567',
-          listingId: listingId,
-          buyerId: 'buyer123',
-          sellerId: 'seller456',
-          messages: [
-            {
-              id: 'msg1234567',
-              text: 'Is this still available?',
-              fromId: 'buyer123',
-              createdAt: Date.now() / 1000 - 3600
-            },
-            {
-              id: 'msg2345678',
-              text: 'Yes, it is! When would you like to meet?',
-              fromId: 'seller456',
-              createdAt: Date.now() / 1000 - 1800
-            }
-          ],
-          lastMessageAt: Date.now() / 1000 - 1800
-        }
-      ];
-      
-      setListingChats(mockChats);
-    } catch (error) {
-      console.error('Error loading listing chats:', error);
-      setListingChats([]);
-    } finally {
-      setIsLoadingChats(false);
-    }
-  };
-
   const handleListingClick = (listing: Listing) => {
     setSelectedListing(listing);
     loadListingChats(listing.id);
+    
+    // Update URL to reflect the selected listing
+    const newUrl = `/admin/listings?title=${encodeURIComponent(listing.title)}`;
+    window.history.pushState({}, '', newUrl);
+  };
+
+  const clearSelectedListing = () => {
+    setSelectedListing(null);
+    setListingChats([]);
+    
+    // Clear URL parameters
+    const newUrl = '/admin/listings';
+    window.history.pushState({}, '', newUrl);
   };
 
   const handleSort = (column: 'createdAt' | 'priceSat' | 'views' | 'replies' | 'username' | 'adType' | 'title' | 'location') => {
@@ -261,6 +234,34 @@ export default function AdminListingsPage() {
   const handleSearch = async () => {
     setCurrentPage(1); // Reset to first page when searching
     loadListings();
+  };
+
+  const loadListingChats = async (listingId: string) => {
+    try {
+      setIsLoadingChats(true);
+      setListingChats([]);
+      
+      // Fetch real chat data for this listing
+      const response = await fetch(`/api/admin/listings/${listingId}/chats`);
+      
+      if (response.ok) {
+        const data: any = await response.json();
+        if (data.success && data.chats) {
+          setListingChats(data.chats);
+        } else {
+          console.log('No chats found for listing:', listingId);
+          setListingChats([]);
+        }
+      } else {
+        console.error('Failed to load listing chats:', response.status);
+        setListingChats([]);
+      }
+    } catch (error) {
+      console.error('Error loading listing chats:', error);
+      setListingChats([]);
+    } finally {
+      setIsLoadingChats(false);
+    }
   };
 
   if (!isAuthenticated) {
@@ -342,12 +343,20 @@ export default function AdminListingsPage() {
         {/* Selected Listing Details Section */}
         <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 p-4 mb-3">
           {selectedListing ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column - Listing Details */}
-              <div>
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">
-                  {selectedListing.title}
-                </h2>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column - Listing Details (2/3 width) */}
+              <div className="lg:col-span-2">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
+                    {selectedListing.title}
+                  </h2>
+                  <button
+                    onClick={clearSelectedListing}
+                    className="px-2 py-1 text-xs text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded transition-colors"
+                  >
+                    Clear Selection
+                  </button>
+                </div>
                 
                 {/* Basic Info Grid */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
@@ -398,50 +407,52 @@ export default function AdminListingsPage() {
                 </div>
               </div>
               
-              {/* Right Column - Active Conversations */}
-              <div>
-                <h3 className="text-md font-semibold text-neutral-900 dark:text-white mb-3">
-                  Active Conversations ({listingChats.length})
-                </h3>
-                
-                <div className="max-h-80 overflow-y-auto space-y-2 pr-2">
-                  {isLoadingChats ? (
-                    <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading chats...</div>
-                  ) : listingChats.length > 0 ? (
-                    listingChats.map((chat) => (
-                      <div key={chat.id} className="bg-neutral-50 dark:bg-neutral-700 rounded p-3 border border-neutral-200 dark:border-neutral-600">
-                        <div className="flex items-center justify-between mb-2">
-                          <a 
-                            href={`/admin/users?search=${chat.buyerId === selectedListing.postedBy ? chat.sellerId : chat.buyerId}`}
-                            className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
-                          >
-                            {chat.buyerId === selectedListing.postedBy ? chat.sellerId : chat.buyerId}
-                          </a>
-                          <a 
-                            href={`/admin/chats?search=${encodeURIComponent(selectedListing.title || '')}`}
-                            className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300"
-                          >
-                            View Chat →
-                          </a>
+              {/* Right Column - Active Conversations (1/3 width) */}
+              <div className="lg:col-span-1">
+                <div className="bg-neutral-50 dark:bg-neutral-700 rounded border border-neutral-200 dark:border-neutral-600 p-3">
+                  <h3 className="text-md font-semibold text-neutral-900 dark:text-white mb-3">
+                    Active Conversations ({listingChats.length})
+                  </h3>
+                  
+                  <div className="max-h-80 overflow-y-auto space-y-2">
+                    {isLoadingChats ? (
+                      <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading chats...</div>
+                    ) : listingChats.length > 0 ? (
+                      listingChats.map((chat) => (
+                        <div key={chat.id} className="bg-white dark:bg-neutral-800 rounded p-2 border border-neutral-200 dark:border-neutral-600">
+                          <div className="flex items-center justify-between mb-1">
+                            <a 
+                              href={`/admin/users?search=${chat.buyerId === selectedListing.postedBy ? chat.sellerId : chat.buyerId}`}
+                              className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                            >
+                              {chat.buyerId === selectedListing.postedBy ? chat.sellerId : chat.buyerId}
+                            </a>
+                            <a 
+                              href={`/admin/chats?search=${encodeURIComponent(selectedListing.title || '')}`}
+                              className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300"
+                            >
+                              View →
+                            </a>
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-neutral-600 dark:text-neutral-400">
+                            <span>{chat.messages.length} messages</span>
+                            <span>{formatDate(chat.lastMessageAt)}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center justify-between text-xs text-neutral-600 dark:text-neutral-400">
-                          <span>{chat.messages.length} messages</span>
-                          <span>{formatDate(chat.lastMessageAt)}</span>
-                        </div>
+                      ))
+                    ) : (
+                      <div className="text-sm text-neutral-500 dark:text-neutral-400 text-center py-4">
+                        No active conversations yet
                       </div>
-                    ))
-                  ) : (
-                    <div className="text-sm text-neutral-500 dark:text-neutral-400 text-center py-4">
-                      No active conversations yet
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column - Placeholder */}
-              <div className="text-center py-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column - Placeholder (2/3 width) */}
+              <div className="lg:col-span-2 text-center py-8">
                 <div className="text-neutral-400 dark:text-neutral-500 mb-2">
                   <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -453,8 +464,8 @@ export default function AdminListingsPage() {
                 </p>
               </div>
               
-              {/* Right Column - Placeholder */}
-              <div className="text-center py-8">
+              {/* Right Column - Placeholder (1/3 width) */}
+              <div className="lg:col-span-1 text-center py-8">
                 <div className="text-neutral-400 dark:text-neutral-500 mb-2">
                   <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
