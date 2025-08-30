@@ -52,6 +52,7 @@ export default function AdminListingsPage() {
   const [sortBy, setSortBy] = useState<'createdAt' | 'priceSat' | 'views' | 'replies' | 'username' | 'adType' | 'title' | 'location'>('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   
   const router = useRouter();
 
@@ -262,94 +263,77 @@ export default function AdminListingsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left Column - Listing Details (2/3 width) */}
               <div className="lg:col-span-2">
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">
                   {selectedListing.title}
                 </h2>
                 
                 {/* Condensed Info Layout */}
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {/* Top Row - Key Info */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Posted By</label>
-                      <div className="mt-1">
-                        <a 
-                          href={`/admin/users?search=${selectedListing.username || selectedListing.postedBy}`}
-                          className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
-                        >
-                          {selectedListing.username || selectedListing.postedBy}
-                        </a>
-                      </div>
+                  <div className="flex items-center gap-6 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-500 dark:text-neutral-400">Posted by:</span>
+                      <a 
+                        href={`/admin/users?search=${selectedListing.username || selectedListing.postedBy}`}
+                        className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        {selectedListing.username || selectedListing.postedBy}
+                      </a>
                     </div>
-                    <div>
-                      <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Posted Date</label>
-                      <div className="text-sm text-neutral-900 dark:text-white mt-1">
-                        {formatDate(selectedListing.createdAt)}
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-500 dark:text-neutral-400">Posted:</span>
+                      <span className="text-neutral-900 dark:text-white">{formatDate(selectedListing.createdAt)}</span>
                     </div>
-                  </div>
-                  
-                  {/* Second Row - Stats & Type */}
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Views</label>
-                      <div className="text-sm text-neutral-900 dark:text-white mt-1">
-                        {selectedListing.views.toLocaleString()}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Type</label>
-                      <div className="mt-1">
-                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                          selectedListing.adType === 'want' 
-                            ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
-                            : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
-                        }`}>
-                          {selectedListing.adType === 'want' ? 'Want' : 'Sell'}
-                        </span>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Category</label>
-                      <div className="text-sm text-neutral-900 dark:text-white mt-1">
-                        {selectedListing.category}
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-500 dark:text-neutral-400">Views:</span>
+                      <span className="text-neutral-900 dark:text-white">{selectedListing.views.toLocaleString()}</span>
                     </div>
                   </div>
                   
-                  {/* Third Row - Location & Price */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Location</label>
-                      <div className="text-sm text-neutral-900 dark:text-white mt-1">
-                        {selectedListing.location || 'N/A'}
-                      </div>
+                  {/* Second Row - Type, Category, Location */}
+                  <div className="flex items-center gap-6 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-500 dark:text-neutral-400">Type:</span>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                        selectedListing.adType === 'want' 
+                          ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
+                          : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+                      }`}>
+                        {selectedListing.adType === 'want' ? 'Want' : 'Sell'}
+                      </span>
                     </div>
-                    <div>
-                      <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Price</label>
-                      <div className="text-sm font-bold text-green-600 mt-1">
-                        {selectedListing.priceSat.toLocaleString()} sats
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-500 dark:text-neutral-400">Category:</span>
+                      <span className="text-neutral-900 dark:text-white">{selectedListing.category}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-500 dark:text-neutral-400">Location:</span>
+                      <span className="text-neutral-900 dark:text-white">{selectedListing.location || 'N/A'}</span>
                     </div>
                   </div>
                   
-                  {/* Fourth Row - Listing ID */}
-                  <div>
-                    <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Listing ID</label>
-                    <div className="text-sm text-neutral-900 dark:text-white font-mono mt-1">
-                      {selectedListing.id}
+                  {/* Third Row - Price & ID */}
+                  <div className="flex items-center gap-6 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-500 dark:text-neutral-400">Price:</span>
+                      <span className="font-bold text-green-600">{selectedListing.priceSat.toLocaleString()} sats</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-500 dark:text-neutral-400">ID:</span>
+                      <span className="font-mono text-neutral-900 dark:text-white">{selectedListing.id}</span>
                     </div>
                   </div>
                   
                   {/* Images Section */}
                   {selectedListing.imageUrl && (
                     <div>
-                      <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Images</label>
-                      <div className="mt-2 flex gap-2 overflow-x-auto">
+                      <span className="text-sm text-neutral-500 dark:text-neutral-400">Images:</span>
+                      <div className="mt-2 flex gap-2">
                         <img 
                           src={selectedListing.imageUrl} 
                           alt={selectedListing.title}
-                          className="w-24 h-24 object-cover rounded border border-neutral-200 dark:border-neutral-600 flex-shrink-0"
+                          className="w-20 h-20 object-cover rounded border border-neutral-200 dark:border-neutral-600 cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => setSelectedImage(selectedListing.imageUrl)}
                         />
                       </div>
                     </div>
@@ -701,6 +685,28 @@ export default function AdminListingsPage() {
           )}
         </div>
       </div>
+
+      {/* Image Popup */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div 
+            className="bg-white dark:bg-neutral-800 rounded-lg max-w-2xl max-h-full w-full h-full flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-4 right-4 text-white text-lg hover:text-gray-300 z-10"
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <img src={selectedImage} alt="Listing Image" className="w-full h-full object-contain" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
