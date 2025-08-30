@@ -45,6 +45,8 @@ export default function AdminListingsPage() {
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [listingChats, setListingChats] = useState<Chat[]>([]);
   const [isLoadingChats, setIsLoadingChats] = useState(false);
+  const [sortBy, setSortBy] = useState<'createdAt' | 'priceSat' | 'views' | 'replies'>('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   
   const router = useRouter();
 
@@ -62,7 +64,14 @@ export default function AdminListingsPage() {
     if (isAuthenticated) {
       loadListings();
     }
-  }, [currentPage, isAuthenticated]);
+  }, [currentPage, isAuthenticated, sortBy, sortOrder]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      setCurrentPage(1); // Reset to first page when sorting changes
+      loadListings();
+    }
+  }, [sortBy, sortOrder]);
 
   const loadListings = async () => {
     try {
@@ -72,7 +81,7 @@ export default function AdminListingsPage() {
       const offset = (currentPage - 1) * itemsPerPage;
       console.log('🔍 Loading listings - Page:', currentPage, 'Items per page:', itemsPerPage, 'Offset:', offset);
       
-      const response = await fetch(`/api/admin/listings/list?limit=${itemsPerPage}&offset=${offset}`);
+      const response = await fetch(`/api/admin/listings/list?limit=${itemsPerPage}&offset=${offset}&sortBy=${sortBy}&sortOrder=${sortOrder}`);
       
       if (response.ok) {
         const data: any = await response.json();
@@ -124,6 +133,17 @@ export default function AdminListingsPage() {
   const handleListingClick = (listing: Listing) => {
     setSelectedListing(listing);
     loadListingChats(listing.id);
+  };
+
+  const handleSort = (column: 'createdAt' | 'priceSat' | 'views' | 'replies') => {
+    if (sortBy === column) {
+      // Toggle sort order if clicking the same column
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Set new sort column with default desc order
+      setSortBy(column);
+      setSortOrder('desc');
+    }
   };
 
   if (!isAuthenticated) {
@@ -198,15 +218,63 @@ export default function AdminListingsPage() {
             <table className="w-full space-y-0 font-mono text-xs">
               <thead className="bg-neutral-50 dark:bg-neutral-700">
                 <tr className="h-6">
-                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Timestamp</th>
+                  <th 
+                    className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('createdAt')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Timestamp
+                      {sortBy === 'createdAt' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
                   <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">ID</th>
                   <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Username</th>
                   <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Type</th>
                   <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Title</th>
                   <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Location</th>
-                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Price</th>
-                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Views</th>
-                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Chats</th>
+                  <th 
+                    className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('priceSat')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Price
+                      {sortBy === 'priceSat' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('views')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Views
+                      {sortBy === 'views' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('replies')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Chats
+                      {sortBy === 'replies' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tbody className="space-y-0 font-mono text-xs">

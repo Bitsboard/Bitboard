@@ -12,10 +12,14 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const limit = Math.min(100, parseInt(url.searchParams.get('limit') ?? '20', 10) || 20);
     const offset = Math.max(0, parseInt(url.searchParams.get('offset') ?? '0', 10));
+    const sortBy = url.searchParams.get('sortBy') ?? 'createdAt';
+    const sortOrder = url.searchParams.get('sortOrder') ?? 'desc';
     
-    console.log('🔍 Admin Listings API: Parsed URL parameters - limit:', limit, 'offset:', offset);
+    console.log('🔍 Admin Listings API: Parsed URL parameters - limit:', limit, 'offset:', offset, 'sortBy:', sortBy, 'sortOrder:', sortOrder);
     console.log('🔍 Admin Listings API: Raw limit param:', url.searchParams.get('limit'));
     console.log('🔍 Admin Listings API: Raw offset param:', url.searchParams.get('offset'));
+    console.log('🔍 Admin Listings API: Raw sortBy param:', url.searchParams.get('sortBy'));
+    console.log('🔍 Admin Listings API: Raw sortOrder param:', url.searchParams.get('sortOrder'));
     
     // Get database connection
     console.log('🔍 Admin Listings API: Attempting to get database binding...');
@@ -157,6 +161,18 @@ export async function GET(req: Request) {
     
     // Now use the correct query based on actual database schema
     console.log('🔍 Admin Listings API: Executing corrected query...');
+    
+    // Map frontend column names to database column names
+    const sortColumnMap: { [key: string]: string } = {
+      'createdAt': 'l.created_at',
+      'priceSat': 'l.price_sat',
+      'views': 'views',
+      'replies': 'COALESCE(chat_counts.chat_count, 0)'
+    };
+    
+    const sortColumn = sortColumnMap[sortBy] || 'l.created_at';
+    const orderDirection = sortOrder === 'asc' ? 'ASC' : 'DESC';
+    
     const listingsQuery = `
       SELECT 
         l.id,
@@ -184,7 +200,7 @@ export async function GET(req: Request) {
         FROM chats
         GROUP BY listing_id
       ) chat_counts ON l.id = chat_counts.listing_id
-      ORDER BY l.created_at DESC 
+      ORDER BY ${sortColumn} ${orderDirection}
       LIMIT ? OFFSET ?
     `;
     
