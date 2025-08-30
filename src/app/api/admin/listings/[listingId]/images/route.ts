@@ -46,8 +46,8 @@ export async function GET(
         SELECT image_url FROM listings WHERE id = ?
       `).bind(listingId).first();
       
-      if (listingResult && listingResult.image_url) {
-        images = [listingResult.image_url];
+      if (listingResult && (listingResult as any).image_url) {
+        images = [(listingResult as any).image_url as string];
       }
     }
 
