@@ -693,29 +693,35 @@ export default function AdminUsersPage() {
                             className="absolute top-1.5 right-1.5 text-purple-600 dark:text-purple-400" 
                           />
                           
-                          {/* Listing Title - Top Left */}
-                          <div className="mb-2">
-                            <div className="text-xs font-medium text-purple-800 dark:text-purple-200 truncate">
-                              {chat.listing_title}
-                            </div>
-                          </div>
-                          
-                          {/* Username in Blue Box - Bottom Left */}
-                          <div className="flex items-center gap-2">
-                            <span 
-                              className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-700 cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors"
+                          {/* Top Row - Listing and User Links */}
+                          <div className="flex items-center gap-2 mb-2">
+                            {/* Green Box - Listing Link */}
+                            <button
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 border border-green-200 dark:border-green-700 cursor-pointer hover:bg-green-200 dark:hover:bg-green-800/50 transition-colors flex-shrink-0"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.location.href = `/admin/listings?title=${encodeURIComponent(chat.listing_title || '')}&id=${encodeURIComponent(chat.listing_id)}`;
+                              }}
+                            >
+                              <span className="truncate max-w-[80px]">{chat.listing_title}</span>
+                              <ExternalLinkIcon size="xs" />
+                            </button>
+                            
+                            {/* Blue Box - User Link */}
+                            <button
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-700 cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors flex-shrink-0"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 window.location.href = `/admin/users?userId=${encodeURIComponent(chat.other_user_id)}&search=${encodeURIComponent(chat.other_username || '')}`;
                               }}
                             >
-                              {chat.other_username}
-                              <ExternalLinkIcon size="sm" className="ml-1" />
-                            </span>
+                              <span className="truncate max-w-[80px]">{chat.other_username}</span>
+                              <ExternalLinkIcon size="xs" />
+                            </button>
                           </div>
                           
                           {/* Bottom Row - Messages & Last Activity */}
-                          <div className="flex items-center justify-between text-xs text-purple-800 dark:text-purple-200 mt-2">
+                          <div className="flex items-center justify-between text-xs text-purple-800 dark:text-purple-200">
                             <span>{chat.messageCount} messages</span>
                             <span>{getTimeAgo(chat.lastMessageAt)}</span>
                           </div>
