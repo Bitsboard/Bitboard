@@ -93,6 +93,7 @@ export async function GET(
     return NextResponse.json({ 
       success: true, 
       messages: transformedMessages,
+      userId: userId,
       pagination: {
         page,
         limit,

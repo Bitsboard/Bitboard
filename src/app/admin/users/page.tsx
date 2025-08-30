@@ -402,7 +402,7 @@ export default function AdminUsersPage() {
         {/* Top Section - Always Visible */}
         <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 p-4 mb-4">
           {selectedUser ? (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" style={{ maxHeight: '400px' }}>
               {/* Left Column - User Details (1/3 width) */}
               <div className="lg:col-span-1">
                 <div className="space-y-4">
@@ -462,7 +462,7 @@ export default function AdminUsersPage() {
                     User Listings ({userListings?.length || 0})
                   </h3>
                   
-                  <div className="h-[calc(100%-3rem)] overflow-y-auto space-y-2">
+                  <div className="h-[calc(100%-3rem)] overflow-y-auto space-y-2" style={{ maxHeight: '300px' }}>
                     {isLoadingUserData ? (
                       <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading listings...</div>
                     ) : userListings && userListings.length > 0 ? (
@@ -517,7 +517,7 @@ export default function AdminUsersPage() {
                     Active Chats ({userChats?.length || 0})
                   </h3>
                   
-                  <div className="h-[calc(100%-3rem)] overflow-y-auto space-y-2">
+                  <div className="h-[calc(100%-3rem)] overflow-y-auto space-y-2" style={{ maxHeight: '300px' }}>
                     {isLoadingUserData ? (
                       <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading chats...</div>
                     ) : userChats && userChats.length > 0 ? (
