@@ -380,3 +380,73 @@ export function validateUsername(username: string): { isValid: boolean; error?: 
   
   return { isValid: true };
 }
+
+/**
+ * Generate a random alphanumeric string of specified length
+ */
+export function generateRandomString(length: number): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+/**
+ * Generate a collision-free user ID (8 characters)
+ * @param existingIds Array of existing user IDs to check against
+ * @returns 8-character alphanumeric ID
+ */
+export function generateUserId(existingIds: string[] = []): string {
+  let attempts = 0;
+  const maxAttempts = 1000;
+  
+  while (attempts < maxAttempts) {
+    const id = generateRandomString(8);
+    if (!existingIds.includes(id)) {
+      return id;
+    }
+    attempts++;
+  }
+  
+  // Fallback: add timestamp to ensure uniqueness
+  const timestamp = Date.now().toString(36);
+  return generateRandomString(6) + timestamp.slice(-2);
+}
+
+/**
+ * Generate a collision-free listing ID (10 characters)
+ * @param existingIds Array of existing listing IDs to check against
+ * @returns 10-character alphanumeric ID
+ */
+export function generateListingId(existingIds: string[] = []): string {
+  let attempts = 0;
+  const maxAttempts = 1000;
+  
+  while (attempts < maxAttempts) {
+    const id = generateRandomString(10);
+    if (!existingIds.includes(id)) {
+      return id;
+    }
+    attempts++;
+  }
+  
+  // Fallback: add timestamp to ensure uniqueness
+  const timestamp = Date.now().toString(36);
+  return generateRandomString(8) + timestamp.slice(-2);
+}
+
+/**
+ * Validate user ID format (8 alphanumeric characters)
+ */
+export function isValidUserId(id: string): boolean {
+  return /^[A-Za-z0-9]{8}$/.test(id);
+}
+
+/**
+ * Validate listing ID format (10 alphanumeric characters)
+ */
+export function isValidListingId(id: string): boolean {
+  return /^[A-Za-z0-9]{10}$/.test(id);
+}

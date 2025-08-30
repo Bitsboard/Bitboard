@@ -4,24 +4,19 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 interface User {
-  id: string;
-  username: string;
+  id: string; // Now 8 alphanumeric characters
   email: string;
-  isVerified: boolean;
-  isAdmin: boolean;
-  isBanned: boolean;
-  banReason?: string;
-  banExpiresAt?: number;
-  createdAt: number;
-  lastLoginAt?: number;
+  username: string;
+  sso: string;
+  verified: boolean;
+  is_admin: boolean;
+  banned: boolean;
+  created_at: number;
   image?: string;
-  listingsCount: number;
-  chatsCount: number;
-  messagesCount: number;
   rating: number;
   deals: number;
-  totalListingsValue: number;
-  lastActivityAt?: number;
+  last_active: number;
+  has_chosen_username: boolean;
 }
 
 export default function AdminUsersPage() {
@@ -226,10 +221,10 @@ export default function AdminUsersPage() {
                         </td>
                         <td className="px-1.5 py-0.5">
                           <div className="text-xs text-neutral-600 dark:text-neutral-400">
-                            {formatDate(user.createdAt)}
+                            {formatDate(user.created_at)}
                           </div>
                           <div className="text-xs text-neutral-500">
-                            {formatTime(user.createdAt)}
+                            {formatTime(user.created_at)}
                           </div>
                         </td>
                         <td className="px-1.5 py-0.5">
@@ -244,36 +239,26 @@ export default function AdminUsersPage() {
                         </td>
                         <td className="px-1.5 py-0.5">
                           <div className="flex flex-col gap-1">
-                            {user.isAdmin && (
+                            {user.is_admin && (
                               <span className="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
                                 Admin
                               </span>
                             )}
-                            {user.isVerified && (
+                            {user.verified && (
                               <span className="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
                                 Verified
                               </span>
                             )}
-                            {user.isBanned && (
+                            {user.banned && (
                               <span className="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
                                 Banned
                               </span>
                             )}
-                            {!user.isVerified && !user.isBanned && !user.isAdmin && (
+                            {!user.verified && !user.banned && !user.is_admin && (
                               <span className="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
                                 Unverified
                               </span>
                             )}
-                          </div>
-                        </td>
-                        <td className="px-1.5 py-0.5">
-                          <div className="text-xs text-neutral-900 dark:text-white">
-                            {user.listingsCount.toLocaleString()}
-                          </div>
-                        </td>
-                        <td className="px-1.5 py-0.5">
-                          <div className="text-xs text-neutral-900 dark:text-white">
-                            {user.chatsCount.toLocaleString()}
                           </div>
                         </td>
                         <td className="px-1.5 py-0.5">
@@ -288,7 +273,7 @@ export default function AdminUsersPage() {
                         </td>
                         <td className="px-1.5 py-0.5">
                           <div className="text-xs text-neutral-600 dark:text-neutral-400">
-                            {user.lastActivityAt ? formatDate(user.lastActivityAt) : 'Never'}
+                            {user.last_active ? formatDate(user.last_active) : 'Never'}
                           </div>
                         </td>
                       </tr>

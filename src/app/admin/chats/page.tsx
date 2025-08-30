@@ -8,25 +8,24 @@ import { cn } from "@/lib/utils";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 interface Chat {
-  id: string;
-  listing_id: string;
-  buyer_id: string;
-  seller_id: string;
+  id: string; // Now 10 alphanumeric characters
+  listing_id: string; // Now 10 alphanumeric characters
+  buyer_id: string; // Now 8 alphanumeric characters
+  seller_id: string; // Now 8 alphanumeric characters
   created_at: number;
   last_message_at: number;
-  listing_title: string;
-  listing_price: number;
-  listing_image: string;
-  listing_created_at: number;
-  buyer_username: string;
-  seller_username: string;
-  messageCount: number;
-  latestMessage: {
-    id: string;
-    from_id: string;
-    text: string;
-    created_at: number;
-  } | null;
+  listing_title?: string;
+  buyer_username?: string;
+  seller_username?: string;
+  message_count?: number;
+}
+
+interface Message {
+  id: string; // Now 10 alphanumeric characters
+  from_id: string; // Now 8 alphanumeric characters
+  text: string;
+  created_at: number;
+  username?: string;
 }
 
 export default function AdminChatsPage() {
@@ -100,7 +99,7 @@ export default function AdminChatsPage() {
   };
 
   const filteredChats = chats.filter(chat => {
-    const matchesSearch = chat.listing_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = chat.listing_title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          chat.buyer_username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          chat.seller_username?.toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -122,7 +121,7 @@ export default function AdminChatsPage() {
     switch (sortBy) {
       case 'createdAt': aValue = a.created_at; bValue = b.created_at; break;
       case 'lastMessage': aValue = a.last_message_at; bValue = b.last_message_at; break;
-      case 'messageCount': aValue = a.messageCount; bValue = b.messageCount; break;
+      case 'messageCount': aValue = a.message_count; bValue = b.message_count; break;
       default: aValue = a.last_message_at; bValue = b.last_message_at;
     }
     
@@ -340,7 +339,7 @@ export default function AdminChatsPage() {
                         </td>
                         <td className="px-1.5 py-0.5">
                           <div className="text-neutral-900 dark:text-white">
-                            {chat.messageCount.toLocaleString()}
+                            {chat.message_count?.toLocaleString()}
                           </div>
                         </td>
                         <td className="px-1.5 py-0.5">

@@ -34,7 +34,7 @@ export type Seller = {
 };
 
 export type Listing = {
-  id: string;
+  id: string; // Now 10 alphanumeric characters
   title: string;
   description: string; // Standardized to description
   priceSats: number;
@@ -47,11 +47,11 @@ export type Listing = {
   boostedUntil: number | null;
   seller: Seller;
   createdAt: number;
-  postedBy?: string;
+  postedBy?: string; // Now 8 alphanumeric characters
 };
 
 export type SavedSearch = {
-  id: string;
+  id: string; // Now 10 alphanumeric characters
   name: string;
   notify: boolean;
   lastOpenedAt: number;
@@ -64,7 +64,7 @@ export type SavedSearch = {
 };
 
 export type User = {
-  id: string;
+  id: string; // Now 8 alphanumeric characters
   email: string;
   handle?: string | null;
   hasChosenUsername: boolean;
@@ -75,19 +75,19 @@ export type User = {
 
 // Chat Types
 export type Message = {
-  id: string;
-  chat_id: string;
-  from_id: string;
+  id: string; // Now 10 alphanumeric characters
+  chat_id: string; // Now 10 alphanumeric characters
+  from_id: string; // Now 8 alphanumeric characters
   text: string;
   created_at: number;
   read_at?: number;
 };
 
 export type Chat = {
-  id: string;
-  listing_id: string;
-  buyer_id: string;
-  seller_id: string;
+  id: string; // Now 10 alphanumeric characters
+  listing_id: string; // Now 10 alphanumeric characters
+  buyer_id: string; // Now 8 alphanumeric characters
+  seller_id: string; // Now 8 alphanumeric characters
   created_at: number;
   last_message_at: number;
   messages: Message[];
@@ -103,10 +103,10 @@ export type EscrowStatus =
   | "DISPUTED";
 
 export type Escrow = {
-  id: string;
-  listingId: string;
-  buyerId: string;
-  sellerId: string;
+  id: string; // Now 10 alphanumeric characters
+  listingId: string; // Now 10 alphanumeric characters
+  buyerId: string; // Now 8 alphanumeric characters
+  sellerId: string; // Now 8 alphanumeric characters
   amountSats: number;
   feeSats: number;
   holdInvoice: string;
