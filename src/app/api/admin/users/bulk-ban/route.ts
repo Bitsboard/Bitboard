@@ -5,7 +5,8 @@ import { getD1 } from '@/lib/cf';
 
 export async function POST(req: Request) {
   try {
-    const { userIds, reason = 'Banned by admin' } = await req.json();
+    const body = await req.json() as { userIds: string[]; reason?: string };
+    const { userIds, reason = 'Banned by admin' } = body;
     
     if (!Array.isArray(userIds) || userIds.length === 0) {
       return NextResponse.json({ 
@@ -38,7 +39,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ 
         success: true, 
         message: `Successfully banned ${userIds.length} users`,
-        bannedCount: result.changes || 0
+        bannedCount: (result as any).changes || 0
       });
     } else {
       return NextResponse.json({ 

@@ -5,7 +5,8 @@ import { getD1 } from '@/lib/cf';
 
 export async function POST(req: Request) {
   try {
-    const { userIds } = await req.json();
+    const body = await req.json() as { userIds: string[] };
+    const { userIds } = body;
     
     if (!Array.isArray(userIds) || userIds.length === 0) {
       return NextResponse.json({ 
@@ -36,7 +37,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ 
         success: true, 
         message: `Successfully verified ${userIds.length} users`,
-        verifiedCount: result.changes || 0
+        verifiedCount: (result as any).changes || 0
       });
     } else {
       return NextResponse.json({ 

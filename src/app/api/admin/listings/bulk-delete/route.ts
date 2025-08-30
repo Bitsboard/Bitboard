@@ -5,7 +5,8 @@ import { getD1 } from '@/lib/cf';
 
 export async function POST(req: Request) {
   try {
-    const { listingIds } = await req.json();
+    const body = await req.json() as { listingIds: string[] };
+    const { listingIds } = body;
     
     if (!Array.isArray(listingIds) || listingIds.length === 0) {
       return NextResponse.json({ 
@@ -59,7 +60,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ 
         success: true, 
         message: `Successfully deleted ${listingIds.length} listings`,
-        deletedCount: result.changes || 0
+        deletedCount: (result as any).changes || 0
       });
     } else {
       return NextResponse.json({ 
