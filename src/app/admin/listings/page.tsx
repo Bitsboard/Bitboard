@@ -271,8 +271,10 @@ export default function AdminListingsPage() {
                           </span>
                         </td>
                         <td className="px-1.5 py-0.5">
-                          <div className="max-w-xs">
-                            <div className="font-medium text-neutral-900 dark:text-white text-xs">{listing.title}</div>
+                          <div className="max-w-xs truncate">
+                            <div className="font-medium text-neutral-900 dark:text-white text-xs truncate" title={listing.title}>
+                              {listing.title}
+                            </div>
                           </div>
                         </td>
                         <td className="px-1.5 py-0.5">
