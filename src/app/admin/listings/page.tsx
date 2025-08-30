@@ -55,6 +55,74 @@ export default function AdminListingsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [listingImages, setListingImages] = useState<string[]>([]);
+  const [isSearchingForListing, setIsSearchingForListing] = useState(false);
+
+  // Check if we need to search for a specific listing (e.g., from activity feed)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const listingTitle = urlParams.get('title');
+    const listingId = urlParams.get('id');
+    
+    if (listingTitle || listingId) {
+      console.log('🔍 URL parameters detected:', { listingTitle, listingId });
+      searchAndSelectListing(listingTitle, listingId);
+    }
+  }, []);
+
+  const searchAndSelectListing = async (title?: string | null, id?: string | null) => {
+    if (!title && !id) return;
+    
+    setIsSearchingForListing(true);
+    try {
+      // Search for the listing by title or ID
+      const searchParam = title || id || '';
+      const response = await fetch(`/api/admin/listings/list?limit=1000&search=${encodeURIComponent(searchParam)}`);
+      
+      if (response.ok) {
+        const data = await response.json() as { 
+          success: boolean; 
+          listings?: any[]; 
+          total?: number;
+        };
+        
+        if (data.success && data.listings && data.listings.length > 0) {
+          // Find the exact match
+          let targetListing = null;
+          
+          if (id) {
+            // Search by ID first
+            targetListing = data.listings.find((l: any) => l.id === id);
+          }
+          
+          if (!targetListing && title) {
+            // Search by title if ID not found
+            targetListing = data.listings.find((l: any) => 
+              l.title.toLowerCase().includes(title.toLowerCase())
+            );
+          }
+          
+          if (targetListing) {
+            console.log('✅ Found target listing:', targetListing);
+            setSelectedListing(targetListing);
+            await loadListingImages(targetListing.id);
+            if (targetListing.id) {
+              await loadListingChats(targetListing.id);
+            }
+            
+            // Clear URL parameters
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, '', newUrl);
+          } else {
+            console.log('❌ Target listing not found');
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error searching for listing:', error);
+    } finally {
+      setIsSearchingForListing(false);
+    }
+  };
 
   const router = useRouter();
 

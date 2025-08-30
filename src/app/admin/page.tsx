@@ -269,7 +269,7 @@ export default function AdminPage() {
 
     const ListingTag = ({ title, id }: { title: string | null; id: string | null }) => (
       <a 
-        href={`/admin/listings?title=${encodeURIComponent(title || '')}`}
+        href={`/admin/listings?title=${encodeURIComponent(title || '')}&id=${encodeURIComponent(id || '')}`}
         className="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded text-xs font-medium bg-green-200 dark:bg-green-800 text-green-900 dark:text-green-100 hover:bg-green-300 dark:hover:bg-green-700 transition-colors border border-green-300 dark:border-green-600"
       >
         <span>{title || 'Unknown Listing'}</span>
