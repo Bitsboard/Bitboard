@@ -58,7 +58,7 @@ export async function GET(req: Request) {
       FROM messages
     `).all();
 
-    // Get recent activity with simplified queries
+    // Get recent activity with more comprehensive queries
     const recentActivity = await db.prepare(`
       SELECT 
         'user' as type,
@@ -75,7 +75,7 @@ export async function GET(req: Request) {
       FROM users u
       WHERE u.created_at >= strftime('%s', 'now', '-7 days')
       ORDER BY u.created_at DESC
-      LIMIT 10
+      LIMIT 20
     `).all();
 
     const recentListings = await db.prepare(`
@@ -95,7 +95,7 @@ export async function GET(req: Request) {
       JOIN users u ON l.posted_by = u.id
       WHERE l.created_at >= strftime('%s', 'now', '-7 days')
       ORDER BY l.created_at DESC
-      LIMIT 10
+      LIMIT 20
     `).all();
 
     const recentMessages = await db.prepare(`
@@ -115,14 +115,14 @@ export async function GET(req: Request) {
             (SELECT username FROM users WHERE id = c.buyer_id)
         END as other_username,
         m.chat_id as chat_id,
-        (SELECT COUNT(*) FROM messages WHERE chat_id = m.chat_id) as message_count
+        (SELECT COUNT(*) FROM messages WHERE chat_id = m.chat_id AND created_at <= m.created_at) as message_count
       FROM messages m
       JOIN users u ON m.from_id = u.id
       JOIN chats c ON m.chat_id = c.id
       JOIN listings l ON c.listing_id = l.id
       WHERE m.created_at >= strftime('%s', 'now', '-7 days')
       ORDER BY m.created_at DESC
-      LIMIT 10
+      LIMIT 40
     `).all();
 
     // Combine and sort all recent activity
@@ -130,7 +130,7 @@ export async function GET(req: Request) {
       ...recentActivity.results || [],
       ...recentListings.results || [],
       ...recentMessages.results || []
-    ].sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 30);
+    ].sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 50);
 
     const stats = {
       users: {

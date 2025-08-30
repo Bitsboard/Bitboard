@@ -17,7 +17,7 @@ interface Chat {
   listing_title?: string;
   buyer_username?: string;
   seller_username?: string;
-  message_count?: number;
+  messageCount?: number; // Changed from message_count to match API response
 }
 
 interface Message {
@@ -121,7 +121,7 @@ export default function AdminChatsPage() {
     switch (sortBy) {
       case 'createdAt': aValue = a.created_at; bValue = b.created_at; break;
       case 'lastMessage': aValue = a.last_message_at; bValue = b.last_message_at; break;
-      case 'messageCount': aValue = a.message_count; bValue = b.message_count; break;
+      case 'messageCount': aValue = a.messageCount; bValue = b.messageCount; break;
       default: aValue = a.last_message_at; bValue = b.last_message_at;
     }
     
@@ -339,7 +339,7 @@ export default function AdminChatsPage() {
                         </td>
                         <td className="px-1.5 py-0.5">
                           <div className="text-neutral-900 dark:text-white">
-                            {chat.message_count?.toLocaleString()}
+                            {chat.messageCount?.toLocaleString()}
                           </div>
                         </td>
                         <td className="px-1.5 py-0.5">
