@@ -127,28 +127,40 @@ export default function AdminUsersPage() {
     if (!searchTerm && !userId) return;
     
     try {
-      // First try to find by user ID if provided
+      // First try to find by user ID if provided - search entire database
       if (userId) {
-        const user = users.find(u => u.id === userId);
-        if (user) {
-          handleUserClick(user);
-          // Clear URL parameters
-          window.history.pushState({}, '', '/admin/users');
-          return;
+        const response = await fetch(`/api/admin/users/list?limit=1000&q=${encodeURIComponent(userId)}`);
+        if (response.ok) {
+          const data = await response.json() as { success: boolean; users?: any[] };
+          if (data.success && data.users) {
+            const user = data.users.find(u => u.id === userId);
+            if (user) {
+              handleUserClick(user);
+              // Clear URL parameters
+              window.history.pushState({}, '', '/admin/users');
+              return;
+            }
+          }
         }
       }
       
-      // If no user ID or not found, search by username
+      // If no user ID or not found, search by username/email in entire database
       if (searchTerm) {
-        const user = users.find(u => 
-          u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          u.email.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        if (user) {
-          handleUserClick(user);
-          // Clear URL parameters
-          window.history.pushState({}, '', '/admin/users');
-          return;
+        const response = await fetch(`/api/admin/users/list?limit=1000&q=${encodeURIComponent(searchTerm)}`);
+        if (response.ok) {
+          const data = await response.json() as { success: boolean; users?: any[] };
+          if (data.success && data.users) {
+            const user = data.users.find(u => 
+              u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              u.email.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            if (user) {
+              handleUserClick(user);
+              // Clear URL parameters
+              window.history.pushState({}, '', '/admin/users');
+              return;
+            }
+          }
         }
       }
     } catch (error) {

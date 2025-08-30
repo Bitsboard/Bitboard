@@ -91,27 +91,39 @@ export default function AdminChatsPage() {
     setIsSearchingForChat(true);
     
     try {
-      // First try to find by chat ID if provided
+      // First try to find by chat ID if provided - search entire database
       if (chatId) {
-        const chat = chats.find(c => c.id === chatId);
-        if (chat) {
-          selectChat(chat);
-          // Clear URL parameters
-          window.history.pushState({}, '', '/admin/chats');
-          return;
+        const response = await fetch(`/api/admin/chats?limit=1000`);
+        if (response.ok) {
+          const data = await response.json() as { chats: Chat[]; total: number };
+          if (data.chats) {
+            const chat = data.chats.find(c => c.id === chatId);
+            if (chat) {
+              selectChat(chat);
+              // Clear URL parameters
+              window.history.pushState({}, '', '/admin/chats');
+              return;
+            }
+          }
         }
       }
       
-      // If no chat ID or not found, search by listing title
+      // If no chat ID or not found, search by listing title in entire database
       if (searchTerm) {
-        const chat = chats.find(c => 
-          c.listing_title?.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        if (chat) {
-          selectChat(chat);
-          // Clear URL parameters
-          window.history.pushState({}, '', '/admin/chats');
-          return;
+        const response = await fetch(`/api/admin/chats?limit=1000`);
+        if (response.ok) {
+          const data = await response.json() as { chats: Chat[]; total: number };
+          if (data.chats) {
+            const chat = data.chats.find(c => 
+              c.listing_title?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            if (chat) {
+              selectChat(chat);
+              // Clear URL parameters
+              window.history.pushState({}, '', '/admin/chats');
+              return;
+            }
+          }
         }
       }
       
