@@ -22,33 +22,14 @@ interface Listing {
   replies: number;
 }
 
-interface ListingsResponse {
-  success: boolean;
-  listings: Listing[];
-  total: number;
-  page: number;
-  limit: number;
-}
-
 export default function AdminListingsPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [listings, setListings] = useState<Listing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'sold' | 'expired'>('all');
-  const [typeFilter, setTypeFilter] = useState<'all' | 'sell' | 'want'>('all');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [sortBy, setSortBy] = useState<'createdAt' | 'updatedAt' | 'priceSat' | 'views' | 'replies'>('createdAt');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [itemsPerPage] = useState(20);
-  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [selectedListings, setSelectedListings] = useState<Set<string>>(new Set());
-  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [itemsPerPage] = useState(50); // Show more per page
   
   const router = useRouter();
 
@@ -71,155 +52,43 @@ export default function AdminListingsPage() {
   const loadListings = async () => {
     try {
       setIsLoading(true);
+      setError(null);
+      
       const offset = (currentPage - 1) * itemsPerPage;
+      console.log('🔍 Loading listings - Page:', currentPage, 'Items per page:', itemsPerPage, 'Offset:', offset);
       
-      // Build query parameters
-      const params = new URLSearchParams({
-        limit: itemsPerPage.toString(),
-        offset: offset.toString()
-      });
-      
-      if (searchTerm) params.append('search', searchTerm);
-      if (statusFilter !== 'all') params.append('status', statusFilter);
-      if (typeFilter !== 'all') params.append('type', typeFilter);
-      if (categoryFilter !== 'all') params.append('category', categoryFilter);
-      if (sortBy) params.append('sortBy', sortBy);
-      if (sortOrder) params.append('sortOrder', sortOrder);
-      
-      console.log('🔍 Loading listings with params:', params.toString());
-      const response = await fetch(`/api/admin/listings/list?${params.toString()}`);
+      const response = await fetch(`/api/admin/listings/list?limit=${itemsPerPage}&offset=${offset}`);
       
       if (response.ok) {
-        const data: ListingsResponse = await response.json();
-        console.log('🔍 Listings API response:', data);
-        setListings(data.listings || []);
-        setTotalPages(Math.ceil((data.total || 0) / itemsPerPage));
+        const data: any = await response.json();
+        console.log('🔍 Listings loaded successfully:', data);
+        
+        if (data.success && data.listings) {
+          setListings(data.listings);
+          setTotalPages(Math.ceil((data.total || 0) / itemsPerPage));
+          console.log('✅ Set listings:', data.listings.length, 'Total pages:', Math.ceil((data.total || 0) / itemsPerPage));
+        } else {
+          console.error('❌ API returned success but no listings:', data);
+          setError('No listings data received');
+          setListings([]);
+        }
       } else {
-        console.error('🔍 Listings API error:', response.status, response.statusText);
-        // Fallback to empty state
+        console.error('❌ API request failed:', response.status, response.statusText);
+        setError(`Failed to load listings: ${response.status}`);
         setListings([]);
-        setTotalPages(1);
       }
     } catch (error) {
-      console.error('Error loading listings:', error);
-      // Fallback to empty state
+      console.error('❌ Error loading listings:', error);
+      setError('Failed to load listings');
       setListings([]);
-      setTotalPages(1);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const deleteListing = async (listingId: string) => {
-    try {
-      setIsDeleting(true);
-      const response = await fetch('/api/admin/listings/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ listingId })
-      });
-
-      if (response.ok) {
-        setListings(prev => prev.filter(l => l.id !== listingId));
-        setShowDeleteModal(false);
-        setSelectedListing(null);
-      } else {
-        console.error('Failed to delete listing');
-      }
-    } catch (error) {
-      console.error('Error deleting listing:', error);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const bulkDeleteListings = async () => {
-    if (selectedListings.size === 0) return;
-    
-    try {
-      setIsBulkDeleting(true);
-      const listingIds = Array.from(selectedListings);
-      
-      for (const listingId of listingIds) {
-        const response = await fetch('/api/admin/listings/delete', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ listingId })
-        });
-        
-        if (response.ok) {
-          setListings(prev => prev.filter(l => l.id !== listingId));
-        }
-      }
-      
-      setSelectedListings(new Set());
-    } catch (error) {
-      console.error('Error bulk deleting listings:', error);
-    } finally {
-      setIsBulkDeleting(false);
-    }
-  };
-
-  const toggleListingSelection = (listingId: string) => {
-    setSelectedListings(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(listingId)) {
-        newSet.delete(listingId);
-      } else {
-        newSet.add(listingId);
-      }
-      return newSet;
-    });
-  };
-
-  const toggleAllListings = () => {
-    if (selectedListings.size === listings.length) {
-      setSelectedListings(new Set());
-    } else {
-      setSelectedListings(new Set(listings.map(l => l.id)));
-    }
-  };
-
   const formatPrice = (priceSat: number) => `${priceSat.toLocaleString()} sats`;
   const formatDate = (timestamp: number) => new Date(timestamp * 1000).toLocaleDateString();
-  const formatRelativeTime = (timestamp: number) => {
-    const now = Date.now();
-    const diff = now - timestamp * 1000;
-    const minutes = Math.floor(diff / (1000 * 60));
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    return `${days}d ago`;
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'sold': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'expired': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      default: return 'bg-neutral-100 text-neutral-800 dark:bg-neutral-900 dark:text-neutral-200';
-    }
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'sell': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
-      case 'want': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
-      default: return 'bg-neutral-100 text-neutral-800 dark:bg-neutral-900 dark:text-neutral-200';
-    }
-  };
-
-  const handleSort = (field: string) => {
-    if (sortBy === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(field as any);
-      setSortOrder('asc');
-    }
-  };
+  const formatTime = (timestamp: number) => new Date(timestamp * 1000).toLocaleTimeString();
 
   if (!isAuthenticated) {
     return (
@@ -241,63 +110,34 @@ export default function AdminListingsPage() {
             <div>
               <h1 className="text-lg font-semibold text-neutral-900 dark:text-white">Listings Management</h1>
               <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                Total: {listings.length} | Page {currentPage} of {totalPages}
+                {isLoading ? 'Loading...' : `${listings.length} listings loaded | Page ${currentPage} of ${totalPages}`}
               </p>
             </div>
             <button
               onClick={() => router.push('/admin')}
-              className="px-3 py-1.5 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded text-sm hover:bg-neutral-300 dark:hover:bg-neutral-600"
+              className="px-3 py-1.5 bg-orange-500 text-white rounded text-sm hover:bg-orange-600 transition-colors"
             >
-              Admin dashboard
+              ← Back to dashboard
             </button>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-4">
-        {/* Filters */}
+        {/* Status Bar */}
         <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 p-3 mb-4">
-          <div className="flex gap-3 items-center">
-            <input
-              type="text"
-              placeholder="Search listings..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="px-3 py-1.5 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-sm flex-1"
-            />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="px-3 py-1.5 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-sm"
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="sold">Sold</option>
-              <option value="expired">Expired</option>
-            </select>
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value as any)}
-              className="px-3 py-1.5 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-sm"
-            >
-              <option value="all">All Types</option>
-              <option value="sell">Sell</option>
-              <option value="want">Want</option>
-            </select>
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-3 py-1.5 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-sm"
-            >
-              <option value="all">All Categories</option>
-              <option value="electronics">Electronics</option>
-              <option value="books">Books</option>
-              <option value="clothing">Clothing</option>
-              <option value="home">Home & Garden</option>
-              <option value="sports">Sports</option>
-              <option value="vehicles">Vehicles</option>
-              <option value="other">Other</option>
-            </select>
+          <div className="flex items-center justify-between">
+            <div className="flex gap-4 text-sm">
+              <span className="text-neutral-600 dark:text-neutral-400">
+                <strong>Total:</strong> {listings.length} listings
+              </span>
+              <span className="text-neutral-600 dark:text-neutral-400">
+                <strong>Page:</strong> {currentPage} of {totalPages}
+              </span>
+              <span className="text-neutral-600 dark:text-neutral-400">
+                <strong>Per page:</strong> {itemsPerPage}
+              </span>
+            </div>
             <button
               onClick={loadListings}
               disabled={isLoading}
@@ -308,20 +148,14 @@ export default function AdminListingsPage() {
           </div>
         </div>
 
-        {/* Bulk Actions */}
-        {selectedListings.size > 0 && (
-          <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded p-3 mb-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-orange-800 dark:text-orange-200">
-                {selectedListings.size} listing(s) selected
-              </span>
-              <button
-                onClick={bulkDeleteListings}
-                disabled={isBulkDeleting}
-                className="px-3 py-1.5 bg-red-500 text-white rounded text-sm hover:bg-red-600 disabled:opacity-50"
-              >
-                {isBulkDeleting ? 'Deleting...' : `Delete ${selectedListings.size} Selected`}
-              </button>
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded p-3 mb-4">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-red-800 dark:text-red-200 text-sm">{error}</span>
             </div>
           </div>
         )}
@@ -332,100 +166,73 @@ export default function AdminListingsPage() {
             <table className="w-full">
               <thead>
                 <tr className="bg-neutral-50 dark:bg-neutral-700">
-                  <th className="px-3 py-2 text-left">
-                    <input
-                      type="checkbox"
-                      checked={selectedListings.size === listings.length && listings.length > 0}
-                      onChange={toggleAllListings}
-                      className="rounded border-neutral-300 text-orange-500 focus:ring-orange-500"
-                    />
-                  </th>
-                  <th className="px-3 py-2 text-left">
-                    <button
-                      onClick={() => handleSort('createdAt')}
-                      className="flex items-center gap-1 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white"
-                    >
-                      Date
-                      {sortBy === 'createdAt' && (
-                        <span>{sortOrder === 'asc' ? '↑' : '↓'}</span>
-                      )}
-                    </button>
-                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">ID</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Date</th>
                   <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">User</th>
                   <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Type</th>
                   <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Title</th>
                   <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Category</th>
                   <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Location</th>
-                  <th className="px-3 py-2 text-left">
-                    <button
-                      onClick={() => handleSort('priceSat')}
-                      className="flex items-center gap-1 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white"
-                    >
-                      Price
-                      {sortBy === 'priceSat' && (
-                        <span>{sortOrder === 'asc' ? '↑' : '↓'}</span>
-                      )}
-                    </button>
-                  </th>
-                  <th className="px-3 py-2 text-left">
-                    <button
-                      onClick={() => handleSort('views')}
-                      className="flex items-center gap-1 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white"
-                    >
-                      Views
-                      {sortBy === 'views' && (
-                        <span>{sortOrder === 'asc' ? '↑' : '↓'}</span>
-                      )}
-                    </button>
-                  </th>
-                  <th className="px-3 py-2 text-left">
-                    <button
-                      onClick={() => handleSort('replies')}
-                      className="flex items-center gap-1 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white"
-                    >
-                      Replies
-                      {sortBy === 'replies' && (
-                        <span>{sortOrder === 'asc' ? '↑' : '↓'}</span>
-                      )}
-                    </button>
-                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Price</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Views</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Replies</th>
                   <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Status</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan={13} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                    <td colSpan={11} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
                       <div className="flex items-center justify-center">
                         <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></div>
                         Loading listings...
                       </div>
                     </td>
                   </tr>
+                ) : error ? (
+                  <tr>
+                    <td colSpan={11} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                      <div className="text-center">
+                        <svg className="w-12 h-12 text-red-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p className="text-red-600 dark:text-red-400 font-medium">Failed to load listings</p>
+                        <p className="text-neutral-500 dark:text-neutral-400 text-sm mt-1">{error}</p>
+                        <button
+                          onClick={loadListings}
+                          className="mt-3 px-4 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+                        >
+                          Try Again
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
                 ) : listings.length === 0 ? (
                   <tr>
-                    <td colSpan={13} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
-                      No listings found
+                    <td colSpan={11} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                      <div className="text-center">
+                        <svg className="w-12 h-12 text-neutral-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                        <p className="text-neutral-600 dark:text-neutral-400 font-medium">No listings found</p>
+                        <p className="text-neutral-500 dark:text-neutral-400 text-sm mt-1">Try refreshing or check your connection</p>
+                      </div>
                     </td>
                   </tr>
                 ) : (
                   listings.map((listing) => (
-                    <tr key={listing.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-700">
+                    <tr key={listing.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-700 border-b border-neutral-100 dark:border-neutral-800">
                       <td className="px-3 py-2">
-                        <input
-                          type="checkbox"
-                          checked={selectedListings.has(listing.id)}
-                          onChange={() => toggleListingSelection(listing.id)}
-                          className="rounded border-neutral-300 text-orange-500 focus:ring-orange-500"
-                        />
+                        <div className="text-xs text-neutral-500 dark:text-neutral-400 font-mono">
+                          {listing.id.slice(0, 8)}...
+                        </div>
                       </td>
                       <td className="px-3 py-2">
                         <div className="text-xs text-neutral-600 dark:text-neutral-400">
                           {formatDate(listing.createdAt)}
                         </div>
                         <div className="text-xs text-neutral-500">
-                          {formatRelativeTime(listing.createdAt)}
+                          {formatTime(listing.createdAt)}
                         </div>
                       </td>
                       <td className="px-3 py-2">
@@ -434,7 +241,11 @@ export default function AdminListingsPage() {
                         </div>
                       </td>
                       <td className="px-3 py-2">
-                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getTypeColor(listing.adType)}`}>
+                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                          listing.adType === 'want' 
+                            ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
+                            : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+                        }`}>
                           {listing.adType === 'want' ? 'Want' : 'Sell'}
                         </span>
                       </td>
@@ -470,25 +281,15 @@ export default function AdminListingsPage() {
                         </div>
                       </td>
                       <td className="px-3 py-2">
-                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getStatusColor(listing.status)}`}>
+                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                          listing.status === 'active' 
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                            : listing.status === 'sold'
+                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                        }`}>
                           {listing.status}
                         </span>
-                      </td>
-                      <td className="px-3 py-2">
-                        <div className="flex flex-col gap-1">
-                          <button
-                            onClick={() => { setSelectedListing(listing); setShowDetailsModal(true); }}
-                            className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
-                          >
-                            Details
-                          </button>
-                          <button
-                            onClick={() => { setSelectedListing(listing); setShowDeleteModal(true); }}
-                            className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200"
-                          >
-                            Delete
-                          </button>
-                        </div>
                       </td>
                     </tr>
                   ))
@@ -501,7 +302,7 @@ export default function AdminListingsPage() {
           {totalPages > 1 && (
             <div className="flex justify-between items-center py-3 px-3 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
               <div className="text-xs text-neutral-600">
-                Page {currentPage} of {totalPages} | {listings.length} listings
+                Page {currentPage} of {totalPages} | {listings.length} listings on this page
               </div>
               <div className="flex gap-2">
                 <button
@@ -536,144 +337,15 @@ export default function AdminListingsPage() {
             </div>
           )}
         </div>
+
+        {/* Debug Info */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-4 p-3 bg-neutral-100 dark:bg-neutral-800 rounded text-xs text-neutral-600 dark:text-neutral-400">
+            <strong>Debug Info:</strong> Current Page: {currentPage}, Items Per Page: {itemsPerPage}, 
+            Total Listings: {listings.length}, Total Pages: {totalPages}
+          </div>
+        )}
       </div>
-
-      {/* Details Modal */}
-      {showDetailsModal && selectedListing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Listing Details</h3>
-              <button
-                onClick={() => setShowDetailsModal(false)}
-                className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
-              >
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Left Column - Images and Basic Info */}
-              <div>
-                <h4 className="font-semibold text-neutral-900 dark:text-white mb-3">Images</h4>
-                {selectedListing.imageUrl ? (
-                  <div className="space-y-2">
-                    <img 
-                      src={selectedListing.imageUrl} 
-                      alt={selectedListing.title}
-                      className="w-full h-64 object-cover rounded-lg"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full h-64 bg-neutral-200 dark:bg-neutral-700 rounded-lg flex items-center justify-center">
-                    <span className="text-neutral-500 dark:text-neutral-400">No images</span>
-                  </div>
-                )}
-                
-                <div className="mt-4 space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Type:</span>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getTypeColor(selectedListing.adType)}`}>
-                      {selectedListing.adType === 'want' ? 'Want' : 'Sell'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Category:</span>
-                    <span className="text-neutral-900 dark:text-white">{selectedListing.category}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Location:</span>
-                    <span className="text-neutral-900 dark:text-white">{selectedListing.location || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Status:</span>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(selectedListing.status)}`}>
-                      {selectedListing.status}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Right Column - Details */}
-              <div>
-                <h4 className="font-semibold text-neutral-900 dark:text-white mb-3">Details</h4>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Title</label>
-                    <p className="text-neutral-900 dark:text-white">{selectedListing.title}</p>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</label>
-                    <p className="text-neutral-900 dark:text-white text-sm">{selectedListing.description}</p>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Price</label>
-                    <p className="text-2xl font-bold text-green-600">{formatPrice(selectedListing.priceSat)}</p>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Views</label>
-                      <p className="text-neutral-900 dark:text-white">{selectedListing.views.toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Replies</label>
-                      <p className="text-neutral-900 dark:text-white">{selectedListing.replies.toLocaleString()}</p>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Posted By</label>
-                    <p className="text-neutral-900 dark:text-white">{selectedListing.username || selectedListing.postedBy}</p>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Created</label>
-                      <p className="text-neutral-900 dark:text-white">{formatDate(selectedListing.createdAt)}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Updated</label>
-                      <p className="text-neutral-900 dark:text-white">{formatDate(selectedListing.updatedAt)}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && selectedListing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Delete Listing</h3>
-            <p className="text-neutral-600 dark:text-neutral-400 mb-6">
-              Are you sure you want to delete "{selectedListing.title}"? This action cannot be undone.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => deleteListing(selectedListing.id)}
-                disabled={isDeleting}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
-              >
-                {isDeleting ? 'Deleting...' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
