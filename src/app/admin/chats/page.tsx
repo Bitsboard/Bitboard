@@ -463,7 +463,7 @@ export default function AdminChatsPage() {
                                 {username || userId.slice(0, 8) + '...'}
                               </span>
                               <span className="text-xs text-neutral-500">
-                                {new Date(message.created_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                {new Date(message.created_at * 1000).toLocaleDateString()} {new Date(message.created_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                               </span>
                             </div>
                             <div className={`max-w-full rounded px-1.5 py-1 text-xs ${
