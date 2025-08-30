@@ -93,6 +93,11 @@ export default function AdminListingsPage() {
         if (foundListing && foundListing !== selectedListing) {
           setSelectedListing(foundListing);
           loadListingChats(foundListing.id);
+        } else if (listingTitle && !foundListing) {
+          // If listing not found on current page, search for it
+          console.log('🔍 Listing not found on current page, searching for:', listingTitle);
+          setSearchQuery(listingTitle);
+          // The search will trigger loadListings via useEffect dependency
         }
       }
       
@@ -102,6 +107,26 @@ export default function AdminListingsPage() {
       }
     }
   }, [isAuthenticated, listings, selectedListing]);
+
+  // Auto-select listing when search results come back with URL parameter
+  useEffect(() => {
+    if (isAuthenticated && listings.length > 0 && searchQuery) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const listingTitle = urlParams.get('title');
+      
+      if (listingTitle && listingTitle === searchQuery) {
+        const foundListing = listings.find(listing => 
+          listing.title === listingTitle
+        );
+        
+        if (foundListing && foundListing !== selectedListing) {
+          console.log('✅ Found listing from search, selecting:', foundListing.title);
+          setSelectedListing(foundListing);
+          loadListingChats(foundListing.id);
+        }
+      }
+    }
+  }, [isAuthenticated, listings, searchQuery, selectedListing]);
 
   const loadListings = async () => {
     try {
