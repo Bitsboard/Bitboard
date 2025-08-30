@@ -41,7 +41,7 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
                 const listingsData = response.data.listings;
                 const totalCount = response.data.total;
                 
-                console.log('useListings: First listing seller rating:', listingsData[0]?.seller?.rating);
+                console.log('useListings: First listing seller thumbsUp:', listingsData[0]?.seller?.thumbsUp);
                 
                 setListings(listingsData);
                 setAllListings(listingsData);
