@@ -47,14 +47,15 @@ export default function AdminListingsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage] = useState(20);
-  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
-  const [listingChats, setListingChats] = useState<Chat[]>([]);
+  const [selectedListing, setSelectedListing] = useState<any>(null);
+  const [listingChats, setListingChats] = useState<any[]>([]);
   const [isLoadingChats, setIsLoadingChats] = useState(false);
   const [sortBy, setSortBy] = useState<'createdAt' | 'priceSat' | 'views' | 'replies' | 'username' | 'adType' | 'title' | 'location'>('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  
+  const [listingImages, setListingImages] = useState<string[]>([]);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -190,10 +191,38 @@ export default function AdminListingsPage() {
     }
   };
 
-  const handleListingClick = (listing: Listing) => {
-    if (isAuthenticated && listing) {
-      setSelectedListing(listing);
-      loadListingChats(listing.id);
+  const handleListingClick = async (listing: any) => {
+    console.log('🔍 Listing clicked:', listing);
+    setSelectedListing(listing);
+    setSelectedImage(null);
+    
+    // Load images for the selected listing
+    await loadListingImages(listing.id);
+    
+    // Load chats for the selected listing
+    if (listing.id) {
+      await loadListingChats(listing.id);
+    }
+  };
+
+  const loadListingImages = async (listingId: string) => {
+    try {
+      const response = await fetch(`/api/admin/listings/${listingId}/images`);
+      if (response.ok) {
+        const data = await response.json() as { success: boolean; images?: string[]; error?: string };
+        if (data.success) {
+          setListingImages(data.images || []);
+        } else {
+          console.error('Failed to load images:', data.error);
+          setListingImages([]);
+        }
+      } else {
+        console.error('Failed to load images:', response.status);
+        setListingImages([]);
+      }
+    } catch (error) {
+      console.error('Error loading images:', error);
+      setListingImages([]);
     }
   };
 
@@ -346,11 +375,11 @@ export default function AdminListingsPage() {
                   </div>
                   
                   {/* Images Section */}
-                  {selectedListing.images && selectedListing.images.length > 0 && (
+                  {listingImages && listingImages.length > 0 && (
                     <div>
                       <span className="text-sm text-neutral-500 dark:text-neutral-400">Images:</span>
                       <div className="mt-2 flex gap-2 flex-wrap">
-                        {Array.isArray(selectedListing.images) ? selectedListing.images.map((imageUrl: string, index: number) => (
+                        {listingImages.map((imageUrl: string, index: number) => (
                           <img 
                             key={index}
                             src={imageUrl} 
@@ -358,15 +387,7 @@ export default function AdminListingsPage() {
                             className="w-20 h-20 object-cover rounded border border-neutral-200 dark:border-neutral-600 cursor-pointer hover:opacity-80 transition-opacity"
                             onClick={() => setSelectedImage(imageUrl)}
                           />
-                        )) : (
-                          // Fallback for single image (backward compatibility)
-                          <img 
-                            src={typeof selectedListing.images === 'string' ? selectedListing.images : selectedListing.imageUrl || ''} 
-                            alt={selectedListing.title}
-                            className="w-20 h-20 object-cover rounded border border-neutral-200 dark:border-neutral-600 cursor-pointer hover:opacity-80 transition-opacity"
-                            onClick={() => setSelectedImage(typeof selectedListing.images === 'string' ? selectedListing.images : selectedListing.imageUrl || null)}
-                          />
-                        )}
+                        ))}
                       </div>
                     </div>
                   )}

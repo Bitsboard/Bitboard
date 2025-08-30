@@ -190,14 +190,7 @@ export async function GET(req: Request) {
         l.location,
         COALESCE(l.views, 0) AS views,
         0 AS favorites,
-        COALESCE(chat_counts.chat_count, 0) AS replies,
-        COALESCE(
-          (SELECT json_group_array(li.image_url) 
-           FROM listing_images li 
-           WHERE li.listing_id = l.id 
-           ORDER BY li.image_order),
-          json_array()
-        ) as images
+        COALESCE(chat_counts.chat_count, 0) AS replies
       FROM listings l
       LEFT JOIN users u ON l.posted_by = u.id
       LEFT JOIN (
