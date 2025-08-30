@@ -310,36 +310,38 @@ export default function AdminChatsPage() {
                         <div className="text-xs text-neutral-600 dark:text-neutral-400">
                           {formatDate(chat.created_at)}
                         </div>
-                        <div className="text-xs text-neutral-500">
-                          {formatRelativeTime(chat.created_at)}
-                        </div>
                       </td>
                       <td className="px-3 py-2">
                         <button
                           onClick={() => router.push(`/admin/listings?search=${chat.listing_title}`)}
-                          className="text-left hover:text-orange-600 transition-colors"
+                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded-full text-sm font-medium hover:bg-green-200 dark:hover:bg-green-900/50 transition-all duration-200 hover:scale-105"
                         >
-                          <div className="font-medium text-neutral-900 dark:text-white text-sm">{chat.listing_title}</div>
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                          {chat.listing_title}
                         </button>
                       </td>
                       <td className="px-3 py-2">
                         <button
                           onClick={() => router.push(`/admin/users?search=${chat.seller_username || chat.seller_id}`)}
-                          className="text-left hover:text-orange-600 transition-colors"
+                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded-full text-sm font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all duration-200 hover:scale-105"
                         >
-                          <div className="text-sm font-medium text-neutral-900 dark:text-white">
-                            {chat.seller_username || chat.seller_id.slice(0, 8) + '...'}
-                          </div>
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                          {chat.seller_username || chat.seller_id.slice(0, 8) + '...'}
                         </button>
                       </td>
                       <td className="px-3 py-2">
                         <button
                           onClick={() => router.push(`/admin/users?search=${chat.buyer_username || chat.buyer_id}`)}
-                          className="text-left hover:text-orange-600 transition-colors"
+                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded-full text-sm font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all duration-200 hover:scale-105"
                         >
-                          <div className="text-sm font-medium text-neutral-900 dark:text-white">
-                            {chat.buyer_username || chat.buyer_id.slice(0, 8) + '...'}
-                          </div>
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                          {chat.buyer_username || chat.buyer_id.slice(0, 8) + '...'}
                         </button>
                       </td>
                       <td className="px-3 py-2">
@@ -355,8 +357,11 @@ export default function AdminChatsPage() {
                       <td className="px-3 py-2">
                         <button
                           onClick={() => openChatModal(chat)}
-                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
+                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 rounded-full text-sm font-medium hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-all duration-200 hover:scale-105"
                         >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
                           View Conversation
                         </button>
                       </td>
