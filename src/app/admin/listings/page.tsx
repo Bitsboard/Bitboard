@@ -49,7 +49,7 @@ export default function AdminListingsPage() {
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [listingChats, setListingChats] = useState<Chat[]>([]);
   const [isLoadingChats, setIsLoadingChats] = useState(false);
-  const [sortBy, setSortBy] = useState<'createdAt' | 'priceSat' | 'views' | 'replies'>('createdAt');
+  const [sortBy, setSortBy] = useState<'createdAt' | 'priceSat' | 'views' | 'replies' | 'username' | 'adType' | 'title' | 'location'>('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   
   const router = useRouter();
@@ -66,6 +66,7 @@ export default function AdminListingsPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
+      setCurrentPage(1); // Reset to first page when sorting changes
       loadListings();
     }
   }, [currentPage, isAuthenticated, sortBy, sortOrder]);
@@ -76,6 +77,26 @@ export default function AdminListingsPage() {
       loadListings();
     }
   }, [sortBy, sortOrder]);
+
+  // Handle navigation from other admin pages
+  useEffect(() => {
+    if (isAuthenticated && listings.length > 0) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const listingId = urlParams.get('listing');
+      const listingTitle = urlParams.get('title');
+      
+      if (listingId || listingTitle) {
+        const foundListing = listings.find(listing => 
+          listing.id === listingId || listing.title === listingTitle
+        );
+        
+        if (foundListing && foundListing !== selectedListing) {
+          setSelectedListing(foundListing);
+          loadListingChats(foundListing.id);
+        }
+      }
+    }
+  }, [isAuthenticated, listings, selectedListing]);
 
   const loadListings = async () => {
     try {
@@ -162,7 +183,7 @@ export default function AdminListingsPage() {
     loadListingChats(listing.id);
   };
 
-  const handleSort = (column: 'createdAt' | 'priceSat' | 'views' | 'replies') => {
+  const handleSort = (column: 'createdAt' | 'priceSat' | 'views' | 'replies' | 'username' | 'adType' | 'title' | 'location') => {
     if (sortBy === column) {
       // Toggle sort order if clicking the same column
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -239,6 +260,101 @@ export default function AdminListingsPage() {
           </div>
         )}
 
+        {/* Selected Listing Details Section */}
+        {selectedListing && (
+          <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 p-4 mb-3">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
+                Selected Listing: {selectedListing.title}
+              </h2>
+              <button
+                onClick={() => {
+                  setSelectedListing(null);
+                  setListingChats([]);
+                }}
+                className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            {/* Basic Info Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+              <div>
+                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Listing ID</label>
+                <div className="text-sm text-neutral-900 dark:text-white font-mono">{selectedListing.id}</div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Posted By</label>
+                <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.username || selectedListing.postedBy}</div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Type</label>
+                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                  selectedListing.adType === 'want' 
+                    ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
+                    : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+                }`}>
+                  {selectedListing.adType === 'want' ? 'Want' : 'Sell'}
+                </span>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Category</label>
+                <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.category}</div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Price</label>
+                <div className="text-sm font-bold text-green-600">{selectedListing.priceSat.toLocaleString()} sats</div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Location</label>
+                <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.location || 'N/A'}</div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Views</label>
+                <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.views.toLocaleString()}</div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Chats</label>
+                <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.replies.toLocaleString()}</div>
+              </div>
+            </div>
+            
+            {/* Description */}
+            <div className="mb-4">
+              <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Description</label>
+              <div className="text-sm text-neutral-900 dark:text-white mt-1">{selectedListing.description || 'No description provided'}</div>
+            </div>
+            
+            {/* Listing Chats */}
+            <div>
+              <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Recent Chats ({listingChats.length})</label>
+              <div className="mt-2 space-y-2">
+                {isLoadingChats ? (
+                  <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading chats...</div>
+                ) : listingChats.length > 0 ? (
+                  listingChats.map((chat) => (
+                    <div key={chat.id} className="bg-neutral-50 dark:bg-neutral-700 rounded p-2 text-xs">
+                      <div className="flex justify-between items-center">
+                        <span className="text-neutral-900 dark:text-white">
+                          Chat with {chat.buyerId === selectedListing.postedBy ? 'buyer' : 'seller'}
+                        </span>
+                        <span className="text-neutral-500 dark:text-neutral-400">
+                          {chat.messages.length} messages
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm text-neutral-500 dark:text-neutral-400">No chats yet</div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Table */}
         <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden">
           <div className="overflow-x-auto">
@@ -259,10 +375,58 @@ export default function AdminListingsPage() {
                     </div>
                   </th>
                   <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">ID</th>
-                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Username</th>
-                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Type</th>
-                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Title</th>
-                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Location</th>
+                  <th 
+                    className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('username')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Username
+                      {sortBy === 'username' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('adType')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Type
+                      {sortBy === 'adType' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('title')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Title
+                      {sortBy === 'title' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('location')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Location
+                      {sortBy === 'location' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
                   <th 
                     className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
                     onClick={() => handleSort('priceSat')}
@@ -448,161 +612,6 @@ export default function AdminListingsPage() {
           )}
         </div>
       </div>
-
-      {/* Detailed Listing Modal */}
-      {selectedListing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-neutral-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-neutral-700">
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
-                Listing Details: {selectedListing.title}
-              </h2>
-              <button
-                onClick={() => {
-                  setSelectedListing(null);
-                  setListingChats([]);
-                }}
-                className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-4 space-y-6">
-              {/* Basic Info Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Listing ID</label>
-                  <div className="text-sm text-neutral-900 dark:text-white font-mono">{selectedListing.id}</div>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Posted By</label>
-                  <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.username || selectedListing.postedBy}</div>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Type</label>
-                  <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                    selectedListing.adType === 'want' 
-                      ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
-                      : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
-                  }`}>
-                    {selectedListing.adType === 'want' ? 'Want' : 'Sell'}
-                  </span>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Category</label>
-                  <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.category}</div>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Price</label>
-                  <div className="text-sm font-bold text-green-600">{selectedListing.priceSat.toLocaleString()} sats</div>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Location</label>
-                  <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.location || 'N/A'}</div>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Views</label>
-                  <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.views.toLocaleString()}</div>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Chats</label>
-                  <div className="text-sm text-neutral-900 dark:text-white">{selectedListing.replies.toLocaleString()}</div>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Created</label>
-                  <div className="text-sm text-neutral-900 dark:text-white">
-                    {formatDate(selectedListing.createdAt)} at {formatTime(selectedListing.createdAt)}
-                  </div>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Updated</label>
-                  <div className="text-sm text-neutral-900 dark:text-white">
-                    {formatDate(selectedListing.updatedAt)} at {formatTime(selectedListing.updatedAt)}
-                  </div>
-                </div>
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Description</label>
-                <div className="mt-1 p-3 bg-neutral-50 dark:bg-neutral-700 rounded text-sm text-neutral-900 dark:text-white">
-                  {selectedListing.description}
-                </div>
-              </div>
-
-              {/* Photos */}
-              {selectedListing.imageUrl && (
-                <div>
-                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Photos</label>
-                  <div className="mt-2">
-                    <img 
-                      src={selectedListing.imageUrl} 
-                      alt={selectedListing.title}
-                      className="w-32 h-32 object-cover rounded border border-neutral-200 dark:border-neutral-600"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Conversations */}
-              <div>
-                <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-                  Conversations ({listingChats.length})
-                </label>
-                <div className="mt-2 space-y-2">
-                  {isLoadingChats ? (
-                    <div className="flex items-center justify-center py-4">
-                      <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2"></div>
-                      <span className="text-sm text-neutral-600 dark:text-neutral-400">Loading conversations...</span>
-                    </div>
-                  ) : listingChats.length === 0 ? (
-                    <div className="text-sm text-neutral-500 dark:text-neutral-400 py-4 text-center">
-                      No conversations yet for this listing
-                    </div>
-                  ) : (
-                    listingChats.map((chat) => (
-                      <div key={chat.id} className="p-3 bg-neutral-50 dark:bg-neutral-700 rounded">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-neutral-500 dark:text-neutral-400">Buyer:</span>
-                            <a 
-                              href={`/admin/users?search=${chat.buyerId}`}
-                              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                            >
-                              {chat.buyerId}
-                            </a>
-                            <span className="text-xs text-neutral-500 dark:text-neutral-400">Seller:</span>
-                            <a 
-                              href={`/admin/users?search=${chat.sellerId}`}
-                              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                            >
-                              {chat.sellerId}
-                            </a>
-                          </div>
-                          <div className="text-xs text-neutral-500 dark:text-neutral-400">
-                            {chat.messages.length} messages
-                          </div>
-                        </div>
-                        <div className="text-sm text-neutral-700 dark:text-neutral-300 mb-2">
-                          Last message: {chat.messages[chat.messages.length - 1]?.text || 'No messages yet'}
-                        </div>
-                        <div className="text-xs text-neutral-500 dark:text-neutral-400">
-                          Last activity: {formatDate(chat.lastMessageAt)} at {formatTime(chat.lastMessageAt)}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
