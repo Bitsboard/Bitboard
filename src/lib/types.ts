@@ -48,6 +48,7 @@ export type Listing = {
   seller: Seller;
   createdAt: number;
   postedBy?: string; // Now 8 alphanumeric characters
+  views?: number; // View count for the listing
 };
 
 export type SavedSearch = {

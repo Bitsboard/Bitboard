@@ -41,6 +41,36 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
   const [sellerImageError, setSellerImageError] = React.useState(false);
   const [showChat, setShowChat] = React.useState(false);
   
+  // Track view when modal opens
+  React.useEffect(() => {
+    if (open && listing.id) {
+      trackListingView(listing.id);
+    }
+  }, [open, listing.id]);
+
+  // Function to track listing view
+  const trackListingView = async (listingId: string) => {
+    try {
+      const response = await fetch(`/api/listings/${listingId}/view`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json() as { success: boolean; alreadyViewed?: boolean; message?: string };
+        if (data.success && !data.alreadyViewed) {
+          console.log('Listing view tracked successfully');
+        } else if (data.alreadyViewed) {
+          console.log('View already recorded recently');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to track listing view:', error);
+    }
+  };
+  
   // Debug: Log btcCad value and listing title
   React.useEffect(() => {
     console.log('ListingModal btcCad:', btcCad, 'unit:', unit, 'listing.priceSats:', listing.priceSats);

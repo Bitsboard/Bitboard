@@ -283,64 +283,64 @@ export default function AdminListingsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left Column - Listing Details (2/3 width) */}
               <div className="lg:col-span-2">
-                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">
-                  {selectedListing.title}
-                </h2>
-                
                 {/* Condensed Info Layout */}
                 <div className="space-y-3">
-                  {/* Top Row - Key Info */}
-                  <div className="flex items-center gap-6 text-sm">
-                    <div className="flex items-center gap-2">
-                      <span className="text-neutral-500 dark:text-neutral-400">Posted by:</span>
-                      <a 
-                        href={`/admin/users?search=${selectedListing.username || selectedListing.postedBy}`}
-                        className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
-                      >
-                        {selectedListing.username || selectedListing.postedBy}
-                      </a>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-neutral-500 dark:text-neutral-400">Posted:</span>
-                      <span className="text-neutral-900 dark:text-white">{formatDate(selectedListing.createdAt)}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-neutral-500 dark:text-neutral-400">Views:</span>
-                      <span className="text-neutral-900 dark:text-white">{selectedListing.views.toLocaleString()}</span>
-                    </div>
+                  {/* Row 1: Type, Title, ID */}
+                  <div className="flex items-center gap-3">
+                    <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                      selectedListing.adType === 'want' 
+                        ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
+                        : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+                    }`}>
+                      {selectedListing.adType === 'want' ? 'Want' : 'Sell'}
+                    </span>
+                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-white flex-1">
+                      {selectedListing.title}
+                    </h3>
+                    <span className="font-mono text-xs bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 px-2 py-1 rounded border border-neutral-200 dark:border-neutral-600">
+                      {selectedListing.id}
+                    </span>
                   </div>
                   
-                  {/* Second Row - Type, Category, Location */}
-                  <div className="flex items-center gap-6 text-sm">
-                    <div className="flex items-center gap-2">
-                      <span className="text-neutral-500 dark:text-neutral-400">Type:</span>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                        selectedListing.adType === 'want' 
-                          ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
-                          : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
-                      }`}>
-                        {selectedListing.adType === 'want' ? 'Want' : 'Sell'}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-neutral-500 dark:text-neutral-400">Category:</span>
-                      <span className="text-neutral-900 dark:text-white">{selectedListing.category}</span>
-                    </div>
+                  {/* Row 2: Posted by, Username, Timestamp */}
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-neutral-500 dark:text-neutral-400">Posted by:</span>
+                    <a 
+                      href={`/admin/users?search=${selectedListing.username || selectedListing.postedBy}`}
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors border border-blue-300 dark:border-blue-600"
+                    >
+                      {selectedListing.username || selectedListing.postedBy}
+                      <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                    <span className="text-neutral-500 dark:text-neutral-400">on</span>
+                    <span className="text-neutral-900 dark:text-white">{formatDate(selectedListing.createdAt)}</span>
+                  </div>
+                  
+                  {/* Row 3: Location and Price */}
+                  <div className="flex items-center gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <span className="text-neutral-500 dark:text-neutral-400">Location:</span>
-                      <span className="text-neutral-900 dark:text-white">{selectedListing.location || 'N/A'}</span>
+                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-600">
+                        {selectedListing.location || 'N/A'}
+                      </span>
                     </div>
-                  </div>
-                  
-                  {/* Third Row - Price & ID */}
-                  <div className="flex items-center gap-6 text-sm">
                     <div className="flex items-center gap-2">
                       <span className="text-neutral-500 dark:text-neutral-400">Price:</span>
                       <span className="font-bold text-green-600">{selectedListing.priceSat.toLocaleString()} sats</span>
                     </div>
+                  </div>
+                  
+                  {/* Row 4: Views and Category */}
+                  <div className="flex items-center gap-4 text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="text-neutral-500 dark:text-neutral-400">ID:</span>
-                      <span className="font-mono text-neutral-900 dark:text-white">{selectedListing.id}</span>
+                      <span className="text-neutral-500 dark:text-neutral-400">Views:</span>
+                      <span className="text-neutral-900 dark:text-white font-medium">{selectedListing.views?.toLocaleString() || 0}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-500 dark:text-neutral-400">Category:</span>
+                      <span className="text-neutral-900 dark:text-white">{selectedListing.category}</span>
                     </div>
                   </div>
                   
@@ -377,23 +377,23 @@ export default function AdminListingsPage() {
                         .map((chat: any) => (
                         <div 
                           key={chat.id} 
-                          className="bg-purple-200 dark:bg-purple-800 rounded p-3 border border-purple-300 dark:border-purple-600 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors cursor-pointer relative"
+                          className="bg-purple-200 dark:bg-purple-800 rounded p-2 border border-purple-300 dark:border-purple-600 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors cursor-pointer relative"
                           onClick={() => window.location.href = `/admin/chats?search=${encodeURIComponent(selectedListing.title || '')}`}
                         >
                           {/* External Link Icon - Top Right */}
-                          <svg className="absolute top-2 right-2 w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="absolute top-1.5 right-1.5 w-3 h-3 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                           </svg>
                           
                           {/* User Box - Top Left */}
-                          <div className="mb-3">
+                          <div className="mb-2">
                             <a 
                               href={`/admin/users?search=${chat.buyerUsername || chat.buyerId}`}
-                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors border border-blue-300 dark:border-blue-600"
+                              className="inline-flex items-center gap-1 px-1 py-0.5 rounded text-xs font-medium bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors border border-blue-300 dark:border-blue-600"
                               onClick={(e) => e.stopPropagation()}
                             >
                               {chat.buyerUsername || chat.buyerId}
-                              <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <svg className="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                               </svg>
                             </a>
@@ -716,21 +716,26 @@ export default function AdminListingsPage() {
       {/* Image Popup */}
       {selectedImage && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
           onClick={() => setSelectedImage(null)}
         >
           <div 
-            className="bg-white dark:bg-neutral-800 rounded-lg max-w-2xl max-h-full w-full h-full flex flex-col"
+            className="relative max-w-4xl max-h-[90vh] w-auto h-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={() => setSelectedImage(null)}
-              className="absolute top-4 right-4 text-white text-lg hover:text-gray-300 z-10"
+            {/* Close button positioned on the image */}
+            <button 
+              onClick={() => setSelectedImage(null)} 
+              className="absolute top-2 right-2 w-8 h-8 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full flex items-center justify-center transition-all duration-200 z-10 hover:scale-110" 
               aria-label="Close"
             >
               ×
             </button>
-            <img src={selectedImage} alt="Listing Image" className="w-full h-full object-contain" />
+            <img 
+              src={selectedImage} 
+              alt="Listing Image" 
+              className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" 
+            />
           </div>
         </div>
       )}
