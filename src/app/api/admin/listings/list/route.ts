@@ -64,11 +64,6 @@ export async function GET(req: Request) {
         page: 1,
         limit
       });
-      
-      return NextResponse.json({ 
-        error: 'Database connection failed',
-        details: 'No D1 database binding found'
-      }, { status: 500 });
     }
     
     console.log('✅ Database connection established successfully');
