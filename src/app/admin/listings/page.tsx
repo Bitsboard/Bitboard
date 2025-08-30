@@ -104,24 +104,21 @@ export default function AdminListingsPage() {
           }
           
           if (targetListing) {
-            console.log('✅ Found target listing:', targetListing);
-            setSelectedListing(targetListing);
-            await loadListingImages(targetListing.id);
-            if (targetListing.id) {
-              await loadListingChats(targetListing.id);
-            }
-            
-            // Clear URL parameters
-            const newUrl = window.location.pathname;
-            window.history.replaceState({}, '', newUrl);
-          } else {
-            console.log('❌ Target listing not found');
+            // Select the listing
+            handleListingClick(targetListing);
+            setIsSearchingForListing(false);
+            return;
           }
         }
+        
+        // If we get here, no listing was found
+        setIsSearchingForListing(false);
+      } else {
+        console.error('Failed to search for listing:', response.status);
+        setIsSearchingForListing(false);
       }
     } catch (error) {
       console.error('Error searching for listing:', error);
-    } finally {
       setIsSearchingForListing(false);
     }
   };
@@ -152,30 +149,26 @@ export default function AdminListingsPage() {
       const offset = (currentPage - 1) * itemsPerPage;
       const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
       
-      console.log('🔍 Loading listings - Page:', currentPage, 'Items per page:', itemsPerPage, 'Offset:', offset, 'Search:', searchQuery || 'none');
-      
       const response = await fetch(`/api/admin/listings/list?limit=${itemsPerPage}&offset=${offset}&sortBy=${sortBy}&sortOrder=${sortOrder}${searchParam}`);
       
       if (response.ok) {
         const data: any = await response.json();
-        console.log('🔍 Listings loaded successfully:', data);
         
         if (data.success && data.listings) {
           setListings(data.listings);
           setTotalPages(Math.ceil((data.total || 0) / itemsPerPage));
-          console.log('✅ Set listings:', data.listings.length, 'Total pages:', Math.ceil((data.total || 0) / itemsPerPage));
         } else {
-          console.error('❌ API returned success but no listings:', data);
+          console.error('API returned success but no listings:', data);
           setError('No listings data received');
           setListings([]);
         }
       } else {
-        console.error('❌ API request failed:', response.status, response.statusText);
+        console.error('API request failed:', response.status, response.statusText);
         setError(`Failed to load listings: ${response.status}`);
         setListings([]);
       }
     } catch (error) {
-      console.error('❌ Error loading listings:', error);
+      console.error('Error loading listings:', error);
       setError('Failed to load listings');
       setListings([]);
     } finally {
@@ -320,43 +313,59 @@ export default function AdminListingsPage() {
     if (selectedListings.size === 0) return;
     
     try {
-      // TODO: Implement actual boost API call
-      console.log('Boosting listings:', Array.from(selectedListings));
+      const response = await fetch('/api/admin/listings/bulk-boost', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listingIds: Array.from(selectedListings) })
+      });
       
-      // For now, just show a success message
-      alert(`Boosted ${selectedListings.size} listing(s)`);
+      const data = await response.json() as { success: boolean; error?: string; message?: string };
       
-      // Clear selection after action
-      setSelectedListings(new Set());
-      setSelectAll(false);
+      if (data.success) {
+        // Clear selection and reload listings
+        setSelectedListings(new Set());
+        setSelectAll(false);
+        loadListings();
+        // TODO: Add success toast notification
+      } else {
+        console.error('Failed to boost listings:', data.error);
+        // TODO: Add error toast notification
+      }
     } catch (error) {
       console.error('Error boosting listings:', error);
-      alert('Failed to boost listings');
+      // TODO: Add error toast notification
     }
   };
 
   const handleBulkDelete = async () => {
     if (selectedListings.size === 0) return;
     
-    if (!confirm(`Are you sure you want to delete ${selectedListings.size} listing(s)? This action cannot be undone.`)) {
+    if (!confirm(`Are you sure you want to delete ${selectedListings.size} listings? This action cannot be undone.`)) {
       return;
     }
     
     try {
-      // TODO: Implement actual delete API call
-      console.log('Deleting listings:', Array.from(selectedListings));
+      const response = await fetch('/api/admin/listings/bulk-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listingIds: Array.from(selectedListings) })
+      });
       
-      // For now, just remove from frontend state
-      setListings(prev => prev.filter(l => !selectedListings.has(l.id)));
+      const data = await response.json() as { success: boolean; error?: string; message?: string };
       
-      // Clear selection after action
-      setSelectedListings(new Set());
-      setSelectAll(false);
-      
-      alert(`Deleted ${selectedListings.size} listing(s)`);
+      if (data.success) {
+        // Clear selection and reload listings
+        setSelectedListings(new Set());
+        setSelectAll(false);
+        loadListings();
+        // TODO: Add success toast notification
+      } else {
+        console.error('Failed to delete listings:', data.error);
+        // TODO: Add error toast notification
+      }
     } catch (error) {
       console.error('Error deleting listings:', error);
-      alert('Failed to delete listings');
+      // TODO: Add error toast notification
     }
   };
 

@@ -304,18 +304,63 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleBulkBan = () => {
-    console.log('Banning users:', Array.from(selectedUsers));
-    // TODO: Implement actual ban API call
-    setSelectedUsers(new Set());
-    setSelectAll(false);
+  const handleBulkBan = async () => {
+    if (selectedUsers.size === 0) return;
+    
+    const reason = prompt('Enter ban reason (optional):') || 'Banned by admin';
+    if (reason === null) return; // User cancelled
+    
+    try {
+      const response = await fetch('/api/admin/users/bulk-ban', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userIds: Array.from(selectedUsers), reason })
+      });
+      
+      const data = await response.json() as { success: boolean; error?: string; message?: string };
+      
+      if (data.success) {
+        // Clear selection and reload users
+        setSelectedUsers(new Set());
+        setSelectAll(false);
+        loadUsers();
+        // TODO: Add success toast notification
+      } else {
+        console.error('Failed to ban users:', data.error);
+        // TODO: Add error toast notification
+      }
+    } catch (error) {
+      console.error('Error banning users:', error);
+      // TODO: Add error toast notification
+    }
   };
 
-  const handleBulkVerify = () => {
-    console.log('Verifying users:', Array.from(selectedUsers));
-    // TODO: Implement actual verify API call
-    setSelectedUsers(new Set());
-    setSelectAll(false);
+  const handleBulkVerify = async () => {
+    if (selectedUsers.size === 0) return;
+    
+    try {
+      const response = await fetch('/api/admin/users/bulk-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userIds: Array.from(selectedUsers) })
+      });
+      
+      const data = await response.json() as { success: boolean; error?: string; message?: string };
+      
+      if (data.success) {
+        // Clear selection and reload users
+        setSelectedUsers(new Set());
+        setSelectAll(false);
+        loadUsers();
+        // TODO: Add success toast notification
+      } else {
+        console.error('Failed to verify users:', data.error);
+        // TODO: Add error toast notification
+      }
+    } catch (error) {
+      console.error('Error verifying users:', error);
+      // TODO: Add error toast notification
+    }
   };
 
   const formatDate = (timestamp: number) => new Date(timestamp * 1000).toLocaleDateString();
