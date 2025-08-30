@@ -174,9 +174,16 @@ export async function GET(req: Request) {
         l.location,
         0 AS views,
         0 AS favorites,
-        0 AS replies
+        COALESCE(chat_counts.chat_count, 0) AS replies
       FROM listings l
       LEFT JOIN users u ON l.posted_by = u.id
+      LEFT JOIN (
+        SELECT 
+          listing_id,
+          COUNT(*) AS chat_count
+        FROM chats
+        GROUP BY listing_id
+      ) chat_counts ON l.id = chat_counts.listing_id
       ORDER BY l.created_at DESC 
       LIMIT ? OFFSET ?
     `;
