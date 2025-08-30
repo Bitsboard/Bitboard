@@ -86,7 +86,6 @@ export default function AdminListingsPage() {
     }
   };
 
-  const formatPrice = (priceSat: number) => `${priceSat.toLocaleString()} sats`;
   const formatDate = (timestamp: number) => new Date(timestamp * 1000).toLocaleDateString();
   const formatTime = (timestamp: number) => new Date(timestamp * 1000).toLocaleTimeString();
 
@@ -156,195 +155,175 @@ export default function AdminListingsPage() {
           </div>
         )}
 
-        {/* Listings Table */}
-        <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-neutral-50 dark:bg-neutral-700">
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">ID</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Date</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">User</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Type</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Title</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Category</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Location</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Price</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Views</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Replies</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Status</th>
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
+                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Timestamp</th>
+                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">ID</th>
+                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Username</th>
+                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Type</th>
+                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Title</th>
+                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Location</th>
+                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Price</th>
+                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Views</th>
+                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Chats</th>
+                <th className="px-1.5 py-1.5 text-left font-medium text-neutral-700 dark:text-neutral-300">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={10} className="px-1.5 py-8 text-center">
+                    <div className="flex items-center justify-center">
+                      <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+                      <span className="text-neutral-600 dark:text-neutral-400">Loading listings...</span>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="space-y-0 font-mono text-xs">
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={11} className="px-1.5 py-0.5 text-center text-neutral-500 dark:text-neutral-400">
-                      <div className="flex items-center justify-center">
-                        <div className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></div>
-                        Loading listings...
-                      </div>
-                    </td>
-                  </tr>
-                ) : error ? (
-                  <tr>
-                    <td colSpan={11} className="px-1.5 py-0.5 text-center text-neutral-500 dark:text-neutral-400">
-                      <div className="text-center">
-                        <svg className="w-8 h-8 text-red-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <p className="text-red-600 dark:text-red-400 font-medium text-xs">Failed to load listings</p>
-                        <p className="text-neutral-500 dark:text-neutral-400 text-xs mt-1">{error}</p>
-                        <button
-                          onClick={loadListings}
-                          className="mt-2 px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
+              ) : error ? (
+                <tr>
+                  <td colSpan={10} className="px-1.5 py-8 text-center text-red-600 dark:text-red-400">
+                    {error}
+                  </td>
+                </tr>
+              ) : listings.length === 0 ? (
+                <tr>
+                  <td colSpan={10} className="px-1.5 py-8 text-center text-neutral-600 dark:text-neutral-400">
+                    No listings found
+                  </td>
+                </tr>
+              ) : (
+                <>
+                  {listings.map((listing) => (
+                    <tr 
+                      key={listing.id} 
+                      className="hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                    >
+                      <td className="px-1.5 py-1">
+                        <div className="text-xs text-neutral-600 dark:text-neutral-400">
+                          {formatDate(listing.createdAt)}
+                        </div>
+                        <div className="text-xs text-neutral-500 dark:text-neutral-500">
+                          {formatTime(listing.createdAt)}
+                        </div>
+                      </td>
+                      <td className="px-1.5 py-1">
+                        <div className="text-xs text-neutral-500 dark:text-neutral-400 font-mono">
+                          {listing.id}
+                        </div>
+                      </td>
+                      <td className="px-1.5 py-1">
+                        <a 
+                          href={`/admin/users?search=${listing.username || listing.postedBy}`}
+                          className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded text-xs font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
                         >
-                          Try Again
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ) : listings.length === 0 ? (
-                  <tr>
-                    <td colSpan={11} className="px-1.5 py-0.5 text-center text-neutral-500 dark:text-neutral-400">
-                      <div className="text-center">
-                        <svg className="w-8 h-8 text-neutral-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                        </svg>
-                        <p className="text-neutral-600 dark:text-neutral-400 font-medium text-xs">No listings found</p>
-                        <p className="text-neutral-500 dark:text-neutral-400 text-xs mt-1">Try refreshing or check your connection</p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  <>
-                    {listings.map((listing) => (
-                      <tr 
-                        key={listing.id} 
-                        className="hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded px-1.5 -mx-1.5 transition-colors cursor-pointer"
-                      >
-                        <td className="px-1.5 py-0.5">
-                          <div className="text-xs text-neutral-500 dark:text-neutral-400 font-mono">
-                            {listing.id.toString().slice(0, 8)}...
-                          </div>
-                        </td>
-                        <td className="px-1.5 py-0.5">
-                          <div className="text-xs text-neutral-600 dark:text-neutral-400">
-                            {formatDate(listing.createdAt)}
-                          </div>
-                          <div className="text-xs text-neutral-500">
-                            {formatTime(listing.createdAt)}
-                          </div>
-                        </td>
-                        <td className="px-1.5 py-0.5">
-                          <div className="text-xs font-medium text-neutral-900 dark:text-white">
-                            {listing.username || listing.postedBy}
-                          </div>
-                        </td>
-                        <td className="px-1.5 py-0.5">
-                          <span className={`inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded-full text-xs font-medium ${
-                            listing.adType === 'want' 
-                              ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
-                              : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
-                          }`}>
-                            {listing.adType === 'want' ? 'Want' : 'Sell'}
-                          </span>
-                        </td>
-                        <td className="px-1.5 py-0.5">
-                          <div className="max-w-xs">
-                            <div className="font-medium text-neutral-900 dark:text-white text-xs">{listing.title}</div>
-                            <div className="text-xs text-neutral-600 dark:text-neutral-400 line-clamp-1">{listing.description}</div>
-                          </div>
-                        </td>
-                        <td className="px-1.5 py-0.5">
-                          <span className="text-xs text-neutral-500 px-1.5 py-0.5 bg-neutral-100 dark:bg-neutral-700 rounded">
-                            {listing.category}
-                          </span>
-                        </td>
-                        <td className="px-1.5 py-0.5">
-                          <div className="text-xs text-neutral-900 dark:text-white">
-                            {listing.location || 'N/A'}
-                          </div>
-                        </td>
-                        <td className="px-1.5 py-0.5">
-                          <div className="text-xs font-bold text-green-600">
-                            {formatPrice(listing.priceSat)}
-                          </div>
-                        </td>
-                        <td className="px-1.5 py-0.5">
-                          <div className="text-xs text-neutral-900 dark:text-white">
-                            {listing.views.toLocaleString()}
-                          </div>
-                        </td>
-                        <td className="px-1.5 py-0.5">
-                          <div className="text-xs text-neutral-900 dark:text-white">
-                            {listing.replies.toLocaleString()}
-                          </div>
-                        </td>
-                        <td className="px-1.5 py-0.5">
-                          <span className={`inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded-full text-xs font-medium ${
-                            listing.status === 'active' 
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                              : listing.status === 'sold'
-                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
-                              : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                          }`}>
-                            {listing.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                    {/* Fill remaining rows to maintain 20 row height */}
-                    {Array.from({ length: Math.max(0, 20 - listings.length) }).map((_, index) => (
-                      <tr key={`empty-${index}`} className="h-6">
-                        <td colSpan={11} className="px-1.5 py-0.5">
-                          <div className="h-6"></div>
-                        </td>
-                      </tr>
-                    ))}
-                  </>
-                )}
-              </tbody>
-            </table>
-          </div>
+                          <span>{listing.username || listing.postedBy}</span>
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
+                      </td>
+                      <td className="px-1.5 py-1">
+                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                          listing.adType === 'want' 
+                            ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
+                            : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+                        }`}>
+                          {listing.adType === 'want' ? 'Want' : 'Sell'}
+                        </span>
+                      </td>
+                      <td className="px-1.5 py-1">
+                        <div className="max-w-xs">
+                          <div className="font-medium text-neutral-900 dark:text-white text-xs">{listing.title}</div>
+                          <div className="text-xs text-neutral-600 dark:text-neutral-400 line-clamp-1">{listing.description}</div>
+                        </div>
+                      </td>
+                      <td className="px-1.5 py-1">
+                        <div className="text-xs text-neutral-900 dark:text-white">
+                          {listing.location || 'N/A'}
+                        </div>
+                      </td>
+                      <td className="px-1.5 py-1">
+                        <div className="text-xs font-bold text-green-600">
+                          {listing.priceSat.toLocaleString()}
+                        </div>
+                      </td>
+                      <td className="px-1.5 py-1">
+                        <div className="text-xs text-neutral-900 dark:text-white">
+                          {listing.views.toLocaleString()}
+                        </div>
+                      </td>
+                      <td className="px-1.5 py-1">
+                        <div className="text-xs text-neutral-900 dark:text-white">
+                          {listing.replies.toLocaleString()}
+                        </div>
+                      </td>
+                      <td className="px-1.5 py-1">
+                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                          listing.status === 'active' 
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                            : listing.status === 'sold'
+                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                        }`}>
+                          {listing.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  {/* Fill remaining rows to maintain 20 row height */}
+                  {Array.from({ length: Math.max(0, 20 - listings.length) }).map((_, index) => (
+                    <tr key={`empty-${index}`} className="h-6">
+                      <td colSpan={10} className="px-1.5 py-1">
+                        <div className="h-6"></div>
+                      </td>
+                    </tr>
+                  ))}
+                </>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-          {/* Pagination */}
-          <div className="flex justify-between items-center py-2 px-3 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
-            <div className="text-xs text-neutral-600">
-              {listings.length} listings • Page {currentPage} of {totalPages}
-            </div>
-            {totalPages > 1 && (
-              <div className="flex gap-1">
-                <button
-                  onClick={() => setCurrentPage(1)}
-                  disabled={currentPage === 1}
-                  className="px-1.5 py-0.5 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
-                >
-                  First
-                </button>
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                  className="px-1.5 py-0.5 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
-                >
-                  Prev
-                </button>
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-1.5 py-0.5 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
-                >
-                  Next
-                </button>
-                <button
-                  onClick={() => setCurrentPage(totalPages)}
-                  disabled={currentPage === totalPages}
-                  className="px-1.5 py-0.5 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
-                >
-                  Last
-                </button>
-              </div>
-            )}
+        {/* Pagination */}
+        <div className="flex justify-between items-center py-2 px-3 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
+          <div className="text-xs text-neutral-600">
+            {listings.length} listings • Page {currentPage} of {totalPages}
           </div>
+          {totalPages > 1 && (
+            <div className="flex gap-1">
+              <button
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+                className="px-1.5 py-0.5 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
+              >
+                First
+              </button>
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="px-1.5 py-0.5 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
+              >
+                Prev
+              </button>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="px-1.5 py-0.5 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
+              >
+                Next
+              </button>
+              <button
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages}
+                className="px-1.5 py-0.5 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
+              >
+                Last
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
