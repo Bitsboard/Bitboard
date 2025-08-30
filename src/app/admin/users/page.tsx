@@ -67,14 +67,14 @@ export default function AdminUsersPage() {
   const [itemsPerPage] = useState(20);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<'all' | 'verified' | 'unverified' | 'banned' | 'admin'>('all');
-  const [sortBy, setSortBy] = useState<'createdAt' | 'username' | 'email' | 'listingsCount' | 'chatsCount' | 'rating' | 'lastActivity'>('createdAt');
+  const [sortBy, setSortBy] = useState<'createdAt' | 'username' | 'email' | 'listingsCount' | 'chatsCount' | 'rating' | 'lastActivityAt'>('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  
-  // Selected user state
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userListings, setUserListings] = useState<UserListing[]>([]);
   const [userChats, setUserChats] = useState<UserChat[]>([]);
   const [isLoadingUserData, setIsLoadingUserData] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
   
   const router = useRouter();
 
@@ -226,6 +226,41 @@ export default function AdminUsersPage() {
     setUserChats([]);
   };
 
+  const handleSelectUser = (userId: string, checked: boolean) => {
+    const newSelected = new Set(selectedUsers);
+    if (checked) {
+      newSelected.add(userId);
+    } else {
+      newSelected.delete(userId);
+    }
+    setSelectedUsers(newSelected);
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allUserIds = users.map(user => user.id);
+      setSelectedUsers(new Set(allUserIds));
+      setSelectAll(true);
+    } else {
+      setSelectedUsers(new Set());
+      setSelectAll(false);
+    }
+  };
+
+  const handleBulkBan = () => {
+    console.log('Banning users:', Array.from(selectedUsers));
+    // TODO: Implement actual ban API call
+    setSelectedUsers(new Set());
+    setSelectAll(false);
+  };
+
+  const handleBulkVerify = () => {
+    console.log('Verifying users:', Array.from(selectedUsers));
+    // TODO: Implement actual verify API call
+    setSelectedUsers(new Set());
+    setSelectAll(false);
+  };
+
   const formatDate = (timestamp: number) => new Date(timestamp * 1000).toLocaleDateString();
   const formatTime = (timestamp: number) => new Date(timestamp * 1000).toLocaleTimeString();
   const formatPrice = (priceSat: number) => `${priceSat.toLocaleString()} sats`;
@@ -302,15 +337,14 @@ export default function AdminUsersPage() {
                 placeholder="Search users..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                className="px-2 py-1 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-xs flex-1"
+                className="flex-1 px-2 py-1 text-xs bg-transparent border-none outline-none placeholder-neutral-500 dark:placeholder-neutral-400"
               />
-              <select 
+              <select
                 value={statusFilter}
                 onChange={(e) => handleStatusFilterChange(e.target.value as typeof statusFilter)}
-                className="px-2 py-1 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-xs"
+                className="px-2 py-1 text-xs bg-transparent border-none outline-none text-neutral-700 dark:text-neutral-300"
               >
-                <option value="all">All Users</option>
+                <option value="all">All Status</option>
                 <option value="verified">Verified</option>
                 <option value="unverified">Unverified</option>
                 <option value="banned">Banned</option>
@@ -318,19 +352,38 @@ export default function AdminUsersPage() {
               </select>
               <button
                 onClick={handleSearch}
-                disabled={isLoading}
-                className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 disabled:opacity-50"
+                className="px-3 py-1 text-xs bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors"
               >
-                {isLoading ? 'Loading...' : 'Search'}
-              </button>
-              <button
-                onClick={loadUsers}
-                disabled={isLoading}
-                className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 disabled:opacity-50"
-              >
-                {isLoading ? 'Loading...' : 'Refresh'}
+                Search
               </button>
             </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-2">
+            <button
+              onClick={loadUsers}
+              className="px-3 py-1.5 bg-neutral-500 text-white rounded text-sm hover:bg-neutral-600 transition-colors"
+            >
+              Refresh
+            </button>
+            
+            {selectedUsers.size > 0 && (
+              <>
+                <button
+                  onClick={handleBulkVerify}
+                  className="px-3 py-1.5 bg-green-500 text-white rounded text-sm hover:bg-green-600 transition-colors"
+                >
+                  Verify ({selectedUsers.size})
+                </button>
+                <button
+                  onClick={handleBulkBan}
+                  className="px-3 py-1.5 bg-red-500 text-white rounded text-sm hover:bg-red-600 transition-colors"
+                >
+                  Ban ({selectedUsers.size})
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -353,55 +406,51 @@ export default function AdminUsersPage() {
               {/* Left Column - User Details (1/3 width) */}
               <div className="lg:col-span-1">
                 <div className="space-y-4">
-                  {/* Row 1: Username and Status */}
-                  <div className="flex flex-col gap-2">
-                    {getStatusBadge(selectedUser)}
-                    <h3 className="text-xl font-semibold text-neutral-900 dark:text-white">
-                      {selectedUser.username}
-                    </h3>
+                  {/* Row 1: User ID, Username, and Verification Status */}
+                  <div className="flex items-center gap-3">
                     <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-600">
                       ID: {selectedUser.id}
                     </span>
+                    <h3 className="text-xl font-semibold text-neutral-900 dark:text-white">
+                      {selectedUser.username}
+                    </h3>
+                    {getStatusBadge(selectedUser)}
                   </div>
                   
-                  {/* Row 2: Email and Signup Date */}
-                  <div className="space-y-2 text-sm">
+                  {/* Row 2: Email */}
+                  <div className="text-sm">
                     <div className="flex items-center gap-2">
                       <span className="text-neutral-500 dark:text-neutral-400">Email:</span>
                       <span className="text-neutral-900 dark:text-white truncate">{selectedUser.email}</span>
                     </div>
+                  </div>
+                  
+                  {/* Row 3: Signup Date */}
+                  <div className="text-sm">
                     <div className="flex items-center gap-2">
                       <span className="text-neutral-500 dark:text-neutral-400">Signed up:</span>
                       <span className="text-neutral-900 dark:text-white">{formatDate(selectedUser.createdAt || selectedUser.created_at)}</span>
                     </div>
                   </div>
                   
-                  {/* Row 3: Stats */}
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <span className="text-neutral-500 dark:text-neutral-400">Listings:</span>
-                      <span className="text-neutral-900 dark:text-white font-medium">{selectedUser.listingsCount || 0}</span>
+                  {/* Row 4: Reputation, Deals, and Last Activity */}
+                  <div className="text-sm">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-neutral-500 dark:text-neutral-400">Reputation:</span>
+                        <span className="text-neutral-900 dark:text-white font-medium">{selectedUser.rating.toFixed(1)}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-neutral-500 dark:text-neutral-400">Deals:</span>
+                        <span className="text-neutral-900 dark:text-white font-medium">{selectedUser.deals}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-neutral-500 dark:text-neutral-400">Last active:</span>
+                        <span className="text-neutral-900 dark:text-white">
+                          {selectedUser.lastActivityAt || selectedUser.last_active ? getTimeAgo(selectedUser.lastActivityAt || selectedUser.last_active) : 'Never'}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-neutral-500 dark:text-neutral-400">Chats:</span>
-                      <span className="text-neutral-900 dark:text-white font-medium">{selectedUser.chatsCount || 0}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-neutral-500 dark:text-neutral-400">Reputation:</span>
-                      <span className="text-neutral-900 dark:text-white font-medium">{selectedUser.rating.toFixed(1)}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-neutral-500 dark:text-neutral-400">Deals:</span>
-                      <span className="text-neutral-900 dark:text-white font-medium">{selectedUser.deals}</span>
-                    </div>
-                  </div>
-                  
-                  {/* Row 4: Last Activity */}
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-neutral-500 dark:text-neutral-400">Last activity:</span>
-                    <span className="text-neutral-900 dark:text-white">
-                      {selectedUser.lastActivityAt || selectedUser.last_active ? getTimeAgo(selectedUser.lastActivityAt || selectedUser.last_active) : 'Never'}
-                    </span>
                   </div>
                 </div>
               </div>
@@ -523,6 +572,14 @@ export default function AdminUsersPage() {
             <table className="w-full space-y-0 font-mono text-xs">
               <thead className="bg-neutral-100 dark:bg-neutral-800">
                 <tr>
+                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">
+                    <input
+                      type="checkbox"
+                      checked={selectAll}
+                      onChange={(e) => handleSelectAll(e.target.checked)}
+                      className="rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+                    />
+                  </th>
                   <th 
                     className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
                     onClick={() => handleSort('createdAt')}
@@ -605,11 +662,11 @@ export default function AdminUsersPage() {
                   </th>
                   <th 
                     className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
-                    onClick={() => handleSort('lastActivity')}
+                    onClick={() => handleSort('lastActivityAt')}
                   >
                     <div className="flex items-center gap-1">
                       Last Activity
-                      {sortBy === 'lastActivity' && (
+                      {sortBy === 'lastActivityAt' && (
                         <span className="text-orange-500">
                           {sortOrder === 'asc' ? '↑' : '↓'}
                         </span>
@@ -621,20 +678,20 @@ export default function AdminUsersPage() {
               <tbody className="space-y-0 font-mono text-xs">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={9} className="px-3 py-8 text-center">
+                    <td colSpan={10} className="px-3 py-8 text-center">
                       <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
                       <p className="text-neutral-600 dark:text-neutral-400">Loading users...</p>
                     </td>
                   </tr>
                 ) : error ? (
                   <tr>
-                    <td colSpan={9} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                    <td colSpan={10} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
                       {error}
                     </td>
                   </tr>
                 ) : users.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                    <td colSpan={10} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
                       No users found
                     </td>
                   </tr>
@@ -646,6 +703,14 @@ export default function AdminUsersPage() {
                         className="hover:bg-neutral-50 dark:hover:bg-neutral-700 cursor-pointer border-b border-neutral-200 dark:border-neutral-600"
                         onClick={() => handleUserClick(user)}
                       >
+                        <td className="px-1.5 py-0.5" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            checked={selectedUsers.has(user.id)}
+                            onChange={(e) => handleSelectUser(user.id, e.target.checked)}
+                            className="rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+                          />
+                        </td>
                         <td className="px-1.5 py-0.5">
                           <div className="text-neutral-600 dark:text-neutral-400">
                             {formatDate(user.createdAt || user.created_at)}
