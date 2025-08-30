@@ -11,7 +11,7 @@ SELECT
   id,
   length(id) as id_length,
   CASE 
-    WHEN id REGEXP '^[A-Za-z0-9]{8}$' THEN 'Valid'
+    WHEN length(id) = 8 THEN 'Valid'
     ELSE 'Invalid'
   END as format_check
 FROM users 
@@ -22,7 +22,7 @@ SELECT
   id,
   length(id) as id_length,
   CASE 
-    WHEN id REGEXP '^[A-Za-z0-9]{10}$' THEN 'Valid'
+    WHEN length(id) = 10 THEN 'Valid'
     ELSE 'Invalid'
   END as format_check
 FROM listings 
@@ -111,7 +111,7 @@ SELECT
   COUNT(*) as total_records,
   MIN(length(id)) as min_id_length,
   MAX(length(id)) as max_id_length,
-  COUNT(CASE WHEN id REGEXP '^[A-Za-z0-9]{8}$' THEN 1 END) as valid_format_count
+  COUNT(CASE WHEN length(id) = 8 THEN 1 END) as valid_format_count
 FROM users;
 
 SELECT 
@@ -119,7 +119,7 @@ SELECT
   COUNT(*) as total_records,
   MIN(length(id)) as min_id_length,
   MAX(length(id)) as max_id_length,
-  COUNT(CASE WHEN id REGEXP '^[A-Za-z0-9]{10}$' THEN 1 END) as valid_format_count
+  COUNT(CASE WHEN length(id) = 10 THEN 1 END) as valid_format_count
 FROM listings;
 
 SELECT 

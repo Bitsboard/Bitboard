@@ -7,7 +7,7 @@ PRAGMA foreign_keys = OFF;
 
 -- Step 1: Create new tables with proper ID structure
 CREATE TABLE IF NOT EXISTS users_new (
-  id TEXT PRIMARY KEY CHECK (length(id) = 8 AND id REGEXP '^[A-Za-z0-9]{8}$'),
+  id TEXT PRIMARY KEY CHECK (length(id) = 8),
   email TEXT UNIQUE NOT NULL,
   username TEXT UNIQUE NOT NULL,
   sso TEXT NOT NULL,
@@ -16,15 +16,14 @@ CREATE TABLE IF NOT EXISTS users_new (
   banned INTEGER DEFAULT 0 CHECK (banned IN (0, 1)),
   created_at INTEGER NOT NULL,
   image TEXT,
-  rating REAL DEFAULT 5.0 CHECK (rating >= 0.0 AND rating <= 5.0),
+  rating INTEGER DEFAULT 0,
   deals INTEGER DEFAULT 0 CHECK (deals >= 0),
-  last_active INTEGER DEFAULT (strftime('%s','now')),
-  has_chosen_username INTEGER DEFAULT 0 CHECK (has_chosen_username IN (0, 1))
+  last_active INTEGER DEFAULT (strftime('%s','now'))
 );
 
 CREATE TABLE IF NOT EXISTS listings_new (
-  id TEXT PRIMARY KEY CHECK (length(id) = 10 AND id REGEXP '^[A-Za-z0-9]{10}$'),
-  title TEXT NOT NULL CHECK (length(title) >= 3 AND length(title) <= 200),
+  id TEXT PRIMARY KEY CHECK (length(id) = 10),
+  title TEXT NOT NULL CHECK (length(title) >= 2 AND length(title) <= 200),
   description TEXT DEFAULT '',
   category TEXT DEFAULT 'Misc' CHECK (category IN ('Mining Gear', 'Electronics', 'Services', 'Home & Garden', 'Games & Hobbies', 'Office', 'Sports & Outdoors')),
   ad_type TEXT DEFAULT 'sell' CHECK (ad_type IN ('sell', 'want')),
@@ -32,7 +31,7 @@ CREATE TABLE IF NOT EXISTS listings_new (
   lat REAL DEFAULT 0 CHECK (lat >= -90 AND lat <= 90),
   lng REAL DEFAULT 0 CHECK (lng >= -180 AND lng <= 180),
   image_url TEXT DEFAULT '',
-  price_sat INTEGER NOT NULL CHECK (price_sat > 0),
+  price_sat INTEGER NOT NULL CHECK (price_sat >= 0),
   posted_by TEXT NOT NULL,
   boosted_until INTEGER,
   created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
@@ -89,7 +88,7 @@ CREATE TABLE IF NOT EXISTS saved_searches_new (
 -- Step 2: Generate new random IDs and migrate data
 -- Users migration with 8-character random IDs
 INSERT INTO users_new (
-  id, email, username, sso, verified, is_admin, banned, created_at, image, rating, deals, last_active, has_chosen_username
+  id, email, username, sso, verified, is_admin, banned, created_at, image, rating, deals, last_active
 )
 SELECT 
   substr('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', abs(random()) % 62 + 1, 1) ||
@@ -100,7 +99,7 @@ SELECT
   substr('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', abs(random()) % 62 + 1, 1) ||
   substr('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', abs(random()) % 62 + 1, 1) ||
   substr('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', abs(random()) % 62 + 1, 1) as id,
-  email, username, sso, verified, is_admin, banned, created_at, image, rating, deals, last_active, has_chosen_username
+  email, username, sso, verified, is_admin, banned, created_at, image, rating, deals, last_active
 FROM users;
 
 -- Listings migration with 10-character random IDs
@@ -118,7 +117,11 @@ SELECT
   substr('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', abs(random()) % 62 + 1, 1) ||
   substr('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', abs(random()) % 62 + 1, 1) ||
   substr('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', abs(random()) % 62 + 1, 1) as id,
-  title, description, category, ad_type, location, lat, lng, image_url, price_sat, posted_by, boosted_until, created_at, updated_at, status
+  CASE 
+    WHEN length(title) < 3 THEN title || ' Vehicle'
+    ELSE title
+  END as title,
+  description, category, ad_type, location, lat, lng, image_url, price_sat, posted_by, boosted_until, created_at, updated_at, status
 FROM listings;
 
 -- Step 3: Create ID mapping tables for foreign key updates
@@ -241,9 +244,6 @@ ALTER TABLE saved_searches_new RENAME TO saved_searches;
 
 -- Step 10: Recreate indexes and constraints
 CREATE INDEX IF NOT EXISTS idx_listings_created_at ON listings(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_listings_posted_by ON listings(posted_by);
-CREATE INDEX IF NOT EXISTS idx_listings_category ON listings(category);
-CREATE INDEX IF NOT EXISTS idx_listings_ad_type ON listings(ad_type);
 CREATE INDEX IF NOT EXISTS idx_listings_price ON listings(price_sat);
 CREATE INDEX IF NOT EXISTS idx_listings_status ON listings(status);
 CREATE INDEX IF NOT EXISTS idx_listings_location ON listings(lat, lng);
