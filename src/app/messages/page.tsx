@@ -413,6 +413,11 @@ export default function MessagesPage() {
     }
   };
 
+  const handleListingClick = (listingId: string, title: string) => {
+    console.log('🔍 Handling listing click for ID:', listingId, 'with title:', title);
+    openListingModal(Number(listingId));
+  };
+
   useEffect(() => {
     if (user?.email) {
       loadChats();
@@ -681,9 +686,16 @@ export default function MessagesPage() {
                               </div>
                               
                               {/* Listing Title */}
-                              <h3 className={`font-semibold text-sm truncate mb-1 ${
-                                selectedChat === item.id ? 'text-white' : 'text-neutral-900 dark:text-white'
-                              }`}>
+                              <h3 
+                                className={`font-semibold text-sm truncate mb-1 cursor-pointer hover:underline ${
+                                  selectedChat === item.id ? 'text-white' : 'text-neutral-900 dark:text-white'
+                                }`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleListingClick(item.listing_id, item.listing_title);
+                                }}
+                                title="Click to view listing details"
+                              >
                                 {item.listing_title}
                               </h3>
                               

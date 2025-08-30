@@ -20,6 +20,7 @@ interface Listing {
   views: number;
   favorites: number;
   replies: number;
+  images?: string[]; // Added for multiple images
 }
 
 interface Chat {
@@ -345,16 +346,27 @@ export default function AdminListingsPage() {
                   </div>
                   
                   {/* Images Section */}
-                  {selectedListing.imageUrl && (
+                  {selectedListing.images && selectedListing.images.length > 0 && (
                     <div>
                       <span className="text-sm text-neutral-500 dark:text-neutral-400">Images:</span>
-                      <div className="mt-2 flex gap-2">
-                        <img 
-                          src={selectedListing.imageUrl} 
-                          alt={selectedListing.title}
-                          className="w-20 h-20 object-cover rounded border border-neutral-200 dark:border-neutral-600 cursor-pointer hover:opacity-80 transition-opacity"
-                          onClick={() => setSelectedImage(selectedListing.imageUrl)}
-                        />
+                      <div className="mt-2 flex gap-2 flex-wrap">
+                        {Array.isArray(selectedListing.images) ? selectedListing.images.map((imageUrl: string, index: number) => (
+                          <img 
+                            key={index}
+                            src={imageUrl} 
+                            alt={`${selectedListing.title} - Image ${index + 1}`}
+                            className="w-20 h-20 object-cover rounded border border-neutral-200 dark:border-neutral-600 cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => setSelectedImage(imageUrl)}
+                          />
+                        )) : (
+                          // Fallback for single image (backward compatibility)
+                          <img 
+                            src={typeof selectedListing.images === 'string' ? selectedListing.images : selectedListing.imageUrl || ''} 
+                            alt={selectedListing.title}
+                            className="w-20 h-20 object-cover rounded border border-neutral-200 dark:border-neutral-600 cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => setSelectedImage(typeof selectedListing.images === 'string' ? selectedListing.images : selectedListing.imageUrl || null)}
+                          />
+                        )}
                       </div>
                     </div>
                   )}
