@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 interface User {
-  id: string; // Now 8 alphanumeric characters
+  id: string;
   email: string;
   username: string;
   sso: string;
@@ -17,6 +17,43 @@ interface User {
   deals: number;
   last_active: number;
   has_chosen_username: boolean;
+  // Additional fields from API
+  isVerified?: boolean;
+  isAdmin?: boolean;
+  isBanned?: boolean;
+  banReason?: string;
+  banExpiresAt?: number;
+  createdAt?: number;
+  lastLoginAt?: number;
+  listingsCount?: number;
+  chatsCount?: number;
+  messagesCount?: number;
+  totalListingsValue?: number;
+  lastActivityAt?: number;
+}
+
+interface UserListing {
+  id: string;
+  title: string;
+  priceSat: number;
+  adType: 'sell' | 'want';
+  location: string;
+  category: string;
+  createdAt: number;
+  views: number;
+  status: string;
+}
+
+interface UserChat {
+  id: string;
+  listing_id: string;
+  listing_title: string;
+  other_user_id: string;
+  other_username: string;
+  createdAt: number;
+  lastMessageAt: number;
+  messageCount: number;
+  unreadCount: number;
 }
 
 export default function AdminUsersPage() {
@@ -27,6 +64,16 @@ export default function AdminUsersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage] = useState(20);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<'all' | 'verified' | 'unverified' | 'banned' | 'admin'>('all');
+  const [sortBy, setSortBy] = useState<'createdAt' | 'username' | 'email' | 'listingsCount' | 'chatsCount' | 'rating' | 'lastActivity'>('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  
+  // Selected user state
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [userListings, setUserListings] = useState<UserListing[]>([]);
+  const [userChats, setUserChats] = useState<UserChat[]>([]);
+  const [isLoadingUserData, setIsLoadingUserData] = useState(false);
   
   const router = useRouter();
 
@@ -46,6 +93,13 @@ export default function AdminUsersPage() {
     }
   }, [currentPage, isAuthenticated]);
 
+  // Handle search and filter changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadUsers();
+    }
+  }, [searchQuery, statusFilter]);
+
   const loadUsers = async () => {
     try {
       setIsLoading(true);
@@ -54,7 +108,13 @@ export default function AdminUsersPage() {
       const offset = (currentPage - 1) * itemsPerPage;
       console.log('🔍 Loading users - Page:', currentPage, 'Items per page:', itemsPerPage, 'Offset:', offset);
       
-      const response = await fetch(`/api/admin/users/list?limit=${itemsPerPage}&offset=${offset}`);
+      // Build query parameters
+      const params = new URLSearchParams();
+      params.append('limit', itemsPerPage.toString());
+      params.append('offset', offset.toString());
+      if (searchQuery) params.append('q', searchQuery);
+      
+      const response = await fetch(`/api/admin/users/list?${params.toString()}`);
       
       if (response.ok) {
         const data: any = await response.json();
@@ -83,9 +143,131 @@ export default function AdminUsersPage() {
     }
   };
 
+  const loadUserListings = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/admin/users/${userId}/listings`);
+      if (response.ok) {
+        const data = await response.json() as { success: boolean; listings?: any[]; error?: string };
+        if (data.success) {
+          setUserListings(data.listings || []);
+        } else {
+          console.error('Failed to load user listings:', data.error);
+          setUserListings([]);
+        }
+      } else {
+        console.error('Failed to load user listings:', response.status);
+        setUserListings([]);
+      }
+    } catch (error) {
+      console.error('Error loading user listings:', error);
+      setUserListings([]);
+    }
+  };
+
+  const loadUserChats = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/admin/users/${userId}/chats`);
+      if (response.ok) {
+        const data = await response.json() as { success: boolean; chats?: any[]; error?: string };
+        if (data.success) {
+          setUserChats(data.chats || []);
+        } else {
+          console.error('Failed to load user chats:', data.error);
+          setUserChats([]);
+        }
+      } else {
+        console.error('Failed to load user chats:', response.status);
+        setUserChats([]);
+      }
+    } catch (error) {
+      console.error('Error loading user chats:', error);
+      setUserChats([]);
+    }
+  };
+
+  const handleUserClick = (user: User) => {
+    setSelectedUser(user);
+    setIsLoadingUserData(true);
+    
+    // Load user's listings and chats
+    Promise.all([
+      loadUserListings(user.id),
+      loadUserChats(user.id)
+    ]).finally(() => {
+      setIsLoadingUserData(false);
+    });
+  };
+
+  const handleSort = (column: typeof sortBy) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('desc');
+    }
+  };
+
+  const handleSearch = () => {
+    setCurrentPage(1);
+    loadUsers();
+  };
+
+  const handleStatusFilterChange = (newStatus: typeof statusFilter) => {
+    setStatusFilter(newStatus);
+    setCurrentPage(1);
+    // Note: Status filtering would need to be implemented in the API
+    loadUsers();
+  };
+
+  const clearSelectedUser = () => {
+    setSelectedUser(null);
+    setUserListings([]);
+    setUserChats([]);
+  };
+
   const formatDate = (timestamp: number) => new Date(timestamp * 1000).toLocaleDateString();
   const formatTime = (timestamp: number) => new Date(timestamp * 1000).toLocaleTimeString();
   const formatPrice = (priceSat: number) => `${priceSat.toLocaleString()} sats`;
+
+  const getTimeAgo = (timestamp: number) => {
+    const now = Math.floor(Date.now() / 1000);
+    const diff = now - timestamp;
+    
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+    if (diff < 2592000) return `${Math.floor(diff / 86400)} days ago`;
+    return `${Math.floor(diff / 2592000)} months ago`;
+  };
+
+  const getStatusBadge = (user: User) => {
+    if (user.isAdmin || user.is_admin) {
+      return (
+        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
+          Admin
+        </span>
+      );
+    }
+    if (user.isBanned || user.banned) {
+      return (
+        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+          Banned
+        </span>
+      );
+    }
+    if (user.isVerified || user.verified) {
+      return (
+        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+          Verified
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+        Unverified
+      </span>
+    );
+  };
 
   if (!isAuthenticated) {
     return (
@@ -117,9 +299,16 @@ export default function AdminUsersPage() {
               <input
                 type="text"
                 placeholder="Search users..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 className="px-2 py-1 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-xs flex-1"
               />
-              <select className="px-2 py-1 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-xs">
+              <select 
+                value={statusFilter}
+                onChange={(e) => handleStatusFilterChange(e.target.value as typeof statusFilter)}
+                className="px-2 py-1 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-xs"
+              >
                 <option value="all">All Users</option>
                 <option value="verified">Verified</option>
                 <option value="unverified">Unverified</option>
@@ -127,9 +316,16 @@ export default function AdminUsersPage() {
                 <option value="admin">Admin</option>
               </select>
               <button
-                onClick={loadUsers}
+                onClick={handleSearch}
                 disabled={isLoading}
                 className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 disabled:opacity-50"
+              >
+                {isLoading ? 'Loading...' : 'Search'}
+              </button>
+              <button
+                onClick={loadUsers}
+                disabled={isLoading}
+                className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 disabled:opacity-50"
               >
                 {isLoading ? 'Loading...' : 'Refresh'}
               </button>
@@ -149,62 +345,290 @@ export default function AdminUsersPage() {
           </div>
         )}
 
+        {/* Top Section - Always Visible */}
+        <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 p-4 mb-4">
+          {selectedUser ? (
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Left Column - User Details (1/4 width) */}
+              <div className="lg:col-span-1">
+                <div className="space-y-4">
+                  {/* Row 1: Username and Status */}
+                  <div className="flex flex-col gap-2">
+                    {getStatusBadge(selectedUser)}
+                    <h3 className="text-xl font-semibold text-neutral-900 dark:text-white">
+                      {selectedUser.username}
+                    </h3>
+                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-600">
+                      ID: {selectedUser.id}
+                    </span>
+                  </div>
+                  
+                  {/* Row 2: Email and Signup Date */}
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-500 dark:text-neutral-400">Email:</span>
+                      <span className="text-neutral-900 dark:text-white truncate">{selectedUser.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-500 dark:text-neutral-400">Signed up:</span>
+                      <span className="text-neutral-900 dark:text-white">{formatDate(selectedUser.createdAt || selectedUser.created_at)}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Row 3: Stats */}
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-500 dark:text-neutral-400">Listings:</span>
+                      <span className="text-neutral-900 dark:text-white font-medium">{selectedUser.listingsCount || 0}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-500 dark:text-neutral-400">Chats:</span>
+                      <span className="text-neutral-900 dark:text-white font-medium">{selectedUser.chatsCount || 0}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-500 dark:text-neutral-400">Reputation:</span>
+                      <span className="text-neutral-900 dark:text-white font-medium">{selectedUser.rating.toFixed(1)}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-neutral-500 dark:text-neutral-400">Deals:</span>
+                      <span className="text-neutral-900 dark:text-white font-medium">{selectedUser.deals}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Row 4: Last Activity */}
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-neutral-500 dark:text-neutral-400">Last activity:</span>
+                    <span className="text-neutral-900 dark:text-white">
+                      {selectedUser.lastActivityAt || selectedUser.last_active ? getTimeAgo(selectedUser.lastActivityAt || selectedUser.last_active) : 'Never'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Middle Column - User Listings (2/4 width) */}
+              <div className="lg:col-span-2">
+                <div className="bg-neutral-50 dark:bg-neutral-700 rounded border border-neutral-200 dark:border-neutral-600 p-3 h-full">
+                  <h3 className="text-md font-semibold text-neutral-900 dark:text-white mb-3">
+                    User Listings ({userListings?.length || 0})
+                  </h3>
+                  
+                  <div className="h-[calc(100%-3rem)] overflow-y-auto space-y-2">
+                    {isLoadingUserData ? (
+                      <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading listings...</div>
+                    ) : userListings && userListings.length > 0 ? (
+                      userListings.map((listing) => (
+                        <div 
+                          key={listing.id} 
+                          className="bg-green-200 dark:bg-green-800 rounded p-2 border border-green-300 dark:border-green-600 hover:bg-green-300 dark:hover:bg-green-700 transition-colors cursor-pointer relative"
+                          onClick={() => window.location.href = `/admin/listings?title=${encodeURIComponent(listing.title)}&id=${encodeURIComponent(listing.id)}`}
+                        >
+                          {/* External Link Icon - Top Right */}
+                          <svg className="absolute top-1.5 right-1.5 w-3 h-3 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                          
+                          {/* Listing Title - Top Left */}
+                          <div className="mb-2">
+                            <div className="text-xs font-medium text-green-800 dark:text-green-200 truncate">
+                              {listing.title}
+                            </div>
+                          </div>
+                          
+                          {/* Bottom Row - Price & Type */}
+                          <div className="flex items-center justify-between text-xs text-green-800 dark:text-green-200">
+                            <span className={`inline-flex items-center px-1 py-0.5 rounded text-xs font-medium ${
+                              listing.adType === 'want' 
+                                ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
+                                : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+                            }`}>
+                              {listing.adType === 'want' ? 'Want' : 'Sell'}
+                            </span>
+                            <span>{listing.priceSat.toLocaleString()} sats</span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-sm text-neutral-500 dark:text-neutral-400">No listings found</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Right Column - Active Chats (1/4 width) */}
+              <div className="lg:col-span-1">
+                <div className="bg-neutral-50 dark:bg-neutral-700 rounded border border-neutral-200 dark:border-neutral-600 p-3 h-full">
+                  <h3 className="text-md font-semibold text-neutral-900 dark:text-white mb-3">
+                    Active Chats ({userChats?.length || 0})
+                  </h3>
+                  
+                  <div className="h-[calc(100%-3rem)] overflow-y-auto space-y-2">
+                    {isLoadingUserData ? (
+                      <div className="text-sm text-neutral-500 dark:text-neutral-400">Loading chats...</div>
+                    ) : userChats && userChats.length > 0 ? (
+                      userChats.map((chat) => (
+                        <div 
+                          key={chat.id} 
+                          className="bg-purple-200 dark:bg-purple-800 rounded p-2 border border-purple-300 dark:border-purple-600 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors cursor-pointer relative"
+                          onClick={() => window.location.href = `/admin/chats?chatId=${encodeURIComponent(chat.id)}&search=${encodeURIComponent(chat.listing_title || '')}`}
+                        >
+                          {/* External Link Icon - Top Right */}
+                          <svg className="absolute top-1.5 right-1.5 w-3 h-3 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                          
+                          {/* Listing Title - Top Left */}
+                          <div className="mb-2">
+                            <div className="text-xs font-medium text-purple-800 dark:text-purple-200 truncate">
+                              {chat.listing_title}
+                            </div>
+                          </div>
+                          
+                          {/* Bottom Row - Messages & Last Activity */}
+                          <div className="flex items-center justify-between text-xs text-purple-800 dark:text-purple-200">
+                            <span>{chat.messageCount} messages</span>
+                            <span>last: {getTimeAgo(chat.lastMessageAt)}</span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-sm text-neutral-500 dark:text-neutral-400">No active chats</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-2">No User Selected</h3>
+              <p className="text-neutral-500 dark:text-neutral-400">Click on a user in the table below to view their details</p>
+            </div>
+          )}
+        </div>
+
         {/* Users Table */}
         <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-neutral-50 dark:bg-neutral-700">
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">ID</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Date</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Username</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Email</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Status</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Listings</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Chats</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Rating</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Deals</th>
-                  <th className="px-1.5 py-1 text-left text-xs font-medium text-neutral-700 dark:text-neutral-300">Last Activity</th>
+            <table className="w-full space-y-0 font-mono text-xs">
+              <thead className="bg-neutral-100 dark:bg-neutral-800">
+                <tr>
+                  <th 
+                    className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('createdAt')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Date Signed Up
+                      {sortBy === 'createdAt' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">User ID</th>
+                  <th 
+                    className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('username')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Username
+                      {sortBy === 'username' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('email')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Email
+                      {sortBy === 'email' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">Status</th>
+                  <th 
+                    className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('listingsCount')}
+                  >
+                    <div className="flex items-center gap-1">
+                      # Listings
+                      {sortBy === 'listingsCount' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('chatsCount')}
+                  >
+                    <div className="flex items-center gap-1">
+                      # Chats
+                      {sortBy === 'chatsCount' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('rating')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Reputation
+                      {sortBy === 'rating' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
+                    onClick={() => handleSort('lastActivity')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Last Activity
+                      {sortBy === 'lastActivity' && (
+                        <span className="text-orange-500">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tbody className="space-y-0 font-mono text-xs">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={10} className="px-1.5 py-0.5 text-center text-neutral-500 dark:text-neutral-400">
-                      <div className="flex items-center justify-center">
-                        <div className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></div>
-                        Loading users...
-                      </div>
+                    <td colSpan={9} className="px-3 py-8 text-center">
+                      <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                      <p className="text-neutral-600 dark:text-neutral-400">Loading users...</p>
                     </td>
                   </tr>
                 ) : error ? (
                   <tr>
-                    <td colSpan={10} className="px-1.5 py-0.5 text-center text-neutral-500 dark:text-neutral-400">
-                      <div className="text-center">
-                        <svg className="w-8 h-8 text-red-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <p className="text-red-600 dark:text-red-400 font-medium text-xs">Failed to load users</p>
-                        <p className="text-neutral-500 dark:text-neutral-400 text-xs mt-1">{error}</p>
-                        <button
-                          onClick={loadUsers}
-                          className="mt-2 px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
-                        >
-                          Try Again
-                        </button>
-                      </div>
+                    <td colSpan={9} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                      {error}
                     </td>
                   </tr>
                 ) : users.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="px-1.5 py-0.5 text-center text-neutral-500 dark:text-neutral-400">
-                      <div className="text-center">
-                        <svg className="w-8 h-8 text-neutral-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <p className="text-neutral-600 dark:text-neutral-400 font-medium text-xs">No users found</p>
-                        <p className="text-neutral-500 dark:text-neutral-400 text-xs mt-1">Try refreshing or check your connection</p>
-                      </div>
+                    <td colSpan={9} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                      No users found
                     </td>
                   </tr>
                 ) : (
@@ -212,77 +636,60 @@ export default function AdminUsersPage() {
                     {users.map((user) => (
                       <tr 
                         key={user.id} 
-                        className="hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded px-1.5 -mx-1.5 transition-colors cursor-pointer"
+                        className="hover:bg-neutral-50 dark:hover:bg-neutral-700 cursor-pointer border-b border-neutral-200 dark:border-neutral-600"
+                        onClick={() => handleUserClick(user)}
                       >
                         <td className="px-1.5 py-0.5">
-                          <div className="text-xs text-neutral-500 dark:text-neutral-400 font-mono">
-                            {user.id.slice(0, 8)}...
+                          <div className="text-neutral-600 dark:text-neutral-400">
+                            {formatDate(user.createdAt || user.created_at)}
                           </div>
                         </td>
                         <td className="px-1.5 py-0.5">
-                          <div className="text-xs text-neutral-600 dark:text-neutral-400">
-                            {formatDate(user.created_at)}
-                          </div>
-                          <div className="text-xs text-neutral-500">
-                            {formatTime(user.created_at)}
+                          <div className="font-mono text-xs text-neutral-900 dark:text-white">
+                            {user.id}
                           </div>
                         </td>
                         <td className="px-1.5 py-0.5">
-                          <div className="text-xs font-medium text-neutral-900 dark:text-white">
-                            {user.username}
+                          <div className="flex items-center gap-2">
+                            {user.image && (
+                              <img 
+                                src={user.image} 
+                                alt={user.username}
+                                className="w-6 h-6 rounded-full object-cover"
+                              />
+                            )}
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                              {user.username}
+                            </span>
                           </div>
                         </td>
                         <td className="px-1.5 py-0.5">
-                          <div className="text-xs text-neutral-600 dark:text-neutral-400 max-w-32 truncate">
+                          <div className="text-neutral-600 dark:text-neutral-400 max-w-32 truncate">
                             {user.email}
                           </div>
                         </td>
                         <td className="px-1.5 py-0.5">
-                          <div className="flex flex-col gap-1">
-                            {user.is_admin && (
-                              <span className="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
-                                Admin
-                              </span>
-                            )}
-                            {user.verified && (
-                              <span className="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                Verified
-                              </span>
-                            )}
-                            {user.banned && (
-                              <span className="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
-                                Banned
-                              </span>
-                            )}
-                            {!user.verified && !user.banned && !user.is_admin && (
-                              <span className="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
-                                Unverified
-                              </span>
-                            )}
+                          {getStatusBadge(user)}
+                        </td>
+                        <td className="px-1.5 py-0.5">
+                          <div className="text-neutral-900 dark:text-white">
+                            {user.listingsCount || 0}
                           </div>
                         </td>
                         <td className="px-1.5 py-0.5">
-                          <div className="text-xs text-neutral-900 dark:text-white">
+                          <div className="text-neutral-900 dark:text-white">
+                            {user.chatsCount || 0}
+                          </div>
+                        </td>
+                        <td className="px-1.5 py-0.5">
+                          <div className="text-neutral-900 dark:text-white">
                             {user.rating.toFixed(1)}
                           </div>
                         </td>
                         <td className="px-1.5 py-0.5">
-                          <div className="text-xs text-neutral-900 dark:text-white">
-                            {user.deals.toLocaleString()}
+                          <div className="text-neutral-600 dark:text-neutral-400">
+                            {user.lastActivityAt || user.last_active ? getTimeAgo(user.lastActivityAt || user.last_active) : 'Never'}
                           </div>
-                        </td>
-                        <td className="px-1.5 py-0.5">
-                          <div className="text-xs text-neutral-600 dark:text-neutral-400">
-                            {user.last_active ? formatDate(user.last_active) : 'Never'}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                    {/* Fill remaining rows to maintain 20 row height */}
-                    {Array.from({ length: Math.max(0, 20 - users.length) }).map((_, index) => (
-                      <tr key={`empty-${index}`} className="h-6">
-                        <td colSpan={10} className="px-1.5 py-0.5">
-                          <div className="h-6"></div>
                         </td>
                       </tr>
                     ))}
