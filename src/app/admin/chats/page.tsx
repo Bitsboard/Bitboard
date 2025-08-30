@@ -362,10 +362,10 @@ export default function AdminChatsPage() {
                               e.stopPropagation();
                               router.push(`/admin/listings?title=${encodeURIComponent(chat.listing_title || '')}&id=${encodeURIComponent(chat.listing_id)}`);
                             }}
-                            className="inline-flex items-center gap-1.5 px-1.5 py-0.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded-full font-medium hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
+                            className="inline-flex items-center gap-1.5 px-1.5 py-0.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded-full font-medium hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors max-w-[200px]"
                           >
-                            {chat.listing_title}
-                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <span className="truncate">{chat.listing_title}</span>
+                            <svg className="w-2.5 h-2.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                             </svg>
                           </button>
@@ -475,9 +475,15 @@ export default function AdminChatsPage() {
                   {/* Chat Header - Compact Layout */}
                   <div className="mb-2 pb-2 border-b border-neutral-200 dark:border-neutral-700">
                     <div className="flex items-start justify-between gap-2 mb-1.5">
-                      <h4 className="font-medium text-neutral-900 dark:text-white text-xs leading-tight flex-1 min-w-0">
-                        {selectedChat.listing_title}
-                      </h4>
+                      <button
+                        onClick={() => router.push(`/admin/listings?title=${encodeURIComponent(selectedChat.listing_title || '')}&id=${encodeURIComponent(selectedChat.listing_id)}`)}
+                        className="inline-flex items-center gap-1.5 px-1.5 py-0.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded-full font-medium hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors flex-1 max-w-[200px]"
+                      >
+                        <span className="truncate">{selectedChat.listing_title}</span>
+                        <svg className="w-2.5 h-2.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </button>
                       <span className="text-xs text-neutral-500 bg-neutral-100 dark:bg-neutral-700 px-1.5 py-0.5 rounded">
                         {chatMessages.length}
                       </span>
