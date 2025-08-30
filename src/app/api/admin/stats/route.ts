@@ -58,7 +58,7 @@ export async function GET(req: Request) {
       FROM messages
     `).all();
 
-    // Get recent activity with better details (last 30 actions for comprehensive view)
+    // Get recent activity with simplified queries
     const recentActivity = await db.prepare(`
       SELECT 
         'user' as type,
@@ -74,7 +74,11 @@ export async function GET(req: Request) {
         NULL as message_count
       FROM users u
       WHERE u.created_at >= strftime('%s', 'now', '-7 days')
-      UNION ALL
+      ORDER BY u.created_at DESC
+      LIMIT 10
+    `).all();
+
+    const recentListings = await db.prepare(`
       SELECT 
         'listing' as type,
         u.username as username,
@@ -90,24 +94,11 @@ export async function GET(req: Request) {
       FROM listings l
       JOIN users u ON l.posted_by = u.id
       WHERE l.created_at >= strftime('%s', 'now', '-7 days')
-      UNION ALL
-      SELECT 
-        'listing' as type,
-        u.username as username,
-        u.id as user_id,
-        u.email as email,
-        'updated' as action,
-        l.updated_at as timestamp,
-        l.title as listing_title,
-        l.id as listing_id,
-        NULL as other_username,
-        NULL as chat_id,
-        NULL as message_count
-      FROM listings l
-      JOIN users u ON l.posted_by = u.id
-      WHERE l.updated_at >= strftime('%s', 'now', '-7 days') AND l.updated_at != l.created_at
+      ORDER BY l.created_at DESC
+      LIMIT 10
+    `).all();
 
-      UNION ALL
+    const recentMessages = await db.prepare(`
       SELECT 
         'message' as type,
         u.username as username,
@@ -117,28 +108,24 @@ export async function GET(req: Request) {
         m.created_at as timestamp,
         l.title as listing_title,
         l.id as listing_id,
-        CASE 
-          WHEN m.from_id = u.id THEN 
-            (SELECT username FROM users WHERE id = (
-              SELECT CASE 
-                WHEN c.buyer_id = m.from_id THEN c.seller_id 
-                ELSE c.buyer_id 
-              END 
-              FROM chats c WHERE c.id = m.chat_id
-            ))
-          ELSE 
-            (SELECT username FROM users WHERE id = m.from_id)
-        END as other_username,
+        NULL as other_username,
         m.chat_id as chat_id,
-        (SELECT COUNT(*) FROM messages WHERE chat_id = m.chat_id AND created_at <= m.created_at) as message_count
+        NULL as message_count
       FROM messages m
       JOIN users u ON m.from_id = u.id
       JOIN chats c ON m.chat_id = c.id
       JOIN listings l ON c.listing_id = l.id
       WHERE m.created_at >= strftime('%s', 'now', '-7 days')
-      ORDER BY timestamp DESC
-      LIMIT 30
+      ORDER BY m.created_at DESC
+      LIMIT 10
     `).all();
+
+    // Combine and sort all recent activity
+    const allActivity = [
+      ...recentActivity.results || [],
+      ...recentListings.results || [],
+      ...recentMessages.results || []
+    ].sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 30);
 
     const stats = {
       users: {
@@ -165,7 +152,7 @@ export async function GET(req: Request) {
         new7d: Number(chatStats.results?.[0]?.new_chats_7d) || 0,
         new30d: Number(chatStats.results?.[0]?.new_chats_30d) || 0
       },
-      recentActivity: recentActivity.results || []
+      recentActivity: allActivity
     };
 
     return NextResponse.json({ success: true, data: stats });

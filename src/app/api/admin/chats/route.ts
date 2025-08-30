@@ -1,33 +1,22 @@
 import '../../../../shims/async_hooks';
 import { NextResponse } from "next/server";
 import { getD1, ensureChatSchema } from '@/lib/cf';
-import { getSessionFromRequest, isAdmin } from '@/lib/auth';
 
 export const runtime = "edge";
 
 export async function GET(req: Request) {
   try {
-    const session = await getSessionFromRequest(req);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-    }
-
-    // Check if user is admin
-    const adminCheck = await isAdmin(session.user.email);
-    if (!adminCheck) {
-      return NextResponse.json({ error: 'forbidden' }, { status: 403 });
-    }
-
-    const url = new URL(req.url);
-    const limit = Math.min(100, parseInt(url.searchParams.get('limit') ?? '100', 10) || 100);
-    const offset = Math.max(0, parseInt(url.searchParams.get('offset') ?? '0', 10) || 0);
-
     const db = await getD1();
     if (!db) return NextResponse.json({ error: 'no_db_binding' }, { status: 500 });
     
     await ensureChatSchema(db);
     
     console.log('🔍 Admin Chats API: Database connection established, fetching chats...');
+    
+    const url = new URL(req.url);
+    const limit = Math.min(100, parseInt(url.searchParams.get('limit') ?? '100', 10) || 100);
+    const offset = Math.max(0, parseInt(url.searchParams.get('offset') ?? '0', 10) || 0);
+    
     console.log('🔍 Admin Chats API: Limit:', limit, 'Offset:', offset);
     
     // Get all chats with listing and user details
