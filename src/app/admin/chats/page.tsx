@@ -39,7 +39,7 @@ export default function AdminChatsPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [itemsPerPage] = useState(100);
+  const [itemsPerPage] = useState(20);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
@@ -172,44 +172,44 @@ export default function AdminChatsPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
-      {/* Compact Header */}
+      {/* Condensed Header */}
       <div className="bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700">
-        <div className="max-w-7xl mx-auto px-4 py-3">
+        <div className="max-w-7xl mx-auto px-4 py-2">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-lg font-semibold text-neutral-900 dark:text-white">Chats Management</h1>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                Total: {chats.length} | Active Today: {chats.filter(c => {
+            <div className="flex items-center gap-4">
+              <h1 className="text-base font-semibold text-neutral-900 dark:text-white">Chats Management</h1>
+              <span className="text-xs text-neutral-600 dark:text-neutral-400">
+                {chats.length} total • {chats.filter(c => {
                   const oneDayAgo = Math.floor(Date.now() / 1000) - (24 * 60 * 60);
                   return c.last_message_at >= oneDayAgo;
-                }).length}
-              </p>
+                }).length} active today
+              </span>
             </div>
             <button
               onClick={() => router.push('/admin')}
-              className="px-3 py-1.5 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded text-sm hover:bg-neutral-300 dark:hover:bg-neutral-600"
+              className="px-2 py-1 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded text-xs hover:bg-neutral-300 dark:hover:bg-neutral-600"
             >
-              ← Admin
+              Admin dashboard
             </button>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-4">
-        {/* Compact Filters */}
-        <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 p-3 mb-4">
-          <div className="flex gap-3 items-center">
+        {/* Condensed Filters */}
+        <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 p-2 mb-3">
+          <div className="flex gap-2 items-center">
             <input
               type="text"
               placeholder="Search chats..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="px-3 py-1.5 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-sm flex-1"
+              className="px-2 py-1 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-xs flex-1"
             />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="px-3 py-1.5 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-sm"
+              className="px-2 py-1 border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white text-xs"
             >
               <option value="all">All Chats</option>
               <option value="active">Active Today</option>
@@ -218,7 +218,7 @@ export default function AdminChatsPage() {
             <button
               onClick={loadChats}
               disabled={isLoading}
-              className="px-3 py-1.5 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 disabled:opacity-50"
+              className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 disabled:opacity-50"
             >
               {isLoading ? 'Refreshing...' : 'Refresh'}
             </button>
@@ -231,18 +231,17 @@ export default function AdminChatsPage() {
           <div className="flex-[0.7]">
             {/* Enhanced Chats Table with Individual Stat Columns */}
             <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden">
-          {/* Table Summary */}
-          <div className="px-4 py-3 bg-neutral-50 dark:bg-neutral-700 border-b border-neutral-200 dark:border-neutral-600">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-neutral-600 dark:text-neutral-400">
-                <span className="font-medium">Total Chats:</span> {chats.length} of {Math.ceil((chats.length / itemsPerPage) * itemsPerPage)} 
-                {totalPages > 1 && ` • Page ${currentPage} of ${totalPages}`}
-              </div>
-              <div className="text-xs text-neutral-500 dark:text-neutral-500">
-                Showing {itemsPerPage} chats per page
+                      {/* Table Summary */}
+            <div className="px-3 py-2 bg-neutral-50 dark:bg-neutral-700 border-b border-neutral-200 dark:border-neutral-600">
+              <div className="flex items-center justify-between">
+                <div className="text-xs text-neutral-600 dark:text-neutral-400">
+                  <span className="font-medium">{chats.length}</span> chats • Page {currentPage} of {totalPages}
+                </div>
+                <div className="text-xs text-neutral-500 dark:text-neutral-500">
+                  {itemsPerPage} per page
+                </div>
               </div>
             </div>
-          </div>
           
                     <div className="overflow-x-auto">
             <table className="w-full space-y-0 font-mono text-xs">
@@ -303,116 +302,126 @@ export default function AdminChatsPage() {
                     </td>
                   </tr>
                 ) : (
-                  paginatedChats.map((chat) => (
-                    <tr 
-                      key={chat.id} 
-                      className={`hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded px-1.5 -mx-1.5 transition-colors cursor-pointer ${
-                        selectedChat?.id === chat.id ? 'bg-blue-100 dark:bg-blue-900/40 border-l-4 border-blue-500 shadow-sm' : ''
-                      }`}
-                      onClick={() => selectChat(chat)}
-                    >
-                      <td className="px-1.5 py-0.5">
-                        <div className="text-neutral-600 dark:text-neutral-400">
-                          {formatDate(chat.created_at)}
-                        </div>
-                      </td>
-                      <td className="px-1.5 py-0.5">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            router.push(`/admin/listings?search=${chat.listing_title}`);
-                          }}
-                          className="inline-flex items-center gap-1.5 px-1.5 py-0.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded-full font-medium hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
-                        >
-                          {chat.listing_title}
-                          <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                        </button>
-                      </td>
-                      <td className="px-1.5 py-0.5">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            router.push(`/admin/users?search=${chat.seller_username || chat.seller_id}`);
-                          }}
-                          className="inline-flex items-center gap-1.5 px-1.5 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded-full font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
-                        >
-                          {chat.seller_username || chat.seller_id.slice(0, 8) + '...'}
-                          <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                        </button>
-                      </td>
-                      <td className="px-1.5 py-0.5">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            router.push(`/admin/users?search=${chat.buyer_username || chat.buyer_id}`);
-                          }}
-                          className="inline-flex items-center gap-1.5 px-1.5 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded-full font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
-                        >
-                          {chat.buyer_username || chat.buyer_id.slice(0, 8) + '...'}
-                          <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                        </button>
-                      </td>
-                      <td className="px-1.5 py-0.5">
-                        <div className="text-neutral-900 dark:text-white">
-                          {chat.messageCount.toLocaleString()}
-                        </div>
-                      </td>
-                      <td className="px-1.5 py-0.5">
-                        <div className="text-neutral-900 dark:text-white">
-                          {formatRelativeTime(chat.last_message_at)}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                  <>
+                    {paginatedChats.map((chat) => (
+                      <tr 
+                        key={chat.id} 
+                        className={`hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded px-1.5 -mx-1.5 transition-colors cursor-pointer ${
+                          selectedChat?.id === chat.id ? 'bg-blue-100 dark:bg-blue-900/40 border-l-4 border-blue-500 shadow-sm' : ''
+                        }`}
+                        onClick={() => selectChat(chat)}
+                      >
+                        <td className="px-1.5 py-0.5">
+                          <div className="text-neutral-600 dark:text-neutral-400">
+                            {formatDate(chat.created_at)}
+                          </div>
+                        </td>
+                        <td className="px-1.5 py-0.5">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/admin/listings?search=${chat.listing_title}`);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-1.5 py-0.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded-full font-medium hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
+                          >
+                            {chat.listing_title}
+                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </button>
+                        </td>
+                        <td className="px-1.5 py-0.5">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/admin/users?search=${chat.seller_username || chat.seller_id}`);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-1.5 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded-full font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                          >
+                            {chat.seller_username || chat.seller_id.slice(0, 8) + '...'}
+                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </button>
+                        </td>
+                        <td className="px-1.5 py-0.5">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/admin/users?search=${chat.buyer_username || chat.buyer_id}`);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-1.5 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded-full font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                          >
+                            {chat.buyer_username || chat.buyer_id.slice(0, 8) + '...'}
+                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </button>
+                        </td>
+                        <td className="px-1.5 py-0.5">
+                          <div className="text-neutral-900 dark:text-white">
+                            {chat.messageCount.toLocaleString()}
+                          </div>
+                        </td>
+                        <td className="px-1.5 py-0.5">
+                          <div className="text-neutral-900 dark:text-white">
+                            {formatRelativeTime(chat.last_message_at)}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {/* Fill remaining rows to maintain 20 row height */}
+                    {Array.from({ length: Math.max(0, 20 - paginatedChats.length) }).map((_, index) => (
+                      <tr key={`empty-${index}`} className="h-6">
+                        <td colSpan={6} className="px-1.5 py-0.5">
+                          <div className="h-6"></div>
+                        </td>
+                      </tr>
+                    ))}
+                  </>
                 )}
               </tbody>
             </table>
           </div>
 
           {/* Compact Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-between items-center py-3 px-3 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
-              <div className="text-xs text-neutral-600">
-                Page {currentPage} of {totalPages} | {filteredChats.length} chats
-              </div>
-              <div className="flex gap-2">
+          <div className="flex justify-between items-center py-2 px-3 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
+            <div className="text-xs text-neutral-600">
+              {filteredChats.length} chats • Page {currentPage} of {totalPages}
+            </div>
+            {totalPages > 1 && (
+              <div className="flex gap-1">
                 <button
                   onClick={() => setCurrentPage(1)}
                   disabled={currentPage === 1}
-                  className="px-2 py-1 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
+                  className="px-1.5 py-0.5 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
                 >
                   First
                 </button>
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
-                  className="px-2 py-1 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
+                  className="px-1.5 py-0.5 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
                 >
                   Prev
                 </button>
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-2 py-1 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
+                  className="px-1.5 py-0.5 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
                 >
                   Next
                 </button>
                 <button
                   onClick={() => setCurrentPage(totalPages)}
                   disabled={currentPage === totalPages}
-                  className="px-2 py-1 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
+                  className="px-1.5 py-0.5 rounded text-xs text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
                 >
                   Last
                 </button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
             </div>
           </div>
 
@@ -427,28 +436,38 @@ export default function AdminChatsPage() {
               </div>
               
               {selectedChat ? (
-                <div className="p-3">
-                  {/* Chat Header - Condensed */}
-                  <div className="mb-3 pb-2 border-b border-neutral-200 dark:border-neutral-700">
-                    <h4 className="font-medium text-neutral-900 dark:text-white text-xs mb-1.5 truncate">
-                      {selectedChat.listing_title}
-                    </h4>
-                    <div className="flex items-center gap-1.5 text-xs text-neutral-600 dark:text-neutral-400">
-                      <span className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded-full text-xs">
-                        {selectedChat.seller_username || selectedChat.seller_id.slice(0, 8) + '...'}
-                      </span>
-                      <span className="text-xs">↔</span>
-                      <span className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 px-1.5 py-0.5 rounded-full text-xs">
-                        {selectedChat.buyer_username || selectedChat.buyer_id.slice(0, 8) + '...'}
+                <div className="p-2">
+                  {/* Chat Header - Compact Layout */}
+                  <div className="mb-2 pb-2 border-b border-neutral-200 dark:border-neutral-700">
+                    <div className="flex items-start justify-between gap-2 mb-1.5">
+                      <h4 className="font-medium text-neutral-900 dark:text-white text-xs leading-tight flex-1 min-w-0">
+                        {selectedChat.listing_title}
+                      </h4>
+                      <span className="text-xs text-neutral-500 bg-neutral-100 dark:bg-neutral-700 px-1.5 py-0.5 rounded">
+                        {chatMessages.length}
                       </span>
                     </div>
+                    <div className="grid grid-cols-2 gap-1.5 text-xs">
+                      <div className="flex items-center gap-1">
+                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                        <span className="text-neutral-600 dark:text-neutral-400 truncate">
+                          {selectedChat.seller_username || selectedChat.seller_id.slice(0, 8) + '...'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                        <span className="text-neutral-600 dark:text-neutral-400 truncate">
+                          {selectedChat.buyer_username || selectedChat.buyer_id.slice(0, 8) + '...'}
+                        </span>
+                      </div>
+                    </div>
                     <div className="mt-1.5 text-xs text-neutral-500">
-                      {formatDate(selectedChat.created_at)} • {chatMessages.length} msg{chatMessages.length !== 1 ? 's' : ''}
+                      {formatDate(selectedChat.created_at)}
                     </div>
                   </div>
 
                   {/* Messages - Condensed */}
-                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                  <div className="space-y-2 h-80 overflow-y-auto">
                     {messagesLoading ? (
                       <div className="text-center py-3">
                         <div className="w-3 h-3 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-1.5"></div>
