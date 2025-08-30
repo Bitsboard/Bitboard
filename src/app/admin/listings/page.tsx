@@ -279,7 +279,6 @@ export default function AdminListingsPage() {
       if (response.ok) {
         const data = await response.json() as { success: boolean; images?: string[]; error?: string };
         if (data.success) {
-          console.log('✅ Images loaded successfully for listing:', listingId, 'Images:', data.images);
           setListingImages(data.images || []);
         } else {
           console.error('Failed to load images:', data.error);

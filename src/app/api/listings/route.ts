@@ -140,15 +140,7 @@ export async function GET(req: NextRequest) {
         .bind(...binds)
         .all();
     }
-    const total = (totalRow.results?.[0] as any)?.c ?? 0;
-
-    // Staging/demo: diversify images if missing
-    const stock = [
-      '1518770660439-4636190af475', '1542751371-adc38448a05e',
-      '1518779578993-ec3579fee39f', '1512496015851-a90fb38ba796',
-      '1517816743773-6e0fd518b4a6', '1517245386807-bb43f82c33c4',
-      '1541532713592-79a0317b6b77', '1555617117-08d3a8fef16c'
-    ];
+    const total = (totalRow.results?.[0]?.c ?? 0);
 
     const listings = results.map((r: any, i: any) => {
       // Debug: Log the raw title values from database
@@ -166,8 +158,7 @@ export async function GET(req: NextRequest) {
       
       return {
         ...r,
-        imageUrl: r.imageUrl && r.imageUrl.trim() ? r.imageUrl :
-          `https://images.unsplash.com/photo-${stock[i % stock.length]}?q=80&w=1600&auto=format&fit=crop`,
+        imageUrl: r.imageUrl && r.imageUrl.trim() ? r.imageUrl : '',
         // Create the seller object structure that the frontend expects
         seller: {
           name: r.postedBy || 'unknown',
@@ -180,19 +171,8 @@ export async function GET(req: NextRequest) {
           },
           onTimeRelease: 100 // Default value
         },
-        // Add missing fields that the frontend expects
-        images: r.imageUrl && r.imageUrl.trim() ? 
-          // If we have a real image, create an array with it plus some stock images for variety
-          [r.imageUrl, 
-           `https://images.unsplash.com/photo-${stock[i % stock.length]}?q=80&w=1600&auto=format&fit=crop`,
-           `https://images.unsplash.com/photo-${stock[(i + 1) % stock.length]}?q=80&w=1600&auto=format&fit=crop`
-          ] : 
-          // If no real image, use multiple stock images
-          [
-            `https://images.unsplash.com/photo-${stock[i % stock.length]}?q=80&w=1600&auto=format&fit=crop`,
-            `https://images.unsplash.com/photo-${stock[(i + 1) % stock.length]}?q=80&w=1600&auto=format&fit=crop`,
-            `https://images.unsplash.com/photo-${stock[(i + 2) % stock.length]}?q=80&w=1600&auto=format&fit=crop`
-          ],
+        // Return only real images from the database
+        images: r.imageUrl && r.imageUrl.trim() ? [r.imageUrl] : [],
         type: r.adType === 'want' ? 'want' : 'sell',
         priceSats: r.priceSat || 0,
         createdAt: r.createdAt || Date.now()

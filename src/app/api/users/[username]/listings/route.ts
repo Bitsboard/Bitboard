@@ -72,29 +72,12 @@ export async function GET(
 
     const listings = listingsResult.results || [];
 
-    // Stock images for creating galleries when listings only have one image
-    const stockImages = [
-      'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1600&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1600&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=1600&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1600&auto=format&fit=crop'
-    ];
-
     // Transform listings to match expected format
     const transformedListings = listings.map((listing: any, index: number) => {
-      // Create a gallery with the main image + stock images
+      // Use only real images from the database
       let images = [];
       if (listing.imageUrl && listing.imageUrl.trim()) {
-        // Start with the main listing image
         images.push(listing.imageUrl);
-        // Add 2-3 stock images to create a gallery
-        const stockStart = (index * 2) % stockImages.length;
-        images.push(stockImages[stockStart]);
-        images.push(stockImages[(stockStart + 1) % stockImages.length]);
-      } else {
-        // If no main image, use stock images
-        const stockStart = (index * 2) % stockImages.length;
-        images = stockImages.slice(stockStart, stockStart + 3);
       }
 
       return {
@@ -108,7 +91,7 @@ export async function GET(
         location: listing.location || '',
         lat: listing.lat || 0,
         lng: listing.lng || 0,
-        images: images, // Now we have a proper gallery array
+        images: images, // Now we have only real images
         boostedUntil: listing.boostedUntil,
         status: listing.status || 'active',
         seller: {

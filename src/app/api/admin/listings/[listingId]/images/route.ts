@@ -35,29 +35,21 @@ export async function GET(
       ORDER BY image_order
     `).bind(listingId).all();
 
-    console.log('🔍 Images query result for listing:', listingId, 'Result:', imagesResult);
-
     let images: string[] = [];
     
     if (imagesResult.results && imagesResult.results.length > 0) {
       // Use images from listing_images table
       images = imagesResult.results.map((row: any) => row.image_url);
-      console.log('✅ Found images in listing_images table:', images);
     } else {
       // Fallback to the original image_url field
       const listingResult = await db.prepare(`
         SELECT image_url FROM listings WHERE id = ?
       `).bind(listingId).first();
       
-      console.log('🔍 Fallback query result for listing:', listingId, 'Result:', listingResult);
-      
       if (listingResult && (listingResult as any).image_url) {
         images = [(listingResult as any).image_url as string];
-        console.log('✅ Found fallback image in listings table:', images);
       }
     }
-
-    console.log('📸 Final images array for listing:', listingId, 'Images:', images);
 
     return NextResponse.json({
       success: true,
