@@ -155,7 +155,37 @@ export async function GET(req: Request) {
       // Continue anyway - table might exist but check failed
     }
     
-    // Simple query to get listings
+    // First, let's see what columns actually exist in the listings table
+    console.log('🔍 Admin Listings API: Checking actual table schema...');
+    try {
+      const schemaResult = await db.prepare("PRAGMA table_info(listings)").all();
+      console.log('🔍 Admin Listings API: Table schema:', schemaResult);
+      
+      if (schemaResult.results) {
+        const columnNames = schemaResult.results.map((col: any) => col.name);
+        console.log('🔍 Admin Listings API: Available columns:', columnNames);
+      }
+    } catch (schemaError: any) {
+      console.error('🔍 Admin Listings API: Schema check failed:', schemaError);
+    }
+    
+    // Try a very simple query first
+    console.log('🔍 Admin Listings API: Testing simple query...');
+    try {
+      const simpleResult = await db.prepare('SELECT * FROM listings LIMIT 1').all();
+      console.log('🔍 Admin Listings API: Simple query result:', simpleResult);
+      
+      if (simpleResult.results && simpleResult.results.length > 0) {
+        const firstRow = simpleResult.results[0];
+        console.log('🔍 Admin Listings API: First row keys:', Object.keys(firstRow));
+        console.log('🔍 Admin Listings API: First row sample:', firstRow);
+      }
+    } catch (simpleError: any) {
+      console.error('🔍 Admin Listings API: Simple query failed:', simpleError);
+    }
+    
+    // Now try the main query with proper column mapping
+    console.log('🔍 Admin Listings API: Executing main query...');
     const listingsQuery = `
       SELECT 
         id,
