@@ -56,6 +56,8 @@ export default function AdminListingsPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [listingImages, setListingImages] = useState<string[]>([]);
   const [isSearchingForListing, setIsSearchingForListing] = useState(false);
+  const [selectedListings, setSelectedListings] = useState<Set<string>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
 
   // Check if we need to search for a specific listing (e.g., from activity feed)
   useEffect(() => {
@@ -294,6 +296,70 @@ export default function AdminListingsPage() {
     }
   };
 
+  const handleSelectListing = (listingId: string, checked: boolean) => {
+    const newSelected = new Set(selectedListings);
+    if (checked) {
+      newSelected.add(listingId);
+    } else {
+      newSelected.delete(listingId);
+    }
+    setSelectedListings(newSelected);
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedListings(new Set(listings.map(l => l.id)));
+      setSelectAll(true);
+    } else {
+      setSelectedListings(new Set());
+      setSelectAll(false);
+    }
+  };
+
+  const handleBulkBoost = async () => {
+    if (selectedListings.size === 0) return;
+    
+    try {
+      // TODO: Implement actual boost API call
+      console.log('Boosting listings:', Array.from(selectedListings));
+      
+      // For now, just show a success message
+      alert(`Boosted ${selectedListings.size} listing(s)`);
+      
+      // Clear selection after action
+      setSelectedListings(new Set());
+      setSelectAll(false);
+    } catch (error) {
+      console.error('Error boosting listings:', error);
+      alert('Failed to boost listings');
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedListings.size === 0) return;
+    
+    if (!confirm(`Are you sure you want to delete ${selectedListings.size} listing(s)? This action cannot be undone.`)) {
+      return;
+    }
+    
+    try {
+      // TODO: Implement actual delete API call
+      console.log('Deleting listings:', Array.from(selectedListings));
+      
+      // For now, just remove from frontend state
+      setListings(prev => prev.filter(l => !selectedListings.has(l.id)));
+      
+      // Clear selection after action
+      setSelectedListings(new Set());
+      setSelectAll(false);
+      
+      alert(`Deleted ${selectedListings.size} listing(s)`);
+    } catch (error) {
+      console.error('Error deleting listings:', error);
+      alert('Failed to delete listings');
+    }
+  };
+
   const clearSelectedListing = () => {
     setSelectedListing(null);
     setListingChats([]);
@@ -359,6 +425,32 @@ export default function AdminListingsPage() {
               >
                 {isLoading ? 'Loading...' : 'Refresh'}
               </button>
+              
+              {/* Bulk Action Buttons */}
+              {selectedListings.size > 0 && (
+                <>
+                  <button
+                    onClick={handleBulkBoost}
+                    disabled={isLoading}
+                    className="px-3 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 disabled:opacity-50 flex items-center gap-1"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Boost ({selectedListings.size})
+                  </button>
+                  <button
+                    onClick={handleBulkDelete}
+                    disabled={isLoading}
+                    className="px-3 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 disabled:opacity-50 flex items-center gap-1"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Delete ({selectedListings.size})
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -559,8 +651,16 @@ export default function AdminListingsPage() {
         <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full space-y-0 font-mono text-xs">
-              <thead className="bg-neutral-50 dark:bg-neutral-700">
-                <tr className="h-6">
+              <thead className="bg-neutral-100 dark:bg-neutral-800">
+                <tr>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                    <input
+                      type="checkbox"
+                      checked={selectAll}
+                      onChange={(e) => handleSelectAll(e.target.checked)}
+                      className="rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+                    />
+                  </th>
                   <th 
                     className="px-1.5 py-0.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors"
                     onClick={() => handleSort('createdAt')}
@@ -671,20 +771,20 @@ export default function AdminListingsPage() {
               <tbody className="space-y-0 font-mono text-xs">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={9} className="px-3 py-8 text-center">
+                    <td colSpan={10} className="px-3 py-8 text-center">
                       <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
                       <p className="text-neutral-600 dark:text-neutral-400">Loading listings...</p>
                     </td>
                   </tr>
                 ) : error ? (
                   <tr>
-                    <td colSpan={9} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                    <td colSpan={10} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
                       {error}
                     </td>
                   </tr>
                 ) : listings.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                    <td colSpan={10} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
                       No listings found
                     </td>
                   </tr>
@@ -693,9 +793,17 @@ export default function AdminListingsPage() {
                     {listings.map((listing) => (
                       <tr 
                         key={listing.id} 
-                        className="hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded px-1.5 -mx-1.5 transition-colors cursor-pointer"
+                        className="hover:bg-neutral-50 dark:hover:bg-neutral-700 cursor-pointer border-b border-neutral-200 dark:border-neutral-600"
                         onClick={() => handleListingClick(listing)}
                       >
+                        <td className="px-1.5 py-0.5" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            checked={selectedListings.has(listing.id)}
+                            onChange={(e) => handleSelectListing(listing.id, e.target.checked)}
+                            className="rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+                          />
+                        </td>
                         <td className="px-1.5 py-0.5">
                           <div className="text-neutral-600 dark:text-neutral-400">
                             {formatDate(listing.createdAt)}
@@ -742,27 +850,19 @@ export default function AdminListingsPage() {
                           </div>
                         </td>
                         <td className="px-1.5 py-0.5">
-                          <div className="text-neutral-900 dark:text-white font-bold text-green-600">
-                            {listing.priceSat.toLocaleString()}
+                          <div className="text-neutral-900 dark:text-white font-medium">
+                            {listing.priceSat.toLocaleString()} sats
                           </div>
                         </td>
                         <td className="px-1.5 py-0.5">
                           <div className="text-neutral-900 dark:text-white">
-                            {listing.views.toLocaleString()}
+                            {listing.views?.toLocaleString() || 0}
                           </div>
                         </td>
                         <td className="px-1.5 py-0.5">
                           <div className="text-neutral-900 dark:text-white">
-                            {listing.replies.toLocaleString()}
+                            {listing.replies || 0}
                           </div>
-                        </td>
-                      </tr>
-                    ))}
-                    {/* Fill remaining rows to maintain 20 row height */}
-                    {Array.from({ length: Math.max(0, 20 - listings.length) }).map((_, index) => (
-                      <tr key={`empty-${index}`} className="h-6">
-                        <td colSpan={9} className="px-1.5 py-0.5">
-                          <div className="h-6"></div>
                         </td>
                       </tr>
                     ))}

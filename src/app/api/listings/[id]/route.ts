@@ -35,6 +35,30 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     // Type assertion for the database result
     const dbListing = listing as any;
     
+    // Fetch real images from listing_images table
+    let images: string[] = [];
+    try {
+      const imagesResult = await db.prepare(`
+        SELECT image_url, image_order 
+        FROM listing_images 
+        WHERE listing_id = ? 
+        ORDER BY image_order
+      `).bind(id).all();
+      
+      if (imagesResult.results && imagesResult.results.length > 0) {
+        images = imagesResult.results.map((row: any) => row.image_url);
+      } else if (dbListing.image_url && dbListing.image_url.trim()) {
+        // Fallback to the original image_url field
+        images = [dbListing.image_url];
+      }
+    } catch (error) {
+      console.error('🔍 Error fetching images:', error);
+      // Fallback to the original image_url field
+      if (dbListing.image_url && dbListing.image_url.trim()) {
+        images = [dbListing.image_url];
+      }
+    }
+    
     // Transform the data to match the expected Listing interface
     const transformedListing = {
       id: String(dbListing.id),
@@ -46,7 +70,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
       lat: Number(dbListing.lat) || 0,
       lng: Number(dbListing.lng) || 0,
       type: dbListing.type || 'sell',
-      images: dbListing.images ? JSON.parse(dbListing.images) : [],
+      images: images, // Use real images from listing_images table
       boostedUntil: dbListing.boosted_until || null,
       seller: {
         name: dbListing.seller_username || dbListing.username || 'Unknown',
