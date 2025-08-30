@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 interface Listing {
-  id: string;
+  id: number;
   title: string;
   description: string;
   priceSat: number;
@@ -224,7 +224,7 @@ export default function AdminListingsPage() {
                       >
                         <td className="px-1.5 py-0.5">
                           <div className="text-xs text-neutral-500 dark:text-neutral-400 font-mono">
-                            {listing.id.slice(0, 8)}...
+                            {listing.id.toString().slice(0, 8)}...
                           </div>
                         </td>
                         <td className="px-1.5 py-0.5">
