@@ -44,7 +44,7 @@ export default function AdminListingsPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [itemsPerPage] = useState(100);
+  const [itemsPerPage] = useState(20);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -65,11 +65,40 @@ export default function AdminListingsPage() {
     }
   }, [router]);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadListings();
+    }
+  }, [currentPage, isAuthenticated]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      setCurrentPage(1); // Reset to first page when filters change
+      loadListings();
+    }
+  }, [searchTerm, statusFilter, typeFilter, categoryFilter, sortBy, sortOrder, isAuthenticated]);
+
   const loadListings = async () => {
     try {
       setIsLoading(true);
-      console.log('🔍 Loading listings with limit:', itemsPerPage);
-      const response = await fetch(`/api/admin/listings/list?limit=${itemsPerPage}`);
+      const offset = (currentPage - 1) * itemsPerPage;
+      
+      // Build query parameters
+      const params = new URLSearchParams({
+        limit: itemsPerPage.toString(),
+        offset: offset.toString()
+      });
+      
+      if (searchTerm) params.append('search', searchTerm);
+      if (statusFilter !== 'all') params.append('status', statusFilter);
+      if (typeFilter !== 'all') params.append('type', typeFilter);
+      if (categoryFilter !== 'all') params.append('category', categoryFilter);
+      if (sortBy) params.append('sortBy', sortBy);
+      if (sortOrder) params.append('sortOrder', sortOrder);
+      
+      console.log('🔍 Loading listings with params:', params.toString());
+      const response = await fetch(`/api/admin/listings/list?${params.toString()}`);
+      
       if (response.ok) {
         const data: ListingsResponse = await response.json();
         console.log('🔍 Listings API response:', data);
@@ -153,43 +182,14 @@ export default function AdminListingsPage() {
   };
 
   const toggleAllListings = () => {
-    if (selectedListings.size === filteredListings.length) {
+    if (selectedListings.size === listings.length) {
       setSelectedListings(new Set());
     } else {
-      setSelectedListings(new Set(filteredListings.map(l => l.id)));
+      setSelectedListings(new Set(listings.map(l => l.id)));
     }
   };
 
-  const filteredListings = listings.filter(listing => {
-    const matchesSearch = listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         listing.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         listing.username.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || listing.status === statusFilter;
-    const matchesType = typeFilter === 'all' || listing.adType === typeFilter;
-    const matchesCategory = categoryFilter === 'all' || listing.category === categoryFilter;
-    
-    return matchesSearch && matchesStatus && matchesType && matchesCategory;
-  });
 
-  const sortedListings = [...filteredListings].sort((a, b) => {
-    let aValue: any, bValue: any;
-    
-    switch (sortBy) {
-      case 'createdAt': aValue = a.createdAt; bValue = b.createdAt; break;
-      case 'updatedAt': aValue = a.updatedAt; bValue = b.updatedAt; break;
-      case 'priceSat': aValue = a.priceSat; bValue = b.priceSat; break;
-      case 'views': aValue = a.views; bValue = b.views; break;
-      case 'replies': aValue = a.replies; bValue = b.replies; break;
-      default: aValue = a.createdAt; bValue = b.createdAt;
-    }
-    
-    return sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
-  });
-
-  const paginatedListings = sortedListings.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
   const formatPrice = (priceSat: number) => `${priceSat.toLocaleString()} sats`;
   const formatDate = (timestamp: number) => new Date(timestamp * 1000).toLocaleDateString();
@@ -362,7 +362,7 @@ export default function AdminListingsPage() {
                   <th className="px-3 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase">
                     <input
                       type="checkbox"
-                      checked={selectedListings.size === filteredListings.length && filteredListings.length > 0}
+                      checked={selectedListings.size === listings.length && listings.length > 0}
                       onChange={toggleAllListings}
                       className="rounded border-neutral-300 text-orange-500 focus:ring-orange-500"
                     />
@@ -436,14 +436,14 @@ export default function AdminListingsPage() {
                       <p className="text-neutral-600 dark:text-neutral-400">Loading listings...</p>
                     </td>
                   </tr>
-                ) : paginatedListings.length === 0 ? (
+                ) : listings.length === 0 ? (
                   <tr>
                     <td colSpan={13} className="px-3 py-8 text-center text-neutral-500 dark:text-neutral-400">
                       No listings found
                     </td>
                   </tr>
                 ) : (
-                  paginatedListings.map((listing) => (
+                  listings.map((listing) => (
                     <tr key={listing.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-700">
                       <td className="px-3 py-2">
                         <input
@@ -534,7 +534,7 @@ export default function AdminListingsPage() {
           {totalPages > 1 && (
             <div className="flex justify-between items-center py-3 px-3 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-700">
               <div className="text-xs text-neutral-600">
-                Page {currentPage} of {totalPages} | {filteredListings.length} listings
+                Page {currentPage} of {totalPages} | {listings.length} listings
               </div>
               <div className="flex gap-2">
                 <button
