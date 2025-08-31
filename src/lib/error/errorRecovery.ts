@@ -203,7 +203,7 @@ export class ErrorRecovery {
 
       if (!response.ok) throw new Error('Token refresh failed');
 
-      const data = await response.json();
+      const data = await response.json() as { accessToken: string; refreshToken: string };
       localStorage.setItem('access_token', data.accessToken);
       localStorage.setItem('refresh_token', data.refreshToken);
     } catch (error) {
