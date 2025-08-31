@@ -92,7 +92,29 @@ export function validateNaming(name: string, convention: keyof typeof NAMING_CON
     'snake_case': /^[a-z]+(_[a-z]+)*$/
   };
 
-  const pattern = patterns[convention];
+  // Map convention keys to pattern keys
+  const conventionToPattern: Record<keyof typeof NAMING_CONVENTIONS, keyof typeof patterns | null> = {
+    FILE_NAMING: 'kebab-case',
+    COMPONENT_NAMING: 'PascalCase',
+    FUNCTION_NAMING: 'camelCase',
+    CONSTANT_NAMING: 'UPPER_SNAKE_CASE',
+    TYPE_NAMING: 'PascalCase',
+    DATABASE_NAMING: 'snake_case',
+    CSS_CLASS_NAMING: 'kebab-case',
+    ERROR_NAMING: 'PascalCase',
+    EVENT_HANDLER_PREFIX: null, // These don't have regex patterns
+    EVENT_PROP_PREFIX: null,
+    BOOLEAN_PREFIXES: null,
+    ASYNC_FUNCTION_SUFFIXES: null,
+    TEST_FILE_SUFFIXES: null
+  };
+
+  const patternKey = conventionToPattern[convention];
+  if (!patternKey) {
+    return false; // No pattern for this convention type
+  }
+
+  const pattern = patterns[patternKey];
   return pattern ? pattern.test(name) : false;
 }
 
