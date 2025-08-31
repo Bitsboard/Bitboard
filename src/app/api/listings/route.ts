@@ -193,7 +193,7 @@ export async function GET(req: NextRequest) {
         // Create the seller object structure that the frontend expects
         seller: {
           name: r.postedBy || 'unknown',
-          rating: r.userRating || 0, // Single metric: thumbs-up count
+          thumbsUp: r.userRating || 0, // Single metric: thumbs-up count
           deals: r.userDeals || 0,
           verifications: {
             email: Boolean(r.userVerified),
