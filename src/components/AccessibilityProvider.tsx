@@ -25,10 +25,10 @@ interface AccessibilityProviderProps {
 }
 
 export const AccessibilityProvider: React.FC<AccessibilityProviderProps> = ({ children }) => {
-  const [enableKeyboardNavigation, setEnableKeyboardNavigation] = useState(
+  const [enableKeyboardNavigation, setEnableKeyboardNavigation] = useState<boolean>(
     APP_CONFIG.ENABLE_KEYBOARD_NAVIGATION
   );
-  const [enableScreenReaderSupport, setEnableScreenReaderSupport] = useState(
+  const [enableScreenReaderSupport, setEnableScreenReaderSupport] = useState<boolean>(
     APP_CONFIG.ENABLE_SCREEN_READER_SUPPORT
   );
 
