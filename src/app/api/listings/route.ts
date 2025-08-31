@@ -7,18 +7,37 @@ export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
   try {
+    console.log('🔍 Listings API: GET request started');
+    console.log('🔍 Listings API: Request URL:', req.url);
+    
     const mod = await import("@cloudflare/next-on-pages").catch(() => null as any);
     if (!mod || typeof mod.getRequestContext !== "function") {
+      console.log('🔍 Listings API: Cloudflare adapter missing');
       return NextResponse.json({ error: "adapter_missing" }, { status: 200 });
     }
 
     const env = mod.getRequestContext().env as { DB?: D1Database };
     const db = env.DB;
-    if (!db) return NextResponse.json({ error: "no_db_binding" }, { status: 200 });
+    if (!db) {
+      console.log('🔍 Listings API: No database binding found');
+      return NextResponse.json({ error: "no_db_binding" }, { status: 200 });
+    }
+    
+    console.log('🔍 Listings API: Database connection established');
 
     // Validate query parameters
     const url = new URL(req.url);
     const queryParams = Object.fromEntries(url.searchParams.entries());
+    console.log('🔍 Listings API: Raw query params:', queryParams);
+    
+    try {
+      const validatedQuery = listingsQuerySchema.parse(queryParams);
+      console.log('🔍 Listings API: Validated query params:', validatedQuery);
+    } catch (validationError) {
+      console.error('🔍 Listings API: Query validation failed:', validationError);
+      throw validationError;
+    }
+    
     const validatedQuery = listingsQuerySchema.parse(queryParams);
 
     // Ensure minimal schema exists so queries don't explode on fresh DBs
@@ -63,12 +82,16 @@ export async function GET(req: NextRequest) {
     }
 
     // Geospatial radius filter - only apply if radius is reasonable
+    console.log('🔍 Listings API: Geospatial filtering - lat:', validatedQuery.lat, 'lng:', validatedQuery.lng, 'radiusKm:', validatedQuery.radiusKm);
+    
     if (validatedQuery.lat !== undefined && validatedQuery.lng !== undefined && validatedQuery.radiusKm !== undefined) {
       const effectiveRadiusKm = validatedQuery.radiusKm === 0 ? 5000 : validatedQuery.radiusKm; // Default to 5000km instead of 100000km
+      console.log('🔍 Listings API: Effective radius:', effectiveRadiusKm, 'km');
       
       // Only apply strict geospatial filtering for reasonable radius searches
       // For very large radius or when user wants to see all listings, don't filter by exact coordinates
       if (effectiveRadiusKm < 10000) { // Only filter if radius is less than 10,000km
+        console.log('🔍 Listings API: Applying strict geospatial filtering');
         const R_KM_PER_DEG = 111.32;
         const deltaLat = effectiveRadiusKm / R_KM_PER_DEG;
         const rad = (validatedQuery.lat * Math.PI) / 180;
@@ -80,8 +103,15 @@ export async function GET(req: NextRequest) {
         binds.push(validatedQuery.lat - deltaLat, validatedQuery.lat + deltaLat);
         whereClause.push("(l.lng BETWEEN ? AND ?)");
         binds.push(validatedQuery.lng - deltaLng, validatedQuery.lng + deltaLng);
+        
+        console.log('🔍 Listings API: Added lat bounds:', validatedQuery.lat - deltaLat, 'to', validatedQuery.lat + deltaLat);
+        console.log('🔍 Listings API: Added lng bounds:', validatedQuery.lng - deltaLng, 'to', validatedQuery.lng + deltaLng);
+      } else {
+        console.log('🔍 Listings API: Radius too large, skipping geospatial filtering');
       }
       // If radius is very large, don't apply strict coordinate filtering - let the user see all listings
+    } else {
+      console.log('🔍 Listings API: Missing geospatial params, skipping filtering');
     }
 
     const whereClauseStr = whereClause.length ? `WHERE ${whereClause.join(" AND ")}` : "";
@@ -218,6 +248,17 @@ export async function GET(req: NextRequest) {
         });
       }
       
+      // Debug: Log price-related fields for first few listings
+      if (i < 3) {
+        console.log(`🔍 Listings API: Listing ${r.id} price debug:`, {
+          id: r.id,
+          priceSat: r.priceSat,
+          priceSatType: typeof r.priceSat,
+          pricingType: r.pricingType,
+          pricingTypeType: typeof r.pricingType
+        });
+      }
+      
       return {
         ...r,
         imageUrl: r.imageUrl && r.imageUrl.trim() ? r.imageUrl : '',
@@ -237,7 +278,7 @@ export async function GET(req: NextRequest) {
           
           // Debug: Log the seller object for first few listings
           if (i < 3) {
-            console.log(`API: Listing ${r.id} seller object:`, seller);
+            console.log(`🔍 Listings API: Listing ${r.id} seller object:`, seller);
           }
           
           return seller;
