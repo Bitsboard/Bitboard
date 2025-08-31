@@ -206,6 +206,7 @@ export async function GET(req: NextRequest) {
         images: finalImages,
         type: r.adType === 'want' ? 'want' : 'sell',
         priceSats: r.priceSat || 0,
+        pricingType: r.pricingType || 'fixed',
         createdAt: r.createdAt || Date.now()
       };
     });
