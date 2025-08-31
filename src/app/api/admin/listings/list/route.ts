@@ -1,7 +1,6 @@
 export const runtime = 'edge';
 
 import { NextResponse } from 'next/server';
-import { getD1 } from '@/lib/cf';
 
 export async function GET(req: Request) {
   try {
@@ -23,19 +22,19 @@ export async function GET(req: Request) {
     console.log('🔍 Admin Listings API: Raw sortBy param:', url.searchParams.get('sortBy'));
     console.log('🔍 Admin Listings API: Raw sortOrder param:', url.searchParams.get('sortOrder'));
     
-    // Get database connection
+    // Get database connection using the same method as main listings API
     console.log('🔍 Admin Listings API: Attempting to get database binding...');
-    const db = await getD1();
     
-    if (!db) {
-      console.log('🔍 Admin Listings API: No database binding - returning mock data');
+    const mod = await import("@cloudflare/next-on-pages").catch(() => null as any);
+    if (!mod || typeof mod.getRequestContext !== "function") {
+      console.log('🔍 Admin Listings API: Cloudflare adapter missing - returning mock data');
       return NextResponse.json({ 
         success: true,
         listings: [
           {
             id: 'mock-1',
-            title: 'Mock Listing 1',
-            description: 'This is a mock listing for development',
+            title: 'Mock Listing 1 (Adapter Missing)',
+            description: 'Cloudflare adapter missing - using mock data',
             priceSat: 100000,
             adType: 'wanted',
             category: 'electronics',
@@ -49,27 +48,42 @@ export async function GET(req: Request) {
             views: 0,
             favorites: 0,
             replies: 0
-          },
+          }
+        ], 
+        total: 1,
+        page: 1,
+        limit
+      });
+    }
+
+    const env = mod.getRequestContext().env as { DB?: D1Database };
+    const db = env.DB;
+    
+    if (!db) {
+      console.log('🔍 Admin Listings API: No database binding - returning mock data');
+      return NextResponse.json({ 
+        success: true,
+        listings: [
           {
-            id: 'mock-2',
-            title: 'Mock Listing 2',
-            description: 'Another mock listing for development',
-            priceSat: 250000,
-            adType: 'offered',
-            category: 'books',
-            postedBy: 'mock-user-2',
-            username: 'mock-user-2',
-            createdAt: Math.floor(Date.now() / 1000) - 172800,
+            id: 'mock-1',
+            title: 'Mock Listing 1 (No DB)',
+            description: 'No database binding - using mock data',
+            priceSat: 100000,
+            adType: 'wanted',
+            category: 'electronics',
+            postedBy: 'mock-user-1',
+            username: 'mock-user-1',
+            createdAt: Math.floor(Date.now() / 1000) - 86400,
             updatedAt: Math.floor(Date.now() / 1000),
             status: 'active',
             imageUrl: null,
-            location: 'Mock Town, MT',
-            views: 5,
-            favorites: 2,
-            replies: 1
+            location: 'Mock City, MC',
+            views: 0,
+            favorites: 0,
+            replies: 0
           }
         ], 
-        total: 2,
+        total: 1,
         page: 1,
         limit
       });
