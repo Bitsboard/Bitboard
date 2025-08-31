@@ -41,6 +41,9 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
                 const listingsData = response.data.listings;
                 const totalCount = response.data.total;
                 
+                console.log('useListings: First listing:', listingsData[0]);
+                console.log('useListings: First listing seller:', listingsData[0]?.seller);
+                
                 // Debug: Log the first listing structure
                 if (listingsData[0]) {
                     console.log('useListings: First listing structure:', {
