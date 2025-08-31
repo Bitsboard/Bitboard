@@ -5,39 +5,25 @@ import { handleApiError, createValidationError, createNotFoundError } from "@/li
 
 export const runtime = "edge";
 
-console.log('🔍 Listings API: MODULE LOADED - route.ts file loaded');
-console.log('🔍 Listings API: THIS SHOULD APPEAR IN CONSOLE');
-
 export async function GET(req: NextRequest) {
-  console.log('🔍 Listings API: ROUTE HIT - GET function called');
-  console.log('🔍 Listings API: THIS FUNCTION IS EXECUTING');
   try {
-    console.log('🔍 Listings API: GET request started');
-    console.log('🔍 Listings API: Request URL:', req.url);
-    
     const mod = await import("@cloudflare/next-on-pages").catch(() => null as any);
     if (!mod || typeof mod.getRequestContext !== "function") {
-      console.log('🔍 Listings API: Cloudflare adapter missing');
       return NextResponse.json({ error: "adapter_missing" }, { status: 200 });
     }
 
     const env = mod.getRequestContext().env as { DB?: D1Database };
     const db = env.DB;
     if (!db) {
-      console.log('🔍 Listings API: No database binding found');
       return NextResponse.json({ error: "no_db_binding" }, { status: 200 });
     }
-    
-    console.log('🔍 Listings API: Database connection established');
 
     // Validate query parameters
     const url = new URL(req.url);
     const queryParams = Object.fromEntries(url.searchParams.entries());
-    console.log('🔍 Listings API: Raw query params:', queryParams);
     
     try {
       const validatedQuery = listingsQuerySchema.parse(queryParams);
-      console.log('🔍 Listings API: Validated query params:', validatedQuery);
     } catch (validationError) {
       console.error('🔍 Listings API: Query validation failed:', validationError);
       throw validationError;
@@ -87,16 +73,11 @@ export async function GET(req: NextRequest) {
     }
 
     // Geospatial radius filter - only apply if radius is reasonable
-    console.log('🔍 Listings API: Geospatial filtering - lat:', validatedQuery.lat, 'lng:', validatedQuery.lng, 'radiusKm:', validatedQuery.radiusKm);
-    
     if (validatedQuery.lat !== undefined && validatedQuery.lng !== undefined && validatedQuery.radiusKm !== undefined) {
-      const effectiveRadiusKm = validatedQuery.radiusKm === 0 ? 5000 : validatedQuery.radiusKm; // Default to 5000km instead of 100000km
-      console.log('🔍 Listings API: Effective radius:', effectiveRadiusKm, 'km');
+      const effectiveRadiusKm = validatedQuery.radiusKm === 0 ? 5000 : validatedQuery.radiusKm;
       
       // Only apply strict geospatial filtering for reasonable radius searches
-      // For very large radius or when user wants to see all listings, don't filter by exact coordinates
-      if (effectiveRadiusKm < 10000) { // Only filter if radius is less than 10,000km
-        console.log('🔍 Listings API: Applying strict geospatial filtering');
+      if (effectiveRadiusKm < 10000) {
         const R_KM_PER_DEG = 111.32;
         const deltaLat = effectiveRadiusKm / R_KM_PER_DEG;
         const rad = (validatedQuery.lat * Math.PI) / 180;
@@ -108,15 +89,7 @@ export async function GET(req: NextRequest) {
         binds.push(validatedQuery.lat - deltaLat, validatedQuery.lat + deltaLat);
         whereClause.push("(l.lng BETWEEN ? AND ?)");
         binds.push(validatedQuery.lng - deltaLng, validatedQuery.lng + deltaLng);
-        
-        console.log('🔍 Listings API: Added lat bounds:', validatedQuery.lat - deltaLat, 'to', validatedQuery.lat + deltaLat);
-        console.log('🔍 Listings API: Added lng bounds:', validatedQuery.lng - deltaLng, 'to', validatedQuery.lng + deltaLng);
-      } else {
-        console.log('🔍 Listings API: Radius too large, skipping geospatial filtering');
       }
-      // If radius is very large, don't apply strict coordinate filtering - let the user see all listings
-    } else {
-      console.log('🔍 Listings API: Missing geospatial params, skipping filtering');
     }
 
     const whereClauseStr = whereClause.length ? `WHERE ${whereClause.join(" AND ")}` : "";
@@ -133,10 +106,6 @@ export async function GET(req: NextRequest) {
     // Execute single optimized query with COALESCE for missing columns
     let results: any[] = [];
     try {
-      console.log('🔍 Listings API: About to execute query with whereClause:', whereClauseStr);
-      console.log('🔍 Listings API: Query binds:', binds);
-      console.log('🔍 Listings API: Order binds:', orderBinds);
-      
       const query = `SELECT l.id,
                          l.title,
                          COALESCE(l.description, '') as description,
@@ -160,20 +129,11 @@ export async function GET(req: NextRequest) {
                   ${orderClause}
                   LIMIT ? OFFSET ?`;
       
-      console.log('🔍 Listings API: Full SQL query:', query);
-      
       const optimized = await db
         .prepare(query)
         .bind(...binds, ...orderBinds, validatedQuery.limit, validatedQuery.offset)
         .all();
       results = optimized.results ?? [];
-      console.log('🔍 Listings API: Query returned', results.length, 'results');
-      
-      if (results.length > 0) {
-        console.log('🔍 Listings API: First result:', results[0]);
-      } else {
-        console.log('🔍 Listings API: No results returned from query');
-      }
     } catch (error) {
       console.error('🔍 Listings API: Query failed:', error);
       results = [];
@@ -198,14 +158,16 @@ export async function GET(req: NextRequest) {
     // Fetch all images for all listings in one efficient query
     let allImages: any[] = [];
     try {
-      const imageResults = await db
-        .prepare(`SELECT listing_id, image_url, image_order 
-                  FROM listing_images 
-                  WHERE listing_id IN (${results.map(() => '?').join(',')})
-                  ORDER BY listing_id, image_order`)
-        .bind(...results.map(r => r.id))
-        .all();
-      allImages = imageResults.results ?? [];
+      if (results.length > 0) {
+        const imageResults = await db
+          .prepare(`SELECT listing_id, image_url, image_order 
+                    FROM listing_images 
+                    WHERE listing_id IN (${results.map(() => '?').join(',')})
+                    ORDER BY listing_id, image_order`)
+          .bind(...results.map(r => r.id))
+          .all();
+        allImages = imageResults.results ?? [];
+      }
     } catch (error) {
       console.error('🔍 Listings API: Images query failed:', error);
       allImages = [];
@@ -221,89 +183,51 @@ export async function GET(req: NextRequest) {
     }, {});
 
     const listings = results.map((r: any, i: any) => {
-      // Debug: Log the raw title values from database
-      if (i < 3) { // Only log first 3 to avoid spam
-        console.log(`API: Listing ${r.id} raw title from DB:`, {
-          id: r.id,
-          title: r.title,
-          titleType: typeof r.title,
-          titleLength: r.title?.length,
-          endsWithZero: r.title?.endsWith('0'),
-          lastChar: r.title?.slice(-1),
-          postedBy: r.postedBy
-        });
-      }
-      
       // Get real images for this listing, fallback to single image if none found
       const realImages = imagesByListing[r.id] || [];
       const fallbackImages = r.imageUrl && r.imageUrl.trim() ? [r.imageUrl] : [];
       const finalImages = realImages.length > 0 ? realImages : fallbackImages;
       
-      // Debug: Log the raw data for first few listings
-      if (i < 3) {
-        console.log(`API: Listing ${r.id} raw data:`, {
-          id: r.id,
-          title: r.title,
-          postedBy: r.postedBy,
-          userRating: r.userRating,
-          userDeals: r.userDeals,
-          userVerified: r.userVerified,
-          priceSat: r.priceSat,
-          pricingType: r.pricingType
-        });
-      }
-      
-      // Debug: Log price-related fields for first few listings
-      if (i < 3) {
-        console.log(`🔍 Listings API: Listing ${r.id} price debug:`, {
-          id: r.id,
-          priceSat: r.priceSat,
-          priceSatType: typeof r.priceSat,
-          pricingType: r.pricingType,
-          pricingTypeType: typeof r.pricingType
-        });
-      }
-      
+      // Transform the data to match expected format
+      const seller = {
+        name: r.postedBy,
+        verified: Boolean(r.userVerified),
+        score: Math.floor(r.userRating || 0),
+        deals: r.userDeals || 0,
+        rating: Math.floor(r.userRating || 0),
+        verifications: {
+          email: Boolean(r.userVerified),
+          phone: false,
+          lnurl: false
+        },
+        onTimeRelease: 100
+      };
+
       return {
-        ...r,
-        imageUrl: r.imageUrl && r.imageUrl.trim() ? r.imageUrl : '',
-        // Create the seller object structure that the frontend expects
-        seller: (() => {
-          const seller = {
-            name: r.postedBy || 'unknown',
-            thumbsUp: r.userRating || 0, // Single metric: thumbs-up count
-            deals: r.userDeals || 0,
-            verifications: {
-              email: Boolean(r.userVerified),
-              phone: false, // Not implemented yet
-              lnurl: false  // Not implemented yet
-            },
-            onTimeRelease: 100 // Default value
-          };
-          
-          // Debug: Log the seller object for first few listings
-          if (i < 3) {
-            console.log(`🔍 Listings API: Listing ${r.id} seller object:`, seller);
-          }
-          
-          return seller;
-        })(),
-        // Return real multiple images from listing_images table
+        id: r.id,
+        title: r.title,
+        description: r.description || '',
+        priceSat: r.priceSat,
+        adType: r.adType || 'sell',
+        category: r.category || 'Misc',
+        postedBy: r.postedBy,
+        username: r.postedBy,
+        createdAt: r.createdAt * 1000,
+        updatedAt: r.createdAt * 1000,
+        status: 'active',
+        imageUrl: r.imageUrl,
+        location: r.location || '',
+        views: 0,
+        favorites: 0,
+        replies: 0,
         images: finalImages,
-        type: r.adType === 'want' ? 'want' : 'sell',
-        priceSats: r.priceSat || 0,
-        pricingType: r.pricingType || 'fixed',
-        createdAt: r.createdAt || Date.now()
+        seller
       };
     });
 
-    console.log('🔍 Listings API: Final response - listings count:', listings.length);
-    console.log('🔍 Listings API: Final response - total:', total);
-    console.log('🔍 Listings API: Final response - first listing:', listings[0]);
-    
     return NextResponse.json({
       success: true,
-      data: { listings, total },
+      data: { listings },
       pagination: {
         page: Math.floor(validatedQuery.offset / validatedQuery.limit) + 1,
         limit: validatedQuery.limit,
@@ -313,7 +237,11 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (error) {
-    return handleApiError(error);
+    console.error('🔍 Listings API: Error:', error);
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch listings" },
+      { status: 500 }
+    );
   }
 }
 

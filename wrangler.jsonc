@@ -27,8 +27,8 @@
     },
     
     "vars": {
-        "NODE_ENV": "production",
-        "DEBUG": "true",
-        "VERBOSE_LOGGING": "true"
+        "NODE_ENV": "staging",
+        "DEBUG": "false",
+        "VERBOSE_LOGGING": "false"
     }
 }

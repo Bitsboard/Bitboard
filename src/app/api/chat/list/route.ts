@@ -1,185 +1,127 @@
-import { NextResponse } from "next/server";
-import { getD1, ensureChatSchema } from '@/lib/cf';
+import '../../../shims/async_hooks';
+import { NextRequest, NextResponse } from "next/server";
+import { getRequestContext } from "@cloudflare/next-on-pages";
+import { getSessionFromRequest } from "@/lib/auth";
 
 export const runtime = "edge";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
-    const url = new URL(req.url);
-    const userEmail = url.searchParams.get('userEmail');
-    
-    if (!userEmail) {
-      return NextResponse.json({ error: 'userEmail required' }, { status: 401 });
+    const session = await getSessionFromRequest(req);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const db = await getD1();
-    if (!db) return NextResponse.json({ chats: [], error: 'no_db_binding' }, { status: 500 });
+    const { env } = getRequestContext();
+    const db = (env as any).DB as D1Database | undefined;
     
-    // Schema is pre-created via migrations - no need to check on every request
-    // await ensureChatSchema(db); // ❌ REMOVED: Expensive schema check on every request
-    
-    // First, find the user by email to get their UUID
-    const userResult = await db.prepare(`
-      SELECT id FROM users WHERE email = ?
-    `).bind(userEmail).all();
-    
-    if (!userResult.results || userResult.results.length === 0) {
-      console.log('No user found for email:', userEmail);
-      return NextResponse.json({ chats: [], userEmail, totalChats: 0 });
+    if (!db) {
+      return NextResponse.json({ error: "Database not available" }, { status: 500 });
     }
-    
-    const userId = userResult.results[0].id;
-    console.log('Found user ID:', userId, 'for email:', userEmail);
-    
-    // MIGRATION: Fix existing chat IDs that use the old string format
+
+    const userEmail = session.user.email;
+
+    // Get user ID from email
+    const userResult = await db
+      .prepare("SELECT id FROM users WHERE email = ?")
+      .bind(userEmail)
+      .first();
+
+    if (!userResult) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const userId = userResult.id;
+
+    // Check for old format chat IDs and migrate them
     try {
-      console.log('🔧 Checking for old format chat IDs to migrate...');
-      
-      // Find chats with old format IDs (starting with 'chat_')
-      const oldChats = await db.prepare(`
-        SELECT id FROM chats WHERE id LIKE 'chat_%'
-      `).all();
-      
+      const oldChats = await db
+        .prepare("SELECT id FROM chats WHERE id LIKE 'chat_%' AND LENGTH(id) < 20")
+        .all();
+
       if (oldChats.results && oldChats.results.length > 0) {
-        console.log('🔧 Found', oldChats.results.length, 'chats with old format IDs, migrating...');
-        
-        for (const oldChat of oldChats.results) {
-          const oldId = oldChat.id;
+        // Migrate old format chat IDs
+        for (const chat of oldChats.results) {
+          const oldId = chat.id;
+          const newId = `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
           
-          // Generate new UUID for this chat
-          const newId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            const r = Math.random() * 16 | 0;
-            const v = c === 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-          });
+          // Update chat ID
+          await db.prepare("UPDATE chats SET id = ? WHERE id = ?").bind(newId, oldId).run();
           
-          console.log('🔧 Migrating chat ID:', oldId, '→', newId);
-          
-          // Update the chat ID
-          await db.prepare('UPDATE chats SET id = ? WHERE id = ?').bind(newId, oldId).run();
-          
-          // Update all messages that reference this chat
-          await db.prepare('UPDATE messages SET chat_id = ? WHERE chat_id = ?').bind(newId, oldId).run();
-          
-          console.log('🔧 Successfully migrated chat and messages');
+          // Update message references
+          await db.prepare("UPDATE messages SET chat_id = ? WHERE chat_id = ?").bind(newId, oldId).run();
         }
-        
-        console.log('🔧 Chat ID migration completed');
-      } else {
-        console.log('🔧 No old format chat IDs found, migration not needed');
       }
     } catch (migrationError) {
-      console.log('🔧 Chat ID migration failed:', migrationError);
-      // Continue with the request even if migration fails
+      console.error('🔍 Chat API: Chat ID migration failed:', migrationError);
     }
-    
-        // Get all chats with basic info first, then we'll fetch messages separately
+
+    // Build the query to get chats for this user
     const basicChatsQuery = `
-      SELECT 
+      SELECT DISTINCT
         c.id,
         c.listing_id,
-        c.buyer_id,
-        c.seller_id,
         c.created_at,
-        c.last_message_at,
+        c.updated_at,
         l.title as listing_title,
         l.price_sat as listing_price,
-        COALESCE(l.pricing_type, 'fixed') as listing_pricing_type,
         l.image_url as listing_image,
-        l.category as listing_category,
-        l.ad_type as listing_type,
-        l.created_at as listing_created_at,
-        l.location as listing_location,
-        buyer.username as buyer_username,
-        seller.username as seller_username,
+        seller.username as seller_name,
         seller.verified as seller_verified,
-        seller.rating as seller_rating,
-        CASE 
-          WHEN c.buyer_id = ? THEN 'buyer'
-          ELSE 'seller'
-        END as user_role,
-        CASE 
-          WHEN c.buyer_id = ? THEN seller.username
-          ELSE buyer.username
-        END as other_user_username
+        seller.thumbs_up as seller_rating,
+        seller.deals as seller_deals
       FROM chats c
       JOIN listings l ON c.listing_id = l.id
-      LEFT JOIN users buyer ON c.buyer_id = buyer.id
-      LEFT JOIN users seller ON c.seller_id = seller.id
-      WHERE c.buyer_id = ? OR c.seller_id = ?
-      ORDER BY c.last_message_at DESC, c.created_at DESC
+      JOIN users seller ON l.posted_by = seller.id
+      WHERE (c.user1_id = ? OR c.user2_id = ?)
+      ORDER BY c.updated_at DESC
     `;
-    
-    console.log('🔍 Chat API: About to execute query with userId:', userId);
-    console.log('🔍 Chat API: Query:', basicChatsQuery);
-    
-    let chats;
+
+    let chats: any;
     try {
-      chats = await db.prepare(basicChatsQuery).bind(
-        userId, 
-        userId, 
-        userId, 
-        userId
-      ).all();
-      
-      console.log('🔍 Chat API: Query executed successfully');
-      console.log('🔍 Chat API: Raw results:', chats);
-      console.log('🔍 Chat API: Found chats:', chats.results?.length || 0, 'for user ID:', userId);
+      chats = await db
+        .prepare(basicChatsQuery)
+        .bind(userId, userId)
+        .all();
     } catch (dbError) {
-      const error = dbError as Error;
       console.error('🔍 Chat API: Database query failed:', dbError);
-      throw new Error(`Database query failed: ${error.message}`);
+      return NextResponse.json({ error: "Failed to fetch chats" }, { status: 500 });
     }
-    
-    // Now fetch latest messages and unread counts for each chat
-    const chatsWithMessages = await Promise.all((chats.results || []).map(async (chat: any) => {
-      // Get latest message for this chat
-      const latestMessageResult = await db.prepare(`
-        SELECT text, created_at, from_id 
-        FROM messages 
-        WHERE chat_id = ? 
-        ORDER BY created_at DESC 
-        LIMIT 1
-      `).bind(chat.id).all();
-      
-      const latestMessage = latestMessageResult.results?.[0];
-      
-      // Get unread count for this chat
-      const unreadResult = await db.prepare(`
-        SELECT COUNT(*) as count 
-        FROM messages 
-        WHERE chat_id = ? AND from_id != ? AND (read_at IS NULL OR read_at = 0)
-      `).bind(chat.id, userId).all();
-      
-      const unreadCount = unreadResult.results?.[0]?.count || 0;
-      
-      return {
-        ...chat,
-        latest_message_text: latestMessage?.text || null,
-        latest_message_time: latestMessage?.created_at || null,
-        latest_message_from: latestMessage?.from_id || null,
-        unread_count: unreadCount
-      };
+
+    if (!chats.results) {
+      return NextResponse.json({ chats: [] });
+    }
+
+    // Transform chats to match expected format
+    const transformedChats = chats.results.map((chat: any) => ({
+      id: chat.id,
+      listing: {
+        id: chat.listing_id,
+        title: chat.listing_title,
+        priceSat: chat.listing_price,
+        imageUrl: chat.listing_image
+      },
+      seller: {
+        name: chat.seller_name,
+        verified: Boolean(chat.seller_verified),
+        rating: chat.seller_rating || 0,
+        deals: chat.seller_deals || 0
+      },
+      lastMessageAt: chat.updated_at * 1000,
+      createdAt: chat.created_at * 1000
     }));
-    
-    return NextResponse.json({ 
-      chats: chatsWithMessages,
-      userEmail,
-      userId,
-      totalChats: chatsWithMessages.length
-    });
+
+    return NextResponse.json({ chats: transformedChats });
+
   } catch (error) {
-    const errorObj = error as Error;
     console.error('🔍 Chat API: Error fetching chats:', error);
     console.error('🔍 Chat API: Error details:', {
-      message: errorObj.message,
-      stack: errorObj.stack,
-      name: errorObj.name
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
     });
-    return NextResponse.json({ 
-      error: 'server_error', 
-      details: errorObj.message,
-      timestamp: new Date().toISOString()
-    }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch chats" },
+      { status: 500 }
+    );
   }
 }

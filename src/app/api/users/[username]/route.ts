@@ -7,8 +7,6 @@ export async function GET(
   { params }: { params: { username: string } }
 ) {
   try {
-    console.log('User API called for username:', params.username);
-    
     // Try to get Cloudflare context
     let db: any = null;
     try {
@@ -18,12 +16,11 @@ export async function GET(
         db = env.DB;
       }
     } catch (error) {
-      console.log('Cloudflare adapter not available, using fallback');
+      // Cloudflare adapter not available
     }
 
     // If no database binding, return fallback for local development
     if (!db) {
-      console.log('Local development mode, returning no_db_binding error');
       return NextResponse.json({ error: "no_db_binding" }, { status: 200 });
     }
 

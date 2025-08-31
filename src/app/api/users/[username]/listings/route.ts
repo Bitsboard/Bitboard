@@ -7,8 +7,6 @@ export async function GET(
   { params }: { params: { username: string } }
 ) {
   try {
-    console.log('User listings API called for username:', params.username);
-    
     // Try to get Cloudflare context
     let db: any = null;
     try {
@@ -18,12 +16,11 @@ export async function GET(
         db = env.DB;
       }
     } catch (error) {
-      console.log('Cloudflare adapter not available, using fallback');
+      // Cloudflare adapter not available
     }
 
     // If no database binding, return fallback for local development
     if (!db) {
-      console.log('Local development mode, returning no_db_binding error');
       return NextResponse.json({ error: "no_db_binding" }, { status: 200 });
     }
 
@@ -32,30 +29,28 @@ export async function GET(
       return NextResponse.json({ error: "username_required" }, { status: 400 });
     }
 
-    // First, get the user ID from username
-    const userResult = await db.prepare(
-      'SELECT id, username, verified, created_at, image, rating, deals FROM users WHERE username = ?'
-    ).bind(username).all();
+    // Get user profile
+    const userResult = await db.prepare(`
+      SELECT id, username, verified, created_at, image, thumbs_up, deals
+      FROM users WHERE username = ?
+    `).bind(username).all();
 
     if (!userResult.results || userResult.results.length === 0) {
-      return NextResponse.json({ 
-        error: "user_not_found",
-        message: "User not found" 
-      }, { status: 404 });
+      return NextResponse.json({ error: "user_not_found" }, { status: 404 });
     }
 
     const user = userResult.results[0];
 
-    // Get listings for this user (only active ones) with seller info
+    // Get user's listings
     const listingsResult = await db.prepare(`
       SELECT 
         l.id,
         l.title,
         l.description,
-        l.price_sat as priceSats,
-        l.ad_type as type,
-        l.created_at as createdAt,
         l.category,
+        l.ad_type as type,
+        l.price_sat as priceSats,
+        l.created_at as createdAt,
         l.location,
         l.lat,
         l.lng,
