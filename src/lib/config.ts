@@ -80,7 +80,7 @@ export const APP_CONFIG = {
   // Development settings
   IS_DEVELOPMENT: process.env.NODE_ENV === 'development',
   IS_PRODUCTION: process.env.NODE_ENV === 'production',
-  IS_STAGING: process.env.NODE_ENV === 'staging',
+  IS_STAGING: process.env.NODE_ENV === 'staging' || process.env.VERCEL_ENV === 'preview',
   
   // Error reporting
   ENABLE_ERROR_REPORTING: process.env.NODE_ENV === 'production',
