@@ -33,7 +33,7 @@ export function BtcRateProvider({ children }: { children: ReactNode }) {
             setBtcCad(data.cad);
             setLastUpdated(data.lastUpdated);
             setNextUpdate(data.nextUpdate);
-            console.log('BTC rate updated successfully:', data.cad);
+    
           } else {
             throw new Error('Invalid BTC rate data received');
           }
@@ -43,7 +43,7 @@ export function BtcRateProvider({ children }: { children: ReactNode }) {
           const rate = await DataService.getInstance().getBtcRate();
           if (rate && Number.isFinite(rate)) {
             setBtcCad(rate);
-            console.log('BTC rate loaded from DataService fallback:', rate);
+    
           } else {
             throw new Error('DataService fallback also failed');
           }
@@ -55,7 +55,7 @@ export function BtcRateProvider({ children }: { children: ReactNode }) {
         if (btcCad === null) {
           const fallbackRate = 157432; // Reasonable fallback rate
           setBtcCad(fallbackRate);
-          console.log('Using fallback BTC rate:', fallbackRate);
+  
         }
       } finally {
         setIsLoading(false);

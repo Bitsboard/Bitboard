@@ -25,13 +25,13 @@ export default function GlobalHeader() {
   const handleModalClosedByUser = async () => {
     if (isLoggingOut) return; // Prevent multiple clicks
     
-    console.log('Modal closed by user, logging out user to show Sign in button');
+    
     setIsLoggingOut(true);
     
     try {
       // Actually log out the user to clear the session
       await fetch('/api/auth/logout', { method: 'POST' });
-      console.log('User logged out successfully');
+      
       
       // Reset user state to show the Sign in button
       setUser(null);
@@ -62,7 +62,7 @@ export default function GlobalHeader() {
             });
           } else {
             // Session exists but user not in database, clear the invalid session
-            console.log('Session exists but user not found in database, clearing session');
+    
             await fetch('/api/auth/logout', { method: 'POST' });
             // Force page reload to clear any cached state
             window.location.reload();
@@ -109,10 +109,10 @@ export default function GlobalHeader() {
   };
 
   const handleUsernameSelected = async (username: string) => {
-    console.log('handleUsernameSelected called with username:', username);
+    
     if (user) {
       try {
-        console.log('Calling API to set username...');
+        
         // Call the API to set the username
         const response = await fetch('/api/users/set-username', {
           method: 'POST',
@@ -121,7 +121,7 @@ export default function GlobalHeader() {
         });
 
         if (response.ok) {
-          console.log('Username set successfully, updating user state immediately...');
+
           
           // IMMEDIATELY update the local user state with the new username
           const updatedUser = {
@@ -129,7 +129,7 @@ export default function GlobalHeader() {
             handle: username,
             hasChosenUsername: true
           };
-          console.log('Updating user state immediately with:', updatedUser);
+          
           setUser(updatedUser);
           
           // Reset the modal closed flag since this is a successful selection
@@ -137,7 +137,7 @@ export default function GlobalHeader() {
           // Close the modal
           closeModal();
           
-          console.log('Username confirmed and user state updated. Profile should now work immediately.');
+          
         } else {
           console.error('Failed to set username');
         }
@@ -145,7 +145,7 @@ export default function GlobalHeader() {
         console.error('Error setting username:', error);
       }
     } else {
-      console.log('No user found, cannot set username');
+      
     }
   };
 

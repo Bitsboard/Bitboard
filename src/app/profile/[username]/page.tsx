@@ -17,8 +17,8 @@ export default function PublicProfilePage() {
   const btcCad = useBtcRate();
   
   // Debug: Log username parameter changes
-  console.log('Profile page: Username param changed to:', username);
-  console.log('Profile page: Params object:', params);
+  
+  
   
   // Use unified settings hook
   const { unit, layout, modals, setModal, user, setUser, closeAllModals } = useSettings();
@@ -46,25 +46,25 @@ export default function PublicProfilePage() {
   
   // Debug: Log the generated profile picture URL
   useEffect(() => {
-    console.log('Generated profile picture URL for', username, ':', generateProfilePicture(username));
+    
   }, [username]);
 
   // Debug: Monitor loading state changes
   useEffect(() => {
-    console.log('Profile page: Loading state changed to:', isLoading);
+    
   }, [isLoading]);
 
   // Fetch user listings from API with retry logic
   useEffect(() => {
-    console.log('Profile page: useEffect triggered with username:', username);
+    
     if (!username) {
-      console.log('Profile page: No username, returning early');
+      
       return;
     }
     
     // Check if this is the current user's own profile and they have a username
     if (user && user.handle === username && user.hasChosenUsername) {
-      console.log('Profile page: This is the current user\'s profile, using local state');
+      
       // Use local user state instead of making API call
       setUserProfile({
         username: user.handle,
@@ -80,16 +80,16 @@ export default function PublicProfilePage() {
       return;
     }
     
-    console.log('Profile page: Starting to fetch listings for username:', username);
+    
     
     const fetchUserListings = async (retryCount = 0) => {
       try {
-        console.log(`Profile page: Fetch attempt ${retryCount + 1}/3`);
-        console.log('Profile page: Setting loading to true');
+        
+        
         setIsLoading(true);
         setError(null); // Clear any previous errors
         
-        console.log('Profile page: Fetching from API:', `/api/users/${username}/listings`);
+        
         
         // Add timeout to prevent hanging requests
         const controller = new AbortController();
@@ -100,12 +100,12 @@ export default function PublicProfilePage() {
         });
         clearTimeout(timeoutId);
         
-        console.log('Profile page: API response status:', response.status);
+        
         
         if (response.ok) {
           const data = await response.json() as { user: any; listings: Listing[] };
-          console.log('Profile page: API data received:', data);
-          console.log('Profile page: Number of listings:', data.listings?.length || 0);
+          
+          
           
           setUserProfile(data.user);
           const allListings = data.listings || [];
@@ -122,7 +122,7 @@ export default function PublicProfilePage() {
           return;
         } else if (response.status === 404) {
           // User not found - show error immediately for non-existent users
-          console.log('Profile page: User not found, showing error immediately');
+          
           setError('user_not_found');
           setIsLoading(false);
         } else {
@@ -135,10 +135,10 @@ export default function PublicProfilePage() {
         
         // Handle abort errors (timeout)
         if (error instanceof Error && error.name === 'AbortError') {
-          console.log('Profile page: Request timed out');
+
           if (retryCount < 2) { // Reduced from 3 to 2 retries for faster response
             const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s
-            console.log(`Profile page: Timeout, retrying in ${delay}ms (attempt ${retryCount + 1}/3)`);
+
             setTimeout(() => {
               fetchUserListings(retryCount + 1);
             }, delay);
@@ -153,7 +153,7 @@ export default function PublicProfilePage() {
         // Retry on other network errors
         if (retryCount < 2) { // Reduced from 3 to 2 retries for faster response
           const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s
-          console.log(`Profile page: Network error, retrying in ${delay}ms (attempt ${retryCount + 1}/3)`);
+          
           // Don't set loading to false here - let the retry handle it
           setTimeout(() => {
             fetchUserListings(retryCount + 1);
@@ -341,8 +341,8 @@ export default function PublicProfilePage() {
 
   const handleProfileImageError = () => {
     try {
-      console.log('Profile image failed to load for:', username);
-      console.log('Generated URL:', generateProfilePicture(username));
+      
+      
       setProfileImageError(true);
     } catch (error) {
       console.error('Error handling profile image error:', error);
@@ -450,7 +450,7 @@ export default function PublicProfilePage() {
                       alt={`${username}'s profile picture`}
                       className="w-28 h-28 rounded-full object-cover shadow-xl border-4 border-white/30"
                       onError={handleProfileImageError}
-                      onLoad={() => console.log('Profile image loaded successfully for:', username)}
+                      onLoad={() => {}}
                       style={{ minWidth: '112px', minHeight: '112px' }}
                     />
                   ) : (
@@ -722,7 +722,7 @@ export default function PublicProfilePage() {
       )}
       
       {/* Debug: Log user state */}
-      {console.log('Profile page - user state:', user, 'modals.active:', modals.active)}
+      
 
       {/* Chat Modal - no longer needed since it's handled by ListingModal */}
       {/* {modals.chatFor && (

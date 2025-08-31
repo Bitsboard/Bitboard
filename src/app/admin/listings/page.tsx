@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import ExternalLinkIcon from "@/components/ExternalLinkIcon";
+import { ExternalLinkIcon } from "@/components/ExternalLinkIcon";
+import { Toast } from "@/components/Toast";
 
 interface Listing {
   id: string; // Now 10 alphanumeric characters
@@ -59,6 +60,7 @@ export default function AdminListingsPage() {
   const [isSearchingForListing, setIsSearchingForListing] = useState(false);
   const [selectedListings, setSelectedListings] = useState<Set<string>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   // Check if we need to search for a specific listing (e.g., from activity feed)
   useEffect(() => {
@@ -67,7 +69,7 @@ export default function AdminListingsPage() {
     const listingId = urlParams.get('id');
     
     if (listingTitle || listingId) {
-      console.log('🔍 URL parameters detected:', { listingTitle, listingId });
+  
       searchAndSelectListing(listingTitle, listingId);
     }
   }, []);
@@ -239,18 +241,18 @@ export default function AdminListingsPage() {
         
         // Add comprehensive validation of the response structure
         if (data && typeof data === 'object' && data.success === true && Array.isArray(data.chats)) {
-          console.log('✅ Chats loaded successfully:', data.chats.length);
+  
           setListingChats(data.chats);
         } else if (data && Array.isArray(data)) {
           // Handle case where API returns array directly
-          console.log('✅ Chats loaded (direct array):', data.length);
+          
           setListingChats(data);
         } else if (data && data.chats && Array.isArray(data.chats)) {
           // Handle case where success field might be missing
-          console.log('✅ Chats loaded (no success field):', data.chats.length);
+          
           setListingChats(data.chats);
         } else {
-          console.log('No chats found for listing:', listingId, 'Response structure:', data);
+  
           setListingChats([]);
         }
       } else {
@@ -266,7 +268,7 @@ export default function AdminListingsPage() {
   };
 
   const handleListingClick = async (listing: any) => {
-    console.log('🔍 Listing clicked:', listing);
+
     setSelectedListing(listing);
     setSelectedImage(null);
     
@@ -337,14 +339,14 @@ export default function AdminListingsPage() {
         setSelectedListings(new Set());
         setSelectAll(false);
         loadListings();
-        // TODO: Add success toast notification
+        setToast({ message: 'Listings boosted successfully!', type: 'success' });
       } else {
         console.error('Failed to boost listings:', data.error);
-        // TODO: Add error toast notification
+        setToast({ message: data.error || 'Failed to boost listings', type: 'error' });
       }
     } catch (error) {
       console.error('Error boosting listings:', error);
-      // TODO: Add error toast notification
+      setToast({ message: 'Error boosting listings', type: 'error' });
     }
   };
 
@@ -369,14 +371,14 @@ export default function AdminListingsPage() {
         setSelectedListings(new Set());
         setSelectAll(false);
         loadListings();
-        // TODO: Add success toast notification
+        setToast({ message: 'Listings deleted successfully!', type: 'success' });
       } else {
         console.error('Failed to delete listings:', data.error);
-        // TODO: Add error toast notification
+        setToast({ message: data.error || 'Failed to delete listings', type: 'error' });
       }
     } catch (error) {
       console.error('Error deleting listings:', error);
-      // TODO: Add error toast notification
+      setToast({ message: 'Error deleting listings', type: 'error' });
     }
   };
 
@@ -953,6 +955,15 @@ export default function AdminListingsPage() {
             />
           </div>
         </div>
+      )}
+      
+      {/* Toast Notifications */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
     </div>
   );

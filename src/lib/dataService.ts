@@ -1,6 +1,62 @@
 import type { Listing, Place, RateResponse, ListingsResponse } from './types';
 import { locationService, LOCATION_CONFIG } from './locationService';
 
+// Define missing types
+interface ListingsParams {
+  limit?: number;
+  offset?: number;
+  lat?: number;
+  lng?: number;
+  radiusKm?: number;
+  query?: string;
+  category?: string;
+  adType?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  sortBy?: string;
+  sortOrder?: string;
+}
+
+interface ChatListResponse {
+  success: boolean;
+  chats?: any[];
+  total?: number;
+  page?: number;
+  limit?: number;
+}
+
+interface UserSession {
+  user?: {
+    id: string;
+    email: string;
+    username?: string;
+    verified?: boolean;
+    isAdmin?: boolean;
+  };
+  expires?: string;
+}
+
+interface ListingRow {
+  id: string;
+  postedBy: string;
+  userRating?: number;
+  userDeals?: number;
+  userVerified?: boolean;
+}
+
+interface Seller {
+  name: string;
+  score: number;
+  deals: number;
+  rating: number;
+  verifications: {
+    email: boolean;
+    phone: boolean;
+    lnurl: boolean;
+  };
+  onTimeRelease: number;
+}
+
 // Configuration constants
 export const CONFIG = {
     PAGE_SIZE: 24,
@@ -15,13 +71,13 @@ export const CONFIG = {
 let btcRateCache: { rate: number | null; timestamp: number } | null = null;
 
 // Cache for listings data
-let listingsCache: { [key: string]: { data: any; timestamp: number } } = {};
+let listingsCache: { [key: string]: { data: ListingsResponse; timestamp: number } } = {};
 
 // Cache for chat data
-let chatCache: { [key: string]: { data: any; timestamp: number } } = {};
+let chatCache: { [key: string]: { data: ChatListResponse; timestamp: number } } = {};
 
 // Helper function to generate cache keys
-function generateCacheKey(params: any, endpoint: string): string {
+function generateCacheKey(params: ListingsParams, endpoint: string): string {
     return `${endpoint}:${JSON.stringify(params)}`;
 }
 
@@ -160,12 +216,12 @@ export class DataService {
     }
 
     // User Session Management
-    async getCurrentUser(): Promise<any | null> {
+    async getCurrentUser(): Promise<UserSession | null> {
         try {
             const response = await fetch('/api/auth/session', { cache: 'no-store' });
             if (!response.ok) return null;
 
-            const data = await response.json() as { session?: any };
+            const data = await response.json() as { session?: UserSession };
             return data?.session || null;
         } catch (error) {
             console.warn('Failed to fetch user session:', error);
@@ -212,7 +268,7 @@ export class DataService {
         return [...base, ...fallbackImages].slice(0, 5);
     }
 
-    private createSellerFromRow(row: any): any {
+    private createSellerFromRow(row: ListingRow): Seller {
         // postedBy should always be present from the API JOIN
         if (!row.postedBy) {
             console.warn('dataService: Missing postedBy field for listing:', row.id);

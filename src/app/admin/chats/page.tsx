@@ -6,7 +6,7 @@ import { useLang } from "@/lib/i18n-client";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import ExternalLinkIcon from "@/components/ExternalLinkIcon";
+import { ExternalLinkIcon } from "@/components/ExternalLinkIcon";
 
 interface Chat {
   id: string; // Now 10 alphanumeric characters
@@ -81,7 +81,7 @@ export default function AdminChatsPage() {
     const chatIdParam = urlParams.get('chatId');
     
     if (searchParam || chatIdParam) {
-      console.log('🔍 Chat admin: Found URL parameters - search:', searchParam, 'chatId:', chatIdParam);
+  
       searchAndSelectChat(searchParam, chatIdParam);
     }
   }, [isAuthenticated, chats, searchTerm, statusFilter]);
@@ -143,7 +143,7 @@ export default function AdminChatsPage() {
   const loadChats = async () => {
     try {
       setIsLoading(true);
-      console.log('🔍 Loading chats with limit:', itemsPerPage);
+
       
       const offset = (currentPage - 1) * itemsPerPage;
       const params = new URLSearchParams();
@@ -155,7 +155,7 @@ export default function AdminChatsPage() {
       const response = await fetch(`/api/admin/chats?${params.toString()}`);
       if (response.ok) {
         const data = await response.json() as { chats: Chat[]; total: number; page: number; limit: number };
-        console.log('🔍 Chats API response:', data);
+
         setChats(data.chats || []);
         setTotalPages(Math.ceil((data.total || 0) / itemsPerPage));
       } else {
@@ -232,7 +232,8 @@ export default function AdminChatsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
+    <ErrorBoundary>
+      <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
 
 
       <div className="max-w-7xl mx-auto px-4 py-4">
@@ -561,8 +562,7 @@ export default function AdminChatsPage() {
           </div>
         </div>
       </div>
-
-
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }

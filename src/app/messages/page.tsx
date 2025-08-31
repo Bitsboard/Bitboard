@@ -86,23 +86,23 @@ export default function MessagesPage() {
 
   const loadChats = async () => {
     if (!user?.email) {
-      console.log('No user email available, cannot load chats');
+      
       return;
     }
     
-    console.log('🔍 Messages Page: Starting loadChats for user:', user.email);
+    
     setIsLoading(true);
     try {
       const url = `/api/chat/list?userEmail=${encodeURIComponent(user.email)}`;
-      console.log('🔍 Messages Page: Fetching from URL:', url);
+      
       
       const response = await fetch(url);
-      console.log('🔍 Messages Page: Response status:', response.status);
-      console.log('🔍 Messages Page: Response headers:', response.headers);
+      
+      
       
       if (response.ok) {
         const data = await response.json() as { chats: any[] };
-        console.log('🔍 Messages Page: Chat API response:', data); // Debug log
+
         
         const transformedChats = data.chats.map((chat: any) => ({
             id: chat.id,
@@ -119,16 +119,7 @@ export default function MessagesPage() {
             last_message_time: chat.latest_message_time || chat.last_message_at || chat.created_at || 0,
             unread_count: chat.unread_count || 0,
             seller_thumbsUp: chat.seller_rating || 0
-        }));
-        
-        console.log('🔍 Raw chat API response:', data.chats);
-        console.log('🔍 Transformed chats with reputation data:', transformedChats.map(c => ({
-          id: c.id,
-          other_user: c.other_user,
-          seller_thumbsUp: c.seller_thumbsUp,
-          other_user_verified: c.other_user_verified,
-          raw_data: data.chats.find(raw => raw.id === c.id)
-        })));
+                }));
         setChats(transformedChats);
         
         // Auto-select the most recent chat
@@ -181,13 +172,13 @@ export default function MessagesPage() {
 
   const loadMessages = async (chatId: string) => {
     if (!user?.email) {
-      console.log('No user email available, cannot load messages');
+      
       return;
     }
     
     // Check cache first
     if (messagesCache[chatId]) {
-      console.log('Loading messages from cache for chat:', chatId);
+      
       setMessages(messagesCache[chatId]);
       setSelectedChat(chatId);
       setSelectedNotification(null);
@@ -199,7 +190,7 @@ export default function MessagesPage() {
       const response = await fetch(`/api/chat/${chatId}?userEmail=${encodeURIComponent(user.email)}`);
       if (response.ok) {
         const data = await response.json() as { messages: any[]; current_user_id: string };
-        console.log('Messages API response:', data); // Debug log
+
         
         // Transform messages to match the expected format
         const transformedMessages = data.messages.map((msg: any) => ({
@@ -342,8 +333,8 @@ export default function MessagesPage() {
   // Function to open listing modal
   const openListingModal = async (listingId: number) => {
     try {
-      console.log('🔍 Opening listing modal for ID:', listingId);
-      console.log('🔍 Current modal state before:', modals);
+      
+      
       
       // Fetch the real listing data from the API
       const response = await fetch(`/api/listings/${listingId}`);
@@ -353,7 +344,7 @@ export default function MessagesPage() {
       }
       
       const dbListing = await response.json() as any;
-      console.log('🔍 Fetched listing data:', dbListing);
+      
       
       // Transform the database listing to match the expected Listing interface
       const transformedListing = {
@@ -387,26 +378,16 @@ export default function MessagesPage() {
         },
         createdAt: Number(dbListing.created_at) || Date.now()
       };
-      
-      console.log('🔍 Transformed listing:', transformedListing);
-      console.log('🔍 Images array:', transformedListing.images);
-      console.log('🔍 Original image fields:', {
-        images: dbListing.images,
-        listing_image: dbListing.listing_image,
-        image: dbListing.image,
-        photo: dbListing.photo,
-        photo_url: dbListing.photo_url,
-        image_url: dbListing.image_url
-      });
+
       
       // Set the modal with the transformed listing data
       setModal('active', transformedListing);
-      console.log('🔍 Modal set to active with listing');
-      console.log('🔍 Modal state after setModal:', modals);
+
+      
       
       // Force a re-render to see if the modal state changes
       setTimeout(() => {
-        console.log('🔍 Modal state after timeout:', modals);
+
       }, 100);
     } catch (error) {
       console.error('Error fetching listing:', error);
@@ -414,7 +395,7 @@ export default function MessagesPage() {
   };
 
   const handleListingClick = (listingId: string, title: string) => {
-    console.log('🔍 Handling listing click for ID:', listingId, 'with title:', title);
+
     openListingModal(Number(listingId));
   };
 
@@ -753,12 +734,12 @@ export default function MessagesPage() {
                         className="w-32 h-32 rounded-tl-2xl rounded-tr-lg rounded-br-lg rounded-bl-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
                         onClick={async () => {
                           const selectedChatData = chats.find(c => c.id === selectedChat);
-                          console.log('🔍 Image clicked, selectedChatData:', selectedChatData);
+                  
                           if (selectedChatData?.listing_id) {
-                            console.log('🔍 Calling openListingModal with ID:', selectedChatData.listing_id);
+                            
                             await openListingModal(Number(selectedChatData.listing_id));
                           } else {
-                            console.log('🔍 No listing_id found in selectedChatData');
+                            
                           }
                         }}
                       />
@@ -777,7 +758,7 @@ export default function MessagesPage() {
                             }`}>
                               {(() => {
                                 const adType = chats.find(c => c.id === selectedChat)?.listing_ad_type;
-                                console.log('🔍 Debug - listing_ad_type:', adType, 'for chat:', selectedChat);
+                        
                                 return adType === 'want' ? 'Looking For' : 'Selling';
                               })()}
                             </span>
@@ -887,12 +868,12 @@ export default function MessagesPage() {
                         <button
                           onClick={async () => {
                             const selectedChatData = chats.find(c => c.id === selectedChat);
-                            console.log('🔍 Button clicked, selectedChatData:', selectedChatData);
+
                             if (selectedChatData?.listing_id) {
-                              console.log('🔍 Calling openListingModal with ID:', selectedChatData.listing_id);
+
                               await openListingModal(Number(selectedChatData.listing_id));
                             } else {
-                              console.log('🔍 No listing_id found in selectedChatData');
+
                             }
                           }}
                           className="px-2 py-1.5 text-sm font-medium text-orange-600 bg-white hover:bg-orange-50 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-md w-fit"

@@ -123,7 +123,7 @@ export function LocationModal({ open, onClose, initialCenter, initialRadiusKm = 
             // This way the pin stays in place (e.g., NYC) when switching to worldwide
             setQuery(""); // Keep search bar empty for worldwide mode
             // Don't change the center name - keep the original city name
-            console.log('LocationModal: Switched to worldwide mode, keeping center at:', center);
+    
         }
     }, [radiusKm, lang, center]);
 

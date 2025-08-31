@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import ExternalLinkIcon from "@/components/ExternalLinkIcon";
+import { ExternalLinkIcon } from "@/components/ExternalLinkIcon";
+import { Toast } from "@/components/Toast";
 
 interface User {
   id: string;
@@ -78,6 +79,7 @@ export default function AdminUsersPage() {
   const [isLoadingUserData, setIsLoadingUserData] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   
   const router = useRouter();
 
@@ -121,7 +123,7 @@ export default function AdminUsersPage() {
     const userIdParam = urlParams.get('userId');
     
     if (searchParam || userIdParam) {
-      console.log('🔍 User admin: Found URL parameters - search:', searchParam, 'userId:', userIdParam);
+  
       searchAndSelectUser(searchParam, userIdParam);
     }
   }, [isAuthenticated, users, searchQuery, statusFilter]);
@@ -177,7 +179,7 @@ export default function AdminUsersPage() {
       setError(null);
       
       const offset = (currentPage - 1) * itemsPerPage;
-      console.log('🔍 Loading users - Page:', currentPage, 'Items per page:', itemsPerPage, 'Offset:', offset);
+
       
       // Build query parameters
       const params = new URLSearchParams();
@@ -191,12 +193,12 @@ export default function AdminUsersPage() {
       
       if (response.ok) {
         const data: any = await response.json();
-        console.log('🔍 Users loaded successfully:', data);
+
         
         if (data.success && data.users) {
           setUsers(data.users);
           setTotalPages(Math.ceil((data.total || 0) / itemsPerPage));
-          console.log('✅ Set users:', data.users.length, 'Total pages:', Math.ceil((data.total || 0) / itemsPerPage));
+
         } else {
           console.error('❌ API returned success but no users:', data);
           setError('No users data received');
@@ -258,7 +260,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleUserClick = (user: User) => {
+  const handleUserClick = useCallback((user: User) => {
     setSelectedUser(user);
     setIsLoadingUserData(true);
     
@@ -269,34 +271,34 @@ export default function AdminUsersPage() {
     ]).finally(() => {
       setIsLoadingUserData(false);
     });
-  };
+  }, []);
 
-  const handleSort = (column: typeof sortBy) => {
+  const handleSort = useCallback((column: typeof sortBy) => {
     if (sortBy === column) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
       setSortBy(column);
       setSortOrder('desc');
     }
-  };
+  }, [sortBy, sortOrder]);
 
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     setCurrentPage(1);
     loadUsers();
-  };
+  }, []);
 
-  const handleStatusFilterChange = (newStatus: typeof statusFilter) => {
+  const handleStatusFilterChange = useCallback((newStatus: typeof statusFilter) => {
     setStatusFilter(newStatus);
     setCurrentPage(1);
     // Note: Status filtering would need to be implemented in the API
     loadUsers();
-  };
+  }, []);
 
-  const clearSelectedUser = () => {
+  const clearSelectedUser = useCallback(() => {
     setSelectedUser(null);
     setUserListings([]);
     setUserChats([]);
-  };
+  }, []);
 
   const handleSelectUser = (userId: string, checked: boolean) => {
     const newSelected = new Set(selectedUsers);
@@ -339,14 +341,14 @@ export default function AdminUsersPage() {
         setSelectedUsers(new Set());
         setSelectAll(false);
         loadUsers();
-        // TODO: Add success toast notification
+        setToast({ message: 'Users banned successfully!', type: 'success' });
       } else {
         console.error('Failed to ban users:', data.error);
-        // TODO: Add error toast notification
+        setToast({ message: data.error || 'Failed to ban users', type: 'error' });
       }
     } catch (error) {
       console.error('Error banning users:', error);
-      // TODO: Add error toast notification
+      setToast({ message: 'Error banning users', type: 'error' });
     }
   };
 
@@ -367,14 +369,14 @@ export default function AdminUsersPage() {
         setSelectedUsers(new Set());
         setSelectAll(false);
         loadUsers();
-        // TODO: Add success toast notification
+        setToast({ message: 'Users verified successfully!', type: 'success' });
       } else {
         console.error('Failed to verify users:', data.error);
-        // TODO: Add error toast notification
+        setToast({ message: data.error || 'Failed to verify users', type: 'error' });
       }
     } catch (error) {
       console.error('Error verifying users:', error);
-      // TODO: Add error toast notification
+      setToast({ message: 'Error verifying users', type: 'error' });
     }
   };
 
@@ -992,6 +994,15 @@ export default function AdminUsersPage() {
           </div>
         </div>
       </div>
+      
+      {/* Toast Notifications */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

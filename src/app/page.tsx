@@ -81,9 +81,9 @@ export default function HomePage() {
   };
 
   const handleLocationUpdate = async (place: any, radius: number) => {
-    console.log('HomePage: Location update requested:', { place, radius });
+    
     await updateLocation(place, radius);
-    console.log('HomePage: Location updated via unified service');
+    
     setModal('showLocationModal', false);
   };
 

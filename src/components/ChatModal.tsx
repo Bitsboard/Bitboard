@@ -80,15 +80,15 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
     
     try {
       setIsLoading(true);
-      console.log('🔍 ChatModal: Loading chat for listing:', listing.id, 'user:', user.email);
+      
       
       // First, try to find existing chat
       const chatResponse = await fetch(`/api/chat/list?userEmail=${encodeURIComponent(user.email)}`);
       if (chatResponse.ok) {
         const chatData = await chatResponse.json() as { chats?: any[]; userId?: string };
-        console.log('🔍 ChatModal: Found chats:', chatData.chats?.length || 0);
-        console.log('🔍 ChatModal: All chats:', chatData.chats);
-        console.log('🔍 ChatModal: User ID from API:', chatData.userId);
+
+
+
         
         // Store the user ID for message identification
         if (chatData.userId) {
@@ -97,30 +97,30 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         
         // Look for chat that matches this listing AND involves the current user
         const existingChat = chatData.chats?.find((c: any) => {
-          console.log('🔍 ChatModal: Checking chat:', c.id, 'listing_id:', c.listing_id, 'vs listing.id:', listing.id);
-          console.log('🔍 ChatModal: User ID from API:', chatData.userId, 'buyer_id:', c.buyer_id, 'seller_id:', c.seller_id);
-          console.log('🔍 ChatModal: Data types - listing_id:', typeof c.listing_id, 'listing.id:', typeof listing.id);
-          console.log('🔍 ChatModal: Data types - user ID from API:', typeof chatData.userId, 'buyer_id:', typeof c.buyer_id, 'seller_id:', typeof c.seller_id);
+
+          
+          
+          
           
           // Check both listing ID and user involvement
           const listingMatches = c.listing_id === listing.id;
           const userInvolved = c.buyer_id === chatData.userId || c.seller_id === chatData.userId;
           
-          console.log('🔍 ChatModal: Listing matches:', listingMatches, 'User involved:', userInvolved);
-          console.log('🔍 ChatModal: Raw comparison - listing_id === listing.id:', c.listing_id === listing.id);
-          console.log('🔍 ChatModal: Raw comparison - buyer_id === user ID from API:', c.buyer_id === chatData.userId);
-          console.log('🔍 ChatModal: Raw comparison - seller_id === user ID from API:', c.seller_id === chatData.userId);
+
+  
+  
+  
           
           return listingMatches && userInvolved;
         });
         
         if (existingChat) {
-          console.log('🔍 ChatModal: Found existing chat:', existingChat.id);
+  
           setChat(existingChat);
           await loadMessages(existingChat.id);
           return;
         } else {
-          console.log('🔍 ChatModal: No existing chat found for this listing');
+  
         }
       }
       
@@ -134,7 +134,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
 
   const loadMessages = async (chatId: string) => {
     try {
-      console.log('🔍 ChatModal: Loading messages for chat:', chatId);
+      
       
       // Add timeout to prevent UI from getting stuck
       const timeoutPromise = new Promise((_, reject) => {
@@ -147,18 +147,18 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       
       if (response.ok) {
         const data = await response.json() as { success: boolean; messages?: Message[]; userId?: string };
-        console.log('🔍 ChatModal: Messages response:', data);
+
         
         if (data.success && data.messages) {
           setMessages(data.messages);
-          console.log('🔍 ChatModal: Loaded', data.messages.length, 'messages');
+  
           
           // Store user ID if provided in the response
           if (data.userId && !currentUserId) {
             setCurrentUserId(data.userId);
           }
         } else {
-          console.log('🔍 ChatModal: No messages found or API error');
+  
           setMessages([]);
         }
       } else {
@@ -171,7 +171,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
     } finally {
       // Always clear loading state
       setIsLoading(false);
-      console.log('🔍 ChatModal: Loading complete, isLoading set to false');
+
     }
   };
 

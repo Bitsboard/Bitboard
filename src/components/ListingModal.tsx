@@ -40,6 +40,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
   const a = accent(listing);
   const [sellerImageError, setSellerImageError] = React.useState(false);
   const [showChat, setShowChat] = React.useState(false);
+  const [isTrackingView, setIsTrackingView] = React.useState(false);
   
   // Track view when modal opens
   React.useEffect(() => {
@@ -51,6 +52,7 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
   // Function to track listing view
   const trackListingView = async (listingId: string) => {
     try {
+      setIsTrackingView(true);
       const response = await fetch(`/api/listings/${listingId}/view`, {
         method: 'POST',
         headers: {
@@ -61,22 +63,24 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
       if (response.ok) {
         const data = await response.json() as { success: boolean; alreadyViewed?: boolean; message?: string };
         if (data.success && !data.alreadyViewed) {
-          console.log('Listing view tracked successfully');
+          // View tracked successfully
         } else if (data.alreadyViewed) {
-          console.log('View already recorded recently');
+          // View already recorded recently
         }
       }
     } catch (error) {
       console.error('Failed to track listing view:', error);
+    } finally {
+      setIsTrackingView(false);
     }
   };
   
   // Debug: Log btcCad value and listing title
   React.useEffect(() => {
-    console.log('ListingModal btcCad:', btcCad, 'unit:', unit, 'listing.priceSats:', listing.priceSats);
-    console.log('ListingModal listing.title:', listing.title, 'type:', typeof listing.title, 'length:', listing.title?.length);
-    console.log('ListingModal listing object:', listing);
-    console.log('ListingModal images:', listing.images, 'count:', listing.images?.length);
+    
+    
+    
+    
   }, [btcCad, unit, listing.priceSats, listing.title, listing, listing.images]);
 
   function sanitizeTitle(raw: string, type: "sell" | "want"): string {
@@ -86,21 +90,21 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
   }
 
   function handleChatClick() {
-    console.log('handleChatClick called, user:', user, 'onShowAuth:', !!onShowAuth);
+    
     if (!user) {
-      console.log('No user, showing auth modal');
+      
       if (onShowAuth) {
         onShowAuth();
       }
     } else {
-      console.log('User exists, setting showChat to true');
+      
       setShowChat(true);
     }
   }
 
   // If showing chat, render ChatModal instead
   if (showChat) {
-    console.log('Rendering ChatModal, showChat:', showChat);
+    
     return (
       <ChatModal
         listing={listing}

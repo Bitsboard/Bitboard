@@ -118,7 +118,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
           {isStaging && (
             <button
               onClick={() => {
-                console.log('Starting real database wipe process...');
+        
                 
                 if (confirm('This will PERMANENTLY delete your georged1997@gmail.com account from the database. You will need to re-sign up and choose a new username. Continue?')) {
                   // First clear all client-side state
@@ -160,7 +160,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                       });
                     });
                     
-                    console.log('Client-side data cleared, now deleting from database...');
+  
                     
                     // Now actually delete the account from the database
                     fetch('/api/wipe-test-account', { 
@@ -171,7 +171,7 @@ export function Nav({ onPost, user, onAuth, avatarUrl }: NavProps) {
                     .then((data: unknown) => {
                       const responseData = data as { success?: boolean; message?: string; error?: string };
                       if (responseData.success) {
-                        console.log('Database wipe successful:', responseData.message);
+  
                         alert('Account wiped successfully! You can now re-sign up and choose a new username.');
                         // Redirect to homepage
                         window.location.href = '/?wiped=' + Date.now();

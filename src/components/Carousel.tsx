@@ -23,7 +23,7 @@ export function Carousel({ images, alt, dark, className, showDots = true, showAr
     ];
     
     // Debug logging
-    console.log('Carousel props:', { images, validImages, showDots, showArrows, showThumbnails, imagesLength: images?.length });
+  
     
     const [index, setIndex] = useState(0);
     const containerRef = useRef<HTMLDivElement | null>(null);

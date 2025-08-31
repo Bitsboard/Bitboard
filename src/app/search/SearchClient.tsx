@@ -108,7 +108,7 @@ export default function SearchClient() {
     // Sync with location context
     useEffect(() => {
         if (Number.isFinite(savedRadiusKm)) {
-            console.log('SearchClient: Syncing radius with context:', savedRadiusKm);
+    
             setRadiusKm(savedRadiusKm);
         }
     }, [savedRadiusKm]);
@@ -116,7 +116,7 @@ export default function SearchClient() {
     // Sync center coordinates with context when no URL params
     useEffect(() => {
         if (!latParam && !lngParam && savedCenter?.lat && savedCenter?.lng) {
-            console.log('SearchClient: Syncing center with context:', savedCenter);
+    
             setCenterLat(String(savedCenter.lat));
             setCenterLng(String(savedCenter.lng));
         }
@@ -551,7 +551,7 @@ export default function SearchClient() {
                         initialRadiusKm={radiusKm}
                         dark={dark}
                         onApply={async (place, r) => {
-                            console.log('SearchClient: Location modal applied:', { place, radius: r });
+                    
                             setCenterLat(String(place.lat));
                             setCenterLng(String(place.lng));
                             setRadiusKm(r);

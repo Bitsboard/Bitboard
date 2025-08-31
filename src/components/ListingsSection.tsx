@@ -40,7 +40,7 @@ export function ListingsSection({
     const lang = useLang();
     
     // Debug logging
-    console.log('ListingsSection render - layout:', layout, 'goods count:', goods.length);
+
 
     return (
         <main id="browse" className="mx-auto max-w-7xl px-4 pb-24">

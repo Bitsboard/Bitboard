@@ -28,18 +28,18 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           const savedRadius = locationService.getUserRadius();
           
           if (savedLocation) {
-            console.log('LocationContext: Loaded saved location:', savedLocation);
+        
             setCenter(savedLocation);
           }
           
           if (savedRadius !== LOCATION_CONFIG.DEFAULT_RADIUS_KM) {
-            console.log('LocationContext: Loaded saved radius:', savedRadius);
+        
             setRadiusKm(savedRadius);
           }
           
           // Check if location data is stale and clear if needed
           if (locationService.isLocationStale()) {
-            console.log('LocationContext: Location data is stale, clearing');
+    
             locationService.clearUserLocation();
             // Use IP-based location if available, otherwise fallback to Toronto
             if (ipLocation?.lat && ipLocation?.lng) {
@@ -69,14 +69,14 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   // Update center when IP location becomes available (if no saved location exists)
   useEffect(() => {
     if (!locationService.getUserLocation() && ipLocation?.lat && ipLocation?.lng) {
-      console.log('LocationContext: Using IP-based location as default:', ipLocation);
+      
       setCenter(ipLocation);
     }
   }, [ipLocation]);
 
   // Update location and save to localStorage
   const updateLocation = (place: Place, radius: number) => {
-    console.log('LocationContext: Updating location to:', place, 'radius:', radius);
+
     
     // Update state immediately
     setCenter(place);
@@ -84,12 +84,12 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     
     // Save to unified location service (which handles localStorage)
     locationService.saveUserLocation(place, radius);
-    console.log('LocationContext: Location saved to unified service');
+    
   };
 
   // Clear location and reset to defaults
   const clearLocation = () => {
-    console.log('LocationContext: Clearing location');
+
     locationService.clearUserLocation();
     // Use IP-based location if available, otherwise fallback to Toronto
     if (ipLocation?.lat && ipLocation?.lng) {

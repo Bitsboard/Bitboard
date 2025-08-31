@@ -35,4 +35,4 @@ export const ExternalLinkIcon: React.FC<ExternalLinkIconProps> = ({
   );
 };
 
-export default ExternalLinkIcon;
+
