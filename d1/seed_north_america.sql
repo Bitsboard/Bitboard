@@ -14,11 +14,11 @@ DELETE FROM listings;
 -- Generate 100 users across North America
 INSERT INTO users (id, email, username, sso, verified, is_admin, banned, created_at, image, rating, deals, last_active, has_chosen_username) VALUES
 -- Tech enthusiasts
-('na-user-001', 'sarah.crypto@email.com', 'cryptosara', 'google', 1, 0, 0, strftime('%s','now') - (30 * 24 * 60 * 60), 'https://i.pravatar.cc/150?img=1', 4.8, 12, strftime('%s','now') - (2 * 24 * 60 * 60), 1),
-('na-user-002', 'mike.mining@email.com', 'minermike', 'google', 1, 0, 0, strftime('%s','now') - (45 * 24 * 60 * 60), 'https://i.pravatar.cc/150?img=2', 4.9, 25, strftime('%s','now') - (1 * 24 * 60 * 60), 1),
-('na-user-003', 'alice.btc@email.com', 'hodlalice', 'google', 1, 0, 0, strftime('%s','now') - (60 * 24 * 60 * 60), 'https://i.pravatar.cc/150?img=3', 4.7, 8, strftime('%s','now') - (3 * 24 * 60 * 60), 1),
-('na-user-004', 'bob.lightning@email.com', 'lightningbob', 'google', 1, 0, 0, strftime('%s','now') - (20 * 24 * 60 * 60), 'https://i.pravatar.cc/150?img=4', 4.6, 15, strftime('%s','now') - (1 * 24 * 60 * 60), 1),
-('na-user-005', 'carol.node@email.com', 'nodecarol', 'google', 1, 0, 0, strftime('%s','now') - (90 * 24 * 60 * 60), 'https://i.pravatar.cc/150?img=5', 4.9, 31, strftime('%s','now') - (12 * 60 * 60), 1),
+('na-user-001', 'sarah.crypto@email.com', 'cryptosara', 'google', 0, 0, 0, strftime('%s','now') - (30 * 24 * 60 * 60), 'https://i.pravatar.cc/150?img=1', 4.8, 12, strftime('%s','now') - (2 * 24 * 60 * 60), 1),
+('na-user-002', 'mike.mining@email.com', 'minermike', 'google', 0, 0, 0, strftime('%s','now') - (45 * 24 * 60 * 60), 'https://i.pravatar.cc/150?img=2', 4.9, 25, strftime('%s','now') - (1 * 24 * 60 * 60), 1),
+('na-user-003', 'alice.btc@email.com', 'hodlalice', 'google', 0, 0, 0, strftime('%s','now') - (60 * 24 * 60 * 60), 'https://i.pravatar.cc/150?img=3', 4.7, 8, strftime('%s','now') - (3 * 24 * 60 * 60), 1),
+('na-user-004', 'bob.lightning@email.com', 'lightningbob', 'google', 0, 0, 0, strftime('%s','now') - (20 * 24 * 60 * 60), 'https://i.pravatar.cc/150?img=4', 4.6, 15, strftime('%s','now') - (1 * 24 * 60 * 60), 1),
+('na-user-005', 'carol.node@email.com', 'nodecarol', 'google', 0, 0, 0, strftime('%s','now') - (90 * 24 * 60 * 60), 'https://i.pravatar.cc/150?img=5', 4.9, 31, strftime('%s','now') - (12 * 60 * 60), 1),
 
 -- Traders and investors
 ('na-user-006', 'dave.trader@email.com', 'traderdave', 'google', 1, 0, 0, strftime('%s','now') - (15 * 24 * 60 * 60), 'https://i.pravatar.cc/150?img=6', 4.5, 42, strftime('%s','now') - (6 * 60 * 60), 1),
