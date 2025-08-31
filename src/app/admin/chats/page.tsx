@@ -462,7 +462,7 @@ export default function AdminChatsPage() {
 
           {/* Right Panel - Conversation Preview (30%) */}
           <div className="flex-[0.3] min-w-0">
-            <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden h-[700px] flex flex-col">
+            <div className="bg-white dark:bg-neutral-800 rounded border border-neutral-200 dark:border-neutral-700 overflow-hidden flex flex-col max-h-[600px]">
 
               
               {selectedChat ? (
@@ -501,7 +501,7 @@ export default function AdminChatsPage() {
                   </div>
 
                   {/* Messages - Condensed */}
-                  <div className="space-y-2 flex-1 overflow-y-auto min-h-0 pr-2 py-1 scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-600 scrollbar-track-transparent hover:scrollbar-thumb-neutral-400 dark:hover:scrollbar-thumb-neutral-500">
+                  <div className="space-y-2 flex-1 overflow-y-auto min-h-0 max-h-[400px] pr-2 py-1 scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-600 scrollbar-track-transparent hover:scrollbar-thumb-neutral-400 dark:hover:scrollbar-thumb-neutral-500">
                     {messagesLoading ? (
                       <div className="text-center py-3">
                         <div className="w-3 h-3 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-1.5"></div>
