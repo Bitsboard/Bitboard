@@ -187,21 +187,44 @@ export async function GET(req: NextRequest) {
       const fallbackImages = r.imageUrl && r.imageUrl.trim() ? [r.imageUrl] : [];
       const finalImages = realImages.length > 0 ? realImages : fallbackImages;
       
+      // Debug: Log the raw data for first few listings
+      if (i < 3) {
+        console.log(`API: Listing ${r.id} raw data:`, {
+          id: r.id,
+          title: r.title,
+          postedBy: r.postedBy,
+          userRating: r.userRating,
+          userDeals: r.userDeals,
+          userVerified: r.userVerified,
+          priceSat: r.priceSat,
+          pricingType: r.pricingType
+        });
+      }
+      
       return {
         ...r,
         imageUrl: r.imageUrl && r.imageUrl.trim() ? r.imageUrl : '',
         // Create the seller object structure that the frontend expects
-        seller: {
-          name: r.postedBy || 'unknown',
-          thumbsUp: r.userRating || 0, // Single metric: thumbs-up count
-          deals: r.userDeals || 0,
-          verifications: {
-            email: Boolean(r.userVerified),
-            phone: false, // Not implemented yet
-            lnurl: false  // Not implemented yet
-          },
-          onTimeRelease: 100 // Default value
-        },
+        seller: (() => {
+          const seller = {
+            name: r.postedBy || 'unknown',
+            thumbsUp: r.userRating || 0, // Single metric: thumbs-up count
+            deals: r.userDeals || 0,
+            verifications: {
+              email: Boolean(r.userVerified),
+              phone: false, // Not implemented yet
+              lnurl: false  // Not implemented yet
+            },
+            onTimeRelease: 100 // Default value
+          };
+          
+          // Debug: Log the seller object for first few listings
+          if (i < 3) {
+            console.log(`API: Listing ${r.id} seller object:`, seller);
+          }
+          
+          return seller;
+        })(),
         // Return real multiple images from listing_images table
         images: finalImages,
         type: r.adType === 'want' ? 'want' : 'sell',
