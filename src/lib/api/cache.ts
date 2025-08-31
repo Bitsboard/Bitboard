@@ -208,7 +208,7 @@ class APICacheManager {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as T;
       const etag = response.headers.get('etag') || undefined;
 
       // Cache successful responses
