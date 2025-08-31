@@ -11,8 +11,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "amountSats required" }, { status: 400 });
     }
 
-    // Create Lightning backend (defaults to mock for now)
-    const lightningBackend = createLightningBackend("mock", {});
+    // Create Lightning backend based on environment configuration
+    // In staging/production, this should be configured via environment variables
+    const lightningType = process.env.LIGHTNING_BACKEND_TYPE || "mock";
+    const lightningConfig = {
+      host: process.env.LIGHTNING_HOST,
+      port: process.env.LIGHTNING_PORT ? parseInt(process.env.LIGHTNING_PORT) : undefined,
+      macaroon: process.env.LIGHTNING_MACAROON,
+      cert: process.env.LIGHTNING_CERT,
+    };
+    
+    const lightningBackend = createLightningBackend(lightningType, lightningConfig);
 
     // Calculate fees and total
     const feeSats = calculateEscrowFee(amountSats);

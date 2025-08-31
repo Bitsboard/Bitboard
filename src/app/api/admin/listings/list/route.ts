@@ -27,66 +27,22 @@ export async function GET(req: Request) {
     
     const mod = await import("@cloudflare/next-on-pages").catch(() => null as any);
     if (!mod || typeof mod.getRequestContext !== "function") {
-      console.log('🔍 Admin Listings API: Cloudflare adapter missing - returning mock data');
+      console.log('🔍 Admin Listings API: Cloudflare adapter missing');
       return NextResponse.json({ 
-        success: true,
-        listings: [
-          {
-            id: 'mock-1',
-            title: 'Mock Listing 1 (Adapter Missing)',
-            description: 'Cloudflare adapter missing - using mock data',
-            priceSat: 100000,
-            adType: 'wanted',
-            category: 'electronics',
-            postedBy: 'mock-user-1',
-            username: 'mock-user-1',
-            createdAt: Math.floor(Date.now() / 1000) - 86400,
-            updatedAt: Math.floor(Date.now() / 1000),
-            status: 'active',
-            imageUrl: null,
-            location: 'Mock City, MC',
-            views: 0,
-            favorites: 0,
-            replies: 0
-          }
-        ], 
-        total: 1,
-        page: 1,
-        limit
-      });
+        success: false,
+        error: 'Cloudflare adapter not available'
+      }, { status: 500 });
     }
 
     const env = mod.getRequestContext().env as { DB?: D1Database };
     const db = env.DB;
     
     if (!db) {
-      console.log('🔍 Admin Listings API: No database binding - returning mock data');
+      console.log('🔍 Admin Listings API: No database binding');
       return NextResponse.json({ 
-        success: true,
-        listings: [
-          {
-            id: 'mock-1',
-            title: 'Mock Listing 1 (No DB)',
-            description: 'No database binding - using mock data',
-            priceSat: 100000,
-            adType: 'wanted',
-            category: 'electronics',
-            postedBy: 'mock-user-1',
-            username: 'mock-user-1',
-            createdAt: Math.floor(Date.now() / 1000) - 86400,
-            updatedAt: Math.floor(Date.now() / 1000),
-            status: 'active',
-            imageUrl: null,
-            location: 'Mock City, MC',
-            views: 0,
-            favorites: 0,
-            replies: 0
-          }
-        ], 
-        total: 1,
-        page: 1,
-        limit
-      });
+        success: false,
+        error: 'Database connection not available'
+      }, { status: 500 });
     }
     
     console.log('✅ Database connection established');
@@ -103,36 +59,12 @@ export async function GET(req: Request) {
       console.error('🔍 Admin Listings API: Test error message:', testError?.message);
       console.error('🔍 Admin Listings API: Test error stack:', testError?.stack);
       
-      // Return mock data if basic test fails
-      console.log('🔍 Admin Listings API: Basic test failed - returning mock data');
       return NextResponse.json({ 
-        success: true,
-        listings: [
-          {
-            id: 'mock-1',
-            title: 'Mock Listing 1 (Test Failed)',
-            description: 'Basic database test failed - using mock data',
-            priceSat: 100000,
-            adType: 'wanted',
-            category: 'electronics',
-            postedBy: 'mock-user-1',
-            username: 'mock-user-1',
-            createdAt: Math.floor(Date.now() / 1000) - 86400,
-            updatedAt: Math.floor(Date.now() / 1000),
-            status: 'active',
-            imageUrl: null,
-            location: 'Mock City, MC',
-            views: 0,
-            favorites: 0,
-            replies: 0
-          }
-        ], 
-        total: 1,
-        page: 1,
-        limit
-      });
+        success: false,
+        error: 'Database connection test failed'
+      }, { status: 500 });
     }
-    
+
     // Check if listings table exists
     console.log('🔍 Admin Listings API: Checking if listings table exists...');
     try {
@@ -140,39 +72,20 @@ export async function GET(req: Request) {
       console.log('🔍 Admin Listings API: Table check result:', tableCheck);
       
       if (!tableCheck.results || tableCheck.results.length === 0) {
-        console.log('🔍 Admin Listings API: Listings table does not exist - returning mock data');
+        console.log('🔍 Admin Listings API: Listings table does not exist');
         return NextResponse.json({ 
-          success: true,
-          listings: [
-            {
-              id: 'mock-1',
-              title: 'Mock Listing 1 (No Table)',
-              description: 'Listings table does not exist - using mock data',
-              priceSat: 100000,
-              adType: 'wanted',
-              category: 'electronics',
-              postedBy: 'mock-user-1',
-              username: 'mock-user-1',
-              createdAt: Math.floor(Date.now() / 1000) - 86400,
-              updatedAt: Math.floor(Date.now() / 1000),
-              status: 'active',
-              imageUrl: null,
-              location: 'Mock City, MC',
-              views: 0,
-              favorites: 0,
-              replies: 0
-            }
-          ], 
-          total: 1,
-          page: 1,
-          limit
-        });
+          success: false,
+          error: 'Listings table not found'
+        }, { status: 500 });
       }
     } catch (tableError: any) {
       console.error('🔍 Admin Listings API: Table check failed:', tableError);
       console.error('🔍 Admin Listings API: Table check error message:', tableError?.message);
       
-      // Continue anyway - table might exist but check failed
+      return NextResponse.json({ 
+        success: false,
+        error: 'Database table check failed'
+      }, { status: 500 });
     }
     
     // Now use the correct query based on actual database schema
@@ -270,34 +183,10 @@ export async function GET(req: Request) {
       console.error('🔍 Admin Listings API: Query error message:', queryError?.message);
       console.error('🔍 Admin Listings API: Query error stack:', queryError?.stack);
       
-      // Return mock data if query fails
-      console.log('🔍 Admin Listings API: Query failed - returning mock data');
       return NextResponse.json({ 
-        success: true,
-        listings: [
-          {
-            id: 'mock-1',
-            title: 'Mock Listing 1 (Query Failed)',
-            description: 'Database query failed - using mock data',
-            priceSat: 100000,
-            adType: 'wanted',
-            category: 'electronics',
-            postedBy: 'mock-user-1',
-            username: 'mock-user-1',
-            createdAt: Math.floor(Date.now() / 1000) - 86400,
-            updatedAt: Math.floor(Date.now() / 1000),
-            status: 'active',
-            imageUrl: null,
-            location: 'Mock City, MC',
-            views: 0,
-            favorites: 0,
-            replies: 0
-          }
-        ], 
-        total: 1,
-        page: 1,
-        limit
-      });
+        success: false,
+        error: 'Database query failed'
+      }, { status: 500 });
     }
     
   } catch (e: any) {

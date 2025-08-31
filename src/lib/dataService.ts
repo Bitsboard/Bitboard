@@ -161,7 +161,7 @@ export class DataService {
             if (params.offset) queryParams.append('offset', params.offset.toString());
             if (params.lat) queryParams.append('lat', params.lat.toString());
             if (params.lng) queryParams.append('lng', params.lng.toString());
-            if (params.radiusKm) queryParams.append('radiusKm', params.radiusKm.toString());
+            if (params.radiusKm !== undefined) queryParams.append('radiusKm', params.radiusKm.toString());
             if (params.query) queryParams.append('q', params.query);
             if (params.category) queryParams.append('category', params.category);
             if (params.adType) queryParams.append('adType', params.adType);
