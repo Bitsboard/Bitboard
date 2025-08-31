@@ -102,6 +102,26 @@ export class LocationService {
         }
     }
 
+    // Reset location to new default (Miami) and clear old saved location
+    resetToNewDefault(): void {
+        try {
+            // Clear old saved location
+            this.clearUserLocation();
+            
+            // Set new default location
+            const newDefault = LOCATION_CONFIG.DEFAULT_CENTER;
+            const newRadius = LOCATION_CONFIG.DEFAULT_RADIUS_KM;
+            
+            localStorage.setItem(LOCATION_CONFIG.STORAGE_KEYS.LOCATION, JSON.stringify(newDefault));
+            localStorage.setItem(LOCATION_CONFIG.STORAGE_KEYS.RADIUS, newRadius.toString());
+            localStorage.setItem(LOCATION_CONFIG.STORAGE_KEYS.LAST_UPDATED, Date.now().toString());
+            
+            console.log('LocationService: Reset to new default location:', { place: newDefault, radiusKm: newRadius });
+        } catch (error) {
+            console.warn('LocationService: Error resetting to new default:', error);
+        }
+    }
+
     // Check if location data is stale (older than 30 days)
     isLocationStale(): boolean {
         try {
