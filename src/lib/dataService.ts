@@ -181,18 +181,6 @@ export class DataService {
             const data = await response.json() as any;
             console.log('DataService: Raw API response:', data);
             
-            // Debug: Log the first listing structure
-            if (data?.data?.listings?.[0]) {
-                console.log('DataService: First listing structure:', {
-                    id: data.data.listings[0].id,
-                    title: data.data.listings[0].title,
-                    seller: data.data.listings[0].seller,
-                    sellerKeys: data.data.listings[0].seller ? Object.keys(data.data.listings[0].seller) : 'NO_SELLER',
-                    hasThumbsUp: data.data.listings[0].seller?.thumbsUp !== undefined,
-                    thumbsUpValue: data.data.listings[0].seller?.thumbsUp
-                });
-            }
-            
             // Cache the successful response
             listingsCache[cacheKey] = {
                 data: data,
