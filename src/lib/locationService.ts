@@ -102,23 +102,30 @@ export class LocationService {
         }
     }
 
-    // Reset location to new default (Miami) and clear old saved location
+    // Reset location to new default and clear old saved location
     resetToNewDefault(): void {
         try {
-            // Clear old saved location
+            // Clear old saved location completely
             this.clearUserLocation();
             
-            // Set new default location
-            const newDefault = LOCATION_CONFIG.DEFAULT_CENTER;
-            const newRadius = LOCATION_CONFIG.DEFAULT_RADIUS_KM;
-            
-            localStorage.setItem(LOCATION_CONFIG.STORAGE_KEYS.LOCATION, JSON.stringify(newDefault));
-            localStorage.setItem(LOCATION_CONFIG.STORAGE_KEYS.RADIUS, newRadius.toString());
-            localStorage.setItem(LOCATION_CONFIG.STORAGE_KEYS.LAST_UPDATED, Date.now().toString());
-            
-            console.log('LocationService: Reset to new default location:', { place: newDefault, radiusKm: newRadius });
+            console.log('LocationService: Cleared old location data, will use default:', LOCATION_CONFIG.DEFAULT_CENTER);
         } catch (error) {
-            console.warn('LocationService: Error resetting to new default:', error);
+            console.warn('LocationService: Error clearing old location data:', error);
+        }
+    }
+
+    // Force clear Miami location if it exists
+    clearMiamiLocation(): void {
+        try {
+            const currentLocation = this.getUserLocation();
+            if (currentLocation && 
+                Math.abs(currentLocation.lat - 25.77427) < 0.1 && 
+                Math.abs(currentLocation.lng - (-80.19366)) < 0.1) {
+                console.log('LocationService: Detected Miami location, clearing it');
+                this.clearUserLocation();
+            }
+        } catch (error) {
+            console.warn('LocationService: Error checking Miami location:', error);
         }
     }
 

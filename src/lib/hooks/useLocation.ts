@@ -20,41 +20,44 @@ export function useLocation() {
         console.log('useLocation: Reset to new default:', LOCATION_CONFIG.DEFAULT_CENTER);
     }, []);
 
-    // Load saved user location on mount
-    useEffect(() => {
-        const loadUserLocation = () => {
-            try {
-                // Load from unified location service
-                const savedLocation = locationService.getUserLocation();
-                const savedRadius = locationService.getUserRadius();
-                
-                if (savedLocation) {
-                    console.log('useLocation: Loaded saved location:', savedLocation);
-                    setCenter(savedLocation);
-                }
-                
-                if (savedRadius !== LOCATION_CONFIG.DEFAULT_RADIUS_KM) {
-                    console.log('useLocation: Loaded saved radius:', savedRadius);
-                    setRadiusKm(savedRadius);
-                }
-                
-                // Check if location data is stale and clear if needed
-                if (locationService.isLocationStale()) {
-                    console.log('useLocation: Location data is stale, clearing');
-                    locationService.clearUserLocation();
+            // Load saved user location on mount
+        useEffect(() => {
+            const loadUserLocation = () => {
+                try {
+                    // First, check if we have the old Miami location and clear it
+                    locationService.clearMiamiLocation();
+                    
+                    // Load from unified location service
+                    const savedLocation = locationService.getUserLocation();
+                    const savedRadius = locationService.getUserRadius();
+                    
+                    if (savedLocation) {
+                        console.log('useLocation: Loaded saved location:', savedLocation);
+                        setCenter(savedLocation);
+                    }
+                    
+                    if (savedRadius !== LOCATION_CONFIG.DEFAULT_RADIUS_KM) {
+                        console.log('useLocation: Loaded saved radius:', savedRadius);
+                        setRadiusKm(savedRadius);
+                    }
+                    
+                    // Check if location data is stale and clear if needed
+                    if (locationService.isLocationStale()) {
+                        console.log('useLocation: Location data is stale, clearing');
+                        locationService.clearUserLocation();
+                        setCenter(LOCATION_CONFIG.DEFAULT_CENTER);
+                        setRadiusKm(LOCATION_CONFIG.DEFAULT_RADIUS_KM);
+                    }
+                    
+                    // Keep user's actual location - don't auto-reset to default
+                    
+                } catch (error) {
+                    console.warn('useLocation: Failed to load user location:', error);
+                    // Fall back to defaults
                     setCenter(LOCATION_CONFIG.DEFAULT_CENTER);
                     setRadiusKm(LOCATION_CONFIG.DEFAULT_RADIUS_KM);
                 }
-                
-                // Keep user's actual location - don't auto-reset to default
-                
-            } catch (error) {
-                console.warn('useLocation: Failed to load user location:', error);
-                // Fall back to defaults
-                setCenter(LOCATION_CONFIG.DEFAULT_CENTER);
-                setRadiusKm(LOCATION_CONFIG.DEFAULT_RADIUS_KM);
-            }
-        };
+            };
 
         loadUserLocation();
     }, [resetToDefault]);
