@@ -14,6 +14,17 @@ interface PriceBlockProps {
 }
 
 export function PriceBlock({ sats, unit, btcCad, dark, size = "sm", compactFiat = false }: PriceBlockProps) {
+  // Handle "make offer" case
+  if (sats === -1) {
+    const mainSize = size === "lg" ? "text-2xl" : size === "md" ? "text-xl" : "text-base";
+    return (
+      <div className="flex flex-col items-start">
+        <span className={`font-bold text-blue-500 ${mainSize}`}>Make Offer</span>
+        <span className={`text-xs ${dark ? "text-neutral-400" : "text-neutral-600"}`}>Contact seller to negotiate</span>
+      </div>
+    );
+  }
+
   const primary = unit === "sats" ? `${formatNumber(sats)} sats` : `₿ ${formatBTCFromSats(sats)}`;
   const cad = btcCad ? formatCurrency(satsToFiat(sats, btcCad), "CAD") : null;
   const mainSize = size === "lg" ? "text-2xl" : size === "md" ? "text-xl" : "text-base";

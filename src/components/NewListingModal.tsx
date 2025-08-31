@@ -36,6 +36,7 @@ export function NewListingModal({ onClose, onPublish, dark }: NewListingModalPro
     title: "",
     description: "",
     priceSats: 0,
+    pricingType: "fixed" as "fixed" | "make_offer",
     category: "Electronics" as Category,
     location: "Toronto, ON",
     lat: 43.653,
@@ -94,13 +95,38 @@ export function NewListingModal({ onClose, onPublish, dark }: NewListingModalPro
             </Field>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Price (sats)">
-              <input type="number" min={0} value={form.priceSats} onChange={(e) => setForm({ ...form, priceSats: Number(e.target.value || 0) })} className={cn("w-full rounded-xl px-3 py-2 focus:outline-none", inputBase)} placeholder="e.g., 5200000" />
+            <Field label="Pricing Type">
+              <select 
+                value={form.pricingType} 
+                onChange={(e) => setForm({ 
+                  ...form, 
+                  pricingType: e.target.value as "fixed" | "make_offer",
+                  priceSats: e.target.value === "make_offer" ? -1 : form.priceSats
+                })} 
+                className={cn("w-full rounded-xl px-3 py-2 focus:outline-none", inputBase)}
+              >
+                <option value="fixed">Fixed Price</option>
+                <option value="make_offer">Make Offer</option>
+              </select>
             </Field>
             <Field label="Photo URL (temporary for demo)">
               <input value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} className={cn("w-full rounded-xl px-3 py-2 focus:outline-none", inputBase)} placeholder="Paste an image URL" />
             </Field>
           </div>
+          
+          {/* Price field - only show when pricing type is fixed */}
+          {form.pricingType === "fixed" && (
+            <Field label="Price (sats)">
+              <input 
+                type="number" 
+                min={0} 
+                value={form.priceSats >= 0 ? form.priceSats : ""} 
+                onChange={(e) => setForm({ ...form, priceSats: Number(e.target.value || 0) })} 
+                className={cn("w-full rounded-xl px-3 py-2 focus:outline-none", inputBase)} 
+                placeholder="e.g., 5200000" 
+              />
+            </Field>
+          )}
           <div className={cn("rounded-xl p-3 text-xs", dark ? "border border-neutral-800 bg-neutral-900 text-neutral-400" : "border border-neutral-300 bg-white text-neutral-600")}>
             All coordination happens in in-app chat. Keep correspondence in-app; off-app contact is against our guidelines.
           </div>
@@ -181,7 +207,8 @@ export function NewListingModal({ onClose, onPublish, dark }: NewListingModalPro
                       id: "temp",
                       title: form.title.trim(),
                       description: form.description.trim(),
-                      priceSats: Number(form.priceSats) || 0,
+                      priceSats: form.pricingType === "make_offer" ? -1 : (Number(form.priceSats) || 0),
+                      pricingType: form.pricingType,
                       category: form.category,
                       location: form.location.trim() || "Toronto, ON",
                       lat: form.lat,

@@ -33,11 +33,14 @@ export type Seller = {
   onTimeRelease: number;
 };
 
+export type PricingType = "fixed" | "make_offer";
+
 export type Listing = {
   id: string; // Now 10 alphanumeric characters
   title: string;
   description: string; // Standardized to description
-  priceSats: number;
+  priceSats: number; // -1 indicates "make offer", >= 0 for fixed prices
+  pricingType: PricingType; // "fixed" or "make_offer"
   category: Category | Exclude<string, never>;
   location: string;
   lat: number;

@@ -130,6 +130,11 @@ export const validators = {
   price: (value: number, fieldName: string): ValidationError | null => {
     if (value === null || value === undefined) return null;
     
+    // Allow -1 for "make offer" listings
+    if (value === -1) {
+      return null;
+    }
+    
     if (value < APP_CONFIG.MIN_PRICE_SATS) {
       return {
         field: fieldName,
