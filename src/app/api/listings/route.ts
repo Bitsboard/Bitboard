@@ -5,7 +5,10 @@ import { handleApiError, createValidationError, createNotFoundError } from "@/li
 
 export const runtime = "edge";
 
+console.log('🔍 Listings API: MODULE LOADED - route.ts file loaded');
+
 export async function GET(req: NextRequest) {
+  console.log('🔍 Listings API: ROUTE HIT - GET function called');
   try {
     console.log('🔍 Listings API: GET request started');
     console.log('🔍 Listings API: Request URL:', req.url);
