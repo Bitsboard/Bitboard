@@ -62,11 +62,13 @@ export async function GET(req: NextRequest) {
       binds.push(Math.round(validatedQuery.maxPrice));
     }
 
-    // Geospatial radius filter
+    // Geospatial radius filter - only apply if radius is reasonable
     if (validatedQuery.lat !== undefined && validatedQuery.lng !== undefined && validatedQuery.radiusKm !== undefined) {
-      const effectiveRadiusKm = validatedQuery.radiusKm === 0 ? 100000 : validatedQuery.radiusKm;
-
-      if (effectiveRadiusKm < 900000) {
+      const effectiveRadiusKm = validatedQuery.radiusKm === 0 ? 5000 : validatedQuery.radiusKm; // Default to 5000km instead of 100000km
+      
+      // Only apply strict geospatial filtering for reasonable radius searches
+      // For very large radius or when user wants to see all listings, don't filter by exact coordinates
+      if (effectiveRadiusKm < 10000) { // Only filter if radius is less than 10,000km
         const R_KM_PER_DEG = 111.32;
         const deltaLat = effectiveRadiusKm / R_KM_PER_DEG;
         const rad = (validatedQuery.lat * Math.PI) / 180;
@@ -79,6 +81,7 @@ export async function GET(req: NextRequest) {
         whereClause.push("(l.lng BETWEEN ? AND ?)");
         binds.push(validatedQuery.lng - deltaLng, validatedQuery.lng + deltaLng);
       }
+      // If radius is very large, don't apply strict coordinate filtering - let the user see all listings
     }
 
     const whereClauseStr = whereClause.length ? `WHERE ${whereClause.join(" AND ")}` : "";

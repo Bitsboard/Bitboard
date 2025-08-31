@@ -5,7 +5,7 @@ export const LOCATION_CONFIG = {
     DEFAULT_RADIUS_KM: 500,
     MAX_RADIUS_KM: 1000,
     MIN_RADIUS_KM: 1,
-    DEFAULT_CENTER: { name: "Miami, Florida", lat: 25.7617, lng: -80.1918 },
+    DEFAULT_CENTER: { name: "North America", lat: 40.0, lng: -100.0 },
     STORAGE_KEYS: {
         LOCATION: 'bitsbarter_userLocation',
         RADIUS: 'bitsbarter_userRadius',

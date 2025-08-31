@@ -46,13 +46,7 @@ export function useLocation() {
                     setRadiusKm(LOCATION_CONFIG.DEFAULT_RADIUS_KM);
                 }
                 
-                // Check if saved location is the old Toronto coordinates and reset to new Miami default
-                if (savedLocation && 
-                    Math.abs(savedLocation.lat - 43.653) < 0.1 && 
-                    Math.abs(savedLocation.lng - (-79.383)) < 0.1) {
-                    console.log('useLocation: Detected old Toronto coordinates, resetting to new Miami default');
-                    resetToDefault();
-                }
+                // Keep user's actual location - don't auto-reset to default
                 
             } catch (error) {
                 console.warn('useLocation: Failed to load user location:', error);
