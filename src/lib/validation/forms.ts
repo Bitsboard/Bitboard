@@ -201,7 +201,7 @@ export const validators = {
       };
     }
     
-    if (allowedTypes.length > 0 && !allowedTypes.includes(file.type)) {
+    if (allowedTypes.length > 0 && !allowedTypes.some(type => type === file.type)) {
       return {
         field: fieldName,
         message: `${fieldName} must be one of: ${allowedTypes.join(', ')}`,
