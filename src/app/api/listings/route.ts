@@ -98,8 +98,11 @@ export async function GET(req: NextRequest) {
     // Execute single optimized query with COALESCE for missing columns
     let results: any[] = [];
     try {
-      const optimized = await db
-        .prepare(`SELECT l.id,
+      console.log('🔍 Listings API: About to execute query with whereClause:', whereClauseStr);
+      console.log('🔍 Listings API: Query binds:', binds);
+      console.log('🔍 Listings API: Order binds:', orderBinds);
+      
+      const query = `SELECT l.id,
                          l.title,
                          COALESCE(l.description, '') as description,
                          COALESCE(l.category, 'general') as category,
@@ -120,11 +123,22 @@ export async function GET(req: NextRequest) {
                   LEFT JOIN users u ON l.posted_by = u.id
                   ${whereClauseStr}
                   ${orderClause}
-                  LIMIT ? OFFSET ?`)
+                  LIMIT ? OFFSET ?`;
+      
+      console.log('🔍 Listings API: Full SQL query:', query);
+      
+      const optimized = await db
+        .prepare(query)
         .bind(...binds, ...orderBinds, validatedQuery.limit, validatedQuery.offset)
         .all();
       results = optimized.results ?? [];
-      console.log('🔍 Listings API: Optimized query returned', results.length, 'results');
+      console.log('🔍 Listings API: Query returned', results.length, 'results');
+      
+      if (results.length > 0) {
+        console.log('🔍 Listings API: First result:', results[0]);
+      } else {
+        console.log('🔍 Listings API: No results returned from query');
+      }
     } catch (error) {
       console.error('🔍 Listings API: Query failed:', error);
       results = [];
@@ -237,6 +251,10 @@ export async function GET(req: NextRequest) {
       };
     });
 
+    console.log('🔍 Listings API: Final response - listings count:', listings.length);
+    console.log('🔍 Listings API: Final response - total:', total);
+    console.log('🔍 Listings API: Final response - first listing:', listings[0]);
+    
     return NextResponse.json({
       success: true,
       data: { listings, total },
