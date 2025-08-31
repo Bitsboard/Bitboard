@@ -193,6 +193,7 @@ export async function GET(req: Request) {
         l.title,
         l.description,
         l.price_sat AS priceSat,
+        COALESCE(l.pricing_type, 'fixed') AS pricingType,
         l.ad_type AS adType,
         l.category,
         l.posted_by AS postedBy,

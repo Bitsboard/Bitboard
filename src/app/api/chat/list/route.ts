@@ -84,6 +84,7 @@ export async function GET(req: Request) {
         c.last_message_at,
         l.title as listing_title,
         l.price_sat as listing_price,
+        COALESCE(l.pricing_type, 'fixed') as listing_pricing_type,
         l.image_url as listing_image,
         l.category as listing_category,
         l.ad_type as listing_type,

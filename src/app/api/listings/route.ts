@@ -106,6 +106,7 @@ export async function GET(req: NextRequest) {
                          COALESCE(l.lng, 0) as lng,
                          COALESCE(l.image_url, '') AS imageUrl,
                          l.price_sat AS priceSat,
+                         COALESCE(l.pricing_type, 'fixed') AS pricingType,
                          COALESCE(u.username, 'unknown') AS postedBy,
                          COALESCE(u.rating, 0) AS userRating,
                          COALESCE(u.deals, 0) AS userDeals,

@@ -50,7 +50,7 @@ export async function GET(req: Request) {
         
         if (userRow) {
           try {
-            const lres = await db.prepare('SELECT id, title, price_sat AS priceSat, created_at AS createdAt FROM listings WHERE posted_by = ? ORDER BY created_at DESC LIMIT 20').bind(userRow?.id ?? '').all();
+            const lres = await db.prepare('SELECT id, title, price_sat AS priceSat, COALESCE(pricing_type, "fixed") AS pricingType, created_at AS createdAt FROM listings WHERE posted_by = ? ORDER BY created_at DESC LIMIT 20').bind(userRow?.id ?? '').all();
             listings = lres.results ?? [];
             console.log('🔍 Session API: Found listings for user:', listings.length);
           } catch (listingError) {
