@@ -35,7 +35,7 @@ export async function GET(req: Request) {
         orderBy = `chats_count ${sortOrder.toUpperCase()}`;
         break;
       case 'thumbsUp':
-        orderBy = `u.rating ${sortOrder.toUpperCase()}`;
+        orderBy = `u.thumbs_up ${sortOrder.toUpperCase()}`;
         break;
       case 'lastActivityAt':
         orderBy = `last_activity ${sortOrder.toUpperCase()}`;
@@ -61,7 +61,7 @@ export async function GET(req: Request) {
         COALESCE(listing_stats.listings_count, 0) AS listingsCount,
         COALESCE(chat_stats.chats_count, 0) AS chatsCount,
         COALESCE(message_stats.messages_count, 0) AS messagesCount,
-        COALESCE(u.rating, 0) AS thumbsUp,
+        COALESCE(u.thumbs_up, 0) AS thumbsUp,
         COALESCE(u.deals, 0) AS deals,
         COALESCE(listing_stats.total_value, 0) AS totalListingsValue,
         COALESCE(activity_stats.last_activity, 0) AS lastActivityAt

@@ -123,9 +123,9 @@ export async function GET(
         seller: {
           name: listing.sellerName,
           verified: Boolean(listing.sellerVerified),
-          score: Math.floor(user.rating || 0), // Ensure whole number, default to 0
+          score: Math.floor(user.thumbs_up || 0), // Ensure whole number, default to 0
           deals: user.deals || 0, // Use real deals count
-          rating: Math.floor(user.rating || 0), // Ensure whole number, default to 0
+          rating: Math.floor(user.thumbs_up || 0), // Ensure whole number, default to 0
           verifications: {
             email: Boolean(listing.sellerVerified),
             phone: false,
@@ -142,7 +142,7 @@ export async function GET(
         verified: Boolean(user.verified),
         registeredAt: user.created_at,
         profilePhoto: user.image,
-        rating: Math.floor(user.rating || 0), // Ensure whole number, default to 0
+        rating: Math.floor(user.thumbs_up || 0), // Ensure whole number, default to 0
         deals: user.deals || 0
       },
       listings: transformedListings,

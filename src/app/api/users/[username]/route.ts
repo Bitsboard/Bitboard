@@ -41,7 +41,7 @@ export async function GET(
         created_at, 
         image,
         email,
-        rating,
+        thumbs_up,
         deals,
         last_active
       FROM users 
@@ -74,7 +74,7 @@ export async function GET(
         verified: Boolean(user.verified),
         registeredAt: user.created_at,
         profilePhoto: user.image,
-        rating: user.rating || 0,
+        rating: user.thumbs_up || 0,
         deals: user.deals || 0,
         lastActive: user.last_active || user.created_at
       },

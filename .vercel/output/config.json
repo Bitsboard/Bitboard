@@ -167,12 +167,68 @@
       "status": 404
     },
     {
+      "src": "^[/]?(?<nextLocale>en|fr|es|de)?/api/admin/chats/(?<nxtPchatId>[^/]+?)/messages(?:\\.rsc)(?:/)?$",
+      "dest": "/api/admin/chats/[chatId]/messages.rsc?nxtPchatId=$nxtPchatId"
+    },
+    {
+      "src": "^[/]?(?<nextLocale>en|fr|es|de)?/api/admin/chats/(?<nxtPchatId>[^/]+?)/messages(?:/)?$",
+      "dest": "/api/admin/chats/[chatId]/messages?nxtPchatId=$nxtPchatId"
+    },
+    {
+      "src": "^[/]?(?<nextLocale>en|fr|es|de)?/api/admin/listings/(?<nxtPlistingId>[^/]+?)/chats(?:\\.rsc)(?:/)?$",
+      "dest": "/api/admin/listings/[listingId]/chats.rsc?nxtPlistingId=$nxtPlistingId"
+    },
+    {
+      "src": "^[/]?(?<nextLocale>en|fr|es|de)?/api/admin/listings/(?<nxtPlistingId>[^/]+?)/chats(?:/)?$",
+      "dest": "/api/admin/listings/[listingId]/chats?nxtPlistingId=$nxtPlistingId"
+    },
+    {
+      "src": "^[/]?(?<nextLocale>en|fr|es|de)?/api/admin/listings/(?<nxtPlistingId>[^/]+?)/images(?:\\.rsc)(?:/)?$",
+      "dest": "/api/admin/listings/[listingId]/images.rsc?nxtPlistingId=$nxtPlistingId"
+    },
+    {
+      "src": "^[/]?(?<nextLocale>en|fr|es|de)?/api/admin/listings/(?<nxtPlistingId>[^/]+?)/images(?:/)?$",
+      "dest": "/api/admin/listings/[listingId]/images?nxtPlistingId=$nxtPlistingId"
+    },
+    {
+      "src": "^[/]?(?<nextLocale>en|fr|es|de)?/api/admin/users/(?<nxtPuserId>[^/]+?)/chats(?:\\.rsc)(?:/)?$",
+      "dest": "/api/admin/users/[userId]/chats.rsc?nxtPuserId=$nxtPuserId"
+    },
+    {
+      "src": "^[/]?(?<nextLocale>en|fr|es|de)?/api/admin/users/(?<nxtPuserId>[^/]+?)/chats(?:/)?$",
+      "dest": "/api/admin/users/[userId]/chats?nxtPuserId=$nxtPuserId"
+    },
+    {
+      "src": "^[/]?(?<nextLocale>en|fr|es|de)?/api/admin/users/(?<nxtPuserId>[^/]+?)/listings(?:\\.rsc)(?:/)?$",
+      "dest": "/api/admin/users/[userId]/listings.rsc?nxtPuserId=$nxtPuserId"
+    },
+    {
+      "src": "^[/]?(?<nextLocale>en|fr|es|de)?/api/admin/users/(?<nxtPuserId>[^/]+?)/listings(?:/)?$",
+      "dest": "/api/admin/users/[userId]/listings?nxtPuserId=$nxtPuserId"
+    },
+    {
+      "src": "^[/]?(?<nextLocale>en|fr|es|de)?/api/chat/(?<nxtPchatId>[^/]+?)(?:\\.rsc)(?:/)?$",
+      "dest": "/api/chat/[chatId].rsc?nxtPchatId=$nxtPchatId"
+    },
+    {
+      "src": "^[/]?(?<nextLocale>en|fr|es|de)?/api/chat/(?<nxtPchatId>[^/]+?)(?:/)?$",
+      "dest": "/api/chat/[chatId]?nxtPchatId=$nxtPchatId"
+    },
+    {
       "src": "^[/]?(?<nextLocale>en|fr|es|de)?/api/listings/(?<nxtPid>[^/]+?)(?:\\.rsc)(?:/)?$",
       "dest": "/api/listings/[id].rsc?nxtPid=$nxtPid"
     },
     {
       "src": "^[/]?(?<nextLocale>en|fr|es|de)?/api/listings/(?<nxtPid>[^/]+?)(?:/)?$",
       "dest": "/api/listings/[id]?nxtPid=$nxtPid"
+    },
+    {
+      "src": "^[/]?(?<nextLocale>en|fr|es|de)?/api/listings/(?<nxtPid>[^/]+?)/view(?:\\.rsc)(?:/)?$",
+      "dest": "/api/listings/[id]/view.rsc?nxtPid=$nxtPid"
+    },
+    {
+      "src": "^[/]?(?<nextLocale>en|fr|es|de)?/api/listings/(?<nxtPid>[^/]+?)/view(?:/)?$",
+      "dest": "/api/listings/[id]/view?nxtPid=$nxtPid"
     },
     {
       "src": "^[/]?(?<nextLocale>en|fr|es|de)?/api/users/(?<nxtPusername>[^/]+?)(?:\\.rsc)(?:/)?$",
@@ -210,7 +266,7 @@
       "handle": "hit"
     },
     {
-      "src": "/_next/static/(?:[^/]+/pages|pages|chunks|runtime|css|image|media|lq0mPVl5cUWiQp774V2Q3)/.+",
+      "src": "/_next/static/(?:[^/]+/pages|pages|chunks|runtime|css|image|media|BcKVVEN\\-PBJrCxRof8qUq)/.+",
       "headers": {
         "cache-control": "public,max-age=31536000,immutable"
       },
@@ -264,12 +320,12 @@
       "path": "404",
       "contentType": "text/html; charset=utf-8"
     },
-    "_error.rsc.json": {
-      "path": "_error.rsc",
-      "contentType": "application/json"
-    },
     "_app.rsc.json": {
       "path": "_app.rsc",
+      "contentType": "application/json"
+    },
+    "_error.rsc.json": {
+      "path": "_error.rsc",
       "contentType": "application/json"
     },
     "_document.rsc.json": {
