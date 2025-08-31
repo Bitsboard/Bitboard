@@ -41,6 +41,18 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
                 const listingsData = response.data.listings;
                 const totalCount = response.data.total;
                 
+                // Debug: Log the first listing structure
+                if (listingsData[0]) {
+                    console.log('useListings: First listing structure:', {
+                        id: listingsData[0].id,
+                        title: listingsData[0].title,
+                        seller: listingsData[0].seller,
+                        sellerKeys: listingsData[0].seller ? Object.keys(listingsData[0].seller) : 'NO_SELLER',
+                        hasThumbsUp: listingsData[0].seller?.thumbsUp !== undefined,
+                        thumbsUpValue: listingsData[0].seller?.thumbsUp
+                    });
+                }
+                
                 console.log('useListings: First listing seller thumbsUp:', listingsData[0]?.seller?.thumbsUp);
                 
                 setListings(listingsData);
