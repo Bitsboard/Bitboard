@@ -186,7 +186,7 @@ export const validators = {
   // File validation
   file: (file: File | null, fieldName: string, options?: {
     maxSize?: number;
-    allowedTypes?: string[];
+    allowedTypes?: (string | 'image/jpeg' | 'image/png' | 'image/webp')[];
   }): ValidationError | null => {
     if (!file) return null;
     
