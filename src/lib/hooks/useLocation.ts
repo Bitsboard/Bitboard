@@ -24,12 +24,19 @@ export function useLocation() {
         useEffect(() => {
             const loadUserLocation = () => {
                 try {
+                    console.log('useLocation: Starting loadUserLocation...');
+                    
                     // First, check if we have the old Miami location and clear it
+                    console.log('useLocation: Calling clearMiamiLocation...');
                     locationService.clearMiamiLocation();
+                    console.log('useLocation: clearMiamiLocation completed');
                     
                     // Load from unified location service
                     const savedLocation = locationService.getUserLocation();
                     const savedRadius = locationService.getUserRadius();
+                    
+                    console.log('useLocation: After clearing Miami, savedLocation:', savedLocation);
+                    console.log('useLocation: After clearing Miami, savedRadius:', savedRadius);
                     
                     if (savedLocation) {
                         console.log('useLocation: Loaded saved location:', savedLocation);
