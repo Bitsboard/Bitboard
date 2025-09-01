@@ -113,7 +113,7 @@ export async function GET(req: NextRequest) {
                          l.title,
                          COALESCE(l.description, '') as description,
                          COALESCE(l.category, 'general') as category,
-                         COALESCE(l.ad_type, 'goods') AS adType,
+                         COALESCE(l.ad_type, 'sell') AS adType,
                          COALESCE(l.location, '') as location,
                          COALESCE(l.lat, 0) as lat,
                          COALESCE(l.lng, 0) as lng,
