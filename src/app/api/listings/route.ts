@@ -214,6 +214,7 @@ export async function GET(req: NextRequest) {
         title: r.title,
         description: r.description || '',
         priceSat: Number(r.priceSat),
+        priceSats: Number(r.priceSat), // Add this for frontend compatibility
         adType: r.adType || 'sell',
         category: r.category || 'Misc',
         postedBy: r.postedBy,
