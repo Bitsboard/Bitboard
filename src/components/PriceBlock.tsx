@@ -22,9 +22,11 @@ export function PriceBlock({ sats, unit, btcCad, dark, size = "sm", compactFiat 
   // Handle "make offer" case
   if (sats === -1) {
     const mainSize = size === "lg" ? "text-2xl" : size === "md" ? "text-xl" : "text-base";
+    const subSize = compactFiat ? "text-xs" : (size === "lg" ? "text-base" : size === "md" ? "text-sm" : "text-xs");
     return (
       <div className="flex flex-col items-start">
         <span className={`font-bold text-orange-500 ${mainSize}`}>Make an offer</span>
+        <span className={`${subSize} ${dark ? "text-neutral-400" : "text-neutral-600"} opacity-0`}>&nbsp;</span>
       </div>
     );
   }
@@ -32,9 +34,11 @@ export function PriceBlock({ sats, unit, btcCad, dark, size = "sm", compactFiat 
   // Handle invalid values
   if (isNaN(sats) || sats < 0) {
     const mainSize = size === "lg" ? "text-2xl" : size === "md" ? "text-xl" : "text-base";
+    const subSize = compactFiat ? "text-xs" : (size === "lg" ? "text-base" : size === "md" ? "text-sm" : "text-xs");
     return (
       <div className="flex flex-col items-start">
         <span className={`font-bold text-orange-500 ${mainSize}`}>Make an offer</span>
+        <span className={`${subSize} ${dark ? "text-neutral-400" : "text-neutral-600"} opacity-0`}>&nbsp;</span>
       </div>
     );
   }
