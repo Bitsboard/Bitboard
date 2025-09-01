@@ -38,7 +38,7 @@ export async function GET(req: Request) {
         orderBy = `u.thumbs_up ${sortOrder.toUpperCase()}`;
         break;
       case 'lastActivityAt':
-        orderBy = `last_activity ${sortOrder.toUpperCase()}`;
+        orderBy = `u.last_active ${sortOrder.toUpperCase()}`;
         break;
       case 'createdAt':
       default:
@@ -64,7 +64,7 @@ export async function GET(req: Request) {
         COALESCE(u.thumbs_up, 0) AS thumbsUp,
         COALESCE(u.deals, 0) AS deals,
         COALESCE(listing_stats.total_value, 0) AS totalListingsValue,
-        COALESCE(activity_stats.last_activity, 0) AS lastActivityAt
+        COALESCE(u.last_active, 0) AS lastActivityAt
       FROM users u
       LEFT JOIN (
         SELECT 
@@ -94,17 +94,6 @@ export async function GET(req: Request) {
         FROM messages
         GROUP BY from_id
       ) message_stats ON u.id = message_stats.from_id
-      LEFT JOIN (
-        SELECT 
-          user_id,
-          MAX(timestamp) AS last_activity
-        FROM (
-          SELECT posted_by AS user_id, created_at AS timestamp FROM listings
-          UNION ALL
-          SELECT from_id AS user_id, created_at AS timestamp FROM messages
-        )
-        GROUP BY user_id
-      ) activity_stats ON u.id = activity_stats.user_id
       ${where}
       ORDER BY ${orderBy}
       LIMIT ? OFFSET ?
