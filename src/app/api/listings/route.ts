@@ -194,10 +194,8 @@ export async function GET(req: NextRequest) {
       // Transform the data to match expected format
       const seller = {
         name: r.postedBy,
-        verified: Boolean(r.userVerified),
-        score: Math.floor(r.userRating || 0),
+        thumbsUp: Math.floor(r.userRating || 0), // Map userRating to thumbsUp for Seller type
         deals: r.userDeals || 0,
-        rating: Math.floor(r.userRating || 0),
         verifications: {
           email: Boolean(r.userVerified),
           phone: false,
@@ -215,7 +213,8 @@ export async function GET(req: NextRequest) {
         description: r.description || '',
         priceSat: Number(r.priceSat),
         priceSats: Number(r.priceSat), // Add this for frontend compatibility
-        adType: r.adType || 'sell',
+        type: r.adType || 'sell', // Map adType to type for frontend compatibility
+        adType: r.adType || 'sell', // Keep adType for backward compatibility
         category: r.category || 'Misc',
         postedBy: r.postedBy,
         username: r.postedBy,
