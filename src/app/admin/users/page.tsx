@@ -47,6 +47,7 @@ interface UserListing {
   replies?: number; // Added for new_listing_count
   imageUrl?: string; // Main listing image
   images?: string[]; // Array of listing images
+  imagesString?: string; // Comma-separated string from API
 }
 
 interface UserChat {
@@ -224,7 +225,13 @@ export default function AdminUsersPage() {
       if (response.ok) {
         const data = await response.json() as { success: boolean; listings?: any[]; error?: string };
         if (data.success) {
-          setUserListings(data.listings || []);
+          // Process listings to convert comma-separated images string to array
+          const processedListings = (data.listings || []).map((listing: any) => ({
+            ...listing,
+            images: listing.imagesString ? listing.imagesString.split(',').filter(Boolean) : [],
+            imageUrl: listing.imagesString ? listing.imagesString.split(',')[0] : undefined
+          }));
+          setUserListings(processedListings);
         } else {
           console.error('Failed to load user listings:', data.error);
           setUserListings([]);
