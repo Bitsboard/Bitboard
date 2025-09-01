@@ -1,0 +1,58 @@
+
+ ⛅️ wrangler 4.30.0 (update available 4.33.1)
+─────────────────────────────────────────────
+🌀 Executing on remote database bitsbarter-staging (d5ed8250-15da-4131-8b78-c364a40515f4):
+🌀 To execute on your local development database, remove the --remote flag from your wrangler command.
+🚣 Executed 1 command in 1.6834ms
+[
+  {
+    "results": [
+      {
+        "id": "wbzsLSokXY"
+      },
+      {
+        "id": "zLzv5XKBBX"
+      },
+      {
+        "id": "UwrXhhEuJC"
+      },
+      {
+        "id": "rqNL9Xcnzz"
+      },
+      {
+        "id": "kc46wOvFgv"
+      },
+      {
+        "id": "NtcB4lnBWg"
+      },
+      {
+        "id": "HEYvVNEjbO"
+      },
+      {
+        "id": "j71QzIOMTo"
+      },
+      {
+        "id": "xKaL07SDAG"
+      },
+      {
+        "id": "9sXOIDAlIi"
+      }
+    ],
+    "success": true,
+    "meta": {
+      "served_by": "v3-prod",
+      "served_by_region": "ENAM",
+      "served_by_primary": true,
+      "timings": {
+        "sql_duration_ms": 1.6834
+      },
+      "duration": 1.6834,
+      "changes": 0,
+      "last_row_id": 0,
+      "changed_db": false,
+      "size_after": 1327104,
+      "rows_read": 7200,
+      "rows_written": 0
+    }
+  }
+]

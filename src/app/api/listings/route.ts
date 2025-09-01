@@ -50,6 +50,30 @@ export async function GET(req: NextRequest) {
     // Always filter for active listings
     whereClause.push("(l.status = 'active')");
 
+    // Get current user ID for blocking filters
+    let currentUserId: string | null = null;
+    try {
+      const cookieHeader = req.headers.get('cookie') || '';
+      const token = /(?:^|; )session=([^;]+)/.exec(cookieHeader)?.[1] || '';
+      if (token) {
+        const { getAuthSecret, verifyJwtHS256 } = await import('@/lib/auth');
+        const payload = await verifyJwtHS256(token, getAuthSecret());
+        const email = (payload as any)?.email || '';
+        if (email) {
+          const u = await db.prepare('SELECT id FROM users WHERE email = ?').bind(email).all();
+          currentUserId = (u.results?.[0] as any)?.id ?? null;
+        }
+      }
+    } catch { }
+
+    // Filter out listings from blocked users (if user is logged in)
+    if (currentUserId) {
+      whereClause.push(`(l.posted_by NOT IN (
+        SELECT blocked_id FROM user_blocks WHERE blocker_id = ?
+      ))`);
+      binds.push(currentUserId);
+    }
+
     if (validatedQuery.q) {
       whereClause.push("(l.title LIKE ? OR l.description LIKE ?)");
       binds.push(`%${validatedQuery.q}%`, `%${validatedQuery.q}%`);

@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
       console.error('🔍 Chat API: Chat ID migration failed:', migrationError);
     }
 
-    // Build the query to get chats for this user
+    // Build the query to get chats for this user (excluding blocked users)
     const basicChatsQuery = `
       SELECT DISTINCT
         c.id,
@@ -74,6 +74,10 @@ export async function GET(req: NextRequest) {
       JOIN listings l ON c.listing_id = l.id
       JOIN users seller ON l.posted_by = seller.id
       WHERE (c.user1_id = ? OR c.user2_id = ?)
+        AND c.user1_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = ?)
+        AND c.user2_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = ?)
+        AND c.user1_id NOT IN (SELECT blocker_id FROM user_blocks WHERE blocked_id = ?)
+        AND c.user2_id NOT IN (SELECT blocker_id FROM user_blocks WHERE blocked_id = ?)
       ORDER BY c.updated_at DESC
     `;
 
@@ -81,7 +85,7 @@ export async function GET(req: NextRequest) {
     try {
       chats = await db
         .prepare(basicChatsQuery)
-        .bind(userId, userId)
+        .bind(userId, userId, userId, userId, userId, userId)
         .all();
     } catch (dbError) {
       console.error('🔍 Chat API: Database query failed:', dbError);

@@ -5,6 +5,7 @@ export const runtime = 'edge';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { ListingCard, ListingRow, ListingModal, ChatModal } from '@/components';
+import { BlockButton } from '@/components/BlockButton';
 import { useBtcRate } from '@/lib/contexts/BtcRateContext';
 import { generateProfilePicture, getInitials, isDefaultUsername } from '@/lib/utils';
 import { useSettings } from '@/lib/settings';
@@ -35,7 +36,7 @@ export default function PublicProfilePage() {
   // State for user data
   const [userListings, setUserListings] = useState<Listing[]>([]);
   const [allUserListings, setAllUserListings] = useState<Listing[]>([]); // Store all loaded listings for sorting
-  const [userProfile, setUserProfile] = useState<{ username: string; verified: boolean; registeredAt: number; profilePhoto: string; thumbsUp?: number; deals?: number; rating?: number; lastActive?: number } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ id: string; username: string; verified: boolean; registeredAt: number; profilePhoto: string; thumbsUp?: number; deals?: number; rating?: number; lastActive?: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -67,6 +68,7 @@ export default function PublicProfilePage() {
       
       // Use local user state instead of making API call
       setUserProfile({
+        id: user.id,
         username: user.handle,
         verified: false, // Default for new users
         registeredAt: Math.floor(Date.now() / 1000), // Current time as fallback
@@ -496,6 +498,11 @@ export default function PublicProfilePage() {
                       </svg>
                     </span>
                   )}
+                  <BlockButton 
+                    targetUserId={userProfile?.id || ''} 
+                    targetUsername={username}
+                    className="ml-2"
+                  />
                 </div>
                 <div className="text-white/80 mb-4">
                   <span className="text-sm">Member since {memberSince}</span>
