@@ -42,14 +42,14 @@ export default function BlockListPage() {
       const response = await fetch('/api/users/blocklist');
       
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as { success?: boolean; blockedUsers?: BlockedUser[]; error?: string };
         if (data.success) {
           setBlockedUsers(data.blockedUsers || []);
         } else {
           setError(data.error || 'Failed to load block list');
         }
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json() as { error?: string };
         setError(errorData.error || 'Failed to load block list');
       }
     } catch (error) {
@@ -78,7 +78,7 @@ export default function BlockListPage() {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as { success?: boolean; message?: string; error?: string };
         if (data.success) {
           // Remove from local state
           setBlockedUsers(prev => prev.filter(u => u.blocked_id !== blockedUserId));
@@ -87,7 +87,7 @@ export default function BlockListPage() {
           alert(data.error || 'Failed to unblock user');
         }
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json() as { error?: string };
         alert(errorData.error || 'Failed to unblock user');
       }
     } catch (error) {
