@@ -1,18 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb } from "@/lib/cf";
+import { getRequestContext } from "@cloudflare/next-on-pages";
 import { getSessionFromRequest } from "@/lib/auth";
 
 export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
   try {
-    const mod = await import("@cloudflare/next-on-pages").catch(() => null as any);
-    if (!mod || typeof mod.getRequestContext !== "function") {
-      return NextResponse.json({ error: "adapter_missing" }, { status: 200 });
-    }
-
-    const env = mod.getRequestContext().env as { DB?: D1Database };
-    const db = env.DB;
+    const { env } = getRequestContext();
+    const db = (env as any).DB as D1Database | undefined;
+    
     if (!db) {
       return NextResponse.json({ error: "Database not available" }, { status: 500 });
     }
