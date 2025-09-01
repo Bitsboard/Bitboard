@@ -19,8 +19,7 @@ export function PriceBlock({ sats, unit, btcCad, dark, size = "sm", compactFiat 
     const mainSize = size === "lg" ? "text-2xl" : size === "md" ? "text-xl" : "text-base";
     return (
       <div className="flex flex-col items-start">
-        <span className={`font-bold text-blue-500 ${mainSize}`}>Make Offer</span>
-        <span className={`text-xs ${dark ? "text-neutral-400" : "text-neutral-600"}`}>Contact seller to negotiate</span>
+        <span className={`font-bold text-orange-500 ${mainSize}`}>Make an offer</span>
       </div>
     );
   }

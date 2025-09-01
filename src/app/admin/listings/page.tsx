@@ -65,9 +65,9 @@ export default function AdminListingsPage() {
   // Helper function to format price display
   const formatPrice = (priceSat: number) => {
     if (priceSat === -1) {
-      return "Taking offers";
+      return "Make an offer";
     }
-    return `${priceSat.toLocaleString()} sats`;
+    return `${priceSat.toLocaleString()}`;
   };
 
   // Check if we need to search for a specific listing (e.g., from activity feed)

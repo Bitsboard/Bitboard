@@ -324,11 +324,8 @@ export default function PublicProfilePage() {
                     <div className="text-right">
                       {listing.priceSat === -1 ? (
                         <>
-                          <div className="text-lg font-semibold text-blue-500">
-                            Make Offer
-                          </div>
-                          <div className="text-xs text-neutral-500 dark:text-neutral-400">
-                            Contact seller to negotiate
+                          <div className="text-lg font-semibold text-orange-600 dark:text-orange-400">
+                            Make an offer
                           </div>
                         </>
                       ) : (
