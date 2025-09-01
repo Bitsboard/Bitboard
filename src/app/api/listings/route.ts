@@ -206,11 +206,14 @@ export async function GET(req: NextRequest) {
         onTimeRelease: 100
       };
 
+      // Debug logging for price data
+      console.log('🔍 Listings API: Raw priceSat value:', r.priceSat, 'Type:', typeof r.priceSat);
+      
       return {
         id: r.id,
         title: r.title,
         description: r.description || '',
-        priceSat: r.priceSat,
+        priceSat: Number(r.priceSat),
         adType: r.adType || 'sell',
         category: r.category || 'Misc',
         postedBy: r.postedBy,
