@@ -78,7 +78,7 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
 
             // Handle new API response structure
             const newListingsData = response.data.listings;
-            const newTotalCount = response.data.total;
+            const newTotalCount = response.pagination.total;
 
             const newListings = [...allListings, ...newListingsData];
             setAllListings(newListings);
