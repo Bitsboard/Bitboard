@@ -79,8 +79,8 @@ export async function GET(req: NextRequest) {
     if (validatedQuery.lat !== undefined && validatedQuery.lng !== undefined && validatedQuery.radiusKm !== undefined) {
       const effectiveRadiusKm = validatedQuery.radiusKm === 0 ? 5000 : validatedQuery.radiusKm;
       
-      // Only apply strict geospatial filtering for reasonable radius searches
-      if (effectiveRadiusKm < 10000) {
+      // Skip geospatial filtering for worldwide searches (radius = 0) or very large radius
+      if (validatedQuery.radiusKm !== 0 && effectiveRadiusKm < 10000) {
         const R_KM_PER_DEG = 111.32;
         const deltaLat = effectiveRadiusKm / R_KM_PER_DEG;
         const rad = (validatedQuery.lat * Math.PI) / 180;
