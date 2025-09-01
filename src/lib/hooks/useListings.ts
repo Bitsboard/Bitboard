@@ -41,7 +41,7 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
                 
                 // Handle new API response structure
                 const listingsData = response.data.listings;
-                const totalCount = response.data.total;
+                const totalCount = response.pagination.total;
                 
                 console.log('useListings: listingsData:', listingsData);
                 console.log('useListings: listingsData.length:', listingsData?.length);
