@@ -81,11 +81,20 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
             const newTotalCount = response.pagination.total;
 
             const newListings = [...allListings, ...newListingsData];
+            
+            console.log('useListings: loadMore - newListingsData.length:', newListingsData.length);
+            console.log('useListings: loadMore - newTotalCount:', newTotalCount);
+            console.log('useListings: loadMore - newListings.length:', newListings.length);
+            console.log('useListings: loadMore - hasMore will be:', newListings.length < newTotalCount);
+            
             setAllListings(newListings);
             setListings(newListings);
             setCurrentPage(nextPage);
             setTotal(newTotalCount);
-            setHasMore(newListings.length < newTotalCount);
+            
+            // Ensure hasMore is true if we received a full page of results
+            const hasMoreResults = newListingsData.length === CONFIG.PAGE_SIZE || newListings.length < newTotalCount;
+            setHasMore(hasMoreResults);
         } catch (error) {
             console.error('Failed to load more listings:', error);
         } finally {
