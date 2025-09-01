@@ -53,16 +53,11 @@ export async function GET(req: NextRequest) {
     // Get current user ID for blocking filters
     let currentUserId: string | null = null;
     try {
-      const cookieHeader = req.headers.get('cookie') || '';
-      const token = /(?:^|; )session=([^;]+)/.exec(cookieHeader)?.[1] || '';
-      if (token) {
-        const { getAuthSecret, verifyJwtHS256 } = await import('@/lib/auth');
-        const payload = await verifyJwtHS256(token, getAuthSecret());
-        const email = (payload as any)?.email || '';
-        if (email) {
-          const u = await db.prepare('SELECT id FROM users WHERE email = ?').bind(email).all();
-          currentUserId = (u.results?.[0] as any)?.id ?? null;
-        }
+      const { getSessionFromRequest } = await import('@/lib/auth');
+      const session = await getSessionFromRequest(req);
+      if (session?.user?.email) {
+        const u = await db.prepare('SELECT id FROM users WHERE email = ?').bind(session.user.email).all();
+        currentUserId = (u.results?.[0] as any)?.id ?? null;
       }
     } catch { }
 

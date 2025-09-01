@@ -73,6 +73,16 @@ export default function HomePage() {
     if (adType && adType !== "all") sp.set("adType", adType);
     try { localStorage.setItem('layoutPref', layout); } catch { }
     sp.set('layout', layout);
+    
+    // Include current location in search navigation
+    if (center?.lat && center?.lng) {
+      sp.set('lat', String(center.lat));
+      sp.set('lng', String(center.lng));
+    }
+    if (radiusKm && radiusKm !== 500) { // Only include if not default
+      sp.set('radiusKm', String(radiusKm));
+    }
+    
     const known = ['en', 'fr', 'es', 'de'] as const;
     const first = (typeof window !== 'undefined' ? window.location.pathname.split('/').filter(Boolean)[0] : '') as typeof known[number] | '';
     const locale = (first && (known as readonly string[]).includes(first)) ? first : lang;

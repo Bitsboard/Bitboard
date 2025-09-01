@@ -25,11 +25,17 @@ export async function POST(req: NextRequest) {
 
     // Get current user from session
     const session = await getSessionFromRequest(req);
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     
-    const currentUserId = session.user.id;
+    // Get database user ID from email
+    const userResult = await db.prepare('SELECT id FROM users WHERE email = ?').bind(session.user.email).first();
+    if (!userResult) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    
+    const currentUserId = userResult.id;
 
     if (currentUserId === targetUserId) {
       return NextResponse.json({ error: "Cannot block yourself" }, { status: 400 });
