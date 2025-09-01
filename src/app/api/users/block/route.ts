@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
         "DELETE FROM user_blocks WHERE blocker_id = ? AND blocked_id = ?"
       ).bind(currentUserId, targetUserId).run();
 
-      if (result.changes === 0) {
+      if (result.meta.changes === 0) {
         return NextResponse.json({ error: "User not blocked" }, { status: 400 });
       }
 
