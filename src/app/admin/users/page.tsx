@@ -46,8 +46,8 @@ interface UserListing {
   status: string;
   replies?: number; // Added for new_listing_count
   imageUrl?: string; // Main listing image
-  images?: string[]; // Array of listing images
-  imagesString?: string; // Comma-separated string from API
+  images?: string; // Comma-separated string from API
+  imagesArray?: string[]; // Processed array of listing images
 }
 
 interface UserChat {
@@ -228,8 +228,8 @@ export default function AdminUsersPage() {
           // Process listings to convert comma-separated images string to array
           const processedListings = (data.listings || []).map((listing: any) => ({
             ...listing,
-            images: listing.imagesString ? listing.imagesString.split(',').filter(Boolean) : [],
-            imageUrl: listing.imagesString ? listing.imagesString.split(',')[0] : undefined
+            imagesArray: listing.images ? listing.images.split(',').filter(Boolean) : [],
+            imageUrl: listing.images ? listing.images.split(',')[0] : undefined
           }));
           setUserListings(processedListings);
         } else {
@@ -623,9 +623,9 @@ export default function AdminUsersPage() {
                           <div className="flex gap-2">
                             {/* Thumbnail Image */}
                             <div className="flex-shrink-0">
-                              {listing.imageUrl || (listing.images && listing.images.length > 0) ? (
+                              {listing.imageUrl || (listing.imagesArray && listing.imagesArray.length > 0) ? (
                                 <img 
-                                  src={listing.imageUrl || listing.images![0]} 
+                                  src={listing.imageUrl || listing.imagesArray![0]} 
                                   alt={`${listing.title} thumbnail`}
                                   className="w-12 h-12 object-cover rounded border border-green-400 dark:border-green-500"
                                   onError={(e) => {
