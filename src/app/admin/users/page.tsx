@@ -382,7 +382,7 @@ export default function AdminUsersPage() {
 
   const formatDate = (timestamp: number) => new Date(timestamp * 1000).toLocaleDateString();
   const formatTime = (timestamp: number) => new Date(timestamp * 1000).toLocaleTimeString();
-  const formatPrice = (priceSat: number) => `${priceSat.toLocaleString()} sats`;
+  const formatPrice = (priceSat: number) => priceSat === -1 ? "Make Offer" : `${priceSat.toLocaleString()} sats`;
 
   const getTimeAgo = (timestamp: number) => {
     const now = Math.floor(Date.now() / 1000);
@@ -654,7 +654,7 @@ export default function AdminUsersPage() {
                                   }`}>
                                     {listing.adType === 'want' ? 'Want' : 'Sell'}
                                   </span>
-                                  <span>{listing.priceSat.toLocaleString()} sats</span>
+                                  <span>{listing.priceSat === -1 ? "Make Offer" : `${listing.priceSat.toLocaleString()} sats`}</span>
                                 </div>
                                 <div className="text-right">
                                   <div className="text-xs">{getTimeAgo(listing.createdAt)}</div>

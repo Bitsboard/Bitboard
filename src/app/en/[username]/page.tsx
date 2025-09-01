@@ -322,12 +322,25 @@ export default function PublicProfilePage() {
                       {listing.title}
                     </h3>
                     <div className="text-right">
-                      <div className="text-lg font-semibold text-orange-600 dark:text-orange-400">
-                        {listing.priceSat.toLocaleString()} sats
-                      </div>
-                      <div className="text-xs text-neutral-500 dark:text-neutral-400">
-                        {formatCADAmount(listing.priceSat / 100000000 * 45000)}
-                      </div>
+                      {listing.priceSat === -1 ? (
+                        <>
+                          <div className="text-lg font-semibold text-blue-500">
+                            Make Offer
+                          </div>
+                          <div className="text-xs text-neutral-500 dark:text-neutral-400">
+                            Contact seller to negotiate
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-lg font-semibold text-orange-600 dark:text-orange-400">
+                            {listing.priceSat.toLocaleString()} sats
+                          </div>
+                          <div className="text-xs text-neutral-500 dark:text-neutral-400">
+                            {formatCADAmount(listing.priceSat / 100000000 * 45000)}
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}
