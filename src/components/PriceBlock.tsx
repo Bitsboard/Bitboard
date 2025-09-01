@@ -14,8 +14,23 @@ interface PriceBlockProps {
 }
 
 export function PriceBlock({ sats, unit, btcCad, dark, size = "sm", compactFiat = false }: PriceBlockProps) {
+  // Debug logging
+  if (isNaN(sats)) {
+    console.warn('PriceBlock: Received NaN sats value:', sats);
+  }
+  
   // Handle "make offer" case
   if (sats === -1) {
+    const mainSize = size === "lg" ? "text-2xl" : size === "md" ? "text-xl" : "text-base";
+    return (
+      <div className="flex flex-col items-start">
+        <span className={`font-bold text-orange-500 ${mainSize}`}>Make an offer</span>
+      </div>
+    );
+  }
+
+  // Handle invalid values
+  if (isNaN(sats) || sats < 0) {
     const mainSize = size === "lg" ? "text-2xl" : size === "md" ? "text-xl" : "text-base";
     return (
       <div className="flex flex-col items-start">
