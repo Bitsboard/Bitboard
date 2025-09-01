@@ -11,6 +11,7 @@ import { useSettings, useModals, useUser } from "@/lib/settings";
 import { useTheme } from "@/lib/contexts/ThemeContext";
 import { useLocation } from "@/lib/contexts/LocationContext";
 import { dataService, CONFIG } from "@/lib/dataService";
+import { LOCATION_CONFIG } from "@/lib/locationService";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export default function SearchClient() {
@@ -70,7 +71,7 @@ export default function SearchClient() {
     const [city, setCity] = useState<string>("");
     const [centerLat, setCenterLat] = useState<string>(latParam ?? "");
     const [centerLng, setCenterLng] = useState<string>(lngParam ?? "");
-    const [radiusKm, setRadiusKm] = useState<number>(CONFIG.DEFAULT_RADIUS_KM);
+    const [radiusKm, setRadiusKm] = useState<number>(LOCATION_CONFIG.DEFAULT_RADIUS_KM);
 
 
     useEffect(() => { setInputQuery(q); }, [q]);
@@ -89,12 +90,12 @@ export default function SearchClient() {
         } catch { }
     }, []);
 
-    // Persisted radius on locale change (for Worldwide state)
+    // Initialize radius from saved location context
     useEffect(() => {
         if (Number.isFinite(savedRadiusKm)) {
             setRadiusKm(savedRadiusKm);
         }
-    }, [lang, savedRadiusKm]);
+    }, [savedRadiusKm]);
 
     useEffect(() => { setSelCategory(category); }, [category]);
     useEffect(() => { setSelAdType(adTypeParam); }, [adTypeParam]);
@@ -105,13 +106,7 @@ export default function SearchClient() {
 
 
 
-    // Sync with location context
-    useEffect(() => {
-        if (Number.isFinite(savedRadiusKm)) {
-    
-            setRadiusKm(savedRadiusKm);
-        }
-    }, [savedRadiusKm]);
+
 
     // Sync center coordinates with context when no URL params
     useEffect(() => {
@@ -191,7 +186,7 @@ export default function SearchClient() {
             const sp = buildParams();
             sp.set('lat', String(savedCenter.lat));
             sp.set('lng', String(savedCenter.lng));
-            if (savedRadiusKm !== CONFIG.DEFAULT_RADIUS_KM) {
+            if (savedRadiusKm !== LOCATION_CONFIG.DEFAULT_RADIUS_KM) {
                 sp.set('radiusKm', String(savedRadiusKm));
             }
             router.replace(`/${lang}/search?${sp.toString()}`);
@@ -230,8 +225,8 @@ export default function SearchClient() {
                 });
 
                 setListings(response.data.listings);
-                setTotal(response.data.total);
-                setHasMore(response.data.listings.length < response.data.total);
+                setTotal(response.pagination.total);
+                setHasMore(response.data.listings.length < response.pagination.total);
             } catch (error) {
                 console.error('Failed to load listings:', error);
             } finally {
@@ -269,10 +264,10 @@ export default function SearchClient() {
 
             setListings(prev => {
                 const newListings = [...prev, ...response.data.listings];
-                setHasMore(newListings.length < response.data.total);
+                setHasMore(newListings.length < response.pagination.total);
                 return newListings;
             });
-            setTotal(response.data.total);
+            setTotal(response.pagination.total);
         } catch (error) {
             console.error('Failed to load more listings:', error);
         } finally {
