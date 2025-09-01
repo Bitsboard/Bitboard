@@ -62,6 +62,14 @@ export default function AdminListingsPage() {
   const [selectAll, setSelectAll] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
+  // Helper function to format price display
+  const formatPrice = (priceSat: number) => {
+    if (priceSat === -1) {
+      return "Taking offers";
+    }
+    return `${priceSat.toLocaleString()} sats`;
+  };
+
   // Check if we need to search for a specific listing (e.g., from activity feed)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -538,7 +546,7 @@ export default function AdminListingsPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-neutral-500 dark:text-neutral-400">Price:</span>
-                      <span className="font-bold text-green-600">{selectedListing.priceSat.toLocaleString()} sats</span>
+                      <span className="font-bold text-green-600">{formatPrice(selectedListing.priceSat)}</span>
                     </div>
                   </div>
                   
@@ -868,7 +876,7 @@ export default function AdminListingsPage() {
                         </td>
                         <td className="px-1.5 py-0.5">
                           <div className="text-neutral-900 dark:text-white font-medium">
-                            {listing.priceSat.toLocaleString()} sats
+                            {formatPrice(listing.priceSat)}
                           </div>
                         </td>
                         <td className="px-1.5 py-0.5">
