@@ -41,6 +41,10 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
                 const listingsData = response.data.listings;
                 const totalCount = response.data.total;
                 
+                console.log('useListings: listingsData.length:', listingsData.length);
+                console.log('useListings: totalCount:', totalCount);
+                console.log('useListings: hasMore will be:', listingsData.length < totalCount);
+                
                 setListings(listingsData);
                 setAllListings(listingsData);
                 setTotal(totalCount);
