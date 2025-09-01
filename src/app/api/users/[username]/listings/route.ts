@@ -31,7 +31,7 @@ export async function GET(
 
     // Get user profile
     const userResult = await db.prepare(`
-      SELECT id, username, verified, created_at, image, thumbs_up, deals
+      SELECT id, username, verified, created_at, image, thumbs_up, deals, last_active
       FROM users WHERE username = ?
     `).bind(username).all();
 
@@ -138,7 +138,8 @@ export async function GET(
         registeredAt: user.created_at,
         profilePhoto: user.image,
         rating: Math.floor(user.thumbs_up || 0), // Ensure whole number, default to 0
-        deals: user.deals || 0
+        deals: user.deals || 0,
+        lastActive: user.last_active || user.created_at
       },
       listings: transformedListings,
       count: transformedListings.length

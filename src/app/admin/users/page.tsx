@@ -575,7 +575,7 @@ export default function AdminUsersPage() {
                   {/* Row 5: Profile Button */}
                   <div className="pt-2">
                     <a
-                      href={`/en/${selectedUser.username}`}
+                      href={`/profile/${selectedUser.username}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded transition-colors"

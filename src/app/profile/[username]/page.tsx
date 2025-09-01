@@ -35,7 +35,7 @@ export default function PublicProfilePage() {
   // State for user data
   const [userListings, setUserListings] = useState<Listing[]>([]);
   const [allUserListings, setAllUserListings] = useState<Listing[]>([]); // Store all loaded listings for sorting
-  const [userProfile, setUserProfile] = useState<{ username: string; verified: boolean; registeredAt: number; profilePhoto: string; thumbsUp?: number; deals?: number } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ username: string; verified: boolean; registeredAt: number; profilePhoto: string; thumbsUp?: number; deals?: number; rating?: number; lastActive?: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -271,11 +271,8 @@ export default function PublicProfilePage() {
 
   // Get user info from API response or fallback to default values
   const userVerified = userProfile?.verified || false;
-  const userScore = userProfile?.thumbsUp || 0; // Rating is already the thumbs up count, no conversion needed
-  const oldestListing = userListings.length > 0 ? userListings.reduce((oldest, current) => 
-    current.createdAt < oldest.createdAt ? current : oldest
-  ) : null;
-  const memberSinceDate = oldestListing ? new Date(oldestListing.createdAt) : new Date();
+  const userScore = userProfile?.rating || 0; // Use rating field from API (same as thumbs_up)
+  const memberSinceDate = userProfile?.registeredAt ? new Date(userProfile.registeredAt * 1000) : new Date();
   
   // Use locale-aware date formatting with fallback
   const memberSince = (() => {
@@ -294,6 +291,22 @@ export default function PublicProfilePage() {
       });
     }
   })();
+
+  // Format last seen time
+  const getLastSeenText = (lastActive?: number) => {
+    if (!lastActive) return 'Never';
+    
+    const lastActiveDate = new Date(lastActive * 1000);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - lastActiveDate.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)}mo ago`;
+    return `${Math.floor(diffInSeconds / 31536000)}y ago`;
+  };
 
   // Sort listings based on selected sort option
   const getSortedListings = () => {
@@ -531,7 +544,7 @@ export default function PublicProfilePage() {
                 </div>
                 <div>
                   <div className="text-sm text-white mb-1 font-medium">Last seen</div>
-                  <div className="text-lg font-semibold text-white">Today</div>
+                  <div className="text-lg font-semibold text-white">{getLastSeenText(userProfile?.lastActive)}</div>
                 </div>
               </div>
             </div>
@@ -546,7 +559,7 @@ export default function PublicProfilePage() {
                 </div>
                 <div>
                   <div className="text-sm text-white mb-1 font-medium">Reputation</div>
-                  <div className="text-lg font-semibold text-white">+{userProfile?.thumbsUp || 0}</div>
+                  <div className="text-lg font-semibold text-white">+{userScore}</div>
                 </div>
               </div>
             </div>
