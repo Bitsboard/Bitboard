@@ -36,14 +36,17 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
                 });
 
                 console.log('useListings: API response:', response);
+                console.log('useListings: response.data:', response.data);
+                console.log('useListings: response.pagination:', response.pagination);
                 
                 // Handle new API response structure
                 const listingsData = response.data.listings;
                 const totalCount = response.data.total;
                 
-                console.log('useListings: listingsData.length:', listingsData.length);
+                console.log('useListings: listingsData:', listingsData);
+                console.log('useListings: listingsData.length:', listingsData?.length);
                 console.log('useListings: totalCount:', totalCount);
-                console.log('useListings: hasMore will be:', listingsData.length < totalCount);
+                console.log('useListings: hasMore will be:', (listingsData?.length || 0) < (totalCount || 0));
                 
                 setListings(listingsData);
                 setAllListings(listingsData);
