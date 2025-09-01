@@ -26,8 +26,8 @@ export function BlockButton({ targetUserId, targetUsername, className = "" }: Bl
       try {
         const response = await fetch(`/api/users/block-status?targetUserId=${targetUserId}`);
         if (response.ok) {
-          const data = await response.json();
-          setIsBlocked(data.blockedByMe);
+          const data = await response.json() as { blockedByMe?: boolean; blockedByThem?: boolean; canInteract?: boolean };
+          setIsBlocked(data.blockedByMe || false);
         }
       } catch (error) {
         console.error('Failed to check block status:', error);
@@ -58,7 +58,7 @@ export function BlockButton({ targetUserId, targetUsername, className = "" }: Bl
       });
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as { success?: boolean; message?: string; error?: string };
         if (data.success) {
           setIsBlocked(!isBlocked);
           // Show success message
@@ -67,7 +67,7 @@ export function BlockButton({ targetUserId, targetUsername, className = "" }: Bl
           alert(data.error || 'Failed to update block status');
         }
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json() as { error?: string };
         alert(errorData.error || 'Failed to update block status');
       }
     } catch (error) {
