@@ -47,6 +47,9 @@ export async function GET(req: NextRequest) {
     const whereClause: string[] = [];
     const binds: any[] = [];
 
+    // Always filter for active listings
+    whereClause.push("(l.status = 'active')");
+
     if (validatedQuery.q) {
       whereClause.push("(l.title LIKE ? OR l.description LIKE ?)");
       binds.push(`%${validatedQuery.q}%`, `%${validatedQuery.q}%`);
