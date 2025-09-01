@@ -58,6 +58,7 @@ export default function SearchClient() {
     const sortOrderParam = (params.get("sortOrder") || "desc").trim();
     const latParam = params.get("lat");
     const lngParam = params.get("lng");
+    const radiusKmParam = params.get("radiusKm");
 
     // Local input state for the search bar and filters
     const [inputQuery, setInputQuery] = useState(q);
@@ -71,7 +72,7 @@ export default function SearchClient() {
     const [city, setCity] = useState<string>("");
     const [centerLat, setCenterLat] = useState<string>(latParam ?? "");
     const [centerLng, setCenterLng] = useState<string>(lngParam ?? "");
-    const [radiusKm, setRadiusKm] = useState<number>(LOCATION_CONFIG.DEFAULT_RADIUS_KM);
+    const [radiusKm, setRadiusKm] = useState<number>(radiusKmParam ? Number(radiusKmParam) : LOCATION_CONFIG.DEFAULT_RADIUS_KM);
 
 
     useEffect(() => { setInputQuery(q); }, [q]);
@@ -90,12 +91,12 @@ export default function SearchClient() {
         } catch { }
     }, []);
 
-    // Initialize radius from saved location context
+    // Initialize radius from saved location context (only if no URL param)
     useEffect(() => {
-        if (Number.isFinite(savedRadiusKm)) {
+        if (!radiusKmParam && Number.isFinite(savedRadiusKm)) {
             setRadiusKm(savedRadiusKm);
         }
-    }, [savedRadiusKm]);
+    }, [savedRadiusKm, radiusKmParam]);
 
     useEffect(() => { setSelCategory(category); }, [category]);
     useEffect(() => { setSelAdType(adTypeParam); }, [adTypeParam]);
@@ -103,6 +104,11 @@ export default function SearchClient() {
     useEffect(() => { setMaxPrice(maxPriceParam ?? ""); }, [maxPriceParam]);
     useEffect(() => { setSortChoice(`${sortByParam}:${sortOrderParam}`); }, [sortByParam, sortOrderParam]);
     useEffect(() => { setCenterLat(latParam ?? ""); setCenterLng(lngParam ?? ""); }, [latParam, lngParam]);
+    useEffect(() => { 
+        if (radiusKmParam) {
+            setRadiusKm(Number(radiusKmParam));
+        }
+    }, [radiusKmParam]);
 
 
 
@@ -182,7 +188,7 @@ export default function SearchClient() {
 
     // Update URL when saved location changes and no URL params exist
     useEffect(() => {
-        if (!latParam && !lngParam && savedCenter?.lat && savedCenter?.lng) {
+        if (!latParam && !lngParam && !radiusKmParam && savedCenter?.lat && savedCenter?.lng) {
             const sp = buildParams();
             sp.set('lat', String(savedCenter.lat));
             sp.set('lng', String(savedCenter.lng));
@@ -191,7 +197,7 @@ export default function SearchClient() {
             }
             router.replace(`/${lang}/search?${sp.toString()}`);
         }
-    }, [savedCenter, savedRadiusKm, buildParams, lang, router, latParam, lngParam]);
+    }, [savedCenter, savedRadiusKm, buildParams, lang, router, latParam, lngParam, radiusKmParam]);
 
     const buildQuery = useCallback((offset: number) => {
         const sp = buildParams();
