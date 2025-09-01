@@ -116,11 +116,12 @@ export default function SearchClient() {
     // Sync center coordinates with context when no URL params
     useEffect(() => {
         if (!latParam && !lngParam && savedCenter?.lat && savedCenter?.lng) {
-    
             setCenterLat(String(savedCenter.lat));
             setCenterLng(String(savedCenter.lng));
         }
     }, [latParam, lngParam, savedCenter]);
+
+
 
     useEffect(() => {
         const loadBtcRate = async () => {
@@ -183,6 +184,19 @@ export default function SearchClient() {
         if (effectiveRadius != null) sp.set('radiusKm', String(effectiveRadius));
         return sp;
     }, [inputQuery, selCategory, selAdType, minPrice, maxPrice, sortChoice, unit, country, region, city, centerLat, centerLng, layout, radiusKm]);
+
+    // Update URL when saved location changes and no URL params exist
+    useEffect(() => {
+        if (!latParam && !lngParam && savedCenter?.lat && savedCenter?.lng) {
+            const sp = buildParams();
+            sp.set('lat', String(savedCenter.lat));
+            sp.set('lng', String(savedCenter.lng));
+            if (savedRadiusKm !== CONFIG.DEFAULT_RADIUS_KM) {
+                sp.set('radiusKm', String(savedRadiusKm));
+            }
+            router.replace(`/${lang}/search?${sp.toString()}`);
+        }
+    }, [savedCenter, savedRadiusKm, buildParams, lang, router, latParam, lngParam]);
 
     const buildQuery = useCallback((offset: number) => {
         const sp = buildParams();
@@ -253,9 +267,12 @@ export default function SearchClient() {
                 sortOrder: sortChoice.split(':')[1] || 'desc'
             });
 
-            setListings(prev => [...prev, ...response.data.listings]);
+            setListings(prev => {
+                const newListings = [...prev, ...response.data.listings];
+                setHasMore(newListings.length < response.data.total);
+                return newListings;
+            });
             setTotal(response.data.total);
-            setHasMore(listings.length + response.data.listings.length < response.data.total);
         } catch (error) {
             console.error('Failed to load more listings:', error);
         } finally {
