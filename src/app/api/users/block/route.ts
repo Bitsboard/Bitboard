@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Database not available" }, { status: 500 });
     }
 
-    const { targetUserId, action, reason } = await req.json();
+    const { targetUserId, action, reason } = await req.json() as { targetUserId?: string; action?: string; reason?: string };
 
     if (!targetUserId || !action) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
