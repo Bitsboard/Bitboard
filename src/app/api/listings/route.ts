@@ -1,4 +1,4 @@
-import '../../../shims/async_hooks';
+import '@/shims/async_hooks';
 import { NextRequest, NextResponse } from "next/server";
 import { listingsQuerySchema, listingCreateSchema } from "@/lib/validation/listings";
 import { handleApiError, createValidationError, createNotFoundError } from "@/lib/api/errors";

@@ -1,4 +1,4 @@
-import '../../../../shims/async_hooks';
+import '@/shims/async_hooks';
 import { NextResponse } from "next/server";
 
 export const runtime = "edge";

@@ -1,5 +1,5 @@
 // Provide a local shim for async_hooks under edge bundling
-import '../../../shims/async_hooks';
+import '@/shims/async_hooks';
 import { NextResponse } from "next/server";
 // Avoid hard crashing if the adapter isn't available; import dynamically inside handler
 

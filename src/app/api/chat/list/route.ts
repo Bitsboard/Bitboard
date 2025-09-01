@@ -1,4 +1,4 @@
-import '../../../shims/async_hooks';
+import '@/shims/async_hooks';
 import { NextRequest, NextResponse } from "next/server";
 import { getRequestContext } from "@cloudflare/next-on-pages";
 import { getSessionFromRequest } from "@/lib/auth";
