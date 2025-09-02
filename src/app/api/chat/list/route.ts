@@ -73,12 +73,12 @@ export async function GET(req: NextRequest) {
       FROM chats c
       JOIN listings l ON c.listing_id = l.id
       JOIN users seller ON l.posted_by = seller.id
-      WHERE (c.user1_id = ? OR c.user2_id = ?)
-        AND c.user1_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = ?)
-        AND c.user2_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = ?)
-        AND c.user1_id NOT IN (SELECT blocker_id FROM user_blocks WHERE blocked_id = ?)
-        AND c.user2_id NOT IN (SELECT blocker_id FROM user_blocks WHERE blocked_id = ?)
-      ORDER BY c.updated_at DESC
+      WHERE (c.buyer_id = ? OR c.seller_id = ?)
+        AND c.buyer_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = ?)
+        AND c.seller_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = ?)
+        AND c.buyer_id NOT IN (SELECT blocker_id FROM user_blocks WHERE blocked_id = ?)
+        AND c.seller_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocked_id = ?)
+      ORDER BY c.last_message_at DESC
     `;
 
     let chats: any;
@@ -111,7 +111,7 @@ export async function GET(req: NextRequest) {
         rating: chat.seller_rating || 0,
         deals: chat.seller_deals || 0
       },
-      lastMessageAt: chat.updated_at * 1000,
+      lastMessageAt: chat.last_message_at * 1000,
       createdAt: chat.created_at * 1000
     }));
 

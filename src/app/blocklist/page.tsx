@@ -13,7 +13,7 @@ interface BlockedUser {
   email: string;
   image?: string;
   verified: boolean;
-  thumbs_up: number;
+  rating: number;
   deals: number;
 }
 
@@ -205,7 +205,7 @@ export default function BlockListPage() {
                         {blockedUser.email}
                       </p>
                       <div className="flex items-center gap-4 mt-1 text-xs text-neutral-500 dark:text-neutral-500">
-                        <span>{blockedUser.thumbs_up} reputation</span>
+                        <span>{blockedUser.rating} reputation</span>
                         <span>{blockedUser.deals} deals</span>
                         <span>Blocked on {formatDate(blockedUser.created_at)}</span>
                       </div>

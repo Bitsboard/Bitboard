@@ -92,7 +92,7 @@ export async function POST(req: Request) {
       try {
         const chatInsertResult = await db
           .prepare(`
-            INSERT INTO chats (id, listing_id, user1_id, user2_id, created_at, updated_at)
+            INSERT INTO chats (id, listing_id, buyer_id, seller_id, created_at, last_message_at)
             VALUES (?, ?, ?, ?, strftime('%s','now'), strftime('%s','now'))
           `)
           .bind(actualChatId, listingId, currentUserId, otherUserActualId)
@@ -109,7 +109,7 @@ export async function POST(req: Request) {
     try {
       await db
         .prepare(`
-          INSERT INTO messages (id, chat_id, sender_id, content, created_at)
+          INSERT INTO messages (id, chat_id, from_id, text, created_at)
           VALUES (?, ?, ?, ?, strftime('%s','now'))
         `)
         .bind(messageId, actualChatId, currentUserId, text)
@@ -122,7 +122,7 @@ export async function POST(req: Request) {
     // Update chat timestamp
     try {
       await db
-        .prepare("UPDATE chats SET updated_at = strftime('%s','now') WHERE id = ?")
+        .prepare("UPDATE chats SET last_message_at = strftime('%s','now') WHERE id = ?")
         .bind(actualChatId)
         .run();
     } catch (updateError) {
