@@ -75,11 +75,32 @@ export async function GET(
       LIMIT ? OFFSET ?
     `).bind(chatId, limit, offset).all();
 
+    // Get offers for this chat (no pagination for offers for now)
+    const offers = await db.prepare(`
+      SELECT id, chat_id, listing_id, from_user_id, to_user_id, 
+             amount_sat, expires_at, status, created_at, updated_at
+      FROM offers 
+      WHERE chat_id = ? 
+      ORDER BY created_at ASC
+    `).bind(chatId).all();
+
     // Transform messages to include is_from_current_user field
     const transformedMessages = (messages.results || []).map((message: any) => ({
       ...message,
-      is_from_current_user: message.from_id === userId
+      is_from_current_user: message.from_id === userId,
+      type: 'message'
     }));
+
+    // Transform offers to include is_from_current_user field
+    const transformedOffers = (offers.results || []).map((offer: any) => ({
+      ...offer,
+      is_from_current_user: offer.from_user_id === userId,
+      type: 'offer'
+    }));
+
+    // Combine messages and offers, sort by created_at
+    const allItems = [...transformedMessages, ...transformedOffers]
+      .sort((a, b) => a.created_at - b.created_at);
     
     // ✅ OPTIMIZED: Only mark messages as read if they're from the other user AND we're on the first page
     // This prevents unnecessary updates when loading older messages
@@ -93,7 +114,7 @@ export async function GET(
     
     return NextResponse.json({ 
       success: true, 
-      messages: transformedMessages,
+      messages: allItems, // Combined messages and offers
       userId: userId,
       pagination: {
         page,

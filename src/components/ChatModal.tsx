@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { PriceBlock } from "./PriceBlock";
 import { Modal } from "./Modal";
+import OfferModal from "./OfferModal";
+import OfferMessage from "./OfferMessage";
 import { generateProfilePicture, getInitials, cn } from "@/lib/utils";
 import type { Listing, Category, Unit, Seller, Message, Chat } from "@/lib/types";
 import Link from "next/link";
@@ -33,6 +35,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [isSearchingForChat, setIsSearchingForChat] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
+  const [showOfferModal, setShowOfferModal] = useState(false);
   
 
   
@@ -289,12 +292,6 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         
         if (data.message) {
           // Replace optimistic message with real one from server (includes correct timestamp)
-          console.log('🔄 Replacing optimistic message with server message:', {
-            optimistic: optimisticMessage,
-            server: data.message,
-            optimisticTime: new Date(optimisticMessage.created_at * 1000),
-            serverTime: new Date(data.message.created_at * 1000)
-          });
           setMessages(prev => prev.map(msg => 
             msg.id === optimisticMessage.id ? data.message! : msg
           ));
@@ -330,6 +327,60 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       setText(messageText);
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const sendOffer = async (amount: number, expiresAt?: number) => {
+    if (!user?.email || !chat?.id) return;
+
+    try {
+      const response = await fetch('/api/offers/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chatId: chat.id,
+          listingId: listing.id,
+          amountSat: amount,
+          expiresAt
+        })
+      });
+
+      if (response.ok) {
+        // Reload messages to show the new offer
+        await loadMessages();
+      } else {
+        const error = await response.json();
+        console.error('Failed to send offer:', error);
+        alert(error.error || 'Failed to send offer');
+      }
+    } catch (error) {
+      console.error('Error sending offer:', error);
+      alert('Failed to send offer');
+    }
+  };
+
+  const handleOfferAction = async (offerId: string, action: 'accept' | 'decline' | 'revoke') => {
+    try {
+      const response = await fetch('/api/offers/action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          offerId,
+          action
+        })
+      });
+
+      if (response.ok) {
+        // Reload messages to show the updated offer status
+        await loadMessages();
+      } else {
+        const error = await response.json();
+        console.error('Failed to process offer action:', error);
+        alert(error.error || 'Failed to process offer action');
+      }
+    } catch (error) {
+      console.error('Error processing offer action:', error);
+      alert('Failed to process offer action');
     }
   };
 
@@ -550,14 +601,14 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                 No messages yet. Start the conversation!
               </div>
             ) : (
-              messages.map((m, index) => {
-                const isOptimistic = m.id.startsWith('temp-');
-                const isOwnMessage = (m as any).is_from_current_user || m.from_id === currentUserId;
-                const previousMessage = index > 0 ? messages[index - 1] : null;
-                const showTimestamp = shouldShowTimestamp(m, previousMessage);
+              messages.map((item, index) => {
+                const isOptimistic = item.id.startsWith('temp-');
+                const isOwnMessage = (item as any).is_from_current_user || item.from_id === currentUserId;
+                const previousItem = index > 0 ? messages[index - 1] : null;
+                const showTimestamp = shouldShowTimestamp(item, previousItem);
                 
                 return (
-                  <div key={m.id}>
+                  <div key={item.id}>
                     {/* Timestamp header - only show when needed */}
                     {showTimestamp && (
                       <div className="flex justify-center my-4">
@@ -565,35 +616,45 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                           "px-3 py-1 rounded-full text-xs font-medium",
                           dark ? "bg-neutral-800 text-neutral-400" : "bg-neutral-200 text-neutral-600"
                         )}>
-                          {isOptimistic ? 'Sending...' : formatTimestamp(m.created_at)}
+                          {isOptimistic ? 'Sending...' : formatTimestamp(item.created_at)}
                         </div>
                       </div>
                     )}
                     
-                    {/* Message bubble */}
-                    <div
-                      className={cn(
-                        "flex",
-                        isOwnMessage ? "justify-end" : "justify-start"
-                      )}
-                    >
-                      <div className={cn(
-                        "max-w-[70%] rounded-2xl px-3 py-2 text-sm break-words relative transition-all duration-200",
-                        isOwnMessage
-                          ? isOptimistic 
-                            ? "bg-orange-400 text-white opacity-80" // Optimistic message styling
-                            : "bg-orange-500 text-white"
-                          : dark ? "bg-neutral-900" : "bg-neutral-100"
-                      )}>
-                        <div className="mb-1 flex items-center gap-2">
-                          {m.text}
-                          {isOptimistic && (
-                            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          )}
+                    {/* Render offer or message */}
+                    {item.type === 'offer' ? (
+                      <OfferMessage
+                        offer={item}
+                        currentUserId={currentUserId || ''}
+                        dark={dark}
+                        onAction={handleOfferAction}
+                      />
+                    ) : (
+                      /* Message bubble */
+                      <div
+                        className={cn(
+                          "flex",
+                          isOwnMessage ? "justify-end" : "justify-start"
+                        )}
+                      >
+                        <div className={cn(
+                          "max-w-[70%] rounded-2xl px-3 py-2 text-sm break-words relative transition-all duration-200",
+                          isOwnMessage
+                            ? isOptimistic 
+                              ? "bg-orange-400 text-white opacity-80" // Optimistic message styling
+                              : "bg-orange-500 text-white"
+                            : dark ? "bg-neutral-900" : "bg-neutral-100"
+                        )}>
+                          <div className="mb-1 flex items-center gap-2">
+                            {item.text}
+                            {isOptimistic && (
+                              <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            )}
+                          </div>
+                          {/* Remove individual message timestamps - now handled by timestamp headers */}
                         </div>
-                        {/* Remove individual message timestamps - now handled by timestamp headers */}
                       </div>
-                    </div>
+                    )}
                   </div>
                 );
               })
@@ -674,6 +735,20 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
             )}
           </div>
           
+          <button
+            onClick={() => setShowOfferModal(true)}
+            className={cn(
+              "rounded-xl p-2 transition-all duration-200",
+              dark 
+                ? "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white" 
+                : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-800"
+            )}
+            title="Make an offer"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </button>
           <input
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -714,6 +789,15 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
           </div>
         )}
       </div>
+      
+      {/* Offer Modal */}
+      <OfferModal
+        isOpen={showOfferModal}
+        onClose={() => setShowOfferModal(false)}
+        onSendOffer={sendOffer}
+        listingPrice={listing.priceSats > 0 ? listing.priceSats : undefined}
+        dark={dark}
+      />
     </Modal>
   );
 }

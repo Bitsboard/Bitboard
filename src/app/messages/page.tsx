@@ -6,6 +6,8 @@ import { useTheme } from '@/lib/contexts/ThemeContext';
 import { useUser, useSettings } from '@/lib/settings';
 import { ListingModal } from '@/components/ListingModal';
 import DeleteConversationModal from '@/components/DeleteConversationModal';
+import OfferModal from '@/components/OfferModal';
+import OfferMessage from '@/components/OfferMessage';
 import { generateProfilePicture, getInitials, formatPostAge, formatCADAmount, cn } from "@/lib/utils";
 import { useBtcRate } from '@/lib/hooks/useBtcRate';
 
@@ -68,6 +70,9 @@ export default function MessagesPage() {
   // Delete conversation modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [conversationToDelete, setConversationToDelete] = useState<Chat | null>(null);
+  
+  // Offer modal state
+  const [showOfferModal, setShowOfferModal] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -346,6 +351,62 @@ export default function MessagesPage() {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
+    }
+  };
+
+  const sendOffer = async (amount: number, expiresAt?: number) => {
+    if (!selectedChat || !user?.email) return;
+
+    try {
+      const response = await fetch('/api/offers/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chatId: selectedChat,
+          listingId: chats.find(c => c.id === selectedChat)?.listing_id,
+          amountSat: amount,
+          expiresAt
+        })
+      });
+
+      if (response.ok) {
+        // Reload messages to show the new offer
+        await loadMessages(selectedChat);
+      } else {
+        const error = await response.json();
+        console.error('Failed to send offer:', error);
+        alert(error.error || 'Failed to send offer');
+      }
+    } catch (error) {
+      console.error('Error sending offer:', error);
+      alert('Failed to send offer');
+    }
+  };
+
+  const handleOfferAction = async (offerId: string, action: 'accept' | 'decline' | 'revoke') => {
+    try {
+      const response = await fetch('/api/offers/action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          offerId,
+          action
+        })
+      });
+
+      if (response.ok) {
+        // Reload messages to show the updated offer status
+        if (selectedChat) {
+          await loadMessages(selectedChat);
+        }
+      } else {
+        const error = await response.json();
+        console.error('Failed to process offer action:', error);
+        alert(error.error || 'Failed to process offer action');
+      }
+    } catch (error) {
+      console.error('Error processing offer action:', error);
+      alert('Failed to process offer action');
     }
   };
 
@@ -1089,35 +1150,45 @@ export default function MessagesPage() {
                         </p>
                       </div>
                     ) : (
-                      messages.map((message, index) => {
-                        const prevMessage = index > 0 ? messages[index - 1] : null;
-                        const showTimestamp = shouldShowTimestamp(message, prevMessage);
+                      messages.map((item, index) => {
+                        const prevItem = index > 0 ? messages[index - 1] : null;
+                        const showTimestamp = shouldShowTimestamp(item, prevItem);
                         
                         return (
-                          <div key={message.id}>
+                          <div key={item.id}>
                             {/* Timestamp header - only show when needed */}
                             {showTimestamp && (
                               <div className="flex justify-center my-4">
                                 <div className="px-3 py-1 rounded-full text-xs font-medium bg-neutral-200 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
-                                  {formatTimestamp(message.created_at)}
+                                  {formatTimestamp(item.created_at)}
                                 </div>
                               </div>
                             )}
                             
-                            {/* Message bubble */}
-                            <div
-                              className={`flex ${message.is_from_current_user ? 'justify-end' : 'justify-start'} mt-3`}
-                            >
+                            {/* Render offer or message */}
+                            {item.type === 'offer' ? (
+                              <OfferMessage
+                                offer={item}
+                                currentUserId={user?.id || ''}
+                                dark={dark}
+                                onAction={handleOfferAction}
+                              />
+                            ) : (
+                              /* Message bubble */
                               <div
-                                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-sm ${
-                                  message.is_from_current_user
-                                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white'
-                                    : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100'
-                                }`}
+                                className={`flex ${item.is_from_current_user ? 'justify-end' : 'justify-start'} mt-3`}
                               >
-                                <p className="text-sm">{message.content}</p>
+                                <div
+                                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-sm ${
+                                    item.is_from_current_user
+                                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white'
+                                      : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100'
+                                  }`}
+                                >
+                                  <p className="text-sm">{item.content}</p>
+                                </div>
                               </div>
-                            </div>
+                            )}
                           </div>
                         );
                       })
@@ -1128,6 +1199,15 @@ export default function MessagesPage() {
                   {/* Message Input */}
                   <div className="p-4 border-t border-neutral-200/50 dark:border-neutral-700/50 bg-neutral-50 dark:bg-neutral-800/50 rounded-bl-3xl">
                     <div className="flex gap-3">
+                      <button
+                        onClick={() => setShowOfferModal(true)}
+                        className="px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-xl bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all duration-200"
+                        title="Make an offer"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                      </button>
                       <input
                         type="text"
                         value={newMessage}
@@ -1222,6 +1302,15 @@ export default function MessagesPage() {
         onConfirm={confirmDeleteConversation}
         dark={dark}
         username={conversationToDelete?.other_user || "this user"}
+      />
+      
+      {/* Offer Modal */}
+      <OfferModal
+        isOpen={showOfferModal}
+        onClose={() => setShowOfferModal(false)}
+        onSendOffer={sendOffer}
+        listingPrice={selectedChat ? chats.find(c => c.id === selectedChat)?.listing_price_sats : undefined}
+        dark={dark}
       />
     </div>
   );
