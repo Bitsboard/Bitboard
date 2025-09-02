@@ -387,7 +387,7 @@ export default function MessagesPage() {
     }
   };
 
-  const handleOfferAction = async (offerId: string, action: 'accept' | 'decline' | 'revoke') => {
+  const handleOfferAction = async (offerId: string, action: 'accept' | 'decline' | 'revoke' | 'abort') => {
     try {
       const response = await fetch('/api/offers/action', {
         method: 'POST',
