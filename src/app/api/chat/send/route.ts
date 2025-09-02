@@ -155,11 +155,11 @@ export async function POST(req: Request) {
       // Don't fail the request for this
     }
 
-    // Unhide conversation for both users when a new message is sent
+    // Unhide conversation for the current user when they send a new message
     try {
       await db
-        .prepare("DELETE FROM hidden_conversations WHERE chat_id = ?")
-        .bind(actualChatId)
+        .prepare("DELETE FROM hidden_conversations WHERE chat_id = ? AND user_id = ?")
+        .bind(actualChatId, currentUserId)
         .run();
     } catch (unhideError) {
       console.error('❌ Error unhiding conversation:', unhideError);

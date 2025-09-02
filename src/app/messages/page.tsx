@@ -794,17 +794,18 @@ export default function MessagesPage() {
                               </span>
                             </div>
                             
-                            {/* Delete Button - Show on hover for selected chat */}
+                            {/* Delete Button - Always visible for selected chat */}
                             {selectedChat === item.id && (
-                              <div className="flex-shrink-0 ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                              <div className="flex-shrink-0 ml-2">
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleDeleteConversation(item);
                                   }}
                                   className={cn(
-                                    "p-1.5 rounded-lg transition-all duration-200 hover:scale-110",
-                                    "bg-red-500/20 hover:bg-red-500/30 text-red-500 hover:text-red-600"
+                                    "p-1.5 rounded-lg transition-all duration-200",
+                                    "bg-red-500/10 hover:bg-red-500/20 text-red-500/70 hover:text-red-600",
+                                    "hover:scale-110 hover:shadow-md border border-red-500/20 hover:border-red-500/40"
                                   )}
                                   title="Delete conversation"
                                 >
