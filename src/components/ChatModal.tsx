@@ -36,6 +36,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
   const [isSearchingForChat, setIsSearchingForChat] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
   const [showOfferModal, setShowOfferModal] = useState(false);
+  const [existingOffer, setExistingOffer] = useState<any>(null);
   
 
   
@@ -711,13 +712,25 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
               try {
                 const response = await fetch(`/api/offers/check?listingId=${encodeURIComponent(listing.id)}&chatId=${encodeURIComponent(chat.id)}`);
                 if (response.ok) {
-                  const data = await response.json() as { canMakeOffer?: boolean; existingOffer?: { status?: string; id?: string; from_user_id?: string; to_user_id?: string; created_at?: number } };
-                  if (!data.canMakeOffer) {
-                    console.log('❌ ChatModal: Cannot make offer - existing offer found:', data.existingOffer);
-                    alert(data.existingOffer?.status === 'pending' 
-                      ? "There is already a pending offer for this listing between you and this user"
-                      : "An offer has already been accepted for this listing between you and this user"
-                    );
+                  const data = await response.json() as { 
+                    canMakeOffer?: boolean; 
+                    hasExistingOffer?: boolean;
+                    existingOffer?: { 
+                      status?: string; 
+                      id?: string; 
+                      from_user_id?: string; 
+                      to_user_id?: string; 
+                      created_at?: number;
+                      amount_sat?: number;
+                      expires_at?: number;
+                    } 
+                  };
+                  
+                  if (data.hasExistingOffer && data.existingOffer) {
+                    console.log('🎯 ChatModal: Existing offer found, showing offer details:', data.existingOffer);
+                    // Set the existing offer and show the modal to display it
+                    setExistingOffer(data.existingOffer);
+                    setShowOfferModal(true);
                     return;
                   }
                 }
@@ -787,11 +800,16 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       {/* Offer Modal */}
       <OfferModal
         isOpen={showOfferModal}
-        onClose={() => setShowOfferModal(false)}
+        onClose={() => {
+          setShowOfferModal(false);
+          setExistingOffer(null);
+        }}
         onSendOffer={sendOffer}
+        onAbortOffer={handleOfferAction}
         listingPrice={listing.priceSats > 0 ? listing.priceSats : undefined}
         dark={dark}
         unit={unit}
+        existingOffer={existingOffer}
       />
     </Modal>
   );

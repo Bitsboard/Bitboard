@@ -86,6 +86,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       canMakeOffer,
+      hasExistingOffer: !!existingOfferResult,
       existingOffer: existingOfferResult ? {
         id: existingOfferResult.id,
         status: existingOfferResult.status,

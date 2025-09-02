@@ -178,7 +178,7 @@ export default function OfferMessage({
               disabled={isProcessing}
               className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-semibold rounded-xl hover:from-red-600 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
             >
-              {isProcessing ? 'Revoking...' : 'Revoke Offer'}
+              {isProcessing ? 'Aborting...' : 'Abort Offer'}
             </button>
           ) : (
             // Offer recipient can accept/decline
