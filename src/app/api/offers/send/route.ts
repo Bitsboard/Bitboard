@@ -140,14 +140,26 @@ export async function POST(req: NextRequest) {
       if (status === 'pending') {
         console.log('❌ API: Pending offer exists between these users');
         return NextResponse.json({ 
-          error: "There is already a pending offer for this listing between you and this user" 
+          error: "There is already a pending offer for this listing between you and this user",
+          debug: {
+            existingOfferFound: true,
+            existingOfferStatus: status,
+            validationPassed: false,
+            reason: 'pending_offer_exists'
+          }
         }, { status: 400 });
       }
       
       if (status === 'accepted') {
         console.log('❌ API: Accepted offer exists between these users');
         return NextResponse.json({ 
-          error: "An offer has already been accepted for this listing between you and this user" 
+          error: "An offer has already been accepted for this listing between you and this user",
+          debug: {
+            existingOfferFound: true,
+            existingOfferStatus: status,
+            validationPassed: false,
+            reason: 'accepted_offer_exists'
+          }
         }, { status: 400 });
       }
       
@@ -198,7 +210,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       offerId,
-      message: "Offer sent successfully"
+      message: "Offer sent successfully",
+      debug: {
+        existingOfferFound: !!existingOfferResult,
+        existingOfferStatus: existingOfferResult?.status || 'none',
+        validationPassed: true
+      }
     });
 
   } catch (error) {

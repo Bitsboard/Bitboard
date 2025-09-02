@@ -365,13 +365,25 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       if (response.ok) {
         const responseData = await response.json();
         console.log('✅ ChatModal: Offer sent successfully, response:', responseData);
+        
+        // Log debug information if available
+        if (responseData.debug) {
+          console.log('🔍 ChatModal: API Debug Info:', responseData.debug);
+        }
+        
         // Reload messages to show the new offer
         console.log('🎯 ChatModal: Reloading messages for chat:', chat.id);
         await loadMessages(chat.id);
         console.log('✅ ChatModal: Messages reloaded');
       } else {
-        const error = await response.json() as { error?: string };
+        const error = await response.json() as { error?: string; debug?: any };
         console.error('❌ ChatModal: Failed to send offer:', error);
+        
+        // Log debug information if available
+        if (error.debug) {
+          console.log('🔍 ChatModal: API Error Debug Info:', error.debug);
+        }
+        
         alert(error.error || 'Failed to send offer');
       }
     } catch (error) {
