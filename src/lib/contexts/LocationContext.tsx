@@ -8,6 +8,7 @@ import { useIpLocation } from '@/lib/hooks/useIpLocation';
 interface LocationContextType {
   center: Place;
   radiusKm: number;
+  isLoading: boolean;
   updateLocation: (place: Place, radius: number) => void;
   clearLocation: () => void;
 }
@@ -18,6 +19,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   const { location: ipLocation } = useIpLocation();
   const [center, setCenter] = useState<Place>(LOCATION_CONFIG.DEFAULT_CENTER);
   const [radiusKm, setRadiusKm] = useState<number>(LOCATION_CONFIG.DEFAULT_RADIUS_KM);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Initialize location from localStorage on mount
   useEffect(() => {
@@ -72,6 +74,9 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           }
           setRadiusKm(LOCATION_CONFIG.DEFAULT_RADIUS_KM);
         }
+        
+        // Mark loading as complete
+        setIsLoading(false);
       };
 
       loadSavedLocation();
@@ -125,6 +130,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   const value: LocationContextType = {
     center,
     radiusKm,
+    isLoading,
     updateLocation,
     clearLocation,
   };

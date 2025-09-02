@@ -38,11 +38,12 @@ export default function HomePage() {
   const lang = useLang();
 
   // Custom hooks
-  const { center, radiusKm, updateLocation } = useLocation();
+  const { center, radiusKm, isLoading: locationLoading, updateLocation } = useLocation();
   const btcCad = useBtcRate();
   
   // Use the actual useListings hook to load from database
-  const { listings, total, isLoading, hasMore, isLoadingMore, loadMore } = useListings(center, radiusKm, isDeployed);
+  // Wait for location to load before making API calls to prevent race condition
+  const { listings, total, isLoading, hasMore, isLoadingMore, loadMore } = useListings(center, radiusKm, isDeployed && !locationLoading);
   
   // Fallback: Force database usage if we're on staging domain
   const forceDatabase = typeof window !== 'undefined' && window.location.hostname.includes('pages.dev');
