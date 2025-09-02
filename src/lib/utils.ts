@@ -240,8 +240,8 @@ export function generateProfilePicture(username: string, seed?: string): string 
   ];
   
   // Select two colors for the gradient based on username
-  const colorIndex1 = Math.abs(avatarSeed.charCodeAt(0)) % brandColors.length;
-  const colorIndex2 = Math.abs(avatarSeed.charCodeAt(1)) % brandColors.length;
+  const colorIndex1 = Math.abs((avatarSeed || 'default').charCodeAt(0)) % brandColors.length;
+  const colorIndex2 = Math.abs((avatarSeed || 'default').charCodeAt(1)) % brandColors.length;
   
   const color1 = brandColors[colorIndex1];
   const color2 = brandColors[colorIndex2];

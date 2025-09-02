@@ -106,19 +106,19 @@ export default function MessagesPage() {
         
         const transformedChats = data.chats.map((chat: any) => ({
             id: chat.id,
-            other_user: chat.other_user_username,
-            other_user_verified: chat.seller_verified || false,
-            listing_id: chat.listing_id,
-            listing_title: chat.listing_title,
-            listing_image: chat.listing_image,
-            listing_price_sats: chat.listing_price || 0,
+            other_user: chat.seller?.name || 'Unknown User',
+            other_user_verified: chat.seller?.verified || false,
+            listing_id: chat.listing?.id || chat.listing_id,
+            listing_title: chat.listing?.title || chat.listing_title,
+            listing_image: chat.listing?.imageUrl || chat.listing_image,
+            listing_price_sats: chat.listing?.priceSat || chat.listing_price || 0,
             listing_created_at: chat.listing_created_at || 0,
             listing_location: chat.listing_location || 'Location N/A',
             listing_ad_type: chat.listing_type || 'sell',
             last_message: chat.latest_message_text || 'No messages yet',
-            last_message_time: chat.latest_message_time || chat.last_message_at || chat.created_at || 0,
+            last_message_time: chat.latest_message_time || chat.lastMessageAt || chat.created_at || 0,
             unread_count: chat.unread_count || 0,
-            seller_thumbsUp: chat.seller_rating || 0
+            seller_thumbsUp: chat.seller?.rating || 0
                 }));
         setChats(transformedChats);
         
@@ -510,7 +510,7 @@ export default function MessagesPage() {
                   <div className="text-center py-8">
                     <div className="w-16 h-16 mx-auto mb-4 bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center">
                       <svg className="w-8 h-8 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12h.01M16h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                       </svg>
                     </div>
                     <p className="text-neutral-600 dark:text-neutral-400 text-sm">
@@ -1028,7 +1028,7 @@ export default function MessagesPage() {
                   <div className="text-center">
                     <div className="w-24 h-24 mx-auto mb-6 bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center">
                       <svg className="w-12 h-12 text-neutral-500 dark:text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12h.01M16h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                       </svg>
                     </div>
                     <h2 className="text-xl font-bold text-neutral-900 dark:text-white mb-2">
