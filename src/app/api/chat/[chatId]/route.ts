@@ -40,7 +40,7 @@ export async function GET(
     }
     
     const userId = userResult.results[0].id;
-    console.log('🔍 Chat API: User ID:', userId, 'for email:', userEmail);
+
     
     // Verify user has access to this chat using UUID
     const chatAccess = await db.prepare(`
@@ -49,11 +49,11 @@ export async function GET(
     `).bind(chatId, userId, userId).all();
     
     if (!chatAccess.results || chatAccess.results.length === 0) {
-      console.log('🔍 Chat API: Access denied for chat:', chatId, 'user:', userId);
+
       return NextResponse.json({ error: 'chat not found or access denied' }, { status: 404 });
     }
     
-    console.log('🔍 Chat API: Access granted for chat:', chatId, 'user:', userId);
+
     
     // ✅ IMPLEMENTED: Message pagination for performance
     const offset = (page - 1) * limit;

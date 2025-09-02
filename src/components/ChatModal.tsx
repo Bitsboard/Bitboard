@@ -34,10 +34,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
   const [isSearchingForChat, setIsSearchingForChat] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
   
-  // Debug currentUserId changes
-  useEffect(() => {
-    console.log('🔍 ChatModal: currentUserId changed:', currentUserId);
-  }, [currentUserId]);
+
   
   const lang = useLang();
   
@@ -102,13 +99,6 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         
         // Look for chat that matches this listing AND involves the current user
         const existingChat = chatData.chats?.find((c: any) => {
-          console.log('🔍 ChatModal: Checking chat:', {
-            chatId: c.id,
-            listingId: c.listing?.id,
-            targetListingId: listing.id,
-            currentUserId: chatData.userId,
-            listingMatches: c.listing?.id === listing.id
-          });
 
           
           
@@ -127,8 +117,6 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         });
         
         if (existingChat) {
-          console.log('🔍 ChatModal: Found existing chat:', existingChat);
-          
           // Transform API response to match Chat type
           const transformedChat = {
             id: existingChat.id,
@@ -143,8 +131,6 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
           setChat(transformedChat);
           await loadMessages(existingChat.id);
           return;
-        } else {
-          console.log('🔍 ChatModal: No existing chat found for listing:', listing.id);
         }
       }
       
@@ -158,8 +144,6 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
 
   const loadMessages = async (chatId: string) => {
     try {
-      console.log('🔍 ChatModal: Loading messages for chat:', chatId);
-      
       // Add timeout to prevent UI from getting stuck
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Message loading timeout')), 10000); // 10 second timeout
@@ -174,17 +158,14 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
 
         
         if (data.success && data.messages) {
-          console.log('🔍 ChatModal: Loaded messages:', data.messages.length, 'messages');
           setMessages(data.messages);
   
           
           // Store user ID if provided in the response
           if (data.userId && !currentUserId) {
-            console.log('🔍 ChatModal: Setting currentUserId from API:', data.userId);
             setCurrentUserId(data.userId);
           }
         } else {
-          console.log('🔍 ChatModal: No messages found or API error');
           setMessages([]);
         }
       } else {
@@ -234,12 +215,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         created_at: Math.floor(Date.now() / 1000)
       };
       
-      console.log('🔍 ChatModal: Creating optimistic message:', {
-        messageId: optimisticMessage.id,
-        fromId: optimisticMessage.from_id,
-        currentUserId,
-        userId
-      });
+
       
       // Add message to UI immediately (optimistic update)
       setMessages(prev => [...prev, optimisticMessage]);

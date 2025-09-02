@@ -29,18 +29,15 @@ export class LocationService {
     getUserLocation(): Place | null {
         try {
             const raw = localStorage.getItem(LOCATION_CONFIG.STORAGE_KEYS.LOCATION);
-            console.log('LocationService: getUserLocation - raw localStorage value:', raw);
+
             
             if (!raw) {
-                console.log('LocationService: No location data in localStorage, returning null');
                 return null;
             }
 
             const place = JSON.parse(raw) as Place;
-            console.log('LocationService: Parsed location from localStorage:', place);
             
             if (this.isValidPlace(place)) {
-                console.log('LocationService: Loaded valid location from localStorage:', place);
                 return place;
             }
             
@@ -62,7 +59,6 @@ export class LocationService {
 
             const radius = Number(raw);
             if (Number.isFinite(radius) && radius > 0 && radius <= 1000) {
-                console.log('LocationService: Loaded radius from localStorage:', radius);
                 return radius;
             }
             
@@ -91,7 +87,7 @@ export class LocationService {
             localStorage.setItem(LOCATION_CONFIG.STORAGE_KEYS.RADIUS, radiusKm.toString());
             localStorage.setItem(LOCATION_CONFIG.STORAGE_KEYS.LAST_UPDATED, Date.now().toString());
             
-            console.log('LocationService: Location saved successfully:', { place, radiusKm });
+
         } catch (error) {
             console.warn('LocationService: Error saving location to localStorage:', error);
         }
@@ -103,7 +99,7 @@ export class LocationService {
             localStorage.removeItem(LOCATION_CONFIG.STORAGE_KEYS.LOCATION);
             localStorage.removeItem(LOCATION_CONFIG.STORAGE_KEYS.RADIUS);
             localStorage.removeItem(LOCATION_CONFIG.STORAGE_KEYS.LAST_UPDATED);
-            console.log('LocationService: Location data cleared');
+
         } catch (error) {
             console.warn('LocationService: Error clearing location data:', error);
         }
@@ -115,7 +111,7 @@ export class LocationService {
             // Clear old saved location completely
             this.clearUserLocation();
             
-            console.log('LocationService: Cleared old location data, will use default:', LOCATION_CONFIG.DEFAULT_CENTER);
+
         } catch (error) {
             console.warn('LocationService: Error clearing old location data:', error);
         }
@@ -125,16 +121,12 @@ export class LocationService {
     clearMiamiLocation(): void {
         try {
             const currentLocation = this.getUserLocation();
-            console.log('LocationService: clearMiamiLocation - checking current location:', currentLocation);
+
             
             if (currentLocation && 
                 Math.abs(currentLocation.lat - 25.77427) < 0.1 && 
                 Math.abs(currentLocation.lng - (-80.19366)) < 0.1) {
-                console.log('LocationService: Detected Miami location, clearing it');
                 this.clearUserLocation();
-                console.log('LocationService: Miami location cleared, localStorage should now be empty');
-            } else {
-                console.log('LocationService: No Miami location detected or already cleared');
             }
         } catch (error) {
             console.warn('LocationService: Error checking Miami location:', error);

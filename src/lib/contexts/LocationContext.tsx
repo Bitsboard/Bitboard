@@ -30,10 +30,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           const savedRadius = locationService.getUserRadius();
           
           if (savedLocation) {
-            console.log('🔍 LocationContext: Loading saved location:', savedLocation);
             setCenter(savedLocation);
-          } else {
-            console.log('🔍 LocationContext: No saved location found');
           }
           
           if (savedRadius !== LOCATION_CONFIG.DEFAULT_RADIUS_KM) {
@@ -43,17 +40,12 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           
           // Check if location data is stale and clear if needed
           if (locationService.isLocationStale()) {
-            console.log('LocationContext: Location is stale, but keeping manual location setting');
             // Don't clear manual location settings - keep them even if stale
             // Only use IP location if no manual location was set
             if (!savedLocation && ipLocation?.lat && ipLocation?.lng) {
-              console.log('LocationContext: No manual location, using IP location:', ipLocation);
               setCenter(ipLocation);
             } else if (!savedLocation) {
-              console.log('LocationContext: No manual location and no IP location, using default');
               setCenter(LOCATION_CONFIG.DEFAULT_CENTER);
-            } else {
-              console.log('LocationContext: Keeping manual location even if stale:', savedLocation);
             }
             setRadiusKm(LOCATION_CONFIG.DEFAULT_RADIUS_KM);
           }
@@ -63,13 +55,10 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           // Try to get saved location even if there was an error
           const fallbackLocation = locationService.getUserLocation();
           if (fallbackLocation) {
-            console.log('LocationContext: Using fallback saved location:', fallbackLocation);
             setCenter(fallbackLocation);
           } else if (ipLocation?.lat && ipLocation?.lng) {
-            console.log('LocationContext: No saved location, using IP location:', ipLocation);
             setCenter(ipLocation);
           } else {
-            console.log('LocationContext: No saved or IP location, using default');
             setCenter(LOCATION_CONFIG.DEFAULT_CENTER);
           }
           setRadiusKm(LOCATION_CONFIG.DEFAULT_RADIUS_KM);
@@ -86,18 +75,9 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   // Update center when IP location becomes available (if no saved location exists)
   useEffect(() => {
     const savedLocation = locationService.getUserLocation();
-    console.log('🔍 LocationContext: IP location effect triggered:', {
-      hasSavedLocation: !!savedLocation,
-      savedLocation,
-      ipLocation,
-      willUseIpLocation: !savedLocation && ipLocation?.lat && ipLocation?.lng
-    });
     
     if (!savedLocation && ipLocation?.lat && ipLocation?.lng) {
-      console.log('🔍 LocationContext: Using IP location because no saved location:', ipLocation);
       setCenter(ipLocation);
-    } else if (savedLocation) {
-      console.log('🔍 LocationContext: Keeping saved location, ignoring IP:', savedLocation);
     }
   }, [ipLocation]);
 
