@@ -26,7 +26,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
   const [text, setText] = useState("");
   const [showEscrow, setShowEscrow] = useState(false);
   const [showTips, setShowTips] = useState(true);
-  const [showOptions, setShowOptions] = useState(false);
+
   const [sellerImageError, setSellerImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
@@ -664,76 +664,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         
         {/* Message Input */}
         <div className={cn("flex items-center gap-2 border-t p-4", dark ? "border-neutral-900" : "border-neutral-200")}>
-          {/* Plus button with options */}
-          <div className="relative">
-            <button
-              onClick={() => setShowOptions(!showOptions)}
-              className={cn(
-                "flex items-center justify-center w-10 h-10 rounded-xl border-2 transition-all duration-200",
-                dark 
-                  ? "border-neutral-700 hover:border-neutral-600 hover:bg-neutral-800" 
-                  : "border-neutral-300 hover:border-neutral-400 hover:bg-neutral-100"
-              )}
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-            </button>
-            
-            {/* Dropdown options */}
-            {showOptions && (
-              <>
-                {/* Click outside overlay */}
-                <div 
-                  className="fixed inset-0 z-0" 
-                  onClick={() => setShowOptions(false)}
-                />
-                <div className={cn(
-                  "absolute bottom-full left-0 mb-2 w-48 rounded-xl shadow-lg border z-10",
-                  dark ? "bg-neutral-800 border-neutral-700" : "bg-white border-neutral-200"
-                )}>
-                  <div className="py-2">
-                    <button
-                      onClick={() => {
-                        setText("I'd like to make an offer on this item. What's your best price?");
-                        setShowOptions(false);
-                      }}
-                      className={cn(
-                        "w-full text-left px-4 py-2 text-sm hover:bg-orange-500 hover:text-white transition-colors duration-200",
-                        dark ? "text-neutral-300 hover:bg-orange-500" : "text-neutral-700 hover:bg-orange-500"
-                      )}
-                    >
-                      💰 Give an offer
-                    </button>
-                    <button
-                      onClick={() => {
-                        setText("Is this item still available?");
-                        setShowOptions(false);
-                      }}
-                      className={cn(
-                        "w-full text-left px-4 py-2 text-sm hover:bg-orange-500 hover:text-white transition-colors duration-200",
-                        dark ? "text-neutral-300 hover:bg-orange-500" : "text-neutral-700 hover:bg-orange-500"
-                      )}
-                    >
-                      ❓ Check availability
-                    </button>
-                    <button
-                      onClick={() => {
-                        setText("Can I see more photos of this item?");
-                        setShowOptions(false);
-                      }}
-                      className={cn(
-                        "w-full text-left px-4 py-2 text-sm hover:bg-orange-500 hover:text-white transition-colors duration-200",
-                        dark ? "text-neutral-300 hover:bg-orange-500" : "text-neutral-700 hover:bg-orange-500"
-                      )}
-                    >
-                      📸 Request more photos
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+
           
           <button
             onClick={() => setShowOfferModal(true)}
