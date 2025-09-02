@@ -656,7 +656,7 @@ export default function AdminPage() {
                     <select
                       value={notificationForm.targetGroup}
                       onChange={(e) => setNotificationForm(prev => ({ ...prev, targetGroup: e.target.value as any }))}
-the                      required
+                      required
                     >
                       <option value="all">All Users</option>
                       <option value="verified">Verified Users Only</option>
