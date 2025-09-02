@@ -334,8 +334,13 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
     console.log('🎯 ChatModal: sendOffer called with:', { amount, expiresAt });
     console.log('🎯 ChatModal: user?.email:', user?.email, 'chat?.id:', chat?.id);
     
-    if (!user?.email || !chat?.id) {
-      console.log('❌ ChatModal: Missing user email or chat ID, returning');
+    if (!user?.email) {
+      console.log('❌ ChatModal: Missing user email, returning');
+      return;
+    }
+    
+    if (!chat?.id) {
+      console.log('❌ ChatModal: Chat not loaded yet, returning');
       return;
     }
 
@@ -684,14 +689,23 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
 
           
           <button
-            onClick={() => setShowOfferModal(true)}
+            onClick={() => {
+              if (!chat?.id) {
+                console.log('❌ ChatModal: Cannot open offer modal - chat not loaded yet');
+                return;
+              }
+              setShowOfferModal(true);
+            }}
+            disabled={!chat?.id}
             className={cn(
               "rounded-xl p-2 transition-all duration-200",
-              dark 
-                ? "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white" 
-                : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-800"
+              chat?.id
+                ? (dark 
+                    ? "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white" 
+                    : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-800")
+                : "bg-neutral-300 text-neutral-500 cursor-not-allowed"
             )}
-            title="Make an offer"
+            title={chat?.id ? "Make an offer" : "Loading chat..."}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />

@@ -114,9 +114,11 @@ export async function POST(req: NextRequest) {
     // Check for existing offers between these two users for this listing
     // No new offers allowed if there's a pending offer OR if the last offer was accepted
     console.log('🎯 API: Checking for existing offers between users');
+    console.log('🎯 API: Query params:', { listingId, currentUserId, otherUserId });
+    
     const existingOfferResult = await db
       .prepare(`
-        SELECT id, status, from_user_id, to_user_id 
+        SELECT id, status, from_user_id, to_user_id, created_at
         FROM offers 
         WHERE listing_id = ? 
         AND (
@@ -128,6 +130,8 @@ export async function POST(req: NextRequest) {
       `)
       .bind(listingId, currentUserId, otherUserId, otherUserId, currentUserId)
       .first();
+    
+    console.log('🎯 API: Existing offer query result:', existingOfferResult);
 
     if (existingOfferResult) {
       const { status, from_user_id, to_user_id } = existingOfferResult;
