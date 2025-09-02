@@ -218,7 +218,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       offerId,
-      message: "Offer sent successfully"
+      message: "Offer sent successfully",
+      ...(createdNewChat && { newChatId: chatId })
     });
 
   } catch (error) {

@@ -360,13 +360,14 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       });
 
       if (response.ok) {
-        const responseData = await response.json() as { success?: boolean; offerId?: string; message?: string };
+        const responseData = await response.json() as { success?: boolean; offerId?: string; message?: string; newChatId?: string };
         console.log('🎯 ChatModal: Offer sent successfully:', responseData);
         
         // Reload messages to show the new offer
-        if (chatId) {
-          console.log('🎯 ChatModal: Reloading messages for chatId:', chatId);
-          await loadMessages(chatId);
+        const chatIdToUse = responseData.newChatId || chatId;
+        if (chatIdToUse) {
+          console.log('🎯 ChatModal: Reloading messages for chatId:', chatIdToUse);
+          await loadMessages(chatIdToUse);
         } else {
           console.log('🎯 ChatModal: No chatId available for reloading messages');
         }
