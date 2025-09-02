@@ -1188,7 +1188,7 @@ export default function MessagesPage() {
         }}
         onConfirm={confirmDeleteConversation}
         dark={dark}
-        conversationTitle={conversationToDelete?.listing_title || "this conversation"}
+        username={conversationToDelete?.other_user || "this user"}
       />
     </div>
   );

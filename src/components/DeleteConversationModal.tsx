@@ -6,7 +6,7 @@ interface DeleteConversationModalProps {
   onClose: () => void;
   onConfirm: () => void;
   dark?: boolean;
-  conversationTitle?: string;
+  username?: string;
 }
 
 export default function DeleteConversationModal({
@@ -14,7 +14,7 @@ export default function DeleteConversationModal({
   onClose,
   onConfirm,
   dark = false,
-  conversationTitle = "this conversation"
+  username = "this user"
 }: DeleteConversationModalProps) {
   if (!isOpen) return null;
 
@@ -56,14 +56,7 @@ export default function DeleteConversationModal({
               "text-sm leading-relaxed",
               dark ? "text-neutral-300" : "text-neutral-600"
             )}>
-              Are you sure you want to delete <strong>{conversationTitle}</strong>? 
-              This will hide the conversation from your messages list.
-            </p>
-            <p className={cn(
-              "text-xs mt-2",
-              dark ? "text-neutral-400" : "text-neutral-500"
-            )}>
-              The conversation will reappear if you or the other person sends a new message.
+              Are you sure you wish to delete your conversation with <strong>{username}</strong>? They will still be able to view the conversation.
             </p>
           </div>
           
@@ -87,7 +80,7 @@ export default function DeleteConversationModal({
               onClick={onConfirm}
               className="px-4 py-2 rounded-lg text-sm font-medium bg-red-500 text-white hover:bg-red-600 transition-all duration-200"
             >
-              Delete
+              Confirm
             </button>
           </div>
         </div>
