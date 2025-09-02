@@ -696,7 +696,7 @@ export default function MessagesPage() {
                           </div>
                         ) : (
                           /* Chat Layout */
-                          <div className="flex items-start gap-3">
+                          <div className="flex items-start gap-3 relative">
                             {/* Content - New Layout */}
                             <div className="flex-1 min-w-0">
                               {/* Top Row: Username Pill Only */}
@@ -794,26 +794,20 @@ export default function MessagesPage() {
                               </span>
                             </div>
                             
-                            {/* Delete Button - Always visible for selected chat */}
+                            {/* Delete Button - Bottom Right */}
                             {selectedChat === item.id && (
-                              <div className="flex-shrink-0 ml-2">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteConversation(item);
-                                  }}
-                                  className={cn(
-                                    "p-1.5 rounded-lg transition-all duration-200",
-                                    "bg-red-500/10 hover:bg-red-500/20 text-red-500/70 hover:text-red-600",
-                                    "hover:scale-110 hover:shadow-md border border-red-500/20 hover:border-red-500/40"
-                                  )}
-                                  title="Delete conversation"
-                                >
-                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                </button>
-                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteConversation(item);
+                                }}
+                                className="absolute bottom-0 right-0 p-1 transition-all duration-200 hover:scale-110"
+                                title="Delete conversation"
+                              >
+                                <svg className="w-4 h-4 text-red-500 hover:text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
                             )}
                           </div>
                         )}
