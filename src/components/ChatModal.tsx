@@ -711,7 +711,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
               try {
                 const response = await fetch(`/api/offers/check?listingId=${encodeURIComponent(listing.id)}&chatId=${encodeURIComponent(chat.id)}`);
                 if (response.ok) {
-                  const data = await response.json();
+                  const data = await response.json() as { canMakeOffer?: boolean; existingOffer?: { status?: string; id?: string; from_user_id?: string; to_user_id?: string; created_at?: number } };
                   if (!data.canMakeOffer) {
                     console.log('❌ ChatModal: Cannot make offer - existing offer found:', data.existingOffer);
                     alert(data.existingOffer?.status === 'pending' 
