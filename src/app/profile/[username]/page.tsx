@@ -298,7 +298,7 @@ export default function PublicProfilePage() {
   const getLastSeenText = (lastActive?: number) => {
     if (!lastActive) return 'Never';
     
-    const lastActiveDate = new Date(lastActive * 1000);
+    const lastActiveDate = new Date(lastActive * 1000); // lastActive is in seconds, convert to milliseconds
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - lastActiveDate.getTime()) / 1000);
     
