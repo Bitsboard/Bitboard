@@ -75,6 +75,7 @@ export async function GET(req: NextRequest) {
         l.price_sat as listing_price,
         l.location as listing_location,
         l.created_at as listing_created_at,
+        l.type as listing_type,
         COALESCE(li.image_url, '') as listing_image,
         seller.username as seller_name,
         seller.verified as seller_verified,
@@ -126,6 +127,7 @@ export async function GET(req: NextRequest) {
         priceSat: chat.listing_price,
         imageUrl: chat.listing_image,
         location: chat.listing_location,
+        type: chat.listing_type,
         createdAt: chat.listing_created_at * 1000
       },
       seller: {
