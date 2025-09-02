@@ -728,6 +728,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         onSendOffer={sendOffer}
         listingPrice={listing.priceSats > 0 ? listing.priceSats : undefined}
         dark={dark}
+        unit={unit}
       />
     </Modal>
   );

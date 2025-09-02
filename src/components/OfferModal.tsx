@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
+import { cn, formatBTCFromSats } from "@/lib/utils";
+import type { Unit } from "@/lib/types";
 
 interface OfferModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface OfferModalProps {
   onSendOffer: (amount: number, expiresAt?: number) => void;
   listingPrice?: number; // in satoshis
   dark?: boolean;
+  unit?: Unit;
 }
 
 export default function OfferModal({
@@ -16,7 +18,8 @@ export default function OfferModal({
   onClose,
   onSendOffer,
   listingPrice,
-  dark = false
+  dark = false,
+  unit = "sats"
 }: OfferModalProps) {
   const [amount, setAmount] = useState<number>(0);
   const [hasExpiration, setHasExpiration] = useState(false);
@@ -53,14 +56,35 @@ export default function OfferModal({
     }
   };
 
+  // Convert BTC to sats
+  const btcToSats = (btc: number): number => {
+    return Math.round(btc * 1e8);
+  };
+
+  // Convert sats to BTC
+  const satsToBtc = (sats: number): number => {
+    return sats / 1e8;
+  };
+
   const formatAmount = (satoshis: number) => {
     if (satoshis === 0) return "0";
+    if (unit === "BTC") {
+      return formatBTCFromSats(satoshis);
+    }
     return satoshis.toLocaleString();
   };
 
   const parseAmount = (value: string) => {
-    const cleaned = value.replace(/[^\d]/g, '');
-    return cleaned ? parseInt(cleaned, 10) : 0;
+    if (unit === "BTC") {
+      // For BTC, allow decimal input
+      const cleaned = value.replace(/[^\d.]/g, '');
+      const btc = parseFloat(cleaned) || 0;
+      return btcToSats(btc);
+    } else {
+      // For sats, only allow integers
+      const cleaned = value.replace(/[^\d]/g, '');
+      return cleaned ? parseInt(cleaned, 10) : 0;
+    }
   };
 
   if (!isOpen) return null;
@@ -105,11 +129,12 @@ export default function OfferModal({
                 "block text-sm font-medium",
                 dark ? "text-neutral-300" : "text-neutral-700"
               )}>
-                Offer Amount (sats)
+                Offer Amount ({unit === "BTC" ? "BTC" : "sats"})
               </label>
               <div className="relative">
                 <input
-                  type="text"
+                  type={unit === "BTC" ? "number" : "text"}
+                  step={unit === "BTC" ? "0.00000001" : undefined}
                   value={formatAmount(amount)}
                   onChange={(e) => setAmount(parseAmount(e.target.value))}
                   placeholder="0"
@@ -120,14 +145,14 @@ export default function OfferModal({
                       ? "bg-neutral-800 border-neutral-600 text-white placeholder-neutral-400" 
                       : "bg-white border-neutral-300 text-neutral-900 placeholder-neutral-500"
                   )}
-                  maxLength={10}
+                  maxLength={unit === "BTC" ? 12 : 10}
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
                   <span className={cn(
                     "text-sm font-medium",
                     dark ? "text-neutral-400" : "text-neutral-500"
                   )}>
-                    sats
+                    {unit === "BTC" ? "₿" : "sats"}
                   </span>
                 </div>
               </div>
@@ -136,7 +161,7 @@ export default function OfferModal({
                   "text-xs",
                   dark ? "text-neutral-400" : "text-neutral-500"
                 )}>
-                  Listing price: {formatAmount(listingPrice)} sats
+                  Listing price: {formatAmount(listingPrice)} {unit === "BTC" ? "₿" : "sats"}
                 </p>
               )}
             </div>
