@@ -73,7 +73,8 @@ export async function GET(req: NextRequest) {
         c.last_message_at,
         l.title as listing_title,
         l.price_sat as listing_price,
-        l.image_url as listing_image,
+        l.location as listing_location,
+        COALESCE(li.image_url, '') as listing_image,
         seller.username as seller_name,
         seller.verified as seller_verified,
         seller.rating as seller_rating,
@@ -81,6 +82,11 @@ export async function GET(req: NextRequest) {
       FROM chats c
       JOIN listings l ON c.listing_id = l.id
       JOIN users seller ON l.posted_by = seller.id
+      LEFT JOIN (
+        SELECT listing_id, image_url,
+               ROW_NUMBER() OVER (PARTITION BY listing_id ORDER BY id) as rn
+        FROM listing_images
+      ) li ON l.id = li.listing_id AND li.rn = 1
       WHERE (c.buyer_id = ? OR c.seller_id = ?)
         AND c.buyer_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = ?)
         AND c.seller_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = ?)
@@ -111,7 +117,8 @@ export async function GET(req: NextRequest) {
         id: chat.listing_id,
         title: chat.listing_title,
         priceSat: chat.listing_price,
-        imageUrl: chat.listing_image
+        imageUrl: chat.listing_image,
+        location: chat.listing_location
       },
       seller: {
         name: chat.seller_name,

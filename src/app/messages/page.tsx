@@ -113,7 +113,7 @@ export default function MessagesPage() {
             listing_image: chat.listing?.imageUrl || chat.listing_image,
             listing_price_sats: chat.listing?.priceSat || chat.listing_price || 0,
             listing_created_at: chat.listing_created_at || 0,
-            listing_location: chat.listing_location || 'Location N/A',
+            listing_location: chat.listing?.location || chat.listing_location || 'Location N/A',
             listing_ad_type: chat.listing_type || 'sell',
             last_message: chat.latest_message_text || 'No messages yet',
             last_message_time: chat.latest_message_time || chat.lastMessageAt || chat.created_at || 0,
