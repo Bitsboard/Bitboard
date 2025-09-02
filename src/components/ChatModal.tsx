@@ -338,32 +338,8 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
     
     let chatId = chat?.id;
     
-    // If no chat exists, create one first
-    if (!chatId) {
-      try {
-        const chatResponse = await fetch('/api/chat/create', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            listingId: listing.id,
-            sellerId: listing.userId
-          })
-        });
-        
-        if (chatResponse.ok) {
-          const chatData = await chatResponse.json();
-          chatId = chatData.chatId;
-          // Reload the chat to get the full chat object
-          await loadChat();
-        } else {
-          alert('Failed to create chat');
-          return;
-        }
-      } catch (error) {
-        alert('Failed to create chat');
-        return;
-      }
-    }
+    // If no chat exists, we'll let the sendOffer API handle chat creation
+    // The /api/offers/send endpoint will create a chat if needed
 
     try {
       const requestBody = {

@@ -44,44 +44,102 @@ export async function POST(req: NextRequest) {
 
     const currentUserId = currentUserResult.id as string;
 
-    // Verify chat exists and user is participant
-    const chatResult = await db
-      .prepare(`
-        SELECT buyer_id, seller_id, listing_id 
-        FROM chats 
-        WHERE id = ?
-      `)
-      .bind(chatId)
-      .first();
+    let chatResult;
+    let otherUserId;
 
-    if (!chatResult) {
-      return NextResponse.json({ error: "Chat not found" }, { status: 404 });
-    }
+    if (chatId) {
+      // Verify chat exists and user is participant
+      chatResult = await db
+        .prepare(`
+          SELECT buyer_id, seller_id, listing_id 
+          FROM chats 
+          WHERE id = ?
+        `)
+        .bind(chatId)
+        .first();
 
-    const { buyer_id, seller_id, listing_id } = chatResult;
-    
-    if (listing_id !== listingId) {
-      return NextResponse.json({ error: "Chat and listing mismatch" }, { status: 400 });
-    }
+      if (!chatResult) {
+        return NextResponse.json({ error: "Chat not found" }, { status: 404 });
+      }
 
-    // Determine the other user (recipient of the offer)
-    const otherUserId = currentUserId === buyer_id ? seller_id : buyer_id;
-    
-    if (!otherUserId) {
-      return NextResponse.json({ error: "Invalid chat participants" }, { status: 400 });
+      const { buyer_id, seller_id, listing_id } = chatResult;
+      
+      if (listing_id !== listingId) {
+        return NextResponse.json({ error: "Chat and listing mismatch" }, { status: 400 });
+      }
+
+      // Determine the other user (recipient of the offer)
+      otherUserId = currentUserId === buyer_id ? seller_id : buyer_id;
+      
+      if (!otherUserId) {
+        return NextResponse.json({ error: "Invalid chat participants" }, { status: 400 });
+      }
+    } else {
+      // No chat provided, need to create one
+      // Get the listing owner (seller)
+      const listingResult = await db
+        .prepare("SELECT posted_by FROM listings WHERE id = ?")
+        .bind(listingId)
+        .first();
+
+      if (!listingResult) {
+        return NextResponse.json({ error: "Listing not found" }, { status: 404 });
+      }
+
+      const sellerId = listingResult.posted_by as string;
+      
+      if (!sellerId) {
+        return NextResponse.json({ error: "Listing has no owner" }, { status: 400 });
+      }
+
+      // Check if user is trying to make an offer on their own listing
+      if (currentUserId === sellerId) {
+        return NextResponse.json({ error: "Cannot make offer on your own listing" }, { status: 400 });
+      }
+
+      otherUserId = sellerId;
+
+      // Check if chat already exists between these users for this listing
+      const existingChatResult = await db
+        .prepare(`
+          SELECT id FROM chats 
+          WHERE listing_id = ? 
+          AND ((buyer_id = ? AND seller_id = ?) OR (buyer_id = ? AND seller_id = ?))
+          LIMIT 1
+        `)
+        .bind(listingId, currentUserId, sellerId, sellerId, currentUserId)
+        .first();
+
+      if (existingChatResult) {
+        chatId = existingChatResult.id as string;
+      } else {
+        // Create new chat
+        const newChatId = `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const currentTime = Math.floor(Date.now() / 1000);
+
+        await db
+          .prepare(`
+            INSERT INTO chats (id, listing_id, buyer_id, seller_id, created_at, last_message_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+          `)
+          .bind(newChatId, listingId, currentUserId, sellerId, currentTime, currentTime)
+          .run();
+
+        chatId = newChatId;
+      }
     }
 
     // Check if listing still exists and is active
-    const listingResult = await db
+    const listingPriceResult = await db
       .prepare("SELECT price_sat FROM listings WHERE id = ? AND status = 'active'")
       .bind(listingId)
       .first();
 
-    if (!listingResult) {
+    if (!listingPriceResult) {
       return NextResponse.json({ error: "Listing not found or inactive" }, { status: 404 });
     }
 
-    const listingPrice = listingResult.price_sat as number;
+    const listingPrice = listingPriceResult.price_sat as number;
     
     // Validate offer amount (should be 0 to listing price, or any amount if listing is "make offer")
     if (listingPrice > 0 && amountSat > listingPrice) {
