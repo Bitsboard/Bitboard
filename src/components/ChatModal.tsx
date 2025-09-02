@@ -99,13 +99,10 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         const existingChat = chatData.chats?.find((c: any) => {
           console.log('🔍 ChatModal: Checking chat:', {
             chatId: c.id,
-            listingId: c.listing_id,
+            listingId: c.listing?.id,
             targetListingId: listing.id,
-            buyerId: c.buyer_id,
-            sellerId: c.seller_id,
             currentUserId: chatData.userId,
-            listingMatches: c.listing_id === listing.id,
-            userInvolved: c.buyer_id === chatData.userId || c.seller_id === chatData.userId
+            listingMatches: c.listing?.id === listing.id
           });
 
           
@@ -113,7 +110,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
           
           
           // Check both listing ID and user involvement
-          const listingMatches = c.listing_id === listing.id;
+          const listingMatches = c.listing?.id === listing.id;
           const userInvolved = c.buyer_id === chatData.userId || c.seller_id === chatData.userId;
           
 
@@ -121,16 +118,28 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
   
   
           
-          return listingMatches && userInvolved;
+          return listingMatches;
         });
         
         if (existingChat) {
-  
-          setChat(existingChat);
+          console.log('🔍 ChatModal: Found existing chat:', existingChat);
+          
+          // Transform API response to match Chat type
+          const transformedChat = {
+            id: existingChat.id,
+            listing_id: existingChat.listing?.id || '',
+            buyer_id: '', // We don't have this info from the API
+            seller_id: '', // We don't have this info from the API
+            created_at: existingChat.createdAt / 1000, // Convert from milliseconds to seconds
+            last_message_at: existingChat.lastMessageAt / 1000, // Convert from milliseconds to seconds
+            messages: [] // Will be loaded separately
+          };
+          
+          setChat(transformedChat);
           await loadMessages(existingChat.id);
           return;
         } else {
-  
+          console.log('🔍 ChatModal: No existing chat found for listing:', listing.id);
         }
       }
       
