@@ -393,7 +393,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
     }
   };
 
-  const handleOfferAction = async (offerId: string, action: 'accept' | 'decline' | 'revoke') => {
+  const handleOfferAction = async (offerId: string, action: 'accept' | 'decline' | 'revoke' | 'abort') => {
     try {
       const response = await fetch('/api/offers/action', {
         method: 'POST',
@@ -805,7 +805,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
           setExistingOffer(null);
         }}
         onSendOffer={sendOffer}
-        onAbortOffer={handleOfferAction}
+        onAbortOffer={(offerId: string) => handleOfferAction(offerId, 'abort')}
         listingPrice={listing.priceSats > 0 ? listing.priceSats : undefined}
         dark={dark}
         unit={unit}

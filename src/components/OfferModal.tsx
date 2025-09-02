@@ -8,7 +8,7 @@ interface OfferModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSendOffer: (amount: number, expiresAt?: number) => void;
-  onAbortOffer?: (offerId: string) => void;
+  onAbortOffer?: (offerId: string, action: 'abort') => void;
   listingPrice?: number; // in satoshis
   dark?: boolean;
   unit?: Unit;
@@ -111,7 +111,7 @@ export default function OfferModal({
     
     setIsSubmitting(true);
     try {
-      await onAbortOffer(existingOffer.id);
+      await onAbortOffer(existingOffer.id, 'abort');
       setShowAbortConfirm(false);
       onClose();
     } catch (error) {

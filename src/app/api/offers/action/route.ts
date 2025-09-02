@@ -20,12 +20,12 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json() as {
       offerId: string;
-      action: 'accept' | 'decline' | 'revoke';
+      action: 'accept' | 'decline' | 'revoke' | 'abort';
     };
 
     const { offerId, action } = body;
 
-    if (!offerId || !['accept', 'decline', 'revoke'].includes(action)) {
+    if (!offerId || !['accept', 'decline', 'revoke', 'abort'].includes(action)) {
       return NextResponse.json({ error: "Invalid request data" }, { status: 400 });
     }
 
@@ -89,11 +89,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Validate user permissions
-    if (action === 'revoke') {
-      // Only the offer sender can revoke
+    if (action === 'revoke' || action === 'abort') {
+      // Only the offer sender can revoke/abort
       if (offer.from_user_id !== currentUserId) {
         return NextResponse.json({ 
-          error: "Only the offer sender can revoke this offer" 
+          error: `Only the offer sender can ${action} this offer` 
         }, { status: 403 });
       }
     } else if (action === 'accept' || action === 'decline') {
@@ -132,7 +132,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Offer ${action}ed successfully`,
+      message: `Offer ${action === 'abort' ? 'aborted' : action + 'd'} successfully`,
       newStatus
     });
 
