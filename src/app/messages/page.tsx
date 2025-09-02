@@ -163,7 +163,7 @@ export default function MessagesPage() {
             last_message: chat.lastMessageText || chat.latest_message_text || 'No messages yet',
             last_message_time: chat.latest_message_time || chat.lastMessageAt || chat.created_at || 0,
             unread_count: chat.unread_count || 0,
-            seller_thumbsUp: chat.seller?.rating || 0
+            seller_thumbsUp: chat.seller?.thumbsUp || 0
                 }));
         
         // Only update if there are actual changes to prevent flashing

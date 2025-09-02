@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
         COALESCE(li.image_url, '') as listing_image,
         seller.username as seller_name,
         seller.verified as seller_verified,
-        seller.rating as seller_rating,
+        seller.thumbs_up as seller_rating,
         seller.deals as seller_deals,
         COALESCE(last_msg.text, '') as last_message_text
       FROM chats c
