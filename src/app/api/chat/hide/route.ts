@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getRequestContext } from "@cloudflare/next-on-pages";
 import { getSessionFromRequest } from "@/lib/auth";
 
+export const runtime = 'edge';
+
 export async function POST(req: NextRequest) {
   try {
     const { env } = getRequestContext();
