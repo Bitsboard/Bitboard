@@ -643,6 +643,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                         offer={item}
                         currentUserId={currentUserId || ''}
                         dark={dark}
+                        unit={unit}
                         onAction={handleOfferAction}
                       />
                     ) : (

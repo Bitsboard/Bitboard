@@ -91,9 +91,27 @@ export async function GET(req: NextRequest) {
         FROM listing_images
       ) li ON l.id = li.listing_id AND li.rn = 1
       LEFT JOIN (
-        SELECT chat_id, text,
-               ROW_NUMBER() OVER (PARTITION BY chat_id ORDER BY created_at DESC) as rn
-        FROM messages
+        SELECT 
+          chat_id,
+          text,
+          created_at,
+          ROW_NUMBER() OVER (PARTITION BY chat_id ORDER BY created_at DESC) as rn
+        FROM (
+          SELECT chat_id, text, created_at FROM messages
+          UNION ALL
+          SELECT 
+            chat_id,
+            CASE 
+              WHEN status = 'pending' THEN 'Made an offer'
+              WHEN status = 'accepted' THEN 'Offer accepted'
+              WHEN status = 'declined' THEN 'Offer declined'
+              WHEN status = 'revoked' THEN 'Offer revoked'
+              WHEN status = 'expired' THEN 'Offer expired'
+              ELSE 'Offer action'
+            END as text,
+            created_at
+          FROM offers
+        ) combined_activity
       ) last_msg ON c.id = last_msg.chat_id AND last_msg.rn = 1
       WHERE (c.buyer_id = ? OR c.seller_id = ?)
         AND c.buyer_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = ?)

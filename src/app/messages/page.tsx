@@ -1175,6 +1175,7 @@ export default function MessagesPage() {
                                 offer={item}
                                 currentUserId={user?.id || ''}
                                 dark={dark}
+                                unit={unit}
                                 onAction={handleOfferAction}
                               />
                             ) : (

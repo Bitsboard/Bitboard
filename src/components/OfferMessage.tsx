@@ -16,6 +16,7 @@ interface OfferMessageProps {
   };
   currentUserId: string;
   dark?: boolean;
+  unit?: 'sats' | 'BTC';
   onAction?: (offerId: string, action: 'accept' | 'decline' | 'revoke') => void;
 }
 
@@ -23,6 +24,7 @@ export default function OfferMessage({
   offer, 
   currentUserId, 
   dark = false, 
+  unit = 'sats',
   onAction 
 }: OfferMessageProps) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -32,7 +34,18 @@ export default function OfferMessage({
   const isActive = offer.status === 'pending' && !isExpired;
 
   const formatAmount = (satoshis: number | undefined) => {
-    return (satoshis || 0).toLocaleString();
+    if (!satoshis) return '0';
+    
+    if (unit === 'BTC') {
+      const btc = satoshis / 1e8;
+      return btc.toFixed(8).replace(/\.?0+$/, '');
+    }
+    
+    return satoshis.toLocaleString();
+  };
+
+  const getAmountSymbol = () => {
+    return unit === 'BTC' ? '₿' : 'sats';
   };
 
   const formatExpiration = (expiresAt: number) => {
@@ -97,31 +110,36 @@ export default function OfferMessage({
 
   return (
     <div className={cn(
-      "max-w-xs mx-4 my-2 p-4 rounded-2xl border-2",
+      "max-w-sm mx-4 my-3 p-5 rounded-3xl shadow-lg border-2",
       isFromCurrentUser 
-        ? "ml-auto bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800" 
-        : "mr-auto bg-white border-neutral-200 dark:bg-neutral-800 dark:border-neutral-700",
+        ? "ml-auto bg-gradient-to-br from-orange-50 to-orange-100 border-orange-300 dark:from-orange-900/30 dark:to-orange-800/30 dark:border-orange-600" 
+        : "mr-auto bg-gradient-to-br from-white to-neutral-50 border-neutral-300 dark:from-neutral-800 dark:to-neutral-700 dark:border-neutral-600",
       !isActive && "opacity-75"
     )}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center space-x-2">
-          <div className="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-3">
+          <div className={cn(
+            "w-8 h-8 rounded-full flex items-center justify-center shadow-md",
+            isFromCurrentUser 
+              ? "bg-gradient-to-br from-orange-500 to-orange-600" 
+              : "bg-gradient-to-br from-neutral-500 to-neutral-600"
+          )}>
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
             </svg>
           </div>
           <span className={cn(
-            "text-sm font-medium",
+            "text-sm font-semibold tracking-wide",
             isFromCurrentUser 
-              ? "text-orange-800 dark:text-orange-300" 
+              ? "text-orange-800 dark:text-orange-200" 
               : "text-neutral-800 dark:text-neutral-200"
           )}>
             Offer
           </span>
         </div>
         <div className={cn(
-          "px-2 py-1 rounded-full text-xs font-medium",
+          "px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm",
           getStatusColor()
         )}>
           {getStatusText()}
@@ -129,38 +147,38 @@ export default function OfferMessage({
       </div>
 
       {/* Amount */}
-      <div className="mb-3">
+      <div className="mb-4">
         <div className={cn(
-          "text-2xl font-bold",
+          "text-3xl font-bold tracking-tight",
           isFromCurrentUser 
             ? "text-orange-900 dark:text-orange-100" 
             : "text-neutral-900 dark:text-neutral-100"
         )}>
-          {formatAmount(offer.amount_sat)} sats
+          {formatAmount(offer.amount_sat)} {getAmountSymbol()}
         </div>
         {offer.expires_at && (
           <div className={cn(
-            "text-sm mt-1",
+            "text-sm mt-2 font-medium",
             isFromCurrentUser 
               ? "text-orange-700 dark:text-orange-300" 
               : "text-neutral-600 dark:text-neutral-400"
           )}>
-            {formatExpiration(offer.expires_at)}
+            ⏰ {formatExpiration(offer.expires_at)}
           </div>
         )}
       </div>
 
       {/* Actions */}
       {isActive && (
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           {isFromCurrentUser ? (
             // Offer sender can revoke
             <button
               onClick={() => handleAction('revoke')}
               disabled={isProcessing}
-              className="flex-1 px-3 py-2 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-semibold rounded-xl hover:from-red-600 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
             >
-              {isProcessing ? 'Revoking...' : 'Revoke'}
+              {isProcessing ? 'Revoking...' : 'Revoke Offer'}
             </button>
           ) : (
             // Offer recipient can accept/decline
@@ -168,14 +186,14 @@ export default function OfferMessage({
               <button
                 onClick={() => handleAction('accept')}
                 disabled={isProcessing}
-                className="flex-1 px-3 py-2 bg-green-500 text-white text-sm font-medium rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-semibold rounded-xl hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
               >
                 {isProcessing ? 'Accepting...' : 'Accept'}
               </button>
               <button
                 onClick={() => handleAction('decline')}
                 disabled={isProcessing}
-                className="flex-1 px-3 py-2 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-semibold rounded-xl hover:from-red-600 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
               >
                 {isProcessing ? 'Declining...' : 'Decline'}
               </button>
