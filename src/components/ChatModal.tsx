@@ -347,7 +347,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
 
       if (response.ok) {
         // Reload messages to show the new offer
-        await loadMessages();
+        await loadMessages(chat.id);
       } else {
         const error = await response.json() as { error?: string };
         console.error('Failed to send offer:', error);
@@ -372,7 +372,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
 
       if (response.ok) {
         // Reload messages to show the updated offer status
-        await loadMessages();
+        await loadMessages(chat?.id || '');
       } else {
         const error = await response.json() as { error?: string };
         console.error('Failed to process offer action:', error);
