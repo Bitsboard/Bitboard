@@ -412,6 +412,13 @@ export default function MessagesPage() {
     }
   }, [messages]);
   
+  // Load messages when a chat is selected
+  useEffect(() => {
+    if (selectedChat && user?.email) {
+      loadMessages(selectedChat);
+    }
+  }, [selectedChat, user?.email]);
+  
   // Periodic refresh of selected chat messages (every 30 seconds)
   useEffect(() => {
     if (!selectedChat) return;
