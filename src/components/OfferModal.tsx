@@ -81,7 +81,7 @@ export default function OfferModal({
   };
 
   const formatAmount = (satoshis: number) => {
-    if (satoshis === 0) return "0";
+    if (!satoshis || satoshis === 0) return "0";
     if (unit === "BTC") {
       return formatBTCFromSats(satoshis);
     }

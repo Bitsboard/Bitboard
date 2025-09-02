@@ -351,6 +351,8 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         expiresAt
       };
       
+      console.log('🎯 ChatModal: Sending offer with request body:', requestBody);
+      
       const response = await fetch('/api/offers/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -370,6 +372,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         }
       } else {
         const error = await response.json() as { error?: string };
+        console.error('🎯 ChatModal: Offer send failed:', response.status, error);
         alert(error.error || 'Failed to send offer');
       }
     } catch (error) {
