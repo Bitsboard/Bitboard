@@ -118,14 +118,16 @@ export default function MessagesPage() {
     });
   };
 
-  const loadChats = async () => {
+  const loadChats = async (showLoading = true) => {
     if (!user?.email) {
       
       return;
     }
     
     
-    setIsLoading(true);
+    if (showLoading) {
+      setIsLoading(true);
+    }
     try {
       const url = `/api/chat/list?userEmail=${encodeURIComponent(user.email)}`;
       
@@ -154,7 +156,25 @@ export default function MessagesPage() {
             unread_count: chat.unread_count || 0,
             seller_thumbsUp: chat.seller?.rating || 0
                 }));
-        setChats(transformedChats);
+        
+        // Only update if there are actual changes to prevent flashing
+        setChats(prev => {
+          // Quick comparison: check length and last message times
+          if (prev.length !== transformedChats.length) {
+            return transformedChats;
+          }
+          
+          // Check if any conversation has updated last message time
+          for (let i = 0; i < prev.length; i++) {
+            if (prev[i].last_message_time !== transformedChats[i].last_message_time ||
+                prev[i].last_message !== transformedChats[i].last_message ||
+                prev[i].unread_count !== transformedChats[i].unread_count) {
+              return transformedChats;
+            }
+          }
+          
+          return prev;
+        });
         
         // Auto-select the most recent chat
         if (transformedChats.length > 0 && !selectedChat) {
@@ -403,33 +423,41 @@ export default function MessagesPage() {
           sender_name: msg.is_from_current_user ? 'You' : 'Other User'
         }));
         
-        // Check if there are new messages (compare with cached messages)
+        // Check if there are actual changes (compare with cached messages)
         const cachedMessages = messagesCache[chatId] || [];
         const hasNewMessages = transformedMessages.length > cachedMessages.length;
         
-        // Update cache and current messages if this chat is selected
-        setMessagesCache(prev => ({
-          ...prev,
-          [chatId]: transformedMessages
-        }));
+        // Only update if there are actual changes to prevent flashing
+        const hasChanges = hasNewMessages || 
+          cachedMessages.length !== transformedMessages.length ||
+          (cachedMessages.length > 0 && transformedMessages.length > 0 && 
+           cachedMessages[cachedMessages.length - 1].id !== transformedMessages[transformedMessages.length - 1].id);
         
-        if (selectedChat === chatId) {
-          setMessages(transformedMessages);
-        }
-        
-        // If there are new messages, update the conversation list
-        if (hasNewMessages && transformedMessages.length > 0) {
-          const latestMessage = transformedMessages[transformedMessages.length - 1];
+        if (hasChanges) {
+          // Update cache and current messages if this chat is selected
+          setMessagesCache(prev => ({
+            ...prev,
+            [chatId]: transformedMessages
+          }));
           
-          setChats(prev => prev.map(chat => 
-            chat.id === chatId 
-              ? {
-                  ...chat,
-                  last_message: latestMessage.content,
-                  last_message_time: latestMessage.created_at
-                }
-              : chat
-          ));
+          if (selectedChat === chatId) {
+            setMessages(transformedMessages);
+          }
+          
+          // If there are new messages, update the conversation list
+          if (hasNewMessages && transformedMessages.length > 0) {
+            const latestMessage = transformedMessages[transformedMessages.length - 1];
+            
+            setChats(prev => prev.map(chat => 
+              chat.id === chatId 
+                ? {
+                    ...chat,
+                    last_message: latestMessage.content,
+                    last_message_time: latestMessage.created_at
+                  }
+                : chat
+            ));
+          }
         }
       }
     } catch (error) {
@@ -542,7 +570,7 @@ export default function MessagesPage() {
     if (!user?.email) return;
     
     const interval = setInterval(() => {
-      loadChats();
+      loadChats(false); // Don't show loading spinner for periodic refresh
     }, 15000); // 15 seconds - more frequent than message refresh
     
     return () => clearInterval(interval);
