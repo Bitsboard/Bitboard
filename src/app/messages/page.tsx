@@ -112,10 +112,10 @@ export default function MessagesPage() {
             listing_title: chat.listing?.title || chat.listing_title,
             listing_image: chat.listing?.imageUrl || chat.listing_image,
             listing_price_sats: chat.listing?.priceSat || chat.listing_price || 0,
-            listing_created_at: chat.listing_created_at || 0,
+            listing_created_at: chat.listing?.createdAt || chat.listing_created_at || 0,
             listing_location: chat.listing?.location || chat.listing_location || 'Location N/A',
             listing_ad_type: chat.listing_type || 'sell',
-            last_message: chat.latest_message_text || 'No messages yet',
+            last_message: chat.lastMessageText || chat.latest_message_text || 'No messages yet',
             last_message_time: chat.latest_message_time || chat.lastMessageAt || chat.created_at || 0,
             unread_count: chat.unread_count || 0,
             seller_thumbsUp: chat.seller?.rating || 0
@@ -772,27 +772,37 @@ export default function MessagesPage() {
                           {/* Price + Dollar Equivalent */}
                           <div className="text-white/90 mb-1">
                             {/* Primary Price */}
-                            {unit === 'BTC' ? (
-                              <div>
-                                <span className="text-lg font-semibold">
-                                  {(Number(chats.find(c => c.id === selectedChat)?.listing_price_sats || 0) / 100000000).toFixed(8)} BTC
-                                </span>
-                                {/* Dollar equivalent */}
-                                <div className="text-sm text-white/80">
-                                  {formatCADAmount((Number(chats.find(c => c.id === selectedChat)?.listing_price_sats || 0) / 100000000) * (btcCad || 0))}
+                            {(() => {
+                              const priceSat = chats.find(c => c.id === selectedChat)?.listing_price_sats || 0;
+                              if (priceSat === -1) {
+                                return (
+                                  <div>
+                                    <span className="text-lg font-semibold">Make an offer</span>
+                                  </div>
+                                );
+                              }
+                              return unit === 'BTC' ? (
+                                <div>
+                                  <span className="text-lg font-semibold">
+                                    {(Number(priceSat) / 100000000).toFixed(8)} BTC
+                                  </span>
+                                  {/* Dollar equivalent */}
+                                  <div className="text-sm text-white/80">
+                                    {formatCADAmount((Number(priceSat) / 100000000) * (btcCad || 0))}
+                                  </div>
                                 </div>
-                              </div>
-                            ) : (
-                              <div>
-                                <span className="text-lg font-semibold">
-                                  {chats.find(c => c.id === selectedChat)?.listing_price_sats?.toLocaleString() || 0} sats
-                                </span>
-                                {/* Dollar equivalent */}
-                                <div className="text-sm text-white/80">
-                                  {formatCADAmount((Number(chats.find(c => c.id === selectedChat)?.listing_price_sats || 0) / 100000000) * (btcCad || 0))}
+                              ) : (
+                                <div>
+                                  <span className="text-lg font-semibold">
+                                    {priceSat.toLocaleString()} sats
+                                  </span>
+                                  {/* Dollar equivalent */}
+                                  <div className="text-sm text-white/80">
+                                    {formatCADAmount((Number(priceSat) / 100000000) * (btcCad || 0))}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                              );
+                            })()}
                           </div>
                         </div>
                         

@@ -74,11 +74,13 @@ export async function GET(req: NextRequest) {
         l.title as listing_title,
         l.price_sat as listing_price,
         l.location as listing_location,
+        l.created_at as listing_created_at,
         COALESCE(li.image_url, '') as listing_image,
         seller.username as seller_name,
         seller.verified as seller_verified,
         seller.rating as seller_rating,
-        seller.deals as seller_deals
+        seller.deals as seller_deals,
+        COALESCE(last_msg.text, '') as last_message_text
       FROM chats c
       JOIN listings l ON c.listing_id = l.id
       JOIN users seller ON l.posted_by = seller.id
@@ -87,6 +89,11 @@ export async function GET(req: NextRequest) {
                ROW_NUMBER() OVER (PARTITION BY listing_id ORDER BY id) as rn
         FROM listing_images
       ) li ON l.id = li.listing_id AND li.rn = 1
+      LEFT JOIN (
+        SELECT chat_id, text,
+               ROW_NUMBER() OVER (PARTITION BY chat_id ORDER BY created_at DESC) as rn
+        FROM messages
+      ) last_msg ON c.id = last_msg.chat_id AND last_msg.rn = 1
       WHERE (c.buyer_id = ? OR c.seller_id = ?)
         AND c.buyer_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = ?)
         AND c.seller_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = ?)
@@ -118,7 +125,8 @@ export async function GET(req: NextRequest) {
         title: chat.listing_title,
         priceSat: chat.listing_price,
         imageUrl: chat.listing_image,
-        location: chat.listing_location
+        location: chat.listing_location,
+        createdAt: chat.listing_created_at * 1000
       },
       seller: {
         name: chat.seller_name,
@@ -127,7 +135,8 @@ export async function GET(req: NextRequest) {
         deals: chat.seller_deals || 0
       },
       lastMessageAt: chat.last_message_at * 1000,
-      createdAt: chat.created_at * 1000
+      createdAt: chat.created_at * 1000,
+      lastMessageText: chat.last_message_text
     }));
 
     return NextResponse.json({ chats: transformedChats });
