@@ -34,6 +34,11 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
   const [isSearchingForChat, setIsSearchingForChat] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
   
+  // Debug currentUserId changes
+  useEffect(() => {
+    console.log('🔍 ChatModal: currentUserId changed:', currentUserId);
+  }, [currentUserId]);
+  
   const lang = useLang();
   
   // Ref for the chat container to enable auto-scrolling
@@ -525,15 +530,6 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
               messages.map((m) => {
                 const isOptimistic = m.id.startsWith('temp-');
                 const isOwnMessage = (m as any).is_from_current_user || m.from_id === currentUserId;
-                
-                console.log('🔍 ChatModal: Message direction check:', {
-                  messageId: m.id,
-                  isOptimistic,
-                  fromId: m.from_id,
-                  currentUserId,
-                  isFromCurrentUser: (m as any).is_from_current_user,
-                  isOwnMessage
-                });
                 
                 return (
                   <div

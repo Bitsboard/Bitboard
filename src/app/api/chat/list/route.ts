@@ -141,7 +141,7 @@ export async function GET(req: NextRequest) {
       lastMessageText: chat.last_message_text
     }));
 
-    return NextResponse.json({ chats: transformedChats });
+    return NextResponse.json({ chats: transformedChats, userId: userId });
 
   } catch (error) {
     console.error('🔍 Chat API: Error fetching chats:', error);
