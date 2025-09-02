@@ -31,12 +31,15 @@ export default function DeleteConversationModal({
         "fixed inset-0 z-50 flex items-center justify-center p-4",
         "animate-in fade-in duration-200"
       )}>
-        <div className={cn(
-          "w-full max-w-md rounded-2xl shadow-xl border",
-          dark 
-            ? "bg-neutral-900 border-neutral-700" 
-            : "bg-white border-neutral-200"
-        )}>
+        <div 
+          className={cn(
+            "w-full max-w-md rounded-2xl shadow-xl border",
+            dark 
+              ? "bg-neutral-900 border-neutral-700" 
+              : "bg-white border-neutral-200"
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
           {/* Header */}
           <div className={cn(
             "px-6 py-4 border-b",
@@ -80,7 +83,7 @@ export default function DeleteConversationModal({
               onClick={onConfirm}
               className="px-4 py-2 rounded-lg text-sm font-medium bg-red-500 text-white hover:bg-red-600 transition-all duration-200"
             >
-              Confirm
+              Delete
             </button>
           </div>
         </div>

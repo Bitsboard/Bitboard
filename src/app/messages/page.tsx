@@ -541,11 +541,16 @@ export default function MessagesPage() {
     }
   }, [user?.email]);
 
+  // Auto-scroll to bottom when new messages are added (not on every refresh)
+  const [lastMessageCount, setLastMessageCount] = useState(0);
+  
   useEffect(() => {
-    if (messagesEndRef.current) {
+    // Only auto-scroll if there are more messages than before (new message added)
+    if (messages.length > lastMessageCount && messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages]);
+    setLastMessageCount(messages.length);
+  }, [messages.length, lastMessageCount]);
   
   // Load messages when a chat is selected
   useEffect(() => {
