@@ -359,7 +359,9 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         const responseData = await response.json() as { success?: boolean; offerId?: string; message?: string };
         
         // Reload messages to show the new offer
-        await loadMessages(chatId);
+        if (chatId) {
+          await loadMessages(chatId);
+        }
       } else {
         const error = await response.json() as { error?: string };
         alert(error.error || 'Failed to send offer');
