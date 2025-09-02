@@ -7,9 +7,19 @@ export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getSessionFromRequest(req);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Try to get userEmail from query parameters first, then from session
+    const url = new URL(req.url);
+    const userEmailParam = url.searchParams.get('userEmail');
+    
+    let userEmail: string;
+    if (userEmailParam) {
+      userEmail = userEmailParam;
+    } else {
+      const session = await getSessionFromRequest(req);
+      if (!session?.user?.email) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      userEmail = session.user.email;
     }
 
     const { env } = getRequestContext();
@@ -18,8 +28,6 @@ export async function GET(req: NextRequest) {
     if (!db) {
       return NextResponse.json({ error: "Database not available" }, { status: 500 });
     }
-
-    const userEmail = session.user.email;
 
     // Get user ID from email
     const userResult = await db
