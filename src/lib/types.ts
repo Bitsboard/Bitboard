@@ -85,6 +85,11 @@ export type Message = {
   text: string;
   created_at: number;
   read_at?: number;
+  type?: 'message' | 'offer'; // Added for offer support
+  amount_sat?: number; // Added for offer support
+  expires_at?: number; // Added for offer support
+  status?: string; // Added for offer support
+  is_from_current_user?: boolean; // Added for client-side use
 };
 
 export type Chat = {

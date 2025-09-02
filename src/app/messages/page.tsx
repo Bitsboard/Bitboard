@@ -44,6 +44,10 @@ interface Message {
   created_at: number; // Use created_at to match the global Message type
   is_from_current_user: boolean;
   sender_name: string;
+  type?: 'message' | 'offer'; // Added for offer support
+  amount_sat?: number; // Added for offer support
+  expires_at?: number; // Added for offer support
+  status?: string; // Added for offer support
 }
 
 export default function MessagesPage() {
