@@ -154,7 +154,7 @@ export default function OfferMessage({
             ? "text-orange-900 dark:text-orange-100" 
             : "text-neutral-900 dark:text-neutral-100"
         )}>
-          {formatAmount(offer.amount_sat)} {getAmountSymbol()}
+          {unit === 'BTC' ? `${getAmountSymbol()}${formatAmount(offer.amount_sat)}` : `${formatAmount(offer.amount_sat)} ${getAmountSymbol()}`}
         </div>
         {offer.expires_at && (
           <div className={cn(

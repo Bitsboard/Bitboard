@@ -701,12 +701,32 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
 
           
           <button
-            onClick={() => {
+            onClick={async () => {
               if (!chat?.id) {
                 console.log('❌ ChatModal: Cannot open offer modal - chat not loaded yet');
                 return;
               }
-              setShowOfferModal(true);
+              
+              // Check for existing offers before opening modal
+              try {
+                const response = await fetch(`/api/offers/check?listingId=${encodeURIComponent(listing.id)}&chatId=${encodeURIComponent(chat.id)}`);
+                if (response.ok) {
+                  const data = await response.json();
+                  if (!data.canMakeOffer) {
+                    console.log('❌ ChatModal: Cannot make offer - existing offer found:', data.existingOffer);
+                    alert(data.existingOffer?.status === 'pending' 
+                      ? "There is already a pending offer for this listing between you and this user"
+                      : "An offer has already been accepted for this listing between you and this user"
+                    );
+                    return;
+                  }
+                }
+                setShowOfferModal(true);
+              } catch (error) {
+                console.error('❌ ChatModal: Error checking offer status:', error);
+                // Allow modal to open if check fails
+                setShowOfferModal(true);
+              }
             }}
             disabled={!chat?.id}
             className={cn(

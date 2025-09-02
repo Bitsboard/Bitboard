@@ -169,7 +169,7 @@ export default function OfferModal({
                   "text-xs",
                   dark ? "text-neutral-400" : "text-neutral-500"
                 )}>
-                  Listing price: {formatAmount(listingPrice)} {unit === "BTC" ? "₿" : "sats"}
+                  Listing price: {unit === "BTC" ? `₿${formatAmount(listingPrice)}` : `${formatAmount(listingPrice)} sats`}
                 </p>
               )}
             </div>
