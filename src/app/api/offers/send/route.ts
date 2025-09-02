@@ -26,9 +26,9 @@ export async function POST(req: NextRequest) {
       expiresAt?: number;
     };
 
-    const { chatId, listingId, amountSat, expiresAt } = body;
+    let { chatId, listingId, amountSat, expiresAt } = body;
 
-    if (!chatId || !listingId || !amountSat || amountSat <= 0) {
+    if (!listingId || !amountSat || amountSat <= 0) {
       return NextResponse.json({ error: "Invalid offer data" }, { status: 400 });
     }
 
