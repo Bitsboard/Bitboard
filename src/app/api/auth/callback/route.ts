@@ -1,6 +1,6 @@
 export const runtime = 'edge';
 
-import { createCookie, deleteCookie, getAuthSecret, signJwtHS256, uuidv4 } from '@/lib/auth';
+import { createCookie, deleteCookie, getAuthSecret, signJwtHS256, generateUserId } from '@/lib/auth';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export async function GET(req: Request) {
@@ -133,21 +133,26 @@ export async function GET(req: Request) {
       let userId = existing.results?.[0]?.id as string | undefined;
       
       if (!userId) {
-        userId = uuidv4();
+        userId = generateUserId();
         console.log('🔐 OAuth callback: Creating new user with ID:', userId);
         
+        const currentTime = Math.floor(Date.now() / 1000);
+        
         // Don't generate a default username - user must choose one
+        // New users start as unverified and have proper last_active timestamp
         await db.prepare(`
           INSERT INTO users (id, email, username, sso, verified, created_at, image, has_chosen_username, rating, deals, last_active, is_admin, banned)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).bind(userId, user.email, null, 'google', 1, Math.floor(Date.now() / 1000), user.picture ?? null, 0, 0, 0, 0, 0, 0).run();
+        `).bind(userId, user.email, null, 'google', 0, currentTime, user.picture ?? null, 0, 0, 0, currentTime, 0, 0).run();
           
         console.log('🔐 OAuth callback: New user created successfully!');
       } else {
         console.log('🔐 OAuth callback: Updating existing user:', userId);
         
-        await db.prepare('UPDATE users SET image = COALESCE(?, image), sso = ? WHERE id = ?')
-          .bind(user.picture ?? null, 'google', userId)
+        const currentTime = Math.floor(Date.now() / 1000);
+        
+        await db.prepare('UPDATE users SET image = COALESCE(?, image), sso = ?, last_active = ? WHERE id = ?')
+          .bind(user.picture ?? null, 'google', currentTime, userId)
           .run();
           
         console.log('🔐 OAuth callback: Existing user updated successfully!');

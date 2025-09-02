@@ -135,6 +135,16 @@ export function uuidv4(): string {
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
+export function generateUserId(): string {
+  // Generate 8-character alphanumeric ID like the seeded users
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 8; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
 // Session management utilities
 export async function getSessionFromRequest(req: Request): Promise<Session | null> {
   try {

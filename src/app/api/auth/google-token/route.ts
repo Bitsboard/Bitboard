@@ -1,6 +1,6 @@
 export const runtime = 'edge';
 
-import { createCookie, getAuthSecret, signJwtHS256, uuidv4 } from '@/lib/auth';
+import { createCookie, getAuthSecret, signJwtHS256, generateUserId } from '@/lib/auth';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export async function POST(req: Request) {
@@ -34,21 +34,29 @@ export async function POST(req: Request) {
           verified INTEGER DEFAULT 0,
           created_at INTEGER NOT NULL,
           image TEXT,
-          has_chosen_username INTEGER DEFAULT 0 CHECK (has_chosen_username IN (0, 1))
+          has_chosen_username INTEGER DEFAULT 0 CHECK (has_chosen_username IN (0, 1)),
+          rating INTEGER DEFAULT 0,
+          deals INTEGER DEFAULT 0,
+          last_active INTEGER DEFAULT 0,
+          is_admin INTEGER DEFAULT 0,
+          banned INTEGER DEFAULT 0
         )`).run();
         
         const existing = await db.prepare('SELECT id, username FROM users WHERE email = ?').bind(tokenInfo.email).all();
         userId = existing.results?.[0]?.id as string;
         
         if (!userId) {
-          userId = uuidv4();
+          userId = generateUserId();
+          const currentTime = Math.floor(Date.now() / 1000);
           // Don't generate a default username - user must choose one
-          await db.prepare('INSERT INTO users (id, email, username, sso, verified, created_at, image, has_chosen_username) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
-            .bind(userId, tokenInfo.email, null, 'google', 1, Math.floor(Date.now() / 1000), tokenInfo.picture ?? null, 0)
+          // New users start as unverified and have proper last_active timestamp
+          await db.prepare('INSERT INTO users (id, email, username, sso, verified, created_at, image, has_chosen_username, rating, deals, last_active, is_admin, banned) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+            .bind(userId, tokenInfo.email, null, 'google', 0, currentTime, tokenInfo.picture ?? null, 0, 0, 0, currentTime, 0, 0)
             .run();
         } else {
-          await db.prepare('UPDATE users SET image = COALESCE(?, image), sso = ? WHERE id = ?')
-            .bind(tokenInfo.picture ?? null, 'google', userId)
+          const currentTime = Math.floor(Date.now() / 1000);
+          await db.prepare('UPDATE users SET image = COALESCE(?, image), sso = ?, last_active = ? WHERE id = ?')
+            .bind(tokenInfo.picture ?? null, 'google', currentTime, userId)
             .run();
         }
       } else {

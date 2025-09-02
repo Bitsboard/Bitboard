@@ -45,13 +45,14 @@ export async function POST(req: Request) {
     }
 
     // Update user's username and mark as having chosen
+    const currentTime = Math.floor(Date.now() / 1000);
     await db
       .prepare(`
         UPDATE users 
-        SET username = ?, has_chosen_username = 1 
+        SET username = ?, has_chosen_username = 1, last_active = ?
         WHERE email = ?
       `)
-      .bind(username.toLowerCase(), session.user.email)
+      .bind(username.toLowerCase(), currentTime, session.user.email)
       .run();
 
     return NextResponse.json({ 

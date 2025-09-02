@@ -119,14 +119,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Failed to send message" }, { status: 500 });
     }
 
-    // Update chat timestamp
+    // Update chat timestamp and user's last_active
     try {
+      const currentTime = Math.floor(Date.now() / 1000);
       await db
-        .prepare("UPDATE chats SET last_message_at = strftime('%s','now') WHERE id = ?")
-        .bind(actualChatId)
+        .prepare("UPDATE chats SET last_message_at = ? WHERE id = ?")
+        .bind(currentTime, actualChatId)
+        .run();
+      
+      // Update user's last_active time
+      await db
+        .prepare("UPDATE users SET last_active = ? WHERE id = ?")
+        .bind(currentTime, currentUserId)
         .run();
     } catch (updateError) {
-      console.error('❌ Error updating chat timestamp:', updateError);
+      console.error('❌ Error updating chat timestamp or user last_active:', updateError);
       // Don't fail the request for this
     }
 
