@@ -403,6 +403,10 @@ export default function MessagesPage() {
           sender_name: msg.is_from_current_user ? 'You' : 'Other User'
         }));
         
+        // Check if there are new messages (compare with cached messages)
+        const cachedMessages = messagesCache[chatId] || [];
+        const hasNewMessages = transformedMessages.length > cachedMessages.length;
+        
         // Update cache and current messages if this chat is selected
         setMessagesCache(prev => ({
           ...prev,
@@ -411,6 +415,21 @@ export default function MessagesPage() {
         
         if (selectedChat === chatId) {
           setMessages(transformedMessages);
+        }
+        
+        // If there are new messages, update the conversation list
+        if (hasNewMessages && transformedMessages.length > 0) {
+          const latestMessage = transformedMessages[transformedMessages.length - 1];
+          
+          setChats(prev => prev.map(chat => 
+            chat.id === chatId 
+              ? {
+                  ...chat,
+                  last_message: latestMessage.content,
+                  last_message_time: latestMessage.timestamp
+                }
+              : chat
+          ));
         }
       }
     } catch (error) {
@@ -517,6 +536,17 @@ export default function MessagesPage() {
     
     return () => clearInterval(interval);
   }, [selectedChat]);
+
+  // Periodic refresh of conversation list (every 15 seconds for better real-time updates)
+  useEffect(() => {
+    if (!user?.email) return;
+    
+    const interval = setInterval(() => {
+      loadChats();
+    }, 15000); // 15 seconds - more frequent than message refresh
+    
+    return () => clearInterval(interval);
+  }, [user?.email]);
 
 
 
