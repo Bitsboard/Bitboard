@@ -229,6 +229,13 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         created_at: Math.floor(Date.now() / 1000)
       };
       
+      console.log('🔍 ChatModal: Creating optimistic message:', {
+        messageId: optimisticMessage.id,
+        fromId: optimisticMessage.from_id,
+        currentUserId,
+        userId
+      });
+      
       // Add message to UI immediately (optimistic update)
       setMessages(prev => [...prev, optimisticMessage]);
       
@@ -518,6 +525,15 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
               messages.map((m) => {
                 const isOptimistic = m.id.startsWith('temp-');
                 const isOwnMessage = (m as any).is_from_current_user || m.from_id === currentUserId;
+                
+                console.log('🔍 ChatModal: Message direction check:', {
+                  messageId: m.id,
+                  isOptimistic,
+                  fromId: m.from_id,
+                  currentUserId,
+                  isFromCurrentUser: (m as any).is_from_current_user,
+                  isOwnMessage
+                });
                 
                 return (
                   <div
