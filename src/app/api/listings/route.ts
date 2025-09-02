@@ -154,7 +154,7 @@ export async function GET(req: NextRequest) {
                          l.price_sat AS priceSat,
                          COALESCE(l.pricing_type, 'fixed') AS pricingType,
                          COALESCE(u.username, 'unknown') AS postedBy,
-                         COALESCE(u.rating, 0) AS userRating,
+                         COALESCE(u.thumbs_up, 0) AS userRating,
                          COALESCE(u.deals, 0) AS userDeals,
                          COALESCE(u.verified, 0) AS userVerified,
                          COALESCE(l.boosted_until, 0) AS boostedUntil,
