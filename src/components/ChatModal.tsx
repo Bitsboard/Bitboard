@@ -209,6 +209,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
 
         
         if (data.success && data.messages) {
+          console.log('🎯 ChatModal: Loaded messages:', data.messages);
           setMessages(data.messages);
   
           
@@ -217,6 +218,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
             setCurrentUserId(data.userId);
           }
         } else {
+          console.log('🎯 ChatModal: No messages found or failed to load');
           setMessages([]);
         }
       } else {
@@ -357,10 +359,14 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
 
       if (response.ok) {
         const responseData = await response.json() as { success?: boolean; offerId?: string; message?: string };
+        console.log('🎯 ChatModal: Offer sent successfully:', responseData);
         
         // Reload messages to show the new offer
         if (chatId) {
+          console.log('🎯 ChatModal: Reloading messages for chatId:', chatId);
           await loadMessages(chatId);
+        } else {
+          console.log('🎯 ChatModal: No chatId available for reloading messages');
         }
       } else {
         const error = await response.json() as { error?: string };
