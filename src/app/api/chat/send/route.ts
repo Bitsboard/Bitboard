@@ -104,14 +104,15 @@ export async function POST(req: Request) {
       } else {
         // Create new chat only if none exists
         actualChatId = `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const chatTime = Math.floor(Date.now() / 1000); // Use consistent timestamp
         
         try {
           const chatInsertResult = await db
             .prepare(`
               INSERT INTO chats (id, listing_id, buyer_id, seller_id, created_at, last_message_at)
-              VALUES (?, ?, ?, ?, strftime('%s','now'), strftime('%s','now'))
+              VALUES (?, ?, ?, ?, ?, ?)
             `)
-            .bind(actualChatId, listingId, currentUserId, otherUserActualId)
+            .bind(actualChatId, listingId, currentUserId, otherUserActualId, chatTime, chatTime)
             .run();
           console.log('✅ Created new chat:', actualChatId);
         } catch (insertError) {
@@ -121,16 +122,17 @@ export async function POST(req: Request) {
       }
     }
 
-    // Insert message
+    // Insert message with consistent timestamp
     const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const currentTime = Math.floor(Date.now() / 1000); // Use consistent timestamp
     
     try {
       await db
         .prepare(`
           INSERT INTO messages (id, chat_id, from_id, text, created_at)
-          VALUES (?, ?, ?, ?, strftime('%s','now'))
+          VALUES (?, ?, ?, ?, ?)
         `)
-        .bind(messageId, actualChatId, currentUserId, text)
+        .bind(messageId, actualChatId, currentUserId, text, currentTime)
         .run();
     } catch (messageError) {
       console.error('❌ Error inserting message:', messageError);
@@ -139,7 +141,6 @@ export async function POST(req: Request) {
 
     // Update chat timestamp and user's last_active
     try {
-      const currentTime = Math.floor(Date.now() / 1000);
       await db
         .prepare("UPDATE chats SET last_message_at = ? WHERE id = ?")
         .bind(currentTime, actualChatId)
@@ -166,10 +167,17 @@ export async function POST(req: Request) {
       // Don't fail the request for this
     }
 
+    // Get the complete message object with correct timestamp
+    const messageResult = await db
+      .prepare("SELECT id, chat_id, from_id, text, created_at, read_at FROM messages WHERE id = ?")
+      .bind(messageId)
+      .first();
+
     return NextResponse.json({ 
       success: true,
       messageId,
-      chatId: actualChatId
+      chatId: actualChatId,
+      message: messageResult
     });
 
   } catch (error) {

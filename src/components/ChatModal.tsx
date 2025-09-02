@@ -254,12 +254,13 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       }
       
       // Create optimistic message that appears instantly
+      // Use UTC timestamp to match server's strftime('%s','now')
       const optimisticMessage: Message = {
         id: `temp-${Date.now()}`,
         chat_id: chat?.id || 'temp',
         from_id: userId,
         text: messageText,
-        created_at: Math.floor(Date.now() / 1000)
+        created_at: Math.floor(Date.now() / 1000) // This will be replaced by server timestamp
       };
       
 
@@ -287,16 +288,9 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         const data = await response.json() as { messageId?: string; chatId?: string; message?: Message };
         
         if (data.message) {
-          // Replace optimistic message with real one from server
+          // Replace optimistic message with real one from server (includes correct timestamp)
           setMessages(prev => prev.map(msg => 
             msg.id === optimisticMessage.id ? data.message! : msg
-          ));
-        } else if (data.messageId) {
-          // Update optimistic message with real ID
-          setMessages(prev => prev.map(msg => 
-            msg.id === optimisticMessage.id 
-              ? { ...msg, id: data.messageId! }
-              : msg
           ));
         }
         
