@@ -97,6 +97,16 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         
         // Look for chat that matches this listing AND involves the current user
         const existingChat = chatData.chats?.find((c: any) => {
+          console.log('🔍 ChatModal: Checking chat:', {
+            chatId: c.id,
+            listingId: c.listing_id,
+            targetListingId: listing.id,
+            buyerId: c.buyer_id,
+            sellerId: c.seller_id,
+            currentUserId: chatData.userId,
+            listingMatches: c.listing_id === listing.id,
+            userInvolved: c.buyer_id === chatData.userId || c.seller_id === chatData.userId
+          });
 
           
           
@@ -134,7 +144,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
 
   const loadMessages = async (chatId: string) => {
     try {
-      
+      console.log('🔍 ChatModal: Loading messages for chat:', chatId);
       
       // Add timeout to prevent UI from getting stuck
       const timeoutPromise = new Promise((_, reject) => {
@@ -150,15 +160,17 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
 
         
         if (data.success && data.messages) {
+          console.log('🔍 ChatModal: Loaded messages:', data.messages.length, 'messages');
           setMessages(data.messages);
   
           
           // Store user ID if provided in the response
           if (data.userId && !currentUserId) {
+            console.log('🔍 ChatModal: Setting currentUserId from API:', data.userId);
             setCurrentUserId(data.userId);
           }
         } else {
-  
+          console.log('🔍 ChatModal: No messages found or API error');
           setMessages([]);
         }
       } else {
@@ -496,7 +508,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
             ) : (
               messages.map((m) => {
                 const isOptimistic = m.id.startsWith('temp-');
-                const isOwnMessage = m.from_id === currentUserId;
+                const isOwnMessage = (m as any).is_from_current_user || m.from_id === currentUserId;
                 
                 return (
                   <div
