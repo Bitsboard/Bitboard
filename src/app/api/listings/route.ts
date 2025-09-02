@@ -94,23 +94,37 @@ export async function GET(req: NextRequest) {
       binds.push(Math.round(validatedQuery.maxPrice));
     }
 
-    // Geospatial radius filter - only apply if radius is reasonable
+    // Geospatial radius filter - apply for reasonable radii
     if (validatedQuery.lat !== undefined && validatedQuery.lng !== undefined && validatedQuery.radiusKm !== undefined) {
-      const effectiveRadiusKm = validatedQuery.radiusKm === 0 ? 5000 : validatedQuery.radiusKm;
-      
-      // Skip geospatial filtering for worldwide searches (radius = 0) or very large radius
-      if (validatedQuery.radiusKm !== 0 && effectiveRadiusKm < 10000) {
+      // Skip geospatial filtering only for worldwide searches (radius = 0)
+      if (validatedQuery.radiusKm > 0) {
+        // Use Haversine formula for accurate distance calculation
+        // First, create a bounding box for performance, then filter by actual distance
         const R_KM_PER_DEG = 111.32;
-        const deltaLat = effectiveRadiusKm / R_KM_PER_DEG;
+        const deltaLat = validatedQuery.radiusKm / R_KM_PER_DEG;
         const rad = (validatedQuery.lat * Math.PI) / 180;
         const cosLat = Math.cos(rad);
         const safeCos = Math.max(0.01, Math.abs(cosLat));
-        const deltaLng = effectiveRadiusKm / (R_KM_PER_DEG * safeCos);
+        const deltaLng = validatedQuery.radiusKm / (R_KM_PER_DEG * safeCos);
 
+        // Use bounding box for initial filtering (performance optimization)
         whereClause.push("(l.lat BETWEEN ? AND ?)");
         binds.push(validatedQuery.lat - deltaLat, validatedQuery.lat + deltaLat);
         whereClause.push("(l.lng BETWEEN ? AND ?)");
         binds.push(validatedQuery.lng - deltaLng, validatedQuery.lng + deltaLng);
+        
+        // Add actual distance calculation for precise filtering
+        // Haversine formula: distance = 2 * R * asin(sqrt(sin²(Δlat/2) + cos(lat1) * cos(lat2) * sin²(Δlng/2)))
+        // Where R = 6371 km (Earth's radius)
+        const earthRadiusKm = 6371;
+        whereClause.push(`(
+          2 * ${earthRadiusKm} * asin(sqrt(
+            sin(radians((l.lat - ?) / 2)) * sin(radians((l.lat - ?) / 2)) +
+            cos(radians(?)) * cos(radians(l.lat)) *
+            sin(radians((l.lng - ?) / 2)) * sin(radians((l.lng - ?) / 2))
+          )) <= ?
+        )`);
+        binds.push(validatedQuery.lat, validatedQuery.lat, validatedQuery.lat, validatedQuery.lng, validatedQuery.lng, validatedQuery.radiusKm);
       }
     }
 
