@@ -6,11 +6,12 @@ import { cn } from "@/lib/utils";
 interface OfferMessageProps {
   offer: {
     id: string;
-    amount_sat: number;
+    amount_sat?: number;
     expires_at?: number;
-    status: 'pending' | 'accepted' | 'declined' | 'revoked' | 'expired';
-    from_user_id: string;
-    to_user_id: string;
+    status?: string;
+    from_id?: string; // For Message type compatibility
+    from_user_id?: string; // For original offer type compatibility
+    to_user_id?: string;
     created_at: number;
   };
   currentUserId: string;
@@ -26,12 +27,12 @@ export default function OfferMessage({
 }: OfferMessageProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   
-  const isFromCurrentUser = offer.from_user_id === currentUserId;
+  const isFromCurrentUser = (offer.from_user_id || offer.from_id) === currentUserId;
   const isExpired = offer.expires_at && offer.expires_at < Math.floor(Date.now() / 1000);
   const isActive = offer.status === 'pending' && !isExpired;
 
-  const formatAmount = (satoshis: number) => {
-    return satoshis.toLocaleString();
+  const formatAmount = (satoshis: number | undefined) => {
+    return (satoshis || 0).toLocaleString();
   };
 
   const formatExpiration = (expiresAt: number) => {
@@ -54,7 +55,7 @@ export default function OfferMessage({
   };
 
   const getStatusColor = () => {
-    switch (offer.status) {
+    switch (offer.status || 'pending') {
       case 'accepted':
         return 'bg-green-100 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300';
       case 'declined':
@@ -69,7 +70,7 @@ export default function OfferMessage({
   };
 
   const getStatusText = () => {
-    switch (offer.status) {
+    switch (offer.status || 'pending') {
       case 'accepted':
         return 'Accepted';
       case 'declined':
