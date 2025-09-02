@@ -17,7 +17,7 @@ interface OfferMessageProps {
   currentUserId: string;
   dark?: boolean;
   unit?: 'sats' | 'BTC';
-  onAction?: (offerId: string, action: 'accept' | 'decline' | 'revoke') => void;
+  onAction?: (offerId: string, action: 'accept' | 'decline' | 'revoke' | 'abort') => void;
 }
 
 export default function OfferMessage({ 
