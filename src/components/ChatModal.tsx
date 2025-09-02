@@ -363,7 +363,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       console.log('🎯 ChatModal: Response status:', response.status, 'ok:', response.ok);
 
       if (response.ok) {
-        const responseData = await response.json();
+        const responseData = await response.json() as { success?: boolean; offerId?: string; message?: string; debug?: any };
         console.log('✅ ChatModal: Offer sent successfully, response:', responseData);
         
         // Log debug information if available
