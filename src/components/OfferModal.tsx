@@ -161,6 +161,31 @@ export default function OfferModal({
                 )}>
                   Set expiration time
                 </span>
+                <div className="relative group">
+                  <svg 
+                    className="w-4 h-4 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 cursor-help" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {/* Tooltip */}
+                  <div className={cn(
+                    "absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 text-xs rounded-lg shadow-lg border z-10",
+                    "opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none",
+                    "w-64 text-center",
+                    dark 
+                      ? "bg-neutral-800 border-neutral-700 text-neutral-200" 
+                      : "bg-white border-neutral-200 text-neutral-700"
+                  )}>
+                    This will allow the offer to automatically expire in a set amount of time if no action is taken
+                    <div className={cn(
+                      "absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent",
+                      dark ? "border-t-neutral-800" : "border-t-white"
+                    )}></div>
+                  </div>
+                </div>
               </label>
 
               {hasExpiration && (
@@ -205,8 +230,8 @@ export default function OfferModal({
                 disabled={amount <= 0 || isSubmitting}
                 className={cn(
                   "flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
-                  "bg-blue-500 text-white hover:bg-blue-600",
-                  "disabled:opacity-50 disabled:cursor-not-allowed"
+                  "bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700",
+                  "disabled:opacity-50 disabled:cursor-not-allowed disabled:from-orange-300 disabled:to-orange-400"
                 )}
               >
                 {isSubmitting ? "Sending..." : "Send Offer"}
