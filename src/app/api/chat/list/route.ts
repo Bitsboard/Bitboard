@@ -100,6 +100,7 @@ export async function GET(req: NextRequest) {
         AND c.seller_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = ?)
         AND c.buyer_id NOT IN (SELECT blocker_id FROM user_blocks WHERE blocked_id = ?)
         AND c.seller_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocked_id = ?)
+        AND c.id NOT IN (SELECT chat_id FROM hidden_conversations WHERE user_id = ?)
       ORDER BY c.last_message_at DESC
     `;
 
@@ -107,7 +108,7 @@ export async function GET(req: NextRequest) {
     try {
       chats = await db
         .prepare(basicChatsQuery)
-        .bind(userId, userId, userId, userId, userId, userId)
+        .bind(userId, userId, userId, userId, userId, userId, userId)
         .all();
     } catch (dbError) {
       console.error('🔍 Chat API: Database query failed:', dbError);

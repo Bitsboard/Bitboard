@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useTheme } from '@/lib/contexts/ThemeContext';
 import { useUser, useSettings } from '@/lib/settings';
 import { ListingModal } from '@/components/ListingModal';
-import { generateProfilePicture, getInitials, formatPostAge, formatCADAmount } from "@/lib/utils";
+import DeleteConversationModal from '@/components/DeleteConversationModal';
+import { generateProfilePicture, getInitials, formatPostAge, formatCADAmount, cn } from "@/lib/utils";
 import { useBtcRate } from '@/lib/hooks/useBtcRate';
 
 interface Chat {
@@ -63,6 +64,10 @@ export default function MessagesPage() {
   // Cache for messages to avoid re-fetching
   const [messagesCache, setMessagesCache] = useState<Record<string, Message[]>>({});
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  
+  // Delete conversation modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [conversationToDelete, setConversationToDelete] = useState<Chat | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -308,6 +313,47 @@ export default function MessagesPage() {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
+    }
+  };
+
+  const handleDeleteConversation = (chat: Chat) => {
+    setConversationToDelete(chat);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteConversation = async () => {
+    if (!conversationToDelete) return;
+
+    try {
+      const response = await fetch('/api/chat/hide', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chatId: conversationToDelete.id,
+          action: 'hide'
+        }),
+      });
+
+      if (response.ok) {
+        // Remove the conversation from the local state
+        setChats(prev => prev.filter(chat => chat.id !== conversationToDelete.id));
+        
+        // If this was the selected chat, clear the selection
+        if (selectedChat === conversationToDelete.id) {
+          setSelectedChat(null);
+          setMessages([]);
+        }
+        
+        // Close the modal
+        setShowDeleteModal(false);
+        setConversationToDelete(null);
+      } else {
+        console.error('Failed to delete conversation');
+      }
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
     }
   };
 
@@ -747,6 +793,27 @@ export default function MessagesPage() {
                                 {formatPostAge(item.last_message_time)}
                               </span>
                             </div>
+                            
+                            {/* Delete Button - Show on hover for selected chat */}
+                            {selectedChat === item.id && (
+                              <div className="flex-shrink-0 ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteConversation(item);
+                                  }}
+                                  className={cn(
+                                    "p-1.5 rounded-lg transition-all duration-200 hover:scale-110",
+                                    "bg-red-500/20 hover:bg-red-500/30 text-red-500 hover:text-red-600"
+                                  )}
+                                  title="Delete conversation"
+                                >
+                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -1073,6 +1140,18 @@ export default function MessagesPage() {
           onShowAuth={() => setModal('showAuth', true)}
         />
       )}
+      
+      {/* Delete Conversation Modal */}
+      <DeleteConversationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setConversationToDelete(null);
+        }}
+        onConfirm={confirmDeleteConversation}
+        dark={dark}
+        conversationTitle={conversationToDelete?.listing_title || "this conversation"}
+      />
     </div>
   );
 }
