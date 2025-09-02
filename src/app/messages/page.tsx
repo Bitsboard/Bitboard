@@ -279,11 +279,13 @@ export default function MessagesPage() {
       });
       
       if (response.ok) {
+        const messageText = newMessage.trim();
         setNewMessage('');
+        
         // Add new message to cache and state immediately for better UX
         const newMessageObj: Message = {
           id: Date.now().toString(), // Temporary ID
-          content: newMessage.trim(),
+          content: messageText,
           timestamp: Date.now(),
           is_from_current_user: true,
           sender_name: 'You'
@@ -297,6 +299,17 @@ export default function MessagesPage() {
         
         // Update current messages
         setMessages(prev => [...prev, newMessageObj]);
+        
+        // Update conversation list to show new most recent message
+        setChats(prev => prev.map(chat => 
+          chat.id === selectedChat 
+            ? {
+                ...chat,
+                last_message: messageText,
+                last_message_time: Date.now()
+              }
+            : chat
+        ));
       } else {
         console.error('Send message error:', response.status, response.statusText);
         const errorData = await response.json();
@@ -804,7 +817,7 @@ export default function MessagesPage() {
                                 className="absolute bottom-0 right-0 p-1 transition-all duration-200 hover:scale-110"
                                 title="Delete conversation"
                               >
-                                <svg className="w-4 h-4 text-red-500 hover:text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <svg className="w-4 h-4 text-white hover:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
                               </button>
