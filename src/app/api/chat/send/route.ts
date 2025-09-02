@@ -86,20 +86,38 @@ export async function POST(req: Request) {
     let actualChatId = chatId;
     
     if (!actualChatId) {
-      // Create new chat
-      actualChatId = `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // First, check if a chat already exists between these users for this listing
+      const existingChatResult = await db
+        .prepare(`
+          SELECT id FROM chats 
+          WHERE listing_id = ? 
+          AND ((buyer_id = ? AND seller_id = ?) OR (buyer_id = ? AND seller_id = ?))
+          LIMIT 1
+        `)
+        .bind(listingId, currentUserId, otherUserActualId, otherUserActualId, currentUserId)
+        .all();
       
-      try {
-        const chatInsertResult = await db
-          .prepare(`
-            INSERT INTO chats (id, listing_id, buyer_id, seller_id, created_at, last_message_at)
-            VALUES (?, ?, ?, ?, strftime('%s','now'), strftime('%s','now'))
-          `)
-          .bind(actualChatId, listingId, currentUserId, otherUserActualId)
-          .run();
-      } catch (insertError) {
-        console.error('❌ Error creating chat:', insertError);
-        return NextResponse.json({ error: "Failed to create chat" }, { status: 500 });
+      if (existingChatResult.results && existingChatResult.results.length > 0) {
+        // Use existing chat
+        actualChatId = existingChatResult.results[0].id;
+        console.log('🔄 Using existing chat:', actualChatId);
+      } else {
+        // Create new chat only if none exists
+        actualChatId = `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        try {
+          const chatInsertResult = await db
+            .prepare(`
+              INSERT INTO chats (id, listing_id, buyer_id, seller_id, created_at, last_message_at)
+              VALUES (?, ?, ?, ?, strftime('%s','now'), strftime('%s','now'))
+            `)
+            .bind(actualChatId, listingId, currentUserId, otherUserActualId)
+            .run();
+          console.log('✅ Created new chat:', actualChatId);
+        } catch (insertError) {
+          console.error('❌ Error creating chat:', insertError);
+          return NextResponse.json({ error: "Failed to create chat" }, { status: 500 });
+        }
       }
     }
 
