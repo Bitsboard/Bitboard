@@ -1,6 +1,6 @@
 import '@/shims/async_hooks';
 import { NextResponse } from "next/server";
-import { getD1, ensureChatSchema } from '@/lib/cf';
+import { getRequestContext } from "@cloudflare/next-on-pages";
 
 export const runtime = "edge";
 
@@ -23,11 +23,12 @@ export async function GET(
       return NextResponse.json({ error: 'chatId required' }, { status: 400 });
     }
 
-    const db = await getD1();
-    if (!db) return NextResponse.json({ error: 'no_db_binding' }, { status: 500 });
+    const { env } = getRequestContext();
+    const db = (env as any).DB as D1Database | undefined;
     
-    // Schema is pre-created via migrations - no need to check on every request
-    // await ensureChatSchema(db); // ❌ REMOVED: Expensive schema check on every request
+    if (!db) {
+      return NextResponse.json({ error: "Database not available" }, { status: 500 });
+    }
     
     // First get the user's UUID from their email
     const userResult = await db.prepare(`

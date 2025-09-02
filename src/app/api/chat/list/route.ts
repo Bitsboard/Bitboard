@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
         c.id,
         c.listing_id,
         c.created_at,
-        c.updated_at,
+        c.last_message_at,
         l.title as listing_title,
         l.price_sat as listing_price,
         l.image_url as listing_image,
