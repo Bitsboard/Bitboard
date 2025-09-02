@@ -13,7 +13,7 @@ interface BlockedUser {
   email: string;
   image?: string;
   verified: boolean;
-  rating: number;
+  thumbs_up: number;
   deals: number;
 }
 
