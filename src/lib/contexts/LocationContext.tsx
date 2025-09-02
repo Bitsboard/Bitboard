@@ -39,23 +39,33 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           
           // Check if location data is stale and clear if needed
           if (locationService.isLocationStale()) {
-    
-            locationService.clearUserLocation();
-            // Use IP-based location if available, otherwise fallback to Toronto
-            if (ipLocation?.lat && ipLocation?.lng) {
+            console.log('LocationContext: Location is stale, but keeping manual location setting');
+            // Don't clear manual location settings - keep them even if stale
+            // Only use IP location if no manual location was set
+            if (!savedLocation && ipLocation?.lat && ipLocation?.lng) {
+              console.log('LocationContext: No manual location, using IP location:', ipLocation);
               setCenter(ipLocation);
-            } else {
+            } else if (!savedLocation) {
+              console.log('LocationContext: No manual location and no IP location, using default');
               setCenter(LOCATION_CONFIG.DEFAULT_CENTER);
+            } else {
+              console.log('LocationContext: Keeping manual location even if stale:', savedLocation);
             }
             setRadiusKm(LOCATION_CONFIG.DEFAULT_RADIUS_KM);
           }
           
         } catch (error) {
           console.warn('LocationContext: Failed to load user location:', error);
-          // Fall back to IP-based location if available, otherwise use Toronto
-          if (ipLocation?.lat && ipLocation?.lng) {
+          // Try to get saved location even if there was an error
+          const fallbackLocation = locationService.getUserLocation();
+          if (fallbackLocation) {
+            console.log('LocationContext: Using fallback saved location:', fallbackLocation);
+            setCenter(fallbackLocation);
+          } else if (ipLocation?.lat && ipLocation?.lng) {
+            console.log('LocationContext: No saved location, using IP location:', ipLocation);
             setCenter(ipLocation);
           } else {
+            console.log('LocationContext: No saved or IP location, using default');
             setCenter(LOCATION_CONFIG.DEFAULT_CENTER);
           }
           setRadiusKm(LOCATION_CONFIG.DEFAULT_RADIUS_KM);
