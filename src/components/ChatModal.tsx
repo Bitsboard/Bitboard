@@ -41,6 +41,53 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
   // Ref for the chat container to enable auto-scrolling
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
+  // iMessage-style timestamp logic
+  const shouldShowTimestamp = (currentMessage: any, previousMessage: any | null) => {
+    if (!previousMessage) return true; // First message always shows timestamp
+    
+    const currentTime = currentMessage.created_at * 1000; // Convert to milliseconds
+    const previousTime = previousMessage.created_at * 1000;
+    const timeDiff = currentTime - previousTime;
+    
+    // Show timestamp if more than 5 minutes have passed
+    const FIVE_MINUTES = 5 * 60 * 1000;
+    return timeDiff > FIVE_MINUTES;
+  };
+
+  const formatTimestamp = (timestamp: number) => {
+    const date = new Date(timestamp * 1000);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const messageDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    
+    // If message is from today, show time only
+    if (messageDate.getTime() === today.getTime()) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    
+    // If message is from yesterday
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (messageDate.getTime() === yesterday.getTime()) {
+      return `Yesterday ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    }
+    
+    // If message is from this week (within 7 days)
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    if (messageDate.getTime() > weekAgo.getTime()) {
+      return date.toLocaleDateString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+    }
+    
+    // For older messages, show full date and time
+    return date.toLocaleDateString([], { 
+      month: 'short', 
+      day: 'numeric', 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
   // Load chat messages when component mounts
   useEffect(() => {
     if (user?.email) {
@@ -503,37 +550,48 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                 No messages yet. Start the conversation!
               </div>
             ) : (
-              messages.map((m) => {
+              messages.map((m, index) => {
                 const isOptimistic = m.id.startsWith('temp-');
                 const isOwnMessage = (m as any).is_from_current_user || m.from_id === currentUserId;
+                const previousMessage = index > 0 ? messages[index - 1] : null;
+                const showTimestamp = shouldShowTimestamp(m, previousMessage);
                 
                 return (
-                  <div
-                    key={m.id}
-                    className={cn(
-                      "flex",
-                      isOwnMessage ? "justify-end" : "justify-start"
-                    )}
-                  >
-                    <div className={cn(
-                      "max-w-[70%] rounded-2xl px-3 py-2 text-sm break-words relative transition-all duration-200",
-                      isOwnMessage
-                        ? isOptimistic 
-                          ? "bg-orange-400 text-white opacity-80" // Optimistic message styling
-                          : "bg-orange-500 text-white"
-                        : dark ? "bg-neutral-900" : "bg-neutral-100"
-                    )}>
-                      <div className="mb-1 flex items-center gap-2">
-                        {m.text}
-                        {isOptimistic && (
-                          <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        )}
+                  <div key={m.id}>
+                    {/* Timestamp header - only show when needed */}
+                    {showTimestamp && (
+                      <div className="flex justify-center my-4">
+                        <div className={cn(
+                          "px-3 py-1 rounded-full text-xs font-medium",
+                          dark ? "bg-neutral-800 text-neutral-400" : "bg-neutral-200 text-neutral-600"
+                        )}>
+                          {isOptimistic ? 'Sending...' : formatTimestamp(m.created_at)}
+                        </div>
                       </div>
+                    )}
+                    
+                    {/* Message bubble */}
+                    <div
+                      className={cn(
+                        "flex",
+                        isOwnMessage ? "justify-end" : "justify-start"
+                      )}
+                    >
                       <div className={cn(
-                        "text-xs opacity-70",
-                        isOwnMessage ? "text-white/80" : dark ? "text-neutral-400" : "text-neutral-500"
+                        "max-w-[70%] rounded-2xl px-3 py-2 text-sm break-words relative transition-all duration-200",
+                        isOwnMessage
+                          ? isOptimistic 
+                            ? "bg-orange-400 text-white opacity-80" // Optimistic message styling
+                            : "bg-orange-500 text-white"
+                          : dark ? "bg-neutral-900" : "bg-neutral-100"
                       )}>
-                        {isOptimistic ? 'Sending...' : new Date(m.created_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <div className="mb-1 flex items-center gap-2">
+                          {m.text}
+                          {isOptimistic && (
+                            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          )}
+                        </div>
+                        {/* Remove individual message timestamps - now handled by timestamp headers */}
                       </div>
                     </div>
                   </div>

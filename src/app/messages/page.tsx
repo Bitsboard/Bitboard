@@ -66,22 +66,51 @@ export default function MessagesPage() {
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // iMessage-style timestamp logic
+  const shouldShowTimestamp = (currentMessage: Message, previousMessage: Message | null) => {
+    if (!previousMessage) return true; // First message always shows timestamp
+    
+    const currentTime = currentMessage.timestamp * 1000; // Convert to milliseconds
+    const previousTime = previousMessage.timestamp * 1000;
+    const timeDiff = currentTime - previousTime;
+    
+    // Show timestamp if more than 5 minutes have passed
+    const FIVE_MINUTES = 5 * 60 * 1000;
+    return timeDiff > FIVE_MINUTES;
+  };
+
   const formatTimestamp = (timestamp: number) => {
-    // Convert to milliseconds if timestamp is in seconds (Unix timestamp)
-    const timestampMs = timestamp > 1000000000000 ? timestamp : timestamp * 1000;
-    const now = Date.now();
-    const diff = now - timestampMs;
+    const date = new Date(timestamp * 1000);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const messageDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     
-    const minutes = Math.floor(diff / (1000 * 60));
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    // If message is from today, show time only
+    if (messageDate.getTime() === today.getTime()) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
     
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
+    // If message is from yesterday
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (messageDate.getTime() === yesterday.getTime()) {
+      return `Yesterday ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    }
     
-    return new Date(timestampMs).toLocaleDateString();
+    // If message is from this week (within 7 days)
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    if (messageDate.getTime() > weekAgo.getTime()) {
+      return date.toLocaleDateString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+    }
+    
+    // For older messages, show full date and time
+    return date.toLocaleDateString([], { 
+      month: 'short', 
+      day: 'numeric', 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
   };
 
   const loadChats = async () => {
@@ -924,53 +953,22 @@ export default function MessagesPage() {
                     ) : (
                       messages.map((message, index) => {
                         const prevMessage = index > 0 ? messages[index - 1] : null;
-                        const nextMessage = index < messages.length - 1 ? messages[index + 1] : null;
-                        
-                        // Show timestamp if:
-                        // 1. It's the first message
-                        // 2. Previous message is from different user
-                        // 3. There's a significant time gap (1 hour, 1 day, etc.)
-                        // 4. It's the last message
-                        const getTimeDifference = (current: number, previous: number) => {
-                          const diff = current - previous;
-                          const hours = Math.floor(diff / (1000 * 60 * 60));
-                          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                          
-                          if (days > 0) return days;
-                          if (hours > 0) return hours;
-                          return 0;
-                        };
-                        
-                        const shouldShowTimestamp = 
-                          index === 0 || 
-                          !prevMessage || 
-                          prevMessage.is_from_current_user !== message.is_from_current_user ||
-                          getTimeDifference(message.timestamp, prevMessage.timestamp) > 0 || // Show timestamp for any hour/day change
-                          index === messages.length - 1;
-                        
-                        // Group messages from same user with smaller spacing
-                        const isGroupedWithPrev = prevMessage && 
-                          prevMessage.is_from_current_user === message.is_from_current_user &&
-                          (message.timestamp - prevMessage.timestamp) <= 300000; // 5 minutes for grouping
+                        const showTimestamp = shouldShowTimestamp(message, prevMessage);
                         
                         return (
                           <div key={message.id}>
-                            {/* Timestamp above message if needed - positioned above the message side */}
-                            {shouldShowTimestamp && (
-                              <div className={`mb-3 ${
-                                message.is_from_current_user ? 'text-right' : 'text-left'
-                              }`}>
-                                <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                            {/* Timestamp header - only show when needed */}
+                            {showTimestamp && (
+                              <div className="flex justify-center my-4">
+                                <div className="px-3 py-1 rounded-full text-xs font-medium bg-neutral-200 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
                                   {formatTimestamp(message.timestamp)}
-                                </span>
+                                </div>
                               </div>
                             )}
                             
                             {/* Message bubble */}
                             <div
-                              className={`flex ${message.is_from_current_user ? 'justify-end' : 'justify-start'} ${
-                                isGroupedWithPrev ? 'mt-1' : 'mt-3'
-                              }`}
+                              className={`flex ${message.is_from_current_user ? 'justify-end' : 'justify-start'} mt-3`}
                             >
                               <div
                                 className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-sm ${
