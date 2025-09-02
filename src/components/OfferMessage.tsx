@@ -97,7 +97,7 @@ export default function OfferMessage({
     }
   };
 
-  const handleAction = async (action: 'accept' | 'decline' | 'revoke') => {
+  const handleAction = async (action: 'accept' | 'decline' | 'revoke' | 'abort') => {
     if (!onAction || isProcessing) return;
     
     setIsProcessing(true);
