@@ -331,30 +331,46 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
   };
 
   const sendOffer = async (amount: number, expiresAt?: number) => {
-    if (!user?.email || !chat?.id) return;
+    console.log('🎯 ChatModal: sendOffer called with:', { amount, expiresAt });
+    console.log('🎯 ChatModal: user?.email:', user?.email, 'chat?.id:', chat?.id);
+    
+    if (!user?.email || !chat?.id) {
+      console.log('❌ ChatModal: Missing user email or chat ID, returning');
+      return;
+    }
 
     try {
+      const requestBody = {
+        chatId: chat.id,
+        listingId: listing.id,
+        amountSat: amount,
+        expiresAt
+      };
+      
+      console.log('🎯 ChatModal: Sending request to /api/offers/send with body:', requestBody);
+      
       const response = await fetch('/api/offers/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chatId: chat.id,
-          listingId: listing.id,
-          amountSat: amount,
-          expiresAt
-        })
+        body: JSON.stringify(requestBody)
       });
 
+      console.log('🎯 ChatModal: Response status:', response.status, 'ok:', response.ok);
+
       if (response.ok) {
+        const responseData = await response.json();
+        console.log('✅ ChatModal: Offer sent successfully, response:', responseData);
         // Reload messages to show the new offer
+        console.log('🎯 ChatModal: Reloading messages for chat:', chat.id);
         await loadMessages(chat.id);
+        console.log('✅ ChatModal: Messages reloaded');
       } else {
         const error = await response.json() as { error?: string };
-        console.error('Failed to send offer:', error);
+        console.error('❌ ChatModal: Failed to send offer:', error);
         alert(error.error || 'Failed to send offer');
       }
     } catch (error) {
-      console.error('Error sending offer:', error);
+      console.error('❌ ChatModal: Error sending offer:', error);
       alert('Failed to send offer');
     }
   };
