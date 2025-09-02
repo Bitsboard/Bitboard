@@ -111,21 +111,44 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    // Check for existing pending offers from this user for this listing
-    console.log('🎯 API: Checking for existing offers');
+    // Check for existing offers between these two users for this listing
+    // No new offers allowed if there's a pending offer OR if the last offer was accepted
+    console.log('🎯 API: Checking for existing offers between users');
     const existingOfferResult = await db
       .prepare(`
-        SELECT id FROM offers 
-        WHERE from_user_id = ? AND listing_id = ? AND status = 'pending'
+        SELECT id, status, from_user_id, to_user_id 
+        FROM offers 
+        WHERE listing_id = ? 
+        AND (
+          (from_user_id = ? AND to_user_id = ?) OR 
+          (from_user_id = ? AND to_user_id = ?)
+        )
+        ORDER BY created_at DESC
+        LIMIT 1
       `)
-      .bind(currentUserId, listingId)
+      .bind(listingId, currentUserId, otherUserId, otherUserId, currentUserId)
       .first();
 
     if (existingOfferResult) {
-      console.log('❌ API: User already has pending offer');
-      return NextResponse.json({ 
-        error: "You already have a pending offer for this listing" 
-      }, { status: 400 });
+      const { status, from_user_id, to_user_id } = existingOfferResult;
+      console.log('🎯 API: Found existing offer:', { status, from_user_id, to_user_id });
+      
+      if (status === 'pending') {
+        console.log('❌ API: Pending offer exists between these users');
+        return NextResponse.json({ 
+          error: "There is already a pending offer for this listing between you and this user" 
+        }, { status: 400 });
+      }
+      
+      if (status === 'accepted') {
+        console.log('❌ API: Accepted offer exists between these users');
+        return NextResponse.json({ 
+          error: "An offer has already been accepted for this listing between you and this user" 
+        }, { status: 400 });
+      }
+      
+      // If the last offer was declined, revoked, or expired, allow a new offer
+      console.log('🎯 API: Last offer was', status, '- allowing new offer');
     }
 
     // Create the offer
