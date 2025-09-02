@@ -99,7 +99,7 @@ export async function POST(req: Request) {
       
       if (existingChatResult.results && existingChatResult.results.length > 0) {
         // Use existing chat
-        actualChatId = existingChatResult.results[0].id;
+        actualChatId = (existingChatResult.results[0] as any).id;
         console.log('🔄 Using existing chat:', actualChatId);
       } else {
         // Create new chat only if none exists
