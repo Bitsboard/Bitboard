@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
         l.image_url as listing_image,
         seller.username as seller_name,
         seller.verified as seller_verified,
-        seller.thumbs_up as seller_rating,
+        seller.rating as seller_rating,
         seller.deals as seller_deals
       FROM chats c
       JOIN listings l ON c.listing_id = l.id

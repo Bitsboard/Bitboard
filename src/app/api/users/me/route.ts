@@ -22,7 +22,7 @@ export async function GET(req: Request) {
     // Get user information from database
     const user = await db
       .prepare(`
-        SELECT id, email, username, has_chosen_username, image, thumbs_up, deals, verified, is_admin
+        SELECT id, email, username, has_chosen_username, image, rating, deals, verified, is_admin
         FROM users 
         WHERE email = ?
       `)
@@ -40,7 +40,7 @@ export async function GET(req: Request) {
         handle: user.username,
         hasChosenUsername: Boolean(user.has_chosen_username),
         image: user.image,
-        rating: user.thumbs_up,
+        rating: user.rating,
         deals: user.deals,
         verified: Boolean(user.verified),
         isAdmin: Boolean(user.is_admin)
