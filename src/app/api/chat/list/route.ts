@@ -82,11 +82,7 @@ export async function GET(req: NextRequest) {
       FROM chats c
       JOIN listings l ON c.listing_id = l.id
       JOIN users seller ON l.posted_by = seller.id
-      LEFT JOIN (
-        SELECT listing_id, image_url,
-               ROW_NUMBER() OVER (PARTITION BY listing_id ORDER BY id) as rn
-        FROM listing_images
-      ) li ON l.id = li.listing_id AND li.rn = 1
+      LEFT JOIN listing_images li ON l.id = li.listing_id
       WHERE (c.buyer_id = ? OR c.seller_id = ?)
         AND c.buyer_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = ?)
         AND c.seller_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = ?)
