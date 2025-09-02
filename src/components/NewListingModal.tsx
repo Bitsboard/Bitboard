@@ -219,7 +219,7 @@ export function NewListingModal({ onClose, onPublish, dark }: NewListingModalPro
                       boostedUntil: boost ? Date.now() + 1000 * 60 * 60 * 24 : 0,
                       seller: {
                         name: "you",
-                        thumbsUp: 5, // Number of thumbs up received (not 0-5 rating)
+                        thumbsUp: 0, // Number of thumbs up received (not 0-5 rating)
                         deals: 0,
                         verifications: { email: true },
                         onTimeRelease: 1.0,
