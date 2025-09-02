@@ -50,11 +50,8 @@ export default function OfferModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('🎯 OfferModal: handleSubmit called');
-    console.log('🎯 OfferModal: amount:', amount, 'unit:', unit);
     
     if (amount <= 0) {
-      console.log('❌ OfferModal: amount is 0 or negative, returning');
       return;
     }
 
@@ -64,9 +61,7 @@ export default function OfferModal({
         ? Math.floor(Date.now() / 1000) + (expirationDays * 24 * 60 * 60)
         : undefined;
       
-      console.log('🎯 OfferModal: calling onSendOffer with:', { amount, expiresAt, hasExpiration, expirationDays });
       await onSendOffer(amount, expiresAt);
-      console.log('✅ OfferModal: onSendOffer completed successfully');
       onClose();
     } catch (error) {
       console.error('❌ OfferModal: Error sending offer:', error);

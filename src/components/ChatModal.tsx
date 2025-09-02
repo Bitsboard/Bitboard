@@ -332,28 +332,46 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
   };
 
   const sendOffer = async (amount: number, expiresAt?: number) => {
-    console.log('🎯 ChatModal: sendOffer called with:', { amount, expiresAt });
-    console.log('🎯 ChatModal: user?.email:', user?.email, 'chat?.id:', chat?.id);
-    
     if (!user?.email) {
-      console.log('❌ ChatModal: Missing user email, returning');
       return;
     }
     
-    if (!chat?.id) {
-      console.log('❌ ChatModal: Chat not loaded yet, returning');
-      return;
+    let chatId = chat?.id;
+    
+    // If no chat exists, create one first
+    if (!chatId) {
+      try {
+        const chatResponse = await fetch('/api/chat/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            listingId: listing.id,
+            sellerId: listing.userId
+          })
+        });
+        
+        if (chatResponse.ok) {
+          const chatData = await chatResponse.json();
+          chatId = chatData.chatId;
+          // Reload the chat to get the full chat object
+          await loadChat();
+        } else {
+          alert('Failed to create chat');
+          return;
+        }
+      } catch (error) {
+        alert('Failed to create chat');
+        return;
+      }
     }
 
     try {
       const requestBody = {
-        chatId: chat.id,
+        chatId: chatId,
         listingId: listing.id,
         amountSat: amount,
         expiresAt
       };
-      
-      console.log('🎯 ChatModal: Sending request to /api/offers/send with body:', requestBody);
       
       const response = await fetch('/api/offers/send', {
         method: 'POST',
@@ -361,30 +379,13 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         body: JSON.stringify(requestBody)
       });
 
-      console.log('🎯 ChatModal: Response status:', response.status, 'ok:', response.ok);
-
       if (response.ok) {
-        const responseData = await response.json() as { success?: boolean; offerId?: string; message?: string; debug?: any };
-        console.log('✅ ChatModal: Offer sent successfully, response:', responseData);
-        
-        // Log debug information if available
-        if (responseData.debug) {
-          console.log('🔍 ChatModal: API Debug Info:', responseData.debug);
-        }
+        const responseData = await response.json() as { success?: boolean; offerId?: string; message?: string };
         
         // Reload messages to show the new offer
-        console.log('🎯 ChatModal: Reloading messages for chat:', chat.id);
-        await loadMessages(chat.id);
-        console.log('✅ ChatModal: Messages reloaded');
+        await loadMessages(chatId);
       } else {
-        const error = await response.json() as { error?: string; debug?: any };
-        console.error('❌ ChatModal: Failed to send offer:', error);
-        
-        // Log debug information if available
-        if (error.debug) {
-          console.log('🔍 ChatModal: API Error Debug Info:', error.debug);
-        }
-        
+        const error = await response.json() as { error?: string };
         alert(error.error || 'Failed to send offer');
       }
     } catch (error) {
@@ -703,8 +704,9 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
           
           <button
             onClick={async () => {
+              // If no chat exists, just open the modal - the sendOffer function will handle chat creation
               if (!chat?.id) {
-                console.log('❌ ChatModal: Cannot open offer modal - chat not loaded yet');
+                setShowOfferModal(true);
                 return;
               }
               
@@ -727,7 +729,6 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                   };
                   
                   if (data.hasExistingOffer && data.existingOffer) {
-                    console.log('🎯 ChatModal: Existing offer found, showing offer details:', data.existingOffer);
                     // Set the existing offer and show the modal to display it
                     setExistingOffer(data.existingOffer);
                     setShowOfferModal(true);
@@ -736,21 +737,18 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                 }
                 setShowOfferModal(true);
               } catch (error) {
-                console.error('❌ ChatModal: Error checking offer status:', error);
                 // Allow modal to open if check fails
                 setShowOfferModal(true);
               }
             }}
-            disabled={!chat?.id}
+            disabled={false}
             className={cn(
               "rounded-xl p-2 transition-all duration-200",
-              chat?.id
-                ? (dark 
-                    ? "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white" 
-                    : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-800")
-                : "bg-neutral-300 text-neutral-500 cursor-not-allowed"
+              dark 
+                ? "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white" 
+                : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-800"
             )}
-            title={chat?.id ? "Make an offer" : "Loading chat..."}
+            title="Make an offer"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
