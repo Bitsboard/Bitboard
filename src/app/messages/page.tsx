@@ -373,7 +373,7 @@ export default function MessagesPage() {
         // Reload messages to show the new offer
         await loadMessages(selectedChat);
       } else {
-        const error = await response.json();
+        const error = await response.json() as { error?: string };
         console.error('Failed to send offer:', error);
         alert(error.error || 'Failed to send offer');
       }
@@ -400,7 +400,7 @@ export default function MessagesPage() {
           await loadMessages(selectedChat);
         }
       } else {
-        const error = await response.json();
+        const error = await response.json() as { error?: string };
         console.error('Failed to process offer action:', error);
         alert(error.error || 'Failed to process offer action');
       }
