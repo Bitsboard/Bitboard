@@ -39,7 +39,7 @@ interface SystemNotification {
 interface Message {
   id: string;
   content: string;
-  timestamp: number;
+  created_at: number; // Use created_at to match the global Message type
   is_from_current_user: boolean;
   sender_name: string;
 }
@@ -75,8 +75,8 @@ export default function MessagesPage() {
   const shouldShowTimestamp = (currentMessage: Message, previousMessage: Message | null) => {
     if (!previousMessage) return true; // First message always shows timestamp
     
-    const currentTime = currentMessage.timestamp * 1000; // Convert to milliseconds
-    const previousTime = previousMessage.timestamp * 1000;
+    const currentTime = currentMessage.created_at * 1000; // Convert to milliseconds
+    const previousTime = previousMessage.created_at * 1000;
     const timeDiff = currentTime - previousTime;
     
     // Show timestamp if more than 5 minutes have passed
@@ -230,7 +230,7 @@ export default function MessagesPage() {
         const transformedMessages = data.messages.map((msg: any) => ({
           id: msg.id,
           content: msg.text, // API returns 'text', not 'content'
-          timestamp: msg.created_at,
+          created_at: msg.created_at,
           is_from_current_user: msg.is_from_current_user, // API already provides this
           sender_name: msg.is_from_current_user ? 'You' : 'Other User' // Simplified sender name
         }));
@@ -286,7 +286,7 @@ export default function MessagesPage() {
         const newMessageObj: Message = {
           id: Date.now().toString(), // Temporary ID
           content: messageText,
-          timestamp: Date.now(),
+          created_at: Math.floor(Date.now() / 1000), // Use seconds to match server and ChatModal
           is_from_current_user: true,
           sender_name: 'You'
         };
@@ -306,7 +306,7 @@ export default function MessagesPage() {
             ? {
                 ...chat,
                 last_message: messageText,
-                last_message_time: Date.now()
+                last_message_time: Math.floor(Date.now() / 1000) // Use seconds to match server
               }
             : chat
         ));
@@ -398,7 +398,7 @@ export default function MessagesPage() {
         const transformedMessages = data.messages.map((msg: any) => ({
           id: msg.id,
           content: msg.text,
-          timestamp: msg.created_at,
+          created_at: msg.created_at,
           is_from_current_user: msg.is_from_current_user,
           sender_name: msg.is_from_current_user ? 'You' : 'Other User'
         }));
@@ -426,7 +426,7 @@ export default function MessagesPage() {
               ? {
                   ...chat,
                   last_message: latestMessage.content,
-                  last_message_time: latestMessage.timestamp
+                  last_message_time: latestMessage.created_at
                 }
               : chat
           ));
@@ -1066,7 +1066,7 @@ export default function MessagesPage() {
                             {showTimestamp && (
                               <div className="flex justify-center my-4">
                                 <div className="px-3 py-1 rounded-full text-xs font-medium bg-neutral-200 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
-                                  {formatTimestamp(message.timestamp)}
+                                  {formatTimestamp(message.created_at)}
                                 </div>
                               </div>
                             )}

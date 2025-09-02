@@ -289,6 +289,12 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         
         if (data.message) {
           // Replace optimistic message with real one from server (includes correct timestamp)
+          console.log('🔄 Replacing optimistic message with server message:', {
+            optimistic: optimisticMessage,
+            server: data.message,
+            optimisticTime: new Date(optimisticMessage.created_at * 1000),
+            serverTime: new Date(data.message.created_at * 1000)
+          });
           setMessages(prev => prev.map(msg => 
             msg.id === optimisticMessage.id ? data.message! : msg
           ));
