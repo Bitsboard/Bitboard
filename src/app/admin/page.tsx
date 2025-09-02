@@ -45,6 +45,9 @@ interface AdminStats {
     other_user_id: string | null; // Now 8 alphanumeric characters or null
     chat_id: string | null; // Now 10 alphanumeric characters
     message_count?: number; // Added for message activity
+    offer_amount?: number; // Added for offer activity
+    offer_expires_at?: number; // Added for offer expiration
+    offer_status?: string; // Added for offer status
   }>;
 }
 
@@ -60,7 +63,7 @@ interface ActivityItem {
   other_username: string | null;
 }
 
-type ActivityFilter = 'all' | 'listings' | 'conversations' | 'users';
+type ActivityFilter = 'all' | 'listings' | 'conversations' | 'users' | 'offers';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -214,6 +217,7 @@ export default function AdminPage() {
     if (activityFilter === 'users') return activity.type === 'user';
     if (activityFilter === 'listings') return activity.type === 'listing';
     if (activityFilter === 'conversations') return activity.type === 'message'; // Only show messages, not conversation starts
+    if (activityFilter === 'offers') return activity.type === 'offer';
     return false;
   }) || [];
 
@@ -335,6 +339,103 @@ export default function AdminPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
               </svg>
             </a>
+          </>
+        );
+      case 'offer':
+        const formatOfferAmount = (amount: number) => {
+          return new Intl.NumberFormat().format(amount);
+        };
+        
+        const formatExpiration = (expiresAt: number | null) => {
+          if (!expiresAt) return null;
+          const now = Math.floor(Date.now() / 1000);
+          const diff = expiresAt - now;
+          
+          if (diff <= 0) return "expired";
+          
+          const hours = Math.floor(diff / 3600);
+          const days = Math.floor(hours / 24);
+          
+          if (days > 0) {
+            return `${days} day${days > 1 ? 's' : ''} left`;
+          } else if (hours > 0) {
+            return `${hours} hour${hours > 1 ? 's' : ''} left`;
+          } else {
+            const minutes = Math.floor(diff / 60);
+            return `${minutes} minute${minutes > 1 ? 's' : ''} left`;
+          }
+        };
+
+        const expirationText = formatExpiration(activity.offer_expires_at || null);
+        
+        if (activity.action === 'offered') {
+          return (
+            <>
+              <UserTag username={activity.username} userId={activity.user_id} />
+              {' '}offered{' '}
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-orange-200 dark:bg-orange-800 text-orange-900 dark:text-orange-100 border border-orange-300 dark:border-orange-600">
+                {formatOfferAmount(activity.offer_amount || 0)} sats
+              </span>
+              {expirationText && (
+                <>
+                  {' '}with an expiration of{' '}
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-yellow-200 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-100 border border-yellow-300 dark:border-yellow-600">
+                    {expirationText}
+                  </span>
+                </>
+              )}
+              {' '}for{' '}
+              <UserTag username={activity.other_username || 'Unknown User'} userId={activity.other_user_id || ''} />
+              {' '}'s{' '}
+              <ListingTag title={activity.listing_title} id={activity.listing_id} />
+            </>
+          );
+        } else if (activity.action === 'offer expired') {
+          return (
+            <>
+              <UserTag username={activity.username} userId={activity.user_id} />
+              {' '}'s offer expired for{' '}
+              <UserTag username={activity.other_username || 'Unknown User'} userId={activity.other_user_id || ''} />
+              {' '}'s{' '}
+              <ListingTag title={activity.listing_title} id={activity.listing_id} />
+            </>
+          );
+        } else if (activity.action === 'revoked offer') {
+          return (
+            <>
+              <UserTag username={activity.username} userId={activity.user_id} />
+              {' '}revoked their offer for{' '}
+              <UserTag username={activity.other_username || 'Unknown User'} userId={activity.other_user_id || ''} />
+              {' '}'s{' '}
+              <ListingTag title={activity.listing_title} id={activity.listing_id} />
+            </>
+          );
+        } else if (activity.action === 'declined offer') {
+          return (
+            <>
+              <UserTag username={activity.username} userId={activity.user_id} />
+              {' '}declined{' '}
+              <UserTag username={activity.other_username || 'Unknown User'} userId={activity.other_user_id || ''} />
+              {' '}'s offer for their{' '}
+              <ListingTag title={activity.listing_title} id={activity.listing_id} />
+            </>
+          );
+        } else if (activity.action === 'accepted offer') {
+          return (
+            <>
+              <UserTag username={activity.username} userId={activity.user_id} />
+              {' '}accepted{' '}
+              <UserTag username={activity.other_username || 'Unknown User'} userId={activity.other_user_id || ''} />
+              {' '}'s offer for their{' '}
+              <ListingTag title={activity.listing_title} id={activity.listing_id} />
+            </>
+          );
+        }
+        return (
+          <>
+            <UserTag username={activity.username} userId={activity.user_id} />
+            {' '}
+            <span className="text-neutral-600 dark:text-neutral-400">{activity.action}</span>
           </>
         );
       default:
@@ -555,8 +656,7 @@ export default function AdminPage() {
                     <select
                       value={notificationForm.targetGroup}
                       onChange={(e) => setNotificationForm(prev => ({ ...prev, targetGroup: e.target.value as any }))}
-                      className="w-full px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      required
+the                      required
                     >
                       <option value="all">All Users</option>
                       <option value="verified">Verified Users Only</option>
@@ -730,7 +830,7 @@ export default function AdminPage() {
                 
                 {/* Activity Filter */}
                 <div className="flex gap-2">
-                  {(['all', 'listings', 'conversations', 'users'] as ActivityFilter[]).map((filter) => (
+                  {(['all', 'listings', 'conversations', 'users', 'offers'] as ActivityFilter[]).map((filter) => (
                     <button
                       key={filter}
                       onClick={() => setActivityFilter(filter)}

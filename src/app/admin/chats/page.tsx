@@ -513,28 +513,70 @@ export default function AdminChatsPage() {
                         No messages
                       </div>
                     ) : (
-                      chatMessages.map((message) => {
-                        const isFromBuyer = message.from_id === selectedChat.buyer_id;
+                      chatMessages.map((item) => {
+                        const isFromBuyer = item.from_id === selectedChat.buyer_id;
                         const username = isFromBuyer ? selectedChat.buyer_username : selectedChat.seller_username;
                         const userId = isFromBuyer ? selectedChat.buyer_id : selectedChat.seller_id;
                         
                         return (
-                          <div key={message.id} className="flex flex-col">
+                          <div key={item.id} className="flex flex-col">
                             <div className="flex items-center gap-1.5 mb-1">
                               <span className={`text-xs font-medium ${isFromBuyer ? 'text-blue-600' : 'text-green-600'}`}>
                                 {username || userId.slice(0, 8) + '...'}
                               </span>
                               <span className="text-xs text-neutral-500">
-                                {new Date(message.created_at * 1000).toLocaleDateString()} {new Date(message.created_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                {new Date(item.created_at * 1000).toLocaleDateString()} {new Date(item.created_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                               </span>
                             </div>
-                            <div className={`max-w-full rounded px-1.5 py-1 text-xs ${
-                              isFromBuyer 
-                                ? 'bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200' 
-                                : 'bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200'
-                            }`}>
-                              {message.text}
-                            </div>
+                            
+                            {item.type === 'offer' ? (
+                              /* Offer Message */
+                              <div className={`max-w-full rounded px-1.5 py-1 text-xs border ${
+                                isFromBuyer 
+                                  ? 'bg-blue-50 text-blue-900 dark:bg-blue-900/20 dark:text-blue-200 border-blue-200 dark:border-blue-800' 
+                                  : 'bg-green-50 text-green-900 dark:bg-green-900/20 dark:text-green-200 border-green-200 dark:border-green-800'
+                              }`}>
+                                {item.status === 'pending' && (
+                                  <div>
+                                    offered {new Intl.NumberFormat().format(item.amount_sat)} sats
+                                    {item.expires_at && (
+                                      <span className="text-neutral-600 dark:text-neutral-400">
+                                        {' '}(expires {new Date(item.expires_at * 1000).toLocaleDateString()})
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                                {item.status === 'accepted' && (
+                                  <div className="text-green-700 dark:text-green-300">
+                                    ✓ accepted offer of {new Intl.NumberFormat().format(item.amount_sat)} sats
+                                  </div>
+                                )}
+                                {item.status === 'declined' && (
+                                  <div className="text-red-700 dark:text-red-300">
+                                    ✗ declined offer of {new Intl.NumberFormat().format(item.amount_sat)} sats
+                                  </div>
+                                )}
+                                {item.status === 'revoked' && (
+                                  <div className="text-gray-700 dark:text-gray-300">
+                                    ↶ revoked their offer of {new Intl.NumberFormat().format(item.amount_sat)} sats
+                                  </div>
+                                )}
+                                {item.status === 'expired' && (
+                                  <div className="text-gray-700 dark:text-gray-300">
+                                    ⏰ offer of {new Intl.NumberFormat().format(item.amount_sat)} sats expired
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              /* Regular Message */
+                              <div className={`max-w-full rounded px-1.5 py-1 text-xs ${
+                                isFromBuyer 
+                                  ? 'bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200' 
+                                  : 'bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200'
+                              }`}>
+                                {item.text}
+                              </div>
+                            )}
                           </div>
                         );
                       })

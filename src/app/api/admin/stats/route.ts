@@ -58,6 +58,21 @@ export async function GET(req: Request) {
       FROM messages
     `).all();
 
+    // Get offer statistics
+    const offerStats = await db.prepare(`
+      SELECT 
+        COUNT(*) as total_offers,
+        COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_offers,
+        COUNT(CASE WHEN status = 'accepted' THEN 1 END) as accepted_offers,
+        COUNT(CASE WHEN status = 'declined' THEN 1 END) as declined_offers,
+        COUNT(CASE WHEN status = 'revoked' THEN 1 END) as revoked_offers,
+        COUNT(CASE WHEN status = 'expired' THEN 1 END) as expired_offers,
+        COUNT(CASE WHEN created_at >= strftime('%s', 'now', '-7 days') THEN 1 END) as new_offers_7d,
+        COUNT(CASE WHEN created_at >= strftime('%s', 'now', '-30 days') THEN 1 END) as new_offers_30d,
+        AVG(amount_sat) as avg_offer_amount
+      FROM offers
+    `).all();
+
     // Get recent activity with more comprehensive queries
     const recentActivity = await db.prepare(`
       SELECT 
@@ -119,7 +134,10 @@ export async function GET(req: Request) {
           ELSE c.buyer_id
         END as other_user_id,
         m.chat_id as chat_id,
-        (SELECT COUNT(*) FROM messages WHERE chat_id = m.chat_id AND created_at <= m.created_at) as message_count
+        (SELECT COUNT(*) FROM messages WHERE chat_id = m.chat_id AND created_at <= m.created_at) as message_count,
+        NULL as offer_amount,
+        NULL as offer_expires_at,
+        NULL as offer_status
       FROM messages m
       JOIN users u ON m.from_id = u.id
       JOIN chats c ON m.chat_id = c.id
@@ -129,11 +147,53 @@ export async function GET(req: Request) {
       LIMIT 40
     `).all();
 
+    // Get recent offer activity
+    const recentOffers = await db.prepare(`
+      SELECT 
+        'offer' as type,
+        from_user.username as username,
+        from_user.id as user_id,
+        from_user.email as email,
+        CASE 
+          WHEN o.status = 'pending' THEN 'offered'
+          WHEN o.status = 'accepted' THEN 'accepted offer'
+          WHEN o.status = 'declined' THEN 'declined offer'
+          WHEN o.status = 'revoked' THEN 'revoked offer'
+          WHEN o.status = 'expired' THEN 'offer expired'
+          ELSE 'offer action'
+        END as action,
+        CASE 
+          WHEN o.status = 'pending' THEN o.created_at
+          ELSE o.updated_at
+        END as timestamp,
+        l.title as listing_title,
+        l.id as listing_id,
+        to_user.username as other_username,
+        o.to_user_id as other_user_id,
+        o.chat_id as chat_id,
+        NULL as message_count,
+        o.amount_sat as offer_amount,
+        o.expires_at as offer_expires_at,
+        o.status as offer_status
+      FROM offers o
+      JOIN users from_user ON o.from_user_id = from_user.id
+      JOIN users to_user ON o.to_user_id = to_user.id
+      JOIN chats c ON o.chat_id = c.id
+      JOIN listings l ON o.listing_id = l.id
+      WHERE (
+        o.created_at >= strftime('%s', 'now', '-7 days') OR 
+        o.updated_at >= strftime('%s', 'now', '-7 days')
+      )
+      ORDER BY timestamp DESC
+      LIMIT 30
+    `).all();
+
     // Combine and sort all recent activity
     const allActivity = [
       ...recentActivity.results || [],
       ...recentListings.results || [],
-      ...recentMessages.results || []
+      ...recentMessages.results || [],
+      ...recentOffers.results || []
     ].sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 50);
 
     const stats = {
@@ -160,6 +220,17 @@ export async function GET(req: Request) {
         unread: Number(messageStats.results?.[0]?.unread_messages) || 0,
         new7d: Number(chatStats.results?.[0]?.new_chats_7d) || 0,
         new30d: Number(chatStats.results?.[0]?.new_chats_30d) || 0
+      },
+      offers: {
+        total: Number(offerStats.results?.[0]?.total_offers) || 0,
+        pending: Number(offerStats.results?.[0]?.pending_offers) || 0,
+        accepted: Number(offerStats.results?.[0]?.accepted_offers) || 0,
+        declined: Number(offerStats.results?.[0]?.declined_offers) || 0,
+        revoked: Number(offerStats.results?.[0]?.revoked_offers) || 0,
+        expired: Number(offerStats.results?.[0]?.expired_offers) || 0,
+        new7d: Number(offerStats.results?.[0]?.new_offers_7d) || 0,
+        new30d: Number(offerStats.results?.[0]?.new_offers_30d) || 0,
+        avgAmount: Math.round(Number(offerStats.results?.[0]?.avg_offer_amount) || 0)
       },
       recentActivity: allActivity
     };

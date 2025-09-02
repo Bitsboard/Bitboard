@@ -27,15 +27,41 @@ export async function GET(
         from_id, 
         text, 
         created_at, 
-        read_at
+        read_at,
+        'message' as type
       FROM messages 
       WHERE chat_id = ? 
       ORDER BY created_at ASC
     `).bind(chatId).all();
+
+    // Get all offers for this chat
+    const offers = await db.prepare(`
+      SELECT 
+        id,
+        chat_id,
+        from_user_id as from_id,
+        amount_sat,
+        expires_at,
+        status,
+        created_at,
+        updated_at,
+        'offer' as type,
+        NULL as text,
+        NULL as read_at
+      FROM offers 
+      WHERE chat_id = ? 
+      ORDER BY created_at ASC
+    `).bind(chatId).all();
+
+    // Combine messages and offers, sort by created_at
+    const allItems = [
+      ...(messages.results || []),
+      ...(offers.results || [])
+    ].sort((a: any, b: any) => a.created_at - b.created_at);
     
     return NextResponse.json({ 
       success: true, 
-      messages: messages.results || [] 
+      messages: allItems 
     });
   } catch (error) {
     console.error('Error fetching chat messages:', error);
