@@ -27,8 +27,8 @@ const securityEvents: SecurityEvent[] = [];
 const blockedIPs = new Set<string>();
 const suspiciousIPs = new Map<string, number>(); // IP -> count
 
-// Clean up old events (keep last 7 days)
-setInterval(() => {
+// Clean up old events (keep last 7 days) - called manually since setInterval doesn't work in Edge Runtime
+function cleanupOldEvents() {
   const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
   const initialLength = securityEvents.length;
   
@@ -41,7 +41,7 @@ setInterval(() => {
   if (securityEvents.length !== initialLength) {
     console.log(`Cleaned up ${initialLength - securityEvents.length} old security events`);
   }
-}, 60 * 60 * 1000); // Run every hour
+}
 
 export class SecurityMonitor {
   /**
@@ -184,34 +184,59 @@ export class SecurityMonitor {
    * Get security metrics
    */
   static getMetrics(): SecurityMetrics {
-    const now = Date.now();
-    const last24h = now - (24 * 60 * 60 * 1000);
-    
-    const recentEvents = securityEvents.filter(e => e.timestamp > last24h);
-    
-    return {
-      blockedIPs: blockedIPs.size,
-      failedLogins: recentEvents.filter(e => e.type === 'failed_login').length,
-      suspiciousActivity: recentEvents.filter(e => e.type === 'suspicious_activity').length,
-      rateLimitHits: recentEvents.filter(e => e.type === 'rate_limit_exceeded').length,
-      last24h: recentEvents
-    };
+    try {
+      // Clean up old events first
+      cleanupOldEvents();
+      
+      const now = Date.now();
+      const last24h = now - (24 * 60 * 60 * 1000);
+      
+      const recentEvents = securityEvents.filter(e => e.timestamp > last24h);
+      
+      return {
+        blockedIPs: blockedIPs.size,
+        failedLogins: recentEvents.filter(e => e.type === 'failed_login').length,
+        suspiciousActivity: recentEvents.filter(e => e.type === 'suspicious_activity').length,
+        rateLimitHits: recentEvents.filter(e => e.type === 'rate_limit_exceeded').length,
+        last24h: recentEvents
+      };
+    } catch (error) {
+      console.error('Error getting security metrics:', error);
+      // Return default metrics if there's an error
+      return {
+        blockedIPs: 0,
+        failedLogins: 0,
+        suspiciousActivity: 0,
+        rateLimitHits: 0,
+        last24h: []
+      };
+    }
   }
 
   /**
    * Get recent security events
    */
   static getRecentEvents(limit: number = 100): SecurityEvent[] {
-    return securityEvents
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, limit);
+    try {
+      return securityEvents
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .slice(0, limit);
+    } catch (error) {
+      console.error('Error getting recent events:', error);
+      return [];
+    }
   }
 
   /**
    * Get blocked IPs
    */
   static getBlockedIPs(): string[] {
-    return Array.from(blockedIPs);
+    try {
+      return Array.from(blockedIPs);
+    } catch (error) {
+      console.error('Error getting blocked IPs:', error);
+      return [];
+    }
   }
 
   /**

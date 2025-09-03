@@ -1,0 +1,332 @@
+"use client";
+
+import React from "react";
+import { cn } from "@/lib/utils";
+
+interface ChartData {
+  label: string;
+  value: number;
+  color?: string;
+}
+
+interface LineChartData {
+  label: string;
+  value: number;
+  date: string;
+}
+
+interface ChartProps {
+  data: ChartData[] | LineChartData[];
+  type: 'bar' | 'line' | 'pie' | 'area';
+  title?: string;
+  height?: number;
+  className?: string;
+}
+
+export function Chart({ data, type, title, height = 300, className }: ChartProps) {
+  if (!data || data.length === 0) {
+    return (
+      <div className={cn("flex items-center justify-center bg-neutral-50 dark:bg-neutral-800 rounded-lg", className)} style={{ height }}>
+        <div className="text-center">
+          <div className="text-4xl mb-2">📊</div>
+          <p className="text-neutral-600 dark:text-neutral-400">No data available</p>
+        </div>
+      </div>
+    );
+  }
+
+  const maxValue = Math.max(...data.map(d => d.value));
+  const colors = [
+    '#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6',
+    '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1'
+  ];
+
+  if (type === 'bar') {
+    return (
+      <div className={cn("bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6", className)}>
+        {title && <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">{title}</h3>}
+        <div className="space-y-3" style={{ height: height - 60 }}>
+          {(data as ChartData[]).map((item, index) => (
+            <div key={item.label} className="flex items-center gap-3">
+              <div className="w-20 text-sm text-neutral-600 dark:text-neutral-400 truncate">
+                {item.label}
+              </div>
+              <div className="flex-1 bg-neutral-200 dark:bg-neutral-700 rounded-full h-4 relative">
+                <div
+                  className="h-4 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${(item.value / maxValue) * 100}%`,
+                    backgroundColor: item.color || colors[index % colors.length]
+                  }}
+                />
+              </div>
+              <div className="w-16 text-sm font-medium text-neutral-900 dark:text-white text-right">
+                {item.value}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (type === 'line') {
+    const lineData = data as LineChartData[];
+    const svgWidth = 400;
+    const svgHeight = height - 60;
+    const padding = 40;
+    const chartWidth = svgWidth - (padding * 2);
+    const chartHeight = svgHeight - (padding * 2);
+
+    // Calculate points for the line
+    const points = lineData.map((item, index) => {
+      const x = padding + (index / (lineData.length - 1)) * chartWidth;
+      const y = padding + chartHeight - (item.value / maxValue) * chartHeight;
+      return { x, y, value: item.value, label: item.label, date: item.date };
+    });
+
+    // Create path for the line
+    const pathData = points.map((point, index) => 
+      `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
+    ).join(' ');
+
+    // Create area path
+    const areaPathData = `${pathData} L ${points[points.length - 1].x} ${padding + chartHeight} L ${points[0].x} ${padding + chartHeight} Z`;
+
+    return (
+      <div className={cn("bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6", className)}>
+        {title && <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">{title}</h3>}
+        <div className="relative">
+          <svg width={svgWidth} height={svgHeight} className="w-full">
+            {/* Grid lines */}
+            {[0, 0.25, 0.5, 0.75, 1].map((ratio) => (
+              <line
+                key={ratio}
+                x1={padding}
+                y1={padding + ratio * chartHeight}
+                x2={padding + chartWidth}
+                y2={padding + ratio * chartHeight}
+                stroke="currentColor"
+                strokeWidth={1}
+                className="text-neutral-200 dark:text-neutral-700"
+              />
+            ))}
+            
+            {/* Area */}
+            <path
+              d={areaPathData}
+              fill="url(#gradient)"
+              opacity={0.3}
+            />
+            
+            {/* Line */}
+            <path
+              d={pathData}
+              fill="none"
+              stroke="#3B82F6"
+              strokeWidth={2}
+            />
+            
+            {/* Points */}
+            {points.map((point, index) => (
+              <circle
+                key={index}
+                cx={point.x}
+                cy={point.y}
+                r={4}
+                fill="#3B82F6"
+                className="hover:r-6 transition-all cursor-pointer"
+              />
+            ))}
+            
+            {/* Gradient definition */}
+            <defs>
+              <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.3} />
+                <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+          </svg>
+          
+          {/* Y-axis labels */}
+          <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-neutral-600 dark:text-neutral-400">
+            {[maxValue, maxValue * 0.75, maxValue * 0.5, maxValue * 0.25, 0].map((value, index) => (
+              <span key={index} className="transform -translate-y-1">
+                {Math.round(value)}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (type === 'pie') {
+    const pieData = data as ChartData[];
+    const total = pieData.reduce((sum, item) => sum + item.value, 0);
+    let currentAngle = 0;
+    const radius = 80;
+    const centerX = 100;
+    const centerY = 100;
+
+    const segments = pieData.map((item, index) => {
+      const percentage = item.value / total;
+      const angle = percentage * 360;
+      const startAngle = currentAngle;
+      const endAngle = currentAngle + angle;
+      currentAngle += angle;
+
+      const startAngleRad = (startAngle * Math.PI) / 180;
+      const endAngleRad = (endAngle * Math.PI) / 180;
+
+      const x1 = centerX + radius * Math.cos(startAngleRad);
+      const y1 = centerY + radius * Math.sin(startAngleRad);
+      const x2 = centerX + radius * Math.cos(endAngleRad);
+      const y2 = centerY + radius * Math.sin(endAngleRad);
+
+      const largeArcFlag = angle > 180 ? 1 : 0;
+
+      const pathData = [
+        `M ${centerX} ${centerY}`,
+        `L ${x1} ${y1}`,
+        `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+        'Z'
+      ].join(' ');
+
+      return {
+        pathData,
+        color: item.color || colors[index % colors.length],
+        percentage: (percentage * 100).toFixed(1),
+        label: item.label,
+        value: item.value
+      };
+    });
+
+    return (
+      <div className={cn("bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6", className)}>
+        {title && <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">{title}</h3>}
+        <div className="flex items-center gap-6">
+          <div className="flex-shrink-0">
+            <svg width={200} height={200} className="w-48 h-48">
+              {segments.map((segment, index) => (
+                <path
+                  key={index}
+                  d={segment.pathData}
+                  fill={segment.color}
+                  stroke="white"
+                  strokeWidth={2}
+                  className="hover:opacity-80 transition-opacity cursor-pointer"
+                />
+              ))}
+            </svg>
+          </div>
+          <div className="flex-1 space-y-2">
+            {segments.map((segment, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <div
+                  className="w-4 h-4 rounded"
+                  style={{ backgroundColor: segment.color }}
+                />
+                <span className="text-sm text-neutral-600 dark:text-neutral-400 flex-1">
+                  {segment.label}
+                </span>
+                <span className="text-sm font-medium text-neutral-900 dark:text-white">
+                  {segment.percentage}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (type === 'area') {
+    const areaData = data as LineChartData[];
+    const svgWidth = 400;
+    const svgHeight = height - 60;
+    const padding = 40;
+    const chartWidth = svgWidth - (padding * 2);
+    const chartHeight = svgHeight - (padding * 2);
+
+    const points = areaData.map((item, index) => {
+      const x = padding + (index / (areaData.length - 1)) * chartWidth;
+      const y = padding + chartHeight - (item.value / maxValue) * chartHeight;
+      return { x, y, value: item.value, label: item.label, date: item.date };
+    });
+
+    const pathData = points.map((point, index) => 
+      `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
+    ).join(' ');
+
+    const areaPathData = `${pathData} L ${points[points.length - 1].x} ${padding + chartHeight} L ${points[0].x} ${padding + chartHeight} Z`;
+
+    return (
+      <div className={cn("bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6", className)}>
+        {title && <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">{title}</h3>}
+        <div className="relative">
+          <svg width={svgWidth} height={svgHeight} className="w-full">
+            {/* Grid lines */}
+            {[0, 0.25, 0.5, 0.75, 1].map((ratio) => (
+              <line
+                key={ratio}
+                x1={padding}
+                y1={padding + ratio * chartHeight}
+                x2={padding + chartWidth}
+                y2={padding + ratio * chartHeight}
+                stroke="currentColor"
+                strokeWidth={1}
+                className="text-neutral-200 dark:text-neutral-700"
+              />
+            ))}
+            
+            {/* Area */}
+            <path
+              d={areaPathData}
+              fill="url(#areaGradient)"
+            />
+            
+            {/* Line */}
+            <path
+              d={pathData}
+              fill="none"
+              stroke="#10B981"
+              strokeWidth={2}
+            />
+            
+            {/* Points */}
+            {points.map((point, index) => (
+              <circle
+                key={index}
+                cx={point.x}
+                cy={point.y}
+                r={3}
+                fill="#10B981"
+                className="hover:r-5 transition-all cursor-pointer"
+              />
+            ))}
+            
+            {/* Gradient definition */}
+            <defs>
+              <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#10B981" stopOpacity={0.4} />
+                <stop offset="100%" stopColor="#10B981" stopOpacity={0.1} />
+              </linearGradient>
+            </defs>
+          </svg>
+          
+          {/* Y-axis labels */}
+          <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-neutral-600 dark:text-neutral-400">
+            {[maxValue, maxValue * 0.75, maxValue * 0.5, maxValue * 0.25, 0].map((value, index) => (
+              <span key={index} className="transform -translate-y-1">
+                {Math.round(value)}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
