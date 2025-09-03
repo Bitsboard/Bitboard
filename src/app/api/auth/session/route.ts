@@ -39,11 +39,6 @@ export async function GET(req: Request) {
         const res = await db.prepare('SELECT id, email, username, sso, verified, created_at AS createdAt, image, has_chosen_username FROM users WHERE email = ?').bind(payload.email ?? '').all();
         userRow = res.results?.[0] ?? null;
         
-          found: !!userRow,
-          userCount: res.results?.length || 0,
-          user: userRow ? { id: userRow.id, email: userRow.email, username: userRow.username } : null
-        });
-        
         if (userRow) {
           try {
             const lres = await db.prepare('SELECT id, title, price_sat AS priceSat, COALESCE(pricing_type, "fixed") AS pricingType, created_at AS createdAt FROM listings WHERE posted_by = ? ORDER BY created_at DESC LIMIT 20').bind(userRow?.id ?? '').all();

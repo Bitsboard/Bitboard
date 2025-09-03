@@ -63,10 +63,6 @@ export async function GET(req: Request) {
       LIMIT ? OFFSET ?
     `).bind(limit, offset).all();
     
-      chatCount: chats.results?.length || 0,
-      chats: chats.results?.slice(0, 3) // Show first 3 chats for debugging
-    });
-    
     // For each chat, get message count and latest message
     const chatsWithDetails = await Promise.all(
       (chats.results || []).map(async (chat: any) => {

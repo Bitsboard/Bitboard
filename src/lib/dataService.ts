@@ -281,14 +281,6 @@ export class DataService {
         const userDeals = row.userDeals || 0;
         const userVerified = Boolean(row.userVerified);
 
-            postedBy: row.postedBy,
-            userRating: row.userRating,
-            userDeals: row.userDeals,
-            userVerified: row.userVerified,
-            userRatingType: typeof row.userRating,
-            userRatingValue: userRating
-        });
-
         return {
             name,
             score: userRating, // Rating is already the thumbs up count
