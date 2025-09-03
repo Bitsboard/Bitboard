@@ -82,7 +82,7 @@ export default function AnalyticsPage() {
     try {
       setLoading(true);
       const response = await fetch(`/api/admin/analytics?timeRange=${timeRange}`);
-      const result = await response.json();
+      const result = await response.json() as { success: boolean; data?: AnalyticsData; error?: string };
       
       if (result.success) {
         setAnalyticsData(result.data);
