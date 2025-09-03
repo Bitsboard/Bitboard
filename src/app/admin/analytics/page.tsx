@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Chart } from "@/components/Chart";
+import { WorldMap } from "@/components/WorldMap";
 
 interface AnalyticsData {
   overview: {
@@ -409,22 +410,28 @@ export default function AnalyticsPage() {
                   date: day.date,
                   value: day.users
                 }))}
-                type="line"
-                title="New Users Over Time"
+                type="timeseries"
+                title="Cumulative Users Over Time"
                 height={400}
                 xAxisLabel="Date"
-                yAxisLabel="New Users"
+                yAxisLabel="Total Users"
+                showTimeframeControls={true}
+                currentTimeframe={timeRange}
+                onTimeframeChange={setTimeRange}
               />
               <Chart
                 data={analyticsData.listingGrowth.map(day => ({
                   date: day.date,
                   value: day.listings
                 }))}
-                type="line"
-                title="New Listings Over Time"
+                type="timeseries"
+                title="Cumulative Listings Over Time"
                 height={400}
                 xAxisLabel="Date"
-                yAxisLabel="New Listings"
+                yAxisLabel="Total Listings"
+                showTimeframeControls={true}
+                currentTimeframe={timeRange}
+                onTimeframeChange={setTimeRange}
               />
             </div>
           </div>
@@ -541,17 +548,15 @@ export default function AnalyticsPage() {
         {/* Locations Tab */}
         {activeTab === 'locations' && (
           <div className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <WorldMap locations={analyticsData.userLocations} />
-              <InteractiveTable
-                data={analyticsData.userLocations}
-                columns={[
-                  { key: 'location', label: 'Location', sortable: true },
-                  { key: 'userCount', label: 'Users', sortable: true }
-                ]}
-                title="User Locations"
-              />
-            </div>
+            <WorldMap data={analyticsData.userLocations} />
+            <InteractiveTable
+              data={analyticsData.userLocations}
+              columns={[
+                { key: 'location', label: 'Location', sortable: true },
+                { key: 'userCount', label: 'Users', sortable: true }
+              ]}
+              title="User Locations"
+            />
           </div>
         )}
       </div>
