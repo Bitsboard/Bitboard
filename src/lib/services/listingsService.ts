@@ -5,7 +5,7 @@
 
 import { apiService, apiUtils } from './apiService';
 import { ErrorHandler } from '@/lib/error/errorHandler';
-import type { Listing, ListingsResponse, ListingsParams } from '@/lib/types';
+import type { Listing, ListingsResponse, ListingFilters } from '@/lib/types';
 
 export interface ListingsFilters {
   limit?: number;
