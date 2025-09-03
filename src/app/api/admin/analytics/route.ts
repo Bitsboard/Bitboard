@@ -48,7 +48,10 @@ export async function GET(req: NextRequest) {
       activeUsers24h,
       newUsers24h,
       newListings24h,
-      newChats24h
+      newChats24h,
+      users7dAgo,
+      listings7dAgo,
+      chats7dAgo
     ] = await Promise.all([
       // Total users
       db.prepare("SELECT COUNT(*) as count FROM users").first(),
@@ -75,18 +78,60 @@ export async function GET(req: NextRequest) {
       db.prepare("SELECT COUNT(*) as count FROM listings WHERE created_at > ?").bind(now - (24 * 60 * 60)).first(),
       
       // New chats in last 24h
-      db.prepare("SELECT COUNT(*) as count FROM chats WHERE created_at > ?").bind(now - (24 * 60 * 60)).first()
+      db.prepare("SELECT COUNT(*) as count FROM chats WHERE created_at > ?").bind(now - (24 * 60 * 60)).first(),
+      
+      // Users 7 days ago (for trend calculation)
+      db.prepare("SELECT COUNT(*) as count FROM users WHERE created_at <= ?").bind(now - (7 * 24 * 60 * 60)).first(),
+      
+      // Listings 7 days ago (for trend calculation)
+      db.prepare("SELECT COUNT(*) as count FROM listings WHERE created_at <= ?").bind(now - (7 * 24 * 60 * 60)).first(),
+      
+      // Chats 7 days ago (for trend calculation)
+      db.prepare("SELECT COUNT(*) as count FROM chats WHERE created_at <= ?").bind(now - (7 * 24 * 60 * 60)).first()
     ]);
 
-    // Get user growth data (all users, not just recent ones)
+    // Get user growth data (cumulative over time)
     const userGrowthResult = await db.prepare(`
-      SELECT 
-        DATE(datetime(created_at, 'unixepoch')) as date,
-        COUNT(*) as users,
-        COUNT(*) as newUsers
-      FROM users 
-      WHERE created_at > ?
-      GROUP BY DATE(datetime(created_at, 'unixepoch'))
+      WITH daily_users AS (
+        SELECT 
+          DATE(datetime(created_at, 'unixepoch')) as date,
+          COUNT(*) as newUsers
+        FROM users 
+        WHERE created_at > ?
+        GROUP BY DATE(datetime(created_at, 'unixepoch'))
+        ORDER BY date ASC
+      ),
+      cumulative_users AS (
+        SELECT 
+          date,
+          newUsers,
+          SUM(newUsers) OVER (ORDER BY date) as totalUsers
+        FROM daily_users
+      )
+      SELECT * FROM cumulative_users
+      ORDER BY date DESC
+      LIMIT 30
+    `).bind(timeBoundary).all();
+
+    // Get listing growth data (cumulative over time)
+    const listingGrowthResult = await db.prepare(`
+      WITH daily_listings AS (
+        SELECT 
+          DATE(datetime(created_at, 'unixepoch')) as date,
+          COUNT(*) as newListings
+        FROM listings 
+        WHERE created_at > ?
+        GROUP BY DATE(datetime(created_at, 'unixepoch'))
+        ORDER BY date ASC
+      ),
+      cumulative_listings AS (
+        SELECT 
+          date,
+          newListings,
+          SUM(newListings) OVER (ORDER BY date) as totalListings
+        FROM daily_listings
+      )
+      SELECT * FROM cumulative_listings
       ORDER BY date DESC
       LIMIT 30
     `).bind(timeBoundary).all();
@@ -183,22 +228,42 @@ export async function GET(req: NextRequest) {
       rateLimitHits: securityMetrics.rateLimitHits
     };
 
+    // Calculate 7-day trends
+    const currentUsers = (totalUsers as any)?.count || 0;
+    const currentListings = (totalListings as any)?.count || 0;
+    const currentChats = (totalChats as any)?.count || 0;
+    const users7dAgoCount = (users7dAgo as any)?.count || 0;
+    const listings7dAgoCount = (listings7dAgo as any)?.count || 0;
+    const chats7dAgoCount = (chats7dAgo as any)?.count || 0;
+
+    const userTrend7d = users7dAgoCount > 0 ? ((currentUsers - users7dAgoCount) / users7dAgoCount * 100) : 0;
+    const listingTrend7d = listings7dAgoCount > 0 ? ((currentListings - listings7dAgoCount) / listings7dAgoCount * 100) : 0;
+    const chatTrend7d = chats7dAgoCount > 0 ? ((currentChats - chats7dAgoCount) / chats7dAgoCount * 100) : 0;
+
     const analyticsData = {
       overview: {
-        totalUsers: (totalUsers as any)?.count || 0,
-        totalListings: (totalListings as any)?.count || 0,
-        totalChats: (totalChats as any)?.count || 0,
+        totalUsers: currentUsers,
+        totalListings: currentListings,
+        totalChats: currentChats,
         totalMessages: (totalMessages as any)?.count || 0,
         totalOffers: (totalOffers as any)?.count || 0,
         activeUsers24h: (activeUsers24h as any)?.count || 0,
         newUsers24h: (newUsers24h as any)?.count || 0,
         newListings24h: (newListings24h as any)?.count || 0,
-        newChats24h: (newChats24h as any)?.count || 0
+        newChats24h: (newChats24h as any)?.count || 0,
+        userTrend7d: Math.round(userTrend7d * 10) / 10,
+        listingTrend7d: Math.round(listingTrend7d * 10) / 10,
+        chatTrend7d: Math.round(chatTrend7d * 10) / 10
       },
       userGrowth: (userGrowthResult.results || []).map((row: any) => ({
         date: row.date,
-        users: row.users,
+        users: row.totalUsers,
         newUsers: row.newUsers
+      })),
+      listingGrowth: (listingGrowthResult.results || []).map((row: any) => ({
+        date: row.date,
+        listings: row.totalListings,
+        newListings: row.newListings
       })),
       listingStats: (listingStatsResult.results || []).map((row: any) => ({
         category: row.category,

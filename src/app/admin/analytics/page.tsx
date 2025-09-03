@@ -226,8 +226,13 @@ export default function AdminAnalyticsPage() {
                         </svg>
                       </div>
                     </div>
-                    <div className="mt-2 text-xs text-green-600 dark:text-green-400">
-                      +{analyticsData.overview.newUsers24h} in last 24h
+                    <div className="mt-2 flex items-center justify-between">
+                      <div className="text-xs text-green-600 dark:text-green-400">
+                        +{analyticsData.overview.newUsers24h} in last 24h
+                      </div>
+                      <div className={`text-xs font-medium ${analyticsData.overview.userTrend7d >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {analyticsData.overview.userTrend7d >= 0 ? '+' : ''}{analyticsData.overview.userTrend7d}% 7d
+                      </div>
                     </div>
                   </div>
 
@@ -245,8 +250,13 @@ export default function AdminAnalyticsPage() {
                         </svg>
                       </div>
                     </div>
-                    <div className="mt-2 text-xs text-green-600 dark:text-green-400">
-                      +{analyticsData.overview.newListings24h} in last 24h
+                    <div className="mt-2 flex items-center justify-between">
+                      <div className="text-xs text-green-600 dark:text-green-400">
+                        +{analyticsData.overview.newListings24h} in last 24h
+                      </div>
+                      <div className={`text-xs font-medium ${analyticsData.overview.listingTrend7d >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {analyticsData.overview.listingTrend7d >= 0 ? '+' : ''}{analyticsData.overview.listingTrend7d}% 7d
+                      </div>
                     </div>
                   </div>
 
@@ -264,8 +274,13 @@ export default function AdminAnalyticsPage() {
                         </svg>
                       </div>
                     </div>
-                    <div className="mt-2 text-xs text-green-600 dark:text-green-400">
-                      +{analyticsData.overview.newChats24h} in last 24h
+                    <div className="mt-2 flex items-center justify-between">
+                      <div className="text-xs text-green-600 dark:text-green-400">
+                        +{analyticsData.overview.newChats24h} in last 24h
+                      </div>
+                      <div className={`text-xs font-medium ${analyticsData.overview.chatTrend7d >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {analyticsData.overview.chatTrend7d >= 0 ? '+' : ''}{analyticsData.overview.chatTrend7d}% 7d
+                      </div>
                     </div>
                   </div>
 
@@ -307,10 +322,10 @@ export default function AdminAnalyticsPage() {
                   />
 
                   <Chart
-                    data={analyticsData.userGrowth.map(day => ({
+                    data={analyticsData.listingGrowth?.map(day => ({
                       date: day.date,
-                      value: Math.floor(day.users * 0.3) // Approximate listings based on user growth
-                    }))}
+                      value: day.listings
+                    })) || []}
                     type="timeseries"
                     title="Listings Growth Over Time"
                     height={350}
