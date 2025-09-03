@@ -1,5 +1,6 @@
 export const runtime = 'edge';
 
+import { NextResponse } from 'next/server';
 import { getAuthSecret, verifyJwtHS256 } from '@/lib/auth';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 
