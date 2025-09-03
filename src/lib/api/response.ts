@@ -154,7 +154,7 @@ export function handleApiError(
 ): NextResponse<ApiResponse> {
   let appError: AppError;
   
-  if (error instanceof Error && 'code' in error) {
+  if (error instanceof Error && 'code' in error && 'statusCode' in error) {
     // Already an AppError
     appError = error as AppError;
   } else if (error?.message?.includes('Unauthorized')) {
