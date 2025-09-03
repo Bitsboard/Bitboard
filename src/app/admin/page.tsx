@@ -607,13 +607,13 @@ export default function AdminPage() {
                   </button>
                   <button 
                     onClick={() => router.push('/admin/analytics')}
-                    className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors"
+                    className="px-3 py-2 bg-neutral-500 hover:bg-neutral-600 text-white text-sm font-medium rounded-lg transition-colors"
                   >
                     View Analytics
                   </button>
                   <button 
                     onClick={() => router.push('/admin/security')}
-                    className="px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors"
+                    className="px-3 py-2 bg-black hover:bg-neutral-800 text-white text-sm font-medium rounded-lg transition-colors"
                   >
                     Security Center
                   </button>
