@@ -11,6 +11,13 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'no_db_binding' }, { status: 500 });
     }
 
+    // Get pagination and filter parameters
+    const url = new URL(req.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const limit = parseInt(url.searchParams.get('limit') || '20');
+    const offset = (page - 1) * limit;
+    const filter = url.searchParams.get('filter') || 'all';
+
     // Ensure chat schema exists
     await ensureChatSchema(db);
 
@@ -114,6 +121,7 @@ export async function GET(req: Request) {
       LIMIT 20
     `).all();
 
+    // Get only the most recent message per conversation
     const recentMessages = await db.prepare(`
       SELECT 
         'message' as type,
@@ -135,7 +143,7 @@ export async function GET(req: Request) {
           ELSE c.buyer_id
         END as other_user_id,
         m.chat_id as chat_id,
-        (SELECT COUNT(*) FROM messages WHERE chat_id = m.chat_id AND created_at <= m.created_at) as message_count,
+        (SELECT COUNT(*) FROM messages WHERE chat_id = m.chat_id) as message_count,
         NULL as offer_amount,
         NULL as offer_expires_at,
         NULL as offer_status
@@ -143,12 +151,18 @@ export async function GET(req: Request) {
       JOIN users u ON m.from_id = u.id
       JOIN chats c ON m.chat_id = c.id
       JOIN listings l ON c.listing_id = l.id
-      WHERE m.created_at >= strftime('%s', 'now', '-7 days')
+      WHERE m.id = (
+        SELECT id FROM messages 
+        WHERE chat_id = m.chat_id 
+        ORDER BY created_at DESC 
+        LIMIT 1
+      )
+      AND m.created_at >= strftime('%s', 'now', '-7 days')
       ORDER BY m.created_at DESC
-      LIMIT 40
+      LIMIT 20
     `).all();
 
-    // Get recent offer activity
+    // Get ALL offer activity (not just recent ones)
     const recentOffers = await db.prepare(`
       SELECT 
         'offer' as type,
@@ -181,12 +195,8 @@ export async function GET(req: Request) {
       JOIN users to_user ON o.to_user_id = to_user.id
       JOIN chats c ON o.chat_id = c.id
       JOIN listings l ON o.listing_id = l.id
-      WHERE (
-        o.created_at >= strftime('%s', 'now', '-7 days') OR 
-        o.updated_at >= strftime('%s', 'now', '-7 days')
-      )
       ORDER BY timestamp DESC
-      LIMIT 30
+      LIMIT 50
     `).all();
     
 
@@ -196,7 +206,22 @@ export async function GET(req: Request) {
       ...recentListings.results || [],
       ...recentMessages.results || [],
       ...recentOffers.results || []
-    ].sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 50);
+    ].sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0));
+
+    // Apply filter to activity
+    const filteredActivity = allActivity.filter((activity: any) => {
+      if (filter === 'all') return true;
+      if (filter === 'users') return activity.type === 'user';
+      if (filter === 'listings') return activity.type === 'listing';
+      if (filter === 'conversations') return activity.type === 'message';
+      if (filter === 'offers') return activity.type === 'offer';
+      return true;
+    });
+
+    // Apply pagination to filtered activity
+    const paginatedActivity = filteredActivity.slice(offset, offset + limit);
+    const totalActivity = filteredActivity.length;
+    const totalPages = Math.ceil(totalActivity / limit);
 
     const stats = {
       users: {
@@ -234,7 +259,15 @@ export async function GET(req: Request) {
         new30d: Number(offerStats.results?.[0]?.new_offers_30d) || 0,
         avgAmount: Math.round(Number(offerStats.results?.[0]?.avg_offer_amount) || 0)
       },
-      recentActivity: allActivity
+      recentActivity: paginatedActivity,
+      pagination: {
+        page,
+        limit,
+        total: totalActivity,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1
+      }
     };
 
     return NextResponse.json({ success: true, data: stats });

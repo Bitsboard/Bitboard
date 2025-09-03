@@ -50,6 +50,14 @@ interface AdminStats {
     offer_expires_at?: number; // Added for offer expiration
     offer_status?: string; // Added for offer status
   }>;
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
 }
 
 interface ActivityItem {
@@ -101,7 +109,7 @@ export default function AdminPage() {
       setIsAuthenticated(true);
       loadStats();
     }
-  }, []);
+  }, [loadStats]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -183,14 +191,18 @@ export default function AdminPage() {
     setNotificationSuccess(null);
   };
 
-  const loadStats = async () => {
+  const loadStats = async (page: number = currentPage) => {
     try {
       setStatsLoading(true);
-      const response = await fetch('/api/admin/stats');
+      const response = await fetch(`/api/admin/stats?page=${page}&limit=${itemsPerPage}&filter=${activityFilter}`);
       if (response.ok) {
         const data = await response.json() as { success: boolean; data?: AdminStats };
         if (data.success && data.data) {
           setStats(data.data);
+          if (data.data.pagination) {
+            setTotalPages(data.data.pagination.totalPages);
+            setCurrentPage(data.data.pagination.page);
+          }
         }
       }
     } catch (error) {
@@ -213,35 +225,14 @@ export default function AdminPage() {
   };
 
   // Filter recent activity based on selected filter
-  const filteredActivity = stats?.recentActivity?.filter(activity => {
-    if (activityFilter === 'all') return true;
-    if (activityFilter === 'users') return activity.type === 'user';
-    if (activityFilter === 'listings') return activity.type === 'listing';
-    if (activityFilter === 'conversations') return activity.type === 'message'; // Only show messages, not conversation starts
-    if (activityFilter === 'offers') return activity.type === 'offer';
-    return false;
-  }) || [];
+  // Use server-side paginated activity directly
+  const paginatedActivity = stats?.recentActivity || [];
 
-  // Paginate the filtered activity
-  const paginatedActivity = filteredActivity.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  // Calculate total pages
-  useEffect(() => {
-    const total = Math.ceil(filteredActivity.length / itemsPerPage);
-    setTotalPages(total);
-    // Reset to first page if current page is out of bounds
-    if (currentPage > total && total > 0) {
-      setCurrentPage(1);
-    }
-  }, [filteredActivity.length, currentPage, itemsPerPage]);
-
-  // Reset to first page when filter changes
+  // Reset to first page when filter changes and reload data
   useEffect(() => {
     setCurrentPage(1);
-  }, [activityFilter]);
+    loadStats(1);
+  }, [activityFilter, loadStats]);
 
   // Get action color based on action type
   const getActionColor = (action: string) => {
@@ -526,7 +517,7 @@ export default function AdminPage() {
             
             <div className="flex items-center gap-4">
               <button
-                onClick={loadStats}
+                onClick={() => loadStats(currentPage)}
                 disabled={statsLoading}
                 className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
               >
@@ -881,19 +872,19 @@ export default function AdminPage() {
                 {totalPages > 1 && (
                   <div className="flex justify-between items-center py-3 px-4 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800">
                     <div className="text-xs text-neutral-600 dark:text-neutral-400">
-                      Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredActivity.length)} of {filteredActivity.length} activities
+                      Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, stats?.pagination?.total || 0)} of {stats?.pagination?.total || 0} activities
                     </div>
                     
                     <div className="flex items-center gap-1">
                       <button
-                        onClick={() => setCurrentPage(1)}
+                        onClick={() => loadStats(1)}
                         disabled={currentPage === 1}
                         className="px-2 py-1 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
                         First
                       </button>
                       <button
-                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        onClick={() => loadStats(Math.max(1, currentPage - 1))}
                         disabled={currentPage === 1}
                         className="px-2 py-1 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
@@ -905,14 +896,14 @@ export default function AdminPage() {
                       </span>
                       
                       <button
-                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        onClick={() => loadStats(Math.min(totalPages, currentPage + 1))}
                         disabled={currentPage === totalPages}
                         className="px-2 py-1 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
                         Next
                       </button>
                       <button
-                        onClick={() => setCurrentPage(totalPages)}
+                        onClick={() => loadStats(totalPages)}
                         disabled={currentPage === totalPages}
                         className="px-2 py-1 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
