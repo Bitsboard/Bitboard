@@ -90,30 +90,48 @@ export async function GET(req: NextRequest) {
       db.prepare("SELECT COUNT(*) as count FROM chats WHERE created_at <= ?").bind(now - (7 * 24 * 60 * 60)).first()
     ]);
 
-    // Get user growth data (simplified and optimized)
+    // Get user growth data - show last x days with cumulative totals
     const userGrowthResult = await db.prepare(`
-      SELECT 
-        DATE(datetime(created_at, 'unixepoch')) as date,
-        COUNT(*) as newUsers,
-        (SELECT COUNT(*) FROM users WHERE DATE(datetime(created_at, 'unixepoch')) <= DATE(datetime(users.created_at, 'unixepoch'))) as totalUsers
-      FROM users 
-      WHERE created_at > ?
-      GROUP BY DATE(datetime(created_at, 'unixepoch'))
-      ORDER BY date ASC
-      LIMIT 30
+      WITH date_range AS (
+        SELECT DISTINCT DATE(datetime(created_at, 'unixepoch')) as date
+        FROM users 
+        WHERE created_at > ?
+        ORDER BY date DESC
+        LIMIT 30
+      ),
+      daily_data AS (
+        SELECT 
+          dr.date,
+          COUNT(u.id) as newUsers,
+          (SELECT COUNT(*) FROM users WHERE DATE(datetime(created_at, 'unixepoch')) <= dr.date) as totalUsers
+        FROM date_range dr
+        LEFT JOIN users u ON DATE(datetime(u.created_at, 'unixepoch')) = dr.date
+        GROUP BY dr.date
+        ORDER BY dr.date ASC
+      )
+      SELECT * FROM daily_data
     `).bind(timeBoundary).all();
 
-    // Get listing growth data (simplified and optimized)
+    // Get listing growth data - show last x days with cumulative totals
     const listingGrowthResult = await db.prepare(`
-      SELECT 
-        DATE(datetime(created_at, 'unixepoch')) as date,
-        COUNT(*) as newListings,
-        (SELECT COUNT(*) FROM listings WHERE DATE(datetime(created_at, 'unixepoch')) <= DATE(datetime(listings.created_at, 'unixepoch'))) as totalListings
-      FROM listings 
-      WHERE created_at > ?
-      GROUP BY DATE(datetime(created_at, 'unixepoch'))
-      ORDER BY date ASC
-      LIMIT 30
+      WITH date_range AS (
+        SELECT DISTINCT DATE(datetime(created_at, 'unixepoch')) as date
+        FROM listings 
+        WHERE created_at > ?
+        ORDER BY date DESC
+        LIMIT 30
+      ),
+      daily_data AS (
+        SELECT 
+          dr.date,
+          COUNT(l.id) as newListings,
+          (SELECT COUNT(*) FROM listings WHERE DATE(datetime(created_at, 'unixepoch')) <= dr.date) as totalListings
+        FROM date_range dr
+        LEFT JOIN listings l ON DATE(datetime(l.created_at, 'unixepoch')) = dr.date
+        GROUP BY dr.date
+        ORDER BY dr.date ASC
+      )
+      SELECT * FROM daily_data
     `).bind(timeBoundary).all();
 
     // Get listing statistics by category (all listings, not just recent ones)
