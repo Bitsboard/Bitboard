@@ -2,8 +2,19 @@ export const runtime = 'edge';
 
 import { createCookie, deleteCookie, getAuthSecret, signJwtHS256, generateUserId } from '@/lib/auth';
 import { getRequestContext } from '@cloudflare/next-on-pages';
+import { applyAPISecurity, secureResponse, logAPIUsage } from '@/lib/middleware/apiSecurity';
+import { SecurityMonitor } from '@/lib/security/securityMonitor';
 
 export async function GET(req: Request) {
+  const startTime = Date.now();
+  const endpoint = '/api/auth/callback';
+  
+  // Apply security checks
+  const securityCheck = applyAPISecurity(req, endpoint);
+  if (securityCheck) {
+    return securityCheck;
+  }
+
   const url = new URL(req.url);
   const code = url.searchParams.get('code');
   const stateParam = url.searchParams.get('state') || '';
@@ -13,8 +24,17 @@ export async function GET(req: Request) {
   const getCookie = (name: string) => new RegExp(`(?:^|; )${name}=([^;]+)`).exec(cookieHeader)?.[1];
   const oauthState = getCookie('oauth_state');
   const verifier = getCookie('oauth_verifier');
+  
   if (!code || !state || !oauthState || state !== oauthState || !verifier) {
-    return new Response('Invalid state', { status: 400 });
+    // Log failed authentication attempt
+    const ip = SecurityMonitor.getClientIP(req);
+    const userAgent = req.headers.get('user-agent') || 'unknown';
+    SecurityMonitor.logFailedLogin(ip, userAgent, 'Invalid OAuth state');
+    
+    const responseTime = Date.now() - startTime;
+    logAPIUsage(req, endpoint, 400, responseTime);
+    
+    return secureResponse({ error: 'Invalid state' }, 400);
   }
 
   const clientId = process.env.GOOGLE_CLIENT_ID || '';
@@ -33,13 +53,31 @@ export async function GET(req: Request) {
   });
   if (!tokenRes.ok) {
     const txt = await tokenRes.text();
-    return new Response(`Token exchange failed: ${txt}`, { status: 400 });
+    // Log failed authentication attempt
+    const ip = SecurityMonitor.getClientIP(req);
+    const userAgent = req.headers.get('user-agent') || 'unknown';
+    SecurityMonitor.logFailedLogin(ip, userAgent, 'Token exchange failed');
+    
+    const responseTime = Date.now() - startTime;
+    logAPIUsage(req, endpoint, 400, responseTime);
+    
+    return secureResponse({ error: `Token exchange failed: ${txt}` }, 400);
   }
   const tokenJson = await tokenRes.json() as any;
   const userRes = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
     headers: { Authorization: `Bearer ${tokenJson.access_token}` },
   });
-  if (!userRes.ok) return new Response('Failed to fetch user', { status: 400 });
+  if (!userRes.ok) {
+    // Log failed authentication attempt
+    const ip = SecurityMonitor.getClientIP(req);
+    const userAgent = req.headers.get('user-agent') || 'unknown';
+    SecurityMonitor.logFailedLogin(ip, userAgent, 'Failed to fetch user info');
+    
+    const responseTime = Date.now() - startTime;
+    logAPIUsage(req, endpoint, 400, responseTime);
+    
+    return secureResponse({ error: 'Failed to fetch user' }, 400);
+  }
   const user = await userRes.json() as any;
 
   // Upsert user in D1 users table
@@ -164,11 +202,31 @@ export async function GET(req: Request) {
     exp: expiresSec,
   }, secret);
 
+  // Log successful authentication
+  const ip = SecurityMonitor.getClientIP(req);
+  const userAgent = req.headers.get('user-agent') || 'unknown';
+  SecurityMonitor.logEvent({
+    type: 'admin_action',
+    severity: 'low',
+    ip,
+    userAgent,
+    details: { action: 'successful_login', email: user.email }
+  });
+
+  const responseTime = Date.now() - startTime;
+  logAPIUsage(req, endpoint, 302, responseTime);
+
   const headers = new Headers();
   headers.append('Set-Cookie', createCookie('session', jwt, { httpOnly: true, maxAgeSec: 60 * 60 * 24 * 7 }));
   headers.append('Set-Cookie', deleteCookie('oauth_state'));
   headers.append('Set-Cookie', deleteCookie('oauth_verifier'));
   headers.append('Location', redirect);
+  
+  // Add security headers
+  headers.append('X-Content-Type-Options', 'nosniff');
+  headers.append('X-Frame-Options', 'DENY');
+  headers.append('X-XSS-Protection', '1; mode=block');
+  
   return new Response(null, { status: 302, headers });
 }
 
