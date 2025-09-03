@@ -16,11 +16,19 @@ interface AnalyticsData {
     newUsers24h: number;
     newListings24h: number;
     newChats24h: number;
+    userTrend7d: number;
+    listingTrend7d: number;
+    chatTrend7d: number;
   };
   userGrowth: Array<{
     date: string;
     users: number;
     newUsers: number;
+  }>;
+  listingGrowth: Array<{
+    date: string;
+    listings: number;
+    newListings: number;
   }>;
   listingStats: Array<{
     category: string;
