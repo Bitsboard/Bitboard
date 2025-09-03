@@ -199,12 +199,6 @@ const countryMapping: Record<string, string> = {
   "Erebus Ice Tongue": "Erebus Ice Tongue",
   "Mackay Ice Tongue": "Mackay Ice Tongue",
   "Borchgrevink Ice Tongue": "Borchgrevink Ice Tongue",
-  "Terra Nova Ice Tongue": "Terra Nova Ice Tongue",
-  "Drygalski Ice Tongue": "Drygalski Ice Tongue",
-  "Mertz Ice Tongue": "Mertz Ice Tongue",
-  "Erebus Ice Tongue": "Erebus Ice Tongue",
-  "Mackay Ice Tongue": "Mackay Ice Tongue",
-  "Borchgrevink Ice Tongue": "Borchgrevink Ice Tongue",
   "Terra Nova Ice Tongue": "Terra Nova Ice Tongue"
 };
 
