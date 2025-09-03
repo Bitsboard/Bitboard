@@ -315,7 +315,7 @@ export default function AdminAnalyticsPage() {
                 {/* Charts */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <Chart
-                    data={analyticsData.userGrowth.map(day => ({
+                    data={analyticsData.userGrowth.slice().reverse().map(day => ({
                       date: day.date,
                       value: day.users
                     }))}
@@ -330,7 +330,7 @@ export default function AdminAnalyticsPage() {
                   />
 
                   <Chart
-                    data={analyticsData.listingGrowth?.map(day => ({
+                    data={analyticsData.listingGrowth?.slice().reverse().map(day => ({
                       date: day.date,
                       value: day.listings
                     })) || []}

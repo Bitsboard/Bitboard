@@ -90,49 +90,29 @@ export async function GET(req: NextRequest) {
       db.prepare("SELECT COUNT(*) as count FROM chats WHERE created_at <= ?").bind(now - (7 * 24 * 60 * 60)).first()
     ]);
 
-    // Get user growth data (cumulative over time) - show actual total users by date
+    // Get user growth data (simplified and optimized)
     const userGrowthResult = await db.prepare(`
-      WITH date_series AS (
-        SELECT DISTINCT DATE(datetime(created_at, 'unixepoch')) as date
-        FROM users 
-        WHERE created_at > ?
-        ORDER BY date ASC
-      ),
-      daily_totals AS (
-        SELECT 
-          ds.date,
-          COUNT(u.id) as totalUsers,
-          COUNT(CASE WHEN DATE(datetime(u.created_at, 'unixepoch')) = ds.date THEN u.id END) as newUsers
-        FROM date_series ds
-        LEFT JOIN users u ON DATE(datetime(u.created_at, 'unixepoch')) <= ds.date
-        GROUP BY ds.date
-        ORDER BY ds.date ASC
-      )
-      SELECT * FROM daily_totals
-      ORDER BY date DESC
+      SELECT 
+        DATE(datetime(created_at, 'unixepoch')) as date,
+        COUNT(*) as newUsers,
+        (SELECT COUNT(*) FROM users WHERE DATE(datetime(created_at, 'unixepoch')) <= DATE(datetime(users.created_at, 'unixepoch'))) as totalUsers
+      FROM users 
+      WHERE created_at > ?
+      GROUP BY DATE(datetime(created_at, 'unixepoch'))
+      ORDER BY date ASC
       LIMIT 30
     `).bind(timeBoundary).all();
 
-    // Get listing growth data (cumulative over time) - show actual total listings by date
+    // Get listing growth data (simplified and optimized)
     const listingGrowthResult = await db.prepare(`
-      WITH date_series AS (
-        SELECT DISTINCT DATE(datetime(created_at, 'unixepoch')) as date
-        FROM listings 
-        WHERE created_at > ?
-        ORDER BY date ASC
-      ),
-      daily_totals AS (
-        SELECT 
-          ds.date,
-          COUNT(l.id) as totalListings,
-          COUNT(CASE WHEN DATE(datetime(l.created_at, 'unixepoch')) = ds.date THEN l.id END) as newListings
-        FROM date_series ds
-        LEFT JOIN listings l ON DATE(datetime(l.created_at, 'unixepoch')) <= ds.date
-        GROUP BY ds.date
-        ORDER BY ds.date ASC
-      )
-      SELECT * FROM daily_totals
-      ORDER BY date DESC
+      SELECT 
+        DATE(datetime(created_at, 'unixepoch')) as date,
+        COUNT(*) as newListings,
+        (SELECT COUNT(*) FROM listings WHERE DATE(datetime(created_at, 'unixepoch')) <= DATE(datetime(listings.created_at, 'unixepoch'))) as totalListings
+      FROM listings 
+      WHERE created_at > ?
+      GROUP BY DATE(datetime(created_at, 'unixepoch'))
+      ORDER BY date ASC
       LIMIT 30
     `).bind(timeBoundary).all();
 
