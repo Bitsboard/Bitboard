@@ -4,9 +4,6 @@ import { NextResponse } from 'next/server';
 
 export async function GET(req: Request) {
   try {
-    console.log('🔍 Admin Listings API: Request started');
-    console.log('🔍 Admin Listings API: Request URL:', req.url);
-    console.log('🔍 Admin Listings API: Request method:', req.method);
     
     const url = new URL(req.url);
     const limit = Math.min(100, parseInt(url.searchParams.get('limit') ?? '20', 10) || 20);
@@ -16,18 +13,11 @@ export async function GET(req: Request) {
     const searchQuery = url.searchParams.get('q') || '';
     const searchById = url.searchParams.get('id') || '';
     
-    console.log('🔍 Admin Listings API: Parsed URL parameters - limit:', limit, 'offset:', offset, 'sortBy:', sortBy, 'sortOrder:', sortOrder, 'searchQuery:', searchQuery, 'searchById:', searchById);
-    console.log('🔍 Admin Listings API: Raw limit param:', url.searchParams.get('limit'));
-    console.log('🔍 Admin Listings API: Raw offset param:', url.searchParams.get('offset'));
-    console.log('🔍 Admin Listings API: Raw sortBy param:', url.searchParams.get('sortBy'));
-    console.log('🔍 Admin Listings API: Raw sortOrder param:', url.searchParams.get('sortOrder'));
     
     // Get database connection using the same method as main listings API
-    console.log('🔍 Admin Listings API: Attempting to get database binding...');
     
     const mod = await import("@cloudflare/next-on-pages").catch(() => null as any);
     if (!mod || typeof mod.getRequestContext !== "function") {
-      console.log('🔍 Admin Listings API: Cloudflare adapter missing');
       return NextResponse.json({ 
         success: false,
         error: 'Cloudflare adapter not available'
@@ -38,22 +28,16 @@ export async function GET(req: Request) {
     const db = env.DB;
     
     if (!db) {
-      console.log('🔍 Admin Listings API: No database binding');
       return NextResponse.json({ 
         success: false,
         error: 'Database connection not available'
       }, { status: 500 });
     }
     
-    console.log('✅ Database connection established');
-    console.log('🔍 Admin Listings API: Database object type:', typeof db);
-    console.log('🔍 Admin Listings API: Database object keys:', Object.keys(db));
     
     // Test basic database functionality
-    console.log('🔍 Admin Listings API: Testing basic database functionality...');
     try {
       const testResult = await db.prepare('SELECT 1 as test').all();
-      console.log('🔍 Admin Listings API: Basic test query successful:', testResult);
     } catch (testError: any) {
       console.error('🔍 Admin Listings API: Basic test query failed:', testError);
       console.error('🔍 Admin Listings API: Test error message:', testError?.message);
@@ -66,13 +50,10 @@ export async function GET(req: Request) {
     }
 
     // Check if listings table exists
-    console.log('🔍 Admin Listings API: Checking if listings table exists...');
     try {
       const tableCheck = await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='listings'").all();
-      console.log('🔍 Admin Listings API: Table check result:', tableCheck);
       
       if (!tableCheck.results || tableCheck.results.length === 0) {
-        console.log('🔍 Admin Listings API: Listings table does not exist');
         return NextResponse.json({ 
           success: false,
           error: 'Listings table not found'
@@ -89,7 +70,6 @@ export async function GET(req: Request) {
     }
     
     // Now use the correct query based on actual database schema
-    console.log('🔍 Admin Listings API: Executing corrected query...');
     
     // Map frontend column names to database column names
     const sortColumnMap: { [key: string]: string } = {
@@ -147,15 +127,9 @@ export async function GET(req: Request) {
       LIMIT ? OFFSET ?
     `;
     
-    console.log('🔍 Admin Listings API: Executing query with limit:', limit, 'offset:', offset);
-    console.log('🔍 Admin Listings API: Query:', listingsQuery);
-    console.log('🔍 Admin Listings API: Bind params:', bindParams);
     
     try {
       const res = await db.prepare(listingsQuery).bind(...bindParams, limit, offset).all();
-      console.log('🔍 Admin Listings API: Query result count:', res.results?.length || 0);
-      console.log('🔍 Admin Listings API: Query success:', res.success);
-      console.log('🔍 Admin Listings API: First result sample:', res.results?.[0] || 'No results');
       
       // Get total count with same search conditions
       let countQuery = 'SELECT COUNT(*) AS total FROM listings l';
@@ -168,7 +142,6 @@ export async function GET(req: Request) {
       const countResult = await db.prepare(countQuery).bind(...bindParams).all();
       const total = countResult.results?.[0]?.total || 0;
       
-      console.log('🔍 Admin Listings API: Total listings in database:', total);
       
       return NextResponse.json({ 
         success: true,

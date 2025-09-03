@@ -5,7 +5,6 @@ import { getD1 } from '@/lib/cf';
 
 export async function GET(req: Request) {
   try {
-    console.log('🔍 Test Listings API: Request started');
     
     // Get database connection
     const db = await getD1();

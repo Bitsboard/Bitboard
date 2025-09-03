@@ -53,7 +53,6 @@ async function fetchBtcRateFromProviders(): Promise<number | null> {
       if (response.ok) {
         const rate = await provider.parser(response);
         if (rate && Number.isFinite(rate)) {
-          console.log(`BTC rate updated from ${provider.name}: ${rate}`);
           return rate;
         }
       }
@@ -67,12 +66,10 @@ async function fetchBtcRateFromProviders(): Promise<number | null> {
 
 export async function GET() {
   const now = Date.now();
-  console.log('BTC rate API called, current cache:', serverBtcRateCache);
 
   // Check if we need to update the rate
   if (now - serverBtcRateCache.lastUpdate >= UPDATE_INTERVAL) {
     try {
-      console.log('Updating BTC rate from external providers...');
       const newRate = await fetchBtcRateFromProviders();
       
       if (newRate && Number.isFinite(newRate)) {
@@ -81,11 +78,9 @@ export async function GET() {
           timestamp: now,
           lastUpdate: now
         };
-        console.log('BTC rate updated successfully to:', newRate);
       } else if (serverBtcRateCache.rate) {
         // If we couldn't get a new rate but have a cached one, keep using it
         serverBtcRateCache.lastUpdate = now;
-        console.log('Using cached BTC rate:', serverBtcRateCache.rate);
       } else {
         console.warn('No valid rate available, using default fallback');
       }
@@ -94,7 +89,6 @@ export async function GET() {
       // Continue using cached rate if available
     }
   } else {
-    console.log('Using cached BTC rate (not expired):', serverBtcRateCache.rate);
   }
 
   // Return the cached rate (even if expired, it's better than nothing)

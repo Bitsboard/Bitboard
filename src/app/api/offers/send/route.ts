@@ -202,10 +202,7 @@ export async function POST(req: NextRequest) {
       )
       .run();
 
-    console.log('🎯 API: Offer insert result:', insertResult);
-
     // Update chat's last_message_at
-    console.log('🎯 API: Updating chat last_message_at');
     await db
       .prepare("UPDATE chats SET last_message_at = ? WHERE id = ?")
       .bind(currentTime, chatId)

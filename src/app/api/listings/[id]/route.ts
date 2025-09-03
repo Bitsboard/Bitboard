@@ -18,7 +18,6 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   }
   
   try {
-    console.log('🔍 Fetching listing with ID:', id);
     
     // First, try to get just the basic listing data
     const listing = await db.prepare(`
@@ -26,11 +25,9 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     `).bind(id).first();
     
     if (!listing) {
-      console.log('🔍 No listing found with ID:', id);
       return NextResponse.json({ error: "listing not found" }, { status: 404 });
     }
     
-    console.log('🔍 Raw listing data:', listing);
     
     // Type assertion for the database result
     const dbListing = listing as any;
@@ -88,7 +85,6 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
       createdAt: Number(dbListing.created_at) || Date.now()
     };
     
-    console.log('🔍 Transformed listing:', transformedListing);
     return NextResponse.json(transformedListing);
   } catch (error) {
     console.error('🔍 Error fetching listing:', error);

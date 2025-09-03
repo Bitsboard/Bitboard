@@ -5,7 +5,6 @@ import { getD1 } from '@/lib/cf';
 
 export async function GET(req: Request) {
   try {
-    console.log('🔍 Debug API: Request started');
     
     const debugInfo: any = {
       timestamp: new Date().toISOString(),
@@ -16,7 +15,6 @@ export async function GET(req: Request) {
     };
     
     // Test database connection
-    console.log('🔍 Debug API: Testing database connection...');
     try {
       const db = await getD1();
       debugInfo.databaseBinding = {
@@ -27,7 +25,6 @@ export async function GET(req: Request) {
       };
       
       if (db) {
-        console.log('🔍 Debug API: Database binding found, testing basic functionality...');
         
         try {
           const testResult = await db.prepare('SELECT 1 as test').all();
@@ -89,7 +86,6 @@ export async function GET(req: Request) {
       };
     }
     
-    console.log('🔍 Debug API: Debug info collected:', debugInfo);
     
     return NextResponse.json({
       success: true,

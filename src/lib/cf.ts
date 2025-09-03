@@ -10,24 +10,20 @@ export async function getCfEnv(): Promise<CfEnv> {
     if (mod && typeof mod.getRequestContext === 'function') {
       const context = mod.getRequestContext();
       if (context?.env?.DB) {
-        console.log('✅ Database found via @cloudflare/next-on-pages');
         return context.env as CfEnv;
       }
     }
     
     // Try alternative approach for edge runtime
     if (typeof globalThis !== 'undefined' && (globalThis as any).__env__) {
-      console.log('✅ Database found via globalThis.__env__');
       return (globalThis as any).__env__ as CfEnv;
     }
     
     // Try accessing process.env (fallback)
     if (typeof process !== 'undefined' && process.env) {
-      console.log('⚠️ Using process.env fallback');
       return process.env as any;
     }
     
-    console.log('❌ No database binding found via any method');
     return {} as CfEnv;
   } catch (error) {
     console.error('Error in getCfEnv:', error);
@@ -37,11 +33,9 @@ export async function getCfEnv(): Promise<CfEnv> {
 
 export async function getD1(): Promise<D1Database | null> {
   try {
-    console.log('🔍 Attempting to get database binding...');
     const env = await getCfEnv();
     
     if (env.DB) {
-      console.log('✅ Database binding found:', typeof env.DB);
       
       // ✅ OPTIMIZATION: Set database optimization hints
       try {
@@ -62,16 +56,12 @@ export async function getD1(): Promise<D1Database | null> {
         // Enable synchronous mode for better performance (NORMAL is a good balance)
         await db.prepare('PRAGMA synchronous = NORMAL').run();
         
-        console.log('✅ Database optimizations applied');
         return db;
       } catch (optimizationError) {
-        console.log('⚠️ Database optimizations failed, continuing with default settings:', optimizationError);
         return env.DB as D1Database;
       }
     }
     
-    console.log('❌ No DB binding in environment');
-    console.log('Available env keys:', Object.keys(env));
     
     return null;
   } catch (error) {

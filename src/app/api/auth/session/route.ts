@@ -11,7 +11,6 @@ export async function GET(req: Request) {
     const payload = await verifyJwtHS256(token, getAuthSecret());
     if (!payload) return new Response(JSON.stringify({ session: null }), { status: 200, headers: { 'content-type': 'application/json' } });
 
-    console.log('🔍 Session API: JWT payload:', { email: payload.email, sub: payload.sub });
 
     // Enrich from D1 users and associated listings
     let userRow: any = null;
@@ -20,7 +19,6 @@ export async function GET(req: Request) {
       const { env } = getRequestContext();
       const db = (env as any).DB as D1Database | undefined;
       if (db) {
-        console.log('🔍 Session API: Database connection established');
         
         await db.prepare(`CREATE TABLE IF NOT EXISTS users (
           id TEXT PRIMARY KEY,
@@ -38,11 +36,9 @@ export async function GET(req: Request) {
           has_chosen_username INTEGER DEFAULT 0
         )`).run();
         
-        console.log('🔍 Session API: Looking up user by email:', payload.email);
         const res = await db.prepare('SELECT id, email, username, sso, verified, created_at AS createdAt, image, has_chosen_username FROM users WHERE email = ?').bind(payload.email ?? '').all();
         userRow = res.results?.[0] ?? null;
         
-        console.log('🔍 Session API: User lookup result:', {
           found: !!userRow,
           userCount: res.results?.length || 0,
           user: userRow ? { id: userRow.id, email: userRow.email, username: userRow.username } : null
@@ -52,16 +48,12 @@ export async function GET(req: Request) {
           try {
             const lres = await db.prepare('SELECT id, title, price_sat AS priceSat, COALESCE(pricing_type, "fixed") AS pricingType, created_at AS createdAt FROM listings WHERE posted_by = ? ORDER BY created_at DESC LIMIT 20').bind(userRow?.id ?? '').all();
             listings = lres.results ?? [];
-            console.log('🔍 Session API: Found listings for user:', listings.length);
           } catch (listingError) {
-            console.log('🔍 Session API: Error fetching listings:', listingError);
           }
         }
       } else {
-        console.log('🔍 Session API: No database connection');
       }
     } catch (dbError) {
-      console.log('🔍 Session API: Database error:', dbError);
     }
 
     const session = {
@@ -82,7 +74,6 @@ export async function GET(req: Request) {
       } : null,
     };
 
-    console.log('🔍 Session API: Returning session:', {
       userId: session.user.id,
       email: session.user.email,
       hasAccount: !!session.account
@@ -90,7 +81,6 @@ export async function GET(req: Request) {
 
     return new Response(JSON.stringify({ session }), { status: 200, headers: { 'content-type': 'application/json' } });
   } catch (error) {
-    console.log('🔍 Session API: JWT verification error:', error);
     return new Response(JSON.stringify({ session: null }), { status: 200, headers: { 'content-type': 'application/json' } });
   }
 }

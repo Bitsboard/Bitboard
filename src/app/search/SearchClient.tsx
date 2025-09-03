@@ -6,6 +6,7 @@ import { ListingCard, ListingRow, ListingModal, LocationModal } from "@/componen
 import type { Listing, AdType, Place } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
+import { PrimaryButton, SecondaryButton } from "@/components/ui/Button";
 import { useLang } from "@/lib/i18n-client";
 import { useSettings, useModals, useUser } from "@/lib/settings";
 import { useTheme } from "@/lib/contexts/ThemeContext";
@@ -382,12 +383,12 @@ export default function SearchClient() {
                                 placeholder={t('search', lang) + " bikes, ASICs, consoles…"}
                                 className={cn("w-full rounded-3xl px-6 pr-32 py-5 text-lg focus:outline-none transition-all duration-300", inputBase)}
                             />
-                            <button
+                            <PrimaryButton
                                 onClick={applyFilters}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2 text-sm font-semibold text-white shadow"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 px-5 py-2 text-sm font-semibold shadow"
                             >
                                 {t('search', lang)}
-                            </button>
+                            </PrimaryButton>
                         </div>
                         <div className="sm:col-span-3 flex items-center gap-2">
                             <select
@@ -416,7 +417,7 @@ export default function SearchClient() {
                                 <div className="flex items-start justify-between">
                                     <div className={cn("font-semibold", dark ? "text-neutral-200" : "text-neutral-900")}>{t('location', lang)}</div>
                                     <div>
-                                        <button onClick={() => setModal('showLocationModal', true)} className="rounded-xl px-3 py-1 text-xs text-white bg-gradient-to-r from-orange-500 to-red-500">{t('change', lang)}</button>
+                                        <PrimaryButton onClick={() => setModal('showLocationModal', true)} className="px-3 py-1 text-xs">{t('change', lang)}</PrimaryButton>
                                     </div>
                                 </div>
                                 {radiusKm === 0 ? (
@@ -477,8 +478,8 @@ export default function SearchClient() {
                             </div>
 
                             <div className="flex gap-2">
-                                <button onClick={applyFilters} className="flex-1 rounded-2xl px-4 py-3 text-sm bg-gradient-to-r from-orange-500 to-red-500 text-white">{t('apply', lang)}</button>
-                                <button onClick={clearFilters} className={cn("flex-1 rounded-2xl px-4 py-3 text-sm", dark ? "bg-neutral-900 text-neutral-300" : "bg-neutral-100 text-neutral-700")}>{t('clear_all', lang)}</button>
+                                <PrimaryButton onClick={applyFilters} className="flex-1 px-4 py-3 text-sm">{t('apply', lang)}</PrimaryButton>
+                                <SecondaryButton onClick={clearFilters} className="flex-1 px-4 py-3 text-sm">{t('clear_all', lang)}</SecondaryButton>
                             </div>
                         </aside>
 
@@ -515,15 +516,10 @@ export default function SearchClient() {
                             {/* Load More Button */}
                             {hasMore && (
                                 <div className="flex justify-center mt-8">
-                                    <button
+                                    <PrimaryButton
                                         onClick={loadMore}
                                         disabled={isLoadingMore}
-                                        className={cn(
-                                            "inline-flex items-center justify-center px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl",
-                                            isLoadingMore
-                                                ? "bg-neutral-400 text-white cursor-not-allowed"
-                                                : "bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600"
-                                        )}
+                                        className="px-6 py-3"
                                     >
                                         {isLoadingMore ? (
                                             <>
@@ -541,7 +537,7 @@ export default function SearchClient() {
                                                 Show more ({listings.length} of {total})
                                             </>
                                         )}
-                                    </button>
+                                    </PrimaryButton>
                                 </div>
                             )}
                             

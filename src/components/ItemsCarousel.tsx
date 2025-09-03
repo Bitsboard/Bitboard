@@ -5,6 +5,7 @@ import type { Listing, Unit } from "@/lib/types";
 import { ListingCard } from "./ListingCard";
 
 import { cn } from "@/lib/utils";
+import { PrimaryButton } from "./ui/Button";
 
 interface ItemsCarouselProps {
     listings: Listing[];
@@ -67,26 +68,26 @@ export function ItemsCarousel({ listings, unit, btcCad, dark, onOpen }: ItemsCar
                 ))}
             </div>
 
-            <button
+            <PrimaryButton
                 className={cn(
-                    "absolute -left-8 top-1/2 -translate-y-1/2 rounded-xl px-4 py-3 text-base font-semibold transition bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-xl hover:from-orange-400 hover:to-red-400",
+                    "absolute -left-8 top-1/2 -translate-y-1/2 px-4 py-3 text-base font-semibold transition shadow-xl",
                     atStart && "opacity-0 pointer-events-none"
                 )}
                 aria-label="Previous"
                 onClick={() => scrollByAmount(-400)}
             >
                 <span className="font-extrabold">←</span>
-            </button>
-            <button
+            </PrimaryButton>
+            <PrimaryButton
                 className={cn(
-                    "absolute -right-8 top-1/2 -translate-y-1/2 rounded-xl px-4 py-3 text-base font-semibold transition bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-xl hover:from-orange-400 hover:to-red-400",
+                    "absolute -right-8 top-1/2 -translate-y-1/2 px-4 py-3 text-base font-semibold transition shadow-xl",
                     atEnd && "opacity-0 pointer-events-none"
                 )}
                 aria-label="Next"
                 onClick={() => scrollByAmount(400)}
             >
                 <span className="font-extrabold">→</span>
-            </button>
+            </PrimaryButton>
         </div>
     );
 }

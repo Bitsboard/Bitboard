@@ -11,7 +11,6 @@ export async function GET(req: Request) {
     
     await ensureChatSchema(db);
     
-    console.log('🔍 Admin Chats API: Database connection established, fetching chats...');
     
     const url = new URL(req.url);
     const limit = Math.min(100, parseInt(url.searchParams.get('limit') ?? '20', 10) || 20);
@@ -19,7 +18,6 @@ export async function GET(req: Request) {
     const sortBy = url.searchParams.get('sortBy') || 'lastMessageAt';
     const sortOrder = url.searchParams.get('sortOrder') || 'desc';
     
-    console.log('🔍 Admin Chats API: Limit:', limit, 'Offset:', offset, 'SortBy:', sortBy, 'SortOrder:', sortOrder);
     
     // Build ORDER BY clause based on sortBy parameter
     let orderBy = 'c.last_message_at DESC, c.created_at DESC'; // default
@@ -65,7 +63,6 @@ export async function GET(req: Request) {
       LIMIT ? OFFSET ?
     `).bind(limit, offset).all();
     
-    console.log('🔍 Admin Chats API: Raw chats query result:', {
       chatCount: chats.results?.length || 0,
       chats: chats.results?.slice(0, 3) // Show first 3 chats for debugging
     });
@@ -104,7 +101,6 @@ export async function GET(req: Request) {
     
     const total = totalCount.results?.[0]?.count || 0;
     
-    console.log('🔍 Admin Chats API: Returning', chatsWithDetails.length, 'chats out of', total, 'total');
     
     return NextResponse.json({ 
       chats: chatsWithDetails,

@@ -6,6 +6,7 @@ import { useLang } from "@/lib/i18n-client";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { PrimaryButton } from "@/components/ui/Button";
 
 interface AdminStats {
   users: {
@@ -486,18 +487,13 @@ export default function AdminPage() {
               </div>
             )}
             
-            <button
+            <PrimaryButton
               type="submit"
               disabled={!password.trim() || loading}
-              className={cn(
-                "w-full py-3 rounded-xl font-semibold transition-all duration-200",
-                password.trim() && !loading
-                  ? "bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600"
-                  : "bg-neutral-300 text-neutral-500 cursor-not-allowed"
-              )}
+              className="w-full py-3"
             >
               {loading ? "Checking..." : "Access Admin"}
-            </button>
+            </PrimaryButton>
           </form>
           
           <div className="mt-6 text-center">

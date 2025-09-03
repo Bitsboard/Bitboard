@@ -44,16 +44,11 @@ export async function GET(req: Request) {
 
   // Upsert user in D1 users table
   try {
-    console.log('🔐 OAuth callback: Starting user creation/update...');
-    console.log('🔐 OAuth callback: User email:', user.email);
-    console.log('🔐 OAuth callback: User name:', user.name);
-    
     const { env } = getRequestContext();
-    console.log('🔐 OAuth callback: Got request context, env keys:', Object.keys(env || {}));
     
     const db = (env as any).DB as D1Database | undefined;
     if (db) {
-      console.log('🔐 OAuth callback: Database connection found, creating users table...');
+
       
       await db.prepare(`CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
@@ -77,14 +72,12 @@ export async function GET(req: Request) {
         const usernameColumn = tableInfo.results?.find((col: any) => col.name === 'username');
         
         if (usernameColumn && usernameColumn.notnull === 1) {
-          console.log('🔐 OAuth callback: Detected NOT NULL constraint on username, migthumbs_up table...');
+
           
           // Drop any existing migration tables first
           try {
             await db.prepare('DROP TABLE IF EXISTS users_new').run();
-            console.log('🔐 OAuth callback: Cleaned up any existing migration tables');
           } catch (cleanupError) {
-            console.log('🔐 OAuth callback: Cleanup check:', cleanupError);
           }
           
           // Create new table with correct schema
@@ -104,37 +97,29 @@ export async function GET(req: Request) {
             banned INTEGER DEFAULT 0
           )`).run();
           
-          console.log('🔐 OAuth callback: Created new users table with correct schema');
           
           // Copy data from old table
           await db.prepare('INSERT INTO users_new (id, email, username, sso, verified, created_at, image, has_chosen_username, thumbs_up, deals, last_active, is_admin, banned) SELECT id, email, username, sso, verified, created_at, image, has_chosen_username, 0, 0, 0, 0, 0 FROM users').run();
-          console.log('🔐 OAuth callback: Copied data to new table');
           
           // Drop old table and rename new one
           await db.prepare('DROP TABLE users').run();
           await db.prepare('ALTER TABLE users_new RENAME TO users').run();
           
-          console.log('🔐 OAuth callback: Successfully migrated users table to allow NULL usernames');
           
           // Verify the migration worked
           const newTableInfo = await db.prepare("PRAGMA table_info(users)").all();
           const newUsernameColumn = newTableInfo.results?.find((col: any) => col.name === 'username');
-          console.log('🔐 OAuth callback: Migration verification - username column notnull:', newUsernameColumn?.notnull);
         } else {
-          console.log('🔐 OAuth callback: Username column already allows NULL, no migration needed');
         }
       } catch (migrationError) {
-        console.log('🔐 OAuth callback: Table migration check:', migrationError);
       }
       
-      console.log('🔐 OAuth callback: Users table ensured, checking for existing user...');
       
       const existing = await db.prepare('SELECT id, username FROM users WHERE email = ?').bind(user.email).all();
       let userId = existing.results?.[0]?.id as string | undefined;
       
       if (!userId) {
         userId = generateUserId();
-        console.log('🔐 OAuth callback: Creating new user with ID:', userId);
         
         const currentTime = Math.floor(Date.now() / 1000);
         
@@ -145,9 +130,7 @@ export async function GET(req: Request) {
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).bind(userId, user.email, null, 'google', 0, currentTime, user.picture ?? null, 0, 0, 0, currentTime, 0, 0).run();
           
-        console.log('🔐 OAuth callback: New user created successfully!');
       } else {
-        console.log('🔐 OAuth callback: Updating existing user:', userId);
         
         const currentTime = Math.floor(Date.now() / 1000);
         
@@ -155,7 +138,6 @@ export async function GET(req: Request) {
           .bind(user.picture ?? null, 'google', currentTime, userId)
           .run();
           
-        console.log('🔐 OAuth callback: Existing user updated successfully!');
       }
       // Optional: ensure listings table has posted_by column; association left as future enhancement
     } else {

@@ -10,6 +10,7 @@ import { useLang } from "@/lib/i18n-client";
 import { generateProfilePicture, getInitials, formatPostAge, cn } from "@/lib/utils";
 import type { Listing, Category, Unit, Seller } from "@/lib/types";
 import { ChatModal } from "./ChatModal";
+import { PrimaryButton } from "./ui/Button";
 
 interface ListingModalProps {
   listing: Listing;
@@ -211,12 +212,12 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                 </div>
                 {/* Row 1, Col 2: button */}
                 <div className="flex justify-end">
-                  <button 
+                  <PrimaryButton 
                     onClick={handleChatClick} 
-                    className="min-w-[200px] rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-4 py-1.5 text-sm font-semibold text-white shadow"
+                    className="min-w-[200px]"
                   >
                     {t('send_message', lang)}
-                  </button>
+                  </PrimaryButton>
                 </div>
                 {/* Row 2, Col 1: report (same size as warning, bold) */}
                 <div>

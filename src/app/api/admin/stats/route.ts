@@ -59,7 +59,6 @@ export async function GET(req: Request) {
     `).all();
 
     // Get offer statistics
-    console.log('🎯 Admin Stats: Fetching offer statistics');
     const offerStats = await db.prepare(`
       SELECT 
         COUNT(*) as total_offers,
@@ -74,7 +73,6 @@ export async function GET(req: Request) {
       FROM offers
     `).all();
     
-    console.log('🎯 Admin Stats: Offer stats result:', offerStats.results);
 
     // Get recent activity with more comprehensive queries
     const recentActivity = await db.prepare(`
@@ -151,7 +149,6 @@ export async function GET(req: Request) {
     `).all();
 
     // Get recent offer activity
-    console.log('🎯 Admin Stats: Fetching recent offer activity');
     const recentOffers = await db.prepare(`
       SELECT 
         'offer' as type,
@@ -192,7 +189,6 @@ export async function GET(req: Request) {
       LIMIT 30
     `).all();
     
-    console.log('🎯 Admin Stats: Recent offers result:', recentOffers.results);
 
     // Combine and sort all recent activity
     const allActivity = [

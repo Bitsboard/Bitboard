@@ -9,6 +9,7 @@ import { generateProfilePicture, getInitials, cn } from "@/lib/utils";
 import type { Listing, Category, Unit, Seller, Message, Chat } from "@/lib/types";
 import Link from "next/link";
 import { useLang } from "@/lib/i18n-client";
+import { PrimaryButton } from "./ui/Button";
 
 interface ChatModalProps {
   listing: Listing;
@@ -209,7 +210,6 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
 
         
         if (data.success && data.messages) {
-          console.log('🎯 ChatModal: Loaded messages:', data.messages);
           setMessages(data.messages);
   
           
@@ -218,7 +218,6 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
             setCurrentUserId(data.userId);
           }
         } else {
-          console.log('🎯 ChatModal: No messages found or failed to load');
           setMessages([]);
         }
       } else {
@@ -351,8 +350,6 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
         expiresAt
       };
       
-      console.log('🎯 ChatModal: Sending offer with request body:', requestBody);
-      
       const response = await fetch('/api/offers/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -361,15 +358,11 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
 
       if (response.ok) {
         const responseData = await response.json() as { success?: boolean; offerId?: string; message?: string; newChatId?: string };
-        console.log('🎯 ChatModal: Offer sent successfully:', responseData);
         
         // Reload messages to show the new offer
         const chatIdToUse = responseData.newChatId || chatId;
         if (chatIdToUse) {
-          console.log('🎯 ChatModal: Reloading messages for chatId:', chatIdToUse);
           await loadMessages(chatIdToUse);
-        } else {
-          console.log('🎯 ChatModal: No chatId available for reloading messages');
         }
       } else {
         const error = await response.json() as { error?: string };
@@ -431,15 +424,15 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       <div className={cn("relative flex items-center justify-between border-b px-6 py-4", dark ? "border-neutral-900" : "border-neutral-200")}>
         <div className="flex items-center gap-4">
           {/* Back button */}
-          <button 
+          <PrimaryButton 
             onClick={onBackToListing || onClose}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 font-medium bg-gradient-to-r from-orange-500 to-red-500 text-white shadow hover:from-orange-600 hover:to-red-600"
+            className="flex items-center gap-2 px-3 py-2"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Back
-          </button>
+          </PrimaryButton>
           
           {/* Listing title - now with truncation */}
           <h2 className={cn("text-lg font-semibold truncate max-w-sm", dark ? "text-white" : "text-neutral-900")}>

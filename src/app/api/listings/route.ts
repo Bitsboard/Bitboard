@@ -165,14 +165,11 @@ export async function GET(req: NextRequest) {
                   ${orderClause}
                   LIMIT ? OFFSET ?`;
       
-      console.log('🔍 Listings API: Executing query with binds:', [...binds, ...orderBinds, validatedQuery.limit, validatedQuery.offset]);
-      
       const optimized = await db
         .prepare(query)
         .bind(...binds, ...orderBinds, validatedQuery.limit, validatedQuery.offset)
         .all();
       results = optimized.results ?? [];
-      console.log('🔍 Listings API: Query returned', results.length, 'results');
     } catch (error) {
       console.error('🔍 Listings API: Query failed:', error);
       results = [];
@@ -181,12 +178,10 @@ export async function GET(req: NextRequest) {
     // Get total count
     let totalRow: any;
     try {
-      console.log('🔍 Listings API: Executing count query with binds:', binds);
       totalRow = await db
         .prepare(`SELECT COUNT(*) AS c FROM listings l JOIN users u ON l.posted_by = u.id ${whereClauseStr}`)
         .bind(...binds)
         .all();
-      console.log('🔍 Listings API: Count query result:', totalRow.results?.[0]?.c);
     } catch (error) {
       console.error('🔍 Listings API: Count query failed, using fallback:', error);
       // Fallback count query
@@ -194,7 +189,6 @@ export async function GET(req: NextRequest) {
         .prepare(`SELECT COUNT(*) AS c FROM listings l ${whereClauseStr}`)
         .bind(...binds)
         .all();
-      console.log('🔍 Listings API: Fallback count result:', totalRow.results?.[0]?.c);
     }
     const total = (totalRow.results?.[0]?.c ?? 0);
 
@@ -244,8 +238,7 @@ export async function GET(req: NextRequest) {
         onTimeRelease: 100
       };
 
-      // Debug logging for price data
-      console.log('🔍 Listings API: Raw priceSat value:', r.priceSat, 'Type:', typeof r.priceSat);
+
       
       return {
         id: r.id,

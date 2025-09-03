@@ -60,7 +60,6 @@ export async function POST(request: NextRequest) {
       status: 'sent'
     };
 
-    console.log('System notification sent:', notification);
 
     return NextResponse.json({
       success: true,

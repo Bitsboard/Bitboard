@@ -13,10 +13,8 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
 
     // Initial page load
     useEffect(() => {
-        console.log('useListings: Initial load, isDeployed:', isDeployed);
         
         if (!isDeployed) {
-            console.log('useListings: Skipping API call - not deployed');
             // Use mock data for development
             return;
         }
@@ -24,7 +22,6 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
         // API logic for production
         const loadFromAPI = async () => {
             try {
-                console.log('useListings: Loading from API...');
                 setIsLoading(true);
                 setCurrentPage(0);
                 const response = await dataService.getListings({
@@ -35,18 +32,11 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
                     radiusKm,
                 });
 
-                console.log('useListings: API response:', response);
-                console.log('useListings: response.data:', response.data);
-                console.log('useListings: response.pagination:', response.pagination);
                 
                 // Handle new API response structure
                 const listingsData = response.data.listings;
                 const totalCount = response.pagination.total;
                 
-                console.log('useListings: listingsData:', listingsData);
-                console.log('useListings: listingsData.length:', listingsData?.length);
-                console.log('useListings: totalCount:', totalCount);
-                console.log('useListings: hasMore will be:', (listingsData?.length || 0) < (totalCount || 0));
                 
                 setListings(listingsData);
                 setAllListings(listingsData);
@@ -82,10 +72,6 @@ export function useListings(center: Place, radiusKm: number, isDeployed: boolean
 
             const newListings = [...allListings, ...newListingsData];
             
-            console.log('useListings: loadMore - newListingsData.length:', newListingsData.length);
-            console.log('useListings: loadMore - newTotalCount:', newTotalCount);
-            console.log('useListings: loadMore - newListings.length:', newListings.length);
-            console.log('useListings: loadMore - hasMore will be:', newListings.length < newTotalCount);
             
             setAllListings(newListings);
             setListings(newListings);

@@ -296,7 +296,6 @@ export default function PublicProfilePage() {
 
   // Format last seen time
   const getLastSeenText = (lastActive?: number) => {
-    console.log('getLastSeenText called with lastActive:', lastActive);
     if (!lastActive) return 'Never';
     
     const lastActiveDate = new Date(lastActive * 1000); // lastActive is in seconds, convert to milliseconds

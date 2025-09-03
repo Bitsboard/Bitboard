@@ -5,7 +5,6 @@ export async function getAdminDb(req: Request): Promise<D1Database> {
   // TODO: Re-implement proper JWT verification when admin authentication is properly set up
   // For now, bypass authentication to allow admin pages to work with localStorage auth
   
-  console.log('🔍 Admin Utility: Attempting to get database connection...');
   const db = await getD1();
   
   if (!db) {
@@ -13,7 +12,6 @@ export async function getAdminDb(req: Request): Promise<D1Database> {
     throw new Error('no_db');
   }
   
-  console.log('🔍 Admin Utility: Database connection established successfully');
   
   // Create tables if they don't exist
   await db.prepare('CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE, username TEXT UNIQUE, sso TEXT, verified INTEGER DEFAULT 0, is_admin INTEGER DEFAULT 0, banned INTEGER DEFAULT 0, created_at INTEGER NOT NULL, image TEXT)').run();
@@ -25,7 +23,6 @@ export async function getAdminDb(req: Request): Promise<D1Database> {
   try { await db.prepare('ALTER TABLE users ADD COLUMN thumbs_up INTEGER DEFAULT 0').run(); } catch { } // Thumbs-up count, not 0-5 scale
   try { await db.prepare('ALTER TABLE users ADD COLUMN deals INTEGER DEFAULT 0').run(); } catch { }
   
-  console.log('🔍 Admin Utility: Schema setup completed');
   return db;
   
   // Original JWT verification code (commented out for now):

@@ -19,7 +19,6 @@ export class MockLightningBackend {
     const invoiceId = `lnbchold${amountSats}n1p${this.generateRandomString(8)}...`;
     this.invoices.set(invoiceId, { amount: amountSats, status: "pending" });
     
-    console.log(`[MOCK] Created hold invoice: ${invoiceId} for ${amountSats} sats`);
     return invoiceId;
   }
 
@@ -30,7 +29,6 @@ export class MockLightningBackend {
     }
     
     invoice.status = "settled";
-    console.log(`[MOCK] Settled invoice: ${invoiceId}`);
     return true;
   }
 
@@ -41,7 +39,6 @@ export class MockLightningBackend {
     }
     
     invoice.status = "cancelled";
-    console.log(`[MOCK] Cancelled invoice: ${invoiceId}`);
     return true;
   }
 

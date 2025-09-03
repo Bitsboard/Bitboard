@@ -146,13 +146,11 @@ export class DataService {
         sortOrder?: string;
     }): Promise<ListingsResponse> {
         try {
-            console.log('DataService: Fetching listings with params:', params);
             
             // Check cache first
             const cacheKey = generateCacheKey(params, 'listings');
             const cached = listingsCache[cacheKey];
             if (cached && isCacheValid(cached.timestamp, CONFIG.LISTINGS_CACHE_DURATION)) {
-                console.log('DataService: Returning cached listings data');
                 return cached.data;
             }
             
@@ -171,7 +169,6 @@ export class DataService {
             if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
 
             const url = `/api/listings?${queryParams.toString()}`;
-            console.log('DataService: Fetching from URL:', url);
             
             const response = await fetch(url, { cache: 'no-store' });
             if (!response.ok) {
@@ -179,7 +176,6 @@ export class DataService {
             }
 
             const data = await response.json() as any;
-            console.log('DataService: Raw API response:', data);
             
             // Cache the successful response
             listingsCache[cacheKey] = {
@@ -285,7 +281,6 @@ export class DataService {
         const userDeals = row.userDeals || 0;
         const userVerified = Boolean(row.userVerified);
 
-        console.log('DataService: createSellerFromRow for listing', row.id, ':', {
             postedBy: row.postedBy,
             userRating: row.userRating,
             userDeals: row.userDeals,

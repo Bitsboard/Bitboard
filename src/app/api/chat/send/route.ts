@@ -100,7 +100,6 @@ export async function POST(req: Request) {
       if (existingChatResult.results && existingChatResult.results.length > 0) {
         // Use existing chat
         actualChatId = (existingChatResult.results[0] as any).id;
-        console.log('🔄 Using existing chat:', actualChatId);
       } else {
         // Create new chat only if none exists
         actualChatId = `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -114,7 +113,6 @@ export async function POST(req: Request) {
             `)
             .bind(actualChatId, listingId, currentUserId, otherUserActualId, chatTime, chatTime)
             .run();
-          console.log('✅ Created new chat:', actualChatId);
         } catch (insertError) {
           console.error('❌ Error creating chat:', insertError);
           return NextResponse.json({ error: "Failed to create chat" }, { status: 500 });
