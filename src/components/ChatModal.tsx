@@ -10,6 +10,7 @@ import type { Listing, Category, Unit, Seller, Message, Chat } from "@/lib/types
 import Link from "next/link";
 import { useLang } from "@/lib/i18n-client";
 import { PrimaryButton } from "./ui/Button";
+import { Avatar } from "./ui/Avatar";
 
 interface ChatModalProps {
   listing: Listing;
@@ -552,9 +553,9 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                       onError={() => setSellerImageError(true)}
                     />
                   ) : (
-                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
+                    <Avatar size="sm">
                       {getInitials(listing.seller.name)}
-                    </div>
+                    </Avatar>
                   )}
                 </div>
                 

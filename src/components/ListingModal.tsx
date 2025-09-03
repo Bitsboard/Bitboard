@@ -11,6 +11,7 @@ import { generateProfilePicture, getInitials, formatPostAge, cn } from "@/lib/ut
 import type { Listing, Category, Unit, Seller } from "@/lib/types";
 import { ChatModal } from "./ChatModal";
 import { PrimaryButton } from "./ui/Button";
+import { Avatar } from "./ui/Avatar";
 
 interface ListingModalProps {
   listing: Listing;
@@ -181,9 +182,9 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
                           onError={() => setSellerImageError(true)}
                         />
                       ) : (
-                        <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
+                        <Avatar size="sm">
                           {getInitials(listing.seller.name)}
-                        </div>
+                        </Avatar>
                       )}
                     </div>
                     

@@ -3,6 +3,7 @@ export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 import { getAuthSecret, verifyJwtHS256 } from '@/lib/auth';
 import { getRequestContext } from '@cloudflare/next-on-pages';
+import { getTableSchema } from '@/lib/database/schema';
 
 export async function GET(req: Request) {
   const cookieHeader = req.headers.get('cookie') || '';
@@ -21,21 +22,7 @@ export async function GET(req: Request) {
       const db = (env as any).DB as D1Database | undefined;
       if (db) {
         
-        await db.prepare(`CREATE TABLE IF NOT EXISTS users (
-          id TEXT PRIMARY KEY,
-          email TEXT UNIQUE,
-          username TEXT UNIQUE,
-          sso TEXT,
-          verified INTEGER DEFAULT 0,
-          created_at INTEGER NOT NULL,
-          image TEXT,
-          is_admin INTEGER DEFAULT 0,
-          banned INTEGER DEFAULT 0,
-          thumbs_up INTEGER DEFAULT 0,
-          deals INTEGER DEFAULT 0,
-          last_active INTEGER DEFAULT 0,
-          has_chosen_username INTEGER DEFAULT 0
-        )`).run();
+        await db.prepare(getTableSchema('users')).run();
         
         const res = await db.prepare('SELECT id, email, username, sso, verified, created_at AS createdAt, image, has_chosen_username FROM users WHERE email = ?').bind(payload.email ?? '').all();
         userRow = res.results?.[0] ?? null;

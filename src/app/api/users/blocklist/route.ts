@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
         u.email,
         u.image,
         u.verified,
-        u.thumbs_up,
+        u.thumbs_up as thumbsUp,
         u.deals
       FROM user_blocks ub
       JOIN users u ON ub.blocked_id = u.id

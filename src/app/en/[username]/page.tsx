@@ -8,6 +8,7 @@ import { useTheme } from '@/lib/contexts/ThemeContext';
 import { useLang } from '@/lib/i18n-client';
 import { t } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
+import { PrimaryButton } from '@/components/ui/Button';
 import { formatCADAmount } from "@/lib/utils";
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import type { Session, ProfileData, SortOptionProfile } from '@/lib/types';
@@ -260,12 +261,12 @@ export default function PublicProfilePage() {
           {/* Post New Listing Button (only for profile owner with listings) */}
           {isOwnProfile && profileData.listings && profileData.listings.length > 0 && (
             <div className="mb-8">
-              <button className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-sm hover:shadow-md">
+              <PrimaryButton className="inline-flex items-center justify-center px-6 py-3">
                 <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
                 + Post New Listing
-              </button>
+              </PrimaryButton>
             </div>
           )}
 
@@ -356,12 +357,12 @@ export default function PublicProfilePage() {
                 }
               </p>
               {isOwnProfile && (
-                <button className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-medium rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-200 shadow-sm hover:shadow-md">
+                <PrimaryButton className="inline-flex items-center justify-center px-6 py-3">
                   <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
                   {t('create_listing', lang)}
-                </button>
+                </PrimaryButton>
               )}
             </div>
           )}

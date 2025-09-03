@@ -18,7 +18,7 @@ interface Chat {
   listing_id: string;
   listing_title: string;
   listing_image: string;
-  listing_price_sats: number;
+  listing_price_sat: number;
   listing_created_at: number;
   listing_location: string;
   listing_ad_type: string;
@@ -156,7 +156,7 @@ export default function MessagesPage() {
             listing_id: chat.listing?.id || chat.listing_id,
             listing_title: chat.listing?.title || chat.listing_title,
             listing_image: chat.listing?.imageUrl || chat.listing_image,
-            listing_price_sats: chat.listing?.priceSat || chat.listing_price || 0,
+            listing_price_sat: chat.listing?.priceSat || chat.listing_price || 0,
             listing_created_at: chat.listing?.createdAt || chat.listing_created_at || 0,
             listing_location: chat.listing?.location || chat.listing_location || 'Location N/A',
             listing_ad_type: chat.listing?.type || 'sell',
@@ -551,7 +551,7 @@ export default function MessagesPage() {
         id: String(dbListing.id),
         title: dbListing.title || 'Untitled Listing',
         description: dbListing.description || 'No description available',
-        priceSats: Number(dbListing.price_sats) || 0,
+        priceSats: Number(dbListing.price_sat) || 0,
         category: dbListing.category || 'Featured',
         location: dbListing.location || 'Location Unknown',
         lat: Number(dbListing.lat) || 0,
@@ -1012,7 +1012,7 @@ export default function MessagesPage() {
                           <div className="text-white/90 mb-1">
                             {/* Primary Price */}
                             {(() => {
-                              const priceSat = chats.find(c => c.id === selectedChat)?.listing_price_sats || 0;
+                              const priceSat = chats.find(c => c.id === selectedChat)?.listing_price_sat || 0;
                               if (priceSat === -1) {
                                 return (
                                   <div>
@@ -1314,7 +1314,7 @@ export default function MessagesPage() {
         isOpen={showOfferModal}
         onClose={() => setShowOfferModal(false)}
         onSendOffer={sendOffer}
-        listingPrice={selectedChat ? chats.find(c => c.id === selectedChat)?.listing_price_sats : undefined}
+        listingPrice={selectedChat ? chats.find(c => c.id === selectedChat)?.listing_price_sat : undefined}
         dark={dark}
       />
     </div>

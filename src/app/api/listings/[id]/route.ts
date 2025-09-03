@@ -61,7 +61,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
       id: String(dbListing.id),
       title: dbListing.title || 'Untitled',
       description: dbListing.description || 'No description available',
-      priceSats: Number(dbListing.price_sats) || 0,
+      priceSats: Number(dbListing.price_sat) || 0,
       pricingType: dbListing.pricing_type || 'fixed',
       category: dbListing.category || 'Featured',
       location: dbListing.location || 'Unknown',

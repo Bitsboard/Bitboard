@@ -40,7 +40,7 @@ export async function GET(req: Request) {
         handle: user.username,
         hasChosenUsername: Boolean(user.has_chosen_username),
         image: user.image,
-        rating: user.thumbs_up,
+        thumbsUp: user.thumbs_up,
         deals: user.deals,
         verified: Boolean(user.verified),
         isAdmin: Boolean(user.is_admin)

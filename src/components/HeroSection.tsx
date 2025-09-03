@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
 import type { Place } from "@/lib/types";
+import { PrimaryButton } from "@/components/ui/Button";
 import OrbitingProductsDemo from './OrbitingProductsDemo';
 
 interface HeroSectionProps {
@@ -90,7 +91,7 @@ export function HeroSection({
                                         placeholder="Search for anything"
                                         className={cn("w-full rounded-3xl px-4 sm:px-6 pr-24 sm:pr-32 py-4 sm:py-5 text-base sm:text-lg focus:outline-none transition-all duration-300", inputBase)}
                                     />
-                                    <button onClick={onSearch} className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-3 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white shadow">{t('search', lang)}</button>
+                                    <PrimaryButton onClick={onSearch} className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 rounded-2xl px-3 sm:px-5 py-2 text-xs sm:text-sm font-semibold shadow">{t('search', lang)}</PrimaryButton>
                                 </div>
                             </div>
                         </div>
