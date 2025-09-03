@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useLang } from "@/lib/i18n-client";
 import { t } from "@/lib/i18n";
@@ -102,7 +102,7 @@ export default function AdminPage() {
   const router = useRouter();
   const lang = useLang();
 
-  const loadStats = async (page: number = currentPage) => {
+  const loadStats = useCallback(async (page: number = currentPage) => {
     try {
       setStatsLoading(true);
       const response = await fetch(`/api/admin/stats?page=${page}&limit=${itemsPerPage}&filter=${activityFilter}`);
@@ -121,7 +121,7 @@ export default function AdminPage() {
     } finally {
       setStatsLoading(false);
     }
-  };
+  }, [currentPage, itemsPerPage, activityFilter]);
 
   // Check if user is already authenticated on component mount
   useEffect(() => {
