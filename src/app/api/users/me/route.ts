@@ -22,7 +22,7 @@ export async function GET(req: Request) {
     // Get user information from database
     const user = await db
       .prepare(`
-        SELECT id, email, username, has_chosen_username, image, rating, deals, verified, is_admin
+        SELECT id, email, username, has_chosen_username, image, thumbs_up, deals, verified, is_admin
         FROM users 
         WHERE email = ?
       `)

@@ -1,6 +1,10 @@
 export { AuthModal } from "./AuthModal";
 export { ChatModal } from "./ChatModal";
+export { ErrorBoundary, useErrorHandler, withErrorBoundary } from "./ErrorBoundary";
 export { GoogleSignInOverlay } from "./GoogleSignInOverlay";
+
+// UI Components
+export * from "./ui";
 export { ListingCard } from "./ListingCard";
 export { ListingModal } from "./ListingModal";
 export { ListingRow } from "./ListingRow";

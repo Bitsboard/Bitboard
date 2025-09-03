@@ -19,9 +19,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Database not available" }, { status: 500 });
     }
 
-    // Reset the current user's rating to 0
+    // Reset the current user's thumbs_up to 0
     const result = await db
-      .prepare("UPDATE users SET rating = 0 WHERE email = ?")
+      .prepare("UPDATE users SET thumbs_up = 0 WHERE email = ?")
       .bind(session.user.email)
       .run();
 

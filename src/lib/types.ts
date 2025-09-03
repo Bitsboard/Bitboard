@@ -178,7 +178,7 @@ export type ListingFilters = {
   radiusKm?: number;
   minPrice?: number;
   maxPrice?: number;
-  sortBy?: "price" | "date" | "rating" | "boosted" | "distance";
+  sortBy?: "price" | "date" | "reputation" | "boosted" | "distance";
   sortOrder?: "asc" | "desc";
 };
 

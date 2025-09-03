@@ -9,6 +9,12 @@ export function cn(...inputs: ClassValue[]) {
 // Re-export performance utilities
 export * from './utils/performance';
 
+// Re-export error handling utilities
+export * from './error/errorHandler';
+
+// Re-export services
+export * from './services';
+
 // Format currency with proper locale support
 export function formatCurrency(amount: number, currency = "CAD", locale?: string): string {
   return new Intl.NumberFormat(locale, {

@@ -7,7 +7,7 @@ import { Carousel } from "./Carousel";
 import { Modal, ModalHeader, ModalTitle, ModalCloseButton } from "./Modal";
 import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
-import { generateProfilePicture, getInitials, formatPostAge } from "@/lib/utils";
+import { generateProfilePicture, getInitials, formatPostAge, cn } from "@/lib/utils";
 import type { Listing, Category, Unit, Seller } from "@/lib/types";
 import { ChatModal } from "./ChatModal";
 
@@ -21,10 +21,6 @@ interface ListingModalProps {
   open: boolean;
   user?: any;
   onShowAuth?: () => void;
-}
-
-function cn(...xs: Array<string | false | null | undefined>) {
-  return xs.filter(Boolean).join(" ");
 }
 
 function accent(listing: Listing) {

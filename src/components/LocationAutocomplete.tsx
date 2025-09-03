@@ -11,9 +11,7 @@ interface LocationAutocompleteProps {
   dark: boolean;
 }
 
-function cn(...xs: Array<string | false | null | undefined>) {
-  return xs.filter(Boolean).join(" ");
-}
+import { cn } from "@/lib/utils";
 
 const COUNTRY_EXPAND: Record<string, string> = {
   CA: "Canada", CAN: "Canada",

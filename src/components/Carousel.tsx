@@ -13,9 +13,7 @@ interface CarouselProps {
     showThumbnails?: boolean;
 }
 
-function cn(...xs: Array<string | false | null | undefined>) {
-    return xs.filter(Boolean).join(" ");
-}
+import { cn } from "@/lib/utils";
 
 export function Carousel({ images, alt, dark, className, showDots = true, showArrows = true, rounded = "rounded-xl", showThumbnails = false }: CarouselProps) {
     const validImages = images && images.length > 0 ? images : [

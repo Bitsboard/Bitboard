@@ -9,7 +9,7 @@ export const listingsQuerySchema = z.object({
     adType: z.enum(['sell', 'want']).optional(),
     minPrice: z.coerce.number().min(0).optional(),
     maxPrice: z.coerce.number().min(0).optional(),
-    sortBy: z.enum(['date', 'price', 'distance', 'rating', 'boosted']).default('date'),
+    sortBy: z.enum(['date', 'price', 'distance', 'reputation', 'boosted']).default('date'),
     sortOrder: z.enum(['asc', 'desc']).default('desc'),
     lat: z.coerce.number().min(-90).max(90).optional(),
     lng: z.coerce.number().min(-180).max(180).optional(),

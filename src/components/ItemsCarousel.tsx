@@ -4,9 +4,7 @@ import React, { useMemo, useRef, useEffect, useState } from "react";
 import type { Listing, Unit } from "@/lib/types";
 import { ListingCard } from "./ListingCard";
 
-function cn(...xs: Array<string | false | null | undefined>) {
-    return xs.filter(Boolean).join(" ");
-}
+import { cn } from "@/lib/utils";
 
 interface ItemsCarouselProps {
     listings: Listing[];

@@ -38,7 +38,7 @@ export async function GET(
         created_at, 
         image,
         email,
-        rating,
+        thumbs_up,
         deals,
         last_active
       FROM users 

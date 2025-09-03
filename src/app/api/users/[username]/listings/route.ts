@@ -31,7 +31,7 @@ export async function GET(
 
     // Get user profile
     const userResult = await db.prepare(`
-      SELECT id, username, verified, created_at, image, rating, deals, last_active
+      SELECT id, username, verified, created_at, image, thumbs_up, deals, last_active
       FROM users WHERE username = ?
     `).bind(username).all();
 

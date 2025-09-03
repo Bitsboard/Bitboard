@@ -35,7 +35,7 @@ export async function POST(req: Request) {
           created_at INTEGER NOT NULL,
           image TEXT,
           has_chosen_username INTEGER DEFAULT 0 CHECK (has_chosen_username IN (0, 1)),
-          rating INTEGER DEFAULT 0,
+          thumbs_up INTEGER DEFAULT 0,
           deals INTEGER DEFAULT 0,
           last_active INTEGER DEFAULT 0,
           is_admin INTEGER DEFAULT 0,
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
           const currentTime = Math.floor(Date.now() / 1000);
           // Don't generate a default username - user must choose one
           // New users start as unverified and have proper last_active timestamp
-          await db.prepare('INSERT INTO users (id, email, username, sso, verified, created_at, image, has_chosen_username, rating, deals, last_active, is_admin, banned) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+          await db.prepare('INSERT INTO users (id, email, username, sso, verified, created_at, image, has_chosen_username, thumbs_up, deals, last_active, is_admin, banned) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
             .bind(userId, tokenInfo.email, null, 'google', 0, currentTime, tokenInfo.picture ?? null, 0, 0, 0, currentTime, 0, 0)
             .run();
         } else {

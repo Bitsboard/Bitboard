@@ -5,15 +5,12 @@ import { Modal, ModalHeader, ModalTitle, ModalBody, ModalCloseButton } from "./M
 import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
 import type { Listing, Category, Seller } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 interface NewListingModalProps {
   onClose: () => void;
   onPublish: (l: Listing) => void;
   dark: boolean;
-}
-
-function cn(...xs: Array<string | false | null | undefined>) {
-  return xs.filter(Boolean).join(" ");
 }
 
 function formatSats(n: number) {

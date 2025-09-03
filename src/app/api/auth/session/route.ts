@@ -32,7 +32,7 @@ export async function GET(req: Request) {
           image TEXT,
           is_admin INTEGER DEFAULT 0,
           banned INTEGER DEFAULT 0,
-          rating INTEGER DEFAULT 0,
+          thumbs_up INTEGER DEFAULT 0,
           deals INTEGER DEFAULT 0,
           last_active INTEGER DEFAULT 0,
           has_chosen_username INTEGER DEFAULT 0
