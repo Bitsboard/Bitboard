@@ -93,7 +93,7 @@ export class ApiService {
         clearTimeout(timeoutId);
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
+          const errorData = await response.json().catch(() => ({})) as { message?: string };
           throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
         }
 
