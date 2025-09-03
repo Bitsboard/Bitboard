@@ -190,7 +190,6 @@ const countryMapping: Record<string, string> = {
   "Nivl Ice Shelf": "Nivl Ice Shelf",
   "Conger Ice Shelf": "Conger Ice Shelf",
   "Glenzer Ice Shelf": "Glenzer Ice Shelf",
-  "Conger Ice Shelf": "Conger Ice Shelf",
   "Tucker Ice Shelf": "Tucker Ice Shelf",
   "Holmes Ice Shelf": "Holmes Ice Shelf",
   "Rennick Ice Shelf": "Rennick Ice Shelf",
