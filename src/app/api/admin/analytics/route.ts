@@ -146,13 +146,13 @@ export async function GET(req: NextRequest) {
         u.username,
         COUNT(DISTINCT l.id) as listings,
         COUNT(DISTINCT c.id) as chats,
-        COALESCE(u.thumbs_up, 0) as reputation
+        0 as reputation
       FROM users u
       LEFT JOIN listings l ON u.id = l.posted_by
       LEFT JOIN chats c ON (u.id = c.buyer_id OR u.id = c.seller_id)
       WHERE u.username IS NOT NULL
-      GROUP BY u.id, u.username, u.thumbs_up
-      ORDER BY reputation DESC, listings DESC
+      GROUP BY u.id, u.username
+      ORDER BY listings DESC, chats DESC
       LIMIT 10
     `).all();
 
