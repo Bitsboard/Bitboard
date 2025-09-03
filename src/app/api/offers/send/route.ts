@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
 
     let chatResult;
     let otherUserId;
+    let createdNewChat = false;
 
     if (chatId) {
       // Verify chat exists and user is participant
@@ -126,6 +127,7 @@ export async function POST(req: NextRequest) {
           .run();
 
         chatId = newChatId;
+        createdNewChat = true;
       }
     }
 
