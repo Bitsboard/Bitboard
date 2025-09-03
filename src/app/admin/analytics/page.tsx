@@ -150,35 +150,7 @@ export default function AnalyticsPage() {
     </div>
   );
 
-  const WorldMap = ({ locations }: { locations: Array<{ location: string; userCount: number; lat: number; lng: number }> }) => (
-    <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
-      <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">User Distribution</h3>
-      <div className="relative h-64 bg-neutral-50 dark:bg-neutral-700 rounded-lg overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-4xl mb-2">🌍</div>
-            <p className="text-neutral-600 dark:text-neutral-400">World Map</p>
-            <p className="text-sm text-neutral-500 dark:text-neutral-500 mt-1">
-              {locations.length} locations with {locations.reduce((sum, loc) => sum + loc.userCount, 0)} users
-            </p>
-          </div>
-        </div>
-        {/* Map dots would be rendered here in a real implementation */}
-        {locations.slice(0, 10).map((loc, index) => (
-          <div
-            key={loc.location}
-            className="absolute w-3 h-3 bg-blue-500 rounded-full opacity-70"
-            style={{
-              left: `${50 + (loc.lng / 180) * 40}%`,
-              top: `${50 - (loc.lat / 90) * 40}%`,
-              transform: 'translate(-50%, -50%)'
-            }}
-            title={`${loc.location}: ${loc.userCount} users`}
-          />
-        ))}
-      </div>
-    </div>
-  );
+
 
   const InteractiveTable = ({ data, columns, title }: {
     data: any[];
