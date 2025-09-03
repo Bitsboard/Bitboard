@@ -29,9 +29,12 @@ interface ChartProps {
   className?: string;
   xAxisLabel?: string;
   yAxisLabel?: string;
+  showTimeframeControls?: boolean;
+  currentTimeframe?: '24h' | '7d' | '30d' | '90d';
+  onTimeframeChange?: (timeframe: '24h' | '7d' | '30d' | '90d') => void;
 }
 
-export function Chart({ data, type, title, height = 300, className, xAxisLabel, yAxisLabel }: ChartProps) {
+export function Chart({ data, type, title, height = 300, className, xAxisLabel, yAxisLabel, showTimeframeControls = false, currentTimeframe = '7d', onTimeframeChange }: ChartProps) {
   if (!data || data.length === 0) {
     return (
       <div className={cn("flex items-center justify-center bg-neutral-50 dark:bg-neutral-800 rounded-lg", className)} style={{ height }}>
@@ -398,7 +401,27 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
 
     return (
       <div className={cn("bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6", className)}>
-        {title && <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">{title}</h3>}
+        <div className="flex items-center justify-between mb-4">
+          {title && <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">{title}</h3>}
+          {showTimeframeControls && onTimeframeChange && (
+            <div className="flex gap-1">
+              {(['24h', '7d', '30d', '90d'] as const).map((timeframe) => (
+                <button
+                  key={timeframe}
+                  onClick={() => onTimeframeChange(timeframe)}
+                  className={cn(
+                    "px-2 py-1 text-xs font-medium rounded transition-colors",
+                    currentTimeframe === timeframe
+                      ? "bg-blue-500 text-white"
+                      : "bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-300 dark:hover:bg-neutral-600"
+                  )}
+                >
+                  {timeframe}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <div className="relative">
           <svg width={svgWidth} height={svgHeight} className="w-full">
             {/* Grid lines */}

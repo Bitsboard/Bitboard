@@ -209,165 +209,172 @@ export default function AdminAnalyticsPage() {
           <div className="space-y-6">
             {/* Overview Tab */}
             {activeTab === 'overview' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-neutral-600 dark:text-neutral-400">Total Users</p>
-                      <p className="text-2xl font-bold text-neutral-900 dark:text-white">
-                        {formatNumber(analyticsData.overview.totalUsers)}
-                      </p>
+              <div className="space-y-6">
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400">Total Users</p>
+                        <p className="text-2xl font-bold text-neutral-900 dark:text-white">
+                          {formatNumber(analyticsData.overview.totalUsers)}
+                        </p>
+                      </div>
+                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                        <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                        </svg>
+                      </div>
                     </div>
-                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                      <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                      </svg>
+                    <div className="mt-2 text-xs text-green-600 dark:text-green-400">
+                      +{analyticsData.overview.newUsers24h} in last 24h
                     </div>
                   </div>
-                  <div className="mt-2 text-xs text-green-600 dark:text-green-400">
-                    +{analyticsData.overview.newUsers24h} in last 24h
+
+                  <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400">Total Listings</p>
+                        <p className="text-2xl font-bold text-neutral-900 dark:text-white">
+                          {formatNumber(analyticsData.overview.totalListings)}
+                        </p>
+                      </div>
+                      <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                        <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="mt-2 text-xs text-green-600 dark:text-green-400">
+                      +{analyticsData.overview.newListings24h} in last 24h
+                    </div>
+                  </div>
+
+                  <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400">Active Chats</p>
+                        <p className="text-2xl font-bold text-neutral-900 dark:text-white">
+                          {formatNumber(analyticsData.overview.totalChats)}
+                        </p>
+                      </div>
+                      <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                        <svg className="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="mt-2 text-xs text-green-600 dark:text-green-400">
+                      +{analyticsData.overview.newChats24h} in last 24h
+                    </div>
+                  </div>
+
+                  <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400">Active Users (24h)</p>
+                        <p className="text-2xl font-bold text-neutral-900 dark:text-white">
+                          {formatNumber(analyticsData.overview.activeUsers24h)}
+                        </p>
+                      </div>
+                      <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                        <svg className="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="mt-2 text-xs text-neutral-600 dark:text-neutral-400">
+                      Currently online
+                    </div>
                   </div>
                 </div>
 
-                <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-neutral-600 dark:text-neutral-400">Total Listings</p>
-                      <p className="text-2xl font-bold text-neutral-900 dark:text-white">
-                        {formatNumber(analyticsData.overview.totalListings)}
-                      </p>
-                    </div>
-                    <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                      <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="mt-2 text-xs text-green-600 dark:text-green-400">
-                    +{analyticsData.overview.newListings24h} in last 24h
-                  </div>
-                </div>
+                {/* Charts */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Chart
+                    data={analyticsData.userGrowth.map(day => ({
+                      date: day.date,
+                      value: day.users
+                    }))}
+                    type="timeseries"
+                    title="User Growth Over Time"
+                    height={350}
+                    xAxisLabel="Date"
+                    yAxisLabel="Total Users"
+                    showTimeframeControls={true}
+                    currentTimeframe={timeRange}
+                    onTimeframeChange={setTimeRange}
+                  />
 
-                <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-neutral-600 dark:text-neutral-400">Active Chats</p>
-                      <p className="text-2xl font-bold text-neutral-900 dark:text-white">
-                        {formatNumber(analyticsData.overview.totalChats)}
-                      </p>
-                    </div>
-                    <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                      <svg className="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="mt-2 text-xs text-green-600 dark:text-green-400">
-                    +{analyticsData.overview.newChats24h} in last 24h
-                  </div>
-                </div>
-
-                <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-neutral-600 dark:text-neutral-400">Active Users (24h)</p>
-                      <p className="text-2xl font-bold text-neutral-900 dark:text-white">
-                        {formatNumber(analyticsData.overview.activeUsers24h)}
-                      </p>
-                    </div>
-                    <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
-                      <svg className="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="mt-2 text-xs text-neutral-600 dark:text-neutral-400">
-                    Currently online
-                  </div>
+                  <Chart
+                    data={analyticsData.userGrowth.map(day => ({
+                      date: day.date,
+                      value: Math.floor(day.users * 0.3) // Approximate listings based on user growth
+                    }))}
+                    type="timeseries"
+                    title="Listings Growth Over Time"
+                    height={350}
+                    xAxisLabel="Date"
+                    yAxisLabel="Total Listings"
+                    showTimeframeControls={true}
+                    currentTimeframe={timeRange}
+                    onTimeframeChange={setTimeRange}
+                  />
                 </div>
               </div>
             )}
 
             {/* Users Tab */}
             {activeTab === 'users' && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
-                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Top Users</h3>
-                  <div className="space-y-3">
-                    {analyticsData.topUsers.map((user, index) => (
-                      <div key={user.username} className="flex items-center justify-between p-3 bg-neutral-50 dark:bg-neutral-700 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                            {index + 1}
-                          </div>
-                          <div>
-                            <p className="font-medium text-neutral-900 dark:text-white">{user.username}</p>
-                            <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                              {user.listings} listings • {user.chats} chats
-                            </p>
-                          </div>
+              <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
+                <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Top Users</h3>
+                <div className="space-y-3">
+                  {analyticsData.topUsers.map((user, index) => (
+                    <div key={user.username} className="flex items-center justify-between p-3 bg-neutral-50 dark:bg-neutral-700 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                          {index + 1}
                         </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-neutral-900 dark:text-white">+{user.reputation}</p>
-                          <p className="text-xs text-neutral-600 dark:text-neutral-400">reputation</p>
+                        <div>
+                          <p className="font-medium text-neutral-900 dark:text-white">{user.username}</p>
+                          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                            {user.listings} listings • {user.chats} chats
+                          </p>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-neutral-900 dark:text-white">+{user.reputation}</p>
+                        <p className="text-xs text-neutral-600 dark:text-neutral-400">reputation</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-
-                <Chart
-                  data={analyticsData.userGrowth.map(day => ({
-                    date: day.date,
-                    value: day.users
-                  }))}
-                  type="timeseries"
-                  title="User Growth Over Time"
-                  height={350}
-                  xAxisLabel="Date"
-                  yAxisLabel="Total Users"
-                />
               </div>
             )}
 
             {/* Listings Tab */}
             {activeTab === 'listings' && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <Chart
-                    data={analyticsData.listingStats.map((stat, index) => ({
-                      label: stat.category,
-                      value: stat.count,
-                      color: ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'][index % 8]
-                    }))}
-                    type="pie"
-                    title="Listings by Category"
-                    height={350}
-                  />
-
-                  <Chart
-                    data={analyticsData.locationStats.slice(0, 8).map((stat, index) => ({
-                      label: stat.location,
-                      value: stat.count,
-                      color: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'][index % 8]
-                    }))}
-                    type="bar"
-                    title="Popular Locations"
-                    height={350}
-                  />
-                </div>
-                
-                {/* Listings Growth Chart */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Chart
-                  data={analyticsData.userGrowth.map(day => ({
-                    date: day.date,
-                    value: Math.floor(day.users * 0.3) // Approximate listings based on user growth
+                  data={analyticsData.listingStats.map((stat, index) => ({
+                    label: stat.category,
+                    value: stat.count,
+                    color: ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'][index % 8]
                   }))}
-                  type="timeseries"
-                  title="Listings Growth Over Time"
+                  type="pie"
+                  title="Listings by Category"
                   height={350}
-                  xAxisLabel="Date"
-                  yAxisLabel="Total Listings"
+                />
+
+                <Chart
+                  data={analyticsData.locationStats.slice(0, 8).map((stat, index) => ({
+                    label: stat.location,
+                    value: stat.count,
+                    color: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'][index % 8]
+                  }))}
+                  type="bar"
+                  title="Popular Locations"
+                  height={350}
                 />
               </div>
             )}
