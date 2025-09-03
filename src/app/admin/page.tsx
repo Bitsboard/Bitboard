@@ -102,6 +102,27 @@ export default function AdminPage() {
   const router = useRouter();
   const lang = useLang();
 
+  const loadStats = async (page: number = currentPage) => {
+    try {
+      setStatsLoading(true);
+      const response = await fetch(`/api/admin/stats?page=${page}&limit=${itemsPerPage}&filter=${activityFilter}`);
+      if (response.ok) {
+        const data = await response.json() as { success: boolean; data?: AdminStats };
+        if (data.success && data.data) {
+          setStats(data.data);
+          if (data.data.pagination) {
+            setTotalPages(data.data.pagination.totalPages);
+            setCurrentPage(data.data.pagination.page);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error loading admin stats:', error);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
   // Check if user is already authenticated on component mount
   useEffect(() => {
     const savedAuth = localStorage.getItem('admin_authenticated');
@@ -191,26 +212,7 @@ export default function AdminPage() {
     setNotificationSuccess(null);
   };
 
-  const loadStats = async (page: number = currentPage) => {
-    try {
-      setStatsLoading(true);
-      const response = await fetch(`/api/admin/stats?page=${page}&limit=${itemsPerPage}&filter=${activityFilter}`);
-      if (response.ok) {
-        const data = await response.json() as { success: boolean; data?: AdminStats };
-        if (data.success && data.data) {
-          setStats(data.data);
-          if (data.data.pagination) {
-            setTotalPages(data.data.pagination.totalPages);
-            setCurrentPage(data.data.pagination.page);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error loading admin stats:', error);
-    } finally {
-      setStatsLoading(false);
-    }
-  };
+
 
   const formatSats = (sats: number) => {
     return new Intl.NumberFormat().format(sats);
