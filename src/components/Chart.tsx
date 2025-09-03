@@ -15,15 +15,23 @@ interface LineChartData {
   date: string;
 }
 
+interface TimeSeriesData {
+  date: string;
+  value: number;
+  label?: string;
+}
+
 interface ChartProps {
-  data: ChartData[] | LineChartData[];
-  type: 'bar' | 'line' | 'pie' | 'area';
+  data: ChartData[] | LineChartData[] | TimeSeriesData[];
+  type: 'bar' | 'line' | 'pie' | 'area' | 'timeseries';
   title?: string;
   height?: number;
   className?: string;
+  xAxisLabel?: string;
+  yAxisLabel?: string;
 }
 
-export function Chart({ data, type, title, height = 300, className }: ChartProps) {
+export function Chart({ data, type, title, height = 300, className, xAxisLabel, yAxisLabel }: ChartProps) {
   if (!data || data.length === 0) {
     return (
       <div className={cn("flex items-center justify-center bg-neutral-50 dark:bg-neutral-800 rounded-lg", className)} style={{ height }}>
@@ -323,6 +331,198 @@ export function Chart({ data, type, title, height = 300, className }: ChartProps
               </span>
             ))}
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (type === 'timeseries') {
+    const timeData = data as TimeSeriesData[];
+    const svgWidth = 500;
+    const svgHeight = height - 80; // More space for axes and labels
+    const padding = { top: 20, right: 40, bottom: 60, left: 60 };
+    const chartWidth = svgWidth - padding.left - padding.right;
+    const chartHeight = svgHeight - padding.top - padding.bottom;
+
+    // Calculate scales
+    const maxValue = Math.max(...timeData.map(d => d.value));
+    const minValue = Math.min(...timeData.map(d => d.value));
+    const valueRange = maxValue - minValue || 1;
+    
+    // Create points for the line
+    const points = timeData.map((item, index) => {
+      const x = padding.left + (index / (timeData.length - 1)) * chartWidth;
+      const y = padding.top + chartHeight - ((item.value - minValue) / valueRange) * chartHeight;
+      return { x, y, value: item.value, date: item.date };
+    });
+
+    // Create path for the line
+    const pathData = points.map((point, index) => 
+      `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
+    ).join(' ');
+
+    // Create area path
+    const areaPathData = `${pathData} L ${points[points.length - 1].x} ${padding.top + chartHeight} L ${points[0].x} ${padding.top + chartHeight} Z`;
+
+    // Generate Y-axis labels
+    const yAxisLabels = [];
+    const numYLabels = 5;
+    for (let i = 0; i <= numYLabels; i++) {
+      const value = minValue + (valueRange * i / numYLabels);
+      yAxisLabels.push({
+        value: Math.round(value),
+        y: padding.top + chartHeight - (i / numYLabels) * chartHeight
+      });
+    }
+
+    // Generate X-axis labels (show every few dates to avoid crowding)
+    const xAxisLabels = [];
+    const step = Math.max(1, Math.floor(timeData.length / 6));
+    for (let i = 0; i < timeData.length; i += step) {
+      const point = points[i];
+      if (point) {
+        xAxisLabels.push({
+          date: timeData[i].date,
+          x: point.x
+        });
+      }
+    }
+    // Always include the last point
+    if (timeData.length > 0 && !xAxisLabels.some(label => label.date === timeData[timeData.length - 1].date)) {
+      const lastPoint = points[points.length - 1];
+      xAxisLabels.push({
+        date: timeData[timeData.length - 1].date,
+        x: lastPoint.x
+      });
+    }
+
+    return (
+      <div className={cn("bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6", className)}>
+        {title && <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">{title}</h3>}
+        <div className="relative">
+          <svg width={svgWidth} height={svgHeight} className="w-full">
+            {/* Grid lines */}
+            {yAxisLabels.map((label, index) => (
+              <line
+                key={index}
+                x1={padding.left}
+                y1={label.y}
+                x2={padding.left + chartWidth}
+                y2={label.y}
+                stroke="currentColor"
+                strokeWidth={1}
+                className="text-neutral-200 dark:text-neutral-700"
+              />
+            ))}
+            
+            {/* Y-axis line */}
+            <line
+              x1={padding.left}
+              y1={padding.top}
+              x2={padding.left}
+              y2={padding.top + chartHeight}
+              stroke="currentColor"
+              strokeWidth={2}
+              className="text-neutral-400 dark:text-neutral-500"
+            />
+            
+            {/* X-axis line */}
+            <line
+              x1={padding.left}
+              y1={padding.top + chartHeight}
+              x2={padding.left + chartWidth}
+              y2={padding.top + chartHeight}
+              stroke="currentColor"
+              strokeWidth={2}
+              className="text-neutral-400 dark:text-neutral-500"
+            />
+            
+            {/* Area */}
+            <path
+              d={areaPathData}
+              fill="url(#timeseriesGradient)"
+              opacity={0.3}
+            />
+            
+            {/* Line */}
+            <path
+              d={pathData}
+              fill="none"
+              stroke="#3B82F6"
+              strokeWidth={3}
+            />
+            
+            {/* Points */}
+            {points.map((point, index) => (
+              <circle
+                key={index}
+                cx={point.x}
+                cy={point.y}
+                r={4}
+                fill="#3B82F6"
+                className="hover:r-6 transition-all cursor-pointer"
+              />
+            ))}
+            
+            {/* Y-axis labels */}
+            {yAxisLabels.map((label, index) => (
+              <text
+                key={index}
+                x={padding.left - 10}
+                y={label.y + 4}
+                textAnchor="end"
+                className="text-xs fill-neutral-600 dark:fill-neutral-400"
+              >
+                {label.value}
+              </text>
+            ))}
+            
+            {/* X-axis labels */}
+            {xAxisLabels.map((label, index) => (
+              <text
+                key={index}
+                x={label.x}
+                y={padding.top + chartHeight + 20}
+                textAnchor="middle"
+                className="text-xs fill-neutral-600 dark:fill-neutral-400"
+              >
+                {new Date(label.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </text>
+            ))}
+            
+            {/* Y-axis label */}
+            {yAxisLabel && (
+              <text
+                x={15}
+                y={padding.top + chartHeight / 2}
+                textAnchor="middle"
+                transform={`rotate(-90, 15, ${padding.top + chartHeight / 2})`}
+                className="text-sm fill-neutral-700 dark:fill-neutral-300 font-medium"
+              >
+                {yAxisLabel}
+              </text>
+            )}
+            
+            {/* X-axis label */}
+            {xAxisLabel && (
+              <text
+                x={padding.left + chartWidth / 2}
+                y={svgHeight - 10}
+                textAnchor="middle"
+                className="text-sm fill-neutral-700 dark:fill-neutral-300 font-medium"
+              >
+                {xAxisLabel}
+              </text>
+            )}
+            
+            {/* Gradient definition */}
+            <defs>
+              <linearGradient id="timeseriesGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.4} />
+                <stop offset="100%" stopColor="#3B82F6" stopOpacity={0.1} />
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
       </div>
     );
