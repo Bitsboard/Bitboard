@@ -146,7 +146,7 @@ export const apiUtils = {
    */
   handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
-      return response.json().then(errorData => {
+      return response.json().then((errorData: { message?: string }) => {
         throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
       });
     }
