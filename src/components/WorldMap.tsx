@@ -52,7 +52,13 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       const data = await response.json() as { data: MapData[] };
       
       if (data.data) {
-        setMapData(data.data);
+        // TEMPORARY FIX: Filter out data for specific timeframes until deployment is fixed
+        if (timeRange !== 'all') {
+          console.log(`🗺️ TEMPORARY FIX: Filtering out data for ${timeRange} timeframe`);
+          setMapData([]);
+        } else {
+          setMapData(data.data);
+        }
       }
     } catch (error) {
       console.error('Error fetching map data:', error);
