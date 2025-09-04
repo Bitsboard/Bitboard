@@ -35,8 +35,8 @@ type Row = {
 type ViewType = "users" | "listings";
 type TimeRange = "24h" | "7d" | "30d" | "90d" | "all";
 
-const MAP_WIDTH = 980;
-const MAP_HEIGHT = 520;
+const MAP_WIDTH = 800;
+const MAP_HEIGHT = 400;
 
 interface WorldMapProps {
   viewType: 'users' | 'listings';
@@ -54,6 +54,14 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
 
   // Selected country drilldown (A3, e.g., 'USA' or 'CAN')
   const [selectedA3, setSelectedA3] = useState<string | null>(null);
+  
+  // Tooltip state
+  const [tooltip, setTooltip] = useState<{
+    region: string;
+    count: number;
+    x: number;
+    y: number;
+  } | null>(null);
 
   // Sync with props
   useEffect(() => {
@@ -167,6 +175,37 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
 
     return 0;
   }
+
+  // Handle mouse enter for tooltips
+  const handleMouseEnter = (feature: GeoFeature, event: React.MouseEvent) => {
+    const props = feature.properties || {};
+    let regionName = "";
+    let count = 0;
+
+    if (isDrilled) {
+      // Admin1 level (states/provinces)
+      const iso = admin1ISO2(props) || "";
+      regionName = admin1Name(props) || iso;
+      count = admin1Counts.get(iso) || 0;
+    } else {
+      // World level (countries)
+      const a3 = (admin0A3(props) || "").toUpperCase();
+      regionName = admin0Name(props) || a3;
+      count = valueForCountry(feature);
+    }
+
+    setTooltip({
+      region: regionName,
+      count,
+      x: event.clientX,
+      y: event.clientY
+    });
+  };
+
+  // Handle mouse leave
+  const handleMouseLeave = () => {
+    setTooltip(null);
+  };
 
   // Drill target (Admin1) list for selected country
   const admin1Features: GeoFeature[] = useMemo(() => {
@@ -284,6 +323,8 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
                         key={geo.properties?.ADM0_A3 || geo.properties?.name || Math.random()}
                         geography={geo}
                         onClick={() => selectable && setSelectedA3(a3)}
+                        onMouseEnter={(event) => handleMouseEnter(geo, event)}
+                        onMouseLeave={handleMouseLeave}
                         style={{
                           default: {
                             fill,
@@ -322,6 +363,8 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
                       <Geography
                         key={geo.properties?.ADM0_A3 || geo.properties?.name || Math.random()}
                         geography={geo}
+                        onMouseEnter={(event) => handleMouseEnter(geo, event)}
+                        onMouseLeave={handleMouseLeave}
                         style={{
                           default: {
                             fill,
@@ -379,6 +422,19 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
         Click <b>United States</b> or <b>Canada</b> to drill down. Colors are choropleth by{" "}
         <b>{view}</b> within the selected <b>{timeRangeState}</b>.
       </p>
+
+      {/* Tooltip */}
+      {tooltip && (
+        <div
+          className="absolute bg-gray-900 text-white px-3 py-2 rounded-lg text-sm pointer-events-none z-20"
+          style={{
+            left: tooltip.x + 10,
+            top: tooltip.y - 10,
+          }}
+        >
+          {tooltip.region}: {tooltip.count} {view}
+        </div>
+      )}
     </div>
   );
 }
