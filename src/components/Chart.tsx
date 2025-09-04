@@ -343,6 +343,39 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
 
   if (type === 'timeseries') {
     const timeData = data as TimeSeriesData[];
+    
+    // Validate data
+    if (!timeData || timeData.length === 0) {
+      return (
+        <div className={cn("flex items-center justify-center bg-neutral-50 dark:bg-neutral-800 rounded-lg", className)} style={{ height }}>
+          <div className="text-center">
+            <div className="text-4xl mb-2">📊</div>
+            <p className="text-neutral-600 dark:text-neutral-400">No data available</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Validate that all data points have valid values
+    const validData = timeData.filter(d => 
+      d && 
+      typeof d.value === 'number' && 
+      !isNaN(d.value) && 
+      isFinite(d.value) &&
+      d.date
+    );
+
+    if (validData.length === 0) {
+      return (
+        <div className={cn("flex items-center justify-center bg-neutral-50 dark:bg-neutral-800 rounded-lg", className)} style={{ height }}>
+          <div className="text-center">
+            <div className="text-4xl mb-2">📊</div>
+            <p className="text-neutral-600 dark:text-neutral-400">Invalid data</p>
+          </div>
+        </div>
+      );
+    }
+
     const svgWidth = 500;
     const svgHeight = height - 80; // More space for axes and labels
     const padding = { top: 20, right: 40, bottom: 60, left: 60 };
@@ -350,8 +383,8 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
     const chartHeight = svgHeight - padding.top - padding.bottom;
 
     // Calculate scales with better handling for small ranges
-    const maxValue = Math.max(...timeData.map(d => d.value));
-    const minValue = Math.min(...timeData.map(d => d.value));
+    const maxValue = Math.max(...validData.map(d => d.value));
+    const minValue = Math.min(...validData.map(d => d.value));
     const valueRange = maxValue - minValue;
     
     // If the range is very small (like 1-2 users), add some padding to make it visible
@@ -360,9 +393,15 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
     const paddedRange = paddedMaxValue - paddedMinValue;
     
     // Create points for the line
-    const points = timeData.map((item, index) => {
-      const x = padding.left + (index / (timeData.length - 1)) * chartWidth;
-      const y = padding.top + chartHeight - ((item.value - paddedMinValue) / paddedRange) * chartHeight;
+    const points = validData.map((item, index) => {
+      const x = validData.length === 1 
+        ? padding.left + chartWidth / 2  // Center single point
+        : padding.left + (index / (validData.length - 1)) * chartWidth;
+      
+      const y = paddedRange === 0 
+        ? padding.top + chartHeight / 2  // Center if no range
+        : padding.top + chartHeight - ((item.value - paddedMinValue) / paddedRange) * chartHeight;
+      
       return { x, y, value: item.value, date: item.date };
     });
 
@@ -387,21 +426,21 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
 
     // Generate X-axis labels (show every few dates to avoid crowding)
     const xAxisLabels = [];
-    const step = Math.max(1, Math.floor(timeData.length / 6));
-    for (let i = 0; i < timeData.length; i += step) {
+    const step = Math.max(1, Math.floor(validData.length / 6));
+    for (let i = 0; i < validData.length; i += step) {
       const point = points[i];
       if (point) {
         xAxisLabels.push({
-          date: timeData[i].date,
+          date: validData[i].date,
           x: point.x
         });
       }
     }
     // Always include the last point
-    if (timeData.length > 0 && !xAxisLabels.some(label => label.date === timeData[timeData.length - 1].date)) {
+    if (validData.length > 0 && !xAxisLabels.some(label => label.date === validData[validData.length - 1].date)) {
       const lastPoint = points[points.length - 1];
       xAxisLabels.push({
-        date: timeData[timeData.length - 1].date,
+        date: validData[validData.length - 1].date,
         x: lastPoint.x
       });
     }
