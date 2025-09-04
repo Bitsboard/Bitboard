@@ -46,6 +46,12 @@ export class GeoDataManager {
       center: [-95.7129, 37.0902],
       zoom: 3
     },
+    'United States': {
+      code: 'USA',
+      name: 'United States of America',
+      center: [-95.7129, 37.0902],
+      zoom: 3
+    },
     'Canada': {
       code: 'CAN',
       name: 'Canada',
@@ -191,11 +197,23 @@ export class GeoDataManager {
 
   // Extract region name from feature properties
   extractRegionName(feature: GeoFeature): string {
-    return feature.properties.NAME_EN || 
+    const regionName = feature.properties.NAME_EN || 
            feature.properties.NAME || 
            feature.properties.ADM1 || 
            feature.properties.ADMIN1 || 
            'Unknown';
+    
+    // Debug logging for country names
+    if (feature.properties.ADM0_A3 === 'USA' || feature.properties.ADM0_A3 === 'CAN') {
+      console.log('🗺️ Country feature:', {
+        NAME: feature.properties.NAME,
+        NAME_EN: feature.properties.NAME_EN,
+        ADM0_A3: feature.properties.ADM0_A3,
+        extracted: regionName
+      });
+    }
+    
+    return regionName;
   }
 
   // Check if country supports drill-down

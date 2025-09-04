@@ -210,16 +210,26 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
   const handleRegionClick = useCallback((feature: GeoFeature) => {
     const regionName = geoDataManager.extractRegionName(feature);
     
+    console.log('🗺️ Region clicked:', {
+      regionName,
+      currentLevel,
+      supportsDrillDown: geoDataManager.supportsDrillDown(regionName),
+      countryInfo: geoDataManager.getCountryInfo(regionName)
+    });
+    
     if (currentLevel === 'world') {
       // Check if this country supports drill-down
       if (geoDataManager.supportsDrillDown(regionName)) {
         const countryInfo = geoDataManager.getCountryInfo(regionName);
         if (countryInfo) {
+          console.log('🗺️ Drilling down to:', regionName, 'with info:', countryInfo);
           setSelectedCountry(regionName);
           setCurrentLevel('admin1');
           setCenter(countryInfo.center);
           setZoom(countryInfo.zoom);
         }
+      } else {
+        console.log('🗺️ Country does not support drill-down:', regionName);
       }
     }
   }, [currentLevel]);
