@@ -163,8 +163,40 @@ const COUNTRY_MAPPING: Record<string, string> = {
 };
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
-const canadaGeoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"; // We'll use a different approach for now
-const usaGeoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"; // We'll use a different approach for now
+const canadaGeoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"; // We'll use a different approach
+const usaGeoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"; // We'll use a different approach
+
+// For now, we'll use a simplified approach with predefined province/state coordinates
+// In a real implementation, you'd load proper GeoJSON files for provinces/states
+const CANADA_PROVINCE_COORDINATES = {
+  'Ontario': { lat: 51.2538, lng: -85.3232, zoom: 4 },
+  'Quebec': { lat: 52.9399, lng: -73.5491, zoom: 4 },
+  'British Columbia': { lat: 53.7267, lng: -127.6476, zoom: 4 },
+  'Alberta': { lat: 53.9333, lng: -116.5765, zoom: 4 },
+  'Manitoba': { lat: 53.7609, lng: -98.8139, zoom: 4 },
+  'Saskatchewan': { lat: 52.9399, lng: -106.4509, zoom: 4 },
+  'Nova Scotia': { lat: 44.6820, lng: -63.7443, zoom: 4 },
+  'New Brunswick': { lat: 46.5653, lng: -66.4619, zoom: 4 },
+  'Newfoundland and Labrador': { lat: 53.1355, lng: -57.6604, zoom: 4 },
+  'Prince Edward Island': { lat: 46.5107, lng: -63.4168, zoom: 4 },
+  'Northwest Territories': { lat: 64.8255, lng: -124.8457, zoom: 4 },
+  'Yukon': { lat: 64.0685, lng: -139.0682, zoom: 4 },
+  'Nunavut': { lat: 70.2998, lng: -83.1076, zoom: 4 }
+};
+
+const USA_STATE_COORDINATES = {
+  'California': { lat: 36.7783, lng: -119.4179, zoom: 4 },
+  'Texas': { lat: 31.9686, lng: -99.9018, zoom: 4 },
+  'Florida': { lat: 27.7663, lng: -82.6404, zoom: 4 },
+  'New York': { lat: 42.1657, lng: -74.9481, zoom: 4 },
+  'Pennsylvania': { lat: 41.2033, lng: -77.1945, zoom: 4 },
+  'Illinois': { lat: 40.3363, lng: -89.0022, zoom: 4 },
+  'Ohio': { lat: 40.3888, lng: -82.7649, zoom: 4 },
+  'Georgia': { lat: 33.0406, lng: -83.6431, zoom: 4 },
+  'North Carolina': { lat: 35.6300, lng: -79.8064, zoom: 4 },
+  'Michigan': { lat: 43.3266, lng: -84.5361, zoom: 4 }
+  // Add more states as needed
+};
 
 // For now, we'll use a simplified approach with predefined province/state data
 const CANADIAN_PROVINCES = [
@@ -450,8 +482,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     const type = viewType === 'users' ? 'users' : 'listings';
     console.log(`🗺️ Drilling down into ${countryName}: ${count} ${type} in the past ${timeRange}`);
     
-    // For now, just zoom in on the country
-    // TODO: Implement proper drill-down with provinces/states
+    // Center the map on the selected country
     const { coordinates } = geo.geometry;
     
     const bounds = coordinates.reduce((acc: any, coord: any) => {
@@ -590,45 +621,6 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
         )}
       </div>
 
-      {/* Drill-down Mode: Show Province/State Data */}
-      {drillDownLevel === 'country' && selectedCountry && (
-        <div className="mb-6">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="text-lg font-semibold text-blue-900 mb-3">
-              {selectedCountry} - {viewType === 'users' ? 'User' : 'Listing'} Distribution
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {Object.entries(countryData)
-                .sort(([,a], [,b]) => (viewType === 'users' ? b.users - a.users : b.listings - a.listings))
-                .map(([region, data]) => {
-                  const count = viewType === 'users' ? data.users : data.listings;
-                  const maxCount = Math.max(...Object.values(countryData).map(d => viewType === 'users' ? d.users : d.listings));
-                  const intensity = maxCount > 0 ? count / maxCount : 0;
-                  
-                  return (
-                    <div key={region} className="bg-white rounded-lg p-3 border border-blue-200">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-gray-900">{region}</span>
-                        <span className="text-sm font-semibold text-blue-600">{count}</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${intensity * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-            {Object.keys(countryData).length === 0 && (
-              <div className="text-center text-gray-500 py-4">
-                No {viewType} data available for {selectedCountry} in the selected timeframe.
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Map Container */}
       <div className="relative">
@@ -638,16 +630,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
           </div>
         )}
         
-        {drillDownLevel === 'country' ? (
-          <div className="w-full h-96 border border-gray-200 rounded-lg bg-gray-50 flex items-center justify-center">
-            <div className="text-center text-gray-500">
-              <div className="text-lg font-medium mb-2">Province/State View</div>
-              <div className="text-sm">Data is shown in the distribution chart above</div>
-              <div className="text-xs mt-2">Click "Back to World" to return to the map view</div>
-            </div>
-          </div>
-        ) : (
-          <div className="w-full h-96 border border-gray-200 rounded-lg overflow-hidden">
+        <div className="w-full h-96 border border-gray-200 rounded-lg overflow-hidden">
           <ComposableMap
             projection="geoMercator"
             projectionConfig={{
@@ -660,29 +643,98 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
             <ZoomableGroup zoom={zoom} center={center}>
               <Geographies geography={geoUrl}>
                 {({ geographies }) =>
-                  geographies.map((geo) => (
-                    <Geography
-                      key={geo.rsmKey}
-                      geography={geo}
-                      fill={getFillColor(geo.properties.name || geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN || geo.properties.NAME_LONG || 'Unknown')}
-                      stroke="#D1D5DB"
-                      strokeWidth={0.5}
-                      style={{
-                        default: { outline: 'none' },
-                        hover: { outline: 'none', fill: '#3B82F6' },
-                        pressed: { outline: 'none' }
-                      }}
-                      onMouseEnter={(event) => handleMouseEnter(geo, event)}
-                      onMouseLeave={handleMouseLeave}
-                      onClick={() => handleCountryClick(geo)}
-                    />
-                  ))
+                  geographies.map((geo) => {
+                    const countryName = geo.properties.name || geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN || geo.properties.NAME_LONG || 'Unknown';
+                    
+                    // In drill-down mode, only show the selected country
+                    if (drillDownLevel === 'country' && selectedCountry) {
+                      const dataKey = mapToDataMapping[countryName] || countryName;
+                      if (dataKey !== selectedCountry) {
+                        return null; // Don't render other countries
+                      }
+                    }
+                    
+                    return (
+                      <Geography
+                        key={geo.rsmKey}
+                        geography={geo}
+                        fill={getFillColor(countryName)}
+                        stroke={drillDownLevel === 'country' ? "#1E40AF" : "#D1D5DB"}
+                        strokeWidth={drillDownLevel === 'country' ? 2 : 0.5}
+                        style={{
+                          default: { outline: 'none' },
+                          hover: { outline: 'none', fill: '#3B82F6' },
+                          pressed: { outline: 'none' }
+                        }}
+                        onMouseEnter={(event) => handleMouseEnter(geo, event)}
+                        onMouseLeave={handleMouseLeave}
+                        onClick={() => handleCountryClick(geo)}
+                      />
+                    );
+                  })
                 }
               </Geographies>
+              
+              {/* Province/State Overlays in Drill-down Mode */}
+              {drillDownLevel === 'country' && selectedCountry && (
+                <g>
+                  {Object.entries(countryData).map(([region, data]) => {
+                    const coordinates = selectedCountry === 'Canada' 
+                      ? CANADA_PROVINCE_COORDINATES[region as keyof typeof CANADA_PROVINCE_COORDINATES]
+                      : USA_STATE_COORDINATES[region as keyof typeof USA_STATE_COORDINATES];
+                    
+                    if (!coordinates) return null;
+                    
+                    const count = viewType === 'users' ? data.users : data.listings;
+                    const maxCount = Math.max(...Object.values(countryData).map(d => viewType === 'users' ? d.users : d.listings));
+                    const intensity = maxCount > 0 ? count / maxCount : 0;
+                    
+                    // Convert lat/lng to map coordinates (simplified)
+                    const x = (coordinates.lng + 180) * (800 / 360);
+                    const y = (90 - coordinates.lat) * (400 / 180);
+                    
+                    return (
+                      <g key={region}>
+                        {/* Province/State Circle */}
+                        <circle
+                          cx={x}
+                          cy={y}
+                          r={Math.max(8, 8 + intensity * 12)}
+                          fill={`hsl(210, ${60 + (intensity * 40)}%, ${85 - (intensity * 40)}%)`}
+                          stroke="#1E40AF"
+                          strokeWidth={2}
+                          opacity={0.8}
+                        />
+                        {/* Province/State Label */}
+                        <text
+                          x={x}
+                          y={y + 4}
+                          textAnchor="middle"
+                          fontSize="10"
+                          fill="#1E40AF"
+                          fontWeight="bold"
+                        >
+                          {region}
+                        </text>
+                        {/* Count Label */}
+                        <text
+                          x={x}
+                          y={y - 8}
+                          textAnchor="middle"
+                          fontSize="8"
+                          fill="#1E40AF"
+                          fontWeight="bold"
+                        >
+                          {count}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </g>
+              )}
             </ZoomableGroup>
           </ComposableMap>
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Legend */}
