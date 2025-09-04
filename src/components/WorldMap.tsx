@@ -18,6 +18,13 @@ interface WorldMapProps {
   onTimeRangeChange?: (range: '24h' | '7d' | '30d' | '90d' | 'all') => void;
 }
 
+interface MapState {
+  zoom: number;
+  center: [number, number];
+  selectedCountry: string | null;
+  viewLevel: 'world' | 'country';
+}
+
 // World map topology data (simplified)
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
@@ -223,6 +230,14 @@ export function WorldMap({
   
   const [mapData, setMapData] = useState(data);
   const [loading, setLoading] = useState(false);
+  
+  // Map state for drill-down functionality
+  const [mapState, setMapState] = useState<MapState>({
+    zoom: 1,
+    center: [0, 0],
+    selectedCountry: null,
+    viewLevel: 'world'
+  });
 
   // Fetch data when view type or time range changes
   useEffect(() => {
@@ -287,13 +302,51 @@ export function WorldMap({
     setTooltipContent(null);
   }, []);
 
+  const handleCountryClick = useCallback((geo: any) => {
+    const countryName = geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN;
+    const count = countryData[countryName] || 0;
+    
+    // Only allow drill-down if there's data for this country
+    if (count > 0) {
+      setMapState(prev => ({
+        ...prev,
+        selectedCountry: countryName,
+        viewLevel: 'country',
+        zoom: 3,
+        center: geo.properties.CENTER || [0, 0]
+      }));
+    }
+  }, [countryData]);
+
+  const handleBackToWorld = useCallback(() => {
+    setMapState({
+      zoom: 1,
+      center: [0, 0],
+      selectedCountry: null,
+      viewLevel: 'world'
+    });
+  }, []);
+
   return (
     <div className={cn("bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6", className)}>
       {/* Header with controls */}
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
-          Global {viewType === 'users' ? 'User' : 'Listing'} Distribution
-        </h3>
+        <div className="flex items-center gap-4">
+          {mapState.viewLevel === 'country' && (
+            <button
+              onClick={handleBackToWorld}
+              className="px-3 py-1.5 bg-orange-500 text-white rounded text-sm hover:bg-orange-600 transition-colors"
+            >
+              ← Back to World
+            </button>
+          )}
+          <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
+            {mapState.viewLevel === 'world' 
+              ? `Global ${viewType === 'users' ? 'User' : 'Listing'} Distribution`
+              : `${mapState.selectedCountry} - ${viewType === 'users' ? 'Users' : 'Listings'}`
+            }
+          </h3>
+        </div>
         
         <div className="flex items-center gap-3">
           {/* View type toggle */}
@@ -355,8 +408,8 @@ export function WorldMap({
           className="w-full h-auto"
         >
           <ZoomableGroup
-            center={[0, 0]}
-            zoom={1}
+            center={mapState.center}
+            zoom={mapState.zoom}
             minZoom={0.5}
             maxZoom={8}
           >
@@ -393,6 +446,7 @@ export function WorldMap({
                       }}
                       onMouseEnter={(event) => handleMouseEnter(geo, event)}
                       onMouseLeave={handleMouseLeave}
+                      onClick={() => handleCountryClick(geo)}
                     />
                   );
                 })
@@ -408,6 +462,7 @@ export function WorldMap({
             <div>• Scroll to zoom</div>
             <div>• Drag to pan</div>
             <div>• Hover for details</div>
+            <div>• Click countries to drill down</div>
           </div>
         </div>
         

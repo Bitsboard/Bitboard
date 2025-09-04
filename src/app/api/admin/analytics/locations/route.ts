@@ -45,18 +45,30 @@ export async function GET(req: NextRequest) {
     
     if (viewType === 'users') {
       // Get user location data
-      const userLocationsResult = await db.prepare(`
+      let query = `
         SELECT 
           location,
           COUNT(*) as userCount,
           AVG(lat) as avgLat,
           AVG(lng) as avgLng
         FROM users 
-        WHERE created_at > ? AND location IS NOT NULL AND location != ''
+        WHERE location IS NOT NULL AND location != ''
+      `;
+      
+      // Only add time filter if not "all"
+      if (timeRange !== 'all') {
+        query += ` AND created_at > ?`;
+      }
+      
+      query += `
         GROUP BY location
         ORDER BY userCount DESC
         LIMIT 50
-      `).bind(timeBoundary).all();
+      `;
+      
+      const userLocationsResult = timeRange === 'all' 
+        ? await db.prepare(query).all()
+        : await db.prepare(query).bind(timeBoundary).all();
 
       result = (userLocationsResult.results || []).map((row: any) => ({
         location: row.location,
@@ -66,18 +78,30 @@ export async function GET(req: NextRequest) {
       }));
     } else if (viewType === 'listings') {
       // Get listing location data
-      const listingLocationsResult = await db.prepare(`
+      let query = `
         SELECT 
           location,
           COUNT(*) as listingCount,
           AVG(lat) as avgLat,
           AVG(lng) as avgLng
         FROM listings 
-        WHERE created_at > ? AND location IS NOT NULL AND location != ''
+        WHERE location IS NOT NULL AND location != ''
+      `;
+      
+      // Only add time filter if not "all"
+      if (timeRange !== 'all') {
+        query += ` AND created_at > ?`;
+      }
+      
+      query += `
         GROUP BY location
         ORDER BY listingCount DESC
         LIMIT 50
-      `).bind(timeBoundary).all();
+      `;
+      
+      const listingLocationsResult = timeRange === 'all' 
+        ? await db.prepare(query).all()
+        : await db.prepare(query).bind(timeBoundary).all();
 
       result = (listingLocationsResult.results || []).map((row: any) => ({
         location: row.location,
