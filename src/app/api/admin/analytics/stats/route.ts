@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getD1 } from "@/lib/cf";
 
+export const runtime = 'edge';
+
 export async function GET(request: NextRequest) {
   try {
     const db = await getD1();
