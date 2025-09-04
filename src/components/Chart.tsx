@@ -396,11 +396,29 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
     const paddedMaxValue = valueRange < 5 ? maxValue + Math.max(1, valueRange * 0.1) : maxValue;
     const paddedRange = paddedMaxValue - paddedMinValue;
     
-    // Create points for the line
+    // Create points for the line with proper date-based X positioning
     const points = validData.map((item, index) => {
-      const x = validData.length === 1 
-        ? padding.left + chartWidth / 2  // Center single point
-        : padding.left + (index / (validData.length - 1)) * chartWidth;
+      let x;
+      
+      if (validData.length === 1) {
+        x = padding.left + chartWidth / 2; // Center single point
+      } else {
+        // Calculate X position based on actual dates
+        const firstDate = new Date(validData[0].date);
+        const lastDate = new Date(validData[validData.length - 1].date);
+        const currentDate = new Date(item.date);
+        
+        const totalTimeSpan = lastDate.getTime() - firstDate.getTime();
+        const currentTimeOffset = currentDate.getTime() - firstDate.getTime();
+        
+        // Handle edge case where all dates are the same
+        if (totalTimeSpan === 0) {
+          x = padding.left + (index / (validData.length - 1)) * chartWidth;
+        } else {
+          const timeRatio = currentTimeOffset / totalTimeSpan;
+          x = padding.left + timeRatio * chartWidth;
+        }
+      }
       
       const y = paddedRange === 0 
         ? padding.top + chartHeight / 2  // Center if no range
@@ -413,6 +431,11 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
     console.log('Chart points:', points);
     console.log('Valid data length:', validData.length);
     console.log('Chart dimensions:', { chartWidth, chartHeight, padding });
+    console.log('Date range:', {
+      firstDate: validData[0]?.date,
+      lastDate: validData[validData.length - 1]?.date,
+      totalTimeSpan: validData.length > 1 ? new Date(validData[validData.length - 1].date).getTime() - new Date(validData[0].date).getTime() : 0
+    });
 
     // Create path for the line
     const pathData = points.map((point, index) => 
@@ -433,25 +456,34 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
       });
     }
 
-    // Generate X-axis labels (show every few dates to avoid crowding)
+    // Generate X-axis labels with proper date-based positioning
     const xAxisLabels = [];
-    const step = Math.max(1, Math.floor(validData.length / 6));
-    for (let i = 0; i < validData.length; i += step) {
-      const point = points[i];
-      if (point) {
+    
+    if (validData.length > 0) {
+      // Always include first and last points
+      xAxisLabels.push({
+        date: validData[0].date,
+        x: points[0].x
+      });
+      
+      // Add intermediate points if there are enough data points
+      if (validData.length > 2) {
+        const step = Math.max(1, Math.floor(validData.length / 6));
+        for (let i = step; i < validData.length - 1; i += step) {
+          xAxisLabels.push({
+            date: validData[i].date,
+            x: points[i].x
+          });
+        }
+      }
+      
+      // Always include the last point if it's different from the first
+      if (validData.length > 1 && validData[validData.length - 1].date !== validData[0].date) {
         xAxisLabels.push({
-          date: validData[i].date,
-          x: point.x
+          date: validData[validData.length - 1].date,
+          x: points[points.length - 1].x
         });
       }
-    }
-    // Always include the last point
-    if (validData.length > 0 && !xAxisLabels.some(label => label.date === validData[validData.length - 1].date)) {
-      const lastPoint = points[points.length - 1];
-      xAxisLabels.push({
-        date: validData[validData.length - 1].date,
-        x: lastPoint.x
-      });
     }
 
     return (
