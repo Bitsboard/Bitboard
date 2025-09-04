@@ -205,24 +205,42 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       let key = item.location;
       
       if (drillDownLevel === 'world') {
-        // For world view, extract country from location
+        // For world view, extract country from location and aggregate
         const parts = item.location.split(', ');
-        if (parts.length > 1) {
-          key = parts[parts.length - 1].trim(); // Last part is usually country
+        let country = parts[parts.length - 1].trim(); // Last part is usually country
+        
+        // Map to standard country names
+        country = COUNTRY_MAPPING[country] || country;
+        
+        // Special handling for US cities - aggregate all under "United States of America"
+        if (parts.length >= 2) {
+          const state = parts[parts.length - 2].trim();
+          if (US_STATE_MAPPING[state]) {
+            country = 'United States of America';
+          }
         }
-        key = COUNTRY_MAPPING[key] || key;
+        
+        // Special handling for Canadian cities - aggregate all under "Canada"
+        if (parts.length >= 2) {
+          const province = parts[parts.length - 2].trim();
+          if (CANADA_PROVINCE_MAPPING[province]) {
+            country = 'Canada';
+          }
+        }
+        
+        key = country;
       } else if (drillDownLevel === 'country' && selectedCountry === 'United States of America') {
         // For US states, extract state from location
         const parts = item.location.split(', ');
         if (parts.length >= 2) {
-          const state = parts[parts.length - 2].trim(); // Second to last part is usually state
+          const state = parts[parts.length - 2].trim();
           key = US_STATE_MAPPING[state] || state;
         }
       } else if (drillDownLevel === 'country' && selectedCountry === 'Canada') {
         // For Canadian provinces, extract province from location
         const parts = item.location.split(', ');
         if (parts.length >= 2) {
-          const province = parts[parts.length - 2].trim(); // Second to last part is usually province
+          const province = parts[parts.length - 2].trim();
           key = CANADA_PROVINCE_MAPPING[province] || province;
         }
       }
@@ -250,19 +268,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     console.log(`🎨 Getting color for region: ${regionName}`);
     console.log(`🎨 Available data keys:`, Object.keys(countryData));
     
-    let data = countryData[regionName];
-    
-    // Try to find data by partial match
-    if (!data) {
-      const matchingKey = Object.keys(countryData).find(key => 
-        key.toLowerCase().includes(regionName.toLowerCase()) || 
-        regionName.toLowerCase().includes(key.toLowerCase())
-      );
-      if (matchingKey) {
-        data = countryData[matchingKey];
-        console.log(`🎨 Found data for ${regionName} via match: ${matchingKey}`);
-      }
-    }
+    const data = countryData[regionName];
     
     if (!data) {
       console.log(`🎨 No data found for ${regionName}, using gray`);
@@ -291,19 +297,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     console.log(`🖱️ Mouse enter on: ${regionName}`);
     console.log(`🖱️ Available data keys:`, Object.keys(countryData));
     
-    let data = countryData[regionName];
-    
-    // Try to find data by partial match
-    if (!data) {
-      const matchingKey = Object.keys(countryData).find(key => 
-        key.toLowerCase().includes(regionName.toLowerCase()) || 
-        regionName.toLowerCase().includes(key.toLowerCase())
-      );
-      if (matchingKey) {
-        data = countryData[matchingKey];
-        console.log(`🖱️ Found data for ${regionName} via match: ${matchingKey}`);
-      }
-    }
+    const data = countryData[regionName];
     
     if (data) {
       const count = viewType === 'users' ? data.users : data.listings;
