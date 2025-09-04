@@ -1,16 +1,42 @@
-'use client';
+// src/components/WorldMap.tsx
+"use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { ComposableMap, Geographies, Geography, ZoomableGroup } from 'react-simple-maps';
-import { geoDataManager, GeoData, GeoFeature } from '@/lib/geoDataManager';
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  ComposableMap,
+  Geographies,
+  Geography,
+  ZoomableGroup,
+} from "react-simple-maps";
+import {
+  loadAdmin0,
+  loadAdmin1,
+  admin0Name,
+  admin0A3,
+  filterAdmin1ByA3,
+  admin1ISO2,
+  admin1Name,
+  isoFromLocation,
+  a3FromISO2,
+  canonCountryName,
+} from "@/lib/geoDataManager";
+import type { GeoFC, GeoFeature } from "@/lib/geoDataManager";
+import { scaleLinear } from "d3-scale";
 
-interface MapData {
+/** API row type */
+type Row = {
   location: string;
   userCount: number;
   listingCount: number;
-  lat: number;
-  lng: number;
-}
+  lat: number | null;
+  lng: number | null;
+};
+
+type ViewType = "users" | "listings";
+type TimeRange = "24h" | "7d" | "30d" | "90d" | "all";
+
+const MAP_WIDTH = 980;
+const MAP_HEIGHT = 520;
 
 interface WorldMapProps {
   viewType: 'users' | 'listings';
@@ -19,268 +45,142 @@ interface WorldMapProps {
   onViewTypeChange?: (type: 'users' | 'listings') => void;
 }
 
-interface TooltipContent {
-  region: string;
-  count: number;
-  x: number;
-  y: number;
-}
-
-type MapLevel = 'world' | 'admin1';
-
 export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onViewTypeChange }: WorldMapProps) {
-  // Core state
-  const [mapData, setMapData] = useState<MapData[]>([]);
-  const [geoData, setGeoData] = useState<GeoData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Map interaction state
-  const [tooltip, setTooltip] = useState<TooltipContent | null>(null);
-  const [zoom, setZoom] = useState(1);
-  const [center, setCenter] = useState<[number, number]>([0, 0]);
-  
-  // Drill-down state
-  const [currentLevel, setCurrentLevel] = useState<MapLevel>('world');
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [admin0, setAdmin0] = useState<GeoFC | null>(null);
+  const [admin1, setAdmin1] = useState<GeoFC | null>(null);
+  const [data, setData] = useState<Row[]>([]);
+  const [view, setView] = useState<ViewType>(viewType);
+  const [timeRangeState, setTimeRangeState] = useState<TimeRange>(timeRange as TimeRange);
 
-  // Fetch map data from API
-  const fetchMapData = useCallback(async () => {
-    try {
-      const url = `/api/admin/analytics/locations?type=${viewType}&timeRange=${timeRange}`;
-      const response = await fetch(url);
-      const data = await response.json() as { data: MapData[] };
-      
-      if (data.data) {
-        // TEMPORARY FIX: Filter out data for specific timeframes until deployment is fixed
-        if (timeRange !== 'all') {
-          console.log(`🗺️ TEMPORARY FIX: Filtering out data for ${timeRange} timeframe`);
-          setMapData([]);
-        } else {
-          setMapData(data.data);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching map data:', error);
-    }
+  // Selected country drilldown (A3, e.g., 'USA' or 'CAN')
+  const [selectedA3, setSelectedA3] = useState<string | null>(null);
+
+  // Sync with props
+  useEffect(() => {
+    setView(viewType);
+    setTimeRangeState(timeRange as TimeRange);
   }, [viewType, timeRange]);
 
-  // Load geographic data based on current level and selected country
-  const loadGeoData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      let data: GeoData;
-      
-      if (currentLevel === 'world') {
-        data = await geoDataManager.getWorldData();
-      } else {
-        const countryInfo = geoDataManager.getCountryInfo(selectedCountry!);
-        if (!countryInfo) {
-          throw new Error(`Country ${selectedCountry} not supported for drill-down`);
-        }
-        data = await geoDataManager.getAdmin1Data(countryInfo.code);
-      }
-
-      setGeoData(data);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load map data';
-      setError(errorMessage);
-      console.error('Error loading geo data:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentLevel, selectedCountry]);
-
-  // Process map data for current view
-  const processedData = useCallback(() => {
-    if (!mapData || mapData.length === 0) {
-      return {};
-    }
-    
-    console.log('🗺️ Processing map data:', mapData);
-    console.log('🗺️ Current level:', currentLevel, 'Selected country:', selectedCountry);
-    
-    const dataMap: Record<string, { users: number; listings: number }> = {};
-
-    mapData.forEach(item => {
-      let key = item.location;
-      
-      if (currentLevel === 'world') {
-        // For world view, extract country from location
-        const parts = item.location.split(', ');
-        let country = parts[parts.length - 1].trim();
-        
-        // Map to standard country names
-        const countryInfo = geoDataManager.getCountryInfo(country);
-        if (countryInfo) {
-          country = countryInfo.name;
-        }
-        
-        key = country;
-      } else if (currentLevel === 'admin1' && selectedCountry) {
-        // For admin1 view, extract state/province from location
-        const parts = item.location.split(', ');
-        if (parts.length >= 2) {
-          const stateProvince = parts[parts.length - 2].trim();
-          
-          // Map state abbreviations to full names for better matching
-          const stateMapping: Record<string, string> = {
-            'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
-            'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
-            'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
-            'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
-            'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
-            'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
-            'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
-            'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
-            'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
-            'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming',
-            'DC': 'District of Columbia',
-            // Canadian provinces
-            'AB': 'Alberta', 'BC': 'British Columbia', 'MB': 'Manitoba', 'NB': 'New Brunswick',
-            'NL': 'Newfoundland and Labrador', 'NS': 'Nova Scotia', 'ON': 'Ontario', 'PE': 'Prince Edward Island',
-            'QC': 'Quebec', 'SK': 'Saskatchewan', 'NT': 'Northwest Territories', 'NU': 'Nunavut', 'YT': 'Yukon'
-          };
-          
-          // Try to map abbreviation to full name, otherwise use the original
-          key = stateMapping[stateProvince] || stateProvince;
-        }
-      }
-
-      if (!dataMap[key]) {
-        dataMap[key] = { users: 0, listings: 0 };
-      }
-      
-      dataMap[key].users += item.userCount || 0;
-      dataMap[key].listings += item.listingCount || 0;
-    });
-
-    console.log('🗺️ Processed data map:', dataMap);
-    return dataMap;
-  }, [mapData, currentLevel, selectedCountry]);
-
-  // Get fill color for a region
-  const getFillColor = useCallback((feature: GeoFeature) => {
-    const regionName = geoDataManager.extractRegionName(feature);
-    const processedDataMap = processedData();
-    const data = processedDataMap[regionName];
-    
-    if (!data) {
-      return '#E5E7EB';
-    }
-
-    const count = viewType === 'users' ? data.users : data.listings;
-    if (count === 0) {
-      return '#E5E7EB';
-    }
-
-    const maxCount = Math.max(...Object.values(processedDataMap).map(d => 
-      viewType === 'users' ? d.users : d.listings
-    ));
-    
-    if (maxCount === 0) return '#E5E7EB';
-    
-    const intensity = Math.min(count / maxCount, 1);
-    const hue = 210; // Blue hue
-    const saturation = 60 + (intensity * 40);
-    const lightness = 85 - (intensity * 40);
-    
-    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-  }, [processedData, viewType]);
-
-  // Handle mouse enter
-  const handleMouseEnter = useCallback((feature: GeoFeature, event: React.MouseEvent) => {
-    const regionName = geoDataManager.extractRegionName(feature);
-    const processedDataMap = processedData();
-    const data = processedDataMap[regionName];
-    
-    if (data) {
-      const count = viewType === 'users' ? data.users : data.listings;
-      setTooltip({
-        region: regionName,
-        count,
-        x: event.clientX,
-        y: event.clientY
-      });
-    }
-  }, [processedData, viewType]);
-
-  // Handle mouse leave
-  const handleMouseLeave = useCallback(() => {
-    setTooltip(null);
+  useEffect(() => {
+    (async () => {
+      const [a0, a1] = await Promise.all([loadAdmin0(), loadAdmin1()]);
+      setAdmin0(a0);
+      setAdmin1(a1);
+    })();
   }, []);
 
-  // Handle region click
-  const handleRegionClick = useCallback((feature: GeoFeature) => {
-    const regionName = geoDataManager.extractRegionName(feature);
-    
-    console.log('🗺️ Region clicked:', {
-      regionName,
-      currentLevel,
-      supportsDrillDown: geoDataManager.supportsDrillDown(regionName),
-      countryInfo: geoDataManager.getCountryInfo(regionName)
-    });
-    
-    if (currentLevel === 'world') {
-      // Check if this country supports drill-down
-      if (geoDataManager.supportsDrillDown(regionName)) {
-        const countryInfo = geoDataManager.getCountryInfo(regionName);
-        if (countryInfo) {
-          console.log('🗺️ Drilling down to:', regionName, 'with info:', countryInfo);
-          setSelectedCountry(regionName);
-          setCurrentLevel('admin1');
-          setCenter(countryInfo.center);
-          setZoom(countryInfo.zoom);
-        }
-      } else {
-        console.log('🗺️ Country does not support drill-down:', regionName);
+  useEffect(() => {
+    (async () => {
+      const res = await fetch(
+        `/api/admin/analytics/locations?type=${view}&timeRange=${timeRangeState}`
+      );
+      const json = (await res.json()) as Row[];
+      setData(json);
+    })();
+  }, [view, timeRangeState]);
+
+  // Aggregate counts at country level (Admin0 A3) and admin1 level (ISO_3166_2)
+  const { countryCounts, admin1Counts } = useMemo(() => {
+    const byCountryA3 = new Map<string, number>();
+    const byISO = new Map<string, number>();
+
+    for (const row of data) {
+      const iso = isoFromLocation(row.location); // e.g. "US-TX" / "CA-ON" (if parseable)
+      const a3 = a3FromISO2(iso);
+
+      const count = view === "users" ? row.userCount : row.listingCount;
+
+      // Admin1 (US/CA) shading
+      if (iso) {
+        byISO.set(iso, (byISO.get(iso) || 0) + count);
+      }
+
+      // Country shading
+      if (a3) {
+        byCountryA3.set(a3, (byCountryA3.get(a3) || 0) + count);
+        continue;
+      }
+
+      // Fallback: try to detect country by trailing token (e.g., "London, United Kingdom")
+      const tokens = row.location.split(",").map((t) => t.trim());
+      if (tokens.length >= 2) {
+        const maybeCountry = canonCountryName(tokens[tokens.length - 1]);
+        // We'll map this during render where we have admin0 features
+        byCountryA3.set(
+          `NAME__${maybeCountry}`,
+          (byCountryA3.get(`NAME__${maybeCountry}`) || 0) + count
+        );
       }
     }
-  }, [currentLevel]);
 
-  // Handle back to world
-  const handleBackToWorld = useCallback(() => {
-    setCenter([0, 0]);
-    setZoom(1);
-    setCurrentLevel('world');
-    setSelectedCountry(null);
-  }, []);
+    return { countryCounts: byCountryA3, admin1Counts: byISO };
+  }, [data, view]);
 
-  // Effects
-  useEffect(() => {
-    fetchMapData();
-  }, [fetchMapData]);
+  // Color scales
+  const worldMax = useMemo(
+    () => Math.max(1, ...Array.from(countryCounts.values())),
+    [countryCounts]
+  );
+  const admin1Max = useMemo(
+    () => Math.max(1, ...Array.from(admin1Counts.values())),
+    [admin1Counts]
+  );
 
-  useEffect(() => {
-    loadGeoData();
-  }, [loadGeoData]);
+  const worldScale = useMemo(
+    () =>
+      scaleLinear<string>()
+        .domain([0, worldMax])
+        .range(["#f2f2f2", "#0a84ff"]),
+    [worldMax]
+  );
 
-  // Get max count for legend
-  const processedDataMap = processedData();
-  const maxCount = Math.max(...Object.values(processedDataMap).map(d => 
-    viewType === 'users' ? d.users : d.listings
-  ));
+  const admin1Scale = useMemo(
+    () =>
+      scaleLinear<string>()
+        .domain([0, admin1Max])
+        .range(["#f4f0ff", "#7c3aed"]),
+    [admin1Max]
+  );
 
-  // Render error state
-  if (error) {
-    return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="text-center">
-          <div className="text-red-500 text-4xl mb-2">⚠️</div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Map Error</h3>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={loadGeoData}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
+  // Find country count given a feature
+  function valueForCountry(f: GeoFeature): number {
+    const props = f.properties || {};
+    const a3 = (admin0A3(props) || "").toUpperCase();
+    if (countryCounts.has(a3)) return countryCounts.get(a3)!;
+
+    // try matching by name fallback
+    const nm = canonCountryName(admin0Name(props));
+    const key = `NAME__${nm}`;
+    if (countryCounts.has(key)) return countryCounts.get(key)!;
+
+    return 0;
   }
+
+  // Drill target (Admin1) list for selected country
+  const admin1Features: GeoFeature[] = useMemo(() => {
+    if (!admin1 || !selectedA3) return [];
+    return filterAdmin1ByA3(admin1, selectedA3);
+  }, [admin1, selectedA3]);
+
+  const isDrilled = !!selectedA3;
+
+  // Zoom heuristics
+  const zoom = isDrilled
+    ? selectedA3 === "USA"
+      ? 2.8
+      : selectedA3 === "CAN"
+      ? 2.6
+      : 2.4
+    : 1;
+
+  // Rough centers
+  const center: [number, number] = isDrilled
+    ? selectedA3 === "USA"
+      ? [-98, 39]
+      : selectedA3 === "CAN"
+      ? [-96, 61]
+      : [0, 20]
+    : [0, 20];
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -288,22 +188,22 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
-            {currentLevel === 'admin1' 
-              ? `${selectedCountry} - ${viewType === 'users' ? 'Users' : 'Listings'}` 
+            {isDrilled 
+              ? `${selectedA3 === 'USA' ? 'United States' : selectedA3 === 'CAN' ? 'Canada' : selectedA3} - ${view === 'users' ? 'Users' : 'Listings'}` 
               : 'World Map'
             }
           </h3>
           <p className="text-sm text-gray-600">
-            {currentLevel === 'admin1' 
-              ? `Showing ${viewType} by ${selectedCountry === 'United States of America' ? 'state' : 'province'}`
-              : `Showing ${viewType} by country`
+            {isDrilled 
+              ? `Showing ${view} by ${selectedA3 === 'USA' ? 'state' : 'province'}`
+              : `Showing ${view} by country`
             }
           </p>
         </div>
         
-        {currentLevel === 'admin1' && (
+        {isDrilled && (
           <button
-            onClick={handleBackToWorld}
+            onClick={() => setSelectedA3(null)}
             className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
           >
             Back to World
@@ -317,8 +217,12 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
           <div className="flex items-center space-x-2">
             <label className="text-sm font-medium text-gray-700">View:</label>
             <select
-              value={viewType}
-              onChange={(e) => onViewTypeChange?.(e.target.value as 'users' | 'listings')}
+              value={view}
+              onChange={(e) => {
+                const newView = e.target.value as ViewType;
+                setView(newView);
+                onViewTypeChange?.(newView);
+              }}
               className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="users">Users</option>
@@ -329,8 +233,12 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
           <div className="flex items-center space-x-2">
             <label className="text-sm font-medium text-gray-700">Timeframe:</label>
             <select
-              value={timeRange}
-              onChange={(e) => onTimeRangeChange(e.target.value)}
+              value={timeRangeState}
+              onChange={(e) => {
+                const newRange = e.target.value as TimeRange;
+                setTimeRangeState(newRange);
+                onTimeRangeChange(newRange);
+              }}
               className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="24h">24h</option>
@@ -345,57 +253,88 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
 
       {/* Map */}
       <div className="relative">
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
-            <div className="text-gray-600">Loading map data...</div>
-          </div>
-        )}
-        
-        {geoData && (
-          <ComposableMap
-            projection="geoMercator"
-            projectionConfig={{
-              scale: 147,
-              center: center,
-            }}
-            width={800}
-            height={400}
-          >
-            <ZoomableGroup zoom={zoom} center={center}>
-              <Geographies geography={geoData}>
+        <ComposableMap width={MAP_WIDTH} height={MAP_HEIGHT} projection="geoEqualEarth">
+          <ZoomableGroup center={center} zoom={zoom}>
+            {/* WORLD LAYER (Admin-0) */}
+            {!isDrilled && admin0 && (
+              <Geographies geography={admin0 as unknown as any}>
                 {({ geographies }) =>
-                  geographies.map((geo) => (
-                    <Geography
-                      key={geo.rsmKey}
-                      geography={geo}
-                      fill={getFillColor(geo)}
-                      stroke="#FFFFFF"
-                      strokeWidth={0.5}
-                      style={{
-                        default: {
-                          fill: getFillColor(geo),
-                          outline: 'none',
-                        },
-                        hover: {
-                          fill: '#3B82F6',
-                          outline: 'none',
-                          cursor: 'pointer',
-                        },
-                        pressed: {
-                          fill: '#1D4ED8',
-                          outline: 'none',
-                        },
-                      }}
-                      onMouseEnter={(event) => handleMouseEnter(geo, event)}
-                      onMouseLeave={handleMouseLeave}
-                      onClick={() => handleRegionClick(geo)}
-                    />
-                  ))
+                  geographies.map((geo: GeoFeature) => {
+                    const props = geo.properties || {};
+                    const a3 = (admin0A3(props) || "").toUpperCase();
+                    const val = valueForCountry(geo);
+                    const fill = worldScale(val);
+
+                    const selectable = a3 === "USA" || a3 === "CAN";
+
+                    return (
+                      <Geography
+                        key={geo.properties?.ADM0_A3 || geo.properties?.name || Math.random()}
+                        geography={geo}
+                        onClick={() => selectable && setSelectedA3(a3)}
+                        style={{
+                          default: {
+                            fill,
+                            outline: "none",
+                            stroke: "#ccc",
+                            strokeWidth: 0.5,
+                            cursor: selectable ? "pointer" : "default",
+                          },
+                          hover: {
+                            fill: "#1e90ff",
+                            outline: "none",
+                            cursor: selectable ? "pointer" : "default",
+                          },
+                          pressed: {
+                            fill: "#1e90ff",
+                            outline: "none",
+                          },
+                        }}
+                      />
+                    );
+                  })
                 }
               </Geographies>
-            </ZoomableGroup>
-          </ComposableMap>
-        )}
+            )}
+
+            {/* ADMIN-1 LAYER (US states / CA provinces) */}
+            {isDrilled && admin1Features.length > 0 && (
+              <Geographies geography={{ type: "FeatureCollection", features: admin1Features } as any}>
+                {({ geographies }) =>
+                  geographies.map((geo: GeoFeature) => {
+                    const iso = admin1ISO2(geo.properties || {}) || "";
+                    const val = admin1Counts.get(iso) || 0;
+                    const fill = admin1Scale(val);
+
+                    return (
+                      <Geography
+                        key={geo.properties?.ADM0_A3 || geo.properties?.name || Math.random()}
+                        geography={geo}
+                        style={{
+                          default: {
+                            fill,
+                            outline: "none",
+                            stroke: "#999",
+                            strokeWidth: 0.6,
+                            cursor: "default",
+                          },
+                          hover: {
+                            fill: "#7c3aed",
+                            outline: "none",
+                          },
+                          pressed: {
+                            fill: "#7c3aed",
+                            outline: "none",
+                          },
+                        }}
+                      />
+                    );
+                  })
+                }
+              </Geographies>
+            )}
+          </ZoomableGroup>
+        </ComposableMap>
       </div>
 
       {/* Legend */}
@@ -420,22 +359,14 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
         </div>
         
         <div className="text-sm text-gray-600">
-          Max: {maxCount} {viewType}
+          Max: {isDrilled ? admin1Max : worldMax} {view}
         </div>
       </div>
 
-      {/* Tooltip */}
-      {tooltip && (
-        <div
-          className="absolute bg-gray-900 text-white px-3 py-2 rounded-lg text-sm pointer-events-none z-20"
-          style={{
-            left: tooltip.x + 10,
-            top: tooltip.y - 10,
-          }}
-        >
-          {tooltip.region}: {tooltip.count} {viewType}
-        </div>
-      )}
+      <p className="text-sm text-gray-500 mt-2">
+        Click <b>United States</b> or <b>Canada</b> to drill down. Colors are choropleth by{" "}
+        <b>{view}</b> within the selected <b>{timeRangeState}</b>.
+      </p>
     </div>
   );
 }
