@@ -74,10 +74,28 @@ export default function AnalyticsPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'listings' | 'performance' | 'security' | 'locations'>('overview');
   const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d' | '90d'>('7d');
+  
+  // Individual chart timeframes
+  const [userChartTimeframe, setUserChartTimeframe] = useState<'24h' | '7d' | '30d' | '90d'>('7d');
+  const [listingChartTimeframe, setListingChartTimeframe] = useState<'24h' | '7d' | '30d' | '90d'>('7d');
+  
+  // Individual chart data
+  const [userChartData, setUserChartData] = useState<Array<{date: string, value: number}>>([]);
+  const [listingChartData, setListingChartData] = useState<Array<{date: string, value: number}>>([]);
+  const [userChartLoading, setUserChartLoading] = useState(false);
+  const [listingChartLoading, setListingChartLoading] = useState(false);
 
   useEffect(() => {
     fetchAnalyticsData();
   }, [timeRange]);
+  
+  useEffect(() => {
+    fetchUserChartData();
+  }, [userChartTimeframe]);
+  
+  useEffect(() => {
+    fetchListingChartData();
+  }, [listingChartTimeframe]);
 
   const fetchAnalyticsData = async () => {
     try {
@@ -96,6 +114,38 @@ export default function AnalyticsPage() {
       console.error('Analytics fetch error:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserChartData = async () => {
+    try {
+      setUserChartLoading(true);
+      const response = await fetch(`/api/admin/analytics/chart?type=users&timeRange=${userChartTimeframe}`);
+      const result = await response.json() as { success: boolean; data?: Array<{date: string, value: number}>; error?: string };
+      
+      if (result.success && result.data) {
+        setUserChartData(result.data);
+      }
+    } catch (err) {
+      console.error('User chart fetch error:', err);
+    } finally {
+      setUserChartLoading(false);
+    }
+  };
+
+  const fetchListingChartData = async () => {
+    try {
+      setListingChartLoading(true);
+      const response = await fetch(`/api/admin/analytics/chart?type=listings&timeRange=${listingChartTimeframe}`);
+      const result = await response.json() as { success: boolean; data?: Array<{date: string, value: number}>; error?: string };
+      
+      if (result.success && result.data) {
+        setListingChartData(result.data);
+      }
+    } catch (err) {
+      console.error('Listing chart fetch error:', err);
+    } finally {
+      setListingChartLoading(false);
     }
   };
 
@@ -385,34 +435,42 @@ export default function AnalyticsPage() {
 
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <Chart
-                data={analyticsData.userGrowth.map(day => ({
-                  date: day.date,
-                  value: day.users
-                }))}
-                type="timeseries"
-                title="Cumulative Users Over Time"
-                height={400}
-                xAxisLabel="Date"
-                yAxisLabel="Total Users"
-                showTimeframeControls={true}
-                currentTimeframe={timeRange}
-                onTimeframeChange={setTimeRange}
-              />
-              <Chart
-                data={analyticsData.listingGrowth.map(day => ({
-                  date: day.date,
-                  value: day.listings
-                }))}
-                type="timeseries"
-                title="Cumulative Listings Over Time"
-                height={400}
-                xAxisLabel="Date"
-                yAxisLabel="Total Listings"
-                showTimeframeControls={true}
-                currentTimeframe={timeRange}
-                onTimeframeChange={setTimeRange}
-              />
+              <div className="relative">
+                {userChartLoading && (
+                  <div className="absolute inset-0 bg-white/80 dark:bg-neutral-800/80 flex items-center justify-center z-10 rounded-lg">
+                    <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
+                <Chart
+                  data={userChartData}
+                  type="timeseries"
+                  title="Cumulative Users Over Time"
+                  height={400}
+                  xAxisLabel="Date"
+                  yAxisLabel="Total Users"
+                  showTimeframeControls={true}
+                  currentTimeframe={userChartTimeframe}
+                  onTimeframeChange={setUserChartTimeframe}
+                />
+              </div>
+              <div className="relative">
+                {listingChartLoading && (
+                  <div className="absolute inset-0 bg-white/80 dark:bg-neutral-800/80 flex items-center justify-center z-10 rounded-lg">
+                    <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
+                <Chart
+                  data={listingChartData}
+                  type="timeseries"
+                  title="Cumulative Listings Over Time"
+                  height={400}
+                  xAxisLabel="Date"
+                  yAxisLabel="Total Listings"
+                  showTimeframeControls={true}
+                  currentTimeframe={listingChartTimeframe}
+                  onTimeframeChange={setListingChartTimeframe}
+                />
+              </div>
             </div>
           </div>
         )}

@@ -90,26 +90,46 @@ export async function GET(req: NextRequest) {
       db.prepare("SELECT COUNT(*) as count FROM chats WHERE created_at <= ?").bind(now - (7 * 24 * 60 * 60)).first()
     ]);
 
-    // Get user growth data - simple and reliable
+    // Get user growth data - cumulative totals
     const userGrowthResult = await db.prepare(`
-      SELECT 
-        DATE(datetime(created_at, 'unixepoch')) as date,
-        COUNT(*) as newUsers
-      FROM users 
-      WHERE created_at > ?
-      GROUP BY DATE(datetime(created_at, 'unixepoch'))
-      ORDER BY date ASC
+      WITH daily_users AS (
+        SELECT 
+          DATE(datetime(created_at, 'unixepoch')) as date,
+          COUNT(*) as newUsers
+        FROM users 
+        WHERE created_at > ?
+        GROUP BY DATE(datetime(created_at, 'unixepoch'))
+        ORDER BY date ASC
+      ),
+      cumulative_users AS (
+        SELECT 
+          date,
+          newUsers,
+          SUM(newUsers) OVER (ORDER BY date) as cumulativeUsers
+        FROM daily_users
+      )
+      SELECT * FROM cumulative_users
     `).bind(timeBoundary).all();
 
-    // Get listing growth data - simple and reliable
+    // Get listing growth data - cumulative totals
     const listingGrowthResult = await db.prepare(`
-      SELECT 
-        DATE(datetime(created_at, 'unixepoch')) as date,
-        COUNT(*) as newListings
-      FROM listings 
-      WHERE created_at > ?
-      GROUP BY DATE(datetime(created_at, 'unixepoch'))
-      ORDER BY date ASC
+      WITH daily_listings AS (
+        SELECT 
+          DATE(datetime(created_at, 'unixepoch')) as date,
+          COUNT(*) as newListings
+        FROM listings 
+        WHERE created_at > ?
+        GROUP BY DATE(datetime(created_at, 'unixepoch'))
+        ORDER BY date ASC
+      ),
+      cumulative_listings AS (
+        SELECT 
+          date,
+          newListings,
+          SUM(newListings) OVER (ORDER BY date) as cumulativeListings
+        FROM daily_listings
+      )
+      SELECT * FROM cumulative_listings
     `).bind(timeBoundary).all();
 
     // Get listing statistics by category
@@ -215,12 +235,12 @@ export async function GET(req: NextRequest) {
       },
       userGrowth: (userGrowthResult.results || []).map((row: any) => ({
         date: row.date,
-        users: row.newUsers,
+        users: row.cumulativeUsers,
         newUsers: row.newUsers
       })),
       listingGrowth: (listingGrowthResult.results || []).map((row: any) => ({
         date: row.date,
-        listings: row.newListings,
+        listings: row.cumulativeListings,
         newListings: row.newListings
       })),
       listingStats: (listingStatsResult.results || []).map((row: any) => ({
