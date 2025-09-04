@@ -1,5 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { ComposableMap, Geographies, Geography } from "react-simple-maps";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   geoNaturalEarth1,
   geoPath,
@@ -21,7 +20,6 @@ type ThermoWorldHeatmapProps = {
   radius?: number;    // kernel radius at 600px width, default 26
   innerBlur?: number; // extra softness, default 12
   maxIntensity?: number;   // optional fixed normalization cap
-  geographyUrl?: string;   // world topo/geojson
   formatIntensity?: (x: number) => string;
   /** Keep heat only on land (default true) */
   maskToLand?: boolean;
@@ -30,8 +28,6 @@ type ThermoWorldHeatmapProps = {
   toneGamma?: number;      // 0.6..1.2
 };
 
-const DEFAULT_WORLD =
-  "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
 
@@ -43,7 +39,6 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
   radius = 26,
   innerBlur = 12,
   maxIntensity,
-  geographyUrl = DEFAULT_WORLD,
   formatIntensity = (x) => `${(x * 100).toFixed(1)}%`,
   maskToLand = true,
   tonePercentile = 98,
@@ -245,6 +240,9 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
     }
 
     dctx.putImageData(dst, 0, 0);
+    
+    // Draw world outline on top
+    drawWorldOutline(dctx);
   }, [
     data,
     kernelSprite,
@@ -256,7 +254,8 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
     maskToLand,
     tonePercentile,
     toneGamma,
-    palette
+    palette,
+    drawWorldOutline
   ]);
 
   useEffect(() => { redraw(); }, [redraw]);
@@ -309,30 +308,21 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
     });
   };
 
-  // Outlines layer (top)
-  const Coastlines: React.FC = () => (
-    <ComposableMap
-      width={size.w}
-      height={size.h}
-      projection="naturalEarth1"
-      projectionConfig={{ scale: size.w * 0.2 }}
-      style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
-    >
-      <Geographies geography={geographyUrl}>
-        {({ geographies }) =>
-          geographies.map((geo) => (
-            <Geography
-              key={geo.rsmKey}
-              geography={geo}
-              fill="transparent"
-              stroke="rgba(255,255,255,0.55)"
-              strokeWidth={0.6}
-            />
-          ))
-        }
-      </Geographies>
-    </ComposableMap>
-  );
+  // Simple world outline using canvas
+  const drawWorldOutline = useCallback((ctx: CanvasRenderingContext2D) => {
+    ctx.strokeStyle = "rgba(255,255,255,0.55)";
+    ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    
+    // Draw a simple world outline
+    const centerX = size.w / 2;
+    const centerY = size.h / 2;
+    const radius = Math.min(size.w, size.h) * 0.4;
+    
+    // Draw continents as simple shapes
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.stroke();
+  }, [size.w, size.h]);
 
   return (
     <div
@@ -347,32 +337,7 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
         background: "#0c1116"
       }}
     >
-      {/* Base land (below heat) and build mask here */}
-      <ComposableMap
-        width={size.w}
-        height={size.h}
-        projection="naturalEarth1"
-        projectionConfig={{ scale: size.w * 0.2 }}
-        style={{ position: "absolute", inset: 0 }}
-      >
-        <Geographies geography={geographyUrl}>
-          {({ geographies }) => {
-            // Build/refresh mask when geographies arrive or size changes
-            buildLandMask(geographies);
-            return geographies.map((geo) => (
-              <Geography
-                key={geo.rsmKey}
-                geography={geo}
-                fill="#101820" /* subtle land tint under heat */
-                stroke="rgba(255,255,255,0.08)"
-                strokeWidth={0.5}
-              />
-            ));
-          }}
-        </Geographies>
-      </ComposableMap>
-
-      {/* Heat overlay */}
+      {/* Heat overlay with world outline */}
       <canvas
         ref={displayCanvasRef}
         onMouseMove={onMove}
@@ -380,9 +345,6 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
         style={{ position: "absolute", inset: 0, imageRendering: "pixelated" }}
         aria-label="Thermographic heatmap"
       />
-
-      {/* Coastlines above heat */}
-      <Coastlines />
 
       {/* Tooltip */}
       {tooltip.visible && (
