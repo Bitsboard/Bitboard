@@ -47,6 +47,8 @@ export async function GET(req: NextRequest) {
     
     if (viewType === 'users') {
       // Get user location data from their listings (since users table doesn't have location)
+      // For users, we want to show users who were active in the selected timeframe
+      // We'll use the most recent listing date as a proxy for user activity
       let query = `
         SELECT 
           l.location,
@@ -59,7 +61,12 @@ export async function GET(req: NextRequest) {
       
       // Only add time filter if not "all"
       if (timeRange !== 'all') {
-        query += ` AND l.created_at > ?`;
+        // For users, filter by the most recent listing date to show active users
+        query += ` AND l.posted_by IN (
+          SELECT DISTINCT posted_by 
+          FROM listings 
+          WHERE created_at > ?
+        )`;
       }
       
       query += `
