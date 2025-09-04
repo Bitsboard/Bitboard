@@ -63,7 +63,7 @@ export default function AnalyticsPage() {
   const [userChartData, setUserChartData] = useState<any[]>([]);
   const [listingChartData, setListingChartData] = useState<any[]>([]);
 
-  const loadChartData = useCallback(async (type: 'users' | 'listings', timeframe: string) => {
+  const loadChartData = async (type: 'users' | 'listings', timeframe: string) => {
     try {
       console.log(`Loading ${type} chart data for timeframe: ${timeframe}`);
       const response = await fetch(`/api/admin/analytics/chart?type=${type}&timeframe=${timeframe}`);
@@ -74,7 +74,17 @@ export default function AnalyticsPage() {
       console.error(`Failed to load ${type} chart data:`, error);
       return [];
     }
-  }, []);
+  };
+
+  const loadUserChartData = async (timeframe: string) => {
+    const data = await loadChartData('users', timeframe);
+    setUserChartData(data);
+  };
+
+  const loadListingChartData = async (timeframe: string) => {
+    const data = await loadChartData('listings', timeframe);
+    setListingChartData(data);
+  };
 
   useEffect(() => {
     const loadAnalytics = async () => {
@@ -86,12 +96,10 @@ export default function AnalyticsPage() {
         }
         
         // Load initial chart data
-        const [userData, listingData] = await Promise.all([
-          loadChartData('users', userTimeframe),
-          loadChartData('listings', listingTimeframe)
+        await Promise.all([
+          loadUserChartData(userTimeframe),
+          loadListingChartData(listingTimeframe)
         ]);
-        setUserChartData(userData);
-        setListingChartData(listingData);
       } catch (error) {
         console.error('Failed to load analytics:', error);
       } finally {
@@ -104,20 +112,12 @@ export default function AnalyticsPage() {
 
   // Load chart data when timeframes change
   useEffect(() => {
-    const loadUserData = async () => {
-      const data = await loadChartData('users', userTimeframe);
-      setUserChartData(data);
-    };
-    loadUserData();
-  }, [userTimeframe, loadChartData]);
+    loadUserChartData(userTimeframe);
+  }, [userTimeframe]);
 
   useEffect(() => {
-    const loadListingData = async () => {
-      const data = await loadChartData('listings', listingTimeframe);
-      setListingChartData(data);
-    };
-    loadListingData();
-  }, [listingTimeframe, loadChartData]);
+    loadListingChartData(listingTimeframe);
+  }, [listingTimeframe]);
 
   if (loading) {
     return (

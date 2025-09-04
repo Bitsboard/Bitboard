@@ -76,37 +76,74 @@ export default function WorldMap() {
   );
 
   console.log('🗺️ Valid data points:', validData.length);
-  console.log('🗺️ Sample coordinates:', validData.slice(0, 3).map(row => ({
-    location: row.location,
-    lat: row.lat,
-    lng: row.lng,
-    count: row.listingCount
-  })));
 
   // Calculate max count for color scaling
   const maxCount = Math.max(1, ...validData.map(row => row.listingCount));
 
+  // Create a heatmap grid for smooth blending
+  const createHeatmapData = () => {
+    const gridSize = 20; // Grid resolution
+    const heatmapData: Array<{x: number, y: number, intensity: number, count: number}> = [];
+    
+    // Create a grid of heat points
+    for (let x = 0; x < MAP_WIDTH; x += gridSize) {
+      for (let y = 0; y < MAP_HEIGHT; y += gridSize) {
+        let totalIntensity = 0;
+        let totalCount = 0;
+        
+        // Calculate heat intensity at this grid point
+        validData.forEach(row => {
+          const dataX = (row.lng! + 180) * (MAP_WIDTH / 360);
+          const dataY = (90 - row.lat!) * (MAP_HEIGHT / 180);
+          
+          // Calculate distance from this grid point to the data point
+          const distance = Math.sqrt((x - dataX) ** 2 + (y - dataY) ** 2);
+          const influenceRadius = 80; // How far each data point influences
+          
+          if (distance < influenceRadius) {
+            const influence = (1 - distance / influenceRadius) * row.listingCount;
+            totalIntensity += influence;
+            totalCount += row.listingCount;
+          }
+        });
+        
+        if (totalIntensity > 0) {
+          heatmapData.push({
+            x: x + gridSize / 2,
+            y: y + gridSize / 2,
+            intensity: totalIntensity,
+            count: totalCount
+          });
+        }
+      }
+    }
+    
+    return heatmapData;
+  };
+
+  const heatmapData = createHeatmapData();
+
   // Color scale for thermographic heatmap
-  const getHeatColor = (count: number) => {
-    const intensity = count / maxCount;
-    if (intensity === 0) return "rgba(0, 0, 255, 0)"; // Transparent blue
-    if (intensity < 0.1) return "rgba(0, 0, 255, 0.3)"; // Blue
-    if (intensity < 0.2) return "rgba(0, 100, 255, 0.4)"; // Light blue
-    if (intensity < 0.3) return "rgba(0, 200, 255, 0.5)"; // Cyan
-    if (intensity < 0.4) return "rgba(0, 255, 200, 0.6)"; // Light green
-    if (intensity < 0.5) return "rgba(100, 255, 100, 0.7)"; // Green
-    if (intensity < 0.6) return "rgba(200, 255, 0, 0.8)"; // Yellow-green
-    if (intensity < 0.7) return "rgba(255, 255, 0, 0.9)"; // Yellow
-    if (intensity < 0.8) return "rgba(255, 200, 0, 0.9)"; // Orange
-    if (intensity < 0.9) return "rgba(255, 100, 0, 0.9)"; // Red-orange
+  const getHeatColor = (intensity: number) => {
+    const normalizedIntensity = intensity / maxCount;
+    if (normalizedIntensity === 0) return "rgba(0, 0, 255, 0)"; // Transparent blue
+    if (normalizedIntensity < 0.1) return "rgba(0, 0, 255, 0.2)"; // Blue
+    if (normalizedIntensity < 0.2) return "rgba(0, 100, 255, 0.3)"; // Light blue
+    if (normalizedIntensity < 0.3) return "rgba(0, 200, 255, 0.4)"; // Cyan
+    if (normalizedIntensity < 0.4) return "rgba(0, 255, 200, 0.5)"; // Light green
+    if (normalizedIntensity < 0.5) return "rgba(100, 255, 100, 0.6)"; // Green
+    if (normalizedIntensity < 0.6) return "rgba(200, 255, 0, 0.7)"; // Yellow-green
+    if (normalizedIntensity < 0.7) return "rgba(255, 255, 0, 0.8)"; // Yellow
+    if (normalizedIntensity < 0.8) return "rgba(255, 200, 0, 0.9)"; // Orange
+    if (normalizedIntensity < 0.9) return "rgba(255, 100, 0, 0.9)"; // Red-orange
     return "rgba(255, 0, 0, 0.9)"; // Red
   };
 
   // Handle mouse enter for tooltips
-  const handleMouseEnter = (row: Row, event: React.MouseEvent) => {
+  const handleMouseEnter = (point: any, event: React.MouseEvent) => {
     setTooltip({
-      location: row.location,
-      count: row.listingCount,
+      location: `Heat Zone (${point.count} listings)`,
+      count: point.count,
       x: event.clientX,
       y: event.clientY
     });
@@ -160,53 +197,22 @@ export default function WorldMap() {
               </Geographies>
             )}
 
-            {/* Thermographic heatmap zones for each listing location */}
-            {validData.map((row, index) => {
-              const baseSize = Math.max(15, Math.min(60, row.listingCount * 3));
-              const color = getHeatColor(row.listingCount);
-              
-              // Convert lat/lng to map coordinates
-              const x = (row.lng! + 180) * (MAP_WIDTH / 360);
-              const y = (90 - row.lat!) * (MAP_HEIGHT / 180);
-              
-              console.log(`🗺️ Plotting ${row.location}: lat=${row.lat}, lng=${row.lng} -> x=${x}, y=${y}`);
+            {/* Smooth thermographic heatmap */}
+            {heatmapData.map((point, index) => {
+              const color = getHeatColor(point.intensity);
+              const size = Math.max(8, Math.min(25, point.intensity * 0.5));
               
               return (
-                <g key={`${row.lat}-${row.lng}-${index}`}>
-                  {/* Outer glow effect */}
-                  <circle
-                    cx={x}
-                    cy={y}
-                    r={baseSize * 1.5}
-                    fill={color}
-                    opacity={0.2}
-                    onMouseEnter={(event) => handleMouseEnter(row, event)}
-                    onMouseLeave={handleMouseLeave}
-                    style={{ cursor: "pointer" }}
-                  />
-                  {/* Middle heat zone */}
-                  <circle
-                    cx={x}
-                    cy={y}
-                    r={baseSize}
-                    fill={color}
-                    opacity={0.6}
-                    onMouseEnter={(event) => handleMouseEnter(row, event)}
-                    onMouseLeave={handleMouseLeave}
-                    style={{ cursor: "pointer" }}
-                  />
-                  {/* Inner core */}
-                  <circle
-                    cx={x}
-                    cy={y}
-                    r={baseSize * 0.6}
-                    fill={color}
-                    opacity={0.9}
-                    onMouseEnter={(event) => handleMouseEnter(row, event)}
-                    onMouseLeave={handleMouseLeave}
-                    style={{ cursor: "pointer" }}
-                  />
-                </g>
+                <circle
+                  key={`heat-${index}`}
+                  cx={point.x}
+                  cy={point.y}
+                  r={size}
+                  fill={color}
+                  onMouseEnter={(event) => handleMouseEnter(point, event)}
+                  onMouseLeave={handleMouseLeave}
+                  style={{ cursor: "pointer" }}
+                />
               );
             })}
           </ZoomableGroup>
@@ -239,7 +245,7 @@ export default function WorldMap() {
       </div>
 
       <p className="text-sm text-gray-500 mt-2">
-        Granular heatmap showing individual listing locations worldwide.
+        Thermographic heatmap showing listing density worldwide.
       </p>
 
       {/* Tooltip */}
