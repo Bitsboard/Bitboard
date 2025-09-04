@@ -30,8 +30,8 @@ interface ChartProps {
   xAxisLabel?: string;
   yAxisLabel?: string;
   showTimeframeControls?: boolean;
-  currentTimeframe?: '24h' | '7d' | '30d' | '90d';
-  onTimeframeChange?: (timeframe: '24h' | '7d' | '30d' | '90d') => void;
+  currentTimeframe?: '24h' | '7d' | '30d' | '90d' | 'all';
+  onTimeframeChange?: (timeframe: '24h' | '7d' | '30d' | '90d' | 'all') => void;
 }
 
 export function Chart({ data, type, title, height = 300, className, xAxisLabel, yAxisLabel, showTimeframeControls = false, currentTimeframe = '7d', onTimeframeChange }: ChartProps) {
@@ -405,7 +405,7 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
           {title && <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">{title}</h3>}
           {showTimeframeControls && onTimeframeChange && (
             <div className="flex gap-1">
-              {(['24h', '7d', '30d', '90d'] as const).map((timeframe) => (
+              {(['24h', '7d', '30d', '90d', 'all'] as const).map((timeframe) => (
                 <button
                   key={timeframe}
                   onClick={() => onTimeframeChange(timeframe)}

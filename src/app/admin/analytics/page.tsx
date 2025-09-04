@@ -76,14 +76,18 @@ export default function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d' | '90d'>('7d');
   
   // Individual chart timeframes
-  const [userChartTimeframe, setUserChartTimeframe] = useState<'24h' | '7d' | '30d' | '90d'>('7d');
-  const [listingChartTimeframe, setListingChartTimeframe] = useState<'24h' | '7d' | '30d' | '90d'>('7d');
+  const [userChartTimeframe, setUserChartTimeframe] = useState<'24h' | '7d' | '30d' | '90d' | 'all'>('7d');
+  const [listingChartTimeframe, setListingChartTimeframe] = useState<'24h' | '7d' | '30d' | '90d' | 'all'>('7d');
   
   // Individual chart data
   const [userChartData, setUserChartData] = useState<Array<{date: string, value: number}>>([]);
   const [listingChartData, setListingChartData] = useState<Array<{date: string, value: number}>>([]);
   const [userChartLoading, setUserChartLoading] = useState(false);
   const [listingChartLoading, setListingChartLoading] = useState(false);
+  
+  // World map state
+  const [mapViewType, setMapViewType] = useState<'users' | 'listings'>('users');
+  const [mapTimeRange, setMapTimeRange] = useState<'24h' | '7d' | '30d' | '90d' | 'all'>('7d');
 
   useEffect(() => {
     fetchAnalyticsData();
@@ -586,7 +590,13 @@ export default function AnalyticsPage() {
         {/* Locations Tab */}
         {activeTab === 'locations' && (
           <div className="space-y-8">
-            <WorldMap data={analyticsData.userLocations} />
+            <WorldMap 
+              data={analyticsData.userLocations} 
+              viewType={mapViewType}
+              onViewTypeChange={setMapViewType}
+              timeRange={mapTimeRange}
+              onTimeRangeChange={setMapTimeRange}
+            />
             <InteractiveTable
               data={analyticsData.userLocations}
               columns={[

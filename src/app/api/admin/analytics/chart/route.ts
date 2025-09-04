@@ -34,6 +34,9 @@ export async function GET(req: NextRequest) {
       case '90d':
         timeBoundary = now - (90 * 24 * 60 * 60);
         break;
+      case 'all':
+        timeBoundary = 0; // All time
+        break;
       default:
         timeBoundary = now - (7 * 24 * 60 * 60);
     }
