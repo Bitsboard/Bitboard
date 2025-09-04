@@ -65,8 +65,10 @@ export default function AnalyticsPage() {
 
   const loadChartData = async (type: 'users' | 'listings', timeframe: string) => {
     try {
+      console.log(`Loading ${type} chart data for timeframe: ${timeframe}`);
       const response = await fetch(`/api/admin/analytics/chart?type=${type}&timeframe=${timeframe}`);
       const result = await response.json() as { data?: any[] };
+      console.log(`${type} chart data:`, result.data);
       return result.data || [];
     } catch (error) {
       console.error(`Failed to load ${type} chart data:`, error);
@@ -82,6 +84,14 @@ export default function AnalyticsPage() {
         if (result.data) {
           setAnalyticsData(result.data);
         }
+        
+        // Load initial chart data
+        const [userData, listingData] = await Promise.all([
+          loadChartData('users', userTimeframe),
+          loadChartData('listings', listingTimeframe)
+        ]);
+        setUserChartData(userData);
+        setListingChartData(listingData);
       } catch (error) {
         console.error('Failed to load analytics:', error);
       } finally {
@@ -344,13 +354,16 @@ export default function AnalyticsPage() {
           </ChartCard>
         </div>
 
-        {/* World Map */}
-        <div className="mb-8">
+        {/* World Map - Half Width */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <ChartCard title="Global Listings Distribution" className="p-0">
             <div className="p-6">
               <WorldMap />
             </div>
           </ChartCard>
+          
+          {/* Empty space for now - could add another chart here */}
+          <div></div>
         </div>
 
         {/* Bottom Stats Grid */}

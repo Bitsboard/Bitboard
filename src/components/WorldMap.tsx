@@ -17,8 +17,8 @@ type Row = {
   lng: number | null;
 };
 
-const MAP_WIDTH = 800;
-const MAP_HEIGHT = 400;
+const MAP_WIDTH = 600;
+const MAP_HEIGHT = 300;
 
 // Simple world GeoJSON (just the outline)
 const worldGeoUrl = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson";
