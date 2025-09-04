@@ -35,8 +35,8 @@ type Row = {
 type ViewType = "users" | "listings";
 type TimeRange = "24h" | "7d" | "30d" | "90d" | "all";
 
-const MAP_WIDTH = 800;
-const MAP_HEIGHT = 400;
+const MAP_WIDTH = 600;
+const MAP_HEIGHT = 300;
 
 interface WorldMapProps {
   viewType: 'users' | 'listings';
@@ -104,20 +104,26 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     const byCountryA3 = new Map<string, number>();
     const byISO = new Map<string, number>();
 
+    console.log('🗺️ Raw data for aggregation:', data.slice(0, 10)); // Debug first 10 items
+
     for (const row of data) {
       const iso = isoFromLocation(row.location); // e.g. "US-TX" / "CA-ON" (if parseable)
       const a3 = a3FromISO2(iso);
 
       const count = view === "users" ? row.userCount : row.listingCount;
 
+      console.log(`🗺️ Processing: ${row.location} -> ISO: ${iso}, A3: ${a3}, Count: ${count}`);
+
       // Admin1 (US/CA) shading
       if (iso) {
         byISO.set(iso, (byISO.get(iso) || 0) + count);
+        console.log(`🗺️ Added to ISO ${iso}: ${count} (total: ${byISO.get(iso)})`);
       }
 
       // Country shading
       if (a3) {
         byCountryA3.set(a3, (byCountryA3.get(a3) || 0) + count);
+        console.log(`🗺️ Added to A3 ${a3}: ${count} (total: ${byCountryA3.get(a3)})`);
         continue;
       }
 
@@ -130,8 +136,12 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
           `NAME__${maybeCountry}`,
           (byCountryA3.get(`NAME__${maybeCountry}`) || 0) + count
         );
+        console.log(`🗺️ Added to NAME ${maybeCountry}: ${count} (total: ${byCountryA3.get(`NAME__${maybeCountry}`)})`);
       }
     }
+
+    console.log('🗺️ Final country counts:', Object.fromEntries(byCountryA3));
+    console.log('🗺️ Final admin1 counts:', Object.fromEntries(byISO));
 
     return { countryCounts: byCountryA3, admin1Counts: byISO };
   }, [data, view]);
@@ -215,14 +225,14 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
 
   const isDrilled = !!selectedA3;
 
-  // Zoom heuristics
+  // Zoom heuristics - more zoomed out
   const zoom = isDrilled
     ? selectedA3 === "USA"
-      ? 2.8
+      ? 2.2
       : selectedA3 === "CAN"
-      ? 2.6
-      : 2.4
-    : 1;
+      ? 2.0
+      : 1.8
+    : 0.8;
 
   // Rough centers
   const center: [number, number] = isDrilled
