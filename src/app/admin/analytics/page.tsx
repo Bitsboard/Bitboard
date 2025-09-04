@@ -58,6 +58,21 @@ export default function AnalyticsPage() {
   const router = useRouter();
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userTimeframe, setUserTimeframe] = useState<'7d' | '30d' | '90d' | 'all'>('7d');
+  const [listingTimeframe, setListingTimeframe] = useState<'7d' | '30d' | '90d' | 'all'>('7d');
+  const [userChartData, setUserChartData] = useState<any[]>([]);
+  const [listingChartData, setListingChartData] = useState<any[]>([]);
+
+  const loadChartData = async (type: 'users' | 'listings', timeframe: string) => {
+    try {
+      const response = await fetch(`/api/admin/analytics/chart?type=${type}&timeframe=${timeframe}`);
+      const result = await response.json() as { data?: any[] };
+      return result.data || [];
+    } catch (error) {
+      console.error(`Failed to load ${type} chart data:`, error);
+      return [];
+    }
+  };
 
   useEffect(() => {
     const loadAnalytics = async () => {
@@ -76,6 +91,23 @@ export default function AnalyticsPage() {
 
     loadAnalytics();
   }, []);
+
+  // Load chart data when timeframes change
+  useEffect(() => {
+    const loadUserData = async () => {
+      const data = await loadChartData('users', userTimeframe);
+      setUserChartData(data);
+    };
+    loadUserData();
+  }, [userTimeframe]);
+
+  useEffect(() => {
+    const loadListingData = async () => {
+      const data = await loadChartData('listings', listingTimeframe);
+      setListingChartData(data);
+    };
+    loadListingData();
+  }, [listingTimeframe]);
 
   if (loading) {
     return (
@@ -157,6 +189,30 @@ export default function AnalyticsPage() {
     </div>
   );
 
+  const TimeframeButton = ({ 
+    timeframe, 
+    currentTimeframe, 
+    onTimeframeChange, 
+    label 
+  }: {
+    timeframe: '7d' | '30d' | '90d' | 'all';
+    currentTimeframe: '7d' | '30d' | '90d' | 'all';
+    onTimeframeChange: (timeframe: '7d' | '30d' | '90d' | 'all') => void;
+    label: string;
+  }) => (
+    <button
+      onClick={() => onTimeframeChange(timeframe)}
+      className={cn(
+        "px-3 py-1 text-sm font-medium rounded-lg transition-colors",
+        currentTimeframe === timeframe
+          ? "bg-blue-600 text-white"
+          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+      )}
+    >
+      {label}
+    </button>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -209,8 +265,34 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* User Growth Chart */}
           <ChartCard title="User Growth">
+            <div className="mb-4 flex justify-end space-x-2">
+              <TimeframeButton
+                timeframe="7d"
+                currentTimeframe={userTimeframe}
+                onTimeframeChange={setUserTimeframe}
+                label="7D"
+              />
+              <TimeframeButton
+                timeframe="30d"
+                currentTimeframe={userTimeframe}
+                onTimeframeChange={setUserTimeframe}
+                label="30D"
+              />
+              <TimeframeButton
+                timeframe="90d"
+                currentTimeframe={userTimeframe}
+                onTimeframeChange={setUserTimeframe}
+                label="90D"
+              />
+              <TimeframeButton
+                timeframe="all"
+                currentTimeframe={userTimeframe}
+                onTimeframeChange={setUserTimeframe}
+                label="All Time"
+              />
+            </div>
             <Chart
-              data={analyticsData.userGrowth.map(item => ({
+              data={userChartData.map(item => ({
                 date: item.date,
                 value: item.users,
                 label: `Users: ${item.users}`
@@ -223,8 +305,34 @@ export default function AnalyticsPage() {
 
           {/* Listing Growth Chart */}
           <ChartCard title="Listing Growth">
+            <div className="mb-4 flex justify-end space-x-2">
+              <TimeframeButton
+                timeframe="7d"
+                currentTimeframe={listingTimeframe}
+                onTimeframeChange={setListingTimeframe}
+                label="7D"
+              />
+              <TimeframeButton
+                timeframe="30d"
+                currentTimeframe={listingTimeframe}
+                onTimeframeChange={setListingTimeframe}
+                label="30D"
+              />
+              <TimeframeButton
+                timeframe="90d"
+                currentTimeframe={listingTimeframe}
+                onTimeframeChange={setListingTimeframe}
+                label="90D"
+              />
+              <TimeframeButton
+                timeframe="all"
+                currentTimeframe={listingTimeframe}
+                onTimeframeChange={setListingTimeframe}
+                label="All Time"
+              />
+            </div>
             <Chart
-              data={analyticsData.listingGrowth.map(item => ({
+              data={listingChartData.map(item => ({
                 date: item.date,
                 value: item.listings,
                 label: `Listings: ${item.listings}`

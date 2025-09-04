@@ -1,30 +1,35 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ComposableMap,
   Geographies,
   Geography,
+  ZoomableGroup,
 } from "react-simple-maps";
-import {
-  loadAdmin0,
-  admin0Name,
-  admin0A3,
-  canonCountryName,
-} from "@/lib/geoDataManager";
-import type { GeoFC, GeoFeature } from "@/lib/geoDataManager";
-import { scaleLinear } from "d3-scale";
+
+/** API row type */
+type Row = {
+  location: string;
+  userCount: number;
+  listingCount: number;
+  lat: number | null;
+  lng: number | null;
+};
 
 const MAP_WIDTH = 800;
 const MAP_HEIGHT = 400;
 
+// Simple world GeoJSON (just the outline)
+const worldGeoUrl = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson";
+
 export default function WorldMap() {
-  const [admin0, setAdmin0] = useState<GeoFC | null>(null);
-  const [data, setData] = useState<any[]>([]);
-  
+  const [worldGeo, setWorldGeo] = useState<any>(null);
+  const [data, setData] = useState<Row[]>([]);
+
   // Tooltip state
   const [tooltip, setTooltip] = useState<{
-    region: string;
+    location: string;
     count: number;
     x: number;
     y: number;
@@ -33,10 +38,11 @@ export default function WorldMap() {
   useEffect(() => {
     (async () => {
       try {
-        const a0 = await loadAdmin0();
-        setAdmin0(a0);
+        const response = await fetch(worldGeoUrl);
+        const geo = await response.json();
+        setWorldGeo(geo);
       } catch (error) {
-        console.error("Error loading geo data:", error);
+        console.error("Error loading world geo data:", error);
       }
     })();
   }, []);
@@ -44,10 +50,15 @@ export default function WorldMap() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/admin/analytics/locations?type=listings&timeRange=all');
+        // Fetch all-time listings data
+        const res = await fetch(
+          `/api/admin/analytics/locations?type=listings&timeRange=all`
+        );
         const json = await res.json() as any;
-        const data = Array.isArray(json) ? json : (json.data || []);
-        setData(data);
+        
+        const fetchedData = Array.isArray(json) ? json : (json.data || []);
+        setData(fetchedData);
+        console.log('🗺️ Fetched data:', fetchedData.slice(0, 5));
       } catch (error) {
         console.error("Error fetching map data:", error);
         setData([]);
@@ -55,65 +66,36 @@ export default function WorldMap() {
     })();
   }, []);
 
-  // Aggregate counts by country
-  const countryCounts = useMemo(() => {
-    const counts = new Map<string, number>();
-
-    console.log('🗺️ Raw data:', data.slice(0, 5));
-
-    for (const row of data) {
-      const count = row.listingCount || 0;
-      console.log(`🗺️ Processing: ${row.location} -> ${count} listings`);
-
-      // Parse country from location string
-      const tokens = row.location?.split(",").map((t: string) => t.trim()) || [];
-      if (tokens.length >= 2) {
-        const country = canonCountryName(tokens[tokens.length - 1]);
-        const key = `NAME__${country}`;
-        counts.set(key, (counts.get(key) || 0) + count);
-        console.log(`🗺️ Added to ${country}: ${count} (total: ${counts.get(key)})`);
-      }
-    }
-
-    console.log('🗺️ Final country counts:', Object.fromEntries(counts));
-    return counts;
-  }, [data]);
-
-  // Color scale
-  const maxCount = useMemo(
-    () => Math.max(1, ...Array.from(countryCounts.values())),
-    [countryCounts]
+  // Filter data to only include entries with valid coordinates
+  const validData = data.filter(row => 
+    row.lat !== null && 
+    row.lng !== null && 
+    !isNaN(row.lat) && 
+    !isNaN(row.lng) &&
+    row.listingCount > 0
   );
 
-  const colorScale = useMemo(
-    () =>
-      scaleLinear<string>()
-        .domain([0, maxCount])
-        .range(["#f2f2f2", "#ff6b35"]),
-    [maxCount]
-  );
+  console.log('🗺️ Valid data points:', validData.length);
 
-  function getCountryValue(f: GeoFeature): number {
-    const props = f.properties || {};
-    const a3 = (admin0A3(props) || "").toUpperCase();
-    if (countryCounts.has(a3)) return countryCounts.get(a3)!;
+  // Calculate max count for color scaling
+  const maxCount = Math.max(1, ...validData.map(row => row.listingCount));
 
-    const nm = canonCountryName(admin0Name(props));
-    const key = `NAME__${nm}`;
-    if (countryCounts.has(key)) return countryCounts.get(key)!;
-
-    return 0;
-  }
+  // Color scale for heatmap
+  const getHeatColor = (count: number) => {
+    const intensity = count / maxCount;
+    if (intensity === 0) return "rgba(255, 255, 255, 0)"; // Transparent
+    if (intensity < 0.2) return "rgba(255, 140, 0, 0.3)"; // Light orange
+    if (intensity < 0.4) return "rgba(255, 140, 0, 0.5)"; // Medium orange
+    if (intensity < 0.6) return "rgba(255, 140, 0, 0.7)"; // Darker orange
+    if (intensity < 0.8) return "rgba(255, 100, 0, 0.8)"; // Dark orange
+    return "rgba(255, 60, 0, 0.9)"; // Red-orange
+  };
 
   // Handle mouse enter for tooltips
-  const handleMouseEnter = (feature: GeoFeature, event: React.MouseEvent) => {
-    const props = feature.properties || {};
-    const regionName = admin0Name(props) || "Unknown";
-    const count = getCountryValue(feature);
-
+  const handleMouseEnter = (row: Row, event: React.MouseEvent) => {
     setTooltip({
-      region: regionName,
-      count,
+      location: row.location,
+      count: row.listingCount,
       x: event.clientX,
       y: event.clientY
     });
@@ -125,71 +107,100 @@ export default function WorldMap() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="text-center">
-        <h3 className="text-lg font-semibold text-gray-800">Active Listings Heatmap</h3>
-        <p className="text-sm text-gray-600">All-time active listings by country</p>
-      </div>
-
+    <div className="flex flex-col gap-3">
       <div className="relative">
-        <ComposableMap width={MAP_WIDTH} height={MAP_HEIGHT} projection="geoMercator">
-          <Geographies geography={admin0 as unknown as any}>
-            {({ geographies }) =>
-              geographies.map((geo: GeoFeature) => {
-                const val = getCountryValue(geo);
-                const fill = colorScale(val);
+        <ComposableMap 
+          width={MAP_WIDTH} 
+          height={MAP_HEIGHT} 
+          projection="geoMercator"
+          projectionConfig={{
+            scale: 100,
+            center: [0, 20]
+          }}
+        >
+          <ZoomableGroup center={[0, 20]} zoom={1}>
+            {/* World outline */}
+            {worldGeo && (
+              <Geographies geography={worldGeo}>
+                {({ geographies }) =>
+                  geographies.map((geo: any) => (
+                    <Geography
+                      key={geo.rsmKey}
+                      geography={geo}
+                      style={{
+                        default: {
+                          fill: "#f8f9fa",
+                          outline: "none",
+                          stroke: "#e9ecef",
+                          strokeWidth: 0.5,
+                        },
+                        hover: {
+                          fill: "#f8f9fa",
+                          outline: "none",
+                        },
+                        pressed: {
+                          fill: "#f8f9fa",
+                          outline: "none",
+                        },
+                      }}
+                    />
+                  ))
+                }
+              </Geographies>
+            )}
 
-                return (
-                  <Geography
-                    key={geo.properties?.ADM0_A3 || geo.properties?.name || Math.random()}
-                    geography={geo}
-                    onMouseEnter={(event) => handleMouseEnter(geo, event)}
-                    onMouseLeave={handleMouseLeave}
-                    style={{
-                      default: {
-                        fill,
-                        outline: "none",
-                        stroke: "#ddd",
-                        strokeWidth: 0.5,
-                        cursor: "pointer",
-                      },
-                      hover: {
-                        fill: "#ff6b35",
-                        outline: "none",
-                        stroke: "#333",
-                        strokeWidth: 1,
-                      },
-                    }}
-                  />
-                );
-              })
-            }
-          </Geographies>
+            {/* Heatmap circles for each listing location */}
+            {validData.map((row, index) => {
+              const size = Math.max(3, Math.min(20, row.listingCount * 2));
+              const color = getHeatColor(row.listingCount);
+              
+              return (
+                <circle
+                  key={`${row.lat}-${row.lng}-${index}`}
+                  cx={row.lng}
+                  cy={row.lat}
+                  r={size}
+                  fill={color}
+                  stroke="rgba(255, 140, 0, 0.8)"
+                  strokeWidth={1}
+                  onMouseEnter={(event) => handleMouseEnter(row, event)}
+                  onMouseLeave={handleMouseLeave}
+                  style={{ cursor: "pointer" }}
+                />
+              );
+            })}
+          </ZoomableGroup>
         </ComposableMap>
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center justify-center space-x-6">
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-gray-200 rounded"></div>
-          <span className="text-sm text-gray-600">0</span>
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 bg-gray-200 rounded"></div>
+            <span className="text-sm text-gray-600">0</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 bg-orange-200 rounded"></div>
+            <span className="text-sm text-gray-600">Low</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 bg-orange-400 rounded"></div>
+            <span className="text-sm text-gray-600">Medium</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 bg-orange-600 rounded"></div>
+            <span className="text-sm text-gray-600">High</span>
+          </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-orange-200 rounded"></div>
-          <span className="text-sm text-gray-600">Low</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-orange-400 rounded"></div>
-          <span className="text-sm text-gray-600">Medium</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-orange-600 rounded"></div>
-          <span className="text-sm text-gray-600">High</span>
-        </div>
+        
         <div className="text-sm text-gray-600">
-          Max: {maxCount} listings
+          {validData.length} locations • Max: {maxCount} listings
         </div>
       </div>
+
+      <p className="text-sm text-gray-500 mt-2">
+        Granular heatmap showing individual listing locations worldwide.
+      </p>
 
       {/* Tooltip */}
       {tooltip && (
@@ -200,7 +211,7 @@ export default function WorldMap() {
             top: tooltip.y - 10,
           }}
         >
-          {tooltip.region}: {tooltip.count} listings
+          {tooltip.location}: {tooltip.count} listings
         </div>
       )}
     </div>
