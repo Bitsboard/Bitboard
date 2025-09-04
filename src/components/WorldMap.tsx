@@ -266,9 +266,12 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     }
 
     console.log(`🎨 Getting color for region: ${regionName}`);
-    console.log(`🎨 Available data keys:`, Object.keys(countryData));
     
-    const data = countryData[regionName];
+    // Use the processed data directly
+    const processedDataMap = processedData();
+    console.log(`🎨 Available data keys:`, Object.keys(processedDataMap));
+    
+    const data = processedDataMap[regionName];
     
     if (!data) {
       console.log(`🎨 No data found for ${regionName}, using gray`);
@@ -280,7 +283,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       return '#E5E7EB';
     }
 
-    const maxCount = Math.max(...Object.values(countryData).map(d => viewType === 'users' ? d.users : d.listings));
+    const maxCount = Math.max(...Object.values(processedDataMap).map(d => viewType === 'users' ? d.users : d.listings));
     const intensity = Math.min(count / maxCount, 1);
     
     const hue = 210; // Blue hue
@@ -289,15 +292,18 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     
     console.log(`🎨 Color for ${regionName}: count=${count}, intensity=${intensity}`);
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-  }, [countryData, viewType]);
+  }, [processedData, viewType]);
 
   // Handle mouse enter
   const handleMouseEnter = useCallback((geo: any, event: React.MouseEvent) => {
     const regionName = geo.properties.name || geo.properties.NAME || 'Unknown';
     console.log(`🖱️ Mouse enter on: ${regionName}`);
-    console.log(`🖱️ Available data keys:`, Object.keys(countryData));
     
-    const data = countryData[regionName];
+    // Use the processed data directly
+    const processedDataMap = processedData();
+    console.log(`🖱️ Available data keys:`, Object.keys(processedDataMap));
+    
+    const data = processedDataMap[regionName];
     
     if (data) {
       const count = viewType === 'users' ? data.users : data.listings;
@@ -311,7 +317,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     } else {
       console.log(`🖱️ No data found for ${regionName}`);
     }
-  }, [countryData, viewType]);
+  }, [processedData, viewType]);
 
   // Handle mouse leave
   const handleMouseLeave = useCallback(() => {
