@@ -25,196 +25,116 @@ interface TooltipContent {
   y: number;
 }
 
-// Simple country mapping - just the essential ones we actually have data for
+// Geographic data URLs
+const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+const usaStatesUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
+const canadaProvincesUrl = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson";
+
+// Country mapping for data lookup
 const COUNTRY_MAPPING: Record<string, string> = {
-  // US States/Regions -> United States
   'United States': 'United States of America',
   'USA': 'United States of America',
   'US': 'United States of America',
-  'California': 'United States of America',
-  'Texas': 'United States of America',
-  'New York': 'United States of America',
-  'Florida': 'United States of America',
-  'Illinois': 'United States of America',
-  'Pennsylvania': 'United States of America',
-  'Ohio': 'United States of America',
-  'Georgia': 'United States of America',
-  'North Carolina': 'United States of America',
-  'Michigan': 'United States of America',
-  'New Jersey': 'United States of America',
-  'Virginia': 'United States of America',
-  'Washington': 'United States of America',
-  'Arizona': 'United States of America',
-  'Massachusetts': 'United States of America',
-  'Tennessee': 'United States of America',
-  'Indiana': 'United States of America',
-  'Missouri': 'United States of America',
-  'Maryland': 'United States of America',
-  'Wisconsin': 'United States of America',
-  'Colorado': 'United States of America',
-  'Minnesota': 'United States of America',
-  'South Carolina': 'United States of America',
-  'Alabama': 'United States of America',
-  'Louisiana': 'United States of America',
-  'Kentucky': 'United States of America',
-  'Oregon': 'United States of America',
-  'Oklahoma': 'United States of America',
-  'Connecticut': 'United States of America',
-  'Utah': 'United States of America',
-  'Iowa': 'United States of America',
-  'Nevada': 'United States of America',
-  'Arkansas': 'United States of America',
-  'Mississippi': 'United States of America',
-  'Kansas': 'United States of America',
-  'New Mexico': 'United States of America',
-  'Nebraska': 'United States of America',
-  'West Virginia': 'United States of America',
-  'Idaho': 'United States of America',
-  'Hawaii': 'United States of America',
-  'New Hampshire': 'United States of America',
-  'Maine': 'United States of America',
-  'Montana': 'United States of America',
-  'Rhode Island': 'United States of America',
-  'Delaware': 'United States of America',
-  'South Dakota': 'United States of America',
-  'North Dakota': 'United States of America',
-  'Alaska': 'United States of America',
-  'Vermont': 'United States of America',
-  'Wyoming': 'United States of America',
-  
-  // Canadian Provinces -> Canada
   'Canada': 'Canada',
-  'Ontario': 'Canada',
-  'Quebec': 'Canada',
-  'British Columbia': 'Canada',
-  'Alberta': 'Canada',
-  'Manitoba': 'Canada',
-  'Saskatchewan': 'Canada',
-  'Nova Scotia': 'Canada',
-  'New Brunswick': 'Canada',
-  'Newfoundland and Labrador': 'Canada',
-  'Prince Edward Island': 'Canada',
-  'Northwest Territories': 'Canada',
-  'Yukon': 'Canada',
-  'Nunavut': 'Canada',
-  
-  // European Countries
-  'Austria': 'Austria',
+  'United Kingdom': 'United Kingdom',
+  'UK': 'United Kingdom',
   'Germany': 'Germany',
   'France': 'France',
-  'United Kingdom': 'United Kingdom',
   'Italy': 'Italy',
   'Spain': 'Spain',
   'Netherlands': 'Netherlands',
-  'Belgium': 'Belgium',
-  'Switzerland': 'Switzerland',
   'Sweden': 'Sweden',
   'Norway': 'Norway',
   'Denmark': 'Denmark',
   'Finland': 'Finland',
+  'Austria': 'Austria',
+  'Switzerland': 'Switzerland',
+  'Belgium': 'Belgium',
+  'Ireland': 'Ireland',
   'Poland': 'Poland',
   'Czech Republic': 'Czech Republic',
   'Hungary': 'Hungary',
   'Portugal': 'Portugal',
-  'Ireland': 'Ireland',
   'Greece': 'Greece',
-  'Romania': 'Romania',
-  'Bulgaria': 'Bulgaria',
-  'Croatia': 'Croatia',
-  'Slovakia': 'Slovakia',
-  'Slovenia': 'Slovenia',
-  'Estonia': 'Estonia',
-  'Latvia': 'Latvia',
-  'Lithuania': 'Lithuania',
-  'Luxembourg': 'Luxembourg',
-  'Malta': 'Malta',
-  'Cyprus': 'Cyprus',
-  
-  // Other Major Countries
   'Australia': 'Australia',
-  'New Zealand': 'New Zealand',
   'Japan': 'Japan',
   'South Korea': 'South Korea',
-  'China': 'China',
-  'India': 'India',
-  'Brazil': 'Brazil',
-  'Mexico': 'Mexico',
-  'Argentina': 'Argentina',
-  'Chile': 'Chile',
-  'South Africa': 'South Africa',
-  'Egypt': 'Egypt',
-  'Nigeria': 'Nigeria',
-  'Kenya': 'Kenya',
-  'Morocco': 'Morocco',
-  'Tunisia': 'Tunisia',
-  'Israel': 'Israel',
-  'Turkey': 'Turkey',
-  'Russia': 'Russia',
-  'Ukraine': 'Ukraine',
-  'Belarus': 'Belarus',
-  'Thailand': 'Thailand',
-  'Vietnam': 'Vietnam',
-  'Philippines': 'Philippines',
-  'Indonesia': 'Indonesia',
-  'Malaysia': 'Malaysia',
   'Singapore': 'Singapore',
   'Hong Kong': 'Hong Kong',
   'Taiwan': 'Taiwan',
 };
 
-const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
-const usaStatesUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
-const canadaProvincesUrl = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"; // We'll use a different approach for Canada
-
-// For now, we'll use a simplified approach with predefined province/state coordinates
-// In a real implementation, you'd load proper GeoJSON files for provinces/states
-const CANADA_PROVINCE_COORDINATES = {
-  'Ontario': { lat: 51.2538, lng: -85.3232, zoom: 4 },
-  'Quebec': { lat: 52.9399, lng: -73.5491, zoom: 4 },
-  'British Columbia': { lat: 53.7267, lng: -127.6476, zoom: 4 },
-  'Alberta': { lat: 53.9333, lng: -116.5765, zoom: 4 },
-  'Manitoba': { lat: 53.7609, lng: -98.8139, zoom: 4 },
-  'Saskatchewan': { lat: 52.9399, lng: -106.4509, zoom: 4 },
-  'Nova Scotia': { lat: 44.6820, lng: -63.7443, zoom: 4 },
-  'New Brunswick': { lat: 46.5653, lng: -66.4619, zoom: 4 },
-  'Newfoundland and Labrador': { lat: 53.1355, lng: -57.6604, zoom: 4 },
-  'Prince Edward Island': { lat: 46.5107, lng: -63.4168, zoom: 4 },
-  'Northwest Territories': { lat: 64.8255, lng: -124.8457, zoom: 4 },
-  'Yukon': { lat: 64.0685, lng: -139.0682, zoom: 4 },
-  'Nunavut': { lat: 70.2998, lng: -83.1076, zoom: 4 }
+// US State mapping
+const US_STATE_MAPPING: Record<string, string> = {
+  'California': 'California',
+  'Texas': 'Texas',
+  'Florida': 'Florida',
+  'New York': 'New York',
+  'Pennsylvania': 'Pennsylvania',
+  'Illinois': 'Illinois',
+  'Ohio': 'Ohio',
+  'Georgia': 'Georgia',
+  'North Carolina': 'North Carolina',
+  'Michigan': 'Michigan',
+  'New Jersey': 'New Jersey',
+  'Virginia': 'Virginia',
+  'Washington': 'Washington',
+  'Arizona': 'Arizona',
+  'Massachusetts': 'Massachusetts',
+  'Tennessee': 'Tennessee',
+  'Indiana': 'Indiana',
+  'Missouri': 'Missouri',
+  'Maryland': 'Maryland',
+  'Wisconsin': 'Wisconsin',
+  'Colorado': 'Colorado',
+  'Minnesota': 'Minnesota',
+  'South Carolina': 'South Carolina',
+  'Alabama': 'Alabama',
+  'Louisiana': 'Louisiana',
+  'Kentucky': 'Kentucky',
+  'Oregon': 'Oregon',
+  'Oklahoma': 'Oklahoma',
+  'Connecticut': 'Connecticut',
+  'Utah': 'Utah',
+  'Iowa': 'Iowa',
+  'Nevada': 'Nevada',
+  'Arkansas': 'Arkansas',
+  'Mississippi': 'Mississippi',
+  'Kansas': 'Kansas',
+  'New Mexico': 'New Mexico',
+  'Nebraska': 'Nebraska',
+  'West Virginia': 'West Virginia',
+  'Idaho': 'Idaho',
+  'Hawaii': 'Hawaii',
+  'New Hampshire': 'New Hampshire',
+  'Maine': 'Maine',
+  'Montana': 'Montana',
+  'Rhode Island': 'Rhode Island',
+  'Delaware': 'Delaware',
+  'South Dakota': 'South Dakota',
+  'North Dakota': 'North Dakota',
+  'Alaska': 'Alaska',
+  'Vermont': 'Vermont',
+  'Wyoming': 'Wyoming',
+  'District of Columbia': 'District of Columbia',
 };
 
-const USA_STATE_COORDINATES = {
-  'California': { lat: 36.7783, lng: -119.4179, zoom: 4 },
-  'Texas': { lat: 31.9686, lng: -99.9018, zoom: 4 },
-  'Florida': { lat: 27.7663, lng: -82.6404, zoom: 4 },
-  'New York': { lat: 42.1657, lng: -74.9481, zoom: 4 },
-  'Pennsylvania': { lat: 41.2033, lng: -77.1945, zoom: 4 },
-  'Illinois': { lat: 40.3363, lng: -89.0022, zoom: 4 },
-  'Ohio': { lat: 40.3888, lng: -82.7649, zoom: 4 },
-  'Georgia': { lat: 33.0406, lng: -83.6431, zoom: 4 },
-  'North Carolina': { lat: 35.6300, lng: -79.8064, zoom: 4 },
-  'Michigan': { lat: 43.3266, lng: -84.5361, zoom: 4 }
-  // Add more states as needed
+// Canadian Province mapping
+const CANADA_PROVINCE_MAPPING: Record<string, string> = {
+  'Ontario': 'Ontario',
+  'Quebec': 'Quebec',
+  'British Columbia': 'British Columbia',
+  'Alberta': 'Alberta',
+  'Manitoba': 'Manitoba',
+  'Saskatchewan': 'Saskatchewan',
+  'Nova Scotia': 'Nova Scotia',
+  'New Brunswick': 'New Brunswick',
+  'Newfoundland and Labrador': 'Newfoundland and Labrador',
+  'Prince Edward Island': 'Prince Edward Island',
+  'Northwest Territories': 'Northwest Territories',
+  'Yukon': 'Yukon',
+  'Nunavut': 'Nunavut',
 };
-
-// For now, we'll use a simplified approach with predefined province/state data
-const CANADIAN_PROVINCES = [
-  'Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador',
-  'Northwest Territories', 'Nova Scotia', 'Nunavut', 'Ontario', 'Prince Edward Island',
-  'Quebec', 'Saskatchewan', 'Yukon'
-];
-
-const US_STATES = [
-  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut',
-  'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa',
-  'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan',
-  'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
-  'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio',
-  'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota',
-  'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia',
-  'Wisconsin', 'Wyoming', 'District of Columbia'
-];
 
 export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onViewTypeChange }: WorldMapProps) {
   const [mapData, setMapData] = useState<MapData[]>([]);
@@ -224,34 +144,9 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
   const [center, setCenter] = useState<[number, number]>([0, 0]);
   const [drillDownLevel, setDrillDownLevel] = useState<'world' | 'country'>('world');
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
-  const [filteredMapData, setFilteredMapData] = useState<MapData[]>([]);
   const [currentGeoUrl, setCurrentGeoUrl] = useState(geoUrl);
-  const [geoData, setGeoData] = useState<any>(null);
 
-  // Load geographic data
-  useEffect(() => {
-    const loadGeoData = async () => {
-      try {
-        let url = geoUrl;
-        if (drillDownLevel === 'country' && selectedCountry === 'United States of America') {
-          url = usaStatesUrl;
-        }
-        
-        if (url !== currentGeoUrl) {
-          setCurrentGeoUrl(url);
-          const response = await fetch(url);
-          const data = await response.json();
-          setGeoData(data);
-        }
-      } catch (error) {
-        console.error('Error loading geographic data:', error);
-      }
-    };
-
-    loadGeoData();
-  }, [drillDownLevel, selectedCountry, currentGeoUrl]);
-
-  // Fetch map data
+  // Fetch map data based on timeframe and view type
   useEffect(() => {
     const fetchMapData = async () => {
       setLoading(true);
@@ -259,23 +154,15 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       
       try {
         const url = `/api/admin/analytics/locations?type=${viewType}&timeRange=${timeRange}`;
-        console.log(`📡 API URL: ${url}`);
-        
         const response = await fetch(url);
-        console.log(`📡 Response status: ${response.status} ${response.statusText}`);
+        const data = await response.json() as { data: MapData[] };
         
-        if (response.ok) {
-          const data = await response.json() as { data: MapData[] };
-          console.log(`📊 Raw API response:`, data);
-          console.log(`📊 Data array length:`, data.data?.length || 0);
-          console.log(`📊 First few items:`, data.data?.slice(0, 3));
-          
-          setMapData(data.data || []);
-        } else {
-          console.error(`❌ API request failed: ${response.status} ${response.statusText}`);
+        if (data.data) {
+          setMapData(data.data);
+          console.log(`📊 Loaded ${data.data.length} locations`);
         }
       } catch (error) {
-        console.error('❌ Error fetching map data:', error);
+        console.error('Error fetching map data:', error);
       } finally {
         setLoading(false);
       }
@@ -284,179 +171,80 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     fetchMapData();
   }, [viewType, timeRange]);
 
-  // Filter map data by selected country when in drill-down mode
+  // Load appropriate geographic data
   useEffect(() => {
-    if (drillDownLevel === 'country' && selectedCountry) {
-      const filtered = mapData.filter(item => {
-        // Extract country from location (e.g., "Toronto, Canada" -> "Canada")
-        let country = item.location;
-        if (item.location.includes(',')) {
-          const parts = item.location.split(',').map(part => part.trim());
-          country = parts[parts.length - 1];
-        }
-        
-        // Handle US states
-        const usStates = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC'];
-        if (usStates.includes(country)) {
-          country = 'United States of America';
-        }
-        
-        // Apply country mapping
-        country = COUNTRY_MAPPING[country] || country;
-        
-        return country === selectedCountry;
-      });
+    const loadGeoData = async () => {
+      let url = geoUrl;
       
-      setFilteredMapData(filtered);
-      console.log(`🗺️ Filtered data for ${selectedCountry}:`, filtered);
-    } else {
-      setFilteredMapData(mapData);
-    }
+      if (drillDownLevel === 'country' && selectedCountry === 'United States of America') {
+        url = usaStatesUrl;
+      } else if (drillDownLevel === 'country' && selectedCountry === 'Canada') {
+        // For now, we'll use the world map for Canada since we don't have province data
+        url = geoUrl;
+      }
+      
+      if (url !== currentGeoUrl) {
+        setCurrentGeoUrl(url);
+      }
+    };
+
+    loadGeoData();
+  }, [drillDownLevel, selectedCountry, currentGeoUrl]);
+
+  // Process data for current view
+  const processedData = useCallback(() => {
+    if (!mapData || mapData.length === 0) return {};
+
+    const dataMap: Record<string, { users: number; listings: number }> = {};
+
+    mapData.forEach(item => {
+      let key = item.location;
+      
+      if (drillDownLevel === 'world') {
+        // For world view, extract country from location
+        const parts = item.location.split(', ');
+        if (parts.length > 1) {
+          key = parts[parts.length - 1]; // Last part is usually country
+        }
+        key = COUNTRY_MAPPING[key] || key;
+      } else if (drillDownLevel === 'country' && selectedCountry === 'United States of America') {
+        // For US states, extract state from location
+        const parts = item.location.split(', ');
+        if (parts.length >= 2) {
+          const state = parts[parts.length - 2]; // Second to last part is usually state
+          key = US_STATE_MAPPING[state] || state;
+        }
+      } else if (drillDownLevel === 'country' && selectedCountry === 'Canada') {
+        // For Canadian provinces, extract province from location
+        const parts = item.location.split(', ');
+        if (parts.length >= 2) {
+          const province = parts[parts.length - 2]; // Second to last part is usually province
+          key = CANADA_PROVINCE_MAPPING[province] || province;
+        }
+      }
+
+      if (!dataMap[key]) {
+        dataMap[key] = { users: 0, listings: 0 };
+      }
+      
+      dataMap[key].users += item.userCount || 0;
+      dataMap[key].listings += item.listingCount || 0;
+    });
+
+    return dataMap;
   }, [mapData, drillDownLevel, selectedCountry]);
 
-  // Process data by country/province/state - aggregate city data
-  const currentData = drillDownLevel === 'country' ? filteredMapData : mapData;
-  const countryData = currentData.reduce((acc, item) => {
-    let region = item.location;
-    
-    if (drillDownLevel === 'country' && selectedCountry) {
-      // In drill-down mode, process by province/state
-      if (item.location.includes(',')) {
-        const parts = item.location.split(',').map(part => part.trim());
-        if (parts.length >= 2) {
-          // For "City, Province, Country" format, take the middle part (province/state)
-          region = parts[parts.length - 2];
-        } else {
-          // For "City, Country" format, use the city as region
-          region = parts[0];
-        }
-      }
-    } else {
-      // In world mode, process by country
-      if (item.location.includes(',')) {
-        const parts = item.location.split(',').map(part => part.trim());
-        region = parts[parts.length - 1]; // Take the last part (country)
-      }
-      
-      // Special handling for US states - aggregate them into "United States of America"
-      const usStates = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC'];
-      if (usStates.includes(region)) {
-        region = 'United States of America';
-      }
-      
-      // Apply country mapping for consistency
-      region = COUNTRY_MAPPING[region] || region;
-    }
-    
-    if (!acc[region]) {
-      acc[region] = { users: 0, listings: 0 };
-    }
-    acc[region].users += item.userCount || 0;
-    acc[region].listings += item.listingCount || 0;
-    return acc;
-  }, {} as Record<string, { users: number; listings: number }>);
+  const countryData = processedData();
 
-  // Create reverse mapping from map country names to our data
-  const mapToDataMapping: Record<string, string> = {
-    'Canada': 'Canada',
-    'United States of America': 'United States of America', 
-    'United States': 'United States of America',
-    'Austria': 'Austria',
-    'Germany': 'Germany',
-    'France': 'France',
-    'United Kingdom': 'United Kingdom',
-    'Italy': 'Italy',
-    'Spain': 'Spain',
-    'Netherlands': 'Netherlands',
-    'Belgium': 'Belgium',
-    'Switzerland': 'Switzerland',
-    'Sweden': 'Sweden',
-    'Norway': 'Norway',
-    'Denmark': 'Denmark',
-    'Finland': 'Finland',
-    'Poland': 'Poland',
-    'Czech Republic': 'Czech Republic',
-    'Hungary': 'Hungary',
-    'Portugal': 'Portugal',
-    'Ireland': 'Ireland',
-    'Greece': 'Greece',
-    'Romania': 'Romania',
-    'Bulgaria': 'Bulgaria',
-    'Croatia': 'Croatia',
-    'Slovakia': 'Slovakia',
-    'Slovenia': 'Slovenia',
-    'Estonia': 'Estonia',
-    'Latvia': 'Latvia',
-    'Lithuania': 'Lithuania',
-    'Luxembourg': 'Luxembourg',
-    'Malta': 'Malta',
-    'Cyprus': 'Cyprus',
-    'Australia': 'Australia',
-    'New Zealand': 'New Zealand',
-    'Japan': 'Japan',
-    'South Korea': 'South Korea',
-    'China': 'China',
-    'India': 'India',
-    'Brazil': 'Brazil',
-    'Mexico': 'Mexico',
-    'Argentina': 'Argentina',
-    'Chile': 'Chile',
-    'South Africa': 'South Africa',
-    'Egypt': 'Egypt',
-    'Nigeria': 'Nigeria',
-    'Kenya': 'Kenya',
-    'Morocco': 'Morocco',
-    'Tunisia': 'Tunisia',
-    'Israel': 'Israel',
-    'Turkey': 'Turkey',
-    'Russia': 'Russia',
-    'Ukraine': 'Ukraine',
-    'Belarus': 'Belarus',
-    'Thailand': 'Thailand',
-    'Vietnam': 'Vietnam',
-    'Philippines': 'Philippines',
-    'Indonesia': 'Indonesia',
-    'Malaysia': 'Malaysia',
-    'Singapore': 'Singapore',
-    'Hong Kong': 'Hong Kong',
-    'Taiwan': 'Taiwan'
-  };
-
-  // Debug country data processing (only log once per data change)
-  if (mapData.length > 0) {
-    console.log(`🗺️ Map data length: ${mapData.length}`);
-    console.log(`🗺️ Country data keys:`, Object.keys(countryData));
-    console.log(`🗺️ View type: ${viewType}`);
-  }
-
-  // Get fill color based on data - memoized for performance
+  // Get fill color based on data
   const getFillColor = useCallback((regionName: string) => {
-    // Handle undefined region names
     if (!regionName || regionName === 'undefined') {
       return '#E5E7EB';
     }
-    
-    // For US states, look up by state name directly
-    let data = countryData[regionName];
-    
-    // If not found, try to find by partial match (e.g., "New York" might be "New York, NY")
+
+    const data = countryData[regionName];
     if (!data) {
-      const matchingKey = Object.keys(countryData).find(key => 
-        key.includes(regionName) || regionName.includes(key)
-      );
-      if (matchingKey) {
-        data = countryData[matchingKey];
-      }
-    }
-    
-    // If still not found, try mapping for world countries
-    if (!data) {
-      const dataKey = mapToDataMapping[regionName] || regionName;
-      data = countryData[dataKey];
-    }
-    
-    if (!data) {
-      return '#E5E7EB'; // Light gray for no data
+      return '#E5E7EB';
     }
 
     const count = viewType === 'users' ? data.users : data.listings;
@@ -464,215 +252,128 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       return '#E5E7EB';
     }
 
-    // Color scale: light blue to dark blue
     const maxCount = Math.max(...Object.values(countryData).map(d => viewType === 'users' ? d.users : d.listings));
     const intensity = Math.min(count / maxCount, 1);
     
-    // Create color gradient from light blue to dark blue
     const hue = 210; // Blue hue
-    const saturation = 60 + (intensity * 40); // 60-100% saturation
-    const lightness = 85 - (intensity * 40); // 85-45% lightness
+    const saturation = 60 + (intensity * 40);
+    const lightness = 85 - (intensity * 40);
     
-    const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-    
-    return color;
-  }, [countryData, viewType, mapToDataMapping]);
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  }, [countryData, viewType]);
 
+  // Handle mouse enter
   const handleMouseEnter = useCallback((geo: any, event: React.MouseEvent) => {
-    // Try different possible property names for country name
-    const countryName = geo.properties.name || geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN || geo.properties.NAME_LONG || 'Unknown';
+    const regionName = geo.properties.name || geo.properties.NAME || 'Unknown';
+    const data = countryData[regionName];
     
-    // Map the country name from the map to our data key
-    const dataKey = mapToDataMapping[countryName] || countryName;
-    const data = countryData[dataKey];
-    const count = data ? (viewType === 'users' ? data.users : data.listings) : 0;
-    
-    setTooltip({
-      country: countryName,
-      count,
-      x: event.clientX,
-      y: event.clientY - 10
-    });
-  }, [countryData, viewType, mapToDataMapping]);
-
-  const handleMouseLeave = () => {
-    setTooltip(null);
-  };
-
-  const handleCountryClick = useCallback((geo: any) => {
-    // Try different possible property names for country name
-    const countryName = geo.properties.name || geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN || geo.properties.NAME_LONG || 'Unknown';
-    
-    // Map the country name from the map to our data key
-    const dataKey = mapToDataMapping[countryName] || countryName;
-    
-    // Check if we have data for this country
-    const data = countryData[dataKey];
-    if (!data || (viewType === 'users' ? data.users : data.listings) === 0) {
-      console.log(`No data for ${countryName}, skipping drill-down`);
-      return;
+    if (data) {
+      const count = viewType === 'users' ? data.users : data.listings;
+      setTooltip({
+        country: regionName,
+        count,
+        x: event.clientX,
+        y: event.clientY
+      });
     }
-    
-    // Set drill-down state
-    setSelectedCountry(countryName);
-    setDrillDownLevel('country');
-    
-    // Show drill-down message
-    const count = viewType === 'users' ? data.users : data.listings;
-    const type = viewType === 'users' ? 'users' : 'listings';
-    console.log(`🗺️ Drilling down into ${countryName}: ${count} ${type} in the past ${timeRange}`);
-    
-    // Center the map on the selected country
-    if (countryName === 'United States of America') {
-      // Center on US
-      setCenter([-95.7129, 37.0902]);
-      setZoom(3);
-    } else if (countryName === 'Canada') {
-      // Center on Canada
-      setCenter([-106.3468, 56.1304]);
-      setZoom(3);
-    } else {
-      // For other countries, use their geometry
-      const { coordinates } = geo.geometry;
-      
-      const bounds = coordinates.reduce((acc: any, coord: any) => {
-        const [x, y] = Array.isArray(coord[0]) ? coord[0] : coord;
-        if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
-          return {
-            minX: Math.min(acc.minX, x),
-            maxX: Math.max(acc.maxX, x),
-            minY: Math.min(acc.minY, y),
-            maxY: Math.max(acc.maxY, y)
-          };
-        }
-        return acc;
-      }, { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity });
+  }, [countryData, viewType]);
 
-      const centerX = (bounds.minX + bounds.maxX) / 2;
-      const centerY = (bounds.minY + bounds.maxY) / 2;
-      
-      // Validate coordinates before setting
-      if (!isNaN(centerX) && !isNaN(centerY) && isFinite(centerX) && isFinite(centerY)) {
-        setCenter([centerX, centerY]);
-        setZoom(4);
+  // Handle mouse leave
+  const handleMouseLeave = useCallback(() => {
+    setTooltip(null);
+  }, []);
+
+  // Handle country/region click
+  const handleRegionClick = useCallback((geo: any) => {
+    const regionName = geo.properties.name || geo.properties.NAME || 'Unknown';
+    
+    if (drillDownLevel === 'world') {
+      // Only allow drill-down for US and Canada
+      if (regionName === 'United States of America' || regionName === 'Canada') {
+        setSelectedCountry(regionName);
+        setDrillDownLevel('country');
+        
+        // Center on the country
+        if (regionName === 'United States of America') {
+          setCenter([-95.7129, 37.0902]);
+          setZoom(3);
+        } else if (regionName === 'Canada') {
+          setCenter([-106.3468, 56.1304]);
+          setZoom(3);
+        }
       }
     }
-  }, [mapToDataMapping, countryData, viewType, timeRange]);
+  }, [drillDownLevel]);
 
-  const handleBackToWorld = () => {
+  // Handle back to world
+  const handleBackToWorld = useCallback(() => {
     setCenter([0, 0]);
     setZoom(1);
     setDrillDownLevel('world');
     setSelectedCountry(null);
     setCurrentGeoUrl(geoUrl);
-  };
+  }, []);
 
+  // Get max count for legend
   const maxCount = Math.max(...Object.values(countryData).map(d => viewType === 'users' ? d.users : d.listings));
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-4">
+        <div>
           <h3 className="text-lg font-semibold text-gray-900">
-            {drillDownLevel === 'country' && selectedCountry 
-              ? `${selectedCountry} - ${viewType === 'users' ? 'User' : 'Listing'} Locations`
-              : `${viewType === 'users' ? 'User' : 'Listing'} Locations`
-            }
+            {drillDownLevel === 'country' ? `${selectedCountry} - ${viewType === 'users' ? 'Users' : 'Listings'}` : 'World Map'}
           </h3>
-          {drillDownLevel === 'country' && (
-            <span className="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded">
-              Drill-down Mode
-            </span>
-          )}
-          {onViewTypeChange && (
-            <div className="flex space-x-2">
-              <button
-                onClick={() => onViewTypeChange('users')}
-                className={`px-3 py-1 text-sm rounded-md ${
-                  viewType === 'users' 
-                    ? 'bg-blue-100 text-blue-700' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Users
-              </button>
-              <button
-                onClick={() => onViewTypeChange('listings')}
-                className={`px-3 py-1 text-sm rounded-md ${
-                  viewType === 'listings' 
-                    ? 'bg-blue-100 text-blue-700' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Listings
-              </button>
-            </div>
-          )}
-          <div className="flex space-x-2">
-            <button
-              onClick={() => onTimeRangeChange('24h')}
-              className={`px-3 py-1 text-sm rounded-md ${
-                timeRange === '24h' 
-                  ? 'bg-blue-100 text-blue-700' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              24h
-            </button>
-            <button
-              onClick={() => onTimeRangeChange('7d')}
-              className={`px-3 py-1 text-sm rounded-md ${
-                timeRange === '7d' 
-                  ? 'bg-blue-100 text-blue-700' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              7d
-            </button>
-            <button
-              onClick={() => onTimeRangeChange('30d')}
-              className={`px-3 py-1 text-sm rounded-md ${
-                timeRange === '30d' 
-                  ? 'bg-blue-100 text-blue-700' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              30d
-            </button>
-            <button
-              onClick={() => onTimeRangeChange('90d')}
-              className={`px-3 py-1 text-sm rounded-md ${
-                timeRange === '90d' 
-                  ? 'bg-blue-100 text-blue-700' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              90d
-            </button>
-            <button
-              onClick={() => onTimeRangeChange('all')}
-              className={`px-3 py-1 text-sm rounded-md ${
-                timeRange === 'all' 
-                  ? 'bg-blue-100 text-blue-700' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              All
-            </button>
-          </div>
+          <p className="text-sm text-gray-600">
+            {drillDownLevel === 'country' 
+              ? `Showing ${viewType} by ${selectedCountry === 'United States of America' ? 'state' : 'province'}`
+              : `Showing ${viewType} by country`
+            }
+          </p>
         </div>
         
-        {(zoom > 1 || drillDownLevel === 'country') && (
+        {drillDownLevel === 'country' && (
           <button
             onClick={handleBackToWorld}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+            className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
           >
             Back to World
           </button>
         )}
       </div>
 
+      {/* Controls */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <label className="text-sm font-medium text-gray-700">View:</label>
+            <select
+              value={viewType}
+              onChange={(e) => onViewTypeChange?.(e.target.value as 'users' | 'listings')}
+              className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="users">Users</option>
+              <option value="listings">Listings</option>
+            </select>
+          </div>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <label className="text-sm font-medium text-gray-700">Timeframe:</label>
+          <select
+            value={timeRange}
+            onChange={(e) => onTimeRangeChange(e.target.value)}
+            className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="24h">24h</option>
+            <option value="7d">7d</option>
+            <option value="30d">30d</option>
+            <option value="90d">90d</option>
+            <option value="all">All time</option>
+          </select>
+        </div>
+      </div>
 
       {/* Map Container */}
       <div className="relative">
@@ -696,23 +397,23 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
               <Geographies geography={currentGeoUrl}>
                 {({ geographies }) =>
                   geographies.map((geo) => {
-                    let regionName = 'Unknown';
-                    let dataKey = 'Unknown';
+                    const regionName = geo.properties.name || geo.properties.NAME || 'Unknown';
                     
+                    // Filter regions based on drill-down level
                     if (drillDownLevel === 'country' && selectedCountry === 'United States of America') {
-                      // For US states, use the state name
-                      regionName = geo.properties.name || geo.properties.NAME || 'Unknown';
-                      dataKey = regionName;
-                    } else {
-                      // For world countries
-                      regionName = geo.properties.name || geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN || geo.properties.NAME_LONG || 'Unknown';
-                      dataKey = mapToDataMapping[regionName] || regionName;
-                      
-                      // In drill-down mode, only show the selected country
-                      if (drillDownLevel === 'country' && selectedCountry) {
-                        if (dataKey !== selectedCountry) {
-                          return null; // Don't render other countries
-                        }
+                      // Only show US states
+                      if (!US_STATE_MAPPING[regionName]) {
+                        return null;
+                      }
+                    } else if (drillDownLevel === 'country' && selectedCountry === 'Canada') {
+                      // For Canada, we'll show the country but highlight provinces
+                      if (regionName !== 'Canada') {
+                        return null;
+                      }
+                    } else if (drillDownLevel === 'world') {
+                      // For world view, only show countries
+                      if (US_STATE_MAPPING[regionName] || CANADA_PROVINCE_MAPPING[regionName]) {
+                        return null;
                       }
                     }
                     
@@ -722,7 +423,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
                         geography={geo}
                         fill={getFillColor(regionName)}
                         stroke={drillDownLevel === 'country' ? "#1E40AF" : "#D1D5DB"}
-                        strokeWidth={drillDownLevel === 'country' ? 1 : 0.5}
+                        strokeWidth={drillDownLevel === 'country' ? 0.5 : 0.5}
                         style={{
                           default: { outline: 'none' },
                           hover: { outline: 'none', fill: '#3B82F6' },
@@ -730,7 +431,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
                         }}
                         onMouseEnter={(event) => handleMouseEnter(geo, event)}
                         onMouseLeave={handleMouseLeave}
-                        onClick={() => handleCountryClick(geo)}
+                        onClick={() => handleRegionClick(geo)}
                       />
                     );
                   })
@@ -740,6 +441,20 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
           </ComposableMap>
         </div>
       </div>
+
+      {/* Tooltip */}
+      {tooltip && (
+        <div
+          className="absolute z-20 px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-lg pointer-events-none"
+          style={{
+            left: tooltip.x + 10,
+            top: tooltip.y - 10,
+            transform: 'translateY(-100%)'
+          }}
+        >
+          {tooltip.country}: {tooltip.count} {viewType}
+        </div>
+      )}
 
       {/* Legend */}
       <div className="mt-4 flex items-center justify-between">
@@ -759,25 +474,10 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
           <span className="text-sm text-gray-600">High</span>
         </div>
         
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-gray-600">
           Max: {maxCount} {viewType}
         </div>
       </div>
-
-      {/* Tooltip */}
-      {tooltip && (
-        <div
-          className="fixed z-50 bg-gray-900 text-white px-3 py-2 rounded-md text-sm pointer-events-none"
-          style={{
-            left: tooltip.x,
-            top: tooltip.y,
-            transform: 'translateX(-50%)'
-          }}
-        >
-          <div className="font-medium">{tooltip.country}</div>
-          <div>{tooltip.count} {viewType}</div>
-        </div>
-      )}
     </div>
   );
 }
