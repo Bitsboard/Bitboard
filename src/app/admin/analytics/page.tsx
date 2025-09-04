@@ -455,6 +455,7 @@ export default function AnalyticsPage() {
                   showTimeframeControls={true}
                   currentTimeframe={userChartTimeframe}
                   onTimeframeChange={setUserChartTimeframe}
+                  dataType="users"
                 />
               </div>
               <div className="relative">
@@ -473,6 +474,7 @@ export default function AnalyticsPage() {
                   showTimeframeControls={true}
                   currentTimeframe={listingChartTimeframe}
                   onTimeframeChange={setListingChartTimeframe}
+                  dataType="listings"
                 />
               </div>
             </div>

@@ -32,9 +32,10 @@ interface ChartProps {
   showTimeframeControls?: boolean;
   currentTimeframe?: '24h' | '7d' | '30d' | '90d' | 'all';
   onTimeframeChange?: (timeframe: '24h' | '7d' | '30d' | '90d' | 'all') => void;
+  dataType?: 'users' | 'listings'; // For tooltip text
 }
 
-export function Chart({ data, type, title, height = 300, className, xAxisLabel, yAxisLabel, showTimeframeControls = false, currentTimeframe = '7d', onTimeframeChange }: ChartProps) {
+export function Chart({ data, type, title, height = 300, className, xAxisLabel, yAxisLabel, showTimeframeControls = false, currentTimeframe = '7d', onTimeframeChange, dataType = 'users' }: ChartProps) {
   const [tooltip, setTooltip] = useState<{ x: number; y: number; value: number; date: string } | null>(null);
 
   if (!data || data.length === 0) {
@@ -344,6 +345,9 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
   if (type === 'timeseries') {
     const timeData = data as TimeSeriesData[];
     
+    // Debug logging
+    console.log('Timeseries chart data:', timeData);
+    
     // Validate data
     if (!timeData || timeData.length === 0) {
       return (
@@ -404,6 +408,11 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
       
       return { x, y, value: item.value, date: item.date };
     });
+
+    // Debug logging
+    console.log('Chart points:', points);
+    console.log('Valid data length:', validData.length);
+    console.log('Chart dimensions:', { chartWidth, chartHeight, padding });
 
     // Create path for the line
     const pathData = points.map((point, index) => 
@@ -533,8 +542,8 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
                 onMouseEnter={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   setTooltip({
-                    x: rect.left + rect.width / 2,
-                    y: rect.top - 10,
+                    x: e.clientX,
+                    y: e.clientY - 10,
                     value: point.value,
                     date: point.date
                   });
@@ -606,14 +615,13 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
           {/* Tooltip */}
           {tooltip && (
             <div
-              className="absolute bg-neutral-900 text-white text-xs rounded px-2 py-1 pointer-events-none z-10"
+              className="fixed bg-neutral-900 text-white text-xs rounded px-2 py-1 pointer-events-none z-50 shadow-lg"
               style={{
-                left: tooltip.x - 30,
-                top: tooltip.y - 30,
-                transform: 'translateX(-50%)'
+                left: tooltip.x + 10,
+                top: tooltip.y - 40,
               }}
             >
-              <div className="font-medium">{tooltip.value} users</div>
+              <div className="font-medium">{tooltip.value} {dataType}</div>
               <div className="text-neutral-300">
                 {new Date(tooltip.date).toLocaleDateString('en-US', { 
                   month: 'short', 
