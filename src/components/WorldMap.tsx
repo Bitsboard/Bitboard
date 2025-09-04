@@ -1,555 +1,427 @@
-"use client";
+'use client';
 
-import React, { useState, useCallback, useEffect } from "react";
-import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps";
-import { cn } from "@/lib/utils";
+import React, { useState, useEffect } from 'react';
+import { ComposableMap, Geographies, Geography, ZoomableGroup } from 'react-simple-maps';
 
-interface WorldMapProps {
-  data: Array<{
-    location: string;
-    userCount: number;
-    lat: number;
-    lng: number;
-  }>;
-  className?: string;
-  viewType?: 'users' | 'listings';
-  onViewTypeChange?: (type: 'users' | 'listings') => void;
-  timeRange?: '24h' | '7d' | '30d' | '90d' | 'all';
-  onTimeRangeChange?: (range: '24h' | '7d' | '30d' | '90d' | 'all') => void;
+interface MapData {
+  location: string;
+  userCount: number;
+  listingCount: number;
+  lat: number;
+  lng: number;
 }
 
-// World map topology data
-const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+interface WorldMapProps {
+  viewType: 'users' | 'listings';
+  timeRange: string;
+  onTimeRangeChange: (range: string) => void;
+}
 
-// Simple country mapping
-const countryMapping: Record<string, string> = {
-  "United States": "United States of America",
-  "USA": "United States of America",
-  "US": "United States of America",
-  "United Kingdom": "United Kingdom",
-  "UK": "United Kingdom",
-  "Canada": "Canada",
-  "Australia": "Australia",
-  "Austria": "Austria",
-  "Germany": "Germany",
-  "France": "France",
-  "Italy": "Italy",
-  "Spain": "Spain",
-  "Netherlands": "Netherlands",
-  "Belgium": "Belgium",
-  "Switzerland": "Switzerland",
-  "Sweden": "Sweden",
-  "Norway": "Norway",
-  "Denmark": "Denmark",
-  "Finland": "Finland",
-  "Poland": "Poland",
-  "Czech Republic": "Czech Republic",
-  "Hungary": "Hungary",
-  "Romania": "Romania",
-  "Bulgaria": "Bulgaria",
-  "Greece": "Greece",
-  "Portugal": "Portugal",
-  "Ireland": "Ireland",
-  "Iceland": "Iceland",
-  "Luxembourg": "Luxembourg",
-  "Malta": "Malta",
-  "Cyprus": "Cyprus",
-  "Estonia": "Estonia",
-  "Latvia": "Latvia",
-  "Lithuania": "Lithuania",
-  "Slovenia": "Slovenia",
-  "Slovakia": "Slovakia",
-  "Croatia": "Croatia",
-  "Serbia": "Serbia",
-  "Bosnia and Herzegovina": "Bosnia and Herzegovina",
-  "Montenegro": "Montenegro",
-  "North Macedonia": "North Macedonia",
-  "Albania": "Albania",
-  "Moldova": "Moldova",
-  "Ukraine": "Ukraine",
-  "Belarus": "Belarus",
-  "Russia": "Russia",
-  "Turkey": "Turkey",
-  "Israel": "Israel",
-  "Palestine": "Palestine",
-  "Jordan": "Jordan",
-  "Lebanon": "Lebanon",
-  "Syria": "Syria",
-  "Iraq": "Iraq",
-  "Iran": "Iran",
-  "Saudi Arabia": "Saudi Arabia",
-  "United Arab Emirates": "United Arab Emirates",
-  "Qatar": "Qatar",
-  "Kuwait": "Kuwait",
-  "Bahrain": "Bahrain",
-  "Oman": "Oman",
-  "Yemen": "Yemen",
-  "Egypt": "Egypt",
-  "Libya": "Libya",
-  "Tunisia": "Tunisia",
-  "Algeria": "Algeria",
-  "Morocco": "Morocco",
-  "Sudan": "Sudan",
-  "Ethiopia": "Ethiopia",
-  "Kenya": "Kenya",
-  "Uganda": "Uganda",
-  "Tanzania": "Tanzania",
-  "South Africa": "South Africa",
-  "Nigeria": "Nigeria",
-  "Ghana": "Ghana",
-  "Senegal": "Senegal",
-  "Mali": "Mali",
-  "Burkina Faso": "Burkina Faso",
-  "Niger": "Niger",
-  "Chad": "Chad",
-  "Cameroon": "Cameroon",
-  "Central African Republic": "Central African Republic",
-  "Democratic Republic of the Congo": "Democratic Republic of the Congo",
-  "Republic of the Congo": "Republic of the Congo",
-  "Gabon": "Gabon",
-  "Equatorial Guinea": "Equatorial Guinea",
-  "São Tomé and Príncipe": "São Tomé and Príncipe",
-  "Angola": "Angola",
-  "Zambia": "Zambia",
-  "Zimbabwe": "Zimbabwe",
-  "Botswana": "Botswana",
-  "Namibia": "Namibia",
-  "Lesotho": "Lesotho",
-  "Swaziland": "Swaziland",
-  "Madagascar": "Madagascar",
-  "Mauritius": "Mauritius",
-  "Seychelles": "Seychelles",
-  "Comoros": "Comoros",
-  "Djibouti": "Djibouti",
-  "Somalia": "Somalia",
-  "Eritrea": "Eritrea",
-  "Rwanda": "Rwanda",
-  "Burundi": "Burundi",
-  "Malawi": "Malawi",
-  "Mozambique": "Mozambique",
-  "Lesotho": "Lesotho",
-  "Swaziland": "Swaziland",
-  "Madagascar": "Madagascar",
-  "Mauritius": "Mauritius",
-  "Seychelles": "Seychelles",
-  "Comoros": "Comoros",
-  "Djibouti": "Djibouti",
-  "Somalia": "Somalia",
-  "Eritrea": "Eritrea",
-  "Rwanda": "Rwanda",
-  "Burundi": "Burundi",
-  "Malawi": "Malawi",
-  "Mozambique": "Mozambique",
-  "China": "China",
-  "Japan": "Japan",
-  "South Korea": "South Korea",
-  "North Korea": "North Korea",
-  "Mongolia": "Mongolia",
-  "Taiwan": "Taiwan",
-  "Hong Kong": "Hong Kong",
-  "Macau": "Macau",
-  "Vietnam": "Vietnam",
-  "Laos": "Laos",
-  "Cambodia": "Cambodia",
-  "Thailand": "Thailand",
-  "Myanmar": "Myanmar",
-  "Malaysia": "Malaysia",
-  "Singapore": "Singapore",
-  "Indonesia": "Indonesia",
-  "Philippines": "Philippines",
-  "Brunei": "Brunei",
-  "East Timor": "East Timor",
-  "Papua New Guinea": "Papua New Guinea",
-  "Solomon Islands": "Solomon Islands",
-  "Vanuatu": "Vanuatu",
-  "New Caledonia": "New Caledonia",
-  "Fiji": "Fiji",
-  "Tonga": "Tonga",
-  "Samoa": "Samoa",
-  "American Samoa": "American Samoa",
-  "Cook Islands": "Cook Islands",
-  "French Polynesia": "French Polynesia",
-  "New Zealand": "New Zealand",
-  "India": "India",
-  "Pakistan": "Pakistan",
-  "Bangladesh": "Bangladesh",
-  "Sri Lanka": "Sri Lanka",
-  "Maldives": "Maldives",
-  "Nepal": "Nepal",
-  "Bhutan": "Bhutan",
-  "Afghanistan": "Afghanistan",
-  "Kazakhstan": "Kazakhstan",
-  "Uzbekistan": "Uzbekistan",
-  "Turkmenistan": "Turkmenistan",
-  "Tajikistan": "Tajikistan",
-  "Kyrgyzstan": "Kyrgyzstan",
-  "Azerbaijan": "Azerbaijan",
-  "Armenia": "Armenia",
-  "Georgia": "Georgia",
-  "Brazil": "Brazil",
-  "Argentina": "Argentina",
-  "Chile": "Chile",
-  "Peru": "Peru",
-  "Colombia": "Colombia",
-  "Venezuela": "Venezuela",
-  "Ecuador": "Ecuador",
-  "Bolivia": "Bolivia",
-  "Paraguay": "Paraguay",
-  "Uruguay": "Uruguay",
-  "Guyana": "Guyana",
-  "Suriname": "Suriname",
-  "French Guiana": "French Guiana",
-  "Mexico": "Mexico",
-  "Guatemala": "Guatemala",
-  "Belize": "Belize",
-  "El Salvador": "El Salvador",
-  "Honduras": "Honduras",
-  "Nicaragua": "Nicaragua",
-  "Costa Rica": "Costa Rica",
-  "Panama": "Panama",
-  "Cuba": "Cuba",
-  "Jamaica": "Jamaica",
-  "Haiti": "Haiti",
-  "Dominican Republic": "Dominican Republic",
-  "Puerto Rico": "Puerto Rico",
-  "Trinidad and Tobago": "Trinidad and Tobago",
-  "Barbados": "Barbados",
-  "Saint Lucia": "Saint Lucia",
-  "Saint Vincent and the Grenadines": "Saint Vincent and the Grenadines",
-  "Grenada": "Grenada",
-  "Antigua and Barbuda": "Antigua and Barbuda",
-  "Saint Kitts and Nevis": "Saint Kitts and Nevis",
-  "Dominica": "Dominica",
-  "Bahamas": "Bahamas",
-  "Greenland": "Greenland",
-  "Iceland": "Iceland",
-  "Faroe Islands": "Faroe Islands",
-  "Svalbard and Jan Mayen": "Svalbard and Jan Mayen",
-  "Bouvet Island": "Bouvet Island",
-  "South Georgia and the South Sandwich Islands": "South Georgia and the South Sandwich Islands",
-  "Falkland Islands": "Falkland Islands",
-  "Antarctica": "Antarctica"
+interface TooltipContent {
+  country: string;
+  count: number;
+  x: number;
+  y: number;
+}
+
+// Simple country mapping - just the essential ones we actually have data for
+const COUNTRY_MAPPING: Record<string, string> = {
+  // US States/Regions -> United States
+  'United States': 'United States of America',
+  'USA': 'United States of America',
+  'US': 'United States of America',
+  'California': 'United States of America',
+  'Texas': 'United States of America',
+  'New York': 'United States of America',
+  'Florida': 'United States of America',
+  'Illinois': 'United States of America',
+  'Pennsylvania': 'United States of America',
+  'Ohio': 'United States of America',
+  'Georgia': 'United States of America',
+  'North Carolina': 'United States of America',
+  'Michigan': 'United States of America',
+  'New Jersey': 'United States of America',
+  'Virginia': 'United States of America',
+  'Washington': 'United States of America',
+  'Arizona': 'United States of America',
+  'Massachusetts': 'United States of America',
+  'Tennessee': 'United States of America',
+  'Indiana': 'United States of America',
+  'Missouri': 'United States of America',
+  'Maryland': 'United States of America',
+  'Wisconsin': 'United States of America',
+  'Colorado': 'United States of America',
+  'Minnesota': 'United States of America',
+  'South Carolina': 'United States of America',
+  'Alabama': 'United States of America',
+  'Louisiana': 'United States of America',
+  'Kentucky': 'United States of America',
+  'Oregon': 'United States of America',
+  'Oklahoma': 'United States of America',
+  'Connecticut': 'United States of America',
+  'Utah': 'United States of America',
+  'Iowa': 'United States of America',
+  'Nevada': 'United States of America',
+  'Arkansas': 'United States of America',
+  'Mississippi': 'United States of America',
+  'Kansas': 'United States of America',
+  'New Mexico': 'United States of America',
+  'Nebraska': 'United States of America',
+  'West Virginia': 'United States of America',
+  'Idaho': 'United States of America',
+  'Hawaii': 'United States of America',
+  'New Hampshire': 'United States of America',
+  'Maine': 'United States of America',
+  'Montana': 'United States of America',
+  'Rhode Island': 'United States of America',
+  'Delaware': 'United States of America',
+  'South Dakota': 'United States of America',
+  'North Dakota': 'United States of America',
+  'Alaska': 'United States of America',
+  'Vermont': 'United States of America',
+  'Wyoming': 'United States of America',
+  
+  // Canadian Provinces -> Canada
+  'Canada': 'Canada',
+  'Ontario': 'Canada',
+  'Quebec': 'Canada',
+  'British Columbia': 'Canada',
+  'Alberta': 'Canada',
+  'Manitoba': 'Canada',
+  'Saskatchewan': 'Canada',
+  'Nova Scotia': 'Canada',
+  'New Brunswick': 'Canada',
+  'Newfoundland and Labrador': 'Canada',
+  'Prince Edward Island': 'Canada',
+  'Northwest Territories': 'Canada',
+  'Yukon': 'Canada',
+  'Nunavut': 'Canada',
+  
+  // European Countries
+  'Austria': 'Austria',
+  'Germany': 'Germany',
+  'France': 'France',
+  'United Kingdom': 'United Kingdom',
+  'Italy': 'Italy',
+  'Spain': 'Spain',
+  'Netherlands': 'Netherlands',
+  'Belgium': 'Belgium',
+  'Switzerland': 'Switzerland',
+  'Sweden': 'Sweden',
+  'Norway': 'Norway',
+  'Denmark': 'Denmark',
+  'Finland': 'Finland',
+  'Poland': 'Poland',
+  'Czech Republic': 'Czech Republic',
+  'Hungary': 'Hungary',
+  'Portugal': 'Portugal',
+  'Ireland': 'Ireland',
+  'Greece': 'Greece',
+  'Romania': 'Romania',
+  'Bulgaria': 'Bulgaria',
+  'Croatia': 'Croatia',
+  'Slovakia': 'Slovakia',
+  'Slovenia': 'Slovenia',
+  'Estonia': 'Estonia',
+  'Latvia': 'Latvia',
+  'Lithuania': 'Lithuania',
+  'Luxembourg': 'Luxembourg',
+  'Malta': 'Malta',
+  'Cyprus': 'Cyprus',
+  
+  // Other Major Countries
+  'Australia': 'Australia',
+  'New Zealand': 'New Zealand',
+  'Japan': 'Japan',
+  'South Korea': 'South Korea',
+  'China': 'China',
+  'India': 'India',
+  'Brazil': 'Brazil',
+  'Mexico': 'Mexico',
+  'Argentina': 'Argentina',
+  'Chile': 'Chile',
+  'South Africa': 'South Africa',
+  'Egypt': 'Egypt',
+  'Nigeria': 'Nigeria',
+  'Kenya': 'Kenya',
+  'Morocco': 'Morocco',
+  'Tunisia': 'Tunisia',
+  'Israel': 'Israel',
+  'Turkey': 'Turkey',
+  'Russia': 'Russia',
+  'Ukraine': 'Ukraine',
+  'Belarus': 'Belarus',
+  'Thailand': 'Thailand',
+  'Vietnam': 'Vietnam',
+  'Philippines': 'Philippines',
+  'Indonesia': 'Indonesia',
+  'Malaysia': 'Malaysia',
+  'Singapore': 'Singapore',
+  'Hong Kong': 'Hong Kong',
+  'Taiwan': 'Taiwan',
 };
 
-export function WorldMap({ 
-  data, 
-  className, 
-  viewType = 'users', 
-  onViewTypeChange,
-  timeRange = '7d',
-  onTimeRangeChange 
-}: WorldMapProps) {
-  const [tooltipContent, setTooltipContent] = useState<{
-    country: string;
-    count: number;
-    x: number;
-    y: number;
-  } | null>(null);
-  
-  const [mapData, setMapData] = useState(data);
-  const [loading, setLoading] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
-  // Fetch data when view type or time range changes
+export default function WorldMap({ viewType, timeRange, onTimeRangeChange }: WorldMapProps) {
+  const [mapData, setMapData] = useState<MapData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [tooltip, setTooltip] = useState<TooltipContent | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [center, setCenter] = useState<[number, number]>([0, 0]);
+
+  // Fetch map data
   useEffect(() => {
     const fetchMapData = async () => {
-      if (!onViewTypeChange || !onTimeRangeChange) return;
-      
+      setLoading(true);
       try {
-        setLoading(true);
         const response = await fetch(`/api/admin/analytics/locations?type=${viewType}&timeRange=${timeRange}`);
-        const result = await response.json() as { 
-          success: boolean; 
-          data?: Array<{location: string, userCount: number, lat: number, lng: number}>; 
-          error?: string 
-        };
-        
-        if (result.success && result.data) {
-          setMapData(result.data);
+        if (response.ok) {
+          const data = await response.json();
+          setMapData(data.data || []);
         }
-      } catch (err) {
-        console.error('Map data fetch error:', err);
+      } catch (error) {
+        console.error('Error fetching map data:', error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchMapData();
-  }, [viewType, timeRange, onViewTypeChange, onTimeRangeChange]);
+  }, [viewType, timeRange]);
 
-  // Process data to map locations to countries
+  // Process data by country
   const countryData = mapData.reduce((acc, item) => {
-    let countryName = countryMapping[item.location];
-    
-    // If no direct mapping, try to extract country from location string
-    if (!countryName) {
-      const location = item.location.toLowerCase();
-      
-      // US cities and states
-      if (location.includes('houston') || location.includes('tx') || 
-          location.includes('san francisco') || location.includes('ca') ||
-          location.includes('portland') || location.includes('or') ||
-          location.includes('el paso') || location.includes('new york') ||
-          location.includes('ny') || location.includes('usa') ||
-          location.includes('united states')) {
-        countryName = 'United States of America';
-      }
-      // Canada
-      else if (location.includes('toronto') || location.includes('on') || 
-               location.includes('canada')) {
-        countryName = 'Canada';
-      }
-      // UK
-      else if (location.includes('london') || location.includes('uk') ||
-               location.includes('united kingdom')) {
-        countryName = 'United Kingdom';
-      }
-      // Australia
-      else if (location.includes('sydney') || location.includes('melbourne') ||
-               location.includes('australia')) {
-        countryName = 'Australia';
-      }
-      // Austria
-      else if (location.includes('vienna') || location.includes('austria')) {
-        countryName = 'Austria';
-      }
-      // Default fallback
-      else {
-        countryName = item.location;
-      }
+    const country = COUNTRY_MAPPING[item.location] || item.location;
+    if (!acc[country]) {
+      acc[country] = { users: 0, listings: 0 };
     }
-    
-    acc[countryName] = (acc[countryName] || 0) + item.userCount;
+    acc[country].users += item.userCount;
+    acc[country].listings += item.listingCount;
     return acc;
-  }, {} as Record<string, number>);
+  }, {} as Record<string, { users: number; listings: number }>);
 
-  // Get the maximum count for color scaling
-  const maxCount = Math.max(...Object.values(countryData), 1);
-
-  // Color scale function
+  // Get fill color based on data
   const getFillColor = (countryName: string) => {
-    const count = countryData[countryName] || 0;
-    if (count === 0) return "#F3F4F6"; // Light gray for no data
-    
+    const data = countryData[countryName];
+    if (!data) return '#E5E7EB'; // Light gray for no data
+
+    const count = viewType === 'users' ? data.users : data.listings;
+    if (count === 0) return '#E5E7EB';
+
+    // Color scale: light blue to dark blue
+    const maxCount = Math.max(...Object.values(countryData).map(d => viewType === 'users' ? d.users : d.listings));
     const intensity = Math.min(count / maxCount, 1);
-    const hue = viewType === 'users' ? 200 : 120; // Blue for users, green for listings
-    const saturation = Math.max(60, intensity * 90); // Higher saturation for visibility
-    const lightness = Math.max(75, 100 - intensity * 25); // Less dramatic lightness change
+    
+    // Create color gradient from light blue to dark blue
+    const hue = 210; // Blue hue
+    const saturation = 60 + (intensity * 40); // 60-100% saturation
+    const lightness = 85 - (intensity * 40); // 85-45% lightness
     
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
   };
 
-  const handleMouseEnter = useCallback((geo: any, event: React.MouseEvent) => {
-    const countryName = geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN;
-    const count = countryData[countryName] || 0;
+  const handleMouseEnter = (geo: any, event: React.MouseEvent) => {
+    const countryName = geo.properties.NAME;
+    const data = countryData[countryName];
+    const count = data ? (viewType === 'users' ? data.users : data.listings) : 0;
     
-    setTooltipContent({
+    setTooltip({
       country: countryName,
-      count: count,
+      count,
       x: event.clientX,
-      y: event.clientY
+      y: event.clientY - 10
     });
-  }, [countryData]);
+  };
 
-  const handleMouseLeave = useCallback(() => {
-    setTooltipContent(null);
-  }, []);
+  const handleMouseLeave = () => {
+    setTooltip(null);
+  };
 
-  const handleCountryClick = useCallback((geo: any) => {
-    const countryName = geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN;
-    const count = countryData[countryName] || 0;
+  const handleCountryClick = (geo: any) => {
+    const countryName = geo.properties.NAME;
+    console.log(`Clicked on ${countryName}`);
     
-    console.log(`Clicked ${countryName} with ${count} ${viewType}`);
-    setSelectedCountry(countryName);
-  }, [countryData, viewType]);
+    // Zoom in on the country
+    const { coordinates } = geo.geometry;
+    const bounds = coordinates.reduce((acc: any, coord: any) => {
+      const [x, y] = Array.isArray(coord[0]) ? coord[0] : coord;
+      return {
+        minX: Math.min(acc.minX, x),
+        maxX: Math.max(acc.maxX, x),
+        minY: Math.min(acc.minY, y),
+        maxY: Math.max(acc.maxY, y)
+      };
+    }, { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity });
 
-  const handleBackToWorld = useCallback(() => {
-    setSelectedCountry(null);
-  }, []);
+    const centerX = (bounds.minX + bounds.maxX) / 2;
+    const centerY = (bounds.minY + bounds.maxY) / 2;
+    
+    setCenter([centerX, centerY]);
+    setZoom(4);
+  };
+
+  const handleBackToWorld = () => {
+    setCenter([0, 0]);
+    setZoom(1);
+  };
+
+  const maxCount = Math.max(...Object.values(countryData).map(d => viewType === 'users' ? d.users : d.listings));
 
   return (
-    <div className={cn("bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6", className)}>
-      {/* Header with controls */}
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          {selectedCountry && (
-            <button
-              onClick={handleBackToWorld}
-              className="px-3 py-1.5 bg-orange-500 text-white rounded text-sm hover:bg-orange-600 transition-colors"
-            >
-              ← Back to World
-            </button>
-          )}
-          <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
-            {selectedCountry 
-              ? `${selectedCountry} - ${viewType === 'users' ? 'Users' : 'Listings'}`
-              : `Global ${viewType === 'users' ? 'User' : 'Listing'} Distribution`
-            }
+        <div className="flex items-center space-x-4">
+          <h3 className="text-lg font-semibold text-gray-900">
+            {viewType === 'users' ? 'User' : 'Listing'} Locations
           </h3>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => onTimeRangeChange('24h')}
+              className={`px-3 py-1 text-sm rounded-md ${
+                timeRange === '24h' 
+                  ? 'bg-blue-100 text-blue-700' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              24h
+            </button>
+            <button
+              onClick={() => onTimeRangeChange('7d')}
+              className={`px-3 py-1 text-sm rounded-md ${
+                timeRange === '7d' 
+                  ? 'bg-blue-100 text-blue-700' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              7d
+            </button>
+            <button
+              onClick={() => onTimeRangeChange('30d')}
+              className={`px-3 py-1 text-sm rounded-md ${
+                timeRange === '30d' 
+                  ? 'bg-blue-100 text-blue-700' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              30d
+            </button>
+            <button
+              onClick={() => onTimeRangeChange('90d')}
+              className={`px-3 py-1 text-sm rounded-md ${
+                timeRange === '90d' 
+                  ? 'bg-blue-100 text-blue-700' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              90d
+            </button>
+            <button
+              onClick={() => onTimeRangeChange('all')}
+              className={`px-3 py-1 text-sm rounded-md ${
+                timeRange === 'all' 
+                  ? 'bg-blue-100 text-blue-700' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              All
+            </button>
+          </div>
         </div>
         
-        <div className="flex items-center gap-3">
-          {/* View type toggle */}
-          {onViewTypeChange && (
-            <div className="flex bg-neutral-100 dark:bg-neutral-700 rounded-lg p-1">
-              <button
-                onClick={() => onViewTypeChange('users')}
-                className={cn(
-                  "px-3 py-1 text-sm font-medium rounded-md transition-colors",
-                  viewType === 'users'
-                    ? "bg-white dark:bg-neutral-600 text-neutral-900 dark:text-white shadow-sm"
-                    : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
-                )}
-              >
-                Users
-              </button>
-              <button
-                onClick={() => onViewTypeChange('listings')}
-                className={cn(
-                  "px-3 py-1 text-sm font-medium rounded-md transition-colors",
-                  viewType === 'listings'
-                    ? "bg-white dark:bg-neutral-600 text-neutral-900 dark:text-white shadow-sm"
-                    : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
-                )}
-              >
-                Listings
-              </button>
-            </div>
-          )}
-          
-          {/* Time range selector */}
-          {onTimeRangeChange && (
-            <select
-              value={timeRange}
-              onChange={(e) => onTimeRangeChange(e.target.value as any)}
-              className="px-3 py-1.5 border border-neutral-300 dark:border-neutral-600 rounded text-sm bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
-            >
-              <option value="24h">24h</option>
-              <option value="7d">7d</option>
-              <option value="30d">30d</option>
-              <option value="90d">90d</option>
-              <option value="all">All time</option>
-            </select>
-          )}
-        </div>
+        {zoom > 1 && (
+          <button
+            onClick={handleBackToWorld}
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+          >
+            Back to World
+          </button>
+        )}
       </div>
 
-      {/* Map container */}
-      <div className="relative bg-neutral-50 dark:bg-neutral-900 rounded-lg overflow-hidden">
+      {/* Map Container */}
+      <div className="relative">
         {loading && (
-          <div className="absolute inset-0 bg-white/80 dark:bg-neutral-800/80 flex items-center justify-center z-10">
-            <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+            <div className="text-gray-500">Loading map...</div>
           </div>
         )}
         
-        <ComposableMap
-          projection="geoNaturalEarth1"
-          width={800}
-          height={500}
-          className="w-full h-auto"
-        >
-          <ZoomableGroup
-            center={selectedCountry ? [0, 0] : [0, 0]}
-            zoom={selectedCountry ? 3 : 1}
-            minZoom={0.5}
-            maxZoom={8}
+        <div className="w-full h-96 border border-gray-200 rounded-lg overflow-hidden">
+          <ComposableMap
+            projection="geoMercator"
+            projectionConfig={{
+              scale: 100,
+              center: center
+            }}
+            width={800}
+            height={400}
           >
-            <Geographies geography={geoUrl}>
-              {({ geographies }) =>
-                geographies.map((geo) => {
-                  const countryName = geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN;
-                  const count = countryData[countryName] || 0;
-                  
-                  return (
+            <ZoomableGroup zoom={zoom} center={center}>
+              <Geographies geography={geoUrl}>
+                {({ geographies }) =>
+                  geographies.map((geo) => (
                     <Geography
                       key={geo.rsmKey}
                       geography={geo}
-                      fill={getFillColor(countryName)}
-                      stroke="#E5E7EB"
+                      fill={getFillColor(geo.properties.NAME)}
+                      stroke="#D1D5DB"
                       strokeWidth={0.5}
                       style={{
-                        default: {
-                          fill: getFillColor(countryName),
-                          stroke: "#E5E7EB",
-                          strokeWidth: 0.5,
-                          outline: "none",
-                        },
-                        hover: {
-                          fill: viewType === 'users' ? "#3B82F6" : "#10B981",
-                          stroke: viewType === 'users' ? "#1D4ED8" : "#059669",
-                          strokeWidth: 1.5,
-                          outline: "none",
-                        },
-                        pressed: {
-                          fill: viewType === 'users' ? "#1E40AF" : "#065F46",
-                          stroke: viewType === 'users' ? "#1E40AF" : "#065F46",
-                          strokeWidth: 1.5,
-                          outline: "none",
-                        },
+                        default: { outline: 'none' },
+                        hover: { outline: 'none', fill: '#3B82F6' },
+                        pressed: { outline: 'none' }
                       }}
                       onMouseEnter={(event) => handleMouseEnter(geo, event)}
                       onMouseLeave={handleMouseLeave}
                       onClick={() => handleCountryClick(geo)}
                     />
-                  );
-                })
-              }
-            </Geographies>
-          </ZoomableGroup>
-        </ComposableMap>
-        
-        {/* Instructions */}
-        <div className="absolute top-4 left-4 bg-white/90 dark:bg-neutral-800/90 rounded-lg p-3 shadow-lg border border-neutral-200 dark:border-neutral-700">
-          <div className="text-sm text-neutral-600 dark:text-neutral-400">
-            <div className="font-medium mb-1">Map Controls:</div>
-            <div>• Scroll to zoom</div>
-            <div>• Drag to pan</div>
-            <div>• Hover for details</div>
-            <div>• Click countries to zoom</div>
-          </div>
+                  ))
+                }
+              </Geographies>
+            </ZoomableGroup>
+          </ComposableMap>
         </div>
-        
-        {/* Legend */}
-        <div className="absolute bottom-4 left-4 bg-white/90 dark:bg-neutral-800/90 rounded-lg p-3 shadow-lg border border-neutral-200 dark:border-neutral-700">
-          <div className="text-sm font-medium text-neutral-900 dark:text-white mb-2">
-            {viewType === 'users' ? 'User Count' : 'Listing Count'}
-          </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: "#F3F4F6" }}></div>
-              <span className="text-xs text-neutral-600 dark:text-neutral-400">No data</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: getFillColor("United States") }}></div>
-              <span className="text-xs text-neutral-600 dark:text-neutral-400">Low</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(${viewType === 'users' ? 200 : 120}, 75%, 80%)` }}></div>
-              <span className="text-xs text-neutral-600 dark:text-neutral-400">Medium</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(${viewType === 'users' ? 200 : 120}, 90%, 70%)` }}></div>
-              <span className="text-xs text-neutral-600 dark:text-neutral-400">High</span>
-            </div>
-          </div>
-        </div>
-        
-        {/* Tooltip */}
-        {tooltipContent && (
-          <div
-            className="fixed bg-neutral-900 text-white text-xs rounded px-2 py-1 pointer-events-none z-50 shadow-lg"
-            style={{
-              left: tooltipContent.x + 10,
-              top: tooltipContent.y - 40,
-            }}
-          >
-            <div className="font-medium">{tooltipContent.country}</div>
-            <div className="text-neutral-300">
-              {tooltipContent.count} {viewType}
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Legend */}
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <span className="text-sm text-gray-600">Low</span>
+          <div className="flex space-x-1">
+            {[0, 0.25, 0.5, 0.75, 1].map((intensity) => (
+              <div
+                key={intensity}
+                className="w-4 h-4 rounded"
+                style={{
+                  backgroundColor: `hsl(210, ${60 + (intensity * 40)}%, ${85 - (intensity * 40)}%)`
+                }}
+              />
+            ))}
+          </div>
+          <span className="text-sm text-gray-600">High</span>
+        </div>
+        
+        <div className="text-sm text-gray-500">
+          Max: {maxCount} {viewType}
+        </div>
+      </div>
+
+      {/* Tooltip */}
+      {tooltip && (
+        <div
+          className="fixed z-50 bg-gray-900 text-white px-3 py-2 rounded-md text-sm pointer-events-none"
+          style={{
+            left: tooltip.x,
+            top: tooltip.y,
+            transform: 'translateX(-50%)'
+          }}
+        >
+          <div className="font-medium">{tooltip.country}</div>
+          <div>{tooltip.count} {viewType}</div>
+        </div>
+      )}
     </div>
   );
 }
