@@ -121,6 +121,29 @@ export async function GET(req: NextRequest) {
       365 // For 'all', show last year of data points
     ).all();
 
+    // Handle case where no data in timeframe - create horizontal line at current total
+    let userGrowthData = (userGrowthResult.results || []).map((row: any) => ({
+      date: row.date,
+      users: row.cumulativeUsers,
+      newUsers: row.newUsers
+    }));
+    
+    if (userGrowthData.length === 0 && (totalUsers as any)?.count > 0) {
+      const today = new Date().toISOString().split('T')[0];
+      const startDate = new Date();
+      const daysBack = timeRange === '24h' ? 1 : 
+                      timeRange === '7d' ? 7 : 
+                      timeRange === '30d' ? 30 : 
+                      timeRange === '90d' ? 90 : 365;
+      startDate.setDate(startDate.getDate() - daysBack);
+      const startDateStr = startDate.toISOString().split('T')[0];
+      
+      userGrowthData = [
+        { date: startDateStr, users: (totalUsers as any).count, newUsers: 0 },
+        { date: today, users: (totalUsers as any).count, newUsers: 0 }
+      ];
+    }
+
     // Get listing growth data - always show full cumulative history
     const listingGrowthResult = await db.prepare(`
       WITH daily_listings AS (
@@ -148,6 +171,29 @@ export async function GET(req: NextRequest) {
       timeRange === '90d' ? 90 : 
       365 // For 'all', show last year of data points
     ).all();
+
+    // Handle case where no data in timeframe - create horizontal line at current total
+    let listingGrowthData = (listingGrowthResult.results || []).map((row: any) => ({
+      date: row.date,
+      listings: row.cumulativeListings,
+      newListings: row.newListings
+    }));
+    
+    if (listingGrowthData.length === 0 && (totalListings as any)?.count > 0) {
+      const today = new Date().toISOString().split('T')[0];
+      const startDate = new Date();
+      const daysBack = timeRange === '24h' ? 1 : 
+                      timeRange === '7d' ? 7 : 
+                      timeRange === '30d' ? 30 : 
+                      timeRange === '90d' ? 90 : 365;
+      startDate.setDate(startDate.getDate() - daysBack);
+      const startDateStr = startDate.toISOString().split('T')[0];
+      
+      listingGrowthData = [
+        { date: startDateStr, listings: (totalListings as any).count, newListings: 0 },
+        { date: today, listings: (totalListings as any).count, newListings: 0 }
+      ];
+    }
 
     // Get listing statistics by category
     const listingStatsResult = await db.prepare(`
@@ -250,16 +296,8 @@ export async function GET(req: NextRequest) {
         listingTrend7d: Math.round(listingTrend7d * 10) / 10,
         chatTrend7d: Math.round(chatTrend7d * 10) / 10
       },
-      userGrowth: (userGrowthResult.results || []).map((row: any) => ({
-        date: row.date,
-        users: row.cumulativeUsers,
-        newUsers: row.newUsers
-      })),
-      listingGrowth: (listingGrowthResult.results || []).map((row: any) => ({
-        date: row.date,
-        listings: row.cumulativeListings,
-        newListings: row.newListings
-      })),
+      userGrowth: userGrowthData,
+      listingGrowth: listingGrowthData,
       listingStats: (listingStatsResult.results || []).map((row: any) => ({
         category: row.category,
         count: row.count,

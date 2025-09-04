@@ -44,6 +44,13 @@ export async function GET(req: NextRequest) {
     let result;
     
     if (chartType === 'users') {
+      // Get current total users first
+      const totalUsersResult = await db.prepare(`
+        SELECT COUNT(*) as totalUsers FROM users
+      `).first();
+      
+      const totalUsers = (totalUsersResult as any)?.totalUsers || 0;
+      
       // Get user growth data - always show full cumulative history
       const userGrowthResult = await db.prepare(`
         WITH daily_users AS (
@@ -72,11 +79,37 @@ export async function GET(req: NextRequest) {
         365 // For 'all', show last year of data points
       ).all();
 
-      result = (userGrowthResult.results || []).map((row: any) => ({
+      const growthData = (userGrowthResult.results || []).map((row: any) => ({
         date: row.date,
         value: row.cumulativeUsers
       }));
+      
+      // If no data in timeframe, create a horizontal line at current total
+      if (growthData.length === 0 && totalUsers > 0) {
+        const today = new Date().toISOString().split('T')[0];
+        const startDate = new Date();
+        const daysBack = timeRange === '24h' ? 1 : 
+                        timeRange === '7d' ? 7 : 
+                        timeRange === '30d' ? 30 : 
+                        timeRange === '90d' ? 90 : 365;
+        startDate.setDate(startDate.getDate() - daysBack);
+        const startDateStr = startDate.toISOString().split('T')[0];
+        
+        result = [
+          { date: startDateStr, value: totalUsers },
+          { date: today, value: totalUsers }
+        ];
+      } else {
+        result = growthData;
+      }
     } else if (chartType === 'listings') {
+      // Get current total listings first
+      const totalListingsResult = await db.prepare(`
+        SELECT COUNT(*) as totalListings FROM listings
+      `).first();
+      
+      const totalListings = (totalListingsResult as any)?.totalListings || 0;
+      
       // Get listing growth data - always show full cumulative history
       const listingGrowthResult = await db.prepare(`
         WITH daily_listings AS (
@@ -105,10 +138,29 @@ export async function GET(req: NextRequest) {
         365 // For 'all', show last year of data points
       ).all();
 
-      result = (listingGrowthResult.results || []).map((row: any) => ({
+      const growthData = (listingGrowthResult.results || []).map((row: any) => ({
         date: row.date,
         value: row.cumulativeListings
       }));
+      
+      // If no data in timeframe, create a horizontal line at current total
+      if (growthData.length === 0 && totalListings > 0) {
+        const today = new Date().toISOString().split('T')[0];
+        const startDate = new Date();
+        const daysBack = timeRange === '24h' ? 1 : 
+                        timeRange === '7d' ? 7 : 
+                        timeRange === '30d' ? 30 : 
+                        timeRange === '90d' ? 90 : 365;
+        startDate.setDate(startDate.getDate() - daysBack);
+        const startDateStr = startDate.toISOString().split('T')[0];
+        
+        result = [
+          { date: startDateStr, value: totalListings },
+          { date: today, value: totalListings }
+        ];
+      } else {
+        result = growthData;
+      }
     } else {
       return NextResponse.json({ error: "Invalid chart type" }, { status: 400 });
     }
