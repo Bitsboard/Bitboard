@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Chart } from "@/components/Chart";
-import { WorldMap } from "@/components/WorldMap";
+import WorldMap from "@/components/WorldMap";
 
 interface AnalyticsData {
   overview: {
