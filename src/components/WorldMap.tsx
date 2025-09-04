@@ -28,7 +28,7 @@ interface TooltipContent {
 // Geographic data URLs
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 const usaStatesUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
-const canadaProvincesUrl = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/canada.geojson";
+const canadaProvincesUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 // Country mapping for data lookup
 const COUNTRY_MAPPING: Record<string, string> = {

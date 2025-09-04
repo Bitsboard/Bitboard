@@ -345,8 +345,6 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
   if (type === 'timeseries') {
     const timeData = data as TimeSeriesData[];
     
-    // Debug logging
-    console.log('Timeseries chart data:', timeData);
     
     // Validate data
     if (!timeData || timeData.length === 0) {
@@ -427,15 +425,6 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
       return { x, y, value: item.value, date: item.date };
     });
 
-    // Debug logging
-    console.log('Chart points:', points);
-    console.log('Valid data length:', validData.length);
-    console.log('Chart dimensions:', { chartWidth, chartHeight, padding });
-    console.log('Date range:', {
-      firstDate: validData[0]?.date,
-      lastDate: validData[validData.length - 1]?.date,
-      totalTimeSpan: validData.length > 1 ? new Date(validData[validData.length - 1].date).getTime() - new Date(validData[0].date).getTime() : 0
-    });
 
     // Create path for the line
     const pathData = points.map((point, index) => 
