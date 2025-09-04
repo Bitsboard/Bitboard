@@ -158,20 +158,78 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
   }, [data, maxIntensity]);
 
   // Render heat -> mask (optional) -> tone map -> colorize
-  // Simple world outline using canvas
-  const drawWorldOutline = useCallback((ctx: CanvasRenderingContext2D) => {
-    ctx.strokeStyle = "rgba(255,255,255,0.55)";
-    ctx.lineWidth = 0.6;
-    ctx.beginPath();
+  // Draw proper world map with continents
+  const drawWorldMap = useCallback((ctx: CanvasRenderingContext2D) => {
+    ctx.fillStyle = "#1a1a1a"; // Dark land color
+    ctx.strokeStyle = "rgba(255,255,255,0.3)";
+    ctx.lineWidth = 0.8;
     
-    // Draw a simple world outline
     const centerX = size.w / 2;
     const centerY = size.h / 2;
-    const radius = Math.min(size.w, size.h) * 0.4;
+    const scale = Math.min(size.w, size.h) * 0.15;
     
-    // Draw continents as simple shapes
-    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    // Draw simplified continents
+    ctx.beginPath();
+    
+    // North America
+    ctx.moveTo(centerX - scale * 2.5, centerY - scale * 0.5);
+    ctx.lineTo(centerX - scale * 1.5, centerY - scale * 1.2);
+    ctx.lineTo(centerX - scale * 0.8, centerY - scale * 1.5);
+    ctx.lineTo(centerX - scale * 0.3, centerY - scale * 1.2);
+    ctx.lineTo(centerX + scale * 0.2, centerY - scale * 0.8);
+    ctx.lineTo(centerX + scale * 0.1, centerY - scale * 0.2);
+    ctx.lineTo(centerX - scale * 0.5, centerY + scale * 0.3);
+    ctx.lineTo(centerX - scale * 1.8, centerY + scale * 0.2);
+    ctx.closePath();
+    ctx.fill();
     ctx.stroke();
+    
+    // South America
+    ctx.beginPath();
+    ctx.moveTo(centerX - scale * 1.2, centerY + scale * 0.5);
+    ctx.lineTo(centerX - scale * 0.8, centerY + scale * 1.8);
+    ctx.lineTo(centerX - scale * 0.3, centerY + scale * 2.2);
+    ctx.lineTo(centerX + scale * 0.1, centerY + scale * 1.5);
+    ctx.lineTo(centerX + scale * 0.2, centerY + scale * 0.8);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    
+    // Europe/Africa
+    ctx.beginPath();
+    ctx.moveTo(centerX + scale * 0.5, centerY - scale * 0.8);
+    ctx.lineTo(centerX + scale * 1.8, centerY - scale * 0.5);
+    ctx.lineTo(centerX + scale * 2.2, centerY + scale * 0.2);
+    ctx.lineTo(centerX + scale * 1.8, centerY + scale * 1.2);
+    ctx.lineTo(centerX + scale * 1.2, centerY + scale * 1.8);
+    ctx.lineTo(centerX + scale * 0.8, centerY + scale * 1.5);
+    ctx.lineTo(centerX + scale * 0.3, centerY + scale * 0.8);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    
+    // Asia
+    ctx.beginPath();
+    ctx.moveTo(centerX + scale * 1.5, centerY - scale * 1.2);
+    ctx.lineTo(centerX + scale * 2.8, centerY - scale * 0.8);
+    ctx.lineTo(centerX + scale * 3.2, centerY - scale * 0.2);
+    ctx.lineTo(centerX + scale * 2.8, centerY + scale * 0.5);
+    ctx.lineTo(centerX + scale * 2.2, centerY + scale * 0.8);
+    ctx.lineTo(centerX + scale * 1.8, centerY + scale * 0.2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    
+    // Australia
+    ctx.beginPath();
+    ctx.moveTo(centerX + scale * 2.5, centerY + scale * 1.2);
+    ctx.lineTo(centerX + scale * 3.0, centerY + scale * 1.5);
+    ctx.lineTo(centerX + scale * 2.8, centerY + scale * 1.8);
+    ctx.lineTo(centerX + scale * 2.2, centerY + scale * 1.6);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    
   }, [size.w, size.h]);
 
   const redraw = React.useCallback(() => {
@@ -257,8 +315,8 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
 
     dctx.putImageData(dst, 0, 0);
     
-    // Draw world outline on top
-    drawWorldOutline(dctx);
+    // Draw world map on top
+    drawWorldMap(dctx);
   }, [
     data,
     kernelSprite,
@@ -271,7 +329,7 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
     tonePercentile,
     toneGamma,
     palette,
-    drawWorldOutline
+    drawWorldMap
   ]);
 
   useEffect(() => { redraw(); }, [redraw]);

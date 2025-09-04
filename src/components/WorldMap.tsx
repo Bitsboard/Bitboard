@@ -69,17 +69,17 @@ export default function WorldMap() {
       </div>
 
       <div className="relative rounded-lg overflow-hidden shadow-inner" style={{ height: '300px' }}>
-        <ThermoWorldHeatmap
-          data={heatPoints}
-          width={600}
-          height={300}
-          radius={35}
-          innerBlur={20}
-          maskToLand={true}
-          tonePercentile={95}
-          toneGamma={0.7}
-          formatIntensity={(x) => `${Math.round(x * maxCount)} listings`}
-        />
+                            <ThermoWorldHeatmap
+                      data={heatPoints}
+                      width={600}
+                      height={300}
+                      radius={15}
+                      innerBlur={8}
+                      maskToLand={false}
+                      tonePercentile={90}
+                      toneGamma={0.8}
+                      formatIntensity={(x) => `${Math.round(x * maxCount)} listings`}
+                    />
       </div>
 
       <div className="mt-4 flex items-center justify-between">
