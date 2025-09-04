@@ -48,45 +48,65 @@ export async function GET(req: NextRequest) {
     if (viewType === 'users') {
       // Get user location data from their listings (since users table doesn't have location)
       // For users, we want to show users who were active in the selected timeframe
-      // We'll use the most recent listing date as a proxy for user activity
-      let query = `
-        SELECT 
-          l.location,
-          COUNT(DISTINCT l.posted_by) as userCount,
-          AVG(l.lat) as avgLat,
-          AVG(l.lng) as avgLng
-        FROM listings l
-        WHERE l.location IS NOT NULL AND l.location != ''
-      `;
+      let query;
       
-      // Only add time filter if not "all"
-      if (timeRange !== 'all') {
-        // For users, filter by users who have listings created in the timeframe
-        query += ` AND l.created_at > ?`;
+      if (timeRange === 'all') {
+        // For all time, count all unique users who have ever posted listings
+        query = `
+          SELECT 
+            l.location,
+            COUNT(DISTINCT l.posted_by) as userCount,
+            AVG(l.lat) as avgLat,
+            AVG(l.lng) as avgLng
+          FROM listings l
+          WHERE l.location IS NOT NULL AND l.location != ''
+          GROUP BY l.location
+          ORDER BY userCount DESC
+          LIMIT 50
+        `;
+        
+        console.log(`🌍 Users query (all time):`, query);
+        
+        const userLocationsResult = await db.prepare(query).all();
+        console.log(`🌍 Users query result:`, userLocationsResult);
+
+        result = (userLocationsResult.results || []).map((row: any) => ({
+          location: row.location,
+          userCount: row.userCount,
+          listingCount: 0, // No listings for users view
+          lat: row.avgLat || 0,
+          lng: row.avgLng || 0
+        }));
+      } else {
+        // For specific timeframes, count users who have listings created in that timeframe
+        query = `
+          SELECT 
+            l.location,
+            COUNT(DISTINCT l.posted_by) as userCount,
+            AVG(l.lat) as avgLat,
+            AVG(l.lng) as avgLng
+          FROM listings l
+          WHERE l.location IS NOT NULL AND l.location != ''
+            AND l.created_at > ?
+          GROUP BY l.location
+          ORDER BY userCount DESC
+          LIMIT 50
+        `;
+        
+        console.log(`🌍 Users query (${timeRange}):`, query);
+        console.log(`🌍 Time boundary:`, timeBoundary, `(${new Date(timeBoundary * 1000).toISOString()})`);
+        
+        const userLocationsResult = await db.prepare(query).bind(timeBoundary).all();
+        console.log(`🌍 Users query result:`, userLocationsResult);
+
+        result = (userLocationsResult.results || []).map((row: any) => ({
+          location: row.location,
+          userCount: row.userCount,
+          listingCount: 0, // No listings for users view
+          lat: row.avgLat || 0,
+          lng: row.avgLng || 0
+        }));
       }
-      
-      query += `
-        GROUP BY l.location
-        ORDER BY userCount DESC
-        LIMIT 50
-      `;
-      
-      console.log(`🌍 Users query:`, query);
-      console.log(`🌍 Time boundary:`, timeBoundary, `(${new Date(timeBoundary * 1000).toISOString()})`);
-      
-      const userLocationsResult = timeRange === 'all' 
-        ? await db.prepare(query).all()
-        : await db.prepare(query).bind(timeBoundary).all();
-
-      console.log(`🌍 Users query result:`, userLocationsResult);
-
-      result = (userLocationsResult.results || []).map((row: any) => ({
-        location: row.location,
-        userCount: row.userCount,
-        listingCount: 0, // No listings for users view
-        lat: row.avgLat || 0,
-        lng: row.avgLng || 0
-      }));
       
       console.log(`🌍 Mapped users result:`, result);
     } else if (viewType === 'listings') {
@@ -134,6 +154,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Invalid view type" }, { status: 400 });
     }
 
+    // Add summary debugging
+    const totalUsers = result.reduce((sum: number, item: any) => sum + (item.userCount || 0), 0);
+    const totalListings = result.reduce((sum: number, item: any) => sum + (item.listingCount || 0), 0);
+    
+    console.log(`🌍 Summary - ${viewType} (${timeRange}):`, {
+      totalUsers,
+      totalListings,
+      locationCount: result.length,
+      timeBoundary: timeRange !== 'all' ? timeBoundary : 'all',
+      timeBoundaryDate: timeRange !== 'all' ? new Date(timeBoundary * 1000).toISOString() : 'all'
+    });
+    
     console.log(`🌍 Final API response:`, { success: true, data: result });
     
     return NextResponse.json({
