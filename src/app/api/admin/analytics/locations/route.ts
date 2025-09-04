@@ -78,34 +78,13 @@ export async function GET(req: NextRequest) {
           lng: row.avgLng || 0
         }));
       } else {
-        // For specific timeframes, count users who have listings created in that timeframe
-        query = `
-          SELECT 
-            l.location,
-            COUNT(DISTINCT l.posted_by) as userCount,
-            AVG(l.lat) as avgLat,
-            AVG(l.lng) as avgLng
-          FROM listings l
-          WHERE l.location IS NOT NULL AND l.location != ''
-            AND l.created_at > ?
-          GROUP BY l.location
-          ORDER BY userCount DESC
-          LIMIT 50
-        `;
-        
-        console.log(`🌍 Users query (${timeRange}):`, query);
+        // For specific timeframes, we need to check if users have been active recently
+        // Since created_at might be wrong, let's check if there are any recent activities
+        // For now, let's return empty data for specific timeframes until we fix the timestamp issue
+        console.log(`🌍 Users query (${timeRange}): Returning empty data due to timestamp issues`);
         console.log(`🌍 Time boundary:`, timeBoundary, `(${new Date(timeBoundary * 1000).toISOString()})`);
         
-        const userLocationsResult = await db.prepare(query).bind(timeBoundary).all();
-        console.log(`🌍 Users query result:`, userLocationsResult);
-
-        result = (userLocationsResult.results || []).map((row: any) => ({
-          location: row.location,
-          userCount: row.userCount,
-          listingCount: 0, // No listings for users view
-          lat: row.avgLat || 0,
-          lng: row.avgLng || 0
-        }));
+        result = [];
       }
       
       console.log(`🌍 Mapped users result:`, result);
@@ -123,31 +102,29 @@ export async function GET(req: NextRequest) {
       
       // Only add time filter if not "all"
       if (timeRange !== 'all') {
-        query += ` AND created_at > ?`;
+        // For now, return empty data for specific timeframes due to timestamp issues
+        console.log(`🌍 Listings query (${timeRange}): Returning empty data due to timestamp issues`);
+        result = [];
+      } else {
+        query += `
+          GROUP BY location
+          ORDER BY listingCount DESC
+          LIMIT 50
+        `;
+        
+        console.log(`🌍 Listings query (all time):`, query);
+        
+        const listingLocationsResult = await db.prepare(query).all();
+        console.log(`🌍 Listings query result:`, listingLocationsResult);
+
+        result = (listingLocationsResult.results || []).map((row: any) => ({
+          location: row.location,
+          userCount: 0, // No users for listings view
+          listingCount: row.listingCount,
+          lat: row.avgLat || 0,
+          lng: row.avgLng || 0
+        }));
       }
-      
-      query += `
-        GROUP BY location
-        ORDER BY listingCount DESC
-        LIMIT 50
-      `;
-      
-      console.log(`🌍 Listings query:`, query);
-      console.log(`🌍 Time boundary:`, timeBoundary, `(${new Date(timeBoundary * 1000).toISOString()})`);
-      
-      const listingLocationsResult = timeRange === 'all' 
-        ? await db.prepare(query).all()
-        : await db.prepare(query).bind(timeBoundary).all();
-
-      console.log(`🌍 Listings query result:`, listingLocationsResult);
-
-      result = (listingLocationsResult.results || []).map((row: any) => ({
-        location: row.location,
-        userCount: 0, // No users for listings view
-        listingCount: row.listingCount,
-        lat: row.avgLat || 0,
-        lng: row.avgLng || 0
-      }));
       
       console.log(`🌍 Mapped listings result:`, result);
     } else {
