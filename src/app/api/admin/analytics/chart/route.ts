@@ -44,14 +44,13 @@ export async function GET(req: NextRequest) {
     let result;
     
     if (chartType === 'users') {
-      // Get user growth data - cumulative totals
+      // Get user growth data - always show full cumulative history
       const userGrowthResult = await db.prepare(`
         WITH daily_users AS (
           SELECT 
             DATE(datetime(created_at, 'unixepoch')) as date,
             COUNT(*) as newUsers
           FROM users 
-          WHERE created_at > ?
           GROUP BY DATE(datetime(created_at, 'unixepoch'))
           ORDER BY date ASC
         ),
@@ -63,21 +62,28 @@ export async function GET(req: NextRequest) {
           FROM daily_users
         )
         SELECT * FROM cumulative_users
-      `).bind(timeBoundary).all();
+        WHERE date >= DATE('now', '-' || ? || ' days')
+        ORDER BY date ASC
+      `).bind(
+        timeRange === '24h' ? 1 : 
+        timeRange === '7d' ? 7 : 
+        timeRange === '30d' ? 30 : 
+        timeRange === '90d' ? 90 : 
+        365 // For 'all', show last year of data points
+      ).all();
 
       result = (userGrowthResult.results || []).map((row: any) => ({
         date: row.date,
         value: row.cumulativeUsers
       }));
     } else if (chartType === 'listings') {
-      // Get listing growth data - cumulative totals
+      // Get listing growth data - always show full cumulative history
       const listingGrowthResult = await db.prepare(`
         WITH daily_listings AS (
           SELECT 
             DATE(datetime(created_at, 'unixepoch')) as date,
             COUNT(*) as newListings
           FROM listings 
-          WHERE created_at > ?
           GROUP BY DATE(datetime(created_at, 'unixepoch'))
           ORDER BY date ASC
         ),
@@ -89,7 +95,15 @@ export async function GET(req: NextRequest) {
           FROM daily_listings
         )
         SELECT * FROM cumulative_listings
-      `).bind(timeBoundary).all();
+        WHERE date >= DATE('now', '-' || ? || ' days')
+        ORDER BY date ASC
+      `).bind(
+        timeRange === '24h' ? 1 : 
+        timeRange === '7d' ? 7 : 
+        timeRange === '30d' ? 30 : 
+        timeRange === '90d' ? 90 : 
+        365 // For 'all', show last year of data points
+      ).all();
 
       result = (listingGrowthResult.results || []).map((row: any) => ({
         date: row.date,
