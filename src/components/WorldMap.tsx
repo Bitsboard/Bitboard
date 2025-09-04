@@ -204,9 +204,20 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     fetchMapData();
   }, [viewType, timeRange]);
 
-  // Process data by country
+  // Process data by country - aggregate city data by country
   const countryData = mapData.reduce((acc, item) => {
-    const country = COUNTRY_MAPPING[item.location] || item.location;
+    // Extract country from location (e.g., "Toronto, Canada" -> "Canada")
+    let country = item.location;
+    
+    // If location contains a comma, take the part after the comma
+    if (item.location.includes(',')) {
+      const parts = item.location.split(',').map(part => part.trim());
+      country = parts[parts.length - 1]; // Take the last part (country)
+    }
+    
+    // Apply country mapping for consistency
+    country = COUNTRY_MAPPING[country] || country;
+    
     if (!acc[country]) {
       acc[country] = { users: 0, listings: 0 };
     }
@@ -283,6 +294,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
 
   // Debug country data processing
   console.log(`🗺️ Map data length: ${mapData.length}`);
+  console.log(`🗺️ Raw map data:`, mapData.slice(0, 5)); // Show first 5 items
   console.log(`🗺️ Country data keys:`, Object.keys(countryData));
   console.log(`🗺️ Country data:`, countryData);
   console.log(`🗺️ View type: ${viewType}`);
