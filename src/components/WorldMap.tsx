@@ -26,6 +26,10 @@ import { scaleLinear } from "d3-scale";
 /** API row type */
 type Row = {
   location: string;
+  city: string;
+  stateProvince: string;
+  country: string;
+  countryCode: string;
   userCount: number;
   listingCount: number;
   lat: number | null;
