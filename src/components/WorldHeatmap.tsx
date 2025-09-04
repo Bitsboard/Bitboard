@@ -312,9 +312,7 @@ export const WorldHeatmap: React.FC<Props> = ({
 
     // Clip to land
     offCtx.save();
-    offCtx.beginPath();
-    offCtx.addPath(landClipPath2D);
-    offCtx.clip();
+    offCtx.clip(landClipPath2D);
 
     // Optional blur to smooth the edges further
     offCtx.filter = `blur(${blurPx}px)`;
