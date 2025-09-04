@@ -106,7 +106,6 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
       // Use a scale that matches ComposableMap's default heuristics:
       // ~160 @ 800px → scale ≈ width * 0.2
       .scale(size.w * 0.2)
-      .center([0, 0])
       .precision(0.1);
     return p;
   }, [size.w, size.h]);
@@ -331,7 +330,7 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
       width={size.w}
       height={size.h}
       projection="naturalEarth1"
-      projectionConfig={{ scale: size.w * 0.2, center: [0, 0] }}
+      projectionConfig={{ scale: size.w * 0.2 }}
       style={{ position: "absolute", inset: 0, pointerEvents: "none", opacity }}
     >
       <Geographies geography={geographyUrl}>
@@ -368,7 +367,7 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
         width={size.w}
         height={size.h}
         projection="naturalEarth1"
-        projectionConfig={{ scale: size.w * 0.2, center: [0, 0] }}
+        projectionConfig={{ scale: size.w * 0.2 }}
         style={{ position: "absolute", inset: 0 }}
       >
         <Geographies geography={geographyUrl}>
