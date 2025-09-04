@@ -49,10 +49,20 @@ export default function AnalyticsPage() {
   const loadStats = async () => {
     try {
       const response = await fetch('/api/admin/analytics/stats');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const result = await response.json() as StatsData;
       setStats(result);
     } catch (error) {
       console.error('Failed to load stats:', error);
+      // Set default stats on error
+      setStats({
+        totalUsers: 0,
+        totalListings: 0,
+        activeUsers: 0,
+        newListings: 0
+      });
     }
   };
 

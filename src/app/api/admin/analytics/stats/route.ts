@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     const db = await getD1();
     if (!db) {
+      console.error("Database not available");
       return NextResponse.json(
         { error: "Database not available" },
         { status: 500 }
@@ -14,32 +15,52 @@ export async function GET(request: NextRequest) {
     }
     
     // Get total users
-    const totalUsersResult = await db.prepare(`
-      SELECT COUNT(*) as count FROM users
-    `).first();
-    const totalUsers = totalUsersResult?.count || 0;
+    let totalUsers = 0;
+    try {
+      const totalUsersResult = await db.prepare(`
+        SELECT COUNT(*) as count FROM users
+      `).first();
+      totalUsers = totalUsersResult?.count || 0;
+    } catch (error) {
+      console.error("Error getting total users:", error);
+    }
 
     // Get total listings
-    const totalListingsResult = await db.prepare(`
-      SELECT COUNT(*) as count FROM listings
-    `).first();
-    const totalListings = totalListingsResult?.count || 0;
+    let totalListings = 0;
+    try {
+      const totalListingsResult = await db.prepare(`
+        SELECT COUNT(*) as count FROM listings
+      `).first();
+      totalListings = totalListingsResult?.count || 0;
+    } catch (error) {
+      console.error("Error getting total listings:", error);
+    }
 
     // Get active users (users who have been active in the last 7 days)
-    const activeUsersResult = await db.prepare(`
-      SELECT COUNT(DISTINCT seller_id) as count 
-      FROM listings 
-      WHERE created_at > datetime('now', '-7 days')
-    `).first();
-    const activeUsers = activeUsersResult?.count || 0;
+    let activeUsers = 0;
+    try {
+      const activeUsersResult = await db.prepare(`
+        SELECT COUNT(DISTINCT seller_id) as count 
+        FROM listings 
+        WHERE created_at > datetime('now', '-7 days')
+      `).first();
+      activeUsers = activeUsersResult?.count || 0;
+    } catch (error) {
+      console.error("Error getting active users:", error);
+    }
 
     // Get new listings (created in the last 7 days)
-    const newListingsResult = await db.prepare(`
-      SELECT COUNT(*) as count 
-      FROM listings 
-      WHERE created_at > datetime('now', '-7 days')
-    `).first();
-    const newListings = newListingsResult?.count || 0;
+    let newListings = 0;
+    try {
+      const newListingsResult = await db.prepare(`
+        SELECT COUNT(*) as count 
+        FROM listings 
+        WHERE created_at > datetime('now', '-7 days')
+      `).first();
+      newListings = newListingsResult?.count || 0;
+    } catch (error) {
+      console.error("Error getting new listings:", error);
+    }
 
     return NextResponse.json({
       totalUsers: Number(totalUsers),
