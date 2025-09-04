@@ -76,6 +76,12 @@ export default function WorldMap() {
   );
 
   console.log('🗺️ Valid data points:', validData.length);
+  console.log('🗺️ Sample coordinates:', validData.slice(0, 3).map(row => ({
+    location: row.location,
+    lat: row.lat,
+    lng: row.lng,
+    count: row.listingCount
+  })));
 
   // Calculate max count for color scaling
   const maxCount = Math.max(1, ...validData.map(row => row.listingCount));
@@ -154,11 +160,18 @@ export default function WorldMap() {
               const size = Math.max(3, Math.min(20, row.listingCount * 2));
               const color = getHeatColor(row.listingCount);
               
+              // Convert lat/lng to map coordinates
+              // For Mercator projection, we need to convert lat/lng to x/y coordinates
+              const x = (row.lng! + 180) * (MAP_WIDTH / 360);
+              const y = (90 - row.lat!) * (MAP_HEIGHT / 180);
+              
+              console.log(`🗺️ Plotting ${row.location}: lat=${row.lat}, lng=${row.lng} -> x=${x}, y=${y}`);
+              
               return (
                 <circle
                   key={`${row.lat}-${row.lng}-${index}`}
-                  cx={row.lng!}
-                  cy={row.lat!}
+                  cx={x}
+                  cy={y}
                   r={size}
                   fill={color}
                   stroke="rgba(255, 140, 0, 0.8)"

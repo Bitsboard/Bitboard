@@ -304,8 +304,8 @@ export default function AnalyticsPage() {
             <Chart
               data={userChartData.map(item => ({
                 date: item.date,
-                value: item.users,
-                label: `Users: ${item.users}`
+                value: item.users || item.value || 0,
+                label: `Users: ${item.users || item.value || 0}`
               }))}
               type="timeseries"
               dataType="users"
@@ -344,8 +344,8 @@ export default function AnalyticsPage() {
             <Chart
               data={listingChartData.map(item => ({
                 date: item.date,
-                value: item.listings,
-                label: `Listings: ${item.listings}`
+                value: item.listings || item.value || 0,
+                label: `Listings: ${item.listings || item.value || 0}`
               }))}
               type="timeseries"
               dataType="listings"
