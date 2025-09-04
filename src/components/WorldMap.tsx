@@ -157,8 +157,8 @@ export default function WorldMap() {
               return (
                 <circle
                   key={`${row.lat}-${row.lng}-${index}`}
-                  cx={row.lng}
-                  cy={row.lat}
+                  cx={row.lng!}
+                  cy={row.lat!}
                   r={size}
                   fill={color}
                   stroke="rgba(255, 140, 0, 0.8)"
