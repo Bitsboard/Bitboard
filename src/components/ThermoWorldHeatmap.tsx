@@ -34,8 +34,8 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
   data,
   width = 600,
   height = 300,
-  radius = 35,
-  innerBlur = 20,
+  radius = 50,
+  innerBlur = 30,
   maxIntensity,
   formatIntensity = (x) => `${(x * 100).toFixed(1)}%`
 }) => {
@@ -119,9 +119,9 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
   // ====== Improved Kernel Sprite ======
   const kernelSprite = useMemo(() => {
     const base = radius * (size.w / 600);
-    const r = Math.max(8, base);
+    const r = Math.max(12, base);
     const blur = Math.max(0, innerBlur * (size.w / 600));
-    const dim = Math.ceil((r + blur) * 2.5); // Larger sprite for smoother blending
+    const dim = Math.ceil((r + blur) * 3); // Much larger sprite for smoother blending
     const c = document.createElement("canvas");
     c.width = Math.ceil(dim * dpr);
     c.height = Math.ceil(dim * dpr);
@@ -131,11 +131,13 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
     const cx = dim / 2;
     const cy = dim / 2;
     
-    // Create a more Gaussian-like gradient
+    // Create a much smoother Gaussian-like gradient
     const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r + blur);
     grad.addColorStop(0, "rgba(255,255,255,1)");
-    grad.addColorStop(0.3, "rgba(255,255,255,0.8)");
-    grad.addColorStop(0.7, "rgba(255,255,255,0.3)");
+    grad.addColorStop(0.1, "rgba(255,255,255,0.9)");
+    grad.addColorStop(0.3, "rgba(255,255,255,0.6)");
+    grad.addColorStop(0.6, "rgba(255,255,255,0.2)");
+    grad.addColorStop(0.8, "rgba(255,255,255,0.05)");
     grad.addColorStop(1, "rgba(255,255,255,0)");
     
     ctx.fillStyle = grad;
@@ -169,9 +171,9 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
 
     ctx.save();
     ctx.scale(dpr, dpr);
-    ctx.strokeStyle = "rgba(255,255,255,0.4)";
-    ctx.fillStyle = "rgba(20,25,35,0.8)";
-    ctx.lineWidth = 0.8;
+    ctx.strokeStyle = "rgba(255,255,255,0.6)";
+    ctx.fillStyle = "rgba(15,20,30,0.9)";
+    ctx.lineWidth = 1.2;
 
     const geo = worldGeoRef.current;
     if (geo.features) {
@@ -264,7 +266,7 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
 
     bctx.restore();
 
-    // Improved colorization with better blending
+    // Much smoother colorization with better blending
     const { width: W, height: H } = buffer;
     const src = bctx.getImageData(0, 0, W, H);
     const dst = dctx.createImageData(W, H);
@@ -275,14 +277,14 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
       const a = spx[i + 3];
       if (a === 0) continue;
 
-      // Use a more sophisticated mapping for better color distribution
-      const intensity = Math.pow(a / 255, 0.7); // Gamma correction for better color distribution
+      // Much smoother mapping for better color distribution
+      const intensity = Math.pow(a / 255, 0.5); // Less aggressive gamma correction
       const idx = Math.floor(intensity * 255) << 2;
       
       dpx[i + 0] = palette[idx + 0];
       dpx[i + 1] = palette[idx + 1];
       dpx[i + 2] = palette[idx + 2];
-      dpx[i + 3] = Math.min(255, Math.max(0, Math.round(a * 0.9))); // Slightly more transparent
+      dpx[i + 3] = Math.min(255, Math.max(0, Math.round(a * 0.7))); // More transparent for smoother blending
     }
 
     dctx.putImageData(dst, 0, 0);

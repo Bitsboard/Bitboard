@@ -73,8 +73,8 @@ export default function WorldMap() {
           data={heatPoints}
           width={600}
           height={300}
-          radius={30}
-          innerBlur={15}
+          radius={60}
+          innerBlur={40}
           formatIntensity={(x) => `${Math.round(x * maxCount)} listings`}
         />
       </div>
