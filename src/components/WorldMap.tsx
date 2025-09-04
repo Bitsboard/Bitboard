@@ -79,7 +79,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
         const res = await fetch(
           `/api/admin/analytics/locations?type=${view}&timeRange=${timeRangeState}`
         );
-        const json = await res.json();
+        const json = await res.json() as any;
         
         // Handle both direct array and wrapped response
         const data = Array.isArray(json) ? json : (json.data || []);
