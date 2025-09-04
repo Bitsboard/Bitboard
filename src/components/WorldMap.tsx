@@ -163,8 +163,8 @@ const COUNTRY_MAPPING: Record<string, string> = {
 };
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
-const canadaGeoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"; // We'll use a different approach
-const usaGeoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"; // We'll use a different approach
+const usaStatesUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
+const canadaProvincesUrl = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"; // We'll use a different approach for Canada
 
 // For now, we'll use a simplified approach with predefined province/state coordinates
 // In a real implementation, you'd load proper GeoJSON files for provinces/states
@@ -225,6 +225,31 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
   const [drillDownLevel, setDrillDownLevel] = useState<'world' | 'country'>('world');
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [filteredMapData, setFilteredMapData] = useState<MapData[]>([]);
+  const [currentGeoUrl, setCurrentGeoUrl] = useState(geoUrl);
+  const [geoData, setGeoData] = useState<any>(null);
+
+  // Load geographic data
+  useEffect(() => {
+    const loadGeoData = async () => {
+      try {
+        let url = geoUrl;
+        if (drillDownLevel === 'country' && selectedCountry === 'United States of America') {
+          url = usaStatesUrl;
+        }
+        
+        if (url !== currentGeoUrl) {
+          setCurrentGeoUrl(url);
+          const response = await fetch(url);
+          const data = await response.json();
+          setGeoData(data);
+        }
+      } catch (error) {
+        console.error('Error loading geographic data:', error);
+      }
+    };
+
+    loadGeoData();
+  }, [drillDownLevel, selectedCountry, currentGeoUrl]);
 
   // Fetch map data
   useEffect(() => {
@@ -405,15 +430,30 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
   }
 
   // Get fill color based on data - memoized for performance
-  const getFillColor = useCallback((countryName: string) => {
-    // Handle undefined country names
-    if (!countryName || countryName === 'undefined') {
+  const getFillColor = useCallback((regionName: string) => {
+    // Handle undefined region names
+    if (!regionName || regionName === 'undefined') {
       return '#E5E7EB';
     }
     
-    // Map the country name from the map to our data key
-    const dataKey = mapToDataMapping[countryName] || countryName;
-    const data = countryData[dataKey];
+    // For US states, look up by state name directly
+    let data = countryData[regionName];
+    
+    // If not found, try to find by partial match (e.g., "New York" might be "New York, NY")
+    if (!data) {
+      const matchingKey = Object.keys(countryData).find(key => 
+        key.includes(regionName) || regionName.includes(key)
+      );
+      if (matchingKey) {
+        data = countryData[matchingKey];
+      }
+    }
+    
+    // If still not found, try mapping for world countries
+    if (!data) {
+      const dataKey = mapToDataMapping[regionName] || regionName;
+      data = countryData[dataKey];
+    }
     
     if (!data) {
       return '#E5E7EB'; // Light gray for no data
@@ -483,28 +523,39 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     console.log(`🗺️ Drilling down into ${countryName}: ${count} ${type} in the past ${timeRange}`);
     
     // Center the map on the selected country
-    const { coordinates } = geo.geometry;
-    
-    const bounds = coordinates.reduce((acc: any, coord: any) => {
-      const [x, y] = Array.isArray(coord[0]) ? coord[0] : coord;
-      if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
-        return {
-          minX: Math.min(acc.minX, x),
-          maxX: Math.max(acc.maxX, x),
-          minY: Math.min(acc.minY, y),
-          maxY: Math.max(acc.maxY, y)
-        };
-      }
-      return acc;
-    }, { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity });
+    if (countryName === 'United States of America') {
+      // Center on US
+      setCenter([-95.7129, 37.0902]);
+      setZoom(3);
+    } else if (countryName === 'Canada') {
+      // Center on Canada
+      setCenter([-106.3468, 56.1304]);
+      setZoom(3);
+    } else {
+      // For other countries, use their geometry
+      const { coordinates } = geo.geometry;
+      
+      const bounds = coordinates.reduce((acc: any, coord: any) => {
+        const [x, y] = Array.isArray(coord[0]) ? coord[0] : coord;
+        if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
+          return {
+            minX: Math.min(acc.minX, x),
+            maxX: Math.max(acc.maxX, x),
+            minY: Math.min(acc.minY, y),
+            maxY: Math.max(acc.maxY, y)
+          };
+        }
+        return acc;
+      }, { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity });
 
-    const centerX = (bounds.minX + bounds.maxX) / 2;
-    const centerY = (bounds.minY + bounds.maxY) / 2;
-    
-    // Validate coordinates before setting
-    if (!isNaN(centerX) && !isNaN(centerY) && isFinite(centerX) && isFinite(centerY)) {
-      setCenter([centerX, centerY]);
-      setZoom(4);
+      const centerX = (bounds.minX + bounds.maxX) / 2;
+      const centerY = (bounds.minY + bounds.maxY) / 2;
+      
+      // Validate coordinates before setting
+      if (!isNaN(centerX) && !isNaN(centerY) && isFinite(centerX) && isFinite(centerY)) {
+        setCenter([centerX, centerY]);
+        setZoom(4);
+      }
     }
   }, [mapToDataMapping, countryData, viewType, timeRange]);
 
@@ -513,6 +564,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     setZoom(1);
     setDrillDownLevel('world');
     setSelectedCountry(null);
+    setCurrentGeoUrl(geoUrl);
   };
 
   const maxCount = Math.max(...Object.values(countryData).map(d => viewType === 'users' ? d.users : d.listings));
@@ -641,16 +693,26 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
             height={400}
           >
             <ZoomableGroup zoom={zoom} center={center}>
-              <Geographies geography={geoUrl}>
+              <Geographies geography={currentGeoUrl}>
                 {({ geographies }) =>
                   geographies.map((geo) => {
-                    const countryName = geo.properties.name || geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN || geo.properties.NAME_LONG || 'Unknown';
+                    let regionName = 'Unknown';
+                    let dataKey = 'Unknown';
                     
-                    // In drill-down mode, only show the selected country
-                    if (drillDownLevel === 'country' && selectedCountry) {
-                      const dataKey = mapToDataMapping[countryName] || countryName;
-                      if (dataKey !== selectedCountry) {
-                        return null; // Don't render other countries
+                    if (drillDownLevel === 'country' && selectedCountry === 'United States of America') {
+                      // For US states, use the state name
+                      regionName = geo.properties.name || geo.properties.NAME || 'Unknown';
+                      dataKey = regionName;
+                    } else {
+                      // For world countries
+                      regionName = geo.properties.name || geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN || geo.properties.NAME_LONG || 'Unknown';
+                      dataKey = mapToDataMapping[regionName] || regionName;
+                      
+                      // In drill-down mode, only show the selected country
+                      if (drillDownLevel === 'country' && selectedCountry) {
+                        if (dataKey !== selectedCountry) {
+                          return null; // Don't render other countries
+                        }
                       }
                     }
                     
@@ -658,9 +720,9 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={getFillColor(countryName)}
+                        fill={getFillColor(regionName)}
                         stroke={drillDownLevel === 'country' ? "#1E40AF" : "#D1D5DB"}
-                        strokeWidth={drillDownLevel === 'country' ? 2 : 0.5}
+                        strokeWidth={drillDownLevel === 'country' ? 1 : 0.5}
                         style={{
                           default: { outline: 'none' },
                           hover: { outline: 'none', fill: '#3B82F6' },
@@ -674,64 +736,6 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
                   })
                 }
               </Geographies>
-              
-              {/* Province/State Overlays in Drill-down Mode */}
-              {drillDownLevel === 'country' && selectedCountry && (
-                <g>
-                  {Object.entries(countryData).map(([region, data]) => {
-                    const coordinates = selectedCountry === 'Canada' 
-                      ? CANADA_PROVINCE_COORDINATES[region as keyof typeof CANADA_PROVINCE_COORDINATES]
-                      : USA_STATE_COORDINATES[region as keyof typeof USA_STATE_COORDINATES];
-                    
-                    if (!coordinates) return null;
-                    
-                    const count = viewType === 'users' ? data.users : data.listings;
-                    const maxCount = Math.max(...Object.values(countryData).map(d => viewType === 'users' ? d.users : d.listings));
-                    const intensity = maxCount > 0 ? count / maxCount : 0;
-                    
-                    // Convert lat/lng to map coordinates (simplified)
-                    const x = (coordinates.lng + 180) * (800 / 360);
-                    const y = (90 - coordinates.lat) * (400 / 180);
-                    
-                    return (
-                      <g key={region}>
-                        {/* Province/State Circle */}
-                        <circle
-                          cx={x}
-                          cy={y}
-                          r={Math.max(8, 8 + intensity * 12)}
-                          fill={`hsl(210, ${60 + (intensity * 40)}%, ${85 - (intensity * 40)}%)`}
-                          stroke="#1E40AF"
-                          strokeWidth={2}
-                          opacity={0.8}
-                        />
-                        {/* Province/State Label */}
-                        <text
-                          x={x}
-                          y={y + 4}
-                          textAnchor="middle"
-                          fontSize="10"
-                          fill="#1E40AF"
-                          fontWeight="bold"
-                        >
-                          {region}
-                        </text>
-                        {/* Count Label */}
-                        <text
-                          x={x}
-                          y={y - 8}
-                          textAnchor="middle"
-                          fontSize="8"
-                          fill="#1E40AF"
-                          fontWeight="bold"
-                        >
-                          {count}
-                        </text>
-                      </g>
-                    );
-                  })}
-                </g>
-              )}
             </ZoomableGroup>
           </ComposableMap>
         </div>
