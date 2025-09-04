@@ -38,7 +38,7 @@ export default function AnalyticsPage() {
   const loadChartData = async (type: 'users' | 'listings', timeframe: string) => {
     try {
       const response = await fetch(`/api/admin/analytics/chart?type=${type}&timeframe=${timeframe}`);
-      const result = await response.json();
+      const result = await response.json() as { data?: any[] };
       return result.data || [];
     } catch (error) {
       console.error(`Failed to load ${type} chart data:`, error);
@@ -49,7 +49,7 @@ export default function AnalyticsPage() {
   const loadStats = async () => {
     try {
       const response = await fetch('/api/admin/analytics/stats');
-      const result = await response.json();
+      const result = await response.json() as StatsData;
       setStats(result);
     } catch (error) {
       console.error('Failed to load stats:', error);
