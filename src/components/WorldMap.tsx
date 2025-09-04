@@ -28,7 +28,7 @@ interface TooltipContent {
 // Geographic data URLs
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 const usaStatesUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
-const canadaProvincesUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+const canadaProvincesUrl = "https://github.com/wmgeolab/geoBoundaries/raw/main/releaseData/gbOpen/CAN/ADM1/geoBoundaries-CAN-ADM1.geojson";
 
 // Country mapping for data lookup
 const COUNTRY_MAPPING: Record<string, string> = {
@@ -109,10 +109,10 @@ const US_STATE_MAPPING: Record<string, string> = {
   'District of Columbia': 'District of Columbia',
 };
 
-// Canadian Province mapping
+// Canadian Province mapping (geoBoundaries uses different property names)
 const CANADA_PROVINCE_MAPPING: Record<string, string> = {
   'Ontario': 'Ontario',
-  'Quebec': 'Quebec',
+  'Quebec': 'Quebec', 
   'British Columbia': 'British Columbia',
   'Alberta': 'Alberta',
   'Manitoba': 'Manitoba',
@@ -124,6 +124,20 @@ const CANADA_PROVINCE_MAPPING: Record<string, string> = {
   'Northwest Territories': 'Northwest Territories',
   'Yukon': 'Yukon',
   'Nunavut': 'Nunavut',
+  // Alternative names that might be in geoBoundaries
+  'NL': 'Newfoundland and Labrador',
+  'PE': 'Prince Edward Island',
+  'NS': 'Nova Scotia',
+  'NB': 'New Brunswick',
+  'QC': 'Quebec',
+  'ON': 'Ontario',
+  'MB': 'Manitoba',
+  'SK': 'Saskatchewan',
+  'AB': 'Alberta',
+  'BC': 'British Columbia',
+  'YT': 'Yukon',
+  'NT': 'Northwest Territories',
+  'NU': 'Nunavut',
 };
 
 export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onViewTypeChange }: WorldMapProps) {
@@ -244,7 +258,17 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
   const countryData = processedData();
 
   // Get fill color based on data
-  const getFillColor = useCallback((regionName: string) => {
+  const getFillColor = useCallback((geo: any) => {
+    // Extract region name from various possible property names
+    const regionName = geo.properties.name || 
+                      geo.properties.NAME || 
+                      geo.properties.NAME_EN || 
+                      geo.properties.ADMIN1 || 
+                      geo.properties.ADMIN1_NAME ||
+                      geo.properties.province ||
+                      geo.properties.territory ||
+                      'Unknown';
+    
     if (!regionName || regionName === 'undefined') {
       return '#E5E7EB';
     }
@@ -274,7 +298,15 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
 
   // Handle mouse enter
   const handleMouseEnter = useCallback((geo: any, event: React.MouseEvent) => {
-    const regionName = geo.properties.name || geo.properties.NAME || 'Unknown';
+    // Extract region name from various possible property names
+    const regionName = geo.properties.name || 
+                      geo.properties.NAME || 
+                      geo.properties.NAME_EN || 
+                      geo.properties.ADMIN1 || 
+                      geo.properties.ADMIN1_NAME ||
+                      geo.properties.province ||
+                      geo.properties.territory ||
+                      'Unknown';
     
     // Use the processed data directly
     const processedDataMap = processedData();
@@ -298,7 +330,15 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
 
   // Handle country/region click
   const handleRegionClick = useCallback((geo: any) => {
-    const regionName = geo.properties.name || geo.properties.NAME || 'Unknown';
+    // Extract region name from various possible property names
+    const regionName = geo.properties.name || 
+                      geo.properties.NAME || 
+                      geo.properties.NAME_EN || 
+                      geo.properties.ADMIN1 || 
+                      geo.properties.ADMIN1_NAME ||
+                      geo.properties.province ||
+                      geo.properties.territory ||
+                      'Unknown';
     
     if (drillDownLevel === 'world') {
       // Only allow drill-down for US and Canada
@@ -412,12 +452,12 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
                   <Geography
                     key={geo.rsmKey}
                     geography={geo}
-                    fill={getFillColor(geo.properties.name || geo.properties.NAME || 'Unknown')}
+                    fill={getFillColor(geo)}
                     stroke="#FFFFFF"
                     strokeWidth={0.5}
                     style={{
                       default: {
-                        fill: getFillColor(geo.properties.name || geo.properties.NAME || 'Unknown'),
+                        fill: getFillColor(geo),
                         outline: 'none',
                       },
                       hover: {
