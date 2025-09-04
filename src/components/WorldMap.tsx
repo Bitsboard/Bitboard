@@ -223,6 +223,12 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
 
   // Get fill color based on data
   const getFillColor = (countryName: string) => {
+    // Handle undefined country names
+    if (!countryName || countryName === 'undefined') {
+      console.log(`🎨 No country name provided, using gray`);
+      return '#E5E7EB';
+    }
+    
     const data = countryData[countryName];
     if (!data) {
       console.log(`🎨 No data for ${countryName}, using gray`);
@@ -251,7 +257,11 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
   };
 
   const handleMouseEnter = (geo: any, event: React.MouseEvent) => {
-    const countryName = geo.properties.NAME;
+    // Try different possible property names for country name
+    const countryName = geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN || geo.properties.NAME_LONG || 'Unknown';
+    console.log(`🖱️ Mouse enter - geo.properties:`, geo.properties);
+    console.log(`🖱️ Country name: ${countryName}`);
+    
     const data = countryData[countryName];
     const count = data ? (viewType === 'users' ? data.users : data.listings) : 0;
     
@@ -268,7 +278,8 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
   };
 
   const handleCountryClick = (geo: any) => {
-    const countryName = geo.properties.NAME;
+    // Try different possible property names for country name
+    const countryName = geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN || geo.properties.NAME_LONG || 'Unknown';
     console.log(`🖱️ Clicked on ${countryName}`);
     console.log(`🖱️ Country data for ${countryName}:`, countryData[countryName]);
     console.log(`🖱️ Current zoom: ${zoom}, center:`, center);
@@ -424,7 +435,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
                     <Geography
                       key={geo.rsmKey}
                       geography={geo}
-                      fill={getFillColor(geo.properties.NAME)}
+                      fill={getFillColor(geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN || geo.properties.NAME_LONG || 'Unknown')}
                       stroke="#D1D5DB"
                       strokeWidth={0.5}
                       style={{
