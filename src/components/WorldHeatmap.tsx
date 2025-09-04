@@ -232,8 +232,8 @@ export const WorldHeatmap: React.FC<Props> = ({
     let alive = true;
     fetch(countriesGeoJsonUrl, { cache: "force-cache" })
       .then(r => r.json())
-      .then((data: GeoJSONFeatureCollection) => {
-        if (alive) setWorld(data);
+      .then((data: unknown) => {
+        if (alive) setWorld(data as GeoJSONFeatureCollection);
       })
       .catch(err => {
         console.error("Failed to load countries GeoJSON:", err);
