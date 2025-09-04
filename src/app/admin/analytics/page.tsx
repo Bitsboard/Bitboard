@@ -211,7 +211,6 @@ export default function AnalyticsPage() {
                 data={userChartData}
                 type="timeseries"
                 title="User Growth"
-                color="#3B82F6"
               />
             </div>
           </div>
@@ -241,7 +240,6 @@ export default function AnalyticsPage() {
                 data={listingChartData}
                 type="timeseries"
                 title="Listing Growth"
-                color="#10B981"
               />
             </div>
           </div>
