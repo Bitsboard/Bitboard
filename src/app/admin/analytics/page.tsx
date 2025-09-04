@@ -63,7 +63,7 @@ export default function AnalyticsPage() {
     const loadAnalytics = async () => {
       try {
         const response = await fetch('/api/admin/analytics');
-        const result = await response.json();
+        const result = await response.json() as { data?: AnalyticsData };
         if (result.data) {
           setAnalyticsData(result.data);
         }
