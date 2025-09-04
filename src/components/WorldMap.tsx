@@ -163,8 +163,26 @@ const COUNTRY_MAPPING: Record<string, string> = {
 };
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
-const canadaGeoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"; // We'll use a different approach
-const usaGeoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"; // We'll use a different approach
+const canadaGeoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"; // We'll use a different approach for now
+const usaGeoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"; // We'll use a different approach for now
+
+// For now, we'll use a simplified approach with predefined province/state data
+const CANADIAN_PROVINCES = [
+  'Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador',
+  'Northwest Territories', 'Nova Scotia', 'Nunavut', 'Ontario', 'Prince Edward Island',
+  'Quebec', 'Saskatchewan', 'Yukon'
+];
+
+const US_STATES = [
+  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut',
+  'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa',
+  'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan',
+  'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
+  'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio',
+  'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota',
+  'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia',
+  'Wisconsin', 'Wyoming', 'District of Columbia'
+];
 
 export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onViewTypeChange }: WorldMapProps) {
   const [mapData, setMapData] = useState<MapData[]>([]);
@@ -174,6 +192,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
   const [center, setCenter] = useState<[number, number]>([0, 0]);
   const [drillDownLevel, setDrillDownLevel] = useState<'world' | 'country'>('world');
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [filteredMapData, setFilteredMapData] = useState<MapData[]>([]);
 
   // Fetch map data
   useEffect(() => {
@@ -208,31 +227,75 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     fetchMapData();
   }, [viewType, timeRange]);
 
-  // Process data by country - aggregate city data by country
-  const countryData = mapData.reduce((acc, item) => {
-    // Extract country from location (e.g., "Toronto, Canada" -> "Canada")
-    let country = item.location;
+  // Filter map data by selected country when in drill-down mode
+  useEffect(() => {
+    if (drillDownLevel === 'country' && selectedCountry) {
+      const filtered = mapData.filter(item => {
+        // Extract country from location (e.g., "Toronto, Canada" -> "Canada")
+        let country = item.location;
+        if (item.location.includes(',')) {
+          const parts = item.location.split(',').map(part => part.trim());
+          country = parts[parts.length - 1];
+        }
+        
+        // Handle US states
+        const usStates = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC'];
+        if (usStates.includes(country)) {
+          country = 'United States of America';
+        }
+        
+        // Apply country mapping
+        country = COUNTRY_MAPPING[country] || country;
+        
+        return country === selectedCountry;
+      });
+      
+      setFilteredMapData(filtered);
+      console.log(`🗺️ Filtered data for ${selectedCountry}:`, filtered);
+    } else {
+      setFilteredMapData(mapData);
+    }
+  }, [mapData, drillDownLevel, selectedCountry]);
+
+  // Process data by country/province/state - aggregate city data
+  const currentData = drillDownLevel === 'country' ? filteredMapData : mapData;
+  const countryData = currentData.reduce((acc, item) => {
+    let region = item.location;
     
-    // If location contains a comma, take the part after the comma
-    if (item.location.includes(',')) {
-      const parts = item.location.split(',').map(part => part.trim());
-      country = parts[parts.length - 1]; // Take the last part (country)
+    if (drillDownLevel === 'country' && selectedCountry) {
+      // In drill-down mode, process by province/state
+      if (item.location.includes(',')) {
+        const parts = item.location.split(',').map(part => part.trim());
+        if (parts.length >= 2) {
+          // For "City, Province, Country" format, take the middle part (province/state)
+          region = parts[parts.length - 2];
+        } else {
+          // For "City, Country" format, use the city as region
+          region = parts[0];
+        }
+      }
+    } else {
+      // In world mode, process by country
+      if (item.location.includes(',')) {
+        const parts = item.location.split(',').map(part => part.trim());
+        region = parts[parts.length - 1]; // Take the last part (country)
+      }
+      
+      // Special handling for US states - aggregate them into "United States of America"
+      const usStates = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC'];
+      if (usStates.includes(region)) {
+        region = 'United States of America';
+      }
+      
+      // Apply country mapping for consistency
+      region = COUNTRY_MAPPING[region] || region;
     }
     
-    // Special handling for US states - aggregate them into "United States of America"
-    const usStates = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC'];
-    if (usStates.includes(country)) {
-      country = 'United States of America';
+    if (!acc[region]) {
+      acc[region] = { users: 0, listings: 0 };
     }
-    
-    // Apply country mapping for consistency
-    country = COUNTRY_MAPPING[country] || country;
-    
-    if (!acc[country]) {
-      acc[country] = { users: 0, listings: 0 };
-    }
-    acc[country].users += item.userCount || 0;
-    acc[country].listings += item.listingCount || 0;
+    acc[region].users += item.userCount || 0;
+    acc[region].listings += item.listingCount || 0;
     return acc;
   }, {} as Record<string, { users: number; listings: number }>);
 
@@ -527,6 +590,46 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
         )}
       </div>
 
+      {/* Drill-down Mode: Show Province/State Data */}
+      {drillDownLevel === 'country' && selectedCountry && (
+        <div className="mb-6">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 className="text-lg font-semibold text-blue-900 mb-3">
+              {selectedCountry} - {viewType === 'users' ? 'User' : 'Listing'} Distribution
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {Object.entries(countryData)
+                .sort(([,a], [,b]) => (viewType === 'users' ? b.users - a.users : b.listings - a.listings))
+                .map(([region, data]) => {
+                  const count = viewType === 'users' ? data.users : data.listings;
+                  const maxCount = Math.max(...Object.values(countryData).map(d => viewType === 'users' ? d.users : d.listings));
+                  const intensity = maxCount > 0 ? count / maxCount : 0;
+                  
+                  return (
+                    <div key={region} className="bg-white rounded-lg p-3 border border-blue-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-gray-900">{region}</span>
+                        <span className="text-sm font-semibold text-blue-600">{count}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${intensity * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+            {Object.keys(countryData).length === 0 && (
+              <div className="text-center text-gray-500 py-4">
+                No {viewType} data available for {selectedCountry} in the selected timeframe.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Map Container */}
       <div className="relative">
         {loading && (
@@ -535,7 +638,16 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
           </div>
         )}
         
-        <div className="w-full h-96 border border-gray-200 rounded-lg overflow-hidden">
+        {drillDownLevel === 'country' ? (
+          <div className="w-full h-96 border border-gray-200 rounded-lg bg-gray-50 flex items-center justify-center">
+            <div className="text-center text-gray-500">
+              <div className="text-lg font-medium mb-2">Province/State View</div>
+              <div className="text-sm">Data is shown in the distribution chart above</div>
+              <div className="text-xs mt-2">Click "Back to World" to return to the map view</div>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full h-96 border border-gray-200 rounded-lg overflow-hidden">
           <ComposableMap
             projection="geoMercator"
             projectionConfig={{
@@ -569,7 +681,8 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
               </Geographies>
             </ZoomableGroup>
           </ComposableMap>
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Legend */}
