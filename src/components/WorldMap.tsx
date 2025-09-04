@@ -227,8 +227,8 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     if (!acc[country]) {
       acc[country] = { users: 0, listings: 0 };
     }
-    acc[country].users += item.userCount;
-    acc[country].listings += item.listingCount;
+    acc[country].users += item.userCount || 0;
+    acc[country].listings += item.listingCount || 0;
     return acc;
   }, {} as Record<string, { users: number; listings: number }>);
 
