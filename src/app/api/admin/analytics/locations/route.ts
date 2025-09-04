@@ -101,56 +101,23 @@ export async function GET(req: NextRequest) {
       // Prefer a real 'users' table with last_active or created_at; else approximate by distinct posted_by in listings.
       const hasUsers = await tableExists(db, "users");
 
-      if (hasUsers) {
-        // Try last_active then fallback to created_at if last_active missing
-        const hasLastActive =
-          (
-            await db
-              .prepare(
-                "PRAGMA table_info('users')" // columns: name, type, notnull...
-              )
-              .all()
-          ).results.find((c: any) => c.name === "last_active") !== undefined;
-
-        const usersTsCol = hasLastActive ? "last_active" : "created_at";
-        const normUsersTsExpr =
-          usersTsCol === "created_at"
-            ? NORMALIZED_TS_EXPR
-            : `CASE WHEN ${usersTsCol} > 2000000000 THEN CAST(${usersTsCol}/1000 AS INTEGER) ELSE ${usersTsCol} END`;
-
-        const sql = `
-          SELECT
-            COALESCE(location, '') AS location,
-            COUNT(*) AS userCount,
-            0 AS listingCount,
-            MIN(lat) AS lat,
-            MIN(lng) AS lng
-          FROM users
-          ${cutoffSec == null ? "" : `WHERE ${normUsersTsExpr} >= ?`}
-          GROUP BY location
-        `;
-        const out: D1Result = cutoffSec
-          ? await db.prepare(sql).bind(cutoffSec).all()
-          : await db.prepare(sql).all();
-        rows = out.results;
-      } else {
-        // Approximate "active users" by distinct posters within window from listings
-        const sql = `
-          SELECT
-            COALESCE(location, '') AS location,
-            COUNT(DISTINCT posted_by) AS userCount,
-            0 AS listingCount,
-            MIN(lat) AS lat,
-            MIN(lng) AS lng
-          FROM listings
-          ${where}
-          GROUP BY location
-        `;
-        const out: D1Result = cutoffSec
-          ? await db.prepare(sql).bind(cutoffSec).all()
-          : await db.prepare(sql).all();
-        rows = out.results;
-      }
+      // Always use listings table for user locations since users table doesn't have location
+      // Approximate "active users" by distinct posters within window from listings
+      const sql = `
+        SELECT
+          COALESCE(location, '') AS location,
+          COUNT(DISTINCT posted_by) AS userCount,
+          0 AS listingCount,
+          MIN(lat) AS lat,
+          MIN(lng) AS lng
+        FROM listings
+        ${where}
+        GROUP BY location
+      `;
+      const out: D1Result = cutoffSec
+        ? await db.prepare(sql).bind(cutoffSec).all()
+        : await db.prepare(sql).all();
+      rows = out.results;
     }
 
     // Ensure numeric types

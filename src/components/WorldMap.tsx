@@ -265,7 +265,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
 
       {/* Map */}
       <div className="relative">
-        <ComposableMap width={MAP_WIDTH} height={MAP_HEIGHT} projection="geoEqualEarth">
+        <ComposableMap width={MAP_WIDTH} height={MAP_HEIGHT} projection="geoMercator">
           <ZoomableGroup center={center} zoom={zoom}>
             {/* WORLD LAYER (Admin-0) */}
             {!isDrilled && admin0 && (
