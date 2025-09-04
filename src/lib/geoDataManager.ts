@@ -39,7 +39,7 @@ const COUNTRY_ALIASES: Record<string, string> = {
   "United States of America": "United States",
   USA: "United States",
   US: "United States",
-  U.S.A: "United States",
+  "U.S.A": "United States",
   "U.S.": "United States",
   "Russian Federation": "Russia",
   "UK": "United Kingdom",
