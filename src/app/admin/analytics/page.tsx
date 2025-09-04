@@ -33,7 +33,7 @@ export default function AnalyticsPage() {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const data = await response.json();
+      const data = await response.json() as { data?: ChartData[] };
       return data.data || [];
     } catch (error) {
       console.error(`Failed to load ${type} chart data:`, error);
@@ -47,7 +47,7 @@ export default function AnalyticsPage() {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const data = await response.json();
+      const data = await response.json() as StatsData;
       setStats(data);
     } catch (error) {
       console.error('Failed to load stats:', error);
