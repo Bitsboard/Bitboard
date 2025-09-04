@@ -140,7 +140,6 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
   useEffect(() => {
     const fetchMapData = async () => {
       setLoading(true);
-      console.log(`🗺️ Fetching map data for viewType: ${viewType}, timeRange: ${timeRange}`);
       
       try {
         const url = `/api/admin/analytics/locations?type=${viewType}&timeRange=${timeRange}`;
@@ -149,7 +148,6 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
         
         if (data.data) {
           setMapData(data.data);
-          console.log(`📊 Loaded ${data.data.length} locations`);
         }
       } catch (error) {
         console.error('Error fetching map data:', error);
@@ -168,16 +166,11 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       
       if (drillDownLevel === 'country' && selectedCountry === 'United States of America') {
         url = usaStatesUrl;
-        console.log('🗺️ Loading US states data from:', url);
       } else if (drillDownLevel === 'country' && selectedCountry === 'Canada') {
         url = canadaProvincesUrl;
-        console.log('🗺️ Loading Canada provinces data from:', url);
-      } else {
-        console.log('🗺️ Loading world data from:', url);
       }
       
       if (url !== currentGeoUrl) {
-        console.log('🗺️ Changing geo URL from', currentGeoUrl, 'to', url);
         setCurrentGeoUrl(url);
       }
     };
@@ -188,13 +181,8 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
   // Process data for current view
   const processedData = useCallback(() => {
     if (!mapData || mapData.length === 0) {
-      console.log('🗺️ No map data available');
       return {};
     }
-
-    console.log('🗺️ Processing map data:', mapData);
-    console.log('🗺️ Current drillDownLevel:', drillDownLevel);
-    console.log('🗺️ Selected country:', selectedCountry);
     
     const dataMap: Record<string, { users: number; listings: number }> = {};
 
@@ -250,8 +238,6 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       dataMap[key].listings += item.listingCount || 0;
     });
 
-    console.log('🗺️ Processed data map:', dataMap);
-    console.log('🗺️ Data map keys:', Object.keys(dataMap));
     return dataMap;
   }, [mapData, drillDownLevel, selectedCountry]);
 
@@ -262,17 +248,12 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     if (!regionName || regionName === 'undefined') {
       return '#E5E7EB';
     }
-
-    console.log(`🎨 Getting color for region: ${regionName}`);
     
     // Use the processed data directly
     const processedDataMap = processedData();
-    console.log(`🎨 Available data keys:`, Object.keys(processedDataMap));
-    
     const data = processedDataMap[regionName];
     
     if (!data) {
-      console.log(`🎨 No data found for ${regionName}, using gray`);
       return '#E5E7EB';
     }
 
@@ -288,32 +269,25 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     const saturation = 60 + (intensity * 40);
     const lightness = 85 - (intensity * 40);
     
-    console.log(`🎨 Color for ${regionName}: count=${count}, intensity=${intensity}`);
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
   }, [processedData, viewType]);
 
   // Handle mouse enter
   const handleMouseEnter = useCallback((geo: any, event: React.MouseEvent) => {
     const regionName = geo.properties.name || geo.properties.NAME || 'Unknown';
-    console.log(`🖱️ Mouse enter on: ${regionName}`);
     
     // Use the processed data directly
     const processedDataMap = processedData();
-    console.log(`🖱️ Available data keys:`, Object.keys(processedDataMap));
-    
     const data = processedDataMap[regionName];
     
     if (data) {
       const count = viewType === 'users' ? data.users : data.listings;
-      console.log(`🖱️ Showing tooltip: ${regionName} = ${count} ${viewType}`);
       setTooltip({
         country: regionName,
         count,
         x: event.clientX,
         y: event.clientY
       });
-    } else {
-      console.log(`🖱️ No data found for ${regionName}`);
     }
   }, [processedData, viewType]);
 
@@ -325,13 +299,10 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
   // Handle country/region click
   const handleRegionClick = useCallback((geo: any) => {
     const regionName = geo.properties.name || geo.properties.NAME || 'Unknown';
-    console.log('🖱️ Clicked on region:', regionName);
-    console.log('🖱️ Current drillDownLevel:', drillDownLevel);
     
     if (drillDownLevel === 'world') {
       // Only allow drill-down for US and Canada
       if (regionName === 'United States of America' || regionName === 'Canada') {
-        console.log('🖱️ Drilling down to:', regionName);
         setSelectedCountry(regionName);
         setDrillDownLevel('country');
         
@@ -343,8 +314,6 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
           setCenter([-106.3468, 56.1304]);
           setZoom(3);
         }
-      } else {
-        console.log('🖱️ Cannot drill down to:', regionName);
       }
     }
   }, [drillDownLevel]);
@@ -438,12 +407,8 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
         >
           <ZoomableGroup zoom={zoom} center={center}>
             <Geographies geography={currentGeoUrl}>
-              {({ geographies }) => {
-                console.log('🗺️ Rendering geographies:', geographies.length);
-                if (drillDownLevel === 'country' && selectedCountry === 'Canada') {
-                  console.log('🗺️ Canada provinces data:', geographies.map(g => g.properties.name || g.properties.NAME));
-                }
-                return geographies.map((geo) => (
+              {({ geographies }) =>
+                geographies.map((geo) => (
                   <Geography
                     key={geo.rsmKey}
                     geography={geo}
@@ -470,7 +435,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
                     onClick={() => handleRegionClick(geo)}
                   />
                 ))
-              }}
+              }
             </Geographies>
           </ZoomableGroup>
         </ComposableMap>
