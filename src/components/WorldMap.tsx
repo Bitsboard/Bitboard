@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { ComposableMap, Geographies, Geography, ZoomableGroup } from 'react-simple-maps';
+import { geoDataManager, GeoData, GeoFeature } from '@/lib/geoDataManager';
 
 interface MapData {
   location: string;
@@ -19,180 +20,74 @@ interface WorldMapProps {
 }
 
 interface TooltipContent {
-  country: string;
+  region: string;
   count: number;
   x: number;
   y: number;
 }
 
-// Geographic data URLs
-const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
-const usaStatesUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
-const canadaProvincesUrl = "https://github.com/wmgeolab/geoBoundaries/raw/main/releaseData/gbOpen/CAN/ADM1/geoBoundaries-CAN-ADM1.geojson";
-
-// Country mapping for data lookup
-const COUNTRY_MAPPING: Record<string, string> = {
-  'United States': 'United States of America',
-  'USA': 'United States of America',
-  'US': 'United States of America',
-  'Canada': 'Canada',
-  'United Kingdom': 'United Kingdom',
-  'UK': 'United Kingdom',
-  'Germany': 'Germany',
-  'France': 'France',
-  'Italy': 'Italy',
-  'Spain': 'Spain',
-  'Netherlands': 'Netherlands',
-  'Sweden': 'Sweden',
-  'Norway': 'Norway',
-  'Denmark': 'Denmark',
-  'Finland': 'Finland',
-  'Austria': 'Austria',
-  'Poland': 'Poland',
-  'Czech Republic': 'Czech Republic',
-  'Hungary': 'Hungary',
-  'Ireland': 'Ireland',
-};
-
-// US State mapping
-const US_STATE_MAPPING: Record<string, string> = {
-  'California': 'California',
-  'Texas': 'Texas',
-  'Florida': 'Florida',
-  'New York': 'New York',
-  'Pennsylvania': 'Pennsylvania',
-  'Illinois': 'Illinois',
-  'Ohio': 'Ohio',
-  'Georgia': 'Georgia',
-  'North Carolina': 'North Carolina',
-  'Michigan': 'Michigan',
-  'New Jersey': 'New Jersey',
-  'Virginia': 'Virginia',
-  'Washington': 'Washington',
-  'Arizona': 'Arizona',
-  'Massachusetts': 'Massachusetts',
-  'Tennessee': 'Tennessee',
-  'Indiana': 'Indiana',
-  'Missouri': 'Missouri',
-  'Maryland': 'Maryland',
-  'Wisconsin': 'Wisconsin',
-  'Colorado': 'Colorado',
-  'Minnesota': 'Minnesota',
-  'South Carolina': 'South Carolina',
-  'Alabama': 'Alabama',
-  'Louisiana': 'Louisiana',
-  'Kentucky': 'Kentucky',
-  'Oregon': 'Oregon',
-  'Oklahoma': 'Oklahoma',
-  'Connecticut': 'Connecticut',
-  'Utah': 'Utah',
-  'Iowa': 'Iowa',
-  'Nevada': 'Nevada',
-  'Arkansas': 'Arkansas',
-  'Mississippi': 'Mississippi',
-  'Kansas': 'Kansas',
-  'New Mexico': 'New Mexico',
-  'Nebraska': 'Nebraska',
-  'West Virginia': 'West Virginia',
-  'Idaho': 'Idaho',
-  'Hawaii': 'Hawaii',
-  'New Hampshire': 'New Hampshire',
-  'Maine': 'Maine',
-  'Montana': 'Montana',
-  'Rhode Island': 'Rhode Island',
-  'Delaware': 'Delaware',
-  'South Dakota': 'South Dakota',
-  'North Dakota': 'North Dakota',
-  'Alaska': 'Alaska',
-  'Vermont': 'Vermont',
-  'Wyoming': 'Wyoming',
-  'District of Columbia': 'District of Columbia',
-};
-
-// Canadian Province mapping (geoBoundaries uses different property names)
-const CANADA_PROVINCE_MAPPING: Record<string, string> = {
-  'Ontario': 'Ontario',
-  'Quebec': 'Quebec', 
-  'British Columbia': 'British Columbia',
-  'Alberta': 'Alberta',
-  'Manitoba': 'Manitoba',
-  'Saskatchewan': 'Saskatchewan',
-  'Nova Scotia': 'Nova Scotia',
-  'New Brunswick': 'New Brunswick',
-  'Newfoundland and Labrador': 'Newfoundland and Labrador',
-  'Prince Edward Island': 'Prince Edward Island',
-  'Northwest Territories': 'Northwest Territories',
-  'Yukon': 'Yukon',
-  'Nunavut': 'Nunavut',
-  // Alternative names that might be in geoBoundaries
-  'NL': 'Newfoundland and Labrador',
-  'PE': 'Prince Edward Island',
-  'NS': 'Nova Scotia',
-  'NB': 'New Brunswick',
-  'QC': 'Quebec',
-  'ON': 'Ontario',
-  'MB': 'Manitoba',
-  'SK': 'Saskatchewan',
-  'AB': 'Alberta',
-  'BC': 'British Columbia',
-  'YT': 'Yukon',
-  'NT': 'Northwest Territories',
-  'NU': 'Nunavut',
-};
+type MapLevel = 'world' | 'admin1';
 
 export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onViewTypeChange }: WorldMapProps) {
+  // Core state
   const [mapData, setMapData] = useState<MapData[]>([]);
+  const [geoData, setGeoData] = useState<GeoData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Map interaction state
   const [tooltip, setTooltip] = useState<TooltipContent | null>(null);
   const [zoom, setZoom] = useState(1);
   const [center, setCenter] = useState<[number, number]>([0, 0]);
-  const [drillDownLevel, setDrillDownLevel] = useState<'world' | 'country'>('world');
+  
+  // Drill-down state
+  const [currentLevel, setCurrentLevel] = useState<MapLevel>('world');
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
-  const [currentGeoUrl, setCurrentGeoUrl] = useState(geoUrl);
 
-  // Fetch map data based on timeframe and view type
-  useEffect(() => {
-    const fetchMapData = async () => {
-      setLoading(true);
+  // Fetch map data from API
+  const fetchMapData = useCallback(async () => {
+    try {
+      const url = `/api/admin/analytics/locations?type=${viewType}&timeRange=${timeRange}`;
+      const response = await fetch(url);
+      const data = await response.json() as { data: MapData[] };
       
-      try {
-        const url = `/api/admin/analytics/locations?type=${viewType}&timeRange=${timeRange}`;
-        const response = await fetch(url);
-        const data = await response.json() as { data: MapData[] };
-        
-        if (data.data) {
-          setMapData(data.data);
-        }
-      } catch (error) {
-        console.error('Error fetching map data:', error);
-      } finally {
-        setLoading(false);
+      if (data.data) {
+        setMapData(data.data);
       }
-    };
-
-    fetchMapData();
+    } catch (error) {
+      console.error('Error fetching map data:', error);
+    }
   }, [viewType, timeRange]);
 
-  // Load appropriate geographic data
-  useEffect(() => {
-    const loadGeoData = async () => {
-      let url = geoUrl;
-      
-      if (drillDownLevel === 'country' && selectedCountry === 'United States of America') {
-        url = usaStatesUrl;
-      } else if (drillDownLevel === 'country' && selectedCountry === 'Canada') {
-        url = canadaProvincesUrl;
-      }
-      
-      if (url !== currentGeoUrl) {
-        setCurrentGeoUrl(url);
-      }
-    };
+  // Load geographic data based on current level and selected country
+  const loadGeoData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-    loadGeoData();
-  }, [drillDownLevel, selectedCountry, currentGeoUrl]);
+    try {
+      let data: GeoData;
+      
+      if (currentLevel === 'world') {
+        data = await geoDataManager.getWorldData();
+      } else {
+        const countryInfo = geoDataManager.getCountryInfo(selectedCountry!);
+        if (!countryInfo) {
+          throw new Error(`Country ${selectedCountry} not supported for drill-down`);
+        }
+        data = await geoDataManager.getAdmin1Data(countryInfo.code);
+      }
 
-  // Process data for current view
+      setGeoData(data);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load map data';
+      setError(errorMessage);
+      console.error('Error loading geo data:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentLevel, selectedCountry]);
+
+  // Process map data for current view
   const processedData = useCallback(() => {
     if (!mapData || mapData.length === 0) {
       return {};
@@ -203,44 +98,24 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     mapData.forEach(item => {
       let key = item.location;
       
-      if (drillDownLevel === 'world') {
-        // For world view, extract country from location and aggregate
+      if (currentLevel === 'world') {
+        // For world view, extract country from location
         const parts = item.location.split(', ');
-        let country = parts[parts.length - 1].trim(); // Last part is usually country
+        let country = parts[parts.length - 1].trim();
         
         // Map to standard country names
-        country = COUNTRY_MAPPING[country] || country;
-        
-        // Special handling for US cities - aggregate all under "United States of America"
-        if (parts.length >= 2) {
-          const state = parts[parts.length - 2].trim();
-          if (US_STATE_MAPPING[state]) {
-            country = 'United States of America';
-          }
-        }
-        
-        // Special handling for Canadian cities - aggregate all under "Canada"
-        if (parts.length >= 2) {
-          const province = parts[parts.length - 2].trim();
-          if (CANADA_PROVINCE_MAPPING[province]) {
-            country = 'Canada';
-          }
+        const countryInfo = geoDataManager.getCountryInfo(country);
+        if (countryInfo) {
+          country = countryInfo.name;
         }
         
         key = country;
-      } else if (drillDownLevel === 'country' && selectedCountry === 'United States of America') {
-        // For US states, extract state from location
+      } else if (currentLevel === 'admin1' && selectedCountry) {
+        // For admin1 view, extract state/province from location
         const parts = item.location.split(', ');
         if (parts.length >= 2) {
-          const state = parts[parts.length - 2].trim();
-          key = US_STATE_MAPPING[state] || state;
-        }
-      } else if (drillDownLevel === 'country' && selectedCountry === 'Canada') {
-        // For Canadian provinces, extract province from location
-        const parts = item.location.split(', ');
-        if (parts.length >= 2) {
-          const province = parts[parts.length - 2].trim();
-          key = CANADA_PROVINCE_MAPPING[province] || province;
+          const stateProvince = parts[parts.length - 2].trim();
+          key = stateProvince;
         }
       }
 
@@ -253,27 +128,11 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     });
 
     return dataMap;
-  }, [mapData, drillDownLevel, selectedCountry]);
+  }, [mapData, currentLevel, selectedCountry]);
 
-  const countryData = processedData();
-
-  // Get fill color based on data
-  const getFillColor = useCallback((geo: any) => {
-    // Extract region name from various possible property names
-    const regionName = geo.properties.name || 
-                      geo.properties.NAME || 
-                      geo.properties.NAME_EN || 
-                      geo.properties.ADMIN1 || 
-                      geo.properties.ADMIN1_NAME ||
-                      geo.properties.province ||
-                      geo.properties.territory ||
-                      'Unknown';
-    
-    if (!regionName || regionName === 'undefined') {
-      return '#E5E7EB';
-    }
-    
-    // Use the processed data directly
+  // Get fill color for a region
+  const getFillColor = useCallback((feature: GeoFeature) => {
+    const regionName = geoDataManager.extractRegionName(feature);
     const processedDataMap = processedData();
     const data = processedDataMap[regionName];
     
@@ -286,9 +145,13 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       return '#E5E7EB';
     }
 
-    const maxCount = Math.max(...Object.values(processedDataMap).map(d => viewType === 'users' ? d.users : d.listings));
-    const intensity = Math.min(count / maxCount, 1);
+    const maxCount = Math.max(...Object.values(processedDataMap).map(d => 
+      viewType === 'users' ? d.users : d.listings
+    ));
     
+    if (maxCount === 0) return '#E5E7EB';
+    
+    const intensity = Math.min(count / maxCount, 1);
     const hue = 210; // Blue hue
     const saturation = 60 + (intensity * 40);
     const lightness = 85 - (intensity * 40);
@@ -297,25 +160,15 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
   }, [processedData, viewType]);
 
   // Handle mouse enter
-  const handleMouseEnter = useCallback((geo: any, event: React.MouseEvent) => {
-    // Extract region name from various possible property names
-    const regionName = geo.properties.name || 
-                      geo.properties.NAME || 
-                      geo.properties.NAME_EN || 
-                      geo.properties.ADMIN1 || 
-                      geo.properties.ADMIN1_NAME ||
-                      geo.properties.province ||
-                      geo.properties.territory ||
-                      'Unknown';
-    
-    // Use the processed data directly
+  const handleMouseEnter = useCallback((feature: GeoFeature, event: React.MouseEvent) => {
+    const regionName = geoDataManager.extractRegionName(feature);
     const processedDataMap = processedData();
     const data = processedDataMap[regionName];
     
     if (data) {
       const count = viewType === 'users' ? data.users : data.listings;
       setTooltip({
-        country: regionName,
+        region: regionName,
         count,
         x: event.clientX,
         y: event.clientY
@@ -328,47 +181,65 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     setTooltip(null);
   }, []);
 
-  // Handle country/region click
-  const handleRegionClick = useCallback((geo: any) => {
-    // Extract region name from various possible property names
-    const regionName = geo.properties.name || 
-                      geo.properties.NAME || 
-                      geo.properties.NAME_EN || 
-                      geo.properties.ADMIN1 || 
-                      geo.properties.ADMIN1_NAME ||
-                      geo.properties.province ||
-                      geo.properties.territory ||
-                      'Unknown';
+  // Handle region click
+  const handleRegionClick = useCallback((feature: GeoFeature) => {
+    const regionName = geoDataManager.extractRegionName(feature);
     
-    if (drillDownLevel === 'world') {
-      // Only allow drill-down for US and Canada
-      if (regionName === 'United States of America' || regionName === 'Canada') {
-        setSelectedCountry(regionName);
-        setDrillDownLevel('country');
-        
-        // Center on the country
-        if (regionName === 'United States of America') {
-          setCenter([-95.7129, 37.0902]);
-          setZoom(3);
-        } else if (regionName === 'Canada') {
-          setCenter([-106.3468, 56.1304]);
-          setZoom(3);
+    if (currentLevel === 'world') {
+      // Check if this country supports drill-down
+      if (geoDataManager.supportsDrillDown(regionName)) {
+        const countryInfo = geoDataManager.getCountryInfo(regionName);
+        if (countryInfo) {
+          setSelectedCountry(regionName);
+          setCurrentLevel('admin1');
+          setCenter(countryInfo.center);
+          setZoom(countryInfo.zoom);
         }
       }
     }
-  }, [drillDownLevel]);
+  }, [currentLevel]);
 
   // Handle back to world
   const handleBackToWorld = useCallback(() => {
     setCenter([0, 0]);
     setZoom(1);
-    setDrillDownLevel('world');
+    setCurrentLevel('world');
     setSelectedCountry(null);
-    setCurrentGeoUrl(geoUrl);
   }, []);
 
+  // Effects
+  useEffect(() => {
+    fetchMapData();
+  }, [fetchMapData]);
+
+  useEffect(() => {
+    loadGeoData();
+  }, [loadGeoData]);
+
   // Get max count for legend
-  const maxCount = Math.max(...Object.values(countryData).map(d => viewType === 'users' ? d.users : d.listings));
+  const processedDataMap = processedData();
+  const maxCount = Math.max(...Object.values(processedDataMap).map(d => 
+    viewType === 'users' ? d.users : d.listings
+  ));
+
+  // Render error state
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="text-center">
+          <div className="text-red-500 text-4xl mb-2">⚠️</div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Map Error</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={loadGeoData}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -376,17 +247,20 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
-            {drillDownLevel === 'country' ? `${selectedCountry} - ${viewType === 'users' ? 'Users' : 'Listings'}` : 'World Map'}
+            {currentLevel === 'admin1' 
+              ? `${selectedCountry} - ${viewType === 'users' ? 'Users' : 'Listings'}` 
+              : 'World Map'
+            }
           </h3>
           <p className="text-sm text-gray-600">
-            {drillDownLevel === 'country' 
+            {currentLevel === 'admin1' 
               ? `Showing ${viewType} by ${selectedCountry === 'United States of America' ? 'state' : 'province'}`
               : `Showing ${viewType} by country`
             }
           </p>
         </div>
         
-        {drillDownLevel === 'country' && (
+        {currentLevel === 'admin1' && (
           <button
             onClick={handleBackToWorld}
             className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
@@ -436,49 +310,51 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
           </div>
         )}
         
-        <ComposableMap
-          projection="geoMercator"
-          projectionConfig={{
-            scale: 147,
-            center: center,
-          }}
-          width={800}
-          height={400}
-        >
-          <ZoomableGroup zoom={zoom} center={center}>
-            <Geographies geography={currentGeoUrl}>
-              {({ geographies }) =>
-                geographies.map((geo) => (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
-                    fill={getFillColor(geo)}
-                    stroke="#FFFFFF"
-                    strokeWidth={0.5}
-                    style={{
-                      default: {
-                        fill: getFillColor(geo),
-                        outline: 'none',
-                      },
-                      hover: {
-                        fill: '#3B82F6',
-                        outline: 'none',
-                        cursor: 'pointer',
-                      },
-                      pressed: {
-                        fill: '#1D4ED8',
-                        outline: 'none',
-                      },
-                    }}
-                    onMouseEnter={(event) => handleMouseEnter(geo, event)}
-                    onMouseLeave={handleMouseLeave}
-                    onClick={() => handleRegionClick(geo)}
-                  />
-                ))
-              }
-            </Geographies>
-          </ZoomableGroup>
-        </ComposableMap>
+        {geoData && (
+          <ComposableMap
+            projection="geoMercator"
+            projectionConfig={{
+              scale: 147,
+              center: center,
+            }}
+            width={800}
+            height={400}
+          >
+            <ZoomableGroup zoom={zoom} center={center}>
+              <Geographies geography={geoData}>
+                {({ geographies }) =>
+                  geographies.map((geo) => (
+                    <Geography
+                      key={geo.rsmKey}
+                      geography={geo}
+                      fill={getFillColor(geo)}
+                      stroke="#FFFFFF"
+                      strokeWidth={0.5}
+                      style={{
+                        default: {
+                          fill: getFillColor(geo),
+                          outline: 'none',
+                        },
+                        hover: {
+                          fill: '#3B82F6',
+                          outline: 'none',
+                          cursor: 'pointer',
+                        },
+                        pressed: {
+                          fill: '#1D4ED8',
+                          outline: 'none',
+                        },
+                      }}
+                      onMouseEnter={(event) => handleMouseEnter(geo, event)}
+                      onMouseLeave={handleMouseLeave}
+                      onClick={() => handleRegionClick(geo)}
+                    />
+                  ))
+                }
+              </Geographies>
+            </ZoomableGroup>
+          </ComposableMap>
+        )}
       </div>
 
       {/* Legend */}
@@ -516,7 +392,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
             top: tooltip.y - 10,
           }}
         >
-          {tooltip.country}: {tooltip.count} {viewType}
+          {tooltip.region}: {tooltip.count} {viewType}
         </div>
       )}
     </div>
