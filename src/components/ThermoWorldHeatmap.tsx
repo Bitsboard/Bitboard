@@ -158,6 +158,22 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
   }, [data, maxIntensity]);
 
   // Render heat -> mask (optional) -> tone map -> colorize
+  // Simple world outline using canvas
+  const drawWorldOutline = useCallback((ctx: CanvasRenderingContext2D) => {
+    ctx.strokeStyle = "rgba(255,255,255,0.55)";
+    ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    
+    // Draw a simple world outline
+    const centerX = size.w / 2;
+    const centerY = size.h / 2;
+    const radius = Math.min(size.w, size.h) * 0.4;
+    
+    // Draw continents as simple shapes
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.stroke();
+  }, [size.w, size.h]);
+
   const redraw = React.useCallback(() => {
     const display = displayCanvasRef.current;
     const buffer = bufferRef.current;
@@ -307,22 +323,6 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
       visible: blended > 0.01
     });
   };
-
-  // Simple world outline using canvas
-  const drawWorldOutline = useCallback((ctx: CanvasRenderingContext2D) => {
-    ctx.strokeStyle = "rgba(255,255,255,0.55)";
-    ctx.lineWidth = 0.6;
-    ctx.beginPath();
-    
-    // Draw a simple world outline
-    const centerX = size.w / 2;
-    const centerY = size.h / 2;
-    const radius = Math.min(size.w, size.h) * 0.4;
-    
-    // Draw continents as simple shapes
-    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-    ctx.stroke();
-  }, [size.w, size.h]);
 
   return (
     <div
