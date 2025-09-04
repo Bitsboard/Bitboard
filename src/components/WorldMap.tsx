@@ -1,4 +1,3 @@
-// src/components/WorldMap.tsx
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -6,58 +5,22 @@ import {
   ComposableMap,
   Geographies,
   Geography,
-  ZoomableGroup,
 } from "react-simple-maps";
 import {
   loadAdmin0,
-  loadAdmin1,
   admin0Name,
   admin0A3,
-  filterAdmin1ByA3,
-  admin1ISO2,
-  admin1Name,
-  isoFromLocation,
-  a3FromISO2,
   canonCountryName,
 } from "@/lib/geoDataManager";
 import type { GeoFC, GeoFeature } from "@/lib/geoDataManager";
 import { scaleLinear } from "d3-scale";
 
-/** API row type */
-type Row = {
-  location: string;
-  city: string;
-  stateProvince: string;
-  country: string;
-  countryCode: string;
-  userCount: number;
-  listingCount: number;
-  lat: number | null;
-  lng: number | null;
-};
+const MAP_WIDTH = 800;
+const MAP_HEIGHT = 400;
 
-type ViewType = "users" | "listings";
-type TimeRange = "24h" | "7d" | "30d" | "90d" | "all";
-
-const MAP_WIDTH = 600;
-const MAP_HEIGHT = 300;
-
-interface WorldMapProps {
-  viewType: 'users' | 'listings';
-  timeRange: string;
-  onTimeRangeChange: (range: string) => void;
-  onViewTypeChange?: (type: 'users' | 'listings') => void;
-}
-
-export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onViewTypeChange }: WorldMapProps) {
+export default function WorldMap() {
   const [admin0, setAdmin0] = useState<GeoFC | null>(null);
-  const [admin1, setAdmin1] = useState<GeoFC | null>(null);
-  const [data, setData] = useState<Row[]>([]);
-  const [view, setView] = useState<ViewType>(viewType);
-  const [timeRangeState, setTimeRangeState] = useState<TimeRange>(timeRange as TimeRange);
-
-  // Selected country drilldown (A3, e.g., 'USA' or 'CAN')
-  const [selectedA3, setSelectedA3] = useState<string | null>(null);
+  const [data, setData] = useState<any[]>([]);
   
   // Tooltip state
   const [tooltip, setTooltip] = useState<{
@@ -67,18 +30,11 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     y: number;
   } | null>(null);
 
-  // Sync with props
-  useEffect(() => {
-    setView(viewType);
-    setTimeRangeState(timeRange as TimeRange);
-  }, [viewType, timeRange]);
-
   useEffect(() => {
     (async () => {
       try {
-        const [a0, a1] = await Promise.all([loadAdmin0(), loadAdmin1()]);
+        const a0 = await loadAdmin0();
         setAdmin0(a0);
-        setAdmin1(a1);
       } catch (error) {
         console.error("Error loading geo data:", error);
       }
@@ -88,12 +44,8 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(
-          `/api/admin/analytics/locations?type=${view}&timeRange=${timeRangeState}`
-        );
+        const res = await fetch('/api/admin/analytics/locations?type=listings&timeRange=all');
         const json = await res.json() as any;
-        
-        // Handle both direct array and wrapped response
         const data = Array.isArray(json) ? json : (json.data || []);
         setData(data);
       } catch (error) {
@@ -101,103 +53,51 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
         setData([]);
       }
     })();
-  }, [view, timeRangeState]);
+  }, []);
 
-  // Aggregate counts at country level (Admin0 A3) and admin1 level (ISO_3166_2)
-  const { countryCounts, admin1Counts } = useMemo(() => {
-    const byCountryA3 = new Map<string, number>();
-    const byISO = new Map<string, number>();
-
-    console.log('🗺️ Raw data for aggregation:', data.slice(0, 10)); // Debug first 10 items
+  // Aggregate counts by country
+  const countryCounts = useMemo(() => {
+    const counts = new Map<string, number>();
 
     for (const row of data) {
-      const count = view === "users" ? row.userCount : row.listingCount;
-
-      console.log(`🗺️ Processing: ${row.location} -> City: ${row.city}, State: ${row.stateProvince}, Country: ${row.country}, Count: ${count}`);
+      const count = row.listingCount || 0;
 
       // Use structured location data if available
       if (row.countryCode) {
-        // Country shading using country code
-        byCountryA3.set(row.countryCode, (byCountryA3.get(row.countryCode) || 0) + count);
-        console.log(`🗺️ Added to A3 ${row.countryCode}: ${count} (total: ${byCountryA3.get(row.countryCode)})`);
-
-        // Admin1 (US/CA) shading using state/province
-        if (row.stateProvince && (row.countryCode === 'USA' || row.countryCode === 'CAN')) {
-          const iso = `${row.countryCode}-${row.stateProvince}`;
-          byISO.set(iso, (byISO.get(iso) || 0) + count);
-          console.log(`🗺️ Added to ISO ${iso}: ${count} (total: ${byISO.get(iso)})`);
-        }
+        counts.set(row.countryCode, (counts.get(row.countryCode) || 0) + count);
         continue;
       }
 
-      // Fallback: try to parse from location string
-      const iso = isoFromLocation(row.location);
-      const a3 = a3FromISO2(iso);
-
-      // Admin1 (US/CA) shading
-      if (iso) {
-        byISO.set(iso, (byISO.get(iso) || 0) + count);
-        console.log(`🗺️ Added to ISO ${iso}: ${count} (total: ${byISO.get(iso)})`);
-      }
-
-      // Country shading
-      if (a3) {
-        byCountryA3.set(a3, (byCountryA3.get(a3) || 0) + count);
-        console.log(`🗺️ Added to A3 ${a3}: ${count} (total: ${byCountryA3.get(a3)})`);
-        continue;
-      }
-
-      // Fallback: try to detect country by trailing token (e.g., "London, United Kingdom")
-      const tokens = row.location.split(",").map((t) => t.trim());
+      // Fallback: parse from location string
+      const tokens = row.location?.split(",").map((t: string) => t.trim()) || [];
       if (tokens.length >= 2) {
-        const maybeCountry = canonCountryName(tokens[tokens.length - 1]);
-        byCountryA3.set(
-          `NAME__${maybeCountry}`,
-          (byCountryA3.get(`NAME__${maybeCountry}`) || 0) + count
-        );
-        console.log(`🗺️ Added to NAME ${maybeCountry}: ${count} (total: ${byCountryA3.get(`NAME__${maybeCountry}`)})`);
+        const country = canonCountryName(tokens[tokens.length - 1]);
+        counts.set(`NAME__${country}`, (counts.get(`NAME__${country}`) || 0) + count);
       }
     }
 
-    console.log('🗺️ Final country counts:', Object.fromEntries(byCountryA3));
-    console.log('🗺️ Final admin1 counts:', Object.fromEntries(byISO));
+    return counts;
+  }, [data]);
 
-    return { countryCounts: byCountryA3, admin1Counts: byISO };
-  }, [data, view]);
-
-  // Color scales
-  const worldMax = useMemo(
+  // Color scale
+  const maxCount = useMemo(
     () => Math.max(1, ...Array.from(countryCounts.values())),
     [countryCounts]
   );
-  const admin1Max = useMemo(
-    () => Math.max(1, ...Array.from(admin1Counts.values())),
-    [admin1Counts]
-  );
 
-  const worldScale = useMemo(
+  const colorScale = useMemo(
     () =>
       scaleLinear<string>()
-        .domain([0, worldMax])
-        .range(["#f2f2f2", "#0a84ff"]),
-    [worldMax]
+        .domain([0, maxCount])
+        .range(["#f2f2f2", "#ff6b35"]),
+    [maxCount]
   );
 
-  const admin1Scale = useMemo(
-    () =>
-      scaleLinear<string>()
-        .domain([0, admin1Max])
-        .range(["#f4f0ff", "#7c3aed"]),
-    [admin1Max]
-  );
-
-  // Find country count given a feature
-  function valueForCountry(f: GeoFeature): number {
+  function getCountryValue(f: GeoFeature): number {
     const props = f.properties || {};
     const a3 = (admin0A3(props) || "").toUpperCase();
     if (countryCounts.has(a3)) return countryCounts.get(a3)!;
 
-    // try matching by name fallback
     const nm = canonCountryName(admin0Name(props));
     const key = `NAME__${nm}`;
     if (countryCounts.has(key)) return countryCounts.get(key)!;
@@ -208,20 +108,8 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
   // Handle mouse enter for tooltips
   const handleMouseEnter = (feature: GeoFeature, event: React.MouseEvent) => {
     const props = feature.properties || {};
-    let regionName = "";
-    let count = 0;
-
-    if (isDrilled) {
-      // Admin1 level (states/provinces)
-      const iso = admin1ISO2(props) || "";
-      regionName = admin1Name(props) || iso;
-      count = admin1Counts.get(iso) || 0;
-    } else {
-      // World level (countries)
-      const a3 = (admin0A3(props) || "").toUpperCase();
-      regionName = admin0Name(props) || a3;
-      count = valueForCountry(feature);
-    }
+    const regionName = admin0Name(props) || "Unknown";
+    const count = getCountryValue(feature);
 
     setTooltip({
       region: regionName,
@@ -236,221 +124,72 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     setTooltip(null);
   };
 
-  // Drill target (Admin1) list for selected country
-  const admin1Features: GeoFeature[] = useMemo(() => {
-    if (!admin1 || !selectedA3) return [];
-    return filterAdmin1ByA3(admin1, selectedA3);
-  }, [admin1, selectedA3]);
-
-  const isDrilled = !!selectedA3;
-
-  // Zoom heuristics - more zoomed out
-  const zoom = isDrilled
-    ? selectedA3 === "USA"
-      ? 2.2
-      : selectedA3 === "CAN"
-      ? 2.0
-      : 1.8
-    : 0.8;
-
-  // Rough centers
-  const center: [number, number] = isDrilled
-    ? selectedA3 === "USA"
-      ? [-98, 39]
-      : selectedA3 === "CAN"
-      ? [-96, 61]
-      : [0, 20]
-    : [0, 20];
-
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">
-            {isDrilled 
-              ? `${selectedA3 === 'USA' ? 'United States' : selectedA3 === 'CAN' ? 'Canada' : selectedA3} - ${view === 'users' ? 'Users' : 'Listings'}` 
-              : 'World Map'
-            }
-          </h3>
-          <p className="text-sm text-gray-600">
-            {isDrilled 
-              ? `Showing ${view} by ${selectedA3 === 'USA' ? 'state' : 'province'}`
-              : `Showing ${view} by country`
-            }
-          </p>
-        </div>
-        
-        {isDrilled && (
-          <button
-            onClick={() => setSelectedA3(null)}
-            className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
-          >
-            Back to World
-          </button>
-        )}
+    <div className="flex flex-col gap-4">
+      <div className="text-center">
+        <h3 className="text-lg font-semibold text-gray-800">Active Listings Heatmap</h3>
+        <p className="text-sm text-gray-600">All-time active listings by country</p>
       </div>
 
-      {/* Controls */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium text-gray-700">View:</label>
-            <select
-              value={view}
-              onChange={(e) => {
-                const newView = e.target.value as ViewType;
-                setView(newView);
-                onViewTypeChange?.(newView);
-              }}
-              className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="users">Users</option>
-              <option value="listings">Listings</option>
-            </select>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium text-gray-700">Timeframe:</label>
-            <select
-              value={timeRangeState}
-              onChange={(e) => {
-                const newRange = e.target.value as TimeRange;
-                setTimeRangeState(newRange);
-                onTimeRangeChange(newRange);
-              }}
-              className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="24h">24h</option>
-              <option value="7d">7d</option>
-              <option value="30d">30d</option>
-              <option value="90d">90d</option>
-              <option value="all">All time</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Map */}
       <div className="relative">
         <ComposableMap width={MAP_WIDTH} height={MAP_HEIGHT} projection="geoMercator">
-          <ZoomableGroup center={center} zoom={zoom}>
-            {/* WORLD LAYER (Admin-0) */}
-            {!isDrilled && admin0 && (
-              <Geographies geography={admin0 as unknown as any}>
-                {({ geographies }) =>
-                  geographies.map((geo: GeoFeature) => {
-                    const props = geo.properties || {};
-                    const a3 = (admin0A3(props) || "").toUpperCase();
-                    const val = valueForCountry(geo);
-                    const fill = worldScale(val);
+          <Geographies geography={admin0 as unknown as any}>
+            {({ geographies }) =>
+              geographies.map((geo: GeoFeature) => {
+                const val = getCountryValue(geo);
+                const fill = colorScale(val);
 
-                    const selectable = a3 === "USA" || a3 === "CAN";
-
-                    return (
-                      <Geography
-                        key={geo.properties?.ADM0_A3 || geo.properties?.name || Math.random()}
-                        geography={geo}
-                        onClick={() => selectable && setSelectedA3(a3)}
-                        onMouseEnter={(event) => handleMouseEnter(geo, event)}
-                        onMouseLeave={handleMouseLeave}
-                        style={{
-                          default: {
-                            fill,
-                            outline: "none",
-                            stroke: "#ccc",
-                            strokeWidth: 0.5,
-                            cursor: selectable ? "pointer" : "default",
-                          },
-                          hover: {
-                            fill: "#1e90ff",
-                            outline: "none",
-                            cursor: selectable ? "pointer" : "default",
-                          },
-                          pressed: {
-                            fill: "#1e90ff",
-                            outline: "none",
-                          },
-                        }}
-                      />
-                    );
-                  })
-                }
-              </Geographies>
-            )}
-
-            {/* ADMIN-1 LAYER (US states / CA provinces) */}
-            {isDrilled && admin1Features.length > 0 && (
-              <Geographies geography={{ type: "FeatureCollection", features: admin1Features } as any}>
-                {({ geographies }) =>
-                  geographies.map((geo: GeoFeature) => {
-                    const iso = admin1ISO2(geo.properties || {}) || "";
-                    const val = admin1Counts.get(iso) || 0;
-                    const fill = admin1Scale(val);
-
-                    return (
-                      <Geography
-                        key={geo.properties?.ADM0_A3 || geo.properties?.name || Math.random()}
-                        geography={geo}
-                        onMouseEnter={(event) => handleMouseEnter(geo, event)}
-                        onMouseLeave={handleMouseLeave}
-                        style={{
-                          default: {
-                            fill,
-                            outline: "none",
-                            stroke: "#999",
-                            strokeWidth: 0.6,
-                            cursor: "default",
-                          },
-                          hover: {
-                            fill: "#7c3aed",
-                            outline: "none",
-                          },
-                          pressed: {
-                            fill: "#7c3aed",
-                            outline: "none",
-                          },
-                        }}
-                      />
-                    );
-                  })
-                }
-              </Geographies>
-            )}
-          </ZoomableGroup>
+                return (
+                  <Geography
+                    key={geo.properties?.ADM0_A3 || geo.properties?.name || Math.random()}
+                    geography={geo}
+                    onMouseEnter={(event) => handleMouseEnter(geo, event)}
+                    onMouseLeave={handleMouseLeave}
+                    style={{
+                      default: {
+                        fill,
+                        outline: "none",
+                        stroke: "#ddd",
+                        strokeWidth: 0.5,
+                        cursor: "pointer",
+                      },
+                      hover: {
+                        fill: "#ff6b35",
+                        outline: "none",
+                        stroke: "#333",
+                        strokeWidth: 1,
+                      },
+                    }}
+                  />
+                );
+              })
+            }
+          </Geographies>
         </ComposableMap>
       </div>
 
       {/* Legend */}
-      <div className="mt-4 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-gray-200 rounded"></div>
-            <span className="text-sm text-gray-600">0</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-blue-200 rounded"></div>
-            <span className="text-sm text-gray-600">Low</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-blue-400 rounded"></div>
-            <span className="text-sm text-gray-600">Medium</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-blue-600 rounded"></div>
-            <span className="text-sm text-gray-600">High</span>
-          </div>
+      <div className="flex items-center justify-center space-x-6">
+        <div className="flex items-center space-x-2">
+          <div className="w-4 h-4 bg-gray-200 rounded"></div>
+          <span className="text-sm text-gray-600">0</span>
         </div>
-        
+        <div className="flex items-center space-x-2">
+          <div className="w-4 h-4 bg-orange-200 rounded"></div>
+          <span className="text-sm text-gray-600">Low</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-4 h-4 bg-orange-400 rounded"></div>
+          <span className="text-sm text-gray-600">Medium</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-4 h-4 bg-orange-600 rounded"></div>
+          <span className="text-sm text-gray-600">High</span>
+        </div>
         <div className="text-sm text-gray-600">
-          Max: {isDrilled ? admin1Max : worldMax} {view}
+          Max: {maxCount} listings
         </div>
       </div>
-
-      <p className="text-sm text-gray-500 mt-2">
-        Click <b>United States</b> or <b>Canada</b> to drill down. Colors are choropleth by{" "}
-        <b>{view}</b> within the selected <b>{timeRangeState}</b>.
-      </p>
 
       {/* Tooltip */}
       {tooltip && (
@@ -461,7 +200,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
             top: tooltip.y - 10,
           }}
         >
-          {tooltip.region}: {tooltip.count} {view}
+          {tooltip.region}: {tooltip.count} listings
         </div>
       )}
     </div>
