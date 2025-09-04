@@ -178,7 +178,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       try {
         const response = await fetch(`/api/admin/analytics/locations?type=${viewType}&timeRange=${timeRange}`);
         if (response.ok) {
-          const data = await response.json();
+          const data = await response.json() as { data: MapData[] };
           setMapData(data.data || []);
         }
       } catch (error) {
