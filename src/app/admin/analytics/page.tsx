@@ -210,8 +210,12 @@ export default function AnalyticsPage() {
           {/* User Growth Chart */}
           <ChartCard title="User Growth">
             <Chart
-              data={analyticsData.userGrowth}
-              dataKey="users"
+              data={analyticsData.userGrowth.map(item => ({
+                date: item.date,
+                value: item.users,
+                label: `Users: ${item.users}`
+              }))}
+              type="timeseries"
               dataType="users"
               height={300}
             />
@@ -220,8 +224,12 @@ export default function AnalyticsPage() {
           {/* Listing Growth Chart */}
           <ChartCard title="Listing Growth">
             <Chart
-              data={analyticsData.listingGrowth}
-              dataKey="listings"
+              data={analyticsData.listingGrowth.map(item => ({
+                date: item.date,
+                value: item.listings,
+                label: `Listings: ${item.listings}`
+              }))}
+              type="timeseries"
               dataType="listings"
               height={300}
             />
