@@ -168,11 +168,16 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       
       if (drillDownLevel === 'country' && selectedCountry === 'United States of America') {
         url = usaStatesUrl;
+        console.log('🗺️ Loading US states data from:', url);
       } else if (drillDownLevel === 'country' && selectedCountry === 'Canada') {
         url = canadaProvincesUrl;
+        console.log('🗺️ Loading Canada provinces data from:', url);
+      } else {
+        console.log('🗺️ Loading world data from:', url);
       }
       
       if (url !== currentGeoUrl) {
+        console.log('🗺️ Changing geo URL from', currentGeoUrl, 'to', url);
         setCurrentGeoUrl(url);
       }
     };
@@ -188,6 +193,9 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     }
 
     console.log('🗺️ Processing map data:', mapData);
+    console.log('🗺️ Current drillDownLevel:', drillDownLevel);
+    console.log('🗺️ Selected country:', selectedCountry);
+    
     const dataMap: Record<string, { users: number; listings: number }> = {};
 
     mapData.forEach(item => {
@@ -243,6 +251,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     });
 
     console.log('🗺️ Processed data map:', dataMap);
+    console.log('🗺️ Data map keys:', Object.keys(dataMap));
     return dataMap;
   }, [mapData, drillDownLevel, selectedCountry]);
 
@@ -316,10 +325,13 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
   // Handle country/region click
   const handleRegionClick = useCallback((geo: any) => {
     const regionName = geo.properties.name || geo.properties.NAME || 'Unknown';
+    console.log('🖱️ Clicked on region:', regionName);
+    console.log('🖱️ Current drillDownLevel:', drillDownLevel);
     
     if (drillDownLevel === 'world') {
       // Only allow drill-down for US and Canada
       if (regionName === 'United States of America' || regionName === 'Canada') {
+        console.log('🖱️ Drilling down to:', regionName);
         setSelectedCountry(regionName);
         setDrillDownLevel('country');
         
@@ -331,6 +343,8 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
           setCenter([-106.3468, 56.1304]);
           setZoom(3);
         }
+      } else {
+        console.log('🖱️ Cannot drill down to:', regionName);
       }
     }
   }, [drillDownLevel]);
@@ -424,8 +438,12 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
         >
           <ZoomableGroup zoom={zoom} center={center}>
             <Geographies geography={currentGeoUrl}>
-              {({ geographies }) =>
-                geographies.map((geo) => (
+              {({ geographies }) => {
+                console.log('🗺️ Rendering geographies:', geographies.length);
+                if (drillDownLevel === 'country' && selectedCountry === 'Canada') {
+                  console.log('🗺️ Canada provinces data:', geographies.map(g => g.properties.name || g.properties.NAME));
+                }
+                return geographies.map((geo) => (
                   <Geography
                     key={geo.rsmKey}
                     geography={geo}
@@ -452,7 +470,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
                     onClick={() => handleRegionClick(geo)}
                   />
                 ))
-              }
+              }}
             </Geographies>
           </ZoomableGroup>
         </ComposableMap>
