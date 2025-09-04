@@ -59,23 +59,23 @@ export default function WorldMap() {
   const countryCounts = useMemo(() => {
     const counts = new Map<string, number>();
 
+    console.log('🗺️ Raw data:', data.slice(0, 5));
+
     for (const row of data) {
       const count = row.listingCount || 0;
+      console.log(`🗺️ Processing: ${row.location} -> ${count} listings`);
 
-      // Use structured location data if available
-      if (row.countryCode) {
-        counts.set(row.countryCode, (counts.get(row.countryCode) || 0) + count);
-        continue;
-      }
-
-      // Fallback: parse from location string
+      // Parse country from location string
       const tokens = row.location?.split(",").map((t: string) => t.trim()) || [];
       if (tokens.length >= 2) {
         const country = canonCountryName(tokens[tokens.length - 1]);
-        counts.set(`NAME__${country}`, (counts.get(`NAME__${country}`) || 0) + count);
+        const key = `NAME__${country}`;
+        counts.set(key, (counts.get(key) || 0) + count);
+        console.log(`🗺️ Added to ${country}: ${count} (total: ${counts.get(key)})`);
       }
     }
 
+    console.log('🗺️ Final country counts:', Object.fromEntries(counts));
     return counts;
   }, [data]);
 

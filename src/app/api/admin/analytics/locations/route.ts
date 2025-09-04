@@ -80,44 +80,34 @@ export async function GET(req: NextRequest) {
     let rows: any[] = [];
 
     if (type === "listings") {
-      // Listings within window - use structured location fields
+      // Listings within window - aggregate by country from location string
       const sql = `
         SELECT
           COALESCE(location, '') AS location,
-          COALESCE(city, '') AS city,
-          COALESCE(state_province, '') AS state_province,
-          COALESCE(country, '') AS country,
-          COALESCE(country_code, '') AS country_code,
           COUNT(*) AS listingCount,
           0 AS userCount,
           MIN(lat) AS lat,
           MIN(lng) AS lng
         FROM listings
         ${where}
-        GROUP BY location, city, state_province, country, country_code
+        GROUP BY location
       `;
       const out: D1Result = cutoffSec
         ? await db.prepare(sql).bind(cutoffSec).all()
         : await db.prepare(sql).all();
       rows = out.results;
     } else {
-      // USERS view - use structured location fields
-      // Always use listings table for user locations since users table doesn't have location
-      // Approximate "active users" by distinct posters within window from listings
+      // USERS view - aggregate by country from location string
       const sql = `
         SELECT
           COALESCE(location, '') AS location,
-          COALESCE(city, '') AS city,
-          COALESCE(state_province, '') AS state_province,
-          COALESCE(country, '') AS country,
-          COALESCE(country_code, '') AS country_code,
           COUNT(DISTINCT posted_by) AS userCount,
           0 AS listingCount,
           MIN(lat) AS lat,
           MIN(lng) AS lng
         FROM listings
         ${where}
-        GROUP BY location, city, state_province, country, country_code
+        GROUP BY location
       `;
       const out: D1Result = cutoffSec
         ? await db.prepare(sql).bind(cutoffSec).all()
@@ -125,13 +115,9 @@ export async function GET(req: NextRequest) {
       rows = out.results;
     }
 
-    // Ensure numeric types and include structured location data
+    // Ensure numeric types
     const data = rows.map((r) => ({
       location: r.location || "",
-      city: r.city || "",
-      stateProvince: r.state_province || "",
-      country: r.country || "",
-      countryCode: r.country_code || "",
       userCount: Number(r.userCount || 0),
       listingCount: Number(r.listingCount || 0),
       lat: r.lat != null ? Number(r.lat) : null,
