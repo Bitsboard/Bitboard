@@ -28,7 +28,7 @@ interface TooltipContent {
 // Geographic data URLs
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 const usaStatesUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
-const canadaProvincesUrl = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson";
+const canadaProvincesUrl = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"; // We'll use a different approach for Canada
 
 // Country mapping for data lookup
 const COUNTRY_MAPPING: Record<string, string> = {
@@ -179,7 +179,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       if (drillDownLevel === 'country' && selectedCountry === 'United States of America') {
         url = usaStatesUrl;
       } else if (drillDownLevel === 'country' && selectedCountry === 'Canada') {
-        // For now, we'll use the world map for Canada since we don't have province data
+        // For Canada, we'll use the world map but filter to show only Canada
         url = geoUrl;
       }
       
@@ -193,8 +193,12 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
 
   // Process data for current view
   const processedData = useCallback(() => {
-    if (!mapData || mapData.length === 0) return {};
+    if (!mapData || mapData.length === 0) {
+      console.log('🗺️ No map data available');
+      return {};
+    }
 
+    console.log('🗺️ Processing map data:', mapData);
     const dataMap: Record<string, { users: number; listings: number }> = {};
 
     mapData.forEach(item => {
@@ -204,21 +208,21 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
         // For world view, extract country from location
         const parts = item.location.split(', ');
         if (parts.length > 1) {
-          key = parts[parts.length - 1]; // Last part is usually country
+          key = parts[parts.length - 1].trim(); // Last part is usually country
         }
         key = COUNTRY_MAPPING[key] || key;
       } else if (drillDownLevel === 'country' && selectedCountry === 'United States of America') {
         // For US states, extract state from location
         const parts = item.location.split(', ');
         if (parts.length >= 2) {
-          const state = parts[parts.length - 2]; // Second to last part is usually state
+          const state = parts[parts.length - 2].trim(); // Second to last part is usually state
           key = US_STATE_MAPPING[state] || state;
         }
       } else if (drillDownLevel === 'country' && selectedCountry === 'Canada') {
         // For Canadian provinces, extract province from location
         const parts = item.location.split(', ');
         if (parts.length >= 2) {
-          const province = parts[parts.length - 2]; // Second to last part is usually province
+          const province = parts[parts.length - 2].trim(); // Second to last part is usually province
           key = CANADA_PROVINCE_MAPPING[province] || province;
         }
       }
@@ -231,6 +235,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       dataMap[key].listings += item.listingCount || 0;
     });
 
+    console.log('🗺️ Processed data map:', dataMap);
     return dataMap;
   }, [mapData, drillDownLevel, selectedCountry]);
 
@@ -242,8 +247,25 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       return '#E5E7EB';
     }
 
-    const data = countryData[regionName];
+    console.log(`🎨 Getting color for region: ${regionName}`);
+    console.log(`🎨 Available data keys:`, Object.keys(countryData));
+    
+    let data = countryData[regionName];
+    
+    // Try to find data by partial match
     if (!data) {
+      const matchingKey = Object.keys(countryData).find(key => 
+        key.toLowerCase().includes(regionName.toLowerCase()) || 
+        regionName.toLowerCase().includes(key.toLowerCase())
+      );
+      if (matchingKey) {
+        data = countryData[matchingKey];
+        console.log(`🎨 Found data for ${regionName} via match: ${matchingKey}`);
+      }
+    }
+    
+    if (!data) {
+      console.log(`🎨 No data found for ${regionName}, using gray`);
       return '#E5E7EB';
     }
 
@@ -259,22 +281,41 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     const saturation = 60 + (intensity * 40);
     const lightness = 85 - (intensity * 40);
     
+    console.log(`🎨 Color for ${regionName}: count=${count}, intensity=${intensity}`);
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
   }, [countryData, viewType]);
 
   // Handle mouse enter
   const handleMouseEnter = useCallback((geo: any, event: React.MouseEvent) => {
     const regionName = geo.properties.name || geo.properties.NAME || 'Unknown';
-    const data = countryData[regionName];
+    console.log(`🖱️ Mouse enter on: ${regionName}`);
+    console.log(`🖱️ Available data keys:`, Object.keys(countryData));
+    
+    let data = countryData[regionName];
+    
+    // Try to find data by partial match
+    if (!data) {
+      const matchingKey = Object.keys(countryData).find(key => 
+        key.toLowerCase().includes(regionName.toLowerCase()) || 
+        regionName.toLowerCase().includes(key.toLowerCase())
+      );
+      if (matchingKey) {
+        data = countryData[matchingKey];
+        console.log(`🖱️ Found data for ${regionName} via match: ${matchingKey}`);
+      }
+    }
     
     if (data) {
       const count = viewType === 'users' ? data.users : data.listings;
+      console.log(`🖱️ Showing tooltip: ${regionName} = ${count} ${viewType}`);
       setTooltip({
         country: regionName,
         count,
         x: event.clientX,
         y: event.clientY
       });
+    } else {
+      console.log(`🖱️ No data found for ${regionName}`);
     }
   }, [countryData, viewType]);
 
