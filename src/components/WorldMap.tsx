@@ -264,10 +264,32 @@ export function WorldMap({
 
   // Create a map of country names to user counts
   const countryData = mapData.reduce((acc, item) => {
-    const countryName = countryMapping[item.location] || item.location;
+    // Try to map location to country
+    let countryName = countryMapping[item.location];
+    
+    // If no direct mapping, try to extract country from location string
+    if (!countryName) {
+      if (item.location.includes('Toronto') || item.location.includes('ON') || item.location.includes('Canada')) {
+        countryName = 'Canada';
+      } else if (item.location.includes('New York') || item.location.includes('NY') || item.location.includes('USA') || item.location.includes('United States')) {
+        countryName = 'United States of America';
+      } else if (item.location.includes('London') || item.location.includes('UK') || item.location.includes('United Kingdom')) {
+        countryName = 'United Kingdom';
+      } else if (item.location.includes('Sydney') || item.location.includes('Melbourne') || item.location.includes('Australia')) {
+        countryName = 'Australia';
+      } else {
+        // Use the original location as fallback
+        countryName = item.location;
+      }
+    }
+    
     acc[countryName] = (acc[countryName] || 0) + item.userCount;
     return acc;
   }, {} as Record<string, number>);
+
+  // Debug logging
+  console.log('Map data:', mapData);
+  console.log('Country data:', countryData);
 
   // Get the maximum count for color scaling
   const maxCount = Math.max(...Object.values(countryData), 1);
@@ -306,6 +328,9 @@ export function WorldMap({
     const countryName = geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN;
     const count = countryData[countryName] || 0;
     
+    console.log('Country clicked:', countryName, 'Count:', count);
+    console.log('Available countries with data:', Object.keys(countryData).filter(k => countryData[k] > 0));
+    
     // Only allow drill-down if there's data for this country
     if (count > 0) {
       setMapState(prev => ({
@@ -315,6 +340,8 @@ export function WorldMap({
         zoom: 3,
         center: geo.properties.CENTER || [0, 0]
       }));
+    } else {
+      console.log('No data for country:', countryName);
     }
   }, [countryData]);
 

@@ -44,24 +44,24 @@ export async function GET(req: NextRequest) {
     let result;
     
     if (viewType === 'users') {
-      // Get user location data
+      // Get user location data from their listings (since users table doesn't have location)
       let query = `
         SELECT 
-          location,
-          COUNT(*) as userCount,
-          AVG(lat) as avgLat,
-          AVG(lng) as avgLng
-        FROM users 
-        WHERE location IS NOT NULL AND location != ''
+          l.location,
+          COUNT(DISTINCT l.posted_by) as userCount,
+          AVG(l.lat) as avgLat,
+          AVG(l.lng) as avgLng
+        FROM listings l
+        WHERE l.location IS NOT NULL AND l.location != ''
       `;
       
       // Only add time filter if not "all"
       if (timeRange !== 'all') {
-        query += ` AND created_at > ?`;
+        query += ` AND l.created_at > ?`;
       }
       
       query += `
-        GROUP BY location
+        GROUP BY l.location
         ORDER BY userCount DESC
         LIMIT 50
       `;
