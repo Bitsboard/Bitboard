@@ -107,12 +107,28 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     console.log('🗺️ Raw data for aggregation:', data.slice(0, 10)); // Debug first 10 items
 
     for (const row of data) {
-      const iso = isoFromLocation(row.location); // e.g. "US-TX" / "CA-ON" (if parseable)
-      const a3 = a3FromISO2(iso);
-
       const count = view === "users" ? row.userCount : row.listingCount;
 
-      console.log(`🗺️ Processing: ${row.location} -> ISO: ${iso}, A3: ${a3}, Count: ${count}`);
+      console.log(`🗺️ Processing: ${row.location} -> City: ${row.city}, State: ${row.stateProvince}, Country: ${row.country}, Count: ${count}`);
+
+      // Use structured location data if available
+      if (row.countryCode) {
+        // Country shading using country code
+        byCountryA3.set(row.countryCode, (byCountryA3.get(row.countryCode) || 0) + count);
+        console.log(`🗺️ Added to A3 ${row.countryCode}: ${count} (total: ${byCountryA3.get(row.countryCode)})`);
+
+        // Admin1 (US/CA) shading using state/province
+        if (row.stateProvince && (row.countryCode === 'USA' || row.countryCode === 'CAN')) {
+          const iso = `${row.countryCode}-${row.stateProvince}`;
+          byISO.set(iso, (byISO.get(iso) || 0) + count);
+          console.log(`🗺️ Added to ISO ${iso}: ${count} (total: ${byISO.get(iso)})`);
+        }
+        continue;
+      }
+
+      // Fallback: try to parse from location string
+      const iso = isoFromLocation(row.location);
+      const a3 = a3FromISO2(iso);
 
       // Admin1 (US/CA) shading
       if (iso) {
@@ -131,42 +147,6 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       const tokens = row.location.split(",").map((t) => t.trim());
       if (tokens.length >= 2) {
         const maybeCountry = canonCountryName(tokens[tokens.length - 1]);
-        
-        // Special handling for Canada: try to map to provinces
-        if (maybeCountry === "Canada" && tokens.length >= 2) {
-          const cityName = tokens[0].toLowerCase();
-          
-          // Map Canadian cities to provinces
-          if (cityName.includes("toronto") || cityName.includes("ottawa") || cityName.includes("hamilton") || 
-              cityName.includes("london") || cityName.includes("windsor") || cityName.includes("kitchener")) {
-            byISO.set("CA-ON", (byISO.get("CA-ON") || 0) + count);
-            byCountryA3.set("CAN", (byCountryA3.get("CAN") || 0) + count);
-            console.log(`🗺️ Mapped Canadian city to CA-ON: ${count} (total: ${byISO.get("CA-ON")})`);
-            continue;
-          } else if (cityName.includes("montreal") || cityName.includes("quebec")) {
-            byISO.set("CA-QC", (byISO.get("CA-QC") || 0) + count);
-            byCountryA3.set("CAN", (byCountryA3.get("CAN") || 0) + count);
-            console.log(`🗺️ Mapped Canadian city to CA-QC: ${count} (total: ${byISO.get("CA-QC")})`);
-            continue;
-          } else if (cityName.includes("vancouver") || cityName.includes("victoria")) {
-            byISO.set("CA-BC", (byISO.get("CA-BC") || 0) + count);
-            byCountryA3.set("CAN", (byCountryA3.get("CAN") || 0) + count);
-            console.log(`🗺️ Mapped Canadian city to CA-BC: ${count} (total: ${byISO.get("CA-BC")})`);
-            continue;
-          } else if (cityName.includes("calgary") || cityName.includes("edmonton")) {
-            byISO.set("CA-AB", (byISO.get("CA-AB") || 0) + count);
-            byCountryA3.set("CAN", (byCountryA3.get("CAN") || 0) + count);
-            console.log(`🗺️ Mapped Canadian city to CA-AB: ${count} (total: ${byISO.get("CA-AB")})`);
-            continue;
-          } else if (cityName.includes("winnipeg")) {
-            byISO.set("CA-MB", (byISO.get("CA-MB") || 0) + count);
-            byCountryA3.set("CAN", (byCountryA3.get("CAN") || 0) + count);
-            console.log(`🗺️ Mapped Canadian city to CA-MB: ${count} (total: ${byISO.get("CA-MB")})`);
-            continue;
-          }
-        }
-        
-        // We'll map this during render where we have admin0 features
         byCountryA3.set(
           `NAME__${maybeCountry}`,
           (byCountryA3.get(`NAME__${maybeCountry}`) || 0) + count

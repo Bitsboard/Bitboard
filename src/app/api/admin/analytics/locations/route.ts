@@ -80,39 +80,44 @@ export async function GET(req: NextRequest) {
     let rows: any[] = [];
 
     if (type === "listings") {
-      // Listings within window
+      // Listings within window - use structured location fields
       const sql = `
         SELECT
           COALESCE(location, '') AS location,
+          COALESCE(city, '') AS city,
+          COALESCE(state_province, '') AS state_province,
+          COALESCE(country, '') AS country,
+          COALESCE(country_code, '') AS country_code,
           COUNT(*) AS listingCount,
           0 AS userCount,
           MIN(lat) AS lat,
           MIN(lng) AS lng
         FROM listings
         ${where}
-        GROUP BY location
+        GROUP BY location, city, state_province, country, country_code
       `;
       const out: D1Result = cutoffSec
         ? await db.prepare(sql).bind(cutoffSec).all()
         : await db.prepare(sql).all();
       rows = out.results;
     } else {
-      // USERS view
-      // Prefer a real 'users' table with last_active or created_at; else approximate by distinct posted_by in listings.
-      const hasUsers = await tableExists(db, "users");
-
+      // USERS view - use structured location fields
       // Always use listings table for user locations since users table doesn't have location
       // Approximate "active users" by distinct posters within window from listings
       const sql = `
         SELECT
           COALESCE(location, '') AS location,
+          COALESCE(city, '') AS city,
+          COALESCE(state_province, '') AS state_province,
+          COALESCE(country, '') AS country,
+          COALESCE(country_code, '') AS country_code,
           COUNT(DISTINCT posted_by) AS userCount,
           0 AS listingCount,
           MIN(lat) AS lat,
           MIN(lng) AS lng
         FROM listings
         ${where}
-        GROUP BY location
+        GROUP BY location, city, state_province, country, country_code
       `;
       const out: D1Result = cutoffSec
         ? await db.prepare(sql).bind(cutoffSec).all()
@@ -120,9 +125,13 @@ export async function GET(req: NextRequest) {
       rows = out.results;
     }
 
-    // Ensure numeric types
+    // Ensure numeric types and include structured location data
     const data = rows.map((r) => ({
       location: r.location || "",
+      city: r.city || "",
+      stateProvince: r.state_province || "",
+      country: r.country || "",
+      countryCode: r.country_code || "",
       userCount: Number(r.userCount || 0),
       listingCount: Number(r.listingCount || 0),
       lat: r.lat != null ? Number(r.lat) : null,

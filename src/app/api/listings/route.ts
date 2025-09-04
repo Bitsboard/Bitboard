@@ -2,6 +2,7 @@ import '@/shims/async_hooks';
 import { NextRequest, NextResponse } from "next/server";
 import { listingsQuerySchema, listingCreateSchema } from "@/lib/validation/listings";
 import { handleApiError, createValidationError, createNotFoundError } from "@/lib/api/errors";
+import { parseLocation } from "@/lib/locationParser";
 
 export const runtime = "edge";
 
@@ -331,19 +332,26 @@ export async function POST(req: NextRequest) {
       await db.prepare('ALTER TABLE listings ADD COLUMN posted_by TEXT').run();
     } catch { }
 
-    // Insert listing
+    // Parse location into structured components
+    const parsedLocation = parseLocation(validatedData.location);
+
+    // Insert listing with structured location data
     let res: any;
     try {
       res = await db
         .prepare(`INSERT INTO listings (
-          title, description, category, ad_type, location, lat, lng, image_url, price_sat, posted_by
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+          title, description, category, ad_type, location, city, state_province, country, country_code, lat, lng, image_url, price_sat, posted_by
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
         .bind(
           validatedData.title.slice(0, 120),
           validatedData.description || "",
           validatedData.category,
           validatedData.adType,
           validatedData.location,
+          parsedLocation.city,
+          parsedLocation.stateProvince,
+          parsedLocation.country,
+          parsedLocation.countryCode,
           validatedData.lat,
           validatedData.lng,
           validatedData.imageUrl || "",
