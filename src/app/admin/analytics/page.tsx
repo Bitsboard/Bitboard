@@ -146,7 +146,7 @@ export default function AnalyticsPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Users</p>
-                <p className="text-2xl font-semibold text-gray-900">{stats.totalUsers.toLocaleString()}</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats?.totalUsers?.toLocaleString() || '0'}</p>
               </div>
             </div>
           </div>
@@ -162,7 +162,7 @@ export default function AnalyticsPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Listings</p>
-                <p className="text-2xl font-semibold text-gray-900">{stats.totalListings.toLocaleString()}</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats?.totalListings?.toLocaleString() || '0'}</p>
               </div>
             </div>
           </div>
@@ -178,7 +178,7 @@ export default function AnalyticsPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Active Users</p>
-                <p className="text-2xl font-semibold text-gray-900">{stats.activeUsers.toLocaleString()}</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats?.activeUsers?.toLocaleString() || '0'}</p>
               </div>
             </div>
           </div>
@@ -194,7 +194,7 @@ export default function AnalyticsPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">New Listings</p>
-                <p className="text-2xl font-semibold text-gray-900">{stats.newListings.toLocaleString()}</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats?.newListings?.toLocaleString() || '0'}</p>
               </div>
             </div>
           </div>

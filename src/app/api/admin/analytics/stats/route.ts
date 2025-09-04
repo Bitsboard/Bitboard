@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     // Get active users (users who have been active in the last 7 days)
     const activeUsersResult = await db.prepare(`
-      SELECT COUNT(DISTINCT user_id) as count 
+      SELECT COUNT(DISTINCT seller_id) as count 
       FROM listings 
       WHERE created_at > datetime('now', '-7 days')
     `).first();
