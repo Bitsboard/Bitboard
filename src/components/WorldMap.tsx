@@ -382,7 +382,13 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     setSelectedCountry(countryName);
     setDrillDownLevel('country');
     
-    // Zoom in on the country
+    // Show drill-down message
+    const count = viewType === 'users' ? data.users : data.listings;
+    const type = viewType === 'users' ? 'users' : 'listings';
+    console.log(`🗺️ Drilling down into ${countryName}: ${count} ${type} in the past ${timeRange}`);
+    
+    // For now, just zoom in on the country
+    // TODO: Implement proper drill-down with provinces/states
     const { coordinates } = geo.geometry;
     
     const bounds = coordinates.reduce((acc: any, coord: any) => {
@@ -406,7 +412,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       setCenter([centerX, centerY]);
       setZoom(4);
     }
-  }, [mapToDataMapping, countryData, viewType]);
+  }, [mapToDataMapping, countryData, viewType, timeRange]);
 
   const handleBackToWorld = () => {
     setCenter([0, 0]);
@@ -423,8 +429,16 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-4">
           <h3 className="text-lg font-semibold text-gray-900">
-            {viewType === 'users' ? 'User' : 'Listing'} Locations
+            {drillDownLevel === 'country' && selectedCountry 
+              ? `${selectedCountry} - ${viewType === 'users' ? 'User' : 'Listing'} Locations`
+              : `${viewType === 'users' ? 'User' : 'Listing'} Locations`
+            }
           </h3>
+          {drillDownLevel === 'country' && (
+            <span className="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded">
+              Drill-down Mode
+            </span>
+          )}
           {onViewTypeChange && (
             <div className="flex space-x-2">
               <button
@@ -503,7 +517,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
           </div>
         </div>
         
-        {zoom > 1 && (
+        {(zoom > 1 || drillDownLevel === 'country') && (
           <button
             onClick={handleBackToWorld}
             className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
