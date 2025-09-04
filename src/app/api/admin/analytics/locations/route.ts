@@ -17,6 +17,8 @@ export async function GET(req: NextRequest) {
     const timeRange = url.searchParams.get('timeRange') || '7d';
     const viewType = url.searchParams.get('type') || 'users'; // 'users' or 'listings'
     
+    console.log(`🌍 API: timeRange=${timeRange}, viewType=${viewType}`);
+    
     // Calculate time boundaries
     const now = Math.floor(Date.now() / 1000);
     let timeBoundary: number;
@@ -66,9 +68,14 @@ export async function GET(req: NextRequest) {
         LIMIT 50
       `;
       
+      console.log(`🌍 Users query:`, query);
+      console.log(`🌍 Time boundary:`, timeBoundary, `(${new Date(timeBoundary * 1000).toISOString()})`);
+      
       const userLocationsResult = timeRange === 'all' 
         ? await db.prepare(query).all()
         : await db.prepare(query).bind(timeBoundary).all();
+
+      console.log(`🌍 Users query result:`, userLocationsResult);
 
       result = (userLocationsResult.results || []).map((row: any) => ({
         location: row.location,
@@ -76,6 +83,8 @@ export async function GET(req: NextRequest) {
         lat: row.avgLat || 0,
         lng: row.avgLng || 0
       }));
+      
+      console.log(`🌍 Mapped users result:`, result);
     } else if (viewType === 'listings') {
       // Get listing location data
       let query = `
@@ -99,20 +108,30 @@ export async function GET(req: NextRequest) {
         LIMIT 50
       `;
       
+      console.log(`🌍 Listings query:`, query);
+      console.log(`🌍 Time boundary:`, timeBoundary, `(${new Date(timeBoundary * 1000).toISOString()})`);
+      
       const listingLocationsResult = timeRange === 'all' 
         ? await db.prepare(query).all()
         : await db.prepare(query).bind(timeBoundary).all();
 
+      console.log(`🌍 Listings query result:`, listingLocationsResult);
+
       result = (listingLocationsResult.results || []).map((row: any) => ({
         location: row.location,
-        userCount: row.listingCount, // Using userCount field for consistency with WorldMap component
+        userCount: 0, // No users for listings view
+        listingCount: row.listingCount,
         lat: row.avgLat || 0,
         lng: row.avgLng || 0
       }));
+      
+      console.log(`🌍 Mapped listings result:`, result);
     } else {
       return NextResponse.json({ error: "Invalid view type" }, { status: 400 });
     }
 
+    console.log(`🌍 Final API response:`, { success: true, data: result });
+    
     return NextResponse.json({
       success: true,
       data: result

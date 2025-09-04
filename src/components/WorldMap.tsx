@@ -175,14 +175,27 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
   useEffect(() => {
     const fetchMapData = async () => {
       setLoading(true);
+      console.log(`🗺️ Fetching map data for viewType: ${viewType}, timeRange: ${timeRange}`);
+      
       try {
-        const response = await fetch(`/api/admin/analytics/locations?type=${viewType}&timeRange=${timeRange}`);
+        const url = `/api/admin/analytics/locations?type=${viewType}&timeRange=${timeRange}`;
+        console.log(`📡 API URL: ${url}`);
+        
+        const response = await fetch(url);
+        console.log(`📡 Response status: ${response.status} ${response.statusText}`);
+        
         if (response.ok) {
           const data = await response.json() as { data: MapData[] };
+          console.log(`📊 Raw API response:`, data);
+          console.log(`📊 Data array length:`, data.data?.length || 0);
+          console.log(`📊 First few items:`, data.data?.slice(0, 3));
+          
           setMapData(data.data || []);
+        } else {
+          console.error(`❌ API request failed: ${response.status} ${response.statusText}`);
         }
       } catch (error) {
-        console.error('Error fetching map data:', error);
+        console.error('❌ Error fetching map data:', error);
       } finally {
         setLoading(false);
       }
@@ -202,13 +215,25 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     return acc;
   }, {} as Record<string, { users: number; listings: number }>);
 
+  // Debug country data processing
+  console.log(`🗺️ Map data length: ${mapData.length}`);
+  console.log(`🗺️ Country data keys:`, Object.keys(countryData));
+  console.log(`🗺️ Country data:`, countryData);
+  console.log(`🗺️ View type: ${viewType}`);
+
   // Get fill color based on data
   const getFillColor = (countryName: string) => {
     const data = countryData[countryName];
-    if (!data) return '#E5E7EB'; // Light gray for no data
+    if (!data) {
+      console.log(`🎨 No data for ${countryName}, using gray`);
+      return '#E5E7EB'; // Light gray for no data
+    }
 
     const count = viewType === 'users' ? data.users : data.listings;
-    if (count === 0) return '#E5E7EB';
+    if (count === 0) {
+      console.log(`🎨 Zero count for ${countryName}, using gray`);
+      return '#E5E7EB';
+    }
 
     // Color scale: light blue to dark blue
     const maxCount = Math.max(...Object.values(countryData).map(d => viewType === 'users' ? d.users : d.listings));
@@ -219,7 +244,10 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     const saturation = 60 + (intensity * 40); // 60-100% saturation
     const lightness = 85 - (intensity * 40); // 85-45% lightness
     
-    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    console.log(`🎨 ${countryName}: ${count} ${viewType}, intensity: ${intensity}, color: ${color}`);
+    
+    return color;
   };
 
   const handleMouseEnter = (geo: any, event: React.MouseEvent) => {
@@ -241,10 +269,14 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
 
   const handleCountryClick = (geo: any) => {
     const countryName = geo.properties.NAME;
-    console.log(`Clicked on ${countryName}`);
+    console.log(`🖱️ Clicked on ${countryName}`);
+    console.log(`🖱️ Country data for ${countryName}:`, countryData[countryName]);
+    console.log(`🖱️ Current zoom: ${zoom}, center:`, center);
     
     // Zoom in on the country
     const { coordinates } = geo.geometry;
+    console.log(`🖱️ Coordinates:`, coordinates);
+    
     const bounds = coordinates.reduce((acc: any, coord: any) => {
       const [x, y] = Array.isArray(coord[0]) ? coord[0] : coord;
       return {
@@ -257,6 +289,8 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
 
     const centerX = (bounds.minX + bounds.maxX) / 2;
     const centerY = (bounds.minY + bounds.maxY) / 2;
+    
+    console.log(`🖱️ New center: [${centerX}, ${centerY}], new zoom: 4`);
     
     setCenter([centerX, centerY]);
     setZoom(4);
