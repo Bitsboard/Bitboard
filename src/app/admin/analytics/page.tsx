@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Chart from "@/components/Chart";
+import { Chart } from "@/components/Chart";
 
 type ChartData = {
   date: string;

@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDB } from "@/lib/cf";
+import { getD1 } from "@/lib/cf";
 
 export async function GET(request: NextRequest) {
   try {
-    const db = getDB();
+    const db = await getD1();
+    if (!db) {
+      return NextResponse.json(
+        { error: "Database not available" },
+        { status: 500 }
+      );
+    }
     
     // Get total users
     const totalUsersResult = await db.prepare(`
