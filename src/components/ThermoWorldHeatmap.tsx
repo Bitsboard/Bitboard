@@ -80,7 +80,6 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
     return geoNaturalEarth1()
       .translate([size.w / 2, size.h / 2])
       .scale(size.w * 0.2)
-      .center([0, 0])
       .precision(0.1);
   }, [size.w, size.h]);
 
@@ -316,7 +315,7 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
       width={size.w}
       height={size.h}
       projection="naturalEarth1"
-      projectionConfig={{ scale: size.w * 0.2, center: [0, 0] }}
+      projectionConfig={{ scale: size.w * 0.2 }}
       style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
     >
       <Geographies geography={geographyUrl}>
@@ -353,7 +352,7 @@ export const ThermoWorldHeatmap: React.FC<ThermoWorldHeatmapProps> = ({
         width={size.w}
         height={size.h}
         projection="naturalEarth1"
-        projectionConfig={{ scale: size.w * 0.2, center: [0, 0] }}
+        projectionConfig={{ scale: size.w * 0.2 }}
         style={{ position: "absolute", inset: 0 }}
       >
         <Geographies geography={geographyUrl}>
