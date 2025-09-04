@@ -215,6 +215,12 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       country = parts[parts.length - 1]; // Take the last part (country)
     }
     
+    // Special handling for US states - aggregate them into "United States of America"
+    const usStates = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC'];
+    if (usStates.includes(country)) {
+      country = 'United States of America';
+    }
+    
     // Apply country mapping for consistency
     country = COUNTRY_MAPPING[country] || country;
     
@@ -376,21 +382,28 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     
     const bounds = coordinates.reduce((acc: any, coord: any) => {
       const [x, y] = Array.isArray(coord[0]) ? coord[0] : coord;
-      return {
-        minX: Math.min(acc.minX, x),
-        maxX: Math.max(acc.maxX, x),
-        minY: Math.min(acc.minY, y),
-        maxY: Math.max(acc.maxY, y)
-      };
+      if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
+        return {
+          minX: Math.min(acc.minX, x),
+          maxX: Math.max(acc.maxX, x),
+          minY: Math.min(acc.minY, y),
+          maxY: Math.max(acc.maxY, y)
+        };
+      }
+      return acc;
     }, { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity });
 
     const centerX = (bounds.minX + bounds.maxX) / 2;
     const centerY = (bounds.minY + bounds.maxY) / 2;
     
-    console.log(`🖱️ New center: [${centerX}, ${centerY}], new zoom: 4`);
-    
-    setCenter([centerX, centerY]);
-    setZoom(4);
+    // Validate coordinates before setting
+    if (!isNaN(centerX) && !isNaN(centerY) && isFinite(centerX) && isFinite(centerY)) {
+      console.log(`🖱️ New center: [${centerX}, ${centerY}], new zoom: 4`);
+      setCenter([centerX, centerY]);
+      setZoom(4);
+    } else {
+      console.log(`🖱️ Invalid coordinates calculated: [${centerX}, ${centerY}], skipping zoom`);
+    }
   };
 
   const handleBackToWorld = () => {
