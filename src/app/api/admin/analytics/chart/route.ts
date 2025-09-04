@@ -95,10 +95,20 @@ export async function GET(req: NextRequest) {
         startDate.setDate(startDate.getDate() - daysBack);
         const startDateStr = startDate.toISOString().split('T')[0];
         
-        result = [
-          { date: startDateStr, value: totalUsers },
-          { date: today, value: totalUsers }
-        ];
+        // Create multiple points for a proper horizontal line
+        const numPoints = Math.max(3, Math.min(daysBack, 10)); // 3-10 points depending on timeframe
+        result = [];
+        
+        for (let i = 0; i < numPoints; i++) {
+          const pointDate = new Date(startDate);
+          pointDate.setDate(startDate.getDate() + (i * daysBack / (numPoints - 1)));
+          const pointDateStr = pointDate.toISOString().split('T')[0];
+          
+          result.push({
+            date: pointDateStr,
+            value: totalUsers
+          });
+        }
       } else {
         result = growthData;
       }
@@ -154,10 +164,20 @@ export async function GET(req: NextRequest) {
         startDate.setDate(startDate.getDate() - daysBack);
         const startDateStr = startDate.toISOString().split('T')[0];
         
-        result = [
-          { date: startDateStr, value: totalListings },
-          { date: today, value: totalListings }
-        ];
+        // Create multiple points for a proper horizontal line
+        const numPoints = Math.max(3, Math.min(daysBack, 10)); // 3-10 points depending on timeframe
+        result = [];
+        
+        for (let i = 0; i < numPoints; i++) {
+          const pointDate = new Date(startDate);
+          pointDate.setDate(startDate.getDate() + (i * daysBack / (numPoints - 1)));
+          const pointDateStr = pointDate.toISOString().split('T')[0];
+          
+          result.push({
+            date: pointDateStr,
+            value: totalListings
+          });
+        }
       } else {
         result = growthData;
       }

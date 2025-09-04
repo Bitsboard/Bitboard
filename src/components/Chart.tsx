@@ -554,25 +554,51 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
               opacity={0.3}
             />
             
-            {/* Line */}
+            {/* Line with hover area */}
             <path
               d={pathData}
               fill="none"
               stroke="#3B82F6"
               strokeWidth={3}
+              className="cursor-pointer"
+              onMouseEnter={(e) => {
+                // Find the closest point to the mouse
+                const rect = e.currentTarget.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                
+                // Find closest point
+                let closestPoint = points[0];
+                let minDistance = Math.sqrt(Math.pow(mouseX - points[0].x, 2) + Math.pow(mouseY - points[0].y, 2));
+                
+                for (let i = 1; i < points.length; i++) {
+                  const distance = Math.sqrt(Math.pow(mouseX - points[i].x, 2) + Math.pow(mouseY - points[i].y, 2));
+                  if (distance < minDistance) {
+                    minDistance = distance;
+                    closestPoint = points[i];
+                  }
+                }
+                
+                setTooltip({
+                  x: e.clientX,
+                  y: e.clientY - 10,
+                  value: closestPoint.value,
+                  date: closestPoint.date
+                });
+              }}
+              onMouseLeave={() => setTooltip(null)}
             />
             
-            {/* Points */}
+            {/* Invisible hover points for better interaction */}
             {points.map((point, index) => (
               <circle
                 key={index}
                 cx={point.x}
                 cy={point.y}
-                r={4}
-                fill="#3B82F6"
-                className="hover:r-6 transition-all cursor-pointer"
+                r={8}
+                fill="transparent"
+                className="cursor-pointer"
                 onMouseEnter={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
                   setTooltip({
                     x: e.clientX,
                     y: e.clientY - 10,
