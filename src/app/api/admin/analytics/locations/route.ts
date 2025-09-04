@@ -61,12 +61,8 @@ export async function GET(req: NextRequest) {
       
       // Only add time filter if not "all"
       if (timeRange !== 'all') {
-        // For users, filter by the most recent listing date to show active users
-        query += ` AND l.posted_by IN (
-          SELECT DISTINCT posted_by 
-          FROM listings 
-          WHERE created_at > ?
-        )`;
+        // For users, filter by users who have listings created in the timeframe
+        query += ` AND l.created_at > ?`;
       }
       
       query += `

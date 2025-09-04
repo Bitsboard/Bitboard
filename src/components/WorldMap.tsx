@@ -28,7 +28,7 @@ interface TooltipContent {
 // Geographic data URLs
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 const usaStatesUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
-const canadaProvincesUrl = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"; // We'll use a different approach for Canada
+const canadaProvincesUrl = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/canada.geojson";
 
 // Country mapping for data lookup
 const COUNTRY_MAPPING: Record<string, string> = {
@@ -179,8 +179,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       if (drillDownLevel === 'country' && selectedCountry === 'United States of America') {
         url = usaStatesUrl;
       } else if (drillDownLevel === 'country' && selectedCountry === 'Canada') {
-        // For Canada, we'll use the world map but filter to show only Canada
-        url = geoUrl;
+        url = canadaProvincesUrl;
       }
       
       if (url !== currentGeoUrl) {
