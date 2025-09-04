@@ -593,11 +593,10 @@ export default function AnalyticsPage() {
         {activeTab === 'locations' && (
           <div className="space-y-8">
             <WorldMap 
-              data={analyticsData.userLocations} 
               viewType={mapViewType}
-              onViewTypeChange={setMapViewType}
               timeRange={mapTimeRange}
-              onTimeRangeChange={setMapTimeRange}
+              onTimeRangeChange={(range: string) => setMapTimeRange(range as '24h' | '7d' | '30d' | '90d' | 'all')}
+              onViewTypeChange={setMapViewType}
             />
             <InteractiveTable
               data={analyticsData.userLocations}

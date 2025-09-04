@@ -15,6 +15,7 @@ interface WorldMapProps {
   viewType: 'users' | 'listings';
   timeRange: string;
   onTimeRangeChange: (range: string) => void;
+  onViewTypeChange?: (type: 'users' | 'listings') => void;
 }
 
 interface TooltipContent {
@@ -163,7 +164,7 @@ const COUNTRY_MAPPING: Record<string, string> = {
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
-export default function WorldMap({ viewType, timeRange, onTimeRangeChange }: WorldMapProps) {
+export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onViewTypeChange }: WorldMapProps) {
   const [mapData, setMapData] = useState<MapData[]>([]);
   const [loading, setLoading] = useState(true);
   const [tooltip, setTooltip] = useState<TooltipContent | null>(null);
@@ -276,6 +277,30 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange }: Wor
           <h3 className="text-lg font-semibold text-gray-900">
             {viewType === 'users' ? 'User' : 'Listing'} Locations
           </h3>
+          {onViewTypeChange && (
+            <div className="flex space-x-2">
+              <button
+                onClick={() => onViewTypeChange('users')}
+                className={`px-3 py-1 text-sm rounded-md ${
+                  viewType === 'users' 
+                    ? 'bg-blue-100 text-blue-700' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Users
+              </button>
+              <button
+                onClick={() => onViewTypeChange('listings')}
+                className={`px-3 py-1 text-sm rounded-md ${
+                  viewType === 'listings' 
+                    ? 'bg-blue-100 text-blue-700' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Listings
+              </button>
+            </div>
+          )}
           <div className="flex space-x-2">
             <button
               onClick={() => onTimeRangeChange('24h')}
