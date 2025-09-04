@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     const timeRange = url.searchParams.get('timeRange') || '7d';
     const viewType = url.searchParams.get('type') || 'users'; // 'users' or 'listings'
     
-    console.log(`🌍 API: timeRange=${timeRange}, viewType=${viewType}`);
+    console.log(`🌍 API: timeRange=${timeRange}, viewType=${viewType} - DEPLOYMENT TEST`);
     
     // Calculate time boundaries
     const now = Math.floor(Date.now() / 1000);
