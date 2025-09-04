@@ -20,13 +20,18 @@ export const runtime = "edge";
 type D1Result<T = any> = { results: T[] };
 
 async function getDB(): Promise<any> {
-  const { env } = getRequestContext();
-  const db = (env as any).DB as D1Database | undefined;
-  
-  if (!db) {
-    throw new Error("Database not available");
+  try {
+    const { env } = getRequestContext();
+    const db = (env as any).DB as D1Database | undefined;
+    
+    if (!db) {
+      throw new Error("Database not available");
+    }
+    return db;
+  } catch (error) {
+    console.error("Error getting database:", error);
+    throw new Error("Database connection failed");
   }
-  return db;
 }
 
 function windowSeconds(range: string | null): number | null {

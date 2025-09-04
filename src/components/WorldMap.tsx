@@ -63,19 +63,31 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
 
   useEffect(() => {
     (async () => {
-      const [a0, a1] = await Promise.all([loadAdmin0(), loadAdmin1()]);
-      setAdmin0(a0);
-      setAdmin1(a1);
+      try {
+        const [a0, a1] = await Promise.all([loadAdmin0(), loadAdmin1()]);
+        setAdmin0(a0);
+        setAdmin1(a1);
+      } catch (error) {
+        console.error("Error loading geo data:", error);
+      }
     })();
   }, []);
 
   useEffect(() => {
     (async () => {
-      const res = await fetch(
-        `/api/admin/analytics/locations?type=${view}&timeRange=${timeRangeState}`
-      );
-      const json = (await res.json()) as Row[];
-      setData(json);
+      try {
+        const res = await fetch(
+          `/api/admin/analytics/locations?type=${view}&timeRange=${timeRangeState}`
+        );
+        const json = await res.json();
+        
+        // Handle both direct array and wrapped response
+        const data = Array.isArray(json) ? json : (json.data || []);
+        setData(data);
+      } catch (error) {
+        console.error("Error fetching map data:", error);
+        setData([]);
+      }
     })();
   }, [view, timeRangeState]);
 

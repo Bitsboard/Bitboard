@@ -10,9 +10,9 @@ export type GeoFC = FeatureCollection<Geometry, Record<string, any>>;
  * - Admin-1 (states/provinces): properties include adm0_a3, name, iso_3166_2
  */
 const ADMIN0_URL =
-  "https://cdn.jsdelivr.net/npm/@naturalearth/geojson@3.0.0/ne_110m_admin_0_countries.geojson";
+  "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_0_countries.geojson";
 const ADMIN1_URL =
-  "https://cdn.jsdelivr.net/npm/@naturalearth/geojson@3.0.0/ne_10m_admin_1_states_provinces.geojson";
+  "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_1_states_provinces.geojson";
 
 /** Cache in-memory to avoid refetch thrash in SPA */
 let admin0Cache: GeoFC | null = null;
