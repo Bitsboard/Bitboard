@@ -48,20 +48,10 @@ const COUNTRY_MAPPING: Record<string, string> = {
   'Denmark': 'Denmark',
   'Finland': 'Finland',
   'Austria': 'Austria',
-  'Switzerland': 'Switzerland',
-  'Belgium': 'Belgium',
-  'Ireland': 'Ireland',
   'Poland': 'Poland',
   'Czech Republic': 'Czech Republic',
   'Hungary': 'Hungary',
-  'Portugal': 'Portugal',
-  'Greece': 'Greece',
-  'Australia': 'Australia',
-  'Japan': 'Japan',
-  'South Korea': 'South Korea',
-  'Singapore': 'Singapore',
-  'Hong Kong': 'Hong Kong',
-  'Taiwan': 'Taiwan',
+  'Ireland': 'Ireland',
 };
 
 // US State mapping
@@ -397,127 +387,115 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
               <option value="listings">Listings</option>
             </select>
           </div>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <label className="text-sm font-medium text-gray-700">Timeframe:</label>
-          <select
-            value={timeRange}
-            onChange={(e) => onTimeRangeChange(e.target.value)}
-            className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="24h">24h</option>
-            <option value="7d">7d</option>
-            <option value="30d">30d</option>
-            <option value="90d">90d</option>
-            <option value="all">All time</option>
-          </select>
+          
+          <div className="flex items-center space-x-2">
+            <label className="text-sm font-medium text-gray-700">Timeframe:</label>
+            <select
+              value={timeRange}
+              onChange={(e) => onTimeRangeChange(e.target.value)}
+              className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="24h">24h</option>
+              <option value="7d">7d</option>
+              <option value="30d">30d</option>
+              <option value="90d">90d</option>
+              <option value="all">All time</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* Map Container */}
+      {/* Map */}
       <div className="relative">
         {loading && (
-          <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
-            <div className="text-gray-500">Loading map...</div>
+          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
+            <div className="text-gray-600">Loading map data...</div>
           </div>
         )}
         
-        <div className="w-full h-96 border border-gray-200 rounded-lg overflow-hidden">
-          <ComposableMap
-            projection="geoMercator"
-            projectionConfig={{
-              scale: 100,
-              center: center
-            }}
-            width={800}
-            height={400}
-          >
-            <ZoomableGroup zoom={zoom} center={center}>
-              <Geographies geography={currentGeoUrl}>
-                {({ geographies }) =>
-                  geographies.map((geo) => {
-                    const regionName = geo.properties.name || geo.properties.NAME || 'Unknown';
-                    
-                    // Filter regions based on drill-down level
-                    if (drillDownLevel === 'country' && selectedCountry === 'United States of America') {
-                      // Only show US states
-                      if (!US_STATE_MAPPING[regionName]) {
-                        return null;
-                      }
-                    } else if (drillDownLevel === 'country' && selectedCountry === 'Canada') {
-                      // For Canada, we'll show the country but highlight provinces
-                      if (regionName !== 'Canada') {
-                        return null;
-                      }
-                    } else if (drillDownLevel === 'world') {
-                      // For world view, only show countries
-                      if (US_STATE_MAPPING[regionName] || CANADA_PROVINCE_MAPPING[regionName]) {
-                        return null;
-                      }
-                    }
-                    
-                    return (
-                      <Geography
-                        key={geo.rsmKey}
-                        geography={geo}
-                        fill={getFillColor(regionName)}
-                        stroke={drillDownLevel === 'country' ? "#1E40AF" : "#D1D5DB"}
-                        strokeWidth={drillDownLevel === 'country' ? 0.5 : 0.5}
-                        style={{
-                          default: { outline: 'none' },
-                          hover: { outline: 'none', fill: '#3B82F6' },
-                          pressed: { outline: 'none' }
-                        }}
-                        onMouseEnter={(event) => handleMouseEnter(geo, event)}
-                        onMouseLeave={handleMouseLeave}
-                        onClick={() => handleRegionClick(geo)}
-                      />
-                    );
-                  })
-                }
-              </Geographies>
-            </ZoomableGroup>
-          </ComposableMap>
-        </div>
-      </div>
-
-      {/* Tooltip */}
-      {tooltip && (
-        <div
-          className="absolute z-20 px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-lg pointer-events-none"
-          style={{
-            left: tooltip.x + 10,
-            top: tooltip.y - 10,
-            transform: 'translateY(-100%)'
+        <ComposableMap
+          projection="geoMercator"
+          projectionConfig={{
+            scale: 147,
+            center: center,
           }}
+          width={800}
+          height={400}
         >
-          {tooltip.country}: {tooltip.count} {viewType}
-        </div>
-      )}
+          <ZoomableGroup zoom={zoom} center={center}>
+            <Geographies geography={currentGeoUrl}>
+              {({ geographies }) =>
+                geographies.map((geo) => (
+                  <Geography
+                    key={geo.rsmKey}
+                    geography={geo}
+                    fill={getFillColor(geo.properties.name || geo.properties.NAME || 'Unknown')}
+                    stroke="#FFFFFF"
+                    strokeWidth={0.5}
+                    style={{
+                      default: {
+                        fill: getFillColor(geo.properties.name || geo.properties.NAME || 'Unknown'),
+                        outline: 'none',
+                      },
+                      hover: {
+                        fill: '#3B82F6',
+                        outline: 'none',
+                        cursor: 'pointer',
+                      },
+                      pressed: {
+                        fill: '#1D4ED8',
+                        outline: 'none',
+                      },
+                    }}
+                    onMouseEnter={(event) => handleMouseEnter(geo, event)}
+                    onMouseLeave={handleMouseLeave}
+                    onClick={() => handleRegionClick(geo)}
+                  />
+                ))
+              }
+            </Geographies>
+          </ZoomableGroup>
+        </ComposableMap>
+      </div>
 
       {/* Legend */}
       <div className="mt-4 flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-600">Low</span>
-          <div className="flex space-x-1">
-            {[0, 0.25, 0.5, 0.75, 1].map((intensity) => (
-              <div
-                key={intensity}
-                className="w-4 h-4 rounded"
-                style={{
-                  backgroundColor: `hsl(210, ${60 + (intensity * 40)}%, ${85 - (intensity * 40)}%)`
-                }}
-              />
-            ))}
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 bg-gray-200 rounded"></div>
+            <span className="text-sm text-gray-600">0</span>
           </div>
-          <span className="text-sm text-gray-600">High</span>
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 bg-blue-200 rounded"></div>
+            <span className="text-sm text-gray-600">Low</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 bg-blue-400 rounded"></div>
+            <span className="text-sm text-gray-600">Medium</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 bg-blue-600 rounded"></div>
+            <span className="text-sm text-gray-600">High</span>
+          </div>
         </div>
         
         <div className="text-sm text-gray-600">
           Max: {maxCount} {viewType}
         </div>
       </div>
+
+      {/* Tooltip */}
+      {tooltip && (
+        <div
+          className="absolute bg-gray-900 text-white px-3 py-2 rounded-lg text-sm pointer-events-none z-20"
+          style={{
+            left: tooltip.x + 10,
+            top: tooltip.y - 10,
+          }}
+        >
+          {tooltip.country}: {tooltip.count} {viewType}
+        </div>
+      )}
     </div>
   );
 }
