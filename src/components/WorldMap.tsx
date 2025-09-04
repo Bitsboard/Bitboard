@@ -86,15 +86,20 @@ export default function WorldMap() {
   // Calculate max count for color scaling
   const maxCount = Math.max(1, ...validData.map(row => row.listingCount));
 
-  // Color scale for heatmap
+  // Color scale for thermographic heatmap
   const getHeatColor = (count: number) => {
     const intensity = count / maxCount;
-    if (intensity === 0) return "rgba(255, 255, 255, 0)"; // Transparent
-    if (intensity < 0.2) return "rgba(255, 140, 0, 0.3)"; // Light orange
-    if (intensity < 0.4) return "rgba(255, 140, 0, 0.5)"; // Medium orange
-    if (intensity < 0.6) return "rgba(255, 140, 0, 0.7)"; // Darker orange
-    if (intensity < 0.8) return "rgba(255, 100, 0, 0.8)"; // Dark orange
-    return "rgba(255, 60, 0, 0.9)"; // Red-orange
+    if (intensity === 0) return "rgba(0, 0, 255, 0)"; // Transparent blue
+    if (intensity < 0.1) return "rgba(0, 0, 255, 0.3)"; // Blue
+    if (intensity < 0.2) return "rgba(0, 100, 255, 0.4)"; // Light blue
+    if (intensity < 0.3) return "rgba(0, 200, 255, 0.5)"; // Cyan
+    if (intensity < 0.4) return "rgba(0, 255, 200, 0.6)"; // Light green
+    if (intensity < 0.5) return "rgba(100, 255, 100, 0.7)"; // Green
+    if (intensity < 0.6) return "rgba(200, 255, 0, 0.8)"; // Yellow-green
+    if (intensity < 0.7) return "rgba(255, 255, 0, 0.9)"; // Yellow
+    if (intensity < 0.8) return "rgba(255, 200, 0, 0.9)"; // Orange
+    if (intensity < 0.9) return "rgba(255, 100, 0, 0.9)"; // Red-orange
+    return "rgba(255, 0, 0, 0.9)"; // Red
   };
 
   // Handle mouse enter for tooltips
@@ -155,31 +160,53 @@ export default function WorldMap() {
               </Geographies>
             )}
 
-            {/* Heatmap circles for each listing location */}
+            {/* Thermographic heatmap zones for each listing location */}
             {validData.map((row, index) => {
-              const size = Math.max(3, Math.min(20, row.listingCount * 2));
+              const baseSize = Math.max(15, Math.min(60, row.listingCount * 3));
               const color = getHeatColor(row.listingCount);
               
               // Convert lat/lng to map coordinates
-              // For Mercator projection, we need to convert lat/lng to x/y coordinates
               const x = (row.lng! + 180) * (MAP_WIDTH / 360);
               const y = (90 - row.lat!) * (MAP_HEIGHT / 180);
               
               console.log(`🗺️ Plotting ${row.location}: lat=${row.lat}, lng=${row.lng} -> x=${x}, y=${y}`);
               
               return (
-                <circle
-                  key={`${row.lat}-${row.lng}-${index}`}
-                  cx={x}
-                  cy={y}
-                  r={size}
-                  fill={color}
-                  stroke="rgba(255, 140, 0, 0.8)"
-                  strokeWidth={1}
-                  onMouseEnter={(event) => handleMouseEnter(row, event)}
-                  onMouseLeave={handleMouseLeave}
-                  style={{ cursor: "pointer" }}
-                />
+                <g key={`${row.lat}-${row.lng}-${index}`}>
+                  {/* Outer glow effect */}
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={baseSize * 1.5}
+                    fill={color}
+                    opacity={0.2}
+                    onMouseEnter={(event) => handleMouseEnter(row, event)}
+                    onMouseLeave={handleMouseLeave}
+                    style={{ cursor: "pointer" }}
+                  />
+                  {/* Middle heat zone */}
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={baseSize}
+                    fill={color}
+                    opacity={0.6}
+                    onMouseEnter={(event) => handleMouseEnter(row, event)}
+                    onMouseLeave={handleMouseLeave}
+                    style={{ cursor: "pointer" }}
+                  />
+                  {/* Inner core */}
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={baseSize * 0.6}
+                    fill={color}
+                    opacity={0.9}
+                    onMouseEnter={(event) => handleMouseEnter(row, event)}
+                    onMouseLeave={handleMouseLeave}
+                    style={{ cursor: "pointer" }}
+                  />
+                </g>
               );
             })}
           </ZoomableGroup>
@@ -189,20 +216,20 @@ export default function WorldMap() {
       <div className="mt-4 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-gray-200 rounded"></div>
-            <span className="text-sm text-gray-600">0</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-orange-200 rounded"></div>
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: "rgba(0, 0, 255, 0.3)" }}></div>
             <span className="text-sm text-gray-600">Low</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-orange-400 rounded"></div>
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: "rgba(100, 255, 100, 0.7)" }}></div>
             <span className="text-sm text-gray-600">Medium</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-orange-600 rounded"></div>
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: "rgba(255, 255, 0, 0.9)" }}></div>
             <span className="text-sm text-gray-600">High</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: "rgba(255, 0, 0, 0.9)" }}></div>
+            <span className="text-sm text-gray-600">Very High</span>
           </div>
         </div>
         

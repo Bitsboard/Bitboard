@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Chart } from "@/components/Chart";
@@ -63,7 +63,7 @@ export default function AnalyticsPage() {
   const [userChartData, setUserChartData] = useState<any[]>([]);
   const [listingChartData, setListingChartData] = useState<any[]>([]);
 
-  const loadChartData = async (type: 'users' | 'listings', timeframe: string) => {
+  const loadChartData = useCallback(async (type: 'users' | 'listings', timeframe: string) => {
     try {
       console.log(`Loading ${type} chart data for timeframe: ${timeframe}`);
       const response = await fetch(`/api/admin/analytics/chart?type=${type}&timeframe=${timeframe}`);
@@ -74,7 +74,7 @@ export default function AnalyticsPage() {
       console.error(`Failed to load ${type} chart data:`, error);
       return [];
     }
-  };
+  }, []);
 
   useEffect(() => {
     const loadAnalytics = async () => {
@@ -109,7 +109,7 @@ export default function AnalyticsPage() {
       setUserChartData(data);
     };
     loadUserData();
-  }, [userTimeframe]);
+  }, [userTimeframe, loadChartData]);
 
   useEffect(() => {
     const loadListingData = async () => {
@@ -117,7 +117,7 @@ export default function AnalyticsPage() {
       setListingChartData(data);
     };
     loadListingData();
-  }, [listingTimeframe]);
+  }, [listingTimeframe, loadChartData]);
 
   if (loading) {
     return (
