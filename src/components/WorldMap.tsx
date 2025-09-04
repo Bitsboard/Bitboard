@@ -215,6 +215,72 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     return acc;
   }, {} as Record<string, { users: number; listings: number }>);
 
+  // Create reverse mapping from map country names to our data
+  const mapToDataMapping: Record<string, string> = {
+    'Canada': 'Canada',
+    'United States of America': 'United States of America', 
+    'United States': 'United States of America',
+    'Austria': 'Austria',
+    'Germany': 'Germany',
+    'France': 'France',
+    'United Kingdom': 'United Kingdom',
+    'Italy': 'Italy',
+    'Spain': 'Spain',
+    'Netherlands': 'Netherlands',
+    'Belgium': 'Belgium',
+    'Switzerland': 'Switzerland',
+    'Sweden': 'Sweden',
+    'Norway': 'Norway',
+    'Denmark': 'Denmark',
+    'Finland': 'Finland',
+    'Poland': 'Poland',
+    'Czech Republic': 'Czech Republic',
+    'Hungary': 'Hungary',
+    'Portugal': 'Portugal',
+    'Ireland': 'Ireland',
+    'Greece': 'Greece',
+    'Romania': 'Romania',
+    'Bulgaria': 'Bulgaria',
+    'Croatia': 'Croatia',
+    'Slovakia': 'Slovakia',
+    'Slovenia': 'Slovenia',
+    'Estonia': 'Estonia',
+    'Latvia': 'Latvia',
+    'Lithuania': 'Lithuania',
+    'Luxembourg': 'Luxembourg',
+    'Malta': 'Malta',
+    'Cyprus': 'Cyprus',
+    'Australia': 'Australia',
+    'New Zealand': 'New Zealand',
+    'Japan': 'Japan',
+    'South Korea': 'South Korea',
+    'China': 'China',
+    'India': 'India',
+    'Brazil': 'Brazil',
+    'Mexico': 'Mexico',
+    'Argentina': 'Argentina',
+    'Chile': 'Chile',
+    'South Africa': 'South Africa',
+    'Egypt': 'Egypt',
+    'Nigeria': 'Nigeria',
+    'Kenya': 'Kenya',
+    'Morocco': 'Morocco',
+    'Tunisia': 'Tunisia',
+    'Israel': 'Israel',
+    'Turkey': 'Turkey',
+    'Russia': 'Russia',
+    'Ukraine': 'Ukraine',
+    'Belarus': 'Belarus',
+    'Thailand': 'Thailand',
+    'Vietnam': 'Vietnam',
+    'Philippines': 'Philippines',
+    'Indonesia': 'Indonesia',
+    'Malaysia': 'Malaysia',
+    'Singapore': 'Singapore',
+    'Hong Kong': 'Hong Kong',
+    'Taiwan': 'Taiwan'
+  };
+
   // Debug country data processing
   console.log(`🗺️ Map data length: ${mapData.length}`);
   console.log(`🗺️ Country data keys:`, Object.keys(countryData));
@@ -229,9 +295,12 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       return '#E5E7EB';
     }
     
-    const data = countryData[countryName];
+    // Map the country name from the map to our data key
+    const dataKey = mapToDataMapping[countryName] || countryName;
+    const data = countryData[dataKey];
+    
     if (!data) {
-      console.log(`🎨 No data for ${countryName}, using gray`);
+      console.log(`🎨 No data for ${countryName} (mapped to ${dataKey}), using gray`);
       return '#E5E7EB'; // Light gray for no data
     }
 
@@ -258,11 +327,13 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
 
   const handleMouseEnter = (geo: any, event: React.MouseEvent) => {
     // Try different possible property names for country name
-    const countryName = geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN || geo.properties.NAME_LONG || 'Unknown';
+    const countryName = geo.properties.name || geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN || geo.properties.NAME_LONG || 'Unknown';
     console.log(`🖱️ Mouse enter - geo.properties:`, geo.properties);
     console.log(`🖱️ Country name: ${countryName}`);
     
-    const data = countryData[countryName];
+    // Map the country name from the map to our data key
+    const dataKey = mapToDataMapping[countryName] || countryName;
+    const data = countryData[dataKey];
     const count = data ? (viewType === 'users' ? data.users : data.listings) : 0;
     
     setTooltip({
@@ -279,9 +350,12 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
 
   const handleCountryClick = (geo: any) => {
     // Try different possible property names for country name
-    const countryName = geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN || geo.properties.NAME_LONG || 'Unknown';
+    const countryName = geo.properties.name || geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN || geo.properties.NAME_LONG || 'Unknown';
     console.log(`🖱️ Clicked on ${countryName}`);
-    console.log(`🖱️ Country data for ${countryName}:`, countryData[countryName]);
+    
+    // Map the country name from the map to our data key
+    const dataKey = mapToDataMapping[countryName] || countryName;
+    console.log(`🖱️ Country data for ${countryName} (mapped to ${dataKey}):`, countryData[dataKey]);
     console.log(`🖱️ Current zoom: ${zoom}, center:`, center);
     
     // Zoom in on the country
@@ -435,7 +509,7 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
                     <Geography
                       key={geo.rsmKey}
                       geography={geo}
-                      fill={getFillColor(geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN || geo.properties.NAME_LONG || 'Unknown')}
+                      fill={getFillColor(geo.properties.name || geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN || geo.properties.NAME_LONG || 'Unknown')}
                       stroke="#D1D5DB"
                       strokeWidth={0.5}
                       style={{
