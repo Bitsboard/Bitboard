@@ -271,12 +271,16 @@ export function WorldMap({
     if (!countryName) {
       if (item.location.includes('Toronto') || item.location.includes('ON') || item.location.includes('Canada')) {
         countryName = 'Canada';
-      } else if (item.location.includes('New York') || item.location.includes('NY') || item.location.includes('USA') || item.location.includes('United States')) {
+      } else if (item.location.includes('New York') || item.location.includes('NY') || item.location.includes('USA') || item.location.includes('United States') || 
+                 item.location.includes('Houston') || item.location.includes('TX') || item.location.includes('San Francisco') || item.location.includes('CA') ||
+                 item.location.includes('Portland') || item.location.includes('OR') || item.location.includes('El Paso')) {
         countryName = 'United States of America';
       } else if (item.location.includes('London') || item.location.includes('UK') || item.location.includes('United Kingdom')) {
         countryName = 'United Kingdom';
       } else if (item.location.includes('Sydney') || item.location.includes('Melbourne') || item.location.includes('Australia')) {
         countryName = 'Australia';
+      } else if (item.location.includes('Vienna') || item.location.includes('Austria')) {
+        countryName = 'Austria';
       } else {
         // Use the original location as fallback
         countryName = item.location;
@@ -299,11 +303,11 @@ export function WorldMap({
     const count = countryData[countryName] || 0;
     if (count === 0) return "#F3F4F6"; // Light gray for no data
     
-    // Create a color scale from light blue to dark blue
-    const intensity = count / maxCount;
+    // Create a more visible color scale
+    const intensity = Math.min(count / maxCount, 1);
     const hue = viewType === 'users' ? 200 : 120; // Blue for users, green for listings
-    const saturation = Math.max(30, intensity * 70);
-    const lightness = Math.max(80, 100 - intensity * 50);
+    const saturation = Math.max(50, intensity * 80); // Higher saturation for visibility
+    const lightness = Math.max(70, 100 - intensity * 30); // Less dramatic lightness change
     
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
   };
@@ -331,7 +335,7 @@ export function WorldMap({
     console.log('Country clicked:', countryName, 'Count:', count);
     console.log('Available countries with data:', Object.keys(countryData).filter(k => countryData[k] > 0));
     
-    // Only allow drill-down if there's data for this country
+    // For now, just zoom in on the country (drill-down to provinces would require additional data)
     if (count > 0) {
       setMapState(prev => ({
         ...prev,
@@ -340,10 +344,19 @@ export function WorldMap({
         zoom: 3,
         center: geo.properties.CENTER || [0, 0]
       }));
+      console.log(`Zoomed into ${countryName} with ${count} ${viewType}`);
     } else {
       console.log('No data for country:', countryName);
+      // Still allow zoom for countries without data
+      setMapState(prev => ({
+        ...prev,
+        selectedCountry: countryName,
+        viewLevel: 'country',
+        zoom: 3,
+        center: geo.properties.CENTER || [0, 0]
+      }));
     }
-  }, [countryData]);
+  }, [countryData, viewType]);
 
   const handleBackToWorld = useCallback(() => {
     setMapState({
