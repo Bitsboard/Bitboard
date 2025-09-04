@@ -69,6 +69,10 @@ export default function AnalyticsPage() {
       const response = await fetch(`/api/admin/analytics/chart?type=${type}&timeframe=${timeframe}`);
       const result = await response.json() as { data?: any[] };
       console.log(`${type} chart data:`, result.data);
+      console.log(`${type} chart data length:`, result.data?.length || 0);
+      if (result.data && result.data.length > 0) {
+        console.log(`${type} first item:`, result.data[0]);
+      }
       return result.data || [];
     } catch (error) {
       console.error(`Failed to load ${type} chart data:`, error);
@@ -304,8 +308,8 @@ export default function AnalyticsPage() {
             <Chart
               data={userChartData.map(item => ({
                 date: item.date,
-                value: item.users || item.value || 0,
-                label: `Users: ${item.users || item.value || 0}`
+                value: item.value || 0,
+                label: `Users: ${item.value || 0}`
               }))}
               type="timeseries"
               dataType="users"
@@ -344,8 +348,8 @@ export default function AnalyticsPage() {
             <Chart
               data={listingChartData.map(item => ({
                 date: item.date,
-                value: item.listings || item.value || 0,
-                label: `Listings: ${item.listings || item.value || 0}`
+                value: item.value || 0,
+                label: `Listings: ${item.value || 0}`
               }))}
               type="timeseries"
               dataType="listings"

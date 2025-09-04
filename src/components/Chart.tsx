@@ -367,6 +367,13 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
       d.date
     );
 
+    console.log('Chart timeseries data validation:', {
+      originalLength: timeData.length,
+      validLength: validData.length,
+      firstItem: timeData[0],
+      validFirstItem: validData[0]
+    });
+
     if (validData.length === 0) {
       return (
         <div className={cn("flex items-center justify-center bg-neutral-50 dark:bg-neutral-800 rounded-lg", className)} style={{ height }}>
