@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface ChartData {
@@ -35,6 +35,8 @@ interface ChartProps {
 }
 
 export function Chart({ data, type, title, height = 300, className, xAxisLabel, yAxisLabel, showTimeframeControls = false, currentTimeframe = '7d', onTimeframeChange }: ChartProps) {
+  const [tooltip, setTooltip] = useState<{ x: number; y: number; value: number; date: string } | null>(null);
+
   if (!data || data.length === 0) {
     return (
       <div className={cn("flex items-center justify-center bg-neutral-50 dark:bg-neutral-800 rounded-lg", className)} style={{ height }}>
@@ -347,15 +349,20 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
     const chartWidth = svgWidth - padding.left - padding.right;
     const chartHeight = svgHeight - padding.top - padding.bottom;
 
-    // Calculate scales
+    // Calculate scales with better handling for small ranges
     const maxValue = Math.max(...timeData.map(d => d.value));
     const minValue = Math.min(...timeData.map(d => d.value));
-    const valueRange = maxValue - minValue || 1;
+    const valueRange = maxValue - minValue;
+    
+    // If the range is very small (like 1-2 users), add some padding to make it visible
+    const paddedMinValue = valueRange < 5 ? Math.max(0, minValue - Math.max(1, valueRange * 0.1)) : minValue;
+    const paddedMaxValue = valueRange < 5 ? maxValue + Math.max(1, valueRange * 0.1) : maxValue;
+    const paddedRange = paddedMaxValue - paddedMinValue;
     
     // Create points for the line
     const points = timeData.map((item, index) => {
       const x = padding.left + (index / (timeData.length - 1)) * chartWidth;
-      const y = padding.top + chartHeight - ((item.value - minValue) / valueRange) * chartHeight;
+      const y = padding.top + chartHeight - ((item.value - paddedMinValue) / paddedRange) * chartHeight;
       return { x, y, value: item.value, date: item.date };
     });
 
@@ -367,11 +374,11 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
     // Create area path
     const areaPathData = `${pathData} L ${points[points.length - 1].x} ${padding.top + chartHeight} L ${points[0].x} ${padding.top + chartHeight} Z`;
 
-    // Generate Y-axis labels
+    // Generate Y-axis labels using padded values
     const yAxisLabels = [];
     const numYLabels = 5;
     for (let i = 0; i <= numYLabels; i++) {
-      const value = minValue + (valueRange * i / numYLabels);
+      const value = paddedMinValue + (paddedRange * i / numYLabels);
       yAxisLabels.push({
         value: Math.round(value),
         y: padding.top + chartHeight - (i / numYLabels) * chartHeight
@@ -484,6 +491,16 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
                 r={4}
                 fill="#3B82F6"
                 className="hover:r-6 transition-all cursor-pointer"
+                onMouseEnter={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setTooltip({
+                    x: rect.left + rect.width / 2,
+                    y: rect.top - 10,
+                    value: point.value,
+                    date: point.date
+                  });
+                }}
+                onMouseLeave={() => setTooltip(null)}
               />
             ))}
             
@@ -546,6 +563,27 @@ export function Chart({ data, type, title, height = 300, className, xAxisLabel, 
               </linearGradient>
             </defs>
           </svg>
+          
+          {/* Tooltip */}
+          {tooltip && (
+            <div
+              className="absolute bg-neutral-900 text-white text-xs rounded px-2 py-1 pointer-events-none z-10"
+              style={{
+                left: tooltip.x - 30,
+                top: tooltip.y - 30,
+                transform: 'translateX(-50%)'
+              }}
+            >
+              <div className="font-medium">{tooltip.value} users</div>
+              <div className="text-neutral-300">
+                {new Date(tooltip.date).toLocaleDateString('en-US', { 
+                  month: 'short', 
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
