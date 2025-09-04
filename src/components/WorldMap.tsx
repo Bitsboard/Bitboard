@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ComposableMap, Geographies, Geography, ZoomableGroup } from 'react-simple-maps';
 
 interface MapData {
@@ -298,18 +298,17 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     'Taiwan': 'Taiwan'
   };
 
-  // Debug country data processing
-  console.log(`🗺️ Map data length: ${mapData.length}`);
-  console.log(`🗺️ Raw map data:`, mapData.slice(0, 5)); // Show first 5 items
-  console.log(`🗺️ Country data keys:`, Object.keys(countryData));
-  console.log(`🗺️ Country data:`, countryData);
-  console.log(`🗺️ View type: ${viewType}`);
+  // Debug country data processing (only log once per data change)
+  if (mapData.length > 0) {
+    console.log(`🗺️ Map data length: ${mapData.length}`);
+    console.log(`🗺️ Country data keys:`, Object.keys(countryData));
+    console.log(`🗺️ View type: ${viewType}`);
+  }
 
-  // Get fill color based on data
-  const getFillColor = (countryName: string) => {
+  // Get fill color based on data - memoized for performance
+  const getFillColor = useCallback((countryName: string) => {
     // Handle undefined country names
     if (!countryName || countryName === 'undefined') {
-      console.log(`🎨 No country name provided, using gray`);
       return '#E5E7EB';
     }
     
@@ -318,13 +317,11 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     const data = countryData[dataKey];
     
     if (!data) {
-      console.log(`🎨 No data for ${countryName} (mapped to ${dataKey}), using gray`);
       return '#E5E7EB'; // Light gray for no data
     }
 
     const count = viewType === 'users' ? data.users : data.listings;
     if (count === 0) {
-      console.log(`🎨 Zero count for ${countryName}, using gray`);
       return '#E5E7EB';
     }
 
@@ -338,16 +335,13 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     const lightness = 85 - (intensity * 40); // 85-45% lightness
     
     const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-    console.log(`🎨 ${countryName}: ${count} ${viewType}, intensity: ${intensity}, color: ${color}`);
     
     return color;
-  };
+  }, [countryData, viewType, mapToDataMapping]);
 
-  const handleMouseEnter = (geo: any, event: React.MouseEvent) => {
+  const handleMouseEnter = useCallback((geo: any, event: React.MouseEvent) => {
     // Try different possible property names for country name
     const countryName = geo.properties.name || geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN || geo.properties.NAME_LONG || 'Unknown';
-    console.log(`🖱️ Mouse enter - geo.properties:`, geo.properties);
-    console.log(`🖱️ Country name: ${countryName}`);
     
     // Map the country name from the map to our data key
     const dataKey = mapToDataMapping[countryName] || countryName;
@@ -360,25 +354,21 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       x: event.clientX,
       y: event.clientY - 10
     });
-  };
+  }, [countryData, viewType, mapToDataMapping]);
 
   const handleMouseLeave = () => {
     setTooltip(null);
   };
 
-  const handleCountryClick = (geo: any) => {
+  const handleCountryClick = useCallback((geo: any) => {
     // Try different possible property names for country name
     const countryName = geo.properties.name || geo.properties.NAME || geo.properties.NAME_EN || geo.properties.ADMIN || geo.properties.NAME_LONG || 'Unknown';
-    console.log(`🖱️ Clicked on ${countryName}`);
     
     // Map the country name from the map to our data key
     const dataKey = mapToDataMapping[countryName] || countryName;
-    console.log(`🖱️ Country data for ${countryName} (mapped to ${dataKey}):`, countryData[dataKey]);
-    console.log(`🖱️ Current zoom: ${zoom}, center:`, center);
     
     // Zoom in on the country
     const { coordinates } = geo.geometry;
-    console.log(`🖱️ Coordinates:`, coordinates);
     
     const bounds = coordinates.reduce((acc: any, coord: any) => {
       const [x, y] = Array.isArray(coord[0]) ? coord[0] : coord;
@@ -398,13 +388,10 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     
     // Validate coordinates before setting
     if (!isNaN(centerX) && !isNaN(centerY) && isFinite(centerX) && isFinite(centerY)) {
-      console.log(`🖱️ New center: [${centerX}, ${centerY}], new zoom: 4`);
       setCenter([centerX, centerY]);
       setZoom(4);
-    } else {
-      console.log(`🖱️ Invalid coordinates calculated: [${centerX}, ${centerY}], skipping zoom`);
     }
-  };
+  }, [mapToDataMapping]);
 
   const handleBackToWorld = () => {
     setCenter([0, 0]);
