@@ -80,6 +80,7 @@ export async function GET(req: NextRequest) {
       result = (userLocationsResult.results || []).map((row: any) => ({
         location: row.location,
         userCount: row.userCount,
+        listingCount: 0, // No listings for users view
         lat: row.avgLat || 0,
         lng: row.avgLng || 0
       }));

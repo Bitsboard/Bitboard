@@ -163,6 +163,8 @@ const COUNTRY_MAPPING: Record<string, string> = {
 };
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+const canadaGeoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"; // We'll use a different approach
+const usaGeoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"; // We'll use a different approach
 
 export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onViewTypeChange }: WorldMapProps) {
   const [mapData, setMapData] = useState<MapData[]>([]);
@@ -170,6 +172,8 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
   const [tooltip, setTooltip] = useState<TooltipContent | null>(null);
   const [zoom, setZoom] = useState(1);
   const [center, setCenter] = useState<[number, number]>([0, 0]);
+  const [drillDownLevel, setDrillDownLevel] = useState<'world' | 'country'>('world');
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
 
   // Fetch map data
   useEffect(() => {
@@ -367,6 +371,17 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
     // Map the country name from the map to our data key
     const dataKey = mapToDataMapping[countryName] || countryName;
     
+    // Check if we have data for this country
+    const data = countryData[dataKey];
+    if (!data || (viewType === 'users' ? data.users : data.listings) === 0) {
+      console.log(`No data for ${countryName}, skipping drill-down`);
+      return;
+    }
+    
+    // Set drill-down state
+    setSelectedCountry(countryName);
+    setDrillDownLevel('country');
+    
     // Zoom in on the country
     const { coordinates } = geo.geometry;
     
@@ -391,11 +406,13 @@ export default function WorldMap({ viewType, timeRange, onTimeRangeChange, onVie
       setCenter([centerX, centerY]);
       setZoom(4);
     }
-  }, [mapToDataMapping]);
+  }, [mapToDataMapping, countryData, viewType]);
 
   const handleBackToWorld = () => {
     setCenter([0, 0]);
     setZoom(1);
+    setDrillDownLevel('world');
+    setSelectedCountry(null);
   };
 
   const maxCount = Math.max(...Object.values(countryData).map(d => viewType === 'users' ? d.users : d.listings));
