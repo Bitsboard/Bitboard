@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import ThermoWorldHeatmap from "./ThermoWorldHeatmap";
+import { WorldHeatmap, HeatPoint } from "./WorldHeatmap";
 
 type Row = {
   location: string;
@@ -11,12 +11,6 @@ type Row = {
   lng: number | null;
 };
 
-type HeatPoint = {
-  lat: number;
-  lng: number;
-  intensity: number;
-  label?: string;
-};
 
 export default function WorldMap() {
   const [data, setData] = useState<Row[]>([]);
@@ -69,17 +63,14 @@ export default function WorldMap() {
       </div>
 
       <div className="relative rounded-lg overflow-hidden shadow-inner" style={{ height: '300px' }}>
-                            <ThermoWorldHeatmap
-                      data={heatPoints}
-                      width={600}
-                      height={300}
-                      radius={15}
-                      innerBlur={8}
-                      maskToLand={false}
-                      tonePercentile={90}
-                      toneGamma={0.8}
-                      formatIntensity={(x) => `${Math.round(x * maxCount)} listings`}
-                    />
+        <WorldHeatmap
+          points={heatPoints}
+          width={600}
+          height={300}
+          projection="mercator"
+          maxPointRadiusPx={34}
+          blurPx={20}
+        />
       </div>
 
       <div className="mt-4 flex items-center justify-between">
