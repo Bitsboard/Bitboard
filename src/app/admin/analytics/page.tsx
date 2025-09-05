@@ -152,17 +152,13 @@ export default function AnalyticsPage() {
     const userScaleFactor = totalUsers / Math.max(1, sortedUsers.length);
     const listingScaleFactor = totalListings / Math.max(1, sortedListings.length);
     
-    console.log('📊 User scale factor:', userScaleFactor);
-    console.log('📊 Listing scale factor:', listingScaleFactor);
+    console.log('📊 User scale factor:', userScaleFactor, 'totalUsers:', totalUsers, 'sampleUsers:', sortedUsers.length);
+    console.log('📊 Listing scale factor:', listingScaleFactor, 'totalListings:', totalListings, 'sampleListings:', sortedListings.length);
     
     // Generate user chart data - SCALED TO REAL TOTALS (cumulative)
     const userChartData: ChartData[] = [];
     let userIndex = 0;
     let cumulativeUsers = 0;
-    
-    // Calculate scale factor to reach real total
-    const userScaleFactor = totalUsers / Math.max(1, sortedUsers.length);
-    console.log('📊 User scale factor:', userScaleFactor, 'totalUsers:', totalUsers, 'sampleUsers:', sortedUsers.length);
     
     const currentDate = new Date(minDate);
     while (currentDate <= maxDate) {
@@ -193,10 +189,6 @@ export default function AnalyticsPage() {
     const listingChartData: ChartData[] = [];
     let listingIndex = 0;
     let cumulativeListings = 0;
-    
-    // Calculate scale factor to reach real total
-    const listingScaleFactor = totalListings / Math.max(1, sortedListings.length);
-    console.log('📊 Listing scale factor:', listingScaleFactor, 'totalListings:', totalListings, 'sampleListings:', sortedListings.length);
     
     const currentDate2 = new Date(minDate);
     while (currentDate2 <= maxDate) {
