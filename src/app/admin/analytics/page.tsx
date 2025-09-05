@@ -34,7 +34,7 @@ export default function AnalyticsPage() {
   const loadAllData = async () => {
     setLoading(true);
     try {
-      const db = await fetch('/api/admin/db-query').then(r => r.json());
+      const db = await fetch('/api/admin/db-query').then(r => r.json()) as { success: boolean; data: { users: any[]; listings: any[] } };
       
       if (db.success) {
         const data = db.data;
