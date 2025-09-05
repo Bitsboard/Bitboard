@@ -31,7 +31,7 @@ export default function AnalyticsPage() {
     try {
       const response = await fetch('/api/admin/stats');
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as StatsData;
         setStats(data);
       }
     } catch (error) {
@@ -44,7 +44,7 @@ export default function AnalyticsPage() {
     try {
       const response = await fetch(`/api/admin/chart?type=${type}&timeframe=${timeframe}`);
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as { data?: ChartData[] };
         return data.data || [];
       }
     } catch (error) {
