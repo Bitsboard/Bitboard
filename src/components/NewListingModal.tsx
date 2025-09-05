@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Modal, ModalHeader, ModalTitle, ModalBody, ModalCloseButton } from "./Modal";
 import { t } from "@/lib/i18n";
 import { useLang } from "@/lib/i18n-client";
+import { getButtonAccessibilityProps, getInputAccessibilityProps, getModalAccessibilityProps } from "@/lib/accessibility";
 import type { Listing, Category, Seller } from "@/lib/types";
 import { cn } from "@/lib/utils";
 

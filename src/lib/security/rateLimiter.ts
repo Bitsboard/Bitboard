@@ -1,63 +1,65 @@
-/**
- * Rate Limiting Middleware
- * Provides rate limiting functionality for API endpoints
- */
+// Simple in-memory rate limiter for edge runtime
+// In production, this should be replaced with Redis or similar
 
-interface RateLimitConfig {
+interface RateLimitEntry {
+  count: number;
+  resetTime: number;
+}
+
+const rateLimitStore = new Map<string, RateLimitEntry>();
+
+export interface RateLimitConfig {
   windowMs: number; // Time window in milliseconds
-  maxRequests: number; // Maximum requests per window
+  maxRequests: number; // Max requests per window
   keyGenerator?: (req: Request) => string; // Custom key generator
-  skipSuccessfulRequests?: boolean; // Skip counting successful requests
-  skipFailedRequests?: boolean; // Skip counting failed requests
 }
 
-interface RateLimitStore {
-  [key: string]: {
-    count: number;
-    resetTime: number;
-  };
-}
+export function createRateLimiter(config: RateLimitConfig) {
+  const { windowMs, maxRequests, keyGenerator } = config;
 
-// In-memory store for rate limiting (in production, use Redis or similar)
-const store: RateLimitStore = {};
-
-// Clean up expired entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  Object.keys(store).forEach(key => {
-    if (store[key].resetTime < now) {
-      delete store[key];
-    }
-  });
-}, 5 * 60 * 1000);
-
-export class RateLimiter {
-  private config: RateLimitConfig;
-
-  constructor(config: RateLimitConfig) {
-    this.config = config;
-  }
-
-  /**
-   * Check if request is within rate limit
-   */
-  check(req: Request): { allowed: boolean; remaining: number; resetTime: number } {
-    const key = this.getKey(req);
+  return async (req: Request): Promise<{ allowed: boolean; remaining: number; resetTime: number }> => {
+    const key = keyGenerator ? keyGenerator(req) : getDefaultKey(req);
     const now = Date.now();
-    const windowStart = now - this.config.windowMs;
+    
+    // Clean up expired entries
+    for (const [k, v] of rateLimitStore.entries()) {
+      if (v.resetTime <= now) {
+        rateLimitStore.delete(k);
+      }
+    }
 
-    // Initialize or get existing entry
-    if (!store[key] || store[key].resetTime < now) {
-      store[key] = {
-        count: 0,
-        resetTime: now + this.config.windowMs
+    const entry = rateLimitStore.get(key);
+    
+    if (!entry) {
+      // First request
+      rateLimitStore.set(key, {
+        count: 1,
+        resetTime: now + windowMs
+      });
+      
+      return {
+        allowed: true,
+        remaining: maxRequests - 1,
+        resetTime: now + windowMs
       };
     }
 
-    const entry = store[key];
-    
-    // Check if request is allowed
-    if (entry.count >= this.config.maxRequests) {
+    if (entry.resetTime <= now) {
+      // Window expired, reset
+      rateLimitStore.set(key, {
+        count: 1,
+        resetTime: now + windowMs
+      });
+      
+      return {
+        allowed: true,
+        remaining: maxRequests - 1,
+        resetTime: now + windowMs
+      };
+    }
+
+    if (entry.count >= maxRequests) {
+      // Rate limit exceeded
       return {
         allowed: false,
         remaining: 0,
@@ -67,119 +69,45 @@ export class RateLimiter {
 
     // Increment counter
     entry.count++;
-
+    rateLimitStore.set(key, entry);
+    
     return {
       allowed: true,
-      remaining: this.config.maxRequests - entry.count,
+      remaining: maxRequests - entry.count,
       resetTime: entry.resetTime
     };
-  }
-
-  /**
-   * Get rate limit key for request
-   */
-  private getKey(req: Request): string {
-    if (this.config.keyGenerator) {
-      return this.config.keyGenerator(req);
-    }
-
-    // Default: use IP address
-    const ip = this.getClientIP(req);
-    const path = new URL(req.url).pathname;
-    return `${ip}:${path}`;
-  }
-
-  /**
-   * Extract client IP from request
-   */
-  private getClientIP(req: Request): string {
-    // Check various headers for IP address
-    const headers = req.headers;
-    
-    // Cloudflare
-    const cfConnectingIp = headers.get('cf-connecting-ip');
-    if (cfConnectingIp) return cfConnectingIp;
-    
-    // Standard headers
-    const xForwardedFor = headers.get('x-forwarded-for');
-    if (xForwardedFor) {
-      return xForwardedFor.split(',')[0].trim();
-    }
-    
-    const xRealIp = headers.get('x-real-ip');
-    if (xRealIp) return xRealIp;
-    
-    // Fallback
-    return 'unknown';
-  }
-}
-
-// Predefined rate limiters
-export const rateLimiters = {
-  // General API rate limiting
-  api: new RateLimiter({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 100 // 100 requests per 15 minutes
-  }),
-
-  // Authentication endpoints
-  auth: new RateLimiter({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 5 // 5 login attempts per 15 minutes
-  }),
-
-  // Chat/messaging endpoints
-  chat: new RateLimiter({
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 30 // 30 messages per minute
-  }),
-
-  // Listing creation
-  listings: new RateLimiter({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    maxRequests: 10 // 10 listings per hour
-  }),
-
-  // Search endpoints
-  search: new RateLimiter({
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 60 // 60 searches per minute
-  }),
-
-  // Admin endpoints
-  admin: new RateLimiter({
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 20 // 20 admin requests per minute
-  })
-};
-
-/**
- * Rate limiting middleware for Next.js API routes
- */
-export function withRateLimit(limiter: RateLimiter) {
-  return function rateLimitMiddleware(req: Request) {
-    const result = limiter.check(req);
-    
-    if (!result.allowed) {
-      return new Response(
-        JSON.stringify({
-          error: 'Rate limit exceeded',
-          message: 'Too many requests, please try again later',
-          retryAfter: Math.ceil((result.resetTime - Date.now()) / 1000)
-        }),
-        {
-          status: 429,
-          headers: {
-            'Content-Type': 'application/json',
-            'X-RateLimit-Limit': limiter['config'].maxRequests.toString(),
-            'X-RateLimit-Remaining': result.remaining.toString(),
-            'X-RateLimit-Reset': result.resetTime.toString(),
-            'Retry-After': Math.ceil((result.resetTime - Date.now()) / 1000).toString()
-          }
-        }
-      );
-    }
-
-    return null; // No rate limit exceeded
   };
 }
+
+function getDefaultKey(req: Request): string {
+  // Use IP address as default key
+  const forwarded = req.headers.get('x-forwarded-for');
+  const ip = forwarded ? forwarded.split(',')[0] : 'unknown';
+  return `rate_limit:${ip}`;
+}
+
+// Pre-configured rate limiters
+export const authRateLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  maxRequests: 5, // 5 attempts per 15 minutes
+  keyGenerator: (req) => {
+    const forwarded = req.headers.get('x-forwarded-for');
+    const ip = forwarded ? forwarded.split(',')[0] : 'unknown';
+    return `auth:${ip}`;
+  }
+});
+
+export const apiRateLimiter = createRateLimiter({
+  windowMs: 60 * 1000, // 1 minute
+  maxRequests: 100, // 100 requests per minute
+});
+
+export const adminRateLimiter = createRateLimiter({
+  windowMs: 60 * 1000, // 1 minute
+  maxRequests: 30, // 30 requests per minute
+  keyGenerator: (req) => {
+    const forwarded = req.headers.get('x-forwarded-for');
+    const ip = forwarded ? forwarded.split(',')[0] : 'unknown';
+    return `admin:${ip}`;
+  }
+});

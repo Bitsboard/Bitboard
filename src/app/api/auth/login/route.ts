@@ -1,8 +1,23 @@
 export const runtime = 'edge';
 
 import { randomUrlSafeString, sha256Base64Url } from '@/lib/auth';
+import { authRateLimiter } from '@/lib/security/rateLimiter';
 
 export async function GET(req: Request) {
+  // Apply rate limiting
+  const rateLimit = await authRateLimiter(req);
+  if (!rateLimit.allowed) {
+    return new Response('Rate limit exceeded', { 
+      status: 429,
+      headers: {
+        'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),
+        'X-RateLimit-Limit': '5',
+        'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+        'X-RateLimit-Reset': rateLimit.resetTime.toString()
+      }
+    });
+  }
+
   const url = new URL(req.url);
   const redirect = url.searchParams.get('redirect') || '/profile';
   const isPopup = url.searchParams.get('popup') === 'true';

@@ -125,12 +125,24 @@ export default function AdminPage() {
 
   // Check if user is already authenticated on component mount
   useEffect(() => {
-    const savedAuth = localStorage.getItem('admin_authenticated');
-    if (savedAuth === 'true') {
-      setIsAuthenticated(true);
-      loadStats();
+    // Check for admin session instead of localStorage
+    checkAdminAuth();
+  }, []);
+
+  const checkAdminAuth = async () => {
+    try {
+      const response = await fetch('/api/admin/check');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.isAdmin) {
+          setIsAuthenticated(true);
+          loadStats();
+        }
+      }
+    } catch (error) {
+      console.error('Error checking admin auth:', error);
     }
-  }, [loadStats]);
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,28 +150,41 @@ export default function AdminPage() {
     setLoading(true);
 
     try {
-      // Simple password check - you can change this password
-      if (password === "admin123") {
-        setIsAuthenticated(true);
-        setPassword("");
-        // Save authentication state to localStorage
-        localStorage.setItem('admin_authenticated', 'true');
-        // Load stats immediately after login
-        loadStats();
+      const response = await fetch('/api/admin/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setIsAuthenticated(true);
+          setPassword("");
+          // No localStorage - rely on session
+          loadStats();
+        } else {
+          setError(data.error || 'Invalid password');
+        }
       } else {
-        setError("Incorrect password");
+        setError('Authentication failed');
       }
     } catch (error) {
-      setError("Login failed");
+      setError('Network error');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem('admin_authenticated');
-    setStats(null);
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setIsAuthenticated(false);
+      setStats(null);
+    }
   };
 
   const sendSystemNotification = async (e: React.FormEvent) => {

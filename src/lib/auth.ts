@@ -180,8 +180,10 @@ export async function isAdmin(email: string | undefined | null): Promise<boolean
   if (!email) return false;
 
   try {
-    // For now, hardcode admin emails - should be moved to environment variables
-    const adminEmails = ['georged1997@gmail.com'];
+    // Get admin emails from environment variables
+    const adminEmailsEnv = process.env.ADMIN_EMAILS || '';
+    const adminEmails = adminEmailsEnv.split(',').map(email => email.trim()).filter(Boolean);
+    
     if (adminEmails.includes(email)) return true;
 
     // TODO: Check database for admin status
