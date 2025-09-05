@@ -133,7 +133,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin/check');
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as { success: boolean; isAdmin: boolean };
         if (data.success && data.isAdmin) {
           setIsAuthenticated(true);
           loadStats();
@@ -157,7 +157,7 @@ export default function AdminPage() {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as { success: boolean; error?: string };
         if (data.success) {
           setIsAuthenticated(true);
           setPassword("");

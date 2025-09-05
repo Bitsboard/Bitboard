@@ -111,3 +111,49 @@ export const adminRateLimiter = createRateLimiter({
     return `admin:${ip}`;
   }
 });
+
+// Export rate limiters object for middleware
+export const rateLimiters = {
+  auth: authRateLimiter,
+  api: apiRateLimiter,
+  admin: adminRateLimiter,
+  chat: createRateLimiter({
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 50, // 50 requests per minute
+  }),
+  listings: createRateLimiter({
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 10, // 10 requests per minute
+  }),
+  search: createRateLimiter({
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 30, // 30 requests per minute
+  }),
+};
+
+// Higher-order function for rate limiting
+export function withRateLimit(rateLimiter: ReturnType<typeof createRateLimiter>) {
+  return async (req: Request): Promise<Response | null> => {
+    const result = await rateLimiter(req);
+    if (!result.allowed) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Rate limit exceeded',
+          retryAfter: Math.ceil((result.resetTime - Date.now()) / 1000)
+        }),
+        {
+          status: 429,
+          headers: {
+            'Retry-After': Math.ceil((result.resetTime - Date.now()) / 1000).toString(),
+            'X-RateLimit-Limit': '100',
+            'X-RateLimit-Remaining': result.remaining.toString(),
+            'X-RateLimit-Reset': result.resetTime.toString(),
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
+    return null;
+  };
+}
