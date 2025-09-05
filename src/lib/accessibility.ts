@@ -8,6 +8,10 @@ export interface AccessibilityProps {
   'aria-hidden'?: boolean;
   'aria-live'?: 'off' | 'polite' | 'assertive';
   'aria-atomic'?: boolean;
+  'aria-required'?: boolean;
+  'aria-invalid'?: boolean;
+  'aria-modal'?: boolean;
+  'aria-selected'?: boolean;
   'role'?: string;
   'tabIndex'?: number;
 }
@@ -21,6 +25,10 @@ export function createAccessibilityProps(props: Partial<AccessibilityProps>): Ac
     'aria-hidden': props['aria-hidden'],
     'aria-live': props['aria-live'],
     'aria-atomic': props['aria-atomic'],
+    'aria-required': props['aria-required'],
+    'aria-invalid': props['aria-invalid'],
+    'aria-modal': props['aria-modal'],
+    'aria-selected': props['aria-selected'],
     'role': props['role'],
     'tabIndex': props['tabIndex'],
   };
