@@ -374,8 +374,17 @@ function CumulativeLineChart({ data, color, title }: {
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
     
-    // Only show tooltip if mouse is within chart area
-    if (mouseX < 40 || mouseX > 380 || mouseY < 20 || mouseY > 180) {
+    // Convert mouse coordinates to SVG viewBox coordinates
+    const svgWidth = rect.width;
+    const svgHeight = rect.height;
+    const viewBoxWidth = 400;
+    const viewBoxHeight = 200;
+    
+    const svgMouseX = (mouseX / svgWidth) * viewBoxWidth;
+    const svgMouseY = (mouseY / svgHeight) * viewBoxHeight;
+    
+    // Only show tooltip if mouse is within chart area (in viewBox coordinates)
+    if (svgMouseX < 40 || svgMouseX > 380 || svgMouseY < 20 || svgMouseY > 180) {
       setHoveredPoint(null);
       return;
     }
@@ -387,13 +396,13 @@ function CumulativeLineChart({ data, color, title }: {
     cumulativeData.forEach((point, index) => {
       const dateTime = new Date(point.date).getTime();
       const x = 40 + ((dateTime - minDate) / timeRange) * 340;
-      const distance = Math.abs(x - mouseX);
+      const distance = Math.abs(x - svgMouseX);
       
       if (distance < minDistance) {
         minDistance = distance;
         closestPoint = {
-          x: mouseX + 16, // Offset from cursor
-          y: mouseY - 16, // Offset from cursor
+          x: mouseX + 16, // Use actual mouse position for tooltip
+          y: mouseY - 16, // Use actual mouse position for tooltip
           value: point.cumulative,
           date: point.date
         };
