@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface AnalyticsData {
   totalUsers: number;
@@ -29,6 +30,7 @@ interface ApiResponse {
 }
 
 export default function AnalyticsPage() {
+  const router = useRouter();
   const [data, setData] = useState<AnalyticsData>({
     totalUsers: 0,
     totalListings: 0,
@@ -207,6 +209,16 @@ export default function AnalyticsPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
+        {/* Back to Dashboard Button */}
+        <div className="flex gap-3 mb-6">
+          <button
+            onClick={() => router.push('/admin')}
+            className="px-3 py-1.5 bg-orange-500 text-white rounded text-sm hover:bg-orange-600 transition-colors"
+          >
+            ← Back to dashboard
+          </button>
+        </div>
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
           <p className="mt-2 text-gray-600">Overview of platform metrics and user activity</p>
@@ -362,21 +374,20 @@ function CumulativeLineChart({ data, color, title }: {
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
     
-    // Find the closest point
+    // Find the closest point based on x-position only
     let closestPoint = null;
     let minDistance = Infinity;
     
     cumulativeData.forEach((point, index) => {
       const dateTime = new Date(point.date).getTime();
       const x = 40 + ((dateTime - minDate) / timeRange) * 340;
-      const y = 20 + 160 - ((point.cumulative - minValue) / range) * 160;
-      const distance = Math.sqrt(Math.pow(x - mouseX, 2) + Math.pow(y - mouseY, 2));
+      const distance = Math.abs(x - mouseX);
       
-      if (distance < minDistance && distance < 30) {
+      if (distance < minDistance) {
         minDistance = distance;
         closestPoint = {
-          x: mouseX + rect.left, // Use actual mouse position
-          y: mouseY + rect.top,  // Use actual mouse position
+          x: e.clientX, // Use actual mouse position
+          y: e.clientY, // Use actual mouse position
           value: point.cumulative,
           date: point.date
         };
