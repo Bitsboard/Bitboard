@@ -29,7 +29,7 @@ export function ChatHeader({ listing, otherUser, onClose, dark, btcCad, unit }: 
       <div className="flex items-center space-x-3">
         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center">
           <span className="text-white font-bold text-sm">
-            {otherUser.username?.charAt(0).toUpperCase() || 'U'}
+            {otherUser.handle?.charAt(0).toUpperCase() || 'U'}
           </span>
         </div>
         <div>
@@ -37,7 +37,7 @@ export function ChatHeader({ listing, otherUser, onClose, dark, btcCad, unit }: 
             "font-semibold text-sm",
             dark ? "text-white" : "text-neutral-900"
           )}>
-            {otherUser.username || 'Unknown User'}
+            {otherUser.handle || 'Unknown User'}
           </h3>
           <p className={cn(
             "text-xs",
