@@ -87,24 +87,19 @@ export default function AnalyticsPage() {
     const minDate = new Date(Math.min(...allDates.map(d => d.getTime())));
     const maxDate = new Date(Math.max(...allDates.map(d => d.getTime())));
     
-    // Generate daily data points
-    const chartData: ChartData[] = [];
+    // Generate daily data points for users (CUMULATIVE)
+    const userChartData: ChartData[] = [];
     const currentDate = new Date(minDate);
     
     while (currentDate <= maxDate) {
       const dateStr = currentDate.toISOString().split('T')[0];
       
-      // Count users created up to this date
+      // Count users created up to this date (CUMULATIVE)
       const usersUpToDate = users.filter(user => 
         new Date(user.createdAt || user.created_at) <= currentDate
       ).length;
       
-      // Count listings created up to this date
-      const listingsUpToDate = listings.filter(listing => 
-        new Date(listing.createdAt) <= currentDate
-      ).length;
-      
-      chartData.push({
+      userChartData.push({
         date: dateStr,
         value: usersUpToDate
       });
@@ -112,15 +107,16 @@ export default function AnalyticsPage() {
       currentDate.setDate(currentDate.getDate() + 1);
     }
     
-    setUserChartData(chartData);
+    setUserChartData(userChartData);
     
-    // Generate listing chart data
+    // Generate daily data points for listings (CUMULATIVE)
     const listingChartData: ChartData[] = [];
     const currentDate2 = new Date(minDate);
     
     while (currentDate2 <= maxDate) {
       const dateStr = currentDate2.toISOString().split('T')[0];
       
+      // Count listings created up to this date (CUMULATIVE)
       const listingsUpToDate = listings.filter(listing => 
         new Date(listing.createdAt) <= currentDate2
       ).length;
