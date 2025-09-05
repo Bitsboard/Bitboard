@@ -36,31 +36,31 @@ export async function GET(req: NextRequest) {
       // Total offers
       db.prepare("SELECT COUNT(*) as count FROM offers").first(),
       
-      // Active users in last 24h
-      db.prepare("SELECT COUNT(*) as count FROM users WHERE last_active > ?").bind(now - (24 * 60 * 60)).first(),
+      // Active users in last 7 days
+      db.prepare("SELECT COUNT(*) as count FROM users WHERE last_active > ?").bind(now - (7 * 24 * 60 * 60)).first(),
       
       // New listings in last 7 days
       db.prepare("SELECT COUNT(*) as count FROM listings WHERE created_at > ?").bind(now - (7 * 24 * 60 * 60)).first()
     ]);
 
-    // Get simple user growth data
+    // Get weekly user growth data
     const userGrowthResult = await db.prepare(`
       SELECT 
-        DATE(datetime(created_at, 'unixepoch')) as date,
+        DATE(datetime(created_at, 'unixepoch'), 'weekday 0', '-6 days') as week_start,
         COUNT(*) as users
       FROM users 
-      GROUP BY DATE(datetime(created_at, 'unixepoch'))
-      ORDER BY date ASC
+      GROUP BY DATE(datetime(created_at, 'unixepoch'), 'weekday 0', '-6 days')
+      ORDER BY week_start ASC
     `).all();
 
-    // Get simple listing growth data
+    // Get weekly listing growth data
     const listingGrowthResult = await db.prepare(`
       SELECT 
-        DATE(datetime(created_at, 'unixepoch')) as date,
+        DATE(datetime(created_at, 'unixepoch'), 'weekday 0', '-6 days') as week_start,
         COUNT(*) as listings
       FROM listings 
-      GROUP BY DATE(datetime(created_at, 'unixepoch'))
-      ORDER BY date ASC
+      GROUP BY DATE(datetime(created_at, 'unixepoch'), 'weekday 0', '-6 days')
+      ORDER BY week_start ASC
     `).all();
 
     // Build simple analytics data
@@ -74,11 +74,11 @@ export async function GET(req: NextRequest) {
         totalOffers: (totalOffers as any)?.count || 0
       },
       userGrowth: (userGrowthResult.results || []).map((row: any) => ({
-        date: row.date,
+        date: row.week_start,
         users: row.users
       })),
       listingGrowth: (listingGrowthResult.results || []).map((row: any) => ({
-        date: row.date,
+        date: row.week_start,
         listings: row.listings
       }))
     };
