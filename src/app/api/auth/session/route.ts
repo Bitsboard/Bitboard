@@ -57,11 +57,7 @@ export async function GET(req: Request) {
       } : null,
     };
 
-    return NextResponse.json({
-      userId: session.user.id,
-      email: session.user.email,
-      hasAccount: !!session.account
-    });
+    return NextResponse.json({ session });
   } catch (error) {
     return new Response(JSON.stringify({ session: null }), { status: 200, headers: { 'content-type': 'application/json' } });
   }
