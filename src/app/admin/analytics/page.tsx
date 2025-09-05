@@ -338,80 +338,71 @@ function CumulativeLineChart({ data, color, title }: {
     return <NoDataMessage />;
   }
 
-  const maxValue = Math.max(...data.map(d => d.users || d.listings || 0));
+  // Make it cumulative
+  let cumulative = 0;
+  const cumulativeData = data.map(point => {
+    cumulative += point.users || point.listings || 0;
+    return { ...point, cumulative };
+  });
+
+  const maxValue = Math.max(...cumulativeData.map(d => d.cumulative));
   const minValue = 0;
   const range = maxValue - minValue || 1;
 
-  const width = 100;
-  const height = 100;
-  const padding = 10;
-
-  const points = data.map((point, index) => {
-    const x = padding + (index / Math.max(1, data.length - 1)) * (width - padding * 2);
-    const y = padding + height - padding * 2 - ((point.users || point.listings || 0) - minValue) / range * (height - padding * 2);
-    return { x, y, value: point.users || point.listings || 0, date: point.date };
-  });
-
-  const pathData = points.map((point, index) => {
-    if (index === 0) return `M ${point.x} ${point.y}`;
-    return `L ${point.x} ${point.y}`;
-  }).join(' ');
-
-  const areaPathData = `${pathData} L ${points[points.length - 1].x} ${padding + height - padding * 2} L ${points[0].x} ${padding + height - padding * 2} Z`;
-
   return (
-    <div className="h-full w-full">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full">
+    <div className="h-full w-full p-4">
+      <svg viewBox="0 0 400 200" className="w-full h-full">
         {/* Grid lines */}
         {[0, 0.25, 0.5, 0.75, 1].map((ratio) => (
           <line
             key={ratio}
-            x1={padding}
-            y1={padding + ratio * (height - padding * 2)}
-            x2={width - padding}
-            y2={padding + ratio * (height - padding * 2)}
+            x1="40"
+            y1={20 + ratio * 160}
+            x2="380"
+            y2={20 + ratio * 160}
             stroke="#F3F4F6"
-            strokeWidth={0.5}
-          />
-        ))}
-        
-        {/* Area */}
-        <path
-          d={areaPathData}
-          fill={color}
-          opacity={0.1}
-        />
-        
-        {/* Line */}
-        <path
-          d={pathData}
-          fill="none"
-          stroke={color}
-          strokeWidth={2}
-        />
-        
-        {/* Points */}
-        {points.map((point, index) => (
-          <circle
-            key={index}
-            cx={point.x}
-            cy={point.y}
-            r={2}
-            fill={color}
-            stroke="white"
             strokeWidth={1}
           />
         ))}
+        
+        {/* Data points and line */}
+        {cumulativeData.map((point, index) => {
+          const x = 40 + (index / Math.max(1, cumulativeData.length - 1)) * 340;
+          const y = 20 + 160 - ((point.cumulative - minValue) / range) * 160;
+          
+          return (
+            <g key={index}>
+              <circle
+                cx={x}
+                cy={y}
+                r={3}
+                fill={color}
+                stroke="white"
+                strokeWidth={2}
+              />
+              {index > 0 && (
+                <line
+                  x1={40 + ((index - 1) / Math.max(1, cumulativeData.length - 1)) * 340}
+                  y1={20 + 160 - ((cumulativeData[index - 1].cumulative - minValue) / range) * 160}
+                  x2={x}
+                  y2={y}
+                  stroke={color}
+                  strokeWidth={2}
+                />
+              )}
+            </g>
+          );
+        })}
         
         {/* Y-axis labels */}
         {[maxValue, maxValue * 0.75, maxValue * 0.5, maxValue * 0.25, 0].map((value, index) => (
           <text
             key={index}
-            x={padding - 8}
-            y={padding + (index / 4) * (height - padding * 2) + 4}
+            x="35"
+            y={20 + (index / 4) * 160 + 4}
             textAnchor="end"
             className="text-xs fill-gray-500"
-            fontSize="10"
+            fontSize="12"
           >
             {Math.round(value).toLocaleString()}
           </text>
