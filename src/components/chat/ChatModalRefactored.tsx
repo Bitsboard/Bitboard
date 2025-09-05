@@ -176,7 +176,7 @@ export function ChatModalRefactored({
                     <OfferMessage
                       key={offer.id}
                       offer={offer}
-                      isCurrentUser={user?.id === offer.from_user_id}
+                      currentUserId={user?.id || ''}
                       onAction={handleOfferAction}
                       dark={dark}
                       btcCad={btcCad}
