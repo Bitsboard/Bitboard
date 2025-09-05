@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withRateLimit, rateLimiters } from "@/lib/security/rateLimiter";
 import { withSecurity, SecurityMonitor } from "@/lib/security/securityMonitor";
 
-export function applyAPISecurity(req: Request, endpoint: string) {
+export function applyAPISecurity(req: Request, endpoint: string): Response | undefined {
   // Apply security checks first
   const securityCheck = withSecurity(req);
   if (securityCheck) {
@@ -41,7 +41,7 @@ export function applyAPISecurity(req: Request, endpoint: string) {
     return rateLimitCheck;
   }
 
-  return null; // No security issues
+  return undefined; // No security issues
 }
 
 /**

@@ -133,7 +133,7 @@ export const rateLimiters = {
 
 // Higher-order function for rate limiting
 export function withRateLimit(rateLimiter: ReturnType<typeof createRateLimiter>) {
-  return async (req: Request): Promise<Response | null> => {
+  return async (req: Request): Promise<Response | undefined> => {
     const result = await rateLimiter(req);
     if (!result.allowed) {
       return new Response(
@@ -154,6 +154,6 @@ export function withRateLimit(rateLimiter: ReturnType<typeof createRateLimiter>)
         }
       );
     }
-    return null;
+    return undefined;
   };
 }

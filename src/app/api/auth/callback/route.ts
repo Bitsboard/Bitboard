@@ -5,7 +5,7 @@ import { getRequestContext } from '@cloudflare/next-on-pages';
 import { applyAPISecurity, secureResponse, logAPIUsage } from '@/lib/middleware/apiSecurity';
 import { SecurityMonitor } from '@/lib/security/securityMonitor';
 
-export async function GET(req: Request) {
+export async function GET(req: Request): Promise<Response> {
   const startTime = Date.now();
   const endpoint = '/api/auth/callback';
   
