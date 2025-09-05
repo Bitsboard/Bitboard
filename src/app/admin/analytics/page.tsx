@@ -47,7 +47,7 @@ export default function AnalyticsPage() {
       let hasMoreUsers = true;
       while (hasMoreUsers) {
         const usersResponse = await fetch(`/api/admin/users/list?page=${page}&limit=100`);
-        const usersData = await usersResponse.json();
+        const usersData = await usersResponse.json() as { success?: boolean; users?: any[]; total?: number };
         
         if (usersData.success && usersData.users) {
           allUsers = [...allUsers, ...usersData.users];
@@ -63,7 +63,7 @@ export default function AnalyticsPage() {
       let hasMoreListings = true;
       while (hasMoreListings) {
         const listingsResponse = await fetch(`/api/admin/listings/list?page=${page}&limit=100`);
-        const listingsData = await listingsResponse.json();
+        const listingsData = await listingsResponse.json() as { success?: boolean; listings?: any[]; total?: number };
         
         if (listingsData.success && listingsData.listings) {
           allListings = [...allListings, ...listingsData.listings];
