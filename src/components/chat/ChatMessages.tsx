@@ -98,7 +98,7 @@ export function ChatMessages({ messages, currentUser, dark, isLoading }: ChatMes
       dark ? "bg-neutral-900" : "bg-neutral-50"
     )}>
       {messages.map((message, index) => {
-        const isCurrentUser = currentUser && message.sender_id === currentUser.id;
+        const isCurrentUser = currentUser && message.from_id === currentUser.id;
         const previousMessage = index > 0 ? messages[index - 1] : null;
         const showTimestamp = shouldShowTimestamp(message, previousMessage);
 
