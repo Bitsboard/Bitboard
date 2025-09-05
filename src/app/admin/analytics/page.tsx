@@ -352,6 +352,8 @@ export default function AnalyticsPage() {
 
 // Smooth line chart component
 function SmoothLineChart({ data, color }: { data: ChartData[], color: string }) {
+  const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; value: number; date: string } | null>(null);
+
   if (!data || data.length === 0) {
     return (
       <div className="h-full flex items-center justify-center text-gray-500">
@@ -380,11 +382,12 @@ function SmoothLineChart({ data, color }: { data: ChartData[], color: string }) 
     purple: 'fill-purple-500'
   };
 
-  const width = 400;
-  const height = 200;
-  const padding = 40;
-  const chartWidth = width - (padding * 2);
-  const chartHeight = height - (padding * 2);
+  // Make chart fill the full container
+  const width = 100; // Use percentage
+  const height = 100; // Use percentage
+  const padding = 8; // Reduced padding for more chart space
+  const chartWidth = 100 - (padding * 2);
+  const chartHeight = 100 - (padding * 2);
 
   // Generate smooth path
   const points = data.map((point, index) => {
@@ -415,9 +418,40 @@ function SmoothLineChart({ data, color }: { data: ChartData[], color: string }) 
   // Create area path
   const areaPathData = `${pathData} L ${points[points.length - 1].x} ${padding + chartHeight} L ${points[0].x} ${padding + chartHeight} Z`;
 
+  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const mouseX = ((e.clientX - rect.left) / rect.width) * 100; // Convert to percentage
+    const mouseY = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    // Find the closest point
+    let closestPoint = null;
+    let minDistance = Infinity;
+    
+    points.forEach(point => {
+      const distance = Math.sqrt(Math.pow(point.x - mouseX, 2) + Math.pow(point.y - mouseY, 2));
+      if (distance < minDistance && distance < 5) { // 5% threshold
+        minDistance = distance;
+        closestPoint = point;
+      }
+    });
+    
+    setHoveredPoint(closestPoint);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredPoint(null);
+  };
+
   return (
-    <div className="h-full flex flex-col">
-      <svg width={width} height={height} className="w-full h-full">
+    <div className="h-full flex flex-col relative">
+      <svg 
+        width="100%" 
+        height="100%" 
+        viewBox="0 0 100 100" 
+        className="w-full h-full"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
         {/* Grid lines */}
         {[0, 0.25, 0.5, 0.75, 1].map((ratio) => (
           <line
@@ -427,7 +461,7 @@ function SmoothLineChart({ data, color }: { data: ChartData[], color: string }) 
             x2={padding + chartWidth}
             y2={padding + ratio * chartHeight}
             stroke="currentColor"
-            strokeWidth={1}
+            strokeWidth={0.5}
             className="text-gray-200"
           />
         ))}
@@ -442,25 +476,60 @@ function SmoothLineChart({ data, color }: { data: ChartData[], color: string }) 
         <path
           d={pathData}
           fill="none"
-          strokeWidth={3}
+          strokeWidth={1.5}
           className={colorClasses[color as keyof typeof colorClasses]}
         />
         
-        {/* No dots - just clean lines */}
+        {/* Hover indicator */}
+        {hoveredPoint && (
+          <g>
+            <circle
+              cx={hoveredPoint.x}
+              cy={hoveredPoint.y}
+              r={2}
+              className={`${fillClasses[color as keyof typeof fillClasses]}`}
+            />
+            <line
+              x1={hoveredPoint.x}
+              y1={padding}
+              x2={hoveredPoint.x}
+              y2={padding + chartHeight}
+              stroke="currentColor"
+              strokeWidth={0.5}
+              className="text-gray-300"
+            />
+          </g>
+        )}
         
         {/* Y-axis labels */}
         {[maxValue, maxValue * 0.75, maxValue * 0.5, maxValue * 0.25, 0].map((value, index) => (
           <text
             key={index}
-            x={padding - 10}
-            y={padding + (index / 4) * chartHeight + 4}
+            x={padding - 2}
+            y={padding + (index / 4) * chartHeight + 1}
             textAnchor="end"
             className="text-xs fill-gray-600"
+            fontSize="3"
           >
             {Math.round(value).toLocaleString()}
           </text>
         ))}
       </svg>
+      
+      {/* Tooltip */}
+      {hoveredPoint && (
+        <div 
+          className="absolute bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg pointer-events-none z-10"
+          style={{
+            left: `${hoveredPoint.x}%`,
+            top: `${hoveredPoint.y - 8}%`,
+            transform: 'translateX(-50%)'
+          }}
+        >
+          <div className="font-semibold">{hoveredPoint.value.toLocaleString()}</div>
+          <div className="text-gray-300">{new Date(hoveredPoint.date).toLocaleDateString()}</div>
+        </div>
+      )}
     </div>
   );
 }
