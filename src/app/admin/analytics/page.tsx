@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Chart } from '@/components/Chart';
 
 interface StatsData {
   totalUsers: number;
@@ -10,68 +9,71 @@ interface StatsData {
   newListings: number;
 }
 
-interface TimeSeriesData {
+interface ChartData {
   date: string;
   value: number;
-  label?: string;
 }
 
 export default function AnalyticsPage() {
-  const [userChartData, setUserChartData] = useState<TimeSeriesData[]>([]);
-  const [listingChartData, setListingChartData] = useState<TimeSeriesData[]>([]);
   const [stats, setStats] = useState<StatsData>({
     totalUsers: 0,
     totalListings: 0,
     activeUsers: 0,
     newListings: 0
   });
+  const [userData, setUserData] = useState<ChartData[]>([]);
+  const [listingData, setListingData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [timeframe, setTimeframe] = useState<'7d' | '30d' | '90d' | 'all'>('30d');
+  const [timeframe, setTimeframe] = useState('30d');
 
-  const loadChartData = async (type: 'users' | 'listings', timeframe: string) => {
-    try {
-      const response = await fetch(`/api/admin/analytics/chart?type=${type}&timeframe=${timeframe}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json() as { data?: TimeSeriesData[] };
-      return data.data || [];
-    } catch (error) {
-      console.error(`Failed to load ${type} chart data:`, error);
-      return [];
-    }
-  };
-
+  // Load stats data
   const loadStats = async () => {
     try {
-      const response = await fetch('/api/admin/analytics/stats');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const response = await fetch('/api/admin/stats');
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
       }
-      const data = await response.json() as StatsData;
-      setStats(data);
     } catch (error) {
       console.error('Failed to load stats:', error);
-      // Keep default values (0) on error
     }
   };
 
+  // Load chart data
+  const loadChartData = async (type: 'users' | 'listings') => {
+    try {
+      const response = await fetch(`/api/admin/chart?type=${type}&timeframe=${timeframe}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data.data || [];
+      }
+    } catch (error) {
+      console.error(`Failed to load ${type} data:`, error);
+    }
+    return [];
+  };
+
+  // Load all data
   const loadAllData = async () => {
     setLoading(true);
     try {
-      const [userData, listingData] = await Promise.all([
-        loadChartData('users', timeframe),
-        loadChartData('listings', timeframe)
-      ]);
-      
-      setUserChartData(userData);
-      setListingChartData(listingData);
       await loadStats();
+      const [users, listings] = await Promise.all([
+        loadChartData('users'),
+        loadChartData('listings')
+      ]);
+      setUserData(users);
+      setListingData(listings);
     } catch (error) {
       console.error('Failed to load data:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handle timeframe change
+  const handleTimeframeChange = (newTimeframe: string) => {
+    setTimeframe(newTimeframe);
   };
 
   useEffect(() => {
@@ -82,24 +84,13 @@ export default function AnalyticsPage() {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
-            <p className="text-gray-600 mt-2">Loading analytics data...</p>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">Analytics Dashboard</h1>
           <div className="animate-pulse">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="bg-white rounded-lg shadow p-6">
                   <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
                   <div className="h-8 bg-gray-200 rounded w-1/2"></div>
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {[1, 2].map((i) => (
-                <div key={i} className="bg-white rounded-lg shadow p-6">
-                  <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
-                  <div className="h-64 bg-gray-200 rounded"></div>
                 </div>
               ))}
             </div>
@@ -112,11 +103,7 @@ export default function AnalyticsPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
-          <p className="text-gray-600 mt-2">Monitor your platform's performance and growth</p>
-        </div>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Analytics Dashboard</h1>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -192,10 +179,10 @@ export default function AnalyticsPage() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">User Growth</h3>
               <div className="flex space-x-2">
-                {(['7d', '30d', '90d', 'all'] as const).map((period) => (
+                {['7d', '30d', '90d', 'all'].map((period) => (
                   <button
                     key={period}
-                    onClick={() => setTimeframe(period)}
+                    onClick={() => handleTimeframeChange(period)}
                     className={`px-3 py-1 text-sm rounded-md ${
                       timeframe === period
                         ? 'bg-blue-500 text-white'
@@ -207,13 +194,19 @@ export default function AnalyticsPage() {
                 ))}
               </div>
             </div>
-            <div className="h-64">
-              <Chart
-                data={userChartData}
-                type="timeseries"
-                title="User Growth"
-                dataType="users"
-              />
+            <div className="h-64 flex items-center justify-center">
+              {userData.length > 0 ? (
+                <div className="w-full">
+                  <div className="text-sm text-gray-600 mb-2">
+                    Total Users: {userData[userData.length - 1]?.value || 0}
+                  </div>
+                  <div className="h-48 bg-gray-50 rounded flex items-center justify-center">
+                    <div className="text-gray-500">Chart visualization coming soon</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-gray-500">No data available</div>
+              )}
             </div>
           </div>
 
@@ -222,10 +215,10 @@ export default function AnalyticsPage() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">Listing Growth</h3>
               <div className="flex space-x-2">
-                {(['7d', '30d', '90d', 'all'] as const).map((period) => (
+                {['7d', '30d', '90d', 'all'].map((period) => (
                   <button
                     key={period}
-                    onClick={() => setTimeframe(period)}
+                    onClick={() => handleTimeframeChange(period)}
                     className={`px-3 py-1 text-sm rounded-md ${
                       timeframe === period
                         ? 'bg-green-500 text-white'
@@ -237,13 +230,19 @@ export default function AnalyticsPage() {
                 ))}
               </div>
             </div>
-            <div className="h-64">
-              <Chart
-                data={listingChartData}
-                type="timeseries"
-                title="Listing Growth"
-                dataType="listings"
-              />
+            <div className="h-64 flex items-center justify-center">
+              {listingData.length > 0 ? (
+                <div className="w-full">
+                  <div className="text-sm text-gray-600 mb-2">
+                    Total Listings: {listingData[listingData.length - 1]?.value || 0}
+                  </div>
+                  <div className="h-48 bg-gray-50 rounded flex items-center justify-center">
+                    <div className="text-gray-500">Chart visualization coming soon</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-gray-500">No data available</div>
+              )}
             </div>
           </div>
         </div>

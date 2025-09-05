@@ -1,278 +1,51 @@
-import '@/shims/async_hooks';
-import { NextResponse } from "next/server";
-import { getD1, ensureChatSchema } from '@/lib/cf';
+import { NextRequest, NextResponse } from "next/server";
+import { getD1 } from "@/lib/cf";
 
-export const runtime = "edge";
+export const runtime = 'edge';
 
-export async function GET(req: Request) {
+export async function GET(request: NextRequest) {
   try {
     const db = await getD1();
     if (!db) {
-      return NextResponse.json({ error: 'no_db_binding' }, { status: 500 });
+      return NextResponse.json({ error: "Database not available" }, { status: 500 });
     }
-
-    // Get pagination and filter parameters
-    const url = new URL(req.url);
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const limit = parseInt(url.searchParams.get('limit') || '20');
-    const offset = (page - 1) * limit;
-    const filter = url.searchParams.get('filter') || 'all';
-
-    // Ensure chat schema exists
-    await ensureChatSchema(db);
-
-    // Get user statistics
-    const userStats = await db.prepare(`
-      SELECT 
-        COUNT(*) as total_users,
-        COUNT(CASE WHEN verified = 1 THEN 1 END) as verified_users,
-        COUNT(CASE WHEN is_admin = 1 THEN 1 END) as admin_users,
-        COUNT(CASE WHEN banned = 1 THEN 1 END) as banned_users,
-        COUNT(CASE WHEN created_at >= strftime('%s', 'now', '-7 days') THEN 1 END) as new_users_7d,
-        COUNT(CASE WHEN created_at >= strftime('%s', 'now', '-30 days') THEN 1 END) as new_users_30d
-      FROM users
-    `).all();
-
-    // Get listing statistics
-    const listingStats = await db.prepare(`
-      SELECT 
-        COUNT(*) as total_listings,
-        COUNT(CASE WHEN status = 'active' THEN 1 END) as active_listings,
-        COUNT(CASE WHEN status = 'sold' THEN 1 END) as sold_listings,
-        COUNT(CASE WHEN created_at >= strftime('%s', 'now', '-7 days') THEN 1 END) as new_listings_7d,
-        COUNT(CASE WHEN created_at >= strftime('%s', 'now', '-30 days') THEN 1 END) as new_listings_30d,
-        AVG(price_sat) as avg_price_sats,
-        SUM(CASE WHEN status = 'active' THEN price_sat ELSE 0 END) as total_value_active
-      FROM listings
-    `).all();
-
-    // Get chat statistics
-    const chatStats = await db.prepare(`
-      SELECT 
-        COUNT(*) as total_chats,
-        COUNT(CASE WHEN created_at >= strftime('%s', 'now', '-7 days') THEN 1 END) as new_chats_7d,
-        COUNT(CASE WHEN created_at >= strftime('%s', 'now', '-30 days') THEN 1 END) as new_chats_30d
-      FROM chats
-    `).all();
-
-    // Get message statistics
-    const messageStats = await db.prepare(`
-      SELECT 
-        COUNT(*) as total_messages,
-        COUNT(CASE WHEN created_at >= strftime('%s', 'now', '-7 days') THEN 1 END) as new_messages_7d,
-        COUNT(CASE WHEN created_at >= strftime('%s', 'now', '-30 days') THEN 1 END) as new_messages_30d,
-        COUNT(CASE WHEN read_at IS NULL OR read_at = 0 THEN 1 END) as unread_messages
-      FROM messages
-    `).all();
-
-    // Get offer statistics
-    const offerStats = await db.prepare(`
-      SELECT 
-        COUNT(*) as total_offers,
-        COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_offers,
-        COUNT(CASE WHEN status = 'accepted' THEN 1 END) as accepted_offers,
-        COUNT(CASE WHEN status = 'declined' THEN 1 END) as declined_offers,
-        COUNT(CASE WHEN status = 'revoked' THEN 1 END) as revoked_offers,
-        COUNT(CASE WHEN status = 'expired' THEN 1 END) as expired_offers,
-        COUNT(CASE WHEN created_at >= strftime('%s', 'now', '-7 days') THEN 1 END) as new_offers_7d,
-        COUNT(CASE WHEN created_at >= strftime('%s', 'now', '-30 days') THEN 1 END) as new_offers_30d,
-        AVG(amount_sat) as avg_offer_amount
-      FROM offers
-    `).all();
     
+    // Get total users
+    const totalUsersResult = await db.prepare(`SELECT COUNT(*) as count FROM users`).first();
+    const totalUsers = Number(totalUsersResult?.count || 0);
 
-    // Get recent activity with more comprehensive queries
-    const recentActivity = await db.prepare(`
-      SELECT 
-        'user' as type,
-        u.username as username,
-        u.id as user_id,
-        u.email as email,
-        'created account' as action,
-        u.created_at as timestamp,
-        NULL as listing_title,
-        NULL as listing_id,
-        NULL as other_username,
-        NULL as chat_id,
-        NULL as message_count
-      FROM users u
-      WHERE u.created_at >= strftime('%s', 'now', '-7 days')
-      ORDER BY u.created_at DESC
-      LIMIT 20
-    `).all();
+    // Get total listings
+    const totalListingsResult = await db.prepare(`SELECT COUNT(*) as count FROM listings`).first();
+    const totalListings = Number(totalListingsResult?.count || 0);
 
-    const recentListings = await db.prepare(`
-      SELECT 
-        'listing' as type,
-        u.username as username,
-        u.id as user_id,
-        u.email as email,
-        'listed' as action,
-        l.created_at as timestamp,
-        l.title as listing_title,
-        l.id as listing_id,
-        NULL as other_username,
-        NULL as chat_id,
-        NULL as message_count
-      FROM listings l
-      JOIN users u ON l.posted_by = u.id
-      WHERE l.created_at >= strftime('%s', 'now', '-7 days')
-      ORDER BY l.created_at DESC
-      LIMIT 20
-    `).all();
+    // Get active users (users who created listings in last 7 days)
+    const activeUsersResult = await db.prepare(`
+      SELECT COUNT(DISTINCT seller_id) as count 
+      FROM listings 
+      WHERE created_at > datetime('now', '-7 days')
+    `).first();
+    const activeUsers = Number(activeUsersResult?.count || 0);
 
-    // Get only the most recent message per conversation
-    const recentMessages = await db.prepare(`
-      SELECT 
-        'message' as type,
-        u.username as username,
-        u.id as user_id,
-        u.email as email,
-        'messaged' as action,
-        m.created_at as timestamp,
-        l.title as listing_title,
-        l.id as listing_id,
-        CASE 
-          WHEN c.buyer_id = m.from_id THEN 
-            (SELECT username FROM users WHERE id = c.seller_id)
-          ELSE 
-            (SELECT username FROM users WHERE id = c.buyer_id)
-        END as other_username,
-        CASE 
-          WHEN c.buyer_id = m.from_id THEN c.seller_id
-          ELSE c.buyer_id
-        END as other_user_id,
-        m.chat_id as chat_id,
-        (SELECT COUNT(*) FROM messages WHERE chat_id = m.chat_id) as message_count,
-        NULL as offer_amount,
-        NULL as offer_expires_at,
-        NULL as offer_status
-      FROM messages m
-      JOIN users u ON m.from_id = u.id
-      JOIN chats c ON m.chat_id = c.id
-      JOIN listings l ON c.listing_id = l.id
-      WHERE m.id = (
-        SELECT id FROM messages 
-        WHERE chat_id = m.chat_id 
-        ORDER BY created_at DESC 
-        LIMIT 1
-      )
-      AND m.created_at >= strftime('%s', 'now', '-7 days')
-      ORDER BY m.created_at DESC
-      LIMIT 20
-    `).all();
+    // Get new listings (created in last 7 days)
+    const newListingsResult = await db.prepare(`
+      SELECT COUNT(*) as count 
+      FROM listings 
+      WHERE created_at > datetime('now', '-7 days')
+    `).first();
+    const newListings = Number(newListingsResult?.count || 0);
 
-    // Get ALL offer activity (not just recent ones)
-    const recentOffers = await db.prepare(`
-      SELECT 
-        'offer' as type,
-        from_user.username as username,
-        from_user.id as user_id,
-        from_user.email as email,
-        CASE 
-          WHEN o.status = 'pending' THEN 'offered'
-          WHEN o.status = 'accepted' THEN 'accepted offer'
-          WHEN o.status = 'declined' THEN 'declined offer'
-          WHEN o.status = 'revoked' THEN 'revoked offer'
-          WHEN o.status = 'expired' THEN 'offer expired'
-          ELSE 'offer action'
-        END as action,
-        CASE 
-          WHEN o.status = 'pending' THEN o.created_at
-          ELSE o.updated_at
-        END as timestamp,
-        l.title as listing_title,
-        l.id as listing_id,
-        to_user.username as other_username,
-        o.to_user_id as other_user_id,
-        o.chat_id as chat_id,
-        NULL as message_count,
-        o.amount_sat as offer_amount,
-        o.expires_at as offer_expires_at,
-        o.status as offer_status
-      FROM offers o
-      JOIN users from_user ON o.from_user_id = from_user.id
-      JOIN users to_user ON o.to_user_id = to_user.id
-      JOIN chats c ON o.chat_id = c.id
-      JOIN listings l ON o.listing_id = l.id
-      ORDER BY timestamp DESC
-      LIMIT 50
-    `).all();
-    
-
-    // Combine and sort all recent activity
-    const allActivity = [
-      ...recentActivity.results || [],
-      ...recentListings.results || [],
-      ...recentMessages.results || [],
-      ...recentOffers.results || []
-    ].sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0));
-
-    // Apply filter to activity
-    const filteredActivity = allActivity.filter((activity: any) => {
-      if (filter === 'all') return true;
-      if (filter === 'users') return activity.type === 'user';
-      if (filter === 'listings') return activity.type === 'listing';
-      if (filter === 'conversations') return activity.type === 'message';
-      if (filter === 'offers') return activity.type === 'offer';
-      return true;
+    return NextResponse.json({
+      totalUsers,
+      totalListings,
+      activeUsers,
+      newListings
     });
 
-    // Apply pagination to filtered activity
-    const paginatedActivity = filteredActivity.slice(offset, offset + limit);
-    const totalActivity = filteredActivity.length;
-    const totalPages = Math.ceil(totalActivity / limit);
-
-    const stats = {
-      users: {
-        total: Number(userStats.results?.[0]?.total_users) || 0,
-        verified: Number(userStats.results?.[0]?.verified_users) || 0,
-        admin: Number(userStats.results?.[0]?.admin_users) || 0,
-        banned: Number(userStats.results?.[0]?.banned_users) || 0,
-        new7d: Number(userStats.results?.[0]?.new_users_7d) || 0,
-        new30d: Number(userStats.results?.[0]?.new_users_30d) || 0
-      },
-      listings: {
-        total: Number(listingStats.results?.[0]?.total_listings) || 0,
-        active: Number(listingStats.results?.[0]?.active_listings) || 0,
-        sold: Number(listingStats.results?.[0]?.sold_listings) || 0,
-        new7d: Number(listingStats.results?.[0]?.new_listings_7d) || 0,
-        new30d: Number(listingStats.results?.[0]?.new_listings_30d) || 0,
-        avgPriceSats: Math.round(Number(listingStats.results?.[0]?.avg_price_sats) || 0),
-        totalValueActive: Number(listingStats.results?.[0]?.total_value_active) || 0
-      },
-      conversations: {
-        total: Number(chatStats.results?.[0]?.total_chats) || 0,
-        messages: Number(messageStats.results?.[0]?.total_messages) || 0,
-        unread: Number(messageStats.results?.[0]?.unread_messages) || 0,
-        new7d: Number(chatStats.results?.[0]?.new_chats_7d) || 0,
-        new30d: Number(chatStats.results?.[0]?.new_chats_30d) || 0
-      },
-      offers: {
-        total: Number(offerStats.results?.[0]?.total_offers) || 0,
-        pending: Number(offerStats.results?.[0]?.pending_offers) || 0,
-        accepted: Number(offerStats.results?.[0]?.accepted_offers) || 0,
-        declined: Number(offerStats.results?.[0]?.declined_offers) || 0,
-        revoked: Number(offerStats.results?.[0]?.revoked_offers) || 0,
-        expired: Number(offerStats.results?.[0]?.expired_offers) || 0,
-        new7d: Number(offerStats.results?.[0]?.new_offers_7d) || 0,
-        new30d: Number(offerStats.results?.[0]?.new_offers_30d) || 0,
-        avgAmount: Math.round(Number(offerStats.results?.[0]?.avg_offer_amount) || 0)
-      },
-      recentActivity: paginatedActivity,
-      pagination: {
-        page,
-        limit,
-        total: totalActivity,
-        totalPages,
-        hasNext: page < totalPages,
-        hasPrev: page > 1
-      }
-    };
-
-    return NextResponse.json({ success: true, data: stats });
   } catch (error) {
-    console.error('Error fetching admin stats:', error);
-    return NextResponse.json({ error: 'server_error' }, { status: 500 });
+    console.error('Stats API error:', error);
+    return NextResponse.json(
+      { error: "Failed to fetch stats" },
+      { status: 500 }
+    );
   }
 }
