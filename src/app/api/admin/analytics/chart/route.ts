@@ -39,27 +39,49 @@ export async function GET(request: NextRequest) {
     let data: any[] = [];
 
     if (type === 'users') {
-      // Get user growth data
+      // Get user growth data with cumulative totals
       const result = await db.prepare(`
-        SELECT 
-          DATE(created_at) as date,
-          COUNT(*) as value
-        FROM users 
-        WHERE created_at > ${dateFilter}
-        GROUP BY DATE(created_at)
+        WITH daily_users AS (
+          SELECT 
+            DATE(created_at) as date,
+            COUNT(*) as daily_count
+          FROM users 
+          WHERE created_at > ${dateFilter}
+          GROUP BY DATE(created_at)
+        ),
+        cumulative_users AS (
+          SELECT 
+            date,
+            daily_count,
+            SUM(daily_count) OVER (ORDER BY date) as value
+          FROM daily_users
+        )
+        SELECT date, value
+        FROM cumulative_users
         ORDER BY date ASC
       `).all();
       
       data = result.results || [];
     } else if (type === 'listings') {
-      // Get listing growth data
+      // Get listing growth data with cumulative totals
       const result = await db.prepare(`
-        SELECT 
-          DATE(created_at) as date,
-          COUNT(*) as value
-        FROM listings 
-        WHERE created_at > ${dateFilter}
-        GROUP BY DATE(created_at)
+        WITH daily_listings AS (
+          SELECT 
+            DATE(created_at) as date,
+            COUNT(*) as daily_count
+          FROM listings 
+          WHERE created_at > ${dateFilter}
+          GROUP BY DATE(created_at)
+        ),
+        cumulative_listings AS (
+          SELECT 
+            date,
+            daily_count,
+            SUM(daily_count) OVER (ORDER BY date) as value
+          FROM daily_listings
+        )
+        SELECT date, value
+        FROM cumulative_listings
         ORDER BY date ASC
       `).all();
       
@@ -75,6 +97,16 @@ export async function GET(request: NextRequest) {
       } else {
         const totalListings = await db.prepare(`SELECT COUNT(*) as count FROM listings`).first();
         data = [{ date: today, value: Number(totalListings?.count || 0) }];
+      }
+    } else {
+      // Ensure we have at least one data point for the current date
+      const today = new Date().toISOString().split('T')[0];
+      const hasToday = data.some(d => d.date === today);
+      
+      if (!hasToday) {
+        // Add today's data point with the last cumulative value
+        const lastValue = data.length > 0 ? data[data.length - 1].value : 0;
+        data.push({ date: today, value: lastValue });
       }
     }
 

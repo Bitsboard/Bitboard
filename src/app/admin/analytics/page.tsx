@@ -10,14 +10,15 @@ interface StatsData {
   newListings: number;
 }
 
-interface ChartData {
+interface TimeSeriesData {
   date: string;
   value: number;
+  label?: string;
 }
 
 export default function AnalyticsPage() {
-  const [userChartData, setUserChartData] = useState<ChartData[]>([]);
-  const [listingChartData, setListingChartData] = useState<ChartData[]>([]);
+  const [userChartData, setUserChartData] = useState<TimeSeriesData[]>([]);
+  const [listingChartData, setListingChartData] = useState<TimeSeriesData[]>([]);
   const [stats, setStats] = useState<StatsData>({
     totalUsers: 0,
     totalListings: 0,
@@ -33,7 +34,7 @@ export default function AnalyticsPage() {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const data = await response.json() as { data?: ChartData[] };
+      const data = await response.json() as { data?: TimeSeriesData[] };
       return data.data || [];
     } catch (error) {
       console.error(`Failed to load ${type} chart data:`, error);
@@ -211,6 +212,7 @@ export default function AnalyticsPage() {
                 data={userChartData}
                 type="timeseries"
                 title="User Growth"
+                dataType="users"
               />
             </div>
           </div>
@@ -240,6 +242,7 @@ export default function AnalyticsPage() {
                 data={listingChartData}
                 type="timeseries"
                 title="Listing Growth"
+                dataType="listings"
               />
             </div>
           </div>
