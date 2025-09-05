@@ -76,59 +76,102 @@ export default function AnalyticsPage() {
   };
 
   const generateChartData = (users: any[], listings: any[]) => {
-    // Get date range from earliest to latest
-    const allDates = [
-      ...users.map(u => new Date(u.createdAt || u.created_at)),
-      ...listings.map(l => new Date(l.createdAt))
-    ].filter(d => !isNaN(d.getTime()));
+    console.log('📊 Generating chart data...');
+    console.log('📊 Users count:', users.length);
+    console.log('📊 Listings count:', listings.length);
     
-    if (allDates.length === 0) return;
+    // Sort users by creation date
+    const sortedUsers = users
+      .map(user => ({
+        ...user,
+        createdAt: new Date(user.createdAt || user.created_at)
+      }))
+      .filter(user => !isNaN(user.createdAt.getTime()))
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    
+    // Sort listings by creation date
+    const sortedListings = listings
+      .map(listing => ({
+        ...listing,
+        createdAt: new Date(listing.createdAt)
+      }))
+      .filter(listing => !isNaN(listing.createdAt.getTime()))
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    
+    console.log('📊 Sorted users:', sortedUsers.length);
+    console.log('📊 Sorted listings:', sortedListings.length);
+    
+    if (sortedUsers.length === 0 && sortedListings.length === 0) {
+      console.log('📊 No data available for charts');
+      return;
+    }
+    
+    // Get date range
+    const allDates = [
+      ...sortedUsers.map(u => u.createdAt),
+      ...sortedListings.map(l => l.createdAt)
+    ];
     
     const minDate = new Date(Math.min(...allDates.map(d => d.getTime())));
     const maxDate = new Date(Math.max(...allDates.map(d => d.getTime())));
     
-    // Generate daily data points for users (CUMULATIVE)
-    const userChartData: ChartData[] = [];
-    const currentDate = new Date(minDate);
+    console.log('📊 Date range:', minDate.toISOString(), 'to', maxDate.toISOString());
     
+    // Generate user chart data - CUMULATIVE TOTALS
+    const userChartData: ChartData[] = [];
+    let userIndex = 0;
+    let cumulativeUsers = 0;
+    
+    const currentDate = new Date(minDate);
     while (currentDate <= maxDate) {
       const dateStr = currentDate.toISOString().split('T')[0];
       
-      // Count users created up to this date (CUMULATIVE)
-      const usersUpToDate = users.filter(user => 
-        new Date(user.createdAt || user.created_at) <= currentDate
-      ).length;
+      // Add all users created on or before this date
+      while (userIndex < sortedUsers.length && 
+             sortedUsers[userIndex].createdAt <= currentDate) {
+        cumulativeUsers++;
+        userIndex++;
+      }
       
       userChartData.push({
         date: dateStr,
-        value: usersUpToDate
+        value: cumulativeUsers
       });
       
       currentDate.setDate(currentDate.getDate() + 1);
     }
     
-    setUserChartData(userChartData);
+    console.log('📊 User chart data points:', userChartData.length);
+    console.log('📊 Final user count:', cumulativeUsers);
     
-    // Generate daily data points for listings (CUMULATIVE)
+    // Generate listing chart data - CUMULATIVE TOTALS
     const listingChartData: ChartData[] = [];
-    const currentDate2 = new Date(minDate);
+    let listingIndex = 0;
+    let cumulativeListings = 0;
     
+    const currentDate2 = new Date(minDate);
     while (currentDate2 <= maxDate) {
       const dateStr = currentDate2.toISOString().split('T')[0];
       
-      // Count listings created up to this date (CUMULATIVE)
-      const listingsUpToDate = listings.filter(listing => 
-        new Date(listing.createdAt) <= currentDate2
-      ).length;
+      // Add all listings created on or before this date
+      while (listingIndex < sortedListings.length && 
+             sortedListings[listingIndex].createdAt <= currentDate2) {
+        cumulativeListings++;
+        listingIndex++;
+      }
       
       listingChartData.push({
         date: dateStr,
-        value: listingsUpToDate
+        value: cumulativeListings
       });
       
       currentDate2.setDate(currentDate2.getDate() + 1);
     }
     
+    console.log('📊 Listing chart data points:', listingChartData.length);
+    console.log('📊 Final listing count:', cumulativeListings);
+    
+    setUserChartData(userChartData);
     setListingChartData(listingChartData);
   };
 
