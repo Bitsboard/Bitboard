@@ -351,6 +351,12 @@ function CumulativeLineChart({ data, color, title }: {
   const minValue = 0;
   const range = maxValue - minValue || 1;
 
+  // Calculate time-based x positions
+  const dates = cumulativeData.map(d => new Date(d.date).getTime());
+  const minDate = Math.min(...dates);
+  const maxDate = Math.max(...dates);
+  const timeRange = maxDate - minDate || 1;
+
   const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
@@ -361,11 +367,12 @@ function CumulativeLineChart({ data, color, title }: {
     let minDistance = Infinity;
     
     cumulativeData.forEach((point, index) => {
-      const x = 40 + (index / Math.max(1, cumulativeData.length - 1)) * 340;
+      const dateTime = new Date(point.date).getTime();
+      const x = 40 + ((dateTime - minDate) / timeRange) * 340;
       const y = 20 + 160 - ((point.cumulative - minValue) / range) * 160;
       const distance = Math.sqrt(Math.pow(x - mouseX, 2) + Math.pow(y - mouseY, 2));
       
-      if (distance < minDistance && distance < 20) {
+      if (distance < minDistance && distance < 30) {
         minDistance = distance;
         closestPoint = {
           x: x,
@@ -382,6 +389,28 @@ function CumulativeLineChart({ data, color, title }: {
   const handleMouseLeave = () => {
     setHoveredPoint(null);
   };
+
+  // Create smooth path
+  const pathData = cumulativeData.map((point, index) => {
+    const dateTime = new Date(point.date).getTime();
+    const x = 40 + ((dateTime - minDate) / timeRange) * 340;
+    const y = 20 + 160 - ((point.cumulative - minValue) / range) * 160;
+    
+    if (index === 0) return `M ${x} ${y}`;
+    
+    const prevPoint = cumulativeData[index - 1];
+    const prevDateTime = new Date(prevPoint.date).getTime();
+    const prevX = 40 + ((prevDateTime - minDate) / timeRange) * 340;
+    const prevY = 20 + 160 - ((prevPoint.cumulative - minValue) / range) * 160;
+    
+    // Create smooth curve
+    const cp1x = prevX + (x - prevX) / 3;
+    const cp1y = prevY;
+    const cp2x = x - (x - prevX) / 3;
+    const cp2y = y;
+    
+    return `C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x} ${y}`;
+  }).join(' ');
 
   return (
     <div className="h-full w-full p-4 relative">
@@ -404,34 +433,13 @@ function CumulativeLineChart({ data, color, title }: {
           />
         ))}
         
-        {/* Data points and line */}
-        {cumulativeData.map((point, index) => {
-          const x = 40 + (index / Math.max(1, cumulativeData.length - 1)) * 340;
-          const y = 20 + 160 - ((point.cumulative - minValue) / range) * 160;
-          
-          return (
-            <g key={index}>
-              <circle
-                cx={x}
-                cy={y}
-                r={3}
-                fill={color}
-                stroke="white"
-                strokeWidth={2}
-              />
-              {index > 0 && (
-                <line
-                  x1={40 + ((index - 1) / Math.max(1, cumulativeData.length - 1)) * 340}
-                  y1={20 + 160 - ((cumulativeData[index - 1].cumulative - minValue) / range) * 160}
-                  x2={x}
-                  y2={y}
-                  stroke={color}
-                  strokeWidth={2}
-                />
-              )}
-            </g>
-          );
-        })}
+        {/* Smooth line */}
+        <path
+          d={pathData}
+          fill="none"
+          stroke={color}
+          strokeWidth={3}
+        />
         
         {/* Y-axis labels */}
         {[maxValue, maxValue * 0.75, maxValue * 0.5, maxValue * 0.25, 0].map((value, index) => (
