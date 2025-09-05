@@ -38,16 +38,44 @@ export default function AnalyticsPage() {
       console.log('🔍 Listings response:', listingsData);
       const totalListings = listingsData.total || 0;
 
-      // Get sample data for charts (just first 100 of each for speed)
-      const allListingsResponse = await fetch('/api/admin/listings/list?limit=100');
-      const allListingsData = await allListingsResponse.json() as { listings?: any[] };
-      const allListings = allListingsData.listings || [];
-      console.log('🔍 Sample listings for chart:', allListings.length);
-
-      const allUsersResponse = await fetch('/api/admin/users/list?limit=100');
-      const allUsersData = await allUsersResponse.json() as { users?: any[] };
-      const allUsers = allUsersData.users || [];
-      console.log('🔍 Sample users for chart:', allUsers.length);
+      // Fetch ALL data for charts (not just samples)
+      let allUsers: any[] = [];
+      let allListings: any[] = [];
+      
+      // Fetch all users
+      let page = 1;
+      let hasMoreUsers = true;
+      while (hasMoreUsers) {
+        const usersResponse = await fetch(`/api/admin/users/list?page=${page}&limit=100`);
+        const usersData = await usersResponse.json();
+        
+        if (usersData.success && usersData.users) {
+          allUsers = [...allUsers, ...usersData.users];
+          hasMoreUsers = usersData.users.length === 100 && allUsers.length < totalUsers;
+          page++;
+        } else {
+          hasMoreUsers = false;
+        }
+      }
+      
+      // Fetch all listings
+      page = 1;
+      let hasMoreListings = true;
+      while (hasMoreListings) {
+        const listingsResponse = await fetch(`/api/admin/listings/list?page=${page}&limit=100`);
+        const listingsData = await listingsResponse.json();
+        
+        if (listingsData.success && listingsData.listings) {
+          allListings = [...allListings, ...listingsData.listings];
+          hasMoreListings = listingsData.listings.length === 100 && allListings.length < totalListings;
+          page++;
+        } else {
+          hasMoreListings = false;
+        }
+      }
+      
+      console.log('🔍 Total users fetched:', allUsers.length, 'of', totalUsers);
+      console.log('🔍 Total listings fetched:', allListings.length, 'of', totalListings);
 
       // Calculate active users (last 7 days) - users with last_active in last 7 days
       const sevenDaysAgo = new Date();
@@ -68,9 +96,11 @@ export default function AnalyticsPage() {
       console.log('🔍 Active users found:', activeUsers);
 
       // Calculate new listings (last 7 days)
-      const newListings = allListings.filter((listing: any) => 
-        new Date(listing.createdAt) > sevenDaysAgo
-      ).length || 0;
+      const newListings = allListings.filter((listing: any) => {
+        const createdAt = listing.createdAt || listing.created_at;
+        const timestampMs = typeof createdAt === 'number' ? createdAt * 1000 : createdAt;
+        return new Date(timestampMs) > sevenDaysAgo;
+      }).length || 0;
 
       setStats({
         totalUsers,
@@ -153,28 +183,25 @@ export default function AnalyticsPage() {
     console.log('📊 User scale factor:', userScaleFactor);
     console.log('📊 Listing scale factor:', listingScaleFactor);
     
-    // Generate user chart data - CUMULATIVE TOTALS (realistic distribution)
+    // Generate user chart data - EXACT REAL DATA (cumulative)
     const userChartData: ChartData[] = [];
+    let userIndex = 0;
     let cumulativeUsers = 0;
     
     const currentDate = new Date(minDate);
-    const totalDays = Math.ceil((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24));
-    
     while (currentDate <= maxDate) {
       const dateStr = currentDate.toISOString().split('T')[0];
       
-      // Calculate progress through the time period (0 to 1)
-      const daysPassed = Math.ceil((currentDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24));
-      const progress = Math.min(daysPassed / totalDays, 1);
-      
-      // Create a realistic growth curve that reaches totalUsers
-      // Use a logarithmic growth pattern for more realistic distribution
-      const growthFactor = Math.pow(progress, 0.7); // Slightly curved growth
-      const scaledCount = Math.round(totalUsers * growthFactor);
+      // Add all users created on or before this date
+      while (userIndex < sortedUsers.length && 
+             sortedUsers[userIndex].createdAt <= currentDate) {
+        cumulativeUsers++;
+        userIndex++;
+      }
       
       userChartData.push({
         date: dateStr,
-        value: scaledCount
+        value: cumulativeUsers
       });
       
       currentDate.setDate(currentDate.getDate() + 1);
@@ -183,26 +210,25 @@ export default function AnalyticsPage() {
     console.log('📊 User chart data points:', userChartData.length);
     console.log('📊 Final scaled user count:', userChartData[userChartData.length - 1]?.value);
     
-    // Generate listing chart data - CUMULATIVE TOTALS (realistic distribution)
+    // Generate listing chart data - EXACT REAL DATA (cumulative)
     const listingChartData: ChartData[] = [];
+    let listingIndex = 0;
+    let cumulativeListings = 0;
     
     const currentDate2 = new Date(minDate);
-    
     while (currentDate2 <= maxDate) {
       const dateStr = currentDate2.toISOString().split('T')[0];
       
-      // Calculate progress through the time period (0 to 1)
-      const daysPassed = Math.ceil((currentDate2.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24));
-      const progress = Math.min(daysPassed / totalDays, 1);
-      
-      // Create a realistic growth curve that reaches totalListings
-      // Use a different growth pattern for listings (more linear with some acceleration)
-      const growthFactor = Math.pow(progress, 0.8); // More linear growth for listings
-      const scaledCount = Math.round(totalListings * growthFactor);
+      // Add all listings created on or before this date
+      while (listingIndex < sortedListings.length && 
+             sortedListings[listingIndex].createdAt <= currentDate2) {
+        cumulativeListings++;
+        listingIndex++;
+      }
       
       listingChartData.push({
         date: dateStr,
-        value: scaledCount
+        value: cumulativeListings
       });
       
       currentDate2.setDate(currentDate2.getDate() + 1);
