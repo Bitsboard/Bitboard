@@ -375,8 +375,8 @@ function CumulativeLineChart({ data, color, title }: {
       if (distance < minDistance && distance < 30) {
         minDistance = distance;
         closestPoint = {
-          x: x,
-          y: y,
+          x: mouseX + rect.left, // Use actual mouse position
+          y: mouseY + rect.top,  // Use actual mouse position
           value: point.cumulative,
           date: point.date
         };
@@ -454,6 +454,31 @@ function CumulativeLineChart({ data, color, title }: {
             {Math.round(value).toLocaleString()}
           </text>
         ))}
+        
+        {/* X-axis labels (dates) */}
+        {(() => {
+          const numLabels = Math.min(5, cumulativeData.length);
+          const step = Math.max(1, Math.floor(cumulativeData.length / (numLabels - 1)));
+          return cumulativeData
+            .filter((_, index) => index % step === 0 || index === cumulativeData.length - 1)
+            .map((point, index) => {
+              const dateTime = new Date(point.date).getTime();
+              const x = 40 + ((dateTime - minDate) / timeRange) * 340;
+              const date = new Date(point.date);
+              return (
+                <text
+                  key={index}
+                  x={x}
+                  y="195"
+                  textAnchor="middle"
+                  className="text-xs fill-gray-500"
+                  fontSize="10"
+                >
+                  {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </text>
+              );
+            });
+        })()}
       </svg>
       
       {/* Tooltip */}
