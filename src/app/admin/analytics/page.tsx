@@ -340,14 +340,22 @@ function SmoothLineChart({ data, color }: { data: ChartData[], color: string }) 
         
         {/* Points */}
         {points.map((point, index) => (
-          <circle
-            key={index}
-            cx={point.x}
-            cy={point.y}
-            r={4}
-            className={`${fillClasses[color as keyof typeof fillClasses]} hover:r-6 transition-all cursor-pointer`}
-            title={`${point.date}: ${point.value}`}
-          />
+          <g key={index}>
+            <circle
+              cx={point.x}
+              cy={point.y}
+              r={4}
+              className={`${fillClasses[color as keyof typeof fillClasses]} hover:r-6 transition-all cursor-pointer`}
+            />
+            <text
+              x={point.x}
+              y={point.y - 10}
+              textAnchor="middle"
+              className="text-xs fill-gray-600 opacity-0 hover:opacity-100 transition-opacity pointer-events-none"
+            >
+              {point.value}
+            </text>
+          </g>
         ))}
         
         {/* Y-axis labels */}
