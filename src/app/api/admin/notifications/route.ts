@@ -110,11 +110,11 @@ export async function POST(request: NextRequest) {
       const batchSize = 100;
       for (let i = 0; i < users.length; i += batchSize) {
         const batch = users.slice(i, i + batchSize);
-        const values = batch.map((user, index) => 
+        const values = batch.map(() => 
           `(?, ?, ?, ?)`
         ).join(', ');
         
-        const batchParams = batch.flatMap(user => [
+        const batchParams = batch.flatMap((user, index) => [
           `${userNotificationId}_${i + index}`,
           user.id,
           notificationId,
