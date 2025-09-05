@@ -253,38 +253,6 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          {/* Activity Analysis Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">Activity Overview</h3>
-                <p className="text-sm text-gray-500 mt-1">Platform activity breakdown</p>
-              </div>
-              <div className="p-6 h-64">
-                <SimpleActivityChart data={data} />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">Key Metrics</h3>
-                <p className="text-sm text-gray-500 mt-1">Important platform statistics</p>
-              </div>
-              <div className="p-6 h-64">
-                <SimpleMetricsChart data={data} />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">Platform Stats</h3>
-                <p className="text-sm text-gray-500 mt-1">Quick statistics overview</p>
-              </div>
-              <div className="p-6 h-64">
-                <SimpleStatsChart data={data} />
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -322,7 +290,7 @@ function UserGrowthChart() {
     return <NoDataMessage />;
   }
 
-  return <SimpleBarChart data={chartData} color="#3B82F6" title="Users" />;
+  return <CumulativeLineChart data={chartData} color="#3B82F6" title="Users" />;
 }
 
 // Listing Growth Chart Component
@@ -356,91 +324,12 @@ function ListingGrowthChart() {
     return <NoDataMessage />;
   }
 
-  return <SimpleBarChart data={chartData} color="#10B981" title="Listings" />;
+  return <CumulativeLineChart data={chartData} color="#10B981" title="Listings" />;
 }
 
-// Simple Activity Chart
-function SimpleActivityChart({ data }: { data: AnalyticsData }) {
-  const activityData = [
-    { name: 'Users', value: data.totalUsers, color: '#3B82F6' },
-    { name: 'Listings', value: data.totalListings, color: '#10B981' },
-    { name: 'Messages', value: data.totalMessages, color: '#F59E0B' },
-    { name: 'Offers', value: data.totalOffers, color: '#8B5CF6' }
-  ];
 
-  const maxValue = Math.max(...activityData.map(item => item.value));
-
-  return (
-    <div className="h-full space-y-3">
-      {activityData.map((item, index) => (
-        <div key={index} className="space-y-1">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium text-gray-700">{item.name}</span>
-            <span className="text-sm font-semibold text-gray-900">{item.value.toLocaleString()}</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="h-2 rounded-full"
-              style={{ 
-                width: `${(item.value / maxValue) * 100}%`,
-                backgroundColor: item.color
-              }}
-            ></div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// Simple Metrics Chart
-function SimpleMetricsChart({ data }: { data: AnalyticsData }) {
-  const metrics = [
-    { label: 'Active Users', value: data.activeUsers, color: 'text-blue-600' },
-    { label: 'New Listings', value: data.newListings, color: 'text-green-600' },
-    { label: 'Total Messages', value: data.totalMessages, color: 'text-yellow-600' },
-    { label: 'Total Offers', value: data.totalOffers, color: 'text-purple-600' }
-  ];
-
-  return (
-    <div className="h-full grid grid-cols-2 gap-4">
-      {metrics.map((metric, index) => (
-        <div key={index} className="text-center">
-          <div className={`text-2xl font-bold ${metric.color}`}>
-            {metric.value.toLocaleString()}
-          </div>
-          <div className="text-xs text-gray-500 mt-1">
-            {metric.label}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// Simple Stats Chart
-function SimpleStatsChart({ data }: { data: AnalyticsData }) {
-  const stats = [
-    { label: 'Total Users', value: data.totalUsers },
-    { label: 'Total Listings', value: data.totalListings },
-    { label: 'Active Users (24h)', value: data.activeUsers },
-    { label: 'New Listings (7d)', value: data.newListings }
-  ];
-
-  return (
-    <div className="h-full space-y-4">
-      {stats.map((stat, index) => (
-        <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-          <span className="text-sm text-gray-600">{stat.label}</span>
-          <span className="text-lg font-semibold text-gray-900">{stat.value.toLocaleString()}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// Simple Bar Chart Component
-function SimpleBarChart({ data, color, title }: { 
+// Cumulative Line Chart Component
+function CumulativeLineChart({ data, color, title }: { 
   data: Array<{date: string, users?: number, listings?: number}>, 
   color: string, 
   title: string 
@@ -450,28 +339,84 @@ function SimpleBarChart({ data, color, title }: {
   }
 
   const maxValue = Math.max(...data.map(d => d.users || d.listings || 0));
-  const values = data.map(d => d.users || d.listings || 0);
+  const minValue = 0;
+  const range = maxValue - minValue || 1;
+
+  const width = 100;
+  const height = 100;
+  const padding = 10;
+
+  const points = data.map((point, index) => {
+    const x = padding + (index / Math.max(1, data.length - 1)) * (width - padding * 2);
+    const y = padding + height - padding * 2 - ((point.users || point.listings || 0) - minValue) / range * (height - padding * 2);
+    return { x, y, value: point.users || point.listings || 0, date: point.date };
+  });
+
+  const pathData = points.map((point, index) => {
+    if (index === 0) return `M ${point.x} ${point.y}`;
+    return `L ${point.x} ${point.y}`;
+  }).join(' ');
+
+  const areaPathData = `${pathData} L ${points[points.length - 1].x} ${padding + height - padding * 2} L ${points[0].x} ${padding + height - padding * 2} Z`;
 
   return (
-    <div className="h-full w-full flex items-end justify-between px-2 py-4">
-      {values.map((value, index) => {
-        const height = (value / maxValue) * 100;
-        return (
-          <div key={index} className="flex flex-col items-center flex-1 mx-1">
-            <div
-              className="w-full rounded-t"
-              style={{ 
-                height: `${height}%`,
-                backgroundColor: color,
-                minHeight: value > 0 ? '4px' : '0px'
-              }}
-            ></div>
-            <div className="text-xs text-gray-500 mt-2 text-center">
-              {value.toLocaleString()}
-            </div>
-          </div>
-        );
-      })}
+    <div className="h-full w-full">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full">
+        {/* Grid lines */}
+        {[0, 0.25, 0.5, 0.75, 1].map((ratio) => (
+          <line
+            key={ratio}
+            x1={padding}
+            y1={padding + ratio * (height - padding * 2)}
+            x2={width - padding}
+            y2={padding + ratio * (height - padding * 2)}
+            stroke="#F3F4F6"
+            strokeWidth={0.5}
+          />
+        ))}
+        
+        {/* Area */}
+        <path
+          d={areaPathData}
+          fill={color}
+          opacity={0.1}
+        />
+        
+        {/* Line */}
+        <path
+          d={pathData}
+          fill="none"
+          stroke={color}
+          strokeWidth={2}
+        />
+        
+        {/* Points */}
+        {points.map((point, index) => (
+          <circle
+            key={index}
+            cx={point.x}
+            cy={point.y}
+            r={2}
+            fill={color}
+            stroke="white"
+            strokeWidth={1}
+          />
+        ))}
+        
+        {/* Y-axis labels */}
+        {[maxValue, maxValue * 0.75, maxValue * 0.5, maxValue * 0.25, 0].map((value, index) => (
+          <text
+            key={index}
+            x={padding - 8}
+            y={padding + (index / 4) * (height - padding * 2) + 4}
+            textAnchor="end"
+            className="text-xs fill-gray-500"
+            fontSize="10"
+          >
+            {Math.round(value).toLocaleString()}
+          </text>
+        ))}
+      </svg>
     </div>
   );
 }
