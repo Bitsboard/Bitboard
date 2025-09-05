@@ -10,7 +10,7 @@ export async function GET(req: Request): Promise<Response> {
   const endpoint = '/api/auth/callback';
   
   // Apply security checks
-  const securityCheck = applyAPISecurity(req, endpoint);
+  const securityCheck = await applyAPISecurity(req, endpoint);
   if (securityCheck) {
     return securityCheck;
   }

@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withRateLimit, rateLimiters } from "@/lib/security/rateLimiter";
 import { withSecurity, SecurityMonitor } from "@/lib/security/securityMonitor";
 
-export function applyAPISecurity(req: Request, endpoint: string): Response | undefined {
+export async function applyAPISecurity(req: Request, endpoint: string): Promise<Response | undefined> {
   // Apply security checks first
   const securityCheck = withSecurity(req);
   if (securityCheck) {
@@ -31,7 +31,7 @@ export function applyAPISecurity(req: Request, endpoint: string): Response | und
     rateLimiter = rateLimiters.api;
   }
 
-  const rateLimitCheck = withRateLimit(rateLimiter)(req);
+  const rateLimitCheck = await withRateLimit(rateLimiter)(req);
   if (rateLimitCheck) {
     // Log rate limit exceeded
     const ip = SecurityMonitor.getClientIP(req);
