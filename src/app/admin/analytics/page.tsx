@@ -32,12 +32,20 @@ export default function AnalyticsPage() {
       const allListingsData = await allListingsResponse.json() as { listings?: any[] };
       const allListings = allListingsData.listings || [];
 
-      // Calculate active users (last 7 days)
+      // Get all users for active calculation
+      const allUsersResponse = await fetch('/api/admin/users/list?limit=10000');
+      const allUsersData = await allUsersResponse.json() as { users?: any[] };
+      const allUsers = allUsersData.users || [];
+
+      // Calculate active users (last 7 days) - users with last_active in last 7 days
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const activeUsers = allListings.filter((listing: any) => 
-        new Date(listing.createdAt) > sevenDaysAgo
-      ).map((listing: any) => listing.postedBy).filter((v: any, i: any, a: any) => a.indexOf(v) === i).length || 0;
+      const sevenDaysAgoTimestamp = sevenDaysAgo.getTime();
+      
+      const activeUsers = allUsers.filter((user: any) => {
+        const lastActive = user.lastActivityAt || user.last_active || 0;
+        return lastActive > sevenDaysAgoTimestamp;
+      }).length || 0;
 
       // Calculate new listings (last 7 days)
       const newListings = allListings.filter((listing: any) => 
