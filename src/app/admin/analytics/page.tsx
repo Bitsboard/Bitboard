@@ -17,26 +17,31 @@ export default function AnalyticsPage() {
 
   const loadStats = async () => {
     try {
-      // Get total users
+      // Get total users count
       const usersResponse = await fetch('/api/admin/users/list');
-      const usersData = await usersResponse.json() as { users?: any[] };
-      const totalUsers = usersData.users?.length || 0;
+      const usersData = await usersResponse.json() as { users?: any[]; total?: number };
+      const totalUsers = usersData.total || 0;
 
-      // Get total listings
+      // Get total listings count
       const listingsResponse = await fetch('/api/admin/listings/list');
-      const listingsData = await listingsResponse.json() as { listings?: any[] };
-      const totalListings = listingsData.listings?.length || 0;
+      const listingsData = await listingsResponse.json() as { listings?: any[]; total?: number };
+      const totalListings = listingsData.total || 0;
+
+      // Get all listings for calculations (with high limit)
+      const allListingsResponse = await fetch('/api/admin/listings/list?limit=10000');
+      const allListingsData = await allListingsResponse.json() as { listings?: any[] };
+      const allListings = allListingsData.listings || [];
 
       // Calculate active users (last 7 days)
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const activeUsers = listingsData.listings?.filter((listing: any) => 
-        new Date(listing.created_at) > sevenDaysAgo
-      ).map((listing: any) => listing.seller_id).filter((v: any, i: any, a: any) => a.indexOf(v) === i).length || 0;
+      const activeUsers = allListings.filter((listing: any) => 
+        new Date(listing.createdAt) > sevenDaysAgo
+      ).map((listing: any) => listing.postedBy).filter((v: any, i: any, a: any) => a.indexOf(v) === i).length || 0;
 
       // Calculate new listings (last 7 days)
-      const newListings = listingsData.listings?.filter((listing: any) => 
-        new Date(listing.created_at) > sevenDaysAgo
+      const newListings = allListings.filter((listing: any) => 
+        new Date(listing.createdAt) > sevenDaysAgo
       ).length || 0;
 
       setStats({
