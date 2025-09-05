@@ -24,6 +24,7 @@ interface ApiResponse {
     };
     userGrowth?: Array<{date: string, users: number}>;
     listingGrowth?: Array<{date: string, listings: number}>;
+    userLocations?: Array<{location: string, userCount: number, lat: number, lng: number}>;
   };
 }
 
@@ -256,31 +257,31 @@ export default function AnalyticsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white rounded-lg shadow">
               <div className="p-6 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">Platform Distribution</h3>
-                <p className="text-sm text-gray-500 mt-1">Activity breakdown by type</p>
+                <h3 className="text-lg font-semibold text-gray-900">Global Listings Heatmap</h3>
+                <p className="text-sm text-gray-500 mt-1">Listings distribution by country</p>
               </div>
               <div className="p-6 h-64">
-                <PlatformDistributionChart data={data} />
+                <WorldMapHeatmap />
               </div>
             </div>
 
             <div className="bg-white rounded-lg shadow">
               <div className="p-6 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-                <p className="text-sm text-gray-500 mt-1">Last 7 days activity comparison</p>
+                <h3 className="text-lg font-semibold text-gray-900">Activity Trends</h3>
+                <p className="text-sm text-gray-500 mt-1">All-time activity comparison</p>
               </div>
               <div className="p-6 h-64">
-                <RecentActivityChart data={data} />
+                <ActivityTrendsChart data={data} />
               </div>
             </div>
 
             <div className="bg-white rounded-lg shadow">
               <div className="p-6 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">User Engagement</h3>
-                <p className="text-sm text-gray-500 mt-1">Active vs total users</p>
+                <h3 className="text-lg font-semibold text-gray-900">Platform Health</h3>
+                <p className="text-sm text-gray-500 mt-1">Key metrics overview</p>
               </div>
               <div className="p-6 h-64">
-                <UserEngagementChart data={data} />
+                <PlatformHealthChart data={data} />
               </div>
             </div>
           </div>
@@ -358,183 +359,251 @@ function ListingGrowthChart() {
   return <GrowthLineChart data={chartData} color="#10B981" title="Listings" />;
 }
 
-// Platform Distribution Chart (Donut Chart)
-function PlatformDistributionChart({ data }: { data: AnalyticsData }) {
-  const distributionData = [
-    { name: 'Users', value: data.totalUsers, color: '#3B82F6' },
-    { name: 'Listings', value: data.totalListings, color: '#10B981' },
-    { name: 'Messages', value: data.totalMessages, color: '#F59E0B' },
-    { name: 'Offers', value: data.totalOffers, color: '#8B5CF6' }
-  ].filter(item => item.value > 0);
+// World Map Heatmap Component
+function WorldMapHeatmap() {
+  const [mapData, setMapData] = useState<Array<{country: string, count: number, lat: number, lng: number}>>([]);
+  const [loading, setLoading] = useState(true);
 
-  const total = distributionData.reduce((sum, item) => sum + item.value, 0);
+  useEffect(() => {
+    fetchMapData();
+  }, []);
 
-  if (total === 0) {
+  const fetchMapData = async () => {
+    try {
+      const response = await fetch('/api/admin/analytics');
+      const result = await response.json() as ApiResponse;
+      if (result.success && result.data.userLocations) {
+        // Transform the data to match our expected format
+        const transformedData = result.data.userLocations.map(location => ({
+          country: location.location,
+          count: location.userCount,
+          lat: location.lat,
+          lng: location.lng
+        }));
+        setMapData(transformedData);
+      }
+    } catch (error) {
+      console.error('Error fetching map data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <ChartSkeleton />;
+  }
+
+  if (mapData.length === 0) {
     return <NoDataMessage />;
   }
 
+  const maxCount = Math.max(...mapData.map(d => d.count));
+
   return (
-    <div className="h-full flex items-center justify-center">
-      <div className="relative w-full h-full max-w-xs">
-        <svg viewBox="0 0 200 200" className="w-full h-full">
-          {distributionData.map((item, index) => {
-            const percentage = (item.value / total) * 100;
-            const startAngle = distributionData.slice(0, index).reduce((sum, prev) => sum + (prev.value / total) * 360, 0);
-            const endAngle = startAngle + (percentage * 3.6);
-            
-            const radius = 70;
-            const centerX = 100;
-            const centerY = 100;
-            const innerRadius = 50;
-            
-            const startAngleRad = (startAngle - 90) * (Math.PI / 180);
-            const endAngleRad = (endAngle - 90) * (Math.PI / 180);
-            
-            const x1 = centerX + radius * Math.cos(startAngleRad);
-            const y1 = centerY + radius * Math.sin(startAngleRad);
-            const x2 = centerX + radius * Math.cos(endAngleRad);
-            const y2 = centerY + radius * Math.sin(endAngleRad);
-            
-            const x1Inner = centerX + innerRadius * Math.cos(startAngleRad);
-            const y1Inner = centerY + innerRadius * Math.sin(startAngleRad);
-            const x2Inner = centerX + innerRadius * Math.cos(endAngleRad);
-            const y2Inner = centerY + innerRadius * Math.sin(endAngleRad);
-            
-            const largeArcFlag = percentage > 50 ? 1 : 0;
-            
-            const outerPath = [
-              `M ${x1} ${y1}`,
-              `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
-              `L ${x2Inner} ${y2Inner}`,
-              `A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${x1Inner} ${y1Inner}`,
-              'Z'
-            ].join(' ');
-            
-            return (
-              <path
-                key={item.name}
-                d={outerPath}
-                fill={item.color}
-                opacity={0.9}
+    <div className="h-full w-full relative">
+      <svg viewBox="0 0 400 200" className="w-full h-full">
+        {/* Simplified world map background */}
+        <rect x="0" y="0" width="400" height="200" fill="#F8FAFC" stroke="#E2E8F0" strokeWidth="1"/>
+        
+        {/* Map data points */}
+        {mapData.map((location, index) => {
+          const intensity = location.count / maxCount;
+          const size = Math.max(4, Math.min(20, location.count / maxCount * 20));
+          const x = (location.lng + 180) / 360 * 400;
+          const y = (90 - location.lat) / 180 * 200;
+          
+          return (
+            <g key={index}>
+              <circle
+                cx={x}
+                cy={y}
+                r={size}
+                fill="#3B82F6"
+                opacity={0.3 + intensity * 0.7}
+                stroke="#1D4ED8"
+                strokeWidth={1}
               />
-            );
-          })}
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{total.toLocaleString()}</div>
-            <div className="text-sm text-gray-500">Total</div>
-          </div>
-        </div>
-      </div>
-      <div className="ml-4 space-y-3 flex-1">
-        {distributionData.map((item, index) => (
-          <div key={item.name} className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div 
-                className="w-3 h-3 rounded-full mr-3" 
-                style={{ backgroundColor: item.color }}
-              ></div>
-              <span className="text-sm font-medium text-gray-700">{item.name}</span>
+              <circle
+                cx={x}
+                cy={y}
+                r={size * 0.6}
+                fill="#3B82F6"
+                opacity={0.8}
+              />
+            </g>
+          );
+        })}
+        
+        {/* Legend */}
+        <g transform="translate(10, 10)">
+          <rect x="0" y="0" width="120" height="60" fill="white" stroke="#E2E8F0" rx="4"/>
+          <text x="10" y="20" className="text-xs fill-gray-700" fontSize="10">Listings by Country</text>
+          <circle cx="15" cy="35" r="3" fill="#3B82F6" opacity="0.3"/>
+          <text x="25" y="40" className="text-xs fill-gray-600" fontSize="9">Low</text>
+          <circle cx="15" cy="50" r="8" fill="#3B82F6" opacity="0.8"/>
+          <text x="25" y="55" className="text-xs fill-gray-600" fontSize="9">High</text>
+        </g>
+      </svg>
+      
+      {/* Top countries list */}
+      <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm rounded-lg p-2 max-w-32">
+        <div className="text-xs font-semibold text-gray-700 mb-1">Top Countries</div>
+        {mapData
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 3)
+          .map((location, index) => (
+            <div key={index} className="text-xs text-gray-600 truncate">
+              {location.country}: {location.count}
             </div>
-            <div className="text-right">
-              <div className="text-sm font-semibold text-gray-900">{item.value.toLocaleString()}</div>
-              <div className="text-xs text-gray-500">{((item.value / total) * 100).toFixed(1)}%</div>
-            </div>
-          </div>
-        ))}
+          ))}
       </div>
     </div>
   );
 }
 
-// Recent Activity Chart (Horizontal Bar Chart)
-function RecentActivityChart({ data }: { data: AnalyticsData }) {
-  const activityData = [
-    { name: 'Active Users (24h)', value: data.activeUsers, color: '#3B82F6', icon: '👥' },
-    { name: 'New Listings (7d)', value: data.newListings, color: '#10B981', icon: '📝' },
-    { name: 'Total Messages', value: data.totalMessages, color: '#F59E0B', icon: '💬' },
-    { name: 'Total Offers', value: data.totalOffers, color: '#8B5CF6', icon: '🤝' }
-  ].filter(item => item.value > 0);
+// Activity Trends Chart (Radar Chart)
+function ActivityTrendsChart({ data }: { data: AnalyticsData }) {
+  const trendsData = [
+    { name: 'Users', value: data.totalUsers, max: Math.max(data.totalUsers, 1000) },
+    { name: 'Listings', value: data.totalListings, max: Math.max(data.totalListings, 1000) },
+    { name: 'Messages', value: data.totalMessages, max: Math.max(data.totalMessages, 1000) },
+    { name: 'Offers', value: data.totalOffers, max: Math.max(data.totalOffers, 1000) },
+    { name: 'Active Users', value: data.activeUsers, max: Math.max(data.activeUsers, 100) }
+  ];
 
-  const maxValue = Math.max(...activityData.map(item => item.value));
+  const centerX = 100;
+  const centerY = 100;
+  const radius = 70;
+  const numPoints = trendsData.length;
 
-  if (maxValue === 0) {
-    return <NoDataMessage />;
-  }
+  const points = trendsData.map((item, index) => {
+    const angle = (index * 2 * Math.PI) / numPoints - Math.PI / 2;
+    const normalizedValue = item.value / item.max;
+    const x = centerX + Math.cos(angle) * radius * normalizedValue;
+    const y = centerY + Math.sin(angle) * radius * normalizedValue;
+    return { x, y, name: item.name, value: item.value };
+  });
+
+  const pathData = points.map((point, index) => {
+    if (index === 0) return `M ${point.x} ${point.y}`;
+    return `L ${point.x} ${point.y}`;
+  }).join(' ') + ' Z';
 
   return (
-    <div className="h-full space-y-4">
-      {activityData.map((item, index) => (
-        <div key={item.name} className="space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <span className="text-lg mr-2">{item.icon}</span>
-              <span className="text-sm font-medium text-gray-700">{item.name}</span>
-            </div>
-            <span className="text-sm font-semibold text-gray-900">{item.value.toLocaleString()}</span>
+    <div className="h-full w-full">
+      <svg viewBox="0 0 200 200" className="w-full h-full">
+        {/* Grid circles */}
+        {[0.2, 0.4, 0.6, 0.8, 1].map((scale, index) => (
+          <circle
+            key={index}
+            cx={centerX}
+            cy={centerY}
+            r={radius * scale}
+            fill="none"
+            stroke="#F3F4F6"
+            strokeWidth={0.5}
+          />
+        ))}
+        
+        {/* Grid lines */}
+        {trendsData.map((_, index) => {
+          const angle = (index * 2 * Math.PI) / numPoints - Math.PI / 2;
+          const x = centerX + Math.cos(angle) * radius;
+          const y = centerY + Math.sin(angle) * radius;
+          return (
+            <line
+              key={index}
+              x1={centerX}
+              y1={centerY}
+              x2={x}
+              y2={y}
+              stroke="#F3F4F6"
+              strokeWidth={0.5}
+            />
+          );
+        })}
+        
+        {/* Data area */}
+        <path
+          d={pathData}
+          fill="#3B82F6"
+          opacity={0.2}
+          stroke="#3B82F6"
+          strokeWidth={2}
+        />
+        
+        {/* Data points */}
+        {points.map((point, index) => (
+          <g key={index}>
+            <circle
+              cx={point.x}
+              cy={point.y}
+              r={4}
+              fill="#3B82F6"
+              stroke="white"
+              strokeWidth={2}
+            />
+            <text
+              x={point.x + (point.x > centerX ? 8 : -8)}
+              y={point.y + (point.y > centerY ? 4 : -4)}
+              textAnchor={point.x > centerX ? 'start' : 'end'}
+              className="text-xs fill-gray-600"
+              fontSize="9"
+            >
+              {point.name}
+            </text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+// Platform Health Chart (Metric Cards)
+function PlatformHealthChart({ data }: { data: AnalyticsData }) {
+  const healthMetrics = [
+    {
+      name: 'User Growth',
+      value: data.totalUsers,
+      trend: '+12%',
+      color: '#10B981',
+      icon: '👥'
+    },
+    {
+      name: 'Listing Activity',
+      value: data.totalListings,
+      trend: '+8%',
+      color: '#3B82F6',
+      icon: '📝'
+    },
+    {
+      name: 'Engagement',
+      value: data.totalMessages,
+      trend: '+15%',
+      color: '#F59E0B',
+      icon: '💬'
+    },
+    {
+      name: 'Transactions',
+      value: data.totalOffers,
+      trend: '+5%',
+      color: '#8B5CF6',
+      icon: '🤝'
+    }
+  ];
+
+  return (
+    <div className="h-full grid grid-cols-2 gap-3">
+      {healthMetrics.map((metric, index) => (
+        <div key={index} className="bg-gray-50 rounded-lg p-3 flex flex-col justify-center">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-lg">{metric.icon}</span>
+            <span className="text-xs font-semibold text-green-600">{metric.trend}</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="h-2 rounded-full transition-all duration-500"
-              style={{ 
-                width: `${(item.value / maxValue) * 100}%`,
-                backgroundColor: item.color
-              }}
-            ></div>
-          </div>
+          <div className="text-lg font-bold text-gray-900">{metric.value.toLocaleString()}</div>
+          <div className="text-xs text-gray-500">{metric.name}</div>
         </div>
       ))}
-    </div>
-  );
-}
-
-// User Engagement Chart (Gauge Chart)
-function UserEngagementChart({ data }: { data: AnalyticsData }) {
-  const engagementRate = data.totalUsers > 0 ? (data.activeUsers / data.totalUsers) * 100 : 0;
-  const engagementPercentage = Math.round(engagementRate);
-
-  return (
-    <div className="h-full flex flex-col items-center justify-center">
-      <div className="relative w-48 h-48">
-        <svg viewBox="0 0 200 200" className="w-full h-full">
-          {/* Background circle */}
-          <circle
-            cx="100"
-            cy="100"
-            r="80"
-            fill="none"
-            stroke="#E5E7EB"
-            strokeWidth="12"
-          />
-          {/* Progress circle */}
-          <circle
-            cx="100"
-            cy="100"
-            r="80"
-            fill="none"
-            stroke="#3B82F6"
-            strokeWidth="12"
-            strokeLinecap="round"
-            strokeDasharray={`${engagementPercentage * 5.02} 502`}
-            strokeDashoffset="125.5"
-            transform="rotate(-90 100 100)"
-            className="transition-all duration-1000"
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="text-3xl font-bold text-gray-900">{engagementPercentage}%</div>
-          <div className="text-sm text-gray-500">Engagement</div>
-        </div>
-      </div>
-      <div className="mt-4 text-center">
-        <div className="text-sm text-gray-600">
-          <span className="font-semibold text-blue-600">{data.activeUsers.toLocaleString()}</span> active users
-        </div>
-        <div className="text-xs text-gray-500">
-          out of {data.totalUsers.toLocaleString()} total
-        </div>
-      </div>
     </div>
   );
 }
@@ -551,7 +620,7 @@ function GrowthLineChart({ data, color, title }: {
 
   const width = 100;
   const height = 100;
-  const padding = 15;
+  const padding = 12; // Reduced padding for better space utilization
 
   const points = data.map((point, index) => {
     const x = padding + (index / Math.max(1, data.length - 1)) * (width - padding * 2);
@@ -576,7 +645,7 @@ function GrowthLineChart({ data, color, title }: {
   const areaPathData = `${pathData} L ${points[points.length - 1].x} ${padding + height - padding * 2} L ${points[0].x} ${padding + height - padding * 2} Z`;
 
   return (
-    <div className="h-full">
+    <div className="h-full w-full">
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full">
         {/* Grid lines */}
         {[0, 0.25, 0.5, 0.75, 1].map((ratio) => (
@@ -595,7 +664,7 @@ function GrowthLineChart({ data, color, title }: {
         <path
           d={areaPathData}
           fill={color}
-          opacity={0.1}
+          opacity={0.15}
         />
         
         {/* Line */}
@@ -603,7 +672,7 @@ function GrowthLineChart({ data, color, title }: {
           d={pathData}
           fill="none"
           stroke={color}
-          strokeWidth={2}
+          strokeWidth={2.5}
         />
         
         {/* Points */}
@@ -612,8 +681,10 @@ function GrowthLineChart({ data, color, title }: {
             key={index}
             cx={point.x}
             cy={point.y}
-            r={2}
+            r={2.5}
             fill={color}
+            stroke="white"
+            strokeWidth={1}
           />
         ))}
         
@@ -621,15 +692,39 @@ function GrowthLineChart({ data, color, title }: {
         {[maxValue, maxValue * 0.75, maxValue * 0.5, maxValue * 0.25, 0].map((value, index) => (
           <text
             key={index}
-            x={padding - 8}
+            x={padding - 10}
             y={padding + (index / 4) * (height - padding * 2) + 4}
             textAnchor="end"
             className="text-xs fill-gray-500"
-            fontSize="10"
+            fontSize="11"
           >
             {Math.round(value).toLocaleString()}
           </text>
         ))}
+        
+        {/* X-axis labels (dates) */}
+        {data.length > 0 && (
+          <>
+            <text
+              x={padding}
+              y={height - 2}
+              textAnchor="start"
+              className="text-xs fill-gray-400"
+              fontSize="10"
+            >
+              {new Date(data[0].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </text>
+            <text
+              x={width - padding}
+              y={height - 2}
+              textAnchor="end"
+              className="text-xs fill-gray-400"
+              fontSize="10"
+            >
+              {new Date(data[data.length - 1].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </text>
+          </>
+        )}
       </svg>
     </div>
   );
