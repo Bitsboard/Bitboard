@@ -374,6 +374,12 @@ function CumulativeLineChart({ data, color, title }: {
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
     
+    // Only show tooltip if mouse is within chart area
+    if (mouseX < 40 || mouseX > 380 || mouseY < 20 || mouseY > 180) {
+      setHoveredPoint(null);
+      return;
+    }
+    
     // Find the closest point based on x-position only
     let closestPoint = null;
     let minDistance = Infinity;
@@ -386,8 +392,8 @@ function CumulativeLineChart({ data, color, title }: {
       if (distance < minDistance) {
         minDistance = distance;
         closestPoint = {
-          x: e.clientX, // Use actual mouse position
-          y: e.clientY, // Use actual mouse position
+          x: mouseX + 16, // Offset from cursor
+          y: mouseY - 16, // Offset from cursor
           value: point.cumulative,
           date: point.date
         };
@@ -498,7 +504,7 @@ function CumulativeLineChart({ data, color, title }: {
           className="absolute bg-gray-900 text-white text-sm px-3 py-2 rounded-lg shadow-xl pointer-events-none z-10 border border-gray-700"
           style={{
             left: `${hoveredPoint.x}px`,
-            top: `${hoveredPoint.y - 50}px`,
+            top: `${hoveredPoint.y}px`,
             transform: 'translateX(-50%)'
           }}
         >
