@@ -283,35 +283,14 @@ export default function AdminPage() {
         return (
           <>
             <UserTag username={activity.username} userId={activity.user_id} />
-            {' '}has{' '}
-            <span className="text-neutral-600 dark:text-neutral-400">{activity.action}</span>
-            {' '}an account.
+            {' '}created their account
           </>
         );
       case 'listing':
-        if (activity.action === 'created' || activity.action === 'listed') {
-          return (
-            <>
-              <UserTag username={activity.username} userId={activity.user_id} />
-              {' '}created{' '}
-              <ListingTag title={activity.listing_title} id={activity.listing_id} />
-            </>
-          );
-        } else if (activity.action === 'updated') {
-          return (
-            <>
-              <UserTag username={activity.username} userId={activity.user_id} />
-              {' '}updated{' '}
-              <ListingTag title={activity.listing_title} id={activity.listing_id} />
-            </>
-          );
-        }
         return (
           <>
             <UserTag username={activity.username} userId={activity.user_id} />
-            {' '}has{' '}
-            <span className="text-neutral-600 dark:text-neutral-400">{activity.action}</span>
-            {' '}
+            {' '}posted{' '}
             <ListingTag title={activity.listing_title} id={activity.listing_id} />
           </>
         );
@@ -321,14 +300,14 @@ export default function AdminPage() {
             <UserTag username={activity.username} userId={activity.user_id} />
             {' '}messaged{' '}
             <UserTag username={activity.other_username || 'Unknown User'} userId={activity.other_user_id || ''} />
-            {' '}for{' '}
+            {' '}about{' '}
             <ListingTag title={activity.listing_title} id={activity.listing_id} />
-            {' '}
+            {'. '}
             <a 
               href={`/admin/chats?chatId=${encodeURIComponent(activity.chat_id || '')}&search=${encodeURIComponent(activity.listing_title || '')}`}
               className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-purple-200 dark:bg-purple-800 text-purple-900 dark:text-purple-100 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors border border-purple-300 dark:border-purple-600"
             >
-              {activity.message_count || 1} messages
+              view conversation
               <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
               </svg>
@@ -366,62 +345,110 @@ export default function AdminPage() {
           return (
             <>
               <UserTag username={activity.username} userId={activity.user_id} />
-              {' '}sent an offer of{' '}
+              {' '}offered{' '}
               <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-orange-200 dark:bg-orange-800 text-orange-900 dark:text-orange-100 border border-orange-300 dark:border-orange-600">
                 {formatOfferAmount(activity.offer_amount || 0)} sats
               </span>
+              {' '}for{' '}
+              <ListingTag title={activity.listing_title} id={activity.listing_id} />
               {expirationText && (
                 <>
-                  {' '}with an expiration of{' '}
+                  {' '}- expires in{' '}
                   <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-yellow-200 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-100 border border-yellow-300 dark:border-yellow-600">
                     {expirationText}
                   </span>
                 </>
               )}
-              {' '}to{' '}
-              <UserTag username={activity.other_username || 'Unknown User'} userId={activity.other_user_id || ''} />
-              {' '}for{' '}
-              <ListingTag title={activity.listing_title} id={activity.listing_id} />
+              {'. '}
+              <a 
+                href={`/admin/chats?chatId=${encodeURIComponent(activity.chat_id || '')}&search=${encodeURIComponent(activity.listing_title || '')}`}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-purple-200 dark:bg-purple-800 text-purple-900 dark:text-purple-100 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors border border-purple-300 dark:border-purple-600"
+              >
+                view conversation
+                <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+                </svg>
+              </a>
             </>
           );
         } else if (activity.action === 'offer expired') {
           return (
             <>
               <UserTag username={activity.username} userId={activity.user_id} />
-              {' '}'s offer expired for{' '}
-              <UserTag username={activity.other_username || 'Unknown User'} userId={activity.other_user_id || ''} />
-              {' '}'s{' '}
+              {' '}'s offer for{' '}
               <ListingTag title={activity.listing_title} id={activity.listing_id} />
+              {' '}expired.{' '}
+              <a 
+                href={`/admin/chats?chatId=${encodeURIComponent(activity.chat_id || '')}&search=${encodeURIComponent(activity.listing_title || '')}`}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-purple-200 dark:bg-purple-800 text-purple-900 dark:text-purple-100 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors border border-purple-300 dark:border-purple-600"
+              >
+                view conversation
+                <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+                </svg>
+              </a>
             </>
           );
         } else if (activity.action === 'revoked offer') {
           return (
             <>
               <UserTag username={activity.username} userId={activity.user_id} />
-              {' '}revoked their offer for{' '}
-              <UserTag username={activity.other_username || 'Unknown User'} userId={activity.other_user_id || ''} />
-              {' '}'s{' '}
+              {' '}'s offer for{' '}
               <ListingTag title={activity.listing_title} id={activity.listing_id} />
+              {' '}was revoked.{' '}
+              <a 
+                href={`/admin/chats?chatId=${encodeURIComponent(activity.chat_id || '')}&search=${encodeURIComponent(activity.listing_title || '')}`}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-purple-200 dark:bg-purple-800 text-purple-900 dark:text-purple-100 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors border border-purple-300 dark:border-purple-600"
+              >
+                view conversation
+                <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+                </svg>
+              </a>
             </>
           );
         } else if (activity.action === 'declined offer') {
           return (
             <>
-              <UserTag username={activity.username} userId={activity.user_id} />
-              {' '}declined{' '}
               <UserTag username={activity.other_username || 'Unknown User'} userId={activity.other_user_id || ''} />
-              {' '}'s offer for their{' '}
-              <ListingTag title={activity.listing_title} id={activity.listing_id} />
+              {' '}declined{' '}
+              <UserTag username={activity.username} userId={activity.user_id} />
+              {' '}'s{' '}
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-orange-200 dark:bg-orange-800 text-orange-900 dark:text-orange-100 border border-orange-300 dark:border-orange-600">
+                {formatOfferAmount(activity.offer_amount || 0)} sats
+              </span>
+              {' '}offer.{' '}
+              <a 
+                href={`/admin/chats?chatId=${encodeURIComponent(activity.chat_id || '')}&search=${encodeURIComponent(activity.listing_title || '')}`}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-purple-200 dark:bg-purple-800 text-purple-900 dark:text-purple-100 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors border border-purple-300 dark:border-purple-600"
+              >
+                view conversation
+                <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+                </svg>
+              </a>
             </>
           );
         } else if (activity.action === 'accepted offer') {
           return (
             <>
-              <UserTag username={activity.username} userId={activity.user_id} />
-              {' '}accepted{' '}
               <UserTag username={activity.other_username || 'Unknown User'} userId={activity.other_user_id || ''} />
-              {' '}'s offer for their{' '}
-              <ListingTag title={activity.listing_title} id={activity.listing_id} />
+              {' '}accepted{' '}
+              <UserTag username={activity.username} userId={activity.user_id} />
+              {' '}'s{' '}
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-orange-200 dark:bg-orange-800 text-orange-900 dark:text-orange-100 border border-orange-300 dark:border-orange-600">
+                {formatOfferAmount(activity.offer_amount || 0)} sats
+              </span>
+              {' '}offer.{' '}
+              <a 
+                href={`/admin/chats?chatId=${encodeURIComponent(activity.chat_id || '')}&search=${encodeURIComponent(activity.listing_title || '')}`}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-purple-200 dark:bg-purple-800 text-purple-900 dark:text-purple-100 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors border border-purple-300 dark:border-purple-600"
+              >
+                view conversation
+                <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+                </svg>
+              </a>
             </>
           );
         }
@@ -430,26 +457,6 @@ export default function AdminPage() {
             <UserTag username={activity.username} userId={activity.user_id} />
             {' '}
             <span className="text-neutral-600 dark:text-neutral-400">{activity.action}</span>
-          </>
-        );
-      case 'chat':
-        return (
-          <>
-            <UserTag username={activity.username} userId={activity.user_id} />
-            {' '}started a chat with{' '}
-            <UserTag username={activity.other_username || 'Unknown User'} userId={activity.other_user_id || ''} />
-            {' '}about{' '}
-            <ListingTag title={activity.listing_title} id={activity.listing_id} />
-            {' '}
-            <a 
-              href={`/admin/chats?chatId=${encodeURIComponent(activity.chat_id || '')}&search=${encodeURIComponent(activity.listing_title || '')}`}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-purple-200 dark:bg-purple-800 text-purple-900 dark:text-purple-100 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors border border-purple-300 dark:border-purple-600"
-            >
-              View Chat
-              <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
-              </svg>
-            </a>
           </>
         );
       default:

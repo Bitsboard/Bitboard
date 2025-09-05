@@ -62,14 +62,14 @@ export async function GET(req: Request) {
       LIMIT 10
     `).all();
 
-    const chatActivity = await db.prepare(`
+    const messageActivity = await db.prepare(`
       SELECT 
-        'chat' as type,
+        'message' as type,
         u1.username,
         u1.id as user_id,
         u1.email,
-        'started' as action,
-        c.created_at as timestamp,
+        'messaged' as action,
+        m.created_at as timestamp,
         l.title as listing_title,
         l.id as listing_id,
         u2.username as other_username,
@@ -79,11 +79,12 @@ export async function GET(req: Request) {
         NULL as offer_amount,
         NULL as offer_expires_at,
         NULL as offer_status
-      FROM chats c
+      FROM messages m
+      JOIN chats c ON m.chat_id = c.id
       JOIN users u1 ON c.buyer_id = u1.id
       JOIN users u2 ON c.seller_id = u2.id
       LEFT JOIN listings l ON c.listing_id = l.id
-      ORDER BY c.created_at DESC
+      ORDER BY m.created_at DESC
       LIMIT 10
     `).all();
 
@@ -116,7 +117,7 @@ export async function GET(req: Request) {
     const allActivities = [
       ...(userActivity.results || []),
       ...(listingActivity.results || []),
-      ...(chatActivity.results || []),
+      ...(messageActivity.results || []),
       ...(offerActivity.results || [])
     ].sort((a, b) => (b.timestamp as number) - (a.timestamp as number)).slice(0, 20);
 
