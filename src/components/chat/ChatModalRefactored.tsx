@@ -179,7 +179,6 @@ export function ChatModalRefactored({
                       currentUserId={user?.id || ''}
                       onAction={handleOfferAction}
                       dark={dark}
-                      btcCad={btcCad}
                       unit={unit === 'BTC' ? 'sats' : unit}
                     />
                   ))}
