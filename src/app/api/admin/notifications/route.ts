@@ -81,9 +81,9 @@ export async function POST(request: NextRequest) {
     const params: any[] = [];
 
     if (body.targetGroup === 'verified') {
-      userQuery += ' AND verified_email = 1';
+      userQuery += ' AND verified = 1';
     } else if (body.targetGroup === 'unverified') {
-      userQuery += ' AND verified_email = 0';
+      userQuery += ' AND verified = 0';
     } else if (body.targetGroup === 'admin') {
       // Get admin users based on email
       const adminEmails = process.env.ADMIN_EMAILS?.split(',') || [];
