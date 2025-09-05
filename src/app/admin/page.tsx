@@ -289,11 +289,11 @@ export default function AdminPage() {
           </>
         );
       case 'listing':
-        if (activity.action === 'listed') {
+        if (activity.action === 'created' || activity.action === 'listed') {
           return (
             <>
               <UserTag username={activity.username} userId={activity.user_id} />
-              {' '}has listed{' '}
+              {' '}created{' '}
               <ListingTag title={activity.listing_title} id={activity.listing_id} />
             </>
           );
@@ -301,7 +301,7 @@ export default function AdminPage() {
           return (
             <>
               <UserTag username={activity.username} userId={activity.user_id} />
-              {' '}has updated{' '}
+              {' '}updated{' '}
               <ListingTag title={activity.listing_title} id={activity.listing_id} />
             </>
           );
@@ -362,11 +362,11 @@ export default function AdminPage() {
 
         const expirationText = formatExpiration(activity.offer_expires_at || null);
         
-        if (activity.action === 'offered') {
+        if (activity.action === 'sent' || activity.action === 'offered') {
           return (
             <>
               <UserTag username={activity.username} userId={activity.user_id} />
-              {' '}offered{' '}
+              {' '}sent an offer of{' '}
               <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-orange-200 dark:bg-orange-800 text-orange-900 dark:text-orange-100 border border-orange-300 dark:border-orange-600">
                 {formatOfferAmount(activity.offer_amount || 0)} sats
               </span>
@@ -378,9 +378,9 @@ export default function AdminPage() {
                   </span>
                 </>
               )}
-              {' '}for{' '}
+              {' '}to{' '}
               <UserTag username={activity.other_username || 'Unknown User'} userId={activity.other_user_id || ''} />
-              {' '}'s{' '}
+              {' '}for{' '}
               <ListingTag title={activity.listing_title} id={activity.listing_id} />
             </>
           );
@@ -430,6 +430,26 @@ export default function AdminPage() {
             <UserTag username={activity.username} userId={activity.user_id} />
             {' '}
             <span className="text-neutral-600 dark:text-neutral-400">{activity.action}</span>
+          </>
+        );
+      case 'chat':
+        return (
+          <>
+            <UserTag username={activity.username} userId={activity.user_id} />
+            {' '}started a chat with{' '}
+            <UserTag username={activity.other_username || 'Unknown User'} userId={activity.other_user_id || ''} />
+            {' '}about{' '}
+            <ListingTag title={activity.listing_title} id={activity.listing_id} />
+            {' '}
+            <a 
+              href={`/admin/chats?chatId=${encodeURIComponent(activity.chat_id || '')}&search=${encodeURIComponent(activity.listing_title || '')}`}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-purple-200 dark:bg-purple-800 text-purple-900 dark:text-purple-100 hover:bg-purple-300 dark:hover:bg-purple-700 transition-colors border border-purple-300 dark:border-purple-600"
+            >
+              View Chat
+              <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+              </svg>
+            </a>
           </>
         );
       default:

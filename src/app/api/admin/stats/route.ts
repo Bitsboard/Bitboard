@@ -16,8 +16,8 @@ export async function GET(req: Request) {
     const listingsCount = await db.prepare('SELECT COUNT(*) as count FROM listings').first();
     const chatsCount = await db.prepare('SELECT COUNT(*) as count FROM chats').first();
     
-    // Get recent activity (simplified)
-    const recentActivity = await db.prepare(`
+    // Get recent activity from multiple sources
+    const userActivity = await db.prepare(`
       SELECT 
         'user' as type,
         u.username,
@@ -29,11 +29,99 @@ export async function GET(req: Request) {
         NULL as listing_id,
         NULL as other_username,
         NULL as other_user_id,
-        NULL as chat_id
+        NULL as chat_id,
+        NULL as message_count,
+        NULL as offer_amount,
+        NULL as offer_expires_at,
+        NULL as offer_status
       FROM users u
       ORDER BY u.created_at DESC
-      LIMIT 20
+      LIMIT 10
     `).all();
+
+    const listingActivity = await db.prepare(`
+      SELECT 
+        'listing' as type,
+        u.username,
+        u.id as user_id,
+        u.email,
+        'created' as action,
+        l.created_at as timestamp,
+        l.title as listing_title,
+        l.id as listing_id,
+        NULL as other_username,
+        NULL as other_user_id,
+        NULL as chat_id,
+        NULL as message_count,
+        NULL as offer_amount,
+        NULL as offer_expires_at,
+        NULL as offer_status
+      FROM listings l
+      JOIN users u ON l.user_id = u.id
+      ORDER BY l.created_at DESC
+      LIMIT 10
+    `).all();
+
+    const chatActivity = await db.prepare(`
+      SELECT 
+        'chat' as type,
+        u1.username,
+        u1.id as user_id,
+        u1.email,
+        'started' as action,
+        c.created_at as timestamp,
+        l.title as listing_title,
+        l.id as listing_id,
+        u2.username as other_username,
+        u2.id as other_user_id,
+        c.id as chat_id,
+        NULL as message_count,
+        NULL as offer_amount,
+        NULL as offer_expires_at,
+        NULL as offer_status
+      FROM chats c
+      JOIN users u1 ON c.user1_id = u1.id
+      JOIN users u2 ON c.user2_id = u2.id
+      LEFT JOIN listings l ON c.listing_id = l.id
+      ORDER BY c.created_at DESC
+      LIMIT 10
+    `).all();
+
+    const offerActivity = await db.prepare(`
+      SELECT 
+        'offer' as type,
+        u1.username,
+        u1.id as user_id,
+        u1.email,
+        'sent' as action,
+        o.created_at as timestamp,
+        l.title as listing_title,
+        l.id as listing_id,
+        u2.username as other_username,
+        u2.id as other_user_id,
+        c.id as chat_id,
+        NULL as message_count,
+        o.amount as offer_amount,
+        o.expires_at as offer_expires_at,
+        o.status as offer_status
+      FROM offers o
+      JOIN users u1 ON o.buyer_id = u1.id
+      JOIN users u2 ON o.seller_id = u2.id
+      LEFT JOIN listings l ON o.listing_id = l.id
+      LEFT JOIN chats c ON o.chat_id = c.id
+      ORDER BY o.created_at DESC
+      LIMIT 10
+    `).all();
+
+    // Combine all activities and sort by timestamp
+    const allActivities = [
+      ...(userActivity.results || []),
+      ...(listingActivity.results || []),
+      ...(chatActivity.results || []),
+      ...(offerActivity.results || [])
+    ].sort((a, b) => (b.timestamp as number) - (a.timestamp as number)).slice(0, 20);
+
+    const recentActivity = { results: allActivities };
     
     const stats = {
       users: {
