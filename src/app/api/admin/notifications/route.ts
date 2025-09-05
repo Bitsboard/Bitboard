@@ -3,6 +3,7 @@ export const runtime = 'edge';
 import { NextRequest, NextResponse } from "next/server";
 import { getRequestContext } from "@cloudflare/next-on-pages";
 import { getSessionFromRequest } from "@/lib/auth";
+import type { D1Database } from "@cloudflare/workers-types";
 
 interface SystemNotificationRequest {
   targetGroup: 'all' | 'verified' | 'unverified' | 'admin' | 'buyers' | 'sellers';
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     const env = getRequestContext().env;
-    const db = env.DB;
+    const db = env.DB as D1Database;
 
     // Generate unique notification ID
     const notificationId = `sys_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;

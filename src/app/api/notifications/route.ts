@@ -3,6 +3,7 @@ export const runtime = 'edge';
 import { NextRequest, NextResponse } from "next/server";
 import { getRequestContext } from "@cloudflare/next-on-pages";
 import { getSessionFromRequest } from "@/lib/auth";
+import type { D1Database } from "@cloudflare/workers-types";
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
 
     const env = getRequestContext().env;
-    const db = env.DB;
+    const db = env.DB as D1Database;
 
     // Get user's notifications with system notification details
     const notificationsResult = await db.prepare(`
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
     }
 
     const env = getRequestContext().env;
-    const db = env.DB;
+    const db = env.DB as D1Database;
 
     if (body.action === 'mark_read') {
       // Mark notification as read
