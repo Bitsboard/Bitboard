@@ -90,20 +90,40 @@ export default function AnalyticsPage() {
     
     // Sort users by creation date
     const sortedUsers = users
-      .map(user => ({
-        ...user,
-        createdAt: new Date(user.createdAt || user.created_at)
-      }))
-      .filter(user => !isNaN(user.createdAt.getTime()))
+      .map(user => {
+        const createdAt = user.createdAt || user.created_at;
+        console.log('🔍 User createdAt raw:', createdAt, 'type:', typeof createdAt);
+        return {
+          ...user,
+          createdAt: new Date(createdAt)
+        };
+      })
+      .filter(user => {
+        const isValid = !isNaN(user.createdAt.getTime());
+        if (!isValid) {
+          console.log('🔍 Invalid user date:', user.createdAt, 'raw:', user.createdAt || user.created_at);
+        }
+        return isValid;
+      })
       .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
     
     // Sort listings by creation date
     const sortedListings = listings
-      .map(listing => ({
-        ...listing,
-        createdAt: new Date(listing.createdAt)
-      }))
-      .filter(listing => !isNaN(listing.createdAt.getTime()))
+      .map(listing => {
+        const createdAt = listing.createdAt;
+        console.log('🔍 Listing createdAt raw:', createdAt, 'type:', typeof createdAt);
+        return {
+          ...listing,
+          createdAt: new Date(createdAt)
+        };
+      })
+      .filter(listing => {
+        const isValid = !isNaN(listing.createdAt.getTime());
+        if (!isValid) {
+          console.log('🔍 Invalid listing date:', listing.createdAt, 'raw:', listing.createdAt);
+        }
+        return isValid;
+      })
       .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
     
     console.log('📊 Sorted users:', sortedUsers.length);
