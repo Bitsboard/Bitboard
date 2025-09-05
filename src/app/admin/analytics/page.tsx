@@ -2,6 +2,11 @@
 
 import { useState, useEffect } from 'react';
 
+interface ChartData {
+  date: string;
+  value: number;
+}
+
 export default function AnalyticsPage() {
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -9,6 +14,8 @@ export default function AnalyticsPage() {
     activeUsers: 0,
     newListings: 0
   });
+  const [userChartData, setUserChartData] = useState<ChartData[]>([]);
+  const [listingChartData, setListingChartData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -58,11 +65,75 @@ export default function AnalyticsPage() {
         activeUsers,
         newListings
       });
+
+      // Generate chart data
+      generateChartData(allUsers, allListings);
     } catch (error) {
       console.error('Failed to load stats:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const generateChartData = (users: any[], listings: any[]) => {
+    // Get date range from earliest to latest
+    const allDates = [
+      ...users.map(u => new Date(u.createdAt || u.created_at)),
+      ...listings.map(l => new Date(l.createdAt))
+    ].filter(d => !isNaN(d.getTime()));
+    
+    if (allDates.length === 0) return;
+    
+    const minDate = new Date(Math.min(...allDates.map(d => d.getTime())));
+    const maxDate = new Date(Math.max(...allDates.map(d => d.getTime())));
+    
+    // Generate daily data points
+    const chartData: ChartData[] = [];
+    const currentDate = new Date(minDate);
+    
+    while (currentDate <= maxDate) {
+      const dateStr = currentDate.toISOString().split('T')[0];
+      
+      // Count users created up to this date
+      const usersUpToDate = users.filter(user => 
+        new Date(user.createdAt || user.created_at) <= currentDate
+      ).length;
+      
+      // Count listings created up to this date
+      const listingsUpToDate = listings.filter(listing => 
+        new Date(listing.createdAt) <= currentDate
+      ).length;
+      
+      chartData.push({
+        date: dateStr,
+        value: usersUpToDate
+      });
+      
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    setUserChartData(chartData);
+    
+    // Generate listing chart data
+    const listingChartData: ChartData[] = [];
+    const currentDate2 = new Date(minDate);
+    
+    while (currentDate2 <= maxDate) {
+      const dateStr = currentDate2.toISOString().split('T')[0];
+      
+      const listingsUpToDate = listings.filter(listing => 
+        new Date(listing.createdAt) <= currentDate2
+      ).length;
+      
+      listingChartData.push({
+        date: dateStr,
+        value: listingsUpToDate
+      });
+      
+      currentDate2.setDate(currentDate2.getDate() + 1);
+    }
+    
+    setListingChartData(listingChartData);
   };
 
   if (loading) {
@@ -155,7 +226,143 @@ export default function AnalyticsPage() {
             </div>
           </div>
         </div>
+
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          {/* User Growth Chart */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">User Growth</h3>
+            <div className="h-64">
+              <SmoothLineChart data={userChartData} color="blue" />
+            </div>
+          </div>
+
+          {/* Listing Growth Chart */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Listing Growth</h3>
+            <div className="h-64">
+              <SmoothLineChart data={listingChartData} color="green" />
+            </div>
+          </div>
+        </div>
       </div>
+    </div>
+  );
+}
+
+// Smooth line chart component
+function SmoothLineChart({ data, color }: { data: ChartData[], color: string }) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="h-full flex items-center justify-center text-gray-500">
+        No data available
+      </div>
+    );
+  }
+
+  const maxValue = Math.max(...data.map(d => d.value));
+  const minValue = Math.min(...data.map(d => d.value));
+  const range = maxValue - minValue || 1;
+
+  const colorClasses = {
+    blue: 'stroke-blue-500',
+    green: 'stroke-green-500',
+    red: 'stroke-red-500',
+    purple: 'stroke-purple-500'
+  };
+
+  const fillClasses = {
+    blue: 'fill-blue-500',
+    green: 'fill-green-500',
+    red: 'fill-red-500',
+    purple: 'fill-purple-500'
+  };
+
+  const width = 400;
+  const height = 200;
+  const padding = 40;
+  const chartWidth = width - (padding * 2);
+  const chartHeight = height - (padding * 2);
+
+  // Generate smooth path
+  const points = data.map((point, index) => {
+    const x = padding + (index / (data.length - 1)) * chartWidth;
+    const y = padding + chartHeight - ((point.value - minValue) / range) * chartHeight;
+    return { x, y, value: point.value, date: point.date };
+  });
+
+  // Create smooth curve path
+  const pathData = points.map((point, index) => {
+    if (index === 0) return `M ${point.x} ${point.y}`;
+    
+    const prevPoint = points[index - 1];
+    const cp1x = prevPoint.x + (point.x - prevPoint.x) / 3;
+    const cp1y = prevPoint.y;
+    const cp2x = point.x - (point.x - prevPoint.x) / 3;
+    const cp2y = point.y;
+    
+    return `C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${point.x} ${point.y}`;
+  }).join(' ');
+
+  // Create area path
+  const areaPathData = `${pathData} L ${points[points.length - 1].x} ${padding + chartHeight} L ${points[0].x} ${padding + chartHeight} Z`;
+
+  return (
+    <div className="h-full flex flex-col">
+      <svg width={width} height={height} className="w-full h-full">
+        {/* Grid lines */}
+        {[0, 0.25, 0.5, 0.75, 1].map((ratio) => (
+          <line
+            key={ratio}
+            x1={padding}
+            y1={padding + ratio * chartHeight}
+            x2={padding + chartWidth}
+            y2={padding + ratio * chartHeight}
+            stroke="currentColor"
+            strokeWidth={1}
+            className="text-gray-200"
+          />
+        ))}
+        
+        {/* Area */}
+        <path
+          d={areaPathData}
+          className={`${fillClasses[color as keyof typeof fillClasses]} opacity-20`}
+        />
+        
+        {/* Line */}
+        <path
+          d={pathData}
+          fill="none"
+          strokeWidth={3}
+          className={colorClasses[color as keyof typeof colorClasses]}
+        />
+        
+        {/* Points */}
+        {points.map((point, index) => (
+          <circle
+            key={index}
+            cx={point.x}
+            cy={point.y}
+            r={4}
+            className={`${fillClasses[color as keyof typeof fillClasses]} hover:r-6 transition-all cursor-pointer`}
+            title={`${point.date}: ${point.value}`}
+          />
+        ))}
+        
+        {/* Y-axis labels */}
+        {[maxValue, maxValue * 0.75, maxValue * 0.5, maxValue * 0.25, minValue].map((value, index) => (
+          <text
+            key={index}
+            x={padding - 10}
+            y={padding + (index / 4) * chartHeight + 4}
+            textAnchor="end"
+            className="text-xs fill-gray-600"
+          >
+            {Math.round(value)}
+          </text>
+        ))}
+      </svg>
     </div>
   );
 }
