@@ -228,36 +228,60 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Charts Section */}
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* User Growth Chart */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">User Growth Over Time</h3>
-            <div className="h-64">
-              <UserGrowthChart />
+        <div className="mt-8 space-y-6">
+          {/* Growth Charts Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg shadow">
+              <div className="p-6 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900">User Growth</h3>
+                <p className="text-sm text-gray-500 mt-1">Cumulative user registrations over time</p>
+              </div>
+              <div className="p-6 h-80">
+                <UserGrowthChart />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow">
+              <div className="p-6 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900">Listing Growth</h3>
+                <p className="text-sm text-gray-500 mt-1">Cumulative listings created over time</p>
+              </div>
+              <div className="p-6 h-80">
+                <ListingGrowthChart />
+              </div>
             </div>
           </div>
 
-          {/* Listing Growth Chart */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Listing Growth Over Time</h3>
-            <div className="h-64">
-              <ListingGrowthChart />
+          {/* Activity Analysis Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="bg-white rounded-lg shadow">
+              <div className="p-6 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900">Platform Distribution</h3>
+                <p className="text-sm text-gray-500 mt-1">Activity breakdown by type</p>
+              </div>
+              <div className="p-6 h-64">
+                <PlatformDistributionChart data={data} />
+              </div>
             </div>
-          </div>
 
-          {/* Activity Distribution */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Platform Activity</h3>
-            <div className="h-64">
-              <ActivityChart data={data} />
+            <div className="bg-white rounded-lg shadow">
+              <div className="p-6 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                <p className="text-sm text-gray-500 mt-1">Last 7 days activity comparison</p>
+              </div>
+              <div className="p-6 h-64">
+                <RecentActivityChart data={data} />
+              </div>
             </div>
-          </div>
 
-          {/* Recent Trends */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity Trends</h3>
-            <div className="h-64">
-              <TrendsChart data={data} />
+            <div className="bg-white rounded-lg shadow">
+              <div className="p-6 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900">User Engagement</h3>
+                <p className="text-sm text-gray-500 mt-1">Active vs total users</p>
+              </div>
+              <div className="p-6 h-64">
+                <UserEngagementChart data={data} />
+              </div>
             </div>
           </div>
         </div>
@@ -290,22 +314,14 @@ function UserGrowthChart() {
   };
 
   if (loading) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <div className="animate-pulse text-gray-500">Loading chart...</div>
-      </div>
-    );
+    return <ChartSkeleton />;
   }
 
   if (chartData.length === 0) {
-    return (
-      <div className="h-full flex items-center justify-center text-gray-500">
-        No data available
-      </div>
-    );
+    return <NoDataMessage />;
   }
 
-  return <LineChart data={chartData} color="blue" />;
+  return <GrowthLineChart data={chartData} color="#3B82F6" title="Users" />;
 }
 
 // Listing Growth Chart Component
@@ -332,47 +348,44 @@ function ListingGrowthChart() {
   };
 
   if (loading) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <div className="animate-pulse text-gray-500">Loading chart...</div>
-      </div>
-    );
+    return <ChartSkeleton />;
   }
 
   if (chartData.length === 0) {
-    return (
-      <div className="h-full flex items-center justify-center text-gray-500">
-        No data available
-      </div>
-    );
+    return <NoDataMessage />;
   }
 
-  return <LineChart data={chartData} color="green" />;
+  return <GrowthLineChart data={chartData} color="#10B981" title="Listings" />;
 }
 
-// Activity Chart Component (Pie Chart)
-function ActivityChart({ data }: { data: AnalyticsData }) {
-  const activityData = [
-    { name: 'Users', value: data.totalUsers, color: 'bg-blue-500' },
-    { name: 'Listings', value: data.totalListings, color: 'bg-green-500' },
-    { name: 'Messages', value: data.totalMessages, color: 'bg-yellow-500' },
-    { name: 'Offers', value: data.totalOffers, color: 'bg-purple-500' }
-  ];
+// Platform Distribution Chart (Donut Chart)
+function PlatformDistributionChart({ data }: { data: AnalyticsData }) {
+  const distributionData = [
+    { name: 'Users', value: data.totalUsers, color: '#3B82F6' },
+    { name: 'Listings', value: data.totalListings, color: '#10B981' },
+    { name: 'Messages', value: data.totalMessages, color: '#F59E0B' },
+    { name: 'Offers', value: data.totalOffers, color: '#8B5CF6' }
+  ].filter(item => item.value > 0);
 
-  const total = activityData.reduce((sum, item) => sum + item.value, 0);
+  const total = distributionData.reduce((sum, item) => sum + item.value, 0);
+
+  if (total === 0) {
+    return <NoDataMessage />;
+  }
 
   return (
     <div className="h-full flex items-center justify-center">
-      <div className="w-48 h-48 relative">
-        <svg viewBox="0 0 100 100" className="w-full h-full">
-          {activityData.map((item, index) => {
-            const percentage = total > 0 ? (item.value / total) * 100 : 0;
-            const startAngle = activityData.slice(0, index).reduce((sum, prev) => sum + (prev.value / total) * 360, 0);
+      <div className="relative w-full h-full max-w-xs">
+        <svg viewBox="0 0 200 200" className="w-full h-full">
+          {distributionData.map((item, index) => {
+            const percentage = (item.value / total) * 100;
+            const startAngle = distributionData.slice(0, index).reduce((sum, prev) => sum + (prev.value / total) * 360, 0);
             const endAngle = startAngle + (percentage * 3.6);
             
-            const radius = 40;
-            const centerX = 50;
-            const centerY = 50;
+            const radius = 70;
+            const centerX = 100;
+            const centerY = 100;
+            const innerRadius = 50;
             
             const startAngleRad = (startAngle - 90) * (Math.PI / 180);
             const endAngleRad = (endAngle - 90) * (Math.PI / 180);
@@ -382,21 +395,27 @@ function ActivityChart({ data }: { data: AnalyticsData }) {
             const x2 = centerX + radius * Math.cos(endAngleRad);
             const y2 = centerY + radius * Math.sin(endAngleRad);
             
+            const x1Inner = centerX + innerRadius * Math.cos(startAngleRad);
+            const y1Inner = centerY + innerRadius * Math.sin(startAngleRad);
+            const x2Inner = centerX + innerRadius * Math.cos(endAngleRad);
+            const y2Inner = centerY + innerRadius * Math.sin(endAngleRad);
+            
             const largeArcFlag = percentage > 50 ? 1 : 0;
             
-            const pathData = [
-              `M ${centerX} ${centerY}`,
-              `L ${x1} ${y1}`,
+            const outerPath = [
+              `M ${x1} ${y1}`,
               `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+              `L ${x2Inner} ${y2Inner}`,
+              `A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${x1Inner} ${y1Inner}`,
               'Z'
             ].join(' ');
             
             return (
               <path
                 key={item.name}
-                d={pathData}
-                className={item.color}
-                opacity={0.8}
+                d={outerPath}
+                fill={item.color}
+                opacity={0.9}
               />
             );
           })}
@@ -404,15 +423,24 @@ function ActivityChart({ data }: { data: AnalyticsData }) {
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center">
             <div className="text-2xl font-bold text-gray-900">{total.toLocaleString()}</div>
-            <div className="text-sm text-gray-500">Total Activity</div>
+            <div className="text-sm text-gray-500">Total</div>
           </div>
         </div>
       </div>
-      <div className="ml-6 space-y-2">
-        {activityData.map((item, index) => (
-          <div key={item.name} className="flex items-center">
-            <div className={`w-3 h-3 rounded-full ${item.color} mr-2`}></div>
-            <span className="text-sm text-gray-600">{item.name}: {item.value.toLocaleString()}</span>
+      <div className="ml-4 space-y-3 flex-1">
+        {distributionData.map((item, index) => (
+          <div key={item.name} className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div 
+                className="w-3 h-3 rounded-full mr-3" 
+                style={{ backgroundColor: item.color }}
+              ></div>
+              <span className="text-sm font-medium text-gray-700">{item.name}</span>
+            </div>
+            <div className="text-right">
+              <div className="text-sm font-semibold text-gray-900">{item.value.toLocaleString()}</div>
+              <div className="text-xs text-gray-500">{((item.value / total) * 100).toFixed(1)}%</div>
+            </div>
           </div>
         ))}
       </div>
@@ -420,32 +448,40 @@ function ActivityChart({ data }: { data: AnalyticsData }) {
   );
 }
 
-// Trends Chart Component (Bar Chart)
-function TrendsChart({ data }: { data: AnalyticsData }) {
-  const trendsData = [
-    { name: 'Active Users', value: data.activeUsers, color: 'bg-blue-500' },
-    { name: 'New Listings', value: data.newListings, color: 'bg-green-500' },
-    { name: 'Messages', value: data.totalMessages, color: 'bg-yellow-500' },
-    { name: 'Offers', value: data.totalOffers, color: 'bg-purple-500' }
-  ];
+// Recent Activity Chart (Horizontal Bar Chart)
+function RecentActivityChart({ data }: { data: AnalyticsData }) {
+  const activityData = [
+    { name: 'Active Users (24h)', value: data.activeUsers, color: '#3B82F6', icon: '👥' },
+    { name: 'New Listings (7d)', value: data.newListings, color: '#10B981', icon: '📝' },
+    { name: 'Total Messages', value: data.totalMessages, color: '#F59E0B', icon: '💬' },
+    { name: 'Total Offers', value: data.totalOffers, color: '#8B5CF6', icon: '🤝' }
+  ].filter(item => item.value > 0);
 
-  const maxValue = Math.max(...trendsData.map(item => item.value));
+  const maxValue = Math.max(...activityData.map(item => item.value));
+
+  if (maxValue === 0) {
+    return <NoDataMessage />;
+  }
 
   return (
-    <div className="h-full flex items-end justify-between px-4">
-      {trendsData.map((item, index) => (
-        <div key={item.name} className="flex flex-col items-center flex-1">
-          <div className="w-full flex flex-col items-center">
+    <div className="h-full space-y-4">
+      {activityData.map((item, index) => (
+        <div key={item.name} className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <span className="text-lg mr-2">{item.icon}</span>
+              <span className="text-sm font-medium text-gray-700">{item.name}</span>
+            </div>
+            <span className="text-sm font-semibold text-gray-900">{item.value.toLocaleString()}</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
             <div
-              className={`w-8 ${item.color} rounded-t`}
-              style={{ height: `${(item.value / maxValue) * 180}px` }}
+              className="h-2 rounded-full transition-all duration-500"
+              style={{ 
+                width: `${(item.value / maxValue) * 100}%`,
+                backgroundColor: item.color
+              }}
             ></div>
-            <div className="text-xs text-gray-600 mt-2 text-center">
-              {item.value.toLocaleString()}
-            </div>
-            <div className="text-xs text-gray-500 mt-1 text-center">
-              {item.name}
-            </div>
           </div>
         </div>
       ))}
@@ -453,23 +489,69 @@ function TrendsChart({ data }: { data: AnalyticsData }) {
   );
 }
 
-// Generic Line Chart Component
-function LineChart({ data, color }: { data: Array<{date: string, users?: number, listings?: number}>, color: string }) {
-  if (data.length === 0) {
-    return (
-      <div className="h-full flex items-center justify-center text-gray-500">
-        No data available
-      </div>
-    );
-  }
+// User Engagement Chart (Gauge Chart)
+function UserEngagementChart({ data }: { data: AnalyticsData }) {
+  const engagementRate = data.totalUsers > 0 ? (data.activeUsers / data.totalUsers) * 100 : 0;
+  const engagementPercentage = Math.round(engagementRate);
 
+  return (
+    <div className="h-full flex flex-col items-center justify-center">
+      <div className="relative w-48 h-48">
+        <svg viewBox="0 0 200 200" className="w-full h-full">
+          {/* Background circle */}
+          <circle
+            cx="100"
+            cy="100"
+            r="80"
+            fill="none"
+            stroke="#E5E7EB"
+            strokeWidth="12"
+          />
+          {/* Progress circle */}
+          <circle
+            cx="100"
+            cy="100"
+            r="80"
+            fill="none"
+            stroke="#3B82F6"
+            strokeWidth="12"
+            strokeLinecap="round"
+            strokeDasharray={`${engagementPercentage * 5.02} 502`}
+            strokeDashoffset="125.5"
+            transform="rotate(-90 100 100)"
+            className="transition-all duration-1000"
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <div className="text-3xl font-bold text-gray-900">{engagementPercentage}%</div>
+          <div className="text-sm text-gray-500">Engagement</div>
+        </div>
+      </div>
+      <div className="mt-4 text-center">
+        <div className="text-sm text-gray-600">
+          <span className="font-semibold text-blue-600">{data.activeUsers.toLocaleString()}</span> active users
+        </div>
+        <div className="text-xs text-gray-500">
+          out of {data.totalUsers.toLocaleString()} total
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Growth Line Chart Component
+function GrowthLineChart({ data, color, title }: { 
+  data: Array<{date: string, users?: number, listings?: number}>, 
+  color: string, 
+  title: string 
+}) {
   const maxValue = Math.max(...data.map(d => d.users || d.listings || 0));
   const minValue = 0;
   const range = maxValue - minValue || 1;
 
   const width = 100;
-  const height = 200;
-  const padding = 20;
+  const height = 100;
+  const padding = 15;
 
   const points = data.map((point, index) => {
     const x = padding + (index / Math.max(1, data.length - 1)) * (width - padding * 2);
@@ -477,17 +559,21 @@ function LineChart({ data, color }: { data: Array<{date: string, users?: number,
     return { x, y, value: point.users || point.listings || 0, date: point.date };
   });
 
+  // Create smooth curve path
   const pathData = points.map((point, index) => {
     if (index === 0) return `M ${point.x} ${point.y}`;
-    return `L ${point.x} ${point.y}`;
+    
+    const prevPoint = points[index - 1];
+    const cp1x = prevPoint.x + (point.x - prevPoint.x) / 3;
+    const cp1y = prevPoint.y;
+    const cp2x = point.x - (point.x - prevPoint.x) / 3;
+    const cp2y = point.y;
+    
+    return `C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${point.x} ${point.y}`;
   }).join(' ');
 
-  const colorClasses = {
-    blue: 'stroke-blue-500 fill-blue-500',
-    green: 'stroke-green-500 fill-green-500',
-    red: 'stroke-red-500 fill-red-500',
-    purple: 'stroke-purple-500 fill-purple-500'
-  };
+  // Create area path
+  const areaPathData = `${pathData} L ${points[points.length - 1].x} ${padding + height - padding * 2} L ${points[0].x} ${padding + height - padding * 2} Z`;
 
   return (
     <div className="h-full">
@@ -500,17 +586,24 @@ function LineChart({ data, color }: { data: Array<{date: string, users?: number,
             y1={padding + ratio * (height - padding * 2)}
             x2={width - padding}
             y2={padding + ratio * (height - padding * 2)}
-            stroke="#f3f4f6"
-            strokeWidth={1}
+            stroke="#F3F4F6"
+            strokeWidth={0.5}
           />
         ))}
+        
+        {/* Area */}
+        <path
+          d={areaPathData}
+          fill={color}
+          opacity={0.1}
+        />
         
         {/* Line */}
         <path
           d={pathData}
           fill="none"
+          stroke={color}
           strokeWidth={2}
-          className={colorClasses[color as keyof typeof colorClasses]?.split(' ')[0]}
         />
         
         {/* Points */}
@@ -519,8 +612,8 @@ function LineChart({ data, color }: { data: Array<{date: string, users?: number,
             key={index}
             cx={point.x}
             cy={point.y}
-            r={3}
-            className={colorClasses[color as keyof typeof colorClasses]?.split(' ')[1]}
+            r={2}
+            fill={color}
           />
         ))}
         
@@ -528,10 +621,10 @@ function LineChart({ data, color }: { data: Array<{date: string, users?: number,
         {[maxValue, maxValue * 0.75, maxValue * 0.5, maxValue * 0.25, 0].map((value, index) => (
           <text
             key={index}
-            x={padding - 5}
+            x={padding - 8}
             y={padding + (index / 4) * (height - padding * 2) + 4}
             textAnchor="end"
-            className="text-xs fill-gray-600"
+            className="text-xs fill-gray-500"
             fontSize="10"
           >
             {Math.round(value).toLocaleString()}
@@ -541,3 +634,24 @@ function LineChart({ data, color }: { data: Array<{date: string, users?: number,
     </div>
   );
 }
+
+// Utility Components
+function ChartSkeleton() {
+  return (
+    <div className="h-full flex items-center justify-center">
+      <div className="animate-pulse text-gray-400">Loading chart...</div>
+    </div>
+  );
+}
+
+function NoDataMessage() {
+  return (
+    <div className="h-full flex items-center justify-center text-gray-400">
+      <div className="text-center">
+        <div className="text-sm">No data available</div>
+      </div>
+    </div>
+  );
+}
+
+
