@@ -21,6 +21,13 @@ export function useIpLocation() {
         setLoading(true);
         setError(null);
 
+        // Skip IP location on admin pages to avoid CORS issues
+        if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
+          console.log('Skipping IP location on admin page to avoid CORS issues');
+          setLoading(false);
+          return;
+        }
+
         // Try multiple free IP geolocation services for reliability
         const services = [
           'https://ipapi.co/json/',
@@ -31,27 +38,31 @@ export function useIpLocation() {
         let ipLocation: IpLocationResponse | null = null;
 
         // First, get the user's IP address
-        const ipResponse = await fetch('https://api.ipify.org?format=json');
-        if (ipResponse.ok) {
-          const ipData = await ipResponse.json() as { ip: string };
-          const { ip } = ipData;
-          
-          // Then get location data for that IP
-          for (const service of services.slice(0, 2)) { // Skip ipify since we already have the IP
-            try {
-              const response = await fetch(service + (service.includes('ip=') ? ip : ''));
-              if (response.ok) {
-                const locationData = await response.json() as IpLocationResponse;
-                ipLocation = locationData;
-                if (ipLocation.city && ipLocation.latitude && ipLocation.longitude) {
-                  break; // We got valid data, stop trying other services
+        try {
+          const ipResponse = await fetch('https://api.ipify.org?format=json');
+          if (ipResponse.ok) {
+            const ipData = await ipResponse.json() as { ip: string };
+            const { ip } = ipData;
+            
+            // Then get location data for that IP
+            for (const service of services.slice(0, 2)) { // Skip ipify since we already have the IP
+              try {
+                const response = await fetch(service + (service.includes('ip=') ? ip : ''));
+                if (response.ok) {
+                  const locationData = await response.json() as IpLocationResponse;
+                  ipLocation = locationData;
+                  if (ipLocation.city && ipLocation.latitude && ipLocation.longitude) {
+                    break; // We got valid data, stop trying other services
+                  }
                 }
+              } catch (e) {
+                console.warn(`IP geolocation service failed: ${service}`, e);
+                continue; // Try next service
               }
-            } catch (e) {
-              console.warn(`IP geolocation service failed: ${service}`, e);
-              continue; // Try next service
             }
           }
+        } catch (ipError) {
+          console.warn('Failed to get IP address:', ipError);
         }
 
         if (ipLocation?.city && ipLocation.latitude && ipLocation.longitude) {
@@ -64,7 +75,7 @@ export function useIpLocation() {
           };
           setLocation(place);
         } else {
-          throw new Error('Could not determine location from IP');
+          console.warn('Could not determine location from IP, using fallback');
         }
       } catch (err) {
         console.warn('IP geolocation failed, using fallback:', err);
