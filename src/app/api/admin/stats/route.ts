@@ -57,7 +57,7 @@ export async function GET(req: Request) {
         NULL as offer_expires_at,
         NULL as offer_status
       FROM listings l
-      JOIN users u ON l.user_id = u.id
+      JOIN users u ON l.posted_by = u.id
       ORDER BY l.created_at DESC
       LIMIT 10
     `).all();
@@ -80,8 +80,8 @@ export async function GET(req: Request) {
         NULL as offer_expires_at,
         NULL as offer_status
       FROM chats c
-      JOIN users u1 ON c.user1_id = u1.id
-      JOIN users u2 ON c.user2_id = u2.id
+      JOIN users u1 ON c.buyer_id = u1.id
+      JOIN users u2 ON c.seller_id = u2.id
       LEFT JOIN listings l ON c.listing_id = l.id
       ORDER BY c.created_at DESC
       LIMIT 10
@@ -99,16 +99,15 @@ export async function GET(req: Request) {
         l.id as listing_id,
         u2.username as other_username,
         u2.id as other_user_id,
-        c.id as chat_id,
+        o.chat_id as chat_id,
         NULL as message_count,
-        o.amount as offer_amount,
+        o.amount_sat as offer_amount,
         o.expires_at as offer_expires_at,
         o.status as offer_status
       FROM offers o
-      JOIN users u1 ON o.buyer_id = u1.id
-      JOIN users u2 ON o.seller_id = u2.id
+      JOIN users u1 ON o.from_user_id = u1.id
+      JOIN users u2 ON o.to_user_id = u2.id
       LEFT JOIN listings l ON o.listing_id = l.id
-      LEFT JOIN chats c ON o.chat_id = c.id
       ORDER BY o.created_at DESC
       LIMIT 10
     `).all();
