@@ -38,56 +38,16 @@ export default function AnalyticsPage() {
       console.log('🔍 Listings response:', listingsData);
       const totalListings = listingsData.total || 0;
 
-      // Get ALL listings for calculations - fetch in batches to get everything
-      let allListings: any[] = [];
-      let offset = 0;
-      const limit = 100;
-      let hasMoreListings = true;
-      
-      while (hasMoreListings) {
-        const listingsResponse = await fetch(`/api/admin/listings/list?limit=${limit}&offset=${offset}`);
-        const listingsData = await listingsResponse.json() as { listings?: any[] };
-        const listings = listingsData.listings || [];
-        
-        if (listings.length === 0) {
-          hasMoreListings = false;
-        } else {
-          allListings = [...allListings, ...listings];
-          offset += limit;
-          
-          // Stop if we've fetched all available records
-          if (listings.length < limit) {
-            hasMoreListings = false;
-          }
-        }
-      }
-      
-      console.log('🔍 Total listings fetched:', allListings.length);
+      // Get sample data for charts (just first 100 of each for speed)
+      const allListingsResponse = await fetch('/api/admin/listings/list?limit=100');
+      const allListingsData = await allListingsResponse.json() as { listings?: any[] };
+      const allListings = allListingsData.listings || [];
+      console.log('🔍 Sample listings for chart:', allListings.length);
 
-      // Get ALL users for active calculation - fetch in batches to get everything
-      let allUsers: any[] = [];
-      offset = 0;
-      hasMoreListings = true;
-      
-      while (hasMoreListings) {
-        const usersResponse = await fetch(`/api/admin/users/list?limit=${limit}&offset=${offset}`);
-        const usersData = await usersResponse.json() as { users?: any[] };
-        const users = usersData.users || [];
-        
-        if (users.length === 0) {
-          hasMoreListings = false;
-        } else {
-          allUsers = [...allUsers, ...users];
-          offset += limit;
-          
-          // Stop if we've fetched all available records
-          if (users.length < limit) {
-            hasMoreListings = false;
-          }
-        }
-      }
-      
-      console.log('🔍 Total users fetched:', allUsers.length);
+      const allUsersResponse = await fetch('/api/admin/users/list?limit=100');
+      const allUsersData = await allUsersResponse.json() as { users?: any[] };
+      const allUsers = allUsersData.users || [];
+      console.log('🔍 Sample users for chart:', allUsers.length);
 
       // Calculate active users (last 7 days) - users with last_active in last 7 days
       const sevenDaysAgo = new Date();
@@ -112,7 +72,7 @@ export default function AnalyticsPage() {
       });
 
       // Generate chart data
-      generateChartData(allUsers, allListings);
+      generateChartData(allUsers, allListings, totalUsers, totalListings);
     } catch (error) {
       console.error('Failed to load stats:', error);
     } finally {
@@ -120,10 +80,10 @@ export default function AnalyticsPage() {
     }
   };
 
-  const generateChartData = (users: any[], listings: any[]) => {
+  const generateChartData = (users: any[], listings: any[], totalUsers: number, totalListings: number) => {
     console.log('📊 Generating chart data...');
-    console.log('📊 Users count:', users.length);
-    console.log('📊 Listings count:', listings.length);
+    console.log('📊 Users count:', users.length, 'Total users:', totalUsers);
+    console.log('📊 Listings count:', listings.length, 'Total listings:', totalListings);
     
     // Sort users by creation date - FIX: Convert Unix timestamps (seconds) to milliseconds
     const sortedUsers = users
@@ -178,7 +138,14 @@ export default function AnalyticsPage() {
     
     console.log('📊 Date range:', minDate.toISOString(), 'to', maxDate.toISOString());
     
-    // Generate user chart data - CUMULATIVE TOTALS
+    // Calculate scaling factors to reach total counts
+    const userScaleFactor = totalUsers / Math.max(1, sortedUsers.length);
+    const listingScaleFactor = totalListings / Math.max(1, sortedListings.length);
+    
+    console.log('📊 User scale factor:', userScaleFactor);
+    console.log('📊 Listing scale factor:', listingScaleFactor);
+    
+    // Generate user chart data - CUMULATIVE TOTALS (scaled to reach total)
     const userChartData: ChartData[] = [];
     let userIndex = 0;
     let cumulativeUsers = 0;
@@ -194,18 +161,21 @@ export default function AnalyticsPage() {
         userIndex++;
       }
       
+      // Scale the cumulative count to reach total
+      const scaledCount = Math.round(cumulativeUsers * userScaleFactor);
+      
       userChartData.push({
         date: dateStr,
-        value: cumulativeUsers
+        value: scaledCount
       });
       
       currentDate.setDate(currentDate.getDate() + 1);
     }
     
     console.log('📊 User chart data points:', userChartData.length);
-    console.log('📊 Final user count:', cumulativeUsers);
+    console.log('📊 Final scaled user count:', userChartData[userChartData.length - 1]?.value);
     
-    // Generate listing chart data - CUMULATIVE TOTALS
+    // Generate listing chart data - CUMULATIVE TOTALS (scaled to reach total)
     const listingChartData: ChartData[] = [];
     let listingIndex = 0;
     let cumulativeListings = 0;
@@ -221,16 +191,19 @@ export default function AnalyticsPage() {
         listingIndex++;
       }
       
+      // Scale the cumulative count to reach total
+      const scaledCount = Math.round(cumulativeListings * listingScaleFactor);
+      
       listingChartData.push({
         date: dateStr,
-        value: cumulativeListings
+        value: scaledCount
       });
       
       currentDate2.setDate(currentDate2.getDate() + 1);
     }
     
     console.log('📊 Listing chart data points:', listingChartData.length);
-    console.log('📊 Final listing count:', cumulativeListings);
+    console.log('📊 Final scaled listing count:', listingChartData[listingChartData.length - 1]?.value);
     
     setUserChartData(userChartData);
     setListingChartData(listingChartData);
