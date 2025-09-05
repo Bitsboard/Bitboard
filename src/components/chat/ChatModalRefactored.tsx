@@ -148,7 +148,7 @@ export function ChatModalRefactored({
             onClose={onClose}
             dark={dark}
             btcCad={btcCad || 0}
-            unit={unit}
+            unit={unit === 'BTC' ? 'sats' : unit}
           />
 
           <div className="flex-1 flex flex-col min-h-0">
@@ -180,7 +180,7 @@ export function ChatModalRefactored({
                       onAction={handleOfferAction}
                       dark={dark}
                       btcCad={btcCad}
-                      unit={unit}
+                      unit={unit === 'BTC' ? 'sats' : unit}
                     />
                   ))}
                 </div>
@@ -196,7 +196,7 @@ export function ChatModalRefactored({
                 <PriceBlock
                   priceSats={listing.priceSats}
                   btcCad={btcCad}
-                  unit={unit}
+                  unit={unit === 'BTC' ? 'sats' : unit}
                   pricingType={listing.pricingType}
                 />
                 {listing.pricingType === 'make_offer' && (
