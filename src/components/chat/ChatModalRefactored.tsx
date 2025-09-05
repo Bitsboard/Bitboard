@@ -221,14 +221,15 @@ export function ChatModalRefactored({
 
       {showOfferModal && (
         <OfferModal
-          listing={listing}
+          isOpen={showOfferModal}
           onClose={() => setShowOfferModal(false)}
-          onOfferSent={() => {
+          onSendOffer={async (amount: number, expiresAt?: number) => {
+            // Handle offer sending logic here
             setShowOfferModal(false);
             loadChat();
           }}
+          listingPrice={listing.priceSats}
           dark={dark}
-          btcCad={btcCad}
           unit={unit}
         />
       )}
