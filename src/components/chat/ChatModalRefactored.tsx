@@ -194,12 +194,12 @@ export function ChatModalRefactored({
             )}>
               <div className="flex items-center justify-between mb-4">
                 <PriceBlock
-                  priceSats={listing.price_sat}
+                  priceSats={listing.priceSats}
                   btcCad={btcCad}
                   unit={unit}
-                  pricingType={listing.pricing_type}
+                  pricingType={listing.pricingType}
                 />
-                {listing.pricing_type === 'make_offer' && (
+                {listing.pricingType === 'make_offer' && (
                   <PrimaryButton
                     onClick={() => setShowOfferModal(true)}
                     className="px-4 py-2"

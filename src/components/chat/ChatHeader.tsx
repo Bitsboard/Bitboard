@@ -54,13 +54,13 @@ export function ChatHeader({ listing, otherUser, onClose, dark, btcCad, unit }: 
             "text-sm font-semibold",
             dark ? "text-white" : "text-neutral-900"
           )}>
-            {formatPrice(listing.price_sat)}
+            {formatPrice(listing.priceSats)}
           </p>
           <p className={cn(
             "text-xs",
             dark ? "text-neutral-400" : "text-neutral-500"
           )}>
-            {listing.pricing_type === 'fixed' ? 'Fixed Price' : 'Make Offer'}
+            {listing.pricingType === 'fixed' ? 'Fixed Price' : 'Make Offer'}
           </p>
         </div>
         
