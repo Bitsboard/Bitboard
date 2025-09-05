@@ -208,19 +208,13 @@ export default function MessagesPage() {
 
   const loadSystemNotifications = async () => {
     if (!user?.email) {
-      console.log('No user email, skipping notification load');
       return;
     }
 
-    console.log('Loading system notifications for user:', user.email);
     try {
       const response = await fetch('/api/notifications');
-      console.log('Notifications API response:', response.status, response.statusText);
-      
       if (response.ok) {
         const data = await response.json() as { success: boolean; notifications: any[] };
-        console.log('Notifications data:', data);
-        
         if (data.success) {
           const transformedNotifications: SystemNotification[] = data.notifications.map(notification => ({
             id: notification.id,
@@ -231,13 +225,10 @@ export default function MessagesPage() {
             type: 'system' as const,
             icon: notification.icon
           }));
-          console.log('Transformed notifications:', transformedNotifications);
           setSystemNotifications(transformedNotifications);
         }
       } else {
         console.error('Error loading system notifications:', response.status, response.statusText);
-        const errorText = await response.text();
-        console.error('Error response body:', errorText);
       }
     } catch (error) {
       console.error('Error loading system notifications:', error);
