@@ -206,27 +206,29 @@ export default function MessagesPage() {
     }
   };
 
-  const loadSystemNotifications = () => {
-    // Load system notifications from localStorage or create defaults
+  const loadSystemNotifications = async () => {
+    if (!user?.email) {
+      return;
+    }
+
     try {
-      const stored = localStorage.getItem('systemNotifications');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setSystemNotifications(parsed);
+      const response = await fetch('/api/notifications');
+      if (response.ok) {
+        const data = await response.json() as { success: boolean; notifications: any[] };
+        if (data.success) {
+          const transformedNotifications: SystemNotification[] = data.notifications.map(notification => ({
+            id: notification.id,
+            title: notification.title,
+            message: notification.message,
+            timestamp: notification.timestamp,
+            read: notification.read,
+            type: 'system' as const,
+            icon: notification.icon
+          }));
+          setSystemNotifications(transformedNotifications);
+        }
       } else {
-        const defaultNotifications: SystemNotification[] = [
-          {
-            id: 'welcome',
-            title: 'Welcome to bitsbarter!',
-            message: 'Your account has been verified. Start trading with Bitcoin today!',
-            timestamp: Date.now() - 86400000, // 24 hours ago
-            read: true,
-            type: 'welcome',
-            icon: 'success'
-          }
-        ];
-        setSystemNotifications(defaultNotifications);
-        localStorage.setItem('systemNotifications', JSON.stringify(defaultNotifications));
+        console.error('Error loading system notifications:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Error loading system notifications:', error);
@@ -455,19 +457,35 @@ export default function MessagesPage() {
     }
   };
 
-  const selectNotification = (notification: SystemNotification) => {
+  const selectNotification = async (notification: SystemNotification) => {
     setSelectedNotification(notification.id);
     setSelectedChat(null);
     
     // Mark as read if not already read
     if (!notification.read) {
-      setSystemNotifications(prev => {
-        const updated = prev.map(n => 
-          n.id === notification.id ? { ...n, read: true } : n
-        );
-        localStorage.setItem('systemNotifications', JSON.stringify(updated));
-        return updated;
-      });
+      try {
+        const response = await fetch('/api/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            notificationId: notification.id,
+            action: 'mark_read'
+          })
+        });
+
+        if (response.ok) {
+          // Update local state
+          setSystemNotifications(prev => {
+            return prev.map(n => 
+              n.id === notification.id ? { ...n, read: true } : n
+            );
+          });
+        } else {
+          console.error('Failed to mark notification as read');
+        }
+      } catch (error) {
+        console.error('Error marking notification as read:', error);
+      }
     }
   };
   
@@ -635,12 +653,13 @@ export default function MessagesPage() {
     return () => clearInterval(interval);
   }, [selectedChat]);
 
-  // Periodic refresh of conversation list (every 15 seconds for better real-time updates)
+  // Periodic refresh of conversation list and notifications (every 15 seconds for better real-time updates)
   useEffect(() => {
     if (!user?.email) return;
     
     const interval = setInterval(() => {
       loadChats(false); // Don't show loading spinner for periodic refresh
+      loadSystemNotifications(); // Refresh notifications too
     }, 15000); // 15 seconds - more frequent than message refresh
     
     return () => clearInterval(interval);
