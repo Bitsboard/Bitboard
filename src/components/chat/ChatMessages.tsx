@@ -129,7 +129,7 @@ export function ChatMessages({ messages, currentUser, dark, isLoading }: ChatMes
                     ? "bg-neutral-700 text-white"
                     : "bg-white text-neutral-900 border border-neutral-200"
               )}>
-                <p className="text-sm">{message.content}</p>
+                <p className="text-sm">{message.text}</p>
               </div>
             </div>
           </div>
