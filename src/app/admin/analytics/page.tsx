@@ -7,6 +7,8 @@ interface StatsData {
   totalListings: number;
   activeUsers: number;
   newListings: number;
+  totalRevenue: number;
+  avgListingPrice: number;
 }
 
 interface ChartData {
@@ -19,56 +21,96 @@ export default function AnalyticsPage() {
     totalUsers: 0,
     totalListings: 0,
     activeUsers: 0,
-    newListings: 0
+    newListings: 0,
+    totalRevenue: 0,
+    avgListingPrice: 0
   });
   const [userData, setUserData] = useState<ChartData[]>([]);
   const [listingData, setListingData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeframe, setTimeframe] = useState('30d');
 
-  // Load stats data
-  const loadStats = async () => {
-    try {
-      const response = await fetch('/api/admin/stats');
-      if (response.ok) {
-        const data = await response.json() as StatsData;
-        setStats(data);
-      }
-    } catch (error) {
-      console.error('Failed to load stats:', error);
-    }
-  };
-
-  // Load chart data
-  const loadChartData = async (type: 'users' | 'listings') => {
-    try {
-      const response = await fetch(`/api/admin/chart?type=${type}&timeframe=${timeframe}`);
-      if (response.ok) {
-        const data = await response.json() as { data?: ChartData[] };
-        return data.data || [];
-      }
-    } catch (error) {
-      console.error(`Failed to load ${type} data:`, error);
-    }
-    return [];
-  };
-
-  // Load all data
+  // Load all data from database
   const loadAllData = async () => {
     setLoading(true);
     try {
-      await loadStats();
-      const [users, listings] = await Promise.all([
-        loadChartData('users'),
-        loadChartData('listings')
-      ]);
-      setUserData(users);
-      setListingData(listings);
+      const db = await fetch('/api/admin/db-query').then(r => r.json());
+      
+      if (db.success) {
+        const data = db.data;
+        
+        // Calculate stats from real data
+        const totalUsers = data.users?.length || 0;
+        const totalListings = data.listings?.length || 0;
+        
+        // Active users (users who created listings in last 7 days)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const activeUsers = data.listings?.filter((listing: any) => 
+          new Date(listing.created_at) > sevenDaysAgo
+        ).map((listing: any) => listing.seller_id).filter((v: any, i: any, a: any) => a.indexOf(v) === i).length || 0;
+        
+        // New listings in last 7 days
+        const newListings = data.listings?.filter((listing: any) => 
+          new Date(listing.created_at) > sevenDaysAgo
+        ).length || 0;
+        
+        // Calculate revenue and average price
+        const totalRevenue = data.listings?.reduce((sum: number, listing: any) => 
+          sum + (listing.price_sats || 0), 0) || 0;
+        const avgListingPrice = totalListings > 0 ? Math.round(totalRevenue / totalListings) : 0;
+        
+        setStats({
+          totalUsers,
+          totalListings,
+          activeUsers,
+          newListings,
+          totalRevenue,
+          avgListingPrice
+        });
+        
+        // Generate chart data
+        generateChartData(data, timeframe);
+      }
     } catch (error) {
       console.error('Failed to load data:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Generate chart data from real database data
+  const generateChartData = (data: any, timeframe: string) => {
+    const days = timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : timeframe === '90d' ? 90 : 365;
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+    
+    // Generate user growth data
+    const userGrowth: ChartData[] = [];
+    const listingGrowth: ChartData[] = [];
+    
+    for (let i = 0; i < days; i++) {
+      const currentDate = new Date(startDate);
+      currentDate.setDate(currentDate.getDate() + i);
+      const dateStr = currentDate.toISOString().split('T')[0];
+      
+      // Count users created up to this date
+      const usersUpToDate = data.users?.filter((user: any) => 
+        new Date(user.created_at) <= currentDate
+      ).length || 0;
+      
+      // Count listings created up to this date
+      const listingsUpToDate = data.listings?.filter((listing: any) => 
+        new Date(listing.created_at) <= currentDate
+      ).length || 0;
+      
+      userGrowth.push({ date: dateStr, value: usersUpToDate });
+      listingGrowth.push({ date: dateStr, value: listingsUpToDate });
+    }
+    
+    setUserData(userGrowth);
+    setListingData(listingGrowth);
   };
 
   // Handle timeframe change
@@ -86,8 +128,8 @@ export default function AnalyticsPage() {
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Analytics Dashboard</h1>
           <div className="animate-pulse">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {[1, 2, 3, 4].map((i) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="bg-white rounded-lg shadow p-6">
                   <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
                   <div className="h-8 bg-gray-200 rounded w-1/2"></div>
@@ -106,7 +148,7 @@ export default function AnalyticsPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Analytics Dashboard</h1>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -170,6 +212,38 @@ export default function AnalyticsPage() {
               </div>
             </div>
           </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-red-500 rounded-md flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  </svg>
+                </div>
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Total Revenue (sats)</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats.totalRevenue.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-indigo-500 rounded-md flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                </div>
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Avg Listing Price</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats.avgListingPrice.toLocaleString()} sats</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Charts */}
@@ -194,19 +268,8 @@ export default function AnalyticsPage() {
                 ))}
               </div>
             </div>
-            <div className="h-64 flex items-center justify-center">
-              {userData.length > 0 ? (
-                <div className="w-full">
-                  <div className="text-sm text-gray-600 mb-2">
-                    Total Users: {userData[userData.length - 1]?.value || 0}
-                  </div>
-                  <div className="h-48 bg-gray-50 rounded flex items-center justify-center">
-                    <div className="text-gray-500">Chart visualization coming soon</div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-gray-500">No data available</div>
-              )}
+            <div className="h-64">
+              <SimpleChart data={userData} title="Users" color="blue" />
             </div>
           </div>
 
@@ -230,22 +293,54 @@ export default function AnalyticsPage() {
                 ))}
               </div>
             </div>
-            <div className="h-64 flex items-center justify-center">
-              {listingData.length > 0 ? (
-                <div className="w-full">
-                  <div className="text-sm text-gray-600 mb-2">
-                    Total Listings: {listingData[listingData.length - 1]?.value || 0}
-                  </div>
-                  <div className="h-48 bg-gray-50 rounded flex items-center justify-center">
-                    <div className="text-gray-500">Chart visualization coming soon</div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-gray-500">No data available</div>
-              )}
+            <div className="h-64">
+              <SimpleChart data={listingData} title="Listings" color="green" />
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// Simple chart component
+function SimpleChart({ data, title, color }: { data: ChartData[], title: string, color: string }) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="h-full flex items-center justify-center text-gray-500">
+        No data available
+      </div>
+    );
+  }
+
+  const maxValue = Math.max(...data.map(d => d.value));
+  const minValue = Math.min(...data.map(d => d.value));
+  const range = maxValue - minValue || 1;
+
+  const colorClasses = {
+    blue: 'bg-blue-500',
+    green: 'bg-green-500',
+    red: 'bg-red-500',
+    purple: 'bg-purple-500'
+  };
+
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 flex items-end space-x-1">
+        {data.map((point, index) => {
+          const height = ((point.value - minValue) / range) * 100;
+          return (
+            <div
+              key={index}
+              className={`flex-1 ${colorClasses[color as keyof typeof colorClasses] || 'bg-gray-500'} rounded-t`}
+              style={{ height: `${Math.max(height, 2)}%` }}
+              title={`${point.date}: ${point.value} ${title}`}
+            />
+          );
+        })}
+      </div>
+      <div className="mt-2 text-xs text-gray-600 text-center">
+        {data.length > 0 && `${data[data.length - 1].value} total ${title}`}
       </div>
     </div>
   );
