@@ -51,7 +51,7 @@ export function ChatModalRefactored({
       // Load chat
       const chatResponse = await fetch(`/api/chat/${listing.id}`);
       if (chatResponse.ok) {
-        const chatData = await chatResponse.json();
+        const chatData = await chatResponse.json() as { data: { chat: Chat; messages: Message[]; otherUser: User } };
         setChat(chatData.data.chat);
         setMessages(chatData.data.messages || []);
         setOtherUser(chatData.data.otherUser);
@@ -60,7 +60,7 @@ export function ChatModalRefactored({
       // Load offers
       const offersResponse = await fetch(`/api/offers/check?listing_id=${listing.id}`);
       if (offersResponse.ok) {
-        const offersData = await offersResponse.json();
+        const offersData = await offersResponse.json() as { data: any[] };
         setOffers(offersData.data || []);
       }
     } catch (error) {
@@ -86,7 +86,7 @@ export function ChatModalRefactored({
       });
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as { data: Message };
         setMessages(prev => [...prev, data.data]);
       }
     } catch (error) {
