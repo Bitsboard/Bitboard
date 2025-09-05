@@ -334,6 +334,8 @@ function CumulativeLineChart({ data, color, title }: {
   color: string, 
   title: string 
 }) {
+  const [hoveredPoint, setHoveredPoint] = useState<{x: number, y: number, value: number, date: string} | null>(null);
+
   if (data.length === 0) {
     return <NoDataMessage />;
   }
@@ -349,9 +351,46 @@ function CumulativeLineChart({ data, color, title }: {
   const minValue = 0;
   const range = maxValue - minValue || 1;
 
+  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    // Find the closest point
+    let closestPoint = null;
+    let minDistance = Infinity;
+    
+    cumulativeData.forEach((point, index) => {
+      const x = 40 + (index / Math.max(1, cumulativeData.length - 1)) * 340;
+      const y = 20 + 160 - ((point.cumulative - minValue) / range) * 160;
+      const distance = Math.sqrt(Math.pow(x - mouseX, 2) + Math.pow(y - mouseY, 2));
+      
+      if (distance < minDistance && distance < 20) {
+        minDistance = distance;
+        closestPoint = {
+          x: x,
+          y: y,
+          value: point.cumulative,
+          date: point.date
+        };
+      }
+    });
+    
+    setHoveredPoint(closestPoint);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredPoint(null);
+  };
+
   return (
-    <div className="h-full w-full p-4">
-      <svg viewBox="0 0 400 200" className="w-full h-full">
+    <div className="h-full w-full p-4 relative">
+      <svg 
+        viewBox="0 0 400 200" 
+        className="w-full h-full"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
         {/* Grid lines */}
         {[0, 0.25, 0.5, 0.75, 1].map((ratio) => (
           <line
@@ -408,6 +447,21 @@ function CumulativeLineChart({ data, color, title }: {
           </text>
         ))}
       </svg>
+      
+      {/* Tooltip */}
+      {hoveredPoint && (
+        <div 
+          className="absolute bg-gray-900 text-white text-sm px-3 py-2 rounded-lg shadow-xl pointer-events-none z-10 border border-gray-700"
+          style={{
+            left: `${hoveredPoint.x}px`,
+            top: `${hoveredPoint.y - 50}px`,
+            transform: 'translateX(-50%)'
+          }}
+        >
+          <div className="font-semibold text-white">{hoveredPoint.value.toLocaleString()}</div>
+          <div className="text-gray-300 text-xs">{new Date(hoveredPoint.date).toLocaleDateString()}</div>
+        </div>
+      )}
     </div>
   );
 }
