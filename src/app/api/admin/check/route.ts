@@ -70,7 +70,7 @@ export async function POST(req: Request) {
       });
     }
 
-    const { password } = await req.json();
+    const { password } = await req.json() as { password: string };
     
     // Check if password matches admin password from environment
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
