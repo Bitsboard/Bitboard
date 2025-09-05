@@ -19,12 +19,12 @@ export default function AnalyticsPage() {
     try {
       // Get total users
       const usersResponse = await fetch('/api/admin/users/list');
-      const usersData = await usersResponse.json();
+      const usersData = await usersResponse.json() as { users?: any[] };
       const totalUsers = usersData.users?.length || 0;
 
       // Get total listings
       const listingsResponse = await fetch('/api/admin/listings/list');
-      const listingsData = await listingsResponse.json();
+      const listingsData = await listingsResponse.json() as { listings?: any[] };
       const totalListings = listingsData.listings?.length || 0;
 
       // Calculate active users (last 7 days)
