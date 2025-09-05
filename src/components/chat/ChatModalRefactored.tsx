@@ -5,7 +5,7 @@ import { Modal } from "../Modal";
 import { ChatHeader } from "./ChatHeader";
 import { ChatMessages } from "./ChatMessages";
 import { ChatInput } from "./ChatInput";
-import { OfferModal } from "../OfferModal";
+import OfferModal from "../OfferModal";
 import { OfferMessage } from "../OfferMessage";
 import { PriceBlock } from "../PriceBlock";
 import { PrimaryButton } from "../ui/Button";
