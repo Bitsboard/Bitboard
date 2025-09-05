@@ -38,19 +38,56 @@ export default function AnalyticsPage() {
       console.log('🔍 Listings response:', listingsData);
       const totalListings = listingsData.total || 0;
 
-      // Get all listings for calculations (with high limit)
-      const allListingsResponse = await fetch('/api/admin/listings/list?limit=10000');
-      const allListingsData = await allListingsResponse.json() as { listings?: any[] };
-      const allListings = allListingsData.listings || [];
-      console.log('🔍 All listings count:', allListings.length);
-      console.log('🔍 Sample listing:', allListings[0]);
+      // Get ALL listings for calculations - fetch in batches to get everything
+      let allListings: any[] = [];
+      let offset = 0;
+      const limit = 100;
+      let hasMoreListings = true;
+      
+      while (hasMoreListings) {
+        const listingsResponse = await fetch(`/api/admin/listings/list?limit=${limit}&offset=${offset}`);
+        const listingsData = await listingsResponse.json() as { listings?: any[] };
+        const listings = listingsData.listings || [];
+        
+        if (listings.length === 0) {
+          hasMoreListings = false;
+        } else {
+          allListings = [...allListings, ...listings];
+          offset += limit;
+          
+          // Stop if we've fetched all available records
+          if (listings.length < limit) {
+            hasMoreListings = false;
+          }
+        }
+      }
+      
+      console.log('🔍 Total listings fetched:', allListings.length);
 
-      // Get all users for active calculation
-      const allUsersResponse = await fetch('/api/admin/users/list?limit=10000');
-      const allUsersData = await allUsersResponse.json() as { users?: any[] };
-      const allUsers = allUsersData.users || [];
-      console.log('🔍 All users count:', allUsers.length);
-      console.log('🔍 Sample user:', allUsers[0]);
+      // Get ALL users for active calculation - fetch in batches to get everything
+      let allUsers: any[] = [];
+      offset = 0;
+      hasMoreListings = true;
+      
+      while (hasMoreListings) {
+        const usersResponse = await fetch(`/api/admin/users/list?limit=${limit}&offset=${offset}`);
+        const usersData = await usersResponse.json() as { users?: any[] };
+        const users = usersData.users || [];
+        
+        if (users.length === 0) {
+          hasMoreListings = false;
+        } else {
+          allUsers = [...allUsers, ...users];
+          offset += limit;
+          
+          // Stop if we've fetched all available records
+          if (users.length < limit) {
+            hasMoreListings = false;
+          }
+        }
+      }
+      
+      console.log('🔍 Total users fetched:', allUsers.length);
 
       // Calculate active users (last 7 days) - users with last_active in last 7 days
       const sevenDaysAgo = new Date();
