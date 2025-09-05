@@ -114,7 +114,7 @@ export function ChatModalRefactored({
 
   if (!chat || !otherUser) {
     return (
-      <Modal onClose={onClose} dark={dark}>
+      <Modal open={true} onClose={onClose} dark={dark}>
         <div className={cn(
           "w-full max-w-2xl mx-auto bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl",
           "max-h-[90vh] flex flex-col"
@@ -137,7 +137,7 @@ export function ChatModalRefactored({
 
   return (
     <>
-      <Modal onClose={onClose} dark={dark}>
+      <Modal open={true} onClose={onClose} dark={dark}>
         <div className={cn(
           "w-full max-w-2xl mx-auto bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl",
           "max-h-[90vh] flex flex-col"
