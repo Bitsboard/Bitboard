@@ -88,40 +88,36 @@ export default function AnalyticsPage() {
     console.log('📊 Users count:', users.length);
     console.log('📊 Listings count:', listings.length);
     
-    // Sort users by creation date
+    // Sort users by creation date - FIX: Convert Unix timestamps (seconds) to milliseconds
     const sortedUsers = users
       .map(user => {
         const createdAt = user.createdAt || user.created_at;
-        console.log('🔍 User createdAt raw:', createdAt, 'type:', typeof createdAt);
+        // Convert Unix timestamp (seconds) to milliseconds
+        const timestampMs = typeof createdAt === 'number' ? createdAt * 1000 : createdAt;
         return {
           ...user,
-          createdAt: new Date(createdAt)
+          createdAt: new Date(timestampMs)
         };
       })
       .filter(user => {
         const isValid = !isNaN(user.createdAt.getTime());
-        if (!isValid) {
-          console.log('🔍 Invalid user date:', user.createdAt, 'raw:', user.createdAt || user.created_at);
-        }
         return isValid;
       })
       .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
     
-    // Sort listings by creation date
+    // Sort listings by creation date - FIX: Convert Unix timestamps (seconds) to milliseconds
     const sortedListings = listings
       .map(listing => {
         const createdAt = listing.createdAt;
-        console.log('🔍 Listing createdAt raw:', createdAt, 'type:', typeof createdAt);
+        // Convert Unix timestamp (seconds) to milliseconds
+        const timestampMs = typeof createdAt === 'number' ? createdAt * 1000 : createdAt;
         return {
           ...listing,
-          createdAt: new Date(createdAt)
+          createdAt: new Date(timestampMs)
         };
       })
       .filter(listing => {
         const isValid = !isNaN(listing.createdAt.getTime());
-        if (!isValid) {
-          console.log('🔍 Invalid listing date:', listing.createdAt, 'raw:', listing.createdAt);
-        }
         return isValid;
       })
       .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
