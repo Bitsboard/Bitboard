@@ -324,8 +324,10 @@ function SmoothLineChart({ data, color }: { data: ChartData[], color: string }) 
   }
 
   const maxValue = Math.max(...data.map(d => d.value));
-  const minValue = Math.min(...data.map(d => d.value));
+  const minValue = 0; // Always start from 0 for cumulative charts
   const range = maxValue - minValue || 1;
+  
+  console.log('📊 Chart scaling - maxValue:', maxValue, 'minValue:', minValue, 'range:', range);
 
   const colorClasses = {
     blue: 'stroke-blue-500',
@@ -407,28 +409,10 @@ function SmoothLineChart({ data, color }: { data: ChartData[], color: string }) 
           className={colorClasses[color as keyof typeof colorClasses]}
         />
         
-        {/* Points */}
-        {points.map((point, index) => (
-          <g key={index}>
-            <circle
-              cx={point.x}
-              cy={point.y}
-              r={4}
-              className={`${fillClasses[color as keyof typeof fillClasses]} hover:r-6 transition-all cursor-pointer`}
-            />
-            <text
-              x={point.x}
-              y={point.y - 10}
-              textAnchor="middle"
-              className="text-xs fill-gray-600 opacity-0 hover:opacity-100 transition-opacity pointer-events-none"
-            >
-              {point.value}
-            </text>
-          </g>
-        ))}
+        {/* No dots - just clean lines */}
         
         {/* Y-axis labels */}
-        {[maxValue, maxValue * 0.75, maxValue * 0.5, maxValue * 0.25, minValue].map((value, index) => (
+        {[maxValue, maxValue * 0.75, maxValue * 0.5, maxValue * 0.25, 0].map((value, index) => (
           <text
             key={index}
             x={padding - 10}
@@ -436,7 +420,7 @@ function SmoothLineChart({ data, color }: { data: ChartData[], color: string }) 
             textAnchor="end"
             className="text-xs fill-gray-600"
           >
-            {Math.round(value)}
+            {Math.round(value).toLocaleString()}
           </text>
         ))}
       </svg>
