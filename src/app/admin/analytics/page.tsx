@@ -24,25 +24,33 @@ export default function AnalyticsPage() {
 
   const loadStats = async () => {
     try {
+      console.log('🔍 Loading stats...');
+      
       // Get total users count
       const usersResponse = await fetch('/api/admin/users/list');
       const usersData = await usersResponse.json() as { users?: any[]; total?: number };
+      console.log('🔍 Users response:', usersData);
       const totalUsers = usersData.total || 0;
 
       // Get total listings count
       const listingsResponse = await fetch('/api/admin/listings/list');
       const listingsData = await listingsResponse.json() as { listings?: any[]; total?: number };
+      console.log('🔍 Listings response:', listingsData);
       const totalListings = listingsData.total || 0;
 
       // Get all listings for calculations (with high limit)
       const allListingsResponse = await fetch('/api/admin/listings/list?limit=10000');
       const allListingsData = await allListingsResponse.json() as { listings?: any[] };
       const allListings = allListingsData.listings || [];
+      console.log('🔍 All listings count:', allListings.length);
+      console.log('🔍 Sample listing:', allListings[0]);
 
       // Get all users for active calculation
       const allUsersResponse = await fetch('/api/admin/users/list?limit=10000');
       const allUsersData = await allUsersResponse.json() as { users?: any[] };
       const allUsers = allUsersData.users || [];
+      console.log('🔍 All users count:', allUsers.length);
+      console.log('🔍 Sample user:', allUsers[0]);
 
       // Calculate active users (last 7 days) - users with last_active in last 7 days
       const sevenDaysAgo = new Date();
@@ -325,10 +333,14 @@ function SmoothLineChart({ data, color }: { data: ChartData[], color: string }) 
 
   // Generate smooth path
   const points = data.map((point, index) => {
-    const x = padding + (index / (data.length - 1)) * chartWidth;
-    const y = padding + chartHeight - ((point.value - minValue) / range) * chartHeight;
+    const x = padding + (index / Math.max(1, data.length - 1)) * chartWidth;
+    const y = padding + chartHeight - ((point.value - minValue) / Math.max(1, range)) * chartHeight;
     return { x, y, value: point.value, date: point.date };
   });
+  
+  console.log('📊 Chart points:', points.length, 'points');
+  console.log('📊 First point:', points[0]);
+  console.log('📊 Last point:', points[points.length - 1]);
 
   // Create smooth curve path
   const pathData = points.map((point, index) => {
@@ -342,6 +354,8 @@ function SmoothLineChart({ data, color }: { data: ChartData[], color: string }) 
     
     return `C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${point.x} ${point.y}`;
   }).join(' ');
+  
+  console.log('📊 Path data:', pathData);
 
   // Create area path
   const areaPathData = `${pathData} L ${points[points.length - 1].x} ${padding + chartHeight} L ${points[0].x} ${padding + chartHeight} Z`;
