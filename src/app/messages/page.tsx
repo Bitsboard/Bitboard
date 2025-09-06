@@ -208,8 +208,20 @@ export default function MessagesPage() {
 
   const loadSystemNotifications = async () => {
     console.log('🔔 loadSystemNotifications called, user:', user);
+    
+    // If no user, show fallback welcome notification
     if (!user?.email) {
-      console.log('🔔 No user email, skipping notification load');
+      console.log('🔔 No user email, showing fallback welcome notification');
+      const fallbackNotification: SystemNotification = {
+        id: 'welcome',
+        type: 'system',
+        title: 'Welcome to bitsbarter!',
+        message: 'Welcome to the Bitcoin trading platform. Check out our safety guidelines to get started.',
+        timestamp: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
+        read: false,
+        icon: 'info'
+      };
+      setSystemNotifications([fallbackNotification]);
       return;
     }
 
@@ -222,7 +234,7 @@ export default function MessagesPage() {
         const data = await response.json() as { success: boolean; notifications: any[] };
         console.log('🔔 Notifications data:', data);
         
-        if (data.success) {
+        if (data.success && data.notifications.length > 0) {
           const transformedNotifications: SystemNotification[] = data.notifications.map(notification => ({
             id: notification.id,
             title: notification.title,
@@ -235,15 +247,50 @@ export default function MessagesPage() {
           console.log('🔔 Transformed notifications:', transformedNotifications);
           setSystemNotifications(transformedNotifications);
         } else {
-          console.log('🔔 API returned success: false');
+          console.log('🔔 No notifications from API, showing fallback');
+          // Show fallback if API returns no notifications
+          const fallbackNotification: SystemNotification = {
+            id: 'welcome',
+            type: 'system',
+            title: 'Welcome to bitsbarter!',
+            message: 'Welcome to the Bitcoin trading platform. Check out our safety guidelines to get started.',
+            timestamp: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
+            read: false,
+            icon: 'info'
+          };
+          setSystemNotifications([fallbackNotification]);
         }
       } else {
         console.error('🔔 Error loading system notifications:', response.status, response.statusText);
         const errorText = await response.text();
         console.error('🔔 Error response body:', errorText);
+        
+        // Show fallback on API error
+        const fallbackNotification: SystemNotification = {
+          id: 'welcome',
+          type: 'system',
+          title: 'Welcome to bitsbarter!',
+          message: 'Welcome to the Bitcoin trading platform. Check out our safety guidelines to get started.',
+          timestamp: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
+          read: false,
+          icon: 'info'
+        };
+        setSystemNotifications([fallbackNotification]);
       }
     } catch (error) {
       console.error('🔔 Error loading system notifications:', error);
+      
+      // Show fallback on network error
+      const fallbackNotification: SystemNotification = {
+        id: 'welcome',
+        type: 'system',
+        title: 'Welcome to bitsbarter!',
+        message: 'Welcome to the Bitcoin trading platform. Check out our safety guidelines to get started.',
+        timestamp: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
+        read: false,
+        icon: 'info'
+      };
+      setSystemNotifications([fallbackNotification]);
     }
   };
 
