@@ -8,6 +8,16 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getSessionFromRequest(request);
     const adminEmails = process.env.ADMIN_EMAILS?.split(',') || [];
+    const cookieHeader = request.headers.get('cookie') || '';
+    
+    // Parse cookies manually
+    const cookies: Record<string, string> = {};
+    cookieHeader.split(';').forEach(cookie => {
+      const [name, value] = cookie.trim().split('=');
+      if (name && value) {
+        cookies[name] = value;
+      }
+    });
     
     return NextResponse.json({
       session: session ? {
@@ -20,7 +30,9 @@ export async function GET(request: NextRequest) {
       } : null,
       adminEmails: adminEmails,
       isAdmin: session?.user?.email ? adminEmails.includes(session.user.email) : false,
-      cookies: request.headers.get('cookie'),
+      cookieHeader: cookieHeader,
+      parsedCookies: cookies,
+      hasSessionCookie: !!cookies.session,
       userAgent: request.headers.get('user-agent')
     });
   } catch (error) {
