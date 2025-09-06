@@ -101,8 +101,12 @@ export async function POST(request: NextRequest) {
     if (users.length > 0) {
       console.log('🔔 Creating user notifications for', users.length, 'users');
       
+      // For testing, only process first 5 users to avoid any SQLite issues
+      const testUsers = users.slice(0, 5);
+      console.log('🔔 Testing with first 5 users only:', testUsers.length);
+      
       const BATCH_SIZE = 25; // Process 25 users at a time to stay well under SQLite limits
-      const userIds = users.map(user => user.id);
+      const userIds = testUsers.map(user => user.id);
       console.log('🔔 First few user IDs:', userIds.slice(0, 5));
       
       // Process users in batches
