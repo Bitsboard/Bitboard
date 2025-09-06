@@ -41,6 +41,12 @@ export async function POST(request: NextRequest) {
     
     console.log('🔔 Admin notifications - Environment context:', !!env);
     console.log('🔔 Admin notifications - ADMIN_EMAILS raw:', env.ADMIN_EMAILS);
+    
+    const adminEmails = ((env.ADMIN_EMAILS as string) ?? '')
+      .split(',')
+      .map((e: string) => e.trim())
+      .filter(Boolean);
+    console.log('🔔 Admin notifications - adminEmails processed:', adminEmails);
 
     console.log('🔔 Admin notifications - Parsing request body...');
     const body: SystemNotificationRequest = await request.json();
