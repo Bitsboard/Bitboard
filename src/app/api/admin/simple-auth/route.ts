@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     
     try {
       const env = getRequestContext().env;
-      adminPassword = env.ADMIN_PASSWORD || 'admin123';
+      adminPassword = (env.ADMIN_PASSWORD as string) || 'admin123';
     } catch (error) {
       console.log('Using default admin password for local development');
     }
