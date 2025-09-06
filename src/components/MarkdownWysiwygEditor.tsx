@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -29,6 +29,7 @@ import {
 } from "@lexical/rich-text";
 import {
   LinkNode,
+  $createLinkNode,
 } from "@lexical/link";
 import {
   TRANSFORMERS,
@@ -37,7 +38,12 @@ import {
   $createParagraphNode,
   $getSelection,
   $isRangeSelection,
+  $isRootOrShadowRoot,
   $setSelection,
+  $createTextNode,
+  $getNodeByKey,
+  $isElementNode,
+  $isTextNode,
   COMMAND_PRIORITY_LOW,
   FORMAT_TEXT_COMMAND,
   FORMAT_ELEMENT_COMMAND,
@@ -47,21 +53,36 @@ import {
   REDO_COMMAND,
   UNDO_COMMAND,
   $getRoot,
+  $createRangeSelection,
+  $isParagraphNode,
 } from "lexical";
-
-/**
- * MarkdownWysiwygEditor
- * A true WYSIWYG Markdown editor using Lexical.
- * - Shows formatting while typing (Markdown shortcuts supported)
- * - Allows direct editing in the formatted view
- * - Correct cursor/selection handling (Lexical-managed)
- * - React state: accepts markdown `value` and emits markdown via `onChange`
- * - Common features: bold/italic/underline/strike/code, links, headings, lists, quotes, code blocks, checklists
- */
+import {
+  $createHeadingNode,
+  $isHeadingNode,
+} from "@lexical/rich-text";
+import {
+  $createQuoteNode,
+  $isQuoteNode,
+} from "@lexical/rich-text";
+import {
+  $createCodeNode,
+  $isCodeNode,
+} from "@lexical/code";
+import {
+  $createListNode,
+  $createListItemNode,
+  $isListNode,
+  INSERT_UNORDERED_LIST_COMMAND,
+  INSERT_ORDERED_LIST_COMMAND,
+  REMOVE_LIST_COMMAND,
+} from "@lexical/list";
+import {
+  $setBlocksType,
+} from "@lexical/selection";
 
 export type MarkdownWysiwygEditorProps = {
-  value?: string; // markdown in
-  onChange?: (markdown: string) => void; // markdown out
+  value?: string;
+  onChange?: (markdown: string) => void;
   placeholder?: string;
   className?: string;
   minHeight?: number;
@@ -70,15 +91,14 @@ export type MarkdownWysiwygEditorProps = {
 export default function MarkdownWysiwygEditor({
   value = "",
   onChange,
-  placeholder = "Write something...",
+  placeholder = "What are your thoughts?",
   className = "",
-  minHeight = 220,
+  minHeight = 200,
 }: MarkdownWysiwygEditorProps) {
   const initialConfig = useMemo(() => ({
     namespace: "markdown-wysiwyg",
     theme: lexicalTheme,
     editorState: (editor: any) => {
-      // Import initial markdown → editor state once at mount
       editor.update(() => {
         if (!value) {
           const root = $getRoot();
@@ -99,21 +119,20 @@ export default function MarkdownWysiwygEditor({
       LinkNode,
     ],
     onError(error: Error) {
-      // Surface Lexical internal errors during dev
       console.error(error);
     },
   }), []);
 
   return (
-    <div className={`w-full rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm ${className}`}>
+    <div className={`w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-sm ${className}`}>
       <LexicalComposer initialConfig={initialConfig}>
-        <div className="flex flex-col gap-2 p-3">
+        <div className="flex flex-col">
           <Toolbar />
-          <div className="relative rounded-xl border border-neutral-200 dark:border-neutral-800">
+          <div className="relative">
             <RichTextPlugin
               contentEditable={
                 <ContentEditable
-                  className="prose dark:prose-invert max-w-none outline-none px-4 py-3 text-base leading-7"
+                  className="prose dark:prose-invert max-w-none outline-none px-4 py-3 text-sm leading-relaxed resize-none"
                   style={{ minHeight }}
                 />
               }
@@ -134,47 +153,100 @@ export default function MarkdownWysiwygEditor({
   );
 }
 
-/**
- * Theme: minimal styling tokens for Lexical
- * You can further tune with Tailwind or your design system.
- */
 const lexicalTheme = {
-  paragraph: "mb-2",
+  paragraph: "mb-1",
   heading: {
-    h1: "text-2xl font-bold mt-4 mb-2",
-    h2: "text-xl font-semibold mt-3 mb-2",
-    h3: "text-lg font-semibold mt-3 mb-1",
+    h1: "text-xl font-bold mb-2 mt-3",
+    h2: "text-lg font-semibold mb-2 mt-3",
+    h3: "text-base font-semibold mb-1 mt-2",
   },
-  quote: "border-l-4 border-neutral-300 dark:border-neutral-600 pl-3 italic my-2",
+  quote: "border-l-2 border-neutral-300 dark:border-neutral-600 pl-3 italic my-2 text-neutral-600 dark:text-neutral-400",
   list: {
-    listitem: "my-1",
+    listitem: "my-0.5",
     nested: {
-      listitem: "my-1",
+      listitem: "my-0.5",
     },
-    ul: "list-disc ml-6 my-2",
-    ol: "list-decimal ml-6 my-2",
-    checklist: "ml-2 my-2",
+    ul: "list-disc ml-4 my-1",
+    ol: "list-decimal ml-4 my-1",
+    checklist: "ml-2 my-1",
   },
-  link: "text-blue-600 underline hover:opacity-80",
+  link: "text-blue-600 dark:text-blue-400 underline hover:opacity-80",
   text: {
     bold: "font-semibold",
     italic: "italic",
     underline: "underline",
     strikethrough: "line-through",
-    code: "rounded bg-neutral-100 dark:bg-neutral-800 px-1 py-0.5 font-mono text-[0.95em]",
+    code: "rounded bg-neutral-100 dark:bg-neutral-800 px-1 py-0.5 font-mono text-xs",
   },
-  code: "block w-full overflow-auto rounded-lg bg-neutral-100 dark:bg-neutral-900 p-3 font-mono text-sm",
+  code: "block w-full overflow-auto rounded bg-neutral-100 dark:bg-neutral-800 p-3 font-mono text-sm my-2",
 };
 
-/** Toolbar with formatting controls */
 function Toolbar() {
   const [editor] = useLexicalComposerContext();
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [blockType, setBlockType] = useState<string>("paragraph");
+  const [isBold, setIsBold] = useState(false);
+  const [isItalic, setIsItalic] = useState(false);
+  const [isUnderline, setIsUnderline] = useState(false);
+  const [isStrikethrough, setIsStrikethrough] = useState(false);
+  const [isCode, setIsCode] = useState(false);
+
+  const updateToolbar = useCallback(() => {
+    const selection = $getSelection();
+    if ($isRangeSelection(selection)) {
+      // Update text format
+      setIsBold(selection.hasFormat("bold"));
+      setIsItalic(selection.hasFormat("italic"));
+      setIsUnderline(selection.hasFormat("underline"));
+      setIsStrikethrough(selection.hasFormat("strikethrough"));
+      setIsCode(selection.hasFormat("code"));
+
+      // Update block type
+      const anchorNode = selection.anchor.getNode();
+      let element: any = anchorNode;
+      
+      // Find the top-level element
+      while (element && element.getParent() && !$isRootOrShadowRoot(element.getParent())) {
+        const parent = element.getParent();
+        if (parent) {
+          element = parent;
+        } else {
+          break;
+        }
+      }
+
+      if (element !== null) {
+        if ($isHeadingNode(element)) {
+          setBlockType(element.getTag());
+        } else if ($isQuoteNode(element)) {
+          setBlockType("quote");
+        } else if ($isCodeNode(element)) {
+          setBlockType("code");
+        } else if ($isListNode(element)) {
+          setBlockType("list");
+        } else {
+          setBlockType("paragraph");
+        }
+      }
+    }
+  }, []);
 
   useEffect(() => {
     return mergeRegister(
+      editor.registerUpdateListener(({ editorState }) => {
+        editorState.read(() => {
+          updateToolbar();
+        });
+      }),
+      editor.registerCommand(
+        SELECTION_CHANGE_COMMAND,
+        (_payload, newEditor) => {
+          updateToolbar();
+          return false;
+        },
+        COMMAND_PRIORITY_LOW
+      ),
       editor.registerCommand(
         CAN_UNDO_COMMAND,
         (payload) => {
@@ -190,116 +262,284 @@ function Toolbar() {
           return false;
         },
         COMMAND_PRIORITY_LOW
-      ),
-      editor.registerCommand(
-        SELECTION_CHANGE_COMMAND,
-        () => {
-          editor.getEditorState().read(() => {
-            const selection = $getSelection();
-            if (!$isRangeSelection(selection)) return;
-            const anchorNode: any = selection.anchor.getNode();
-            const element = anchorNode.getKey ? anchorNode.getTopLevelElementOrThrow() : null;
-            const type = element?.getType?.() || "paragraph";
-            setBlockType(type);
-          });
-          return false;
-        },
-        COMMAND_PRIORITY_LOW
       )
     );
-  }, [editor]);
+  }, [editor, updateToolbar]);
 
-  const applyBlock = (type: string) => {
-    editor.update(() => {
-      const selection = $getSelection();
-      if (!$isRangeSelection(selection)) return;
-      const root = $getRoot();
-      // Convert current paragraph to heading/quote/list/code by using markdown shortcuts conversion
-      // We do this by exporting to MD and reimporting with the desired prefix as a quick, robust approach.
-      const md = $convertToMarkdownString(TRANSFORMERS);
-      // naive transform: if selection at start of paragraph, prepend the markdown token
-      // For simplicity, insert token and a space at selection.
-      let token = "";
-      switch (type) {
-        case "h1": token = "# "; break;
-        case "h2": token = "## "; break;
-        case "h3": token = "### "; break;
-        case "quote": token = "> "; break;
-        case "ul": token = "- "; break;
-        case "ol": token = "1. "; break;
-        case "code": token = "```\n"; break;
-        default: token = ""; break;
-      }
-      if (token) {
-        // Replace editor content with markdown + token inserted at top (simple UX). For rich block transforms,
-        // a custom command would be cleaner; this keeps example concise yet functional.
-        $convertFromMarkdownString(token + md, TRANSFORMERS);
-      } else {
-        // paragraph
-        $convertFromMarkdownString(md, TRANSFORMERS);
-      }
-    });
+  const formatText = (format: "bold" | "italic" | "underline" | "strikethrough" | "code") => {
+    editor.dispatchCommand(FORMAT_TEXT_COMMAND, format);
   };
 
-  const btn = (
-    label: string,
-    onClick: () => void,
-    isActive?: boolean,
-    hotkey?: string
-  ) => (
+  const formatParagraph = () => {
+    if (blockType !== "paragraph") {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          $setBlocksType(selection, () => $createParagraphNode());
+        }
+      });
+    }
+  };
+
+  const formatHeading = (headingSize: "h1" | "h2" | "h3") => {
+    if (blockType !== headingSize) {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          $setBlocksType(selection, () => $createHeadingNode(headingSize));
+        }
+      });
+    }
+  };
+
+  const formatQuote = () => {
+    if (blockType !== "quote") {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          $setBlocksType(selection, () => $createQuoteNode());
+        }
+      });
+    }
+  };
+
+  const formatCode = () => {
+    if (blockType !== "code") {
+    editor.update(() => {
+      const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          $setBlocksType(selection, () => $createCodeNode());
+        }
+      });
+    }
+  };
+
+  const formatBulletList = () => {
+    if (blockType !== "ul") {
+      editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
+    } else {
+      editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+    }
+  };
+
+  const formatNumberedList = () => {
+    if (blockType !== "ol") {
+      editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
+      } else {
+      editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+    }
+  };
+
+  const insertLink = () => {
+    const url = window.prompt("Enter URL:");
+    if (url) {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          const linkNode = $createLinkNode(url);
+          const textNode = $createTextNode(url);
+          linkNode.append(textNode);
+          selection.insertNodes([linkNode]);
+        }
+      });
+    }
+  };
+
+  const ToolbarButton = ({ 
+    onClick, 
+    isActive = false, 
+    children, 
+    title, 
+    className = "" 
+  }: {
+    onClick: () => void;
+    isActive?: boolean;
+    children: React.ReactNode;
+    title: string;
+    className?: string;
+  }) => (
     <button
       type="button"
       onClick={onClick}
-      className={`px-2 py-1 text-sm rounded-lg border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-900 ${isActive ? "bg-neutral-100 dark:bg-neutral-900" : ""}`}
-      title={hotkey ? `${label} (${hotkey})` : label}
+      className={`p-2 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors ${
+        isActive ? "bg-neutral-100 dark:bg-neutral-800" : ""
+      } ${className}`}
+      title={title}
     >
-      {label}
+      {children}
     </button>
   );
 
   return (
-    <div className="flex flex-wrap items-center gap-1">
-      {btn("Undo", () => editor.dispatchCommand(UNDO_COMMAND, undefined), !canUndo)}
-      {btn("Redo", () => editor.dispatchCommand(REDO_COMMAND, undefined), !canRedo)}
-      <span className="mx-2 h-6 w-px bg-neutral-200 dark:bg-neutral-800" />
-      {btn("B", () => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold"), undefined, "Ctrl/Cmd+B")}
-      {btn("I", () => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic"), undefined, "Ctrl/Cmd+I")}
-      {btn("U", () => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline"), undefined, "Ctrl/Cmd+U")}
-      {btn("S", () => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough"))}
-      {btn("Code", () => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "code"), undefined, "Ctrl/Cmd+`")}
-      <span className="mx-2 h-6 w-px bg-neutral-200 dark:bg-neutral-800" />
-      {btn("H1", () => applyBlock("h1"), blockType === "heading")}
-      {btn("H2", () => applyBlock("h2"), blockType === "heading")}
-      {btn("H3", () => applyBlock("h3"), blockType === "heading")}
-      {btn("Quote", () => applyBlock("quote"), blockType === "quote")}
-      {btn("UL", () => applyBlock("ul"), blockType === "list" && undefined)}
-      {btn("OL", () => applyBlock("ol"), blockType === "list" && undefined)}
-      {btn("CodeBlk", () => applyBlock("code"), blockType === "code")}
-      <InsertLinkButton />
+    <div className="flex items-center gap-1 p-2 border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50">
+      {/* History */}
+      <ToolbarButton
+        onClick={() => editor.dispatchCommand(UNDO_COMMAND, undefined)}
+        isActive={false}
+        title="Undo (Ctrl+Z)"
+        className={!canUndo ? "opacity-50 cursor-not-allowed" : ""}
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+        </svg>
+      </ToolbarButton>
+      
+      <ToolbarButton
+        onClick={() => editor.dispatchCommand(REDO_COMMAND, undefined)}
+        isActive={false}
+        title="Redo (Ctrl+Y)"
+        className={!canRedo ? "opacity-50 cursor-not-allowed" : ""}
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10H11a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6" />
+        </svg>
+      </ToolbarButton>
+
+      <div className="w-px h-6 bg-neutral-300 dark:bg-neutral-600 mx-1" />
+
+      {/* Text Formatting */}
+      <ToolbarButton
+        onClick={() => formatText("bold")}
+        isActive={isBold}
+        title="Bold (Ctrl+B)"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z" />
+        </svg>
+      </ToolbarButton>
+
+      <ToolbarButton
+        onClick={() => formatText("italic")}
+        isActive={isItalic}
+        title="Italic (Ctrl+I)"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 4h4M8 20h4M12 4l-2 16" />
+        </svg>
+      </ToolbarButton>
+
+      <ToolbarButton
+        onClick={() => formatText("underline")}
+        isActive={isUnderline}
+        title="Underline (Ctrl+U)"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </ToolbarButton>
+
+      <ToolbarButton
+        onClick={() => formatText("strikethrough")}
+        isActive={isStrikethrough}
+        title="Strikethrough"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+        </svg>
+      </ToolbarButton>
+
+      <ToolbarButton
+        onClick={() => formatText("code")}
+        isActive={isCode}
+        title="Inline Code (Ctrl+`)"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+        </svg>
+      </ToolbarButton>
+
+      <div className="w-px h-6 bg-neutral-300 dark:bg-neutral-600 mx-1" />
+
+      {/* Block Types */}
+      <ToolbarButton
+        onClick={formatParagraph}
+        isActive={blockType === "paragraph"}
+        title="Normal text"
+      >
+        <span className="text-sm font-medium">P</span>
+      </ToolbarButton>
+
+      <ToolbarButton
+        onClick={() => formatHeading("h1")}
+        isActive={blockType === "h1"}
+        title="Heading 1"
+      >
+        <span className="text-sm font-bold">H1</span>
+      </ToolbarButton>
+
+      <ToolbarButton
+        onClick={() => formatHeading("h2")}
+        isActive={blockType === "h2"}
+        title="Heading 2"
+      >
+        <span className="text-sm font-semibold">H2</span>
+      </ToolbarButton>
+
+      <ToolbarButton
+        onClick={() => formatHeading("h3")}
+        isActive={blockType === "h3"}
+        title="Heading 3"
+      >
+        <span className="text-sm font-medium">H3</span>
+      </ToolbarButton>
+
+      <ToolbarButton
+        onClick={formatQuote}
+        isActive={blockType === "quote"}
+        title="Quote"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      </ToolbarButton>
+
+      <ToolbarButton
+        onClick={formatCode}
+        isActive={blockType === "code"}
+        title="Code block"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+        </svg>
+      </ToolbarButton>
+
+      <div className="w-px h-6 bg-neutral-300 dark:bg-neutral-600 mx-1" />
+
+      {/* Lists */}
+      <ToolbarButton
+        onClick={formatBulletList}
+        isActive={blockType === "ul"}
+        title="Bullet list"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        </svg>
+      </ToolbarButton>
+
+      <ToolbarButton
+        onClick={formatNumberedList}
+        isActive={blockType === "ol"}
+        title="Numbered list"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+      </ToolbarButton>
+
+      <ToolbarButton
+        onClick={insertLink}
+        isActive={false}
+        title="Insert link"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+        </svg>
+      </ToolbarButton>
     </div>
   );
 }
 
-function InsertLinkButton() {
-  const [editor] = useLexicalComposerContext();
-  return (
-    <button
-      type="button"
-      className="px-2 py-1 text-sm rounded-lg border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-900"
-      onClick={() => {
-        const href = window.prompt("Enter URL");
-        if (!href) return;
-        editor.update(() => {
-          document.execCommand("createLink", false, href);
-        });
-      }}
-    >
-      Link
-    </button>
-  );
-}
-
-/** Emits Markdown up to parent on editor changes */
 function EmitMarkdownOnChange({ onChange }: { onChange?: (md: string) => void }) {
   const [editor] = useLexicalComposerContext();
   const initialSync = useRef(true);
@@ -309,9 +549,9 @@ function EmitMarkdownOnChange({ onChange }: { onChange?: (md: string) => void })
     return editor.registerUpdateListener(({ editorState }) => {
       editorState.read(() => {
         const md = $convertToMarkdownString(TRANSFORMERS);
-        // Ignore the very first import cycle
         if (initialSync.current) {
           initialSync.current = false;
+          return;
         }
         onChange(md);
       });
@@ -322,7 +562,7 @@ function EmitMarkdownOnChange({ onChange }: { onChange?: (md: string) => void })
 
 function Placeholder({ text }: { text: string }) {
   return (
-    <div className="pointer-events-none absolute left-4 top-3 select-none text-neutral-400">
+    <div className="pointer-events-none absolute left-4 top-3 select-none text-neutral-400 text-sm">
       {text}
     </div>
   );
