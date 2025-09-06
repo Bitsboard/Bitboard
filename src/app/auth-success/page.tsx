@@ -4,11 +4,15 @@ import { useEffect } from 'react';
 
 export default function AuthSuccessPage() {
   useEffect(() => {
+    console.log("🔔 AuthSuccess: useEffect running");
+    
     // Parse search params from Google's redirect
     const params = new URLSearchParams(window.location.search);
     const code = params.get("code");
     const state = params.get("state");
     const error = params.get("error");
+    
+    console.log("🔔 AuthSuccess: params", { code: !!code, state: !!state, error });
 
     const chan = new BroadcastChannel("oauth-google");
     chan.postMessage({ type: "OAUTH_READY" });
@@ -26,11 +30,36 @@ export default function AuthSuccessPage() {
     }
 
     function tryCloseAggressively() {
+      console.log("🔔 AuthSuccess: tryCloseAggressively called");
+      
       // Try multiple close strategies immediately
-      try { window.close(); } catch {}
-      try { location.replace("about:blank"); } catch {}
-      try { location.href = "about:blank"; } catch {}
-      try { location.assign("about:blank"); } catch {}
+      try { 
+        console.log("🔔 AuthSuccess: trying window.close()");
+        window.close(); 
+      } catch (e) {
+        console.log("🔔 AuthSuccess: window.close() failed", e);
+      }
+      
+      try { 
+        console.log("🔔 AuthSuccess: trying location.replace()");
+        location.replace("about:blank"); 
+      } catch (e) {
+        console.log("🔔 AuthSuccess: location.replace() failed", e);
+      }
+      
+      try { 
+        console.log("🔔 AuthSuccess: trying location.href");
+        location.href = "about:blank"; 
+      } catch (e) {
+        console.log("🔔 AuthSuccess: location.href failed", e);
+      }
+      
+      try { 
+        console.log("🔔 AuthSuccess: trying location.assign()");
+        location.assign("about:blank"); 
+      } catch (e) {
+        console.log("🔔 AuthSuccess: location.assign() failed", e);
+      }
       
       // Self-target then close (older trick)
       try {
@@ -103,8 +132,8 @@ export default function AuthSuccessPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
-        <h1 className="text-xl font-semibold text-gray-900 mb-2">Authentication Successful!</h1>
-        <p className="text-gray-600">Closing popup and redirecting...</p>
+        <h1 className="text-xl font-semibold text-gray-900 mb-2">Processing authentication...</h1>
+        <p className="text-gray-600">Please wait...</p>
       </div>
     </div>
   );
