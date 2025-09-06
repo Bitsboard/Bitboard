@@ -47,52 +47,9 @@ export function AuthModal({ onClose, onAuthed, dark }: AuthModalProps) {
   const handleGoogleSignIn = () => {
     setIsAuthenticating(true);
     
-    // Open OAuth flow in a popup window
-    const popup = window.open(
-      loginUrl,
-      'googleSignIn',
-      'width=500,height=600,scrollbars=yes,resizable=yes'
-    );
-
-    if (popup) {
-      // Listen for success message from popup
-      const handleMessage = (event: MessageEvent) => {
-        if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
-          setIsAuthenticating(false);
-          // The popup will close itself, and we'll detect the session change
-        }
-      };
-
-      window.addEventListener('message', handleMessage);
-
-      // Check if popup was closed manually
-      const checkClosed = setInterval(() => {
-        try {
-          if (popup.closed) {
-            clearInterval(checkClosed);
-            window.removeEventListener('message', handleMessage);
-            setIsAuthenticating(false);
-          }
-        } catch (error) {
-          // Cross-Origin-Opener-Policy blocks window.closed check
-          // This is expected behavior, so we'll rely on the message listener
-          console.log('Popup closed check blocked by CORS policy (expected)');
-        }
-      }, 1000);
-
-      // Timeout after 30 seconds if no response
-      setTimeout(() => {
-        clearInterval(checkClosed);
-        window.removeEventListener('message', handleMessage);
-        setIsAuthenticating(false);
-        if (popup && !popup.closed) {
-          popup.close();
-        }
-      }, 30000);
-    } else {
-      // Fallback to redirect if popup blocked
-      window.location.href = loginUrl;
-    }
+    // Use redirect-based flow to avoid CORS issues
+    // The user will be redirected to OAuth and then back to the site
+    window.location.href = loginUrl;
   };
 
   return (
