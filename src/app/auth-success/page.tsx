@@ -26,30 +26,35 @@ export default function AuthSuccessPage() {
     }
 
     function tryCloseAggressively() {
-      // 1) Straight close (works if script-opened)
-      window.close();
-
-      // 2) Some browsers close after replacing to about:blank or same-origin
+      // Try multiple close strategies immediately
+      try { window.close(); } catch {}
       try { location.replace("about:blank"); } catch {}
-
-      // 3) Self-target then close (older trick; may be ignored but harmless)
+      try { location.href = "about:blank"; } catch {}
+      try { location.assign("about:blank"); } catch {}
+      
+      // Self-target then close (older trick)
       try {
         const w = window.open("", "_self");
         w?.close?.();
       } catch {}
 
-      // 4) As a last resort, show a manual-close link
-      setTimeout(() => {
-        document.body.innerHTML = `
-          <div style="font:14px system-ui; padding:24px; text-align:center">
-            <h2>Authentication Successful</h2>
-            <p>You can close this window.</p>
-            <button id="closeBtn" style="padding:8px 14px; border-radius:8px">Close</button>
-          </div>`;
-        document.getElementById("closeBtn")?.addEventListener("click", () => {
-          tryCloseAggressively(); // retry on user gesture (more likely to succeed)
-        });
-      }, 150); // give earlier attempts a moment
+      // Show manual close button immediately (no delay)
+      document.body.innerHTML = `
+        <div style="font:14px system-ui; padding:24px; text-align:center; background: #f0f9ff; min-height: 100vh; display: flex; flex-direction: column; justify-content: center;">
+          <h2 style="color: #059669; margin-bottom: 16px;">✅ Authentication Successful!</h2>
+          <p style="margin-bottom: 20px; color: #374151;">You can now close this window.</p>
+          <button id="closeBtn" style="padding:12px 24px; border-radius:8px; background: #3b82f6; color: white; border: none; cursor: pointer; font-size: 16px; font-weight: 600;">
+            Close Window
+          </button>
+        </div>`;
+      
+      document.getElementById("closeBtn")?.addEventListener("click", () => {
+        // Retry all close methods on user gesture
+        try { window.close(); } catch {}
+        try { location.replace("about:blank"); } catch {}
+        try { location.href = "about:blank"; } catch {}
+        try { location.assign("about:blank"); } catch {}
+      });
     }
 
     // Send outcome then close NOW (don't wait for parent)
@@ -63,6 +68,22 @@ export default function AuthSuccessPage() {
       clearInterval(hb);
       chan.close();
       tryCloseAggressively();
+      
+      // Additional aggressive close attempts with timing
+      setTimeout(() => {
+        try { window.close(); } catch {}
+        try { location.replace("about:blank"); } catch {}
+      }, 100);
+      
+      setTimeout(() => {
+        try { window.close(); } catch {}
+        try { location.href = "about:blank"; } catch {}
+      }, 500);
+      
+      setTimeout(() => {
+        try { window.close(); } catch {}
+        try { location.assign("about:blank"); } catch {}
+      }, 1000);
     }
 
     // Clean up on navigate-away
