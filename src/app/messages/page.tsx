@@ -68,6 +68,7 @@ export default function MessagesPage() {
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [newMessage, setNewMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   
   // Cache for messages to avoid re-fetching
   const [messagesCache, setMessagesCache] = useState<Record<string, Message[]>>({});
@@ -705,10 +706,21 @@ export default function MessagesPage() {
       console.log('🔔 User has email, loading chats and notifications');
       loadChats();
       loadSystemNotifications();
+      setIsInitialLoad(false);
     } else {
       console.log('🔔 No user email, not loading data');
+      // Don't clear existing data if user becomes null temporarily
+      // This prevents data loss during authentication state changes
+      // Only set initial load to false if we've never had a user
+      if (isInitialLoad) {
+        // Wait a bit for user to load
+        const timer = setTimeout(() => {
+          setIsInitialLoad(false);
+        }, 2000);
+        return () => clearTimeout(timer);
+      }
     }
-  }, [user?.email]);
+  }, [user?.email, isInitialLoad]);
 
   // Auto-scroll to bottom when new messages are added (not on every refresh)
   const [lastMessageCount, setLastMessageCount] = useState(0);
@@ -1632,17 +1644,33 @@ export default function MessagesPage() {
                 /* Empty State */
                 <div className="flex-1 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="w-24 h-24 mx-auto mb-6 bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center">
-                      <svg className="w-12 h-12 text-neutral-500 dark:text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                      </svg>
-                    </div>
-                    <h2 className="text-xl font-bold text-neutral-900 dark:text-white mb-2">
-                      Select a conversation or notification
-                    </h2>
-                    <p className="text-neutral-600 dark:text-neutral-400">
-                      Choose a chat or notification from the left panel
-                    </p>
+                    {isInitialLoad ? (
+                      <>
+                        <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-800 dark:to-orange-900 rounded-full flex items-center justify-center">
+                          <div className="w-12 h-12 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                        <h2 className="text-xl font-bold text-neutral-900 dark:text-white mb-2">
+                          Loading messages...
+                        </h2>
+                        <p className="text-neutral-600 dark:text-neutral-400">
+                          Please wait while we load your conversations
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-24 h-24 mx-auto mb-6 bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center">
+                          <svg className="w-12 h-12 text-neutral-500 dark:text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                          </svg>
+                        </div>
+                        <h2 className="text-xl font-bold text-neutral-900 dark:text-white mb-2">
+                          Select a conversation or notification
+                        </h2>
+                        <p className="text-neutral-600 dark:text-neutral-400">
+                          Choose a chat or notification from the left panel
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
               )}
