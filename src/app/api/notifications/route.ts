@@ -6,10 +6,19 @@ import { getSessionFromRequest } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    // Get user session
-    const session = await getSessionFromRequest(request);
-    if (!session || !session.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Try to get userEmail from query parameters first, then from session
+    const url = new URL(request.url);
+    const userEmailParam = url.searchParams.get('userEmail');
+    
+    let userEmail: string;
+    if (userEmailParam) {
+      userEmail = userEmailParam;
+    } else {
+      const session = await getSessionFromRequest(request);
+      if (!session?.user?.email) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      userEmail = session.user.email;
     }
 
     // Get database connection
@@ -19,6 +28,18 @@ export async function GET(request: NextRequest) {
     if (!db) {
       return NextResponse.json({ error: "Database not available" }, { status: 500 });
     }
+
+    // Get user ID from email
+    const userResult = await db
+      .prepare("SELECT id FROM users WHERE email = ?")
+      .bind(userEmail)
+      .first();
+
+    if (!userResult) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const userId = userResult.id;
 
     // Get user's notifications
     const notifications = await db.prepare(`
@@ -37,7 +58,7 @@ export async function GET(request: NextRequest) {
       WHERE un.user_id = ? AND sn.status = 'active'
       ORDER BY un.created_at DESC
       LIMIT 50
-    `).bind(session.user.id).all();
+    `).bind(userId).all();
 
     return NextResponse.json({
       success: true,
