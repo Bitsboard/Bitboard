@@ -64,7 +64,7 @@ export async function getSessionFromRequestEdge(req: NextRequest): Promise<Sessi
       account: payload.sso ? {
         sso: String(payload.sso),
         verified: Boolean(payload.verified),
-        registeredAt: Number(payload.registeredAt || 0),
+        registeredAt: Number(payload.exp || 0), // Use exp as fallback since registeredAt doesn't exist in JwtPayload
       } : undefined,
       expires: Number(payload.exp || 0),
     };
