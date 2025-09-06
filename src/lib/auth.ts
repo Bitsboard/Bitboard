@@ -93,6 +93,16 @@ export async function verifyJwtHS256(token: string, secret: string): Promise<Jwt
 }
 
 export function getAuthSecret(): string {
+  // Try to get from Cloudflare context first (Edge runtime)
+  try {
+    const { getRequestContext } = require('@cloudflare/next-on-pages');
+    const env = getRequestContext().env;
+    const secret = env.NEXTAUTH_SECRET || env.AUTH_SECRET || '';
+    if (secret) return secret;
+  } catch {
+    // Fallback to process.env for Node runtime
+  }
+  
   const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || '';
   if (!secret) throw new Error('Missing auth secret (NEXTAUTH_SECRET or AUTH_SECRET)');
   return secret;
