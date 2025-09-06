@@ -32,6 +32,17 @@ export function AuthModal({ onClose, onAuthed, dark }: AuthModalProps) {
     return () => cleanup();
   }, []);
 
+  // Optional: storage-based confirmation (extra safety)
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "oauth:last_success") {
+        cleanup(); // already done on OAUTH_SUCCESS, but this covers edge cases
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
   // Check for authentication completion
   useEffect(() => {
     const checkAuth = async () => {
@@ -124,9 +135,8 @@ export function AuthModal({ onClose, onAuthed, dark }: AuthModalProps) {
           } catch (e) {
             console.error(e);
           } finally {
-            // Ask popup to close itself (best-effort)
-            chan.postMessage({ type: "OAUTH_CLOSE" });
-            cleanup();
+            // Do NOT wait for popup to close or send OAUTH_CLOSE.
+            cleanup(); // stops heartbeat + closes BroadcastChannel + setIsAuthenticating(false)
           }
           break;
         }

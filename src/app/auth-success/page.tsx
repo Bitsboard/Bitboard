@@ -19,25 +19,53 @@ export default function AuthSuccessPage() {
       chan.postMessage({ type: "OAUTH_HEARTBEAT" });
     }, HEARTBEAT_INTERVAL_MS);
 
-    // Send outcome
-    if (error) {
-      chan.postMessage({ type: "OAUTH_ERROR", error });
-    } else if (code) {
-      chan.postMessage({ type: "OAUTH_SUCCESS", code, state });
+    function notifyParentDone() {
+      try { chan.postMessage({ type: "OAUTH_SUCCESS", code, state }); } catch {}
+      try { window.opener?.postMessage({ type: "OAUTH_SUCCESS", code, state }, "*"); } catch {}
+      try { localStorage.setItem("oauth:last_success", String(Date.now())); } catch {}
     }
 
-    // If parent acknowledges, close the popup
-    chan.onmessage = (ev) => {
-      if (ev.data && ev.data.type === "OAUTH_CLOSE") {
-        clearInterval(hb);
-        chan.close();
-        // Best-effort close; if blocked by browser, user can still close manually.
-        window.close();
-      }
-    };
+    function tryCloseAggressively() {
+      // 1) Straight close (works if script-opened)
+      window.close();
 
-    // Fallback: if user navigates away or closes
-    // (Not guaranteed to fire, but harmless to include)
+      // 2) Some browsers close after replacing to about:blank or same-origin
+      try { location.replace("about:blank"); } catch {}
+
+      // 3) Self-target then close (older trick; may be ignored but harmless)
+      try {
+        const w = window.open("", "_self");
+        w?.close?.();
+      } catch {}
+
+      // 4) As a last resort, show a manual-close link
+      setTimeout(() => {
+        document.body.innerHTML = `
+          <div style="font:14px system-ui; padding:24px; text-align:center">
+            <h2>Authentication Successful</h2>
+            <p>You can close this window.</p>
+            <button id="closeBtn" style="padding:8px 14px; border-radius:8px">Close</button>
+          </div>`;
+        document.getElementById("closeBtn")?.addEventListener("click", () => {
+          tryCloseAggressively(); // retry on user gesture (more likely to succeed)
+        });
+      }, 150); // give earlier attempts a moment
+    }
+
+    // Send outcome then close NOW (don't wait for parent)
+    if (error) {
+      chan.postMessage({ type: "OAUTH_ERROR", error });
+      clearInterval(hb);
+      chan.close();
+      tryCloseAggressively();
+    } else if (code) {
+      notifyParentDone();
+      clearInterval(hb);
+      chan.close();
+      tryCloseAggressively();
+    }
+
+    // Clean up on navigate-away
     window.addEventListener("pagehide", () => {
       clearInterval(hb);
       chan.close();
