@@ -31,6 +31,8 @@ interface Chat {
 
 interface SystemNotification {
   id: string;
+  userNotificationId?: string | null;
+  systemNotificationId?: string | null;
   title: string;
   message: string;
   timestamp: number;
@@ -234,10 +236,14 @@ export default function MessagesPage() {
         
         if (data.success && data.notifications.length > 0) {
           const transformedNotifications: SystemNotification[] = data.notifications.map(notification => {
+            // Use user_notification_id for delete operations, fallback to notification_id for display
             const id = notification.user_notification_id || notification.notification_id;
             console.log('🔔 Notification mapping - user_notification_id:', notification.user_notification_id, 'notification_id:', notification.notification_id, 'final_id:', id);
             return {
               id,
+              // Store both IDs for proper API operations
+              userNotificationId: notification.user_notification_id,
+              systemNotificationId: notification.notification_id,
               title: notification.title,
               message: notification.message,
               timestamp: notification.received_at * 1000, // Convert from seconds to milliseconds
@@ -581,12 +587,24 @@ export default function MessagesPage() {
 
   const deleteNotification = async (notificationId: string) => {
     console.log('🔔 deleteNotification called with:', notificationId);
+    
+    // Find the notification to get the correct user_notification_id
+    const notification = systemNotifications.find(n => n.id === notificationId);
+    if (!notification) {
+      console.error('🔔 Notification not found in local state:', notificationId);
+      return;
+    }
+    
+    // Use userNotificationId if available, otherwise fall back to the display ID
+    const deleteId = notification.userNotificationId || notificationId;
+    console.log('🔔 Using delete ID:', deleteId, 'for notification:', notificationId);
+    
     try {
       const response = await fetch('/api/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          notificationId: notificationId,
+          notificationId: deleteId,
           action: 'delete'
         })
       });

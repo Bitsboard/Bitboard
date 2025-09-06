@@ -62,6 +62,9 @@ export async function GET(request: NextRequest) {
       LIMIT 50
     `).bind(userId).all();
 
+    console.log('🔔 API: Raw notifications from DB:', notifications.results);
+    console.log('🔔 API: First notification user_notification_id:', notifications.results?.[0]?.user_notification_id);
+
     return NextResponse.json({
       success: true,
       notifications: notifications.results || []
