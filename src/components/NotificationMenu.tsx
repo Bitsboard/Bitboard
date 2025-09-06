@@ -82,8 +82,18 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
       loadNotifications();
     };
 
+    const handleStateChange = (event: CustomEvent) => {
+      // Reload notifications when state changes in other components
+      loadNotifications();
+    };
+
     window.addEventListener('refreshNotifications', handleRefresh);
-    return () => window.removeEventListener('refreshNotifications', handleRefresh);
+    window.addEventListener('notificationStateChanged', handleStateChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('refreshNotifications', handleRefresh);
+      window.removeEventListener('notificationStateChanged', handleStateChange as EventListener);
+    };
   }, [user?.email]);
 
   // Update unread count whenever notifications change
@@ -104,15 +114,7 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
   }, []);
 
   const markAsRead = async (notificationId: string) => {
-    // Update local state immediately for better UX
-    setNotifications(prev => {
-      const updated = prev.map(n => 
-        n.id === notificationId ? { ...n, read: true } : n
-      );
-      return updated;
-    });
-
-    // Mark as read on server
+    // Mark as read on server first
     try {
       const response = await fetch('/api/notifications', {
         method: 'POST',
@@ -123,37 +125,29 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
         })
       });
 
-      if (!response.ok) {
-        console.error('Failed to mark notification as read');
-        // Revert local state if server call failed
+      if (response.ok) {
+        // Update local state after successful server update
         setNotifications(prev => {
-          const reverted = prev.map(n => 
-            n.id === notificationId ? { ...n, read: false } : n
+          const updated = prev.map(n => 
+            n.id === notificationId ? { ...n, read: true } : n
           );
-          return reverted;
+          return updated;
         });
+        
+        // Dispatch event to notify other components
+        window.dispatchEvent(new CustomEvent('notificationStateChanged', {
+          detail: { action: 'mark_read', notificationId }
+        }));
+      } else {
+        console.error('Failed to mark notification as read');
       }
     } catch (error) {
       console.error('Error marking notification as read:', error);
-      // Revert local state if server call failed
-      setNotifications(prev => {
-        const reverted = prev.map(n => 
-          n.id === notificationId ? { ...n, read: false } : n
-        );
-        return reverted;
-      });
     }
   };
 
   const markAllAsRead = async () => {
-    // Update local state immediately for better UX
-    setNotifications(prev => {
-      const updated = prev.map(n => ({ ...n, read: true }));
-      return updated;
-    });
-    setUnreadCount(0);
-
-    // Mark all as read on server
+    // Mark all as read on server first
     try {
       const response = await fetch('/api/notifications', {
         method: 'POST',
@@ -163,23 +157,23 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
         })
       });
 
-      if (!response.ok) {
-        console.error('Failed to mark all notifications as read');
-        // Revert local state if server call failed
+      if (response.ok) {
+        // Update local state after successful server update
         setNotifications(prev => {
-          const reverted = prev.map(n => ({ ...n, read: false }));
-          return reverted;
+          const updated = prev.map(n => ({ ...n, read: true }));
+          return updated;
         });
-        setUnreadCount(notifications.filter(n => !n.read).length);
+        setUnreadCount(0);
+        
+        // Dispatch event to notify other components
+        window.dispatchEvent(new CustomEvent('notificationStateChanged', {
+          detail: { action: 'mark_all_read' }
+        }));
+      } else {
+        console.error('Failed to mark all notifications as read');
       }
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
-      // Revert local state if server call failed
-      setNotifications(prev => {
-        const reverted = prev.map(n => ({ ...n, read: false }));
-        return reverted;
-      });
-      setUnreadCount(notifications.filter(n => !n.read).length);
     }
   };
 

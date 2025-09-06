@@ -503,8 +503,11 @@ export default function MessagesPage() {
             );
           });
           
-          // Trigger a custom event to refresh header notifications
+          // Trigger events to refresh all notification components
           window.dispatchEvent(new CustomEvent('refreshNotifications'));
+          window.dispatchEvent(new CustomEvent('notificationStateChanged', {
+            detail: { action: 'mark_read', notificationId: notification.id }
+          }));
         } else {
           console.error('Failed to mark notification as read');
         }
@@ -534,8 +537,11 @@ export default function MessagesPage() {
           setSelectedNotification(null);
         }
         
-        // Trigger a custom event to refresh header notifications
+        // Trigger events to refresh all notification components
         window.dispatchEvent(new CustomEvent('refreshNotifications'));
+        window.dispatchEvent(new CustomEvent('notificationStateChanged', {
+          detail: { action: 'delete', notificationId }
+        }));
       } else {
         console.error('Failed to delete notification');
       }
@@ -724,7 +730,19 @@ export default function MessagesPage() {
     return () => clearInterval(interval);
   }, [user?.email]);
 
+  // Listen for notification state changes from other components
+  useEffect(() => {
+    const handleStateChange = (event: CustomEvent) => {
+      // Reload notifications when state changes in other components
+      loadSystemNotifications();
+    };
 
+    window.addEventListener('notificationStateChanged', handleStateChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('notificationStateChanged', handleStateChange as EventListener);
+    };
+  }, []);
 
   // Filter chats and notifications based on unread status
   // Memoize filtered and combined items to prevent unnecessary re-renders
@@ -1470,8 +1488,11 @@ export default function MessagesPage() {
                                           n.id === notification.id ? { ...n, read: false } : n
                                         )
                                       );
-                                      // Trigger refresh for header
+                                      // Trigger events to refresh all notification components
                                       window.dispatchEvent(new CustomEvent('refreshNotifications'));
+                                      window.dispatchEvent(new CustomEvent('notificationStateChanged', {
+                                        detail: { action: 'mark_unread', notificationId: notification.id }
+                                      }));
                                     } else {
                                       console.error('Failed to mark notification as unread');
                                     }
