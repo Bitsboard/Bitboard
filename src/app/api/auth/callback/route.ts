@@ -232,9 +232,19 @@ export async function GET(req: Request): Promise<Response> {
   headers.append('Set-Cookie', createCookie('session', jwt, { httpOnly: true, maxAgeSec: 60 * 60 * 24 * 7 }));
   headers.append('Set-Cookie', deleteCookie('oauth_state'));
   headers.append('Set-Cookie', deleteCookie('oauth_verifier'));
-  headers.append('Location', redirect);
   
-  console.log('🔔 OAuth Callback - Session cookie created, redirecting to:', redirect);
+  // If redirecting to auth-success (popup flow), pass the OAuth parameters
+  let finalRedirect = redirect;
+  if (redirect === '/auth-success') {
+    const authSuccessUrl = new URL('/auth-success', url.origin);
+    authSuccessUrl.searchParams.set('code', code);
+    authSuccessUrl.searchParams.set('state', state);
+    finalRedirect = authSuccessUrl.toString();
+  }
+  
+  headers.append('Location', finalRedirect);
+  
+  console.log('🔔 OAuth Callback - Session cookie created, redirecting to:', finalRedirect);
   
   // Add security headers
   headers.append('X-Content-Type-Options', 'nosniff');
