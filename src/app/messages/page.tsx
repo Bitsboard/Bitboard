@@ -803,9 +803,9 @@ export default function MessagesPage() {
                         }`}
                       >
                         {item.itemType === 'notification' ? (
-                          /* System Notification Layout */
-                          <div className="flex items-start gap-3">
-                            <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center shadow-sm ${
+                          /* System Notification Layout - Email Style */
+                          <div className="flex items-start gap-3 p-2">
+                            <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center shadow-sm ${
                               item.icon === 'info' ? 'bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-900' :
                               item.icon === 'success' ? 'bg-gradient-to-br from-green-100 to-green-200 dark:from-green-800 dark:to-green-900' :
                               item.icon === 'warning' ? 'bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-800 dark:to-yellow-900' :
@@ -813,67 +813,87 @@ export default function MessagesPage() {
                               'bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-800 dark:to-purple-900'
                             }`}>
                               {item.icon === 'info' && (
-                                <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               )}
                               {item.icon === 'success' && (
-                                <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               )}
                               {item.icon === 'warning' && (
-                                <svg className="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
                                 </svg>
                               )}
                               {item.icon === 'error' && (
-                                <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-5 h-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               )}
                               {(!item.icon || item.icon === 'system') && (
-                                <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19h6a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
                               )}
                             </div>
                             
                             <div className="flex-1 min-w-0">
-                              <h3 className={`font-semibold text-sm truncate mb-1 ${
-                                selectedNotification === item.id ? 'text-white' : 'text-neutral-900 dark:text-white'
-                              }`}>
-                                {item.title}
-                              </h3>
+                              {/* Email-style header */}
+                              <div className="flex items-center justify-between mb-1">
+                                <h3 className={`font-semibold text-sm ${
+                                  selectedNotification === item.id ? 'text-white' : 'text-neutral-900 dark:text-white'
+                                }`}>
+                                  {item.title}
+                                </h3>
+                                <div className="flex items-center gap-2">
+                                  {!item.read && (
+                                    <span className={`text-xs px-2 py-0.5 rounded-full min-w-[18px] text-center font-medium ${
+                                      selectedNotification === item.id 
+                                        ? 'bg-white/20 text-white'
+                                        : item.icon === 'info' ? 'bg-blue-500 text-white' :
+                                          item.icon === 'success' ? 'bg-green-500 text-white' :
+                                          item.icon === 'warning' ? 'bg-yellow-500 text-white' :
+                                          item.icon === 'error' ? 'bg-red-500 text-white' :
+                                          'bg-purple-500 text-white'
+                                    }`}>
+                                      New
+                                    </span>
+                                  )}
+                                  <span className={`text-xs ${
+                                    selectedNotification === item.id ? 'text-white/70' : 'text-neutral-500 dark:text-neutral-400'
+                                  }`}>
+                                    {formatTimestamp(item.timestamp)}
+                                  </span>
+                                </div>
+                              </div>
                               
-                              <div className="flex items-center justify-between gap-2">
-                                <p className={`text-xs truncate flex-1 ${
-                                  selectedNotification === item.id ? 'text-white/80' : 'text-neutral-600 dark:text-neutral-300'
+                              {/* Email-style sender */}
+                              <div className="flex items-center gap-1 mb-2">
+                                <span className={`text-xs font-medium ${
+                                  selectedNotification === item.id ? 'text-white/80' : 'text-neutral-600 dark:text-neutral-400'
                                 }`}>
-                                  {item.message}
-                                </p>
-                                <span className={`text-xs flex-shrink-0 ${
-                                  selectedNotification === item.id ? 'text-white/70' : 'text-neutral-500 dark:text-neutral-400'
+                                  bitsbarter
+                                </span>
+                                <span className={`text-xs ${
+                                  selectedNotification === item.id ? 'text-white/60' : 'text-neutral-400 dark:text-neutral-500'
                                 }`}>
-                                  {formatTimestamp(item.timestamp)}
+                                  •
+                                </span>
+                                <span className={`text-xs ${
+                                  selectedNotification === item.id ? 'text-white/60' : 'text-neutral-400 dark:text-neutral-500'
+                                }`}>
+                                  System Notification
                                 </span>
                               </div>
                               
-                              {!item.read && (
-                                <div className="mt-1 flex justify-end">
-                                  <span className={`text-xs px-2 py-0.5 rounded-full min-w-[18px] text-center font-medium ${
-                                    selectedNotification === item.id 
-                                      ? 'bg-white/20 text-white'
-                                      : item.icon === 'info' ? 'bg-blue-500 text-white' :
-                                        item.icon === 'success' ? 'bg-green-500 text-white' :
-                                        item.icon === 'warning' ? 'bg-yellow-500 text-white' :
-                                        item.icon === 'error' ? 'bg-red-500 text-white' :
-                                        'bg-purple-500 text-white'
-                                  }`}>
-                                    New
-                                  </span>
-                                </div>
-                              )}
+                              {/* Email-style preview */}
+                              <p className={`text-sm line-clamp-2 ${
+                                selectedNotification === item.id ? 'text-white/90' : 'text-neutral-600 dark:text-neutral-300'
+                              }`}>
+                                {item.message}
+                              </p>
                             </div>
                           </div>
                         ) : (
@@ -1278,26 +1298,82 @@ export default function MessagesPage() {
                 </>
               ) : selectedNotification ? (
                 <>
-                  {/* Notification View */}
-                  <div className="p-6">
-                    <div className="text-center">
-                      <div className="w-16 h-16 mx-auto mb-4 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
-                        <svg className="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19h6a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
+                  {/* System Notification View - Email Style */}
+                  <div className="flex-1 flex flex-col">
+                    {/* Email Header */}
+                    <div className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700 p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {/* Notification Icon */}
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center shadow-sm ${
+                            systemNotifications.find(n => n.id === selectedNotification)?.icon === 'info' ? 'bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-900' :
+                            systemNotifications.find(n => n.id === selectedNotification)?.icon === 'success' ? 'bg-gradient-to-br from-green-100 to-green-200 dark:from-green-800 dark:to-green-900' :
+                            systemNotifications.find(n => n.id === selectedNotification)?.icon === 'warning' ? 'bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-800 dark:to-yellow-900' :
+                            systemNotifications.find(n => n.id === selectedNotification)?.icon === 'error' ? 'bg-gradient-to-br from-red-100 to-red-200 dark:from-red-800 dark:to-red-900' :
+                            'bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-800 dark:to-purple-900'
+                          }`}>
+                            {systemNotifications.find(n => n.id === selectedNotification)?.icon === 'info' && (
+                              <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            )}
+                            {systemNotifications.find(n => n.id === selectedNotification)?.icon === 'success' && (
+                              <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            )}
+                            {systemNotifications.find(n => n.id === selectedNotification)?.icon === 'warning' && (
+                              <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                              </svg>
+                            )}
+                            {systemNotifications.find(n => n.id === selectedNotification)?.icon === 'error' && (
+                              <svg className="w-5 h-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            )}
+                            {(!systemNotifications.find(n => n.id === selectedNotification)?.icon || systemNotifications.find(n => n.id === selectedNotification)?.icon === 'system') && (
+                              <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19h6a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                              </svg>
+                            )}
+                          </div>
+                          
+                          <div>
+                            <h1 className="text-lg font-semibold text-neutral-900 dark:text-white">
+                              {systemNotifications.find(n => n.id === selectedNotification)?.title}
+                            </h1>
+                            <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
+                              <span>bitsbarter</span>
+                              <span>•</span>
+                              <span>{formatTimestamp(systemNotifications.find(n => n.id === selectedNotification)?.timestamp || 0)}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <button
+                          onClick={() => setSelectedNotification(null)}
+                          className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors"
+                          title="Close notification"
+                        >
+                          <svg className="w-5 h-5 text-neutral-500 dark:text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
                       </div>
-                      <h2 className="text-xl font-bold text-neutral-900 dark:text-white mb-2">
-                        {systemNotifications.find(n => n.id === selectedNotification)?.title}
-                      </h2>
-                      <p className="text-neutral-600 dark:text-neutral-400 mb-4">
-                        {systemNotifications.find(n => n.id === selectedNotification)?.message}
-                      </p>
-                      <button
-                        onClick={() => setSelectedNotification(null)}
-                        className="px-6 py-2 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl font-medium hover:from-purple-600 hover:to-purple-700 transition-all duration-200 hover:scale-105 shadow-md"
-                      >
-                        Close
-                      </button>
+                    </div>
+                    
+                    {/* Email Body */}
+                    <div className="flex-1 p-6 bg-neutral-50 dark:bg-neutral-800/50">
+                      <div className="max-w-4xl">
+                        <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-700 p-6">
+                          <div className="prose prose-neutral dark:prose-invert max-w-none">
+                            <div className="text-neutral-700 dark:text-neutral-300 leading-relaxed whitespace-pre-wrap">
+                              {systemNotifications.find(n => n.id === selectedNotification)?.message}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </>
