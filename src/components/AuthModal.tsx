@@ -67,12 +67,28 @@ export function AuthModal({ onClose, onAuthed, dark }: AuthModalProps) {
 
       // Check if popup was closed manually
       const checkClosed = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(checkClosed);
-          window.removeEventListener('message', handleMessage);
-          setIsAuthenticating(false);
+        try {
+          if (popup.closed) {
+            clearInterval(checkClosed);
+            window.removeEventListener('message', handleMessage);
+            setIsAuthenticating(false);
+          }
+        } catch (error) {
+          // Cross-Origin-Opener-Policy blocks window.closed check
+          // This is expected behavior, so we'll rely on the message listener
+          console.log('Popup closed check blocked by CORS policy (expected)');
         }
       }, 1000);
+
+      // Timeout after 30 seconds if no response
+      setTimeout(() => {
+        clearInterval(checkClosed);
+        window.removeEventListener('message', handleMessage);
+        setIsAuthenticating(false);
+        if (popup && !popup.closed) {
+          popup.close();
+        }
+      }, 30000);
     } else {
       // Fallback to redirect if popup blocked
       window.location.href = loginUrl;

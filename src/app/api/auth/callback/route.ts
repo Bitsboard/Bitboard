@@ -25,6 +25,16 @@ export async function GET(req: Request): Promise<Response> {
   const oauthState = getCookie('oauth_state');
   const verifier = getCookie('oauth_verifier');
   
+  console.log('🔔 OAuth Callback Debug:', {
+    hasCode: !!code,
+    hasState: !!state,
+    hasOauthState: !!oauthState,
+    stateMatch: state === oauthState,
+    hasVerifier: !!verifier,
+    stateParam,
+    redirectRaw
+  });
+  
   if (!code || !state || !oauthState || state !== oauthState || !verifier) {
     // Log failed authentication attempt
     const ip = SecurityMonitor.getClientIP(req);
@@ -216,11 +226,15 @@ export async function GET(req: Request): Promise<Response> {
   const responseTime = Date.now() - startTime;
   logAPIUsage(req, endpoint, 302, responseTime);
 
+  console.log('🔔 OAuth Callback - Creating session for user:', user.email);
+  
   const headers = new Headers();
   headers.append('Set-Cookie', createCookie('session', jwt, { httpOnly: true, maxAgeSec: 60 * 60 * 24 * 7 }));
   headers.append('Set-Cookie', deleteCookie('oauth_state'));
   headers.append('Set-Cookie', deleteCookie('oauth_verifier'));
   headers.append('Location', redirect);
+  
+  console.log('🔔 OAuth Callback - Session cookie created, redirecting to:', redirect);
   
   // Add security headers
   headers.append('X-Content-Type-Options', 'nosniff');
