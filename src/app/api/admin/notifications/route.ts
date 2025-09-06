@@ -9,6 +9,7 @@ interface SystemNotificationRequest {
   message: string;
   icon: 'info' | 'success' | 'warning' | 'error' | 'system';
   actionUrl?: string;
+  priority?: 'low' | 'normal' | 'high' | 'urgent';
 }
 
 export async function POST(request: NextRequest) {
