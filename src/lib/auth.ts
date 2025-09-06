@@ -149,10 +149,13 @@ export function generateUserId(): string {
 export async function getSessionFromRequest(req: Request): Promise<Session | null> {
   try {
     const cookieHeader = req.headers.get('cookie') || '';
+    console.log('🔔 getSessionFromRequest - cookieHeader:', cookieHeader);
     const token = /(?:^|; )session=([^;]+)/.exec(cookieHeader)?.[1];
+    console.log('🔔 getSessionFromRequest - token:', token ? 'exists' : 'null');
     if (!token) return null;
 
     const payload = await verifyJwtHS256(token, getAuthSecret());
+    console.log('🔔 getSessionFromRequest - payload:', payload ? 'valid' : 'invalid');
     if (!payload) return null;
 
     return {
