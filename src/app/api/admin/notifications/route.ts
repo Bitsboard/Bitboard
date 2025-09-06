@@ -122,8 +122,13 @@ export async function POST(request: NextRequest) {
     // For 'all', 'buyers', 'sellers' - we send to all users for now
     // In a real implementation, you'd track user roles
 
+    console.log('🔔 Admin notifications - User query:', userQuery);
+    console.log('🔔 Admin notifications - Query params:', params);
+    
     const usersResult = await db.prepare(userQuery).bind(...params).all();
     const users = usersResult.results as { id: string }[];
+    
+    console.log('🔔 Admin notifications - Found users:', users.length);
 
     // Create user notification records for each user
     if (users.length > 0) {
