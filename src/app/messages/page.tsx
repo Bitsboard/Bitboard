@@ -215,10 +215,9 @@ export default function MessagesPage() {
   const loadSystemNotifications = async () => {
     console.log('🔔 loadSystemNotifications called, user:', user);
     
-    // If no user, don't load notifications - PRESERVE EXISTING DATA
+    // If no user, don't load notifications
     if (!user?.email) {
-      console.log('🔔 No user email, not loading notifications - PRESERVING EXISTING DATA');
-      // Don't clear existing data when user is null - this prevents data loss
+      console.log('🔔 No user email, not loading notifications');
       return;
     }
 
@@ -559,11 +558,9 @@ export default function MessagesPage() {
             return updated;
           });
           
-          // Trigger events to refresh all notification components
-          window.dispatchEvent(new CustomEvent('refreshNotifications'));
-          window.dispatchEvent(new CustomEvent('notificationStateChanged', {
-            detail: { action: 'mark_read', notificationId: notification.id }
-          }));
+          // Don't trigger refresh events after mark_read - we've already updated local state
+          // This prevents the user state race condition from causing data to reappear
+          console.log('🔔 Mark read completed - not triggering refresh events to prevent race condition');
         } else {
           console.error('Failed to mark notification as read:', response.status);
           const errorText = await response.text();
@@ -605,11 +602,9 @@ export default function MessagesPage() {
           setSelectedNotification(null);
         }
         
-        // Trigger events to refresh all notification components
-        window.dispatchEvent(new CustomEvent('refreshNotifications'));
-        window.dispatchEvent(new CustomEvent('notificationStateChanged', {
-          detail: { action: 'delete', notificationId }
-        }));
+        // Don't trigger refresh events after delete - we've already updated local state
+        // This prevents the user state race condition from causing data to reappear
+        console.log('🔔 Delete completed - not triggering refresh events to prevent race condition');
       } else {
         console.error('Failed to delete notification:', response.status);
         const errorText = await response.text();
