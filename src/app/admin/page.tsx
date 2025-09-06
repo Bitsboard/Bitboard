@@ -561,6 +561,7 @@ export default function AdminPage() {
           
           <div className="mt-6 text-center">
             <button
+              type="button"
               onClick={() => router.push('/')}
               className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200 transition-colors"
             >
@@ -589,6 +590,7 @@ export default function AdminPage() {
             
             <div className="flex items-center gap-4">
               <button
+                type="button"
                 onClick={() => loadStats(currentPage)}
                 disabled={statsLoading}
                 className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
@@ -596,6 +598,7 @@ export default function AdminPage() {
                 {statsLoading ? 'Refreshing...' : 'Refresh'}
               </button>
               <button
+                type="button"
                 onClick={handleLogout}
                 className="px-4 py-2 bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-colors"
               >
@@ -618,6 +621,7 @@ export default function AdminPage() {
                   <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">Users</div>
                 </div>
                 <button 
+                  type="button"
                   onClick={() => router.push('/admin/users')}
                   className="w-full px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors"
                 >
@@ -632,6 +636,7 @@ export default function AdminPage() {
                   <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">Listings</div>
                 </div>
                 <button 
+                  type="button"
                   onClick={() => router.push('/admin/listings')}
                   className="w-full px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors"
                 >
@@ -646,6 +651,7 @@ export default function AdminPage() {
                   <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">Active Conversations</div>
                 </div>
                 <button 
+                  type="button"
                   onClick={() => router.push('/admin/chats')}
                   className="w-full px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium rounded-lg transition-colors"
                 >
@@ -657,24 +663,28 @@ export default function AdminPage() {
               <div className="md:col-span-2 p-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800">
                 <div className="grid grid-cols-2 gap-2 h-full">
                   <button 
+                    type="button"
                     onClick={() => setShowNotificationForm(true)}
                     className="px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors"
                   >
                     Send System Msg
                   </button>
                   <button 
+                    type="button"
                     onClick={() => router.push('/admin/reports')}
                     className="px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors"
                   >
                     Manage reports
                   </button>
                   <button 
+                    type="button"
                     onClick={() => router.push('/admin/analytics')}
                     className="px-3 py-2 bg-neutral-500 hover:bg-neutral-600 text-white text-sm font-medium rounded-lg transition-colors"
                   >
                     View Analytics
                   </button>
                   <button 
+                    type="button"
                     onClick={() => router.push('/admin/security')}
                     className="px-3 py-2 bg-black hover:bg-neutral-800 text-white text-sm font-medium rounded-lg transition-colors"
                   >
@@ -1203,6 +1213,7 @@ export default function AdminPage() {
                   {(['all', 'listings', 'conversations', 'users', 'offers'] as ActivityFilter[]).map((filter) => (
                     <button
                       key={filter}
+                      type="button"
                       onClick={() => setActivityFilter(filter)}
                       className={cn(
                         "px-3 py-1 rounded-lg text-sm font-medium transition-colors",
@@ -1255,6 +1266,7 @@ export default function AdminPage() {
                     
                     <div className="flex items-center gap-1">
                       <button
+                        type="button"
                         onClick={() => loadStats(1)}
                         disabled={currentPage === 1}
                         className="px-2 py-1 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -1262,6 +1274,7 @@ export default function AdminPage() {
                         First
                       </button>
                       <button
+                        type="button"
                         onClick={() => loadStats(Math.max(1, currentPage - 1))}
                         disabled={currentPage === 1}
                         className="px-2 py-1 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -1274,6 +1287,7 @@ export default function AdminPage() {
                       </span>
                       
                       <button
+                        type="button"
                         onClick={() => loadStats(Math.min(totalPages, currentPage + 1))}
                         disabled={currentPage === totalPages}
                         className="px-2 py-1 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -1281,6 +1295,7 @@ export default function AdminPage() {
                         Next
                       </button>
                       <button
+                        type="button"
                         onClick={() => loadStats(totalPages)}
                         disabled={currentPage === totalPages}
                         className="px-2 py-1 rounded text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
