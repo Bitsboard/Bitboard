@@ -125,8 +125,8 @@ export default function AdminPage() {
 
   // Check if user is already authenticated on component mount
   useEffect(() => {
-    // Check for admin session instead of localStorage
-    checkAdminAuth();
+    // Don't auto-authenticate - require admin password every time
+    // checkAdminAuth();
   }, []);
 
   const checkAdminAuth = async () => {
