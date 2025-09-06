@@ -17,13 +17,20 @@ export async function POST(request: NextRequest) {
   try {
     // Check admin authentication
     const session = await getSessionFromRequest(request);
+    console.log('🔔 Admin notifications - session:', session);
+    
     if (!session || !session.user) {
+      console.log('🔔 Admin notifications - No session or user');
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Check if user is admin
     const adminEmails = process.env.ADMIN_EMAILS?.split(',') || [];
+    console.log('🔔 Admin notifications - adminEmails:', adminEmails);
+    console.log('🔔 Admin notifications - user email:', session.user.email);
+    
     if (!adminEmails.includes(session.user.email)) {
+      console.log('🔔 Admin notifications - User not in admin emails list');
       return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 });
     }
 
