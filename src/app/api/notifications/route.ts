@@ -3,25 +3,30 @@ export const runtime = 'edge';
 import { NextRequest, NextResponse } from "next/server";
 import { getRequestContext } from "@cloudflare/next-on-pages";
 import { getSessionFromRequest } from "@/lib/auth";
-import type { D1Database } from "@cloudflare/workers-types";
 
 export async function GET(request: NextRequest) {
   try {
-    // Check user authentication
+    // Get user session
     const session = await getSessionFromRequest(request);
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get database connection
     const env = getRequestContext().env;
     const db = env.DB as D1Database;
+    
+    if (!db) {
+      return NextResponse.json({ error: "Database not available" }, { status: 500 });
+    }
 
-    // Get user's notifications with system notification details
-    const notificationsResult = await db.prepare(`
+    // Get user's notifications
+    const notifications = await db.prepare(`
       SELECT 
-        un.id,
+        un.id as user_notification_id,
         un.read_at,
-        un.created_at,
+        un.created_at as received_at,
+        sn.id as notification_id,
         sn.title,
         sn.message,
         sn.icon,
@@ -31,23 +36,12 @@ export async function GET(request: NextRequest) {
       JOIN system_notifications sn ON un.notification_id = sn.id
       WHERE un.user_id = ? AND sn.status = 'active'
       ORDER BY un.created_at DESC
+      LIMIT 50
     `).bind(session.user.id).all();
-
-    const notifications = notificationsResult.results.map((notification: any) => ({
-      id: notification.id,
-      title: notification.title,
-      message: notification.message,
-      timestamp: notification.created_at * 1000, // Convert to milliseconds for frontend
-      read: !!notification.read_at,
-      type: 'system' as const,
-      icon: notification.icon,
-      actionUrl: notification.action_url,
-      targetGroup: notification.target_group
-    }));
 
     return NextResponse.json({
       success: true,
-      notifications
+      notifications: notifications.results || []
     });
 
   } catch (error) {
@@ -61,51 +55,49 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Check user authentication
+    // Get user session
     const session = await getSessionFromRequest(request);
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json() as { notificationId: string; action: 'mark_read' | 'mark_unread' };
-    
-    if (!body.notificationId || !body.action) {
-      return NextResponse.json(
-        { error: "Missing required fields: notificationId, action" },
-        { status: 400 }
-      );
-    }
+    const { action, notificationId } = await request.json() as { 
+      action: 'mark_read' | 'mark_all_read'; 
+      notificationId?: string 
+    };
 
+    // Get database connection
     const env = getRequestContext().env;
     const db = env.DB as D1Database;
+    
+    if (!db) {
+      return NextResponse.json({ error: "Database not available" }, { status: 500 });
+    }
 
-    if (body.action === 'mark_read') {
-      // Mark notification as read
+    if (action === 'mark_read' && notificationId) {
+      // Mark specific notification as read
       await db.prepare(`
         UPDATE user_notifications 
         SET read_at = ? 
-        WHERE id = ? AND user_id = ?
+        WHERE user_id = ? AND notification_id = ?
       `).bind(
         Math.floor(Date.now() / 1000),
-        body.notificationId,
-        session.user.id
+        session.user.id,
+        notificationId
       ).run();
-    } else if (body.action === 'mark_unread') {
-      // Mark notification as unread
+    } else if (action === 'mark_all_read') {
+      // Mark all notifications as read
       await db.prepare(`
         UPDATE user_notifications 
-        SET read_at = NULL 
-        WHERE id = ? AND user_id = ?
+        SET read_at = ? 
+        WHERE user_id = ? AND read_at IS NULL
       `).bind(
-        body.notificationId,
+        Math.floor(Date.now() / 1000),
         session.user.id
       ).run();
     }
 
-    return NextResponse.json({
-      success: true,
-      message: `Notification ${body.action === 'mark_read' ? 'marked as read' : 'marked as unread'}`
-    });
+    return NextResponse.json({ success: true });
 
   } catch (error) {
     console.error('Error updating notification:', error);

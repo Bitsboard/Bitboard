@@ -236,11 +236,11 @@ export default function MessagesPage() {
         
         if (data.success && data.notifications.length > 0) {
           const transformedNotifications: SystemNotification[] = data.notifications.map(notification => ({
-            id: notification.id,
+            id: notification.user_notification_id || notification.notification_id,
             title: notification.title,
             message: notification.message,
-            timestamp: notification.timestamp,
-            read: notification.read,
+            timestamp: notification.received_at * 1000, // Convert from seconds to milliseconds
+            read: !!notification.read_at,
             type: 'system' as const,
             icon: notification.icon
           }));

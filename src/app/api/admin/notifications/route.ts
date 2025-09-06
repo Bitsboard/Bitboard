@@ -101,27 +101,35 @@ export async function POST(request: NextRequest) {
     if (users.length > 0) {
       console.log('🔔 Creating user notifications for', users.length, 'users');
       
-      // Insert user notifications in smaller batches to avoid SQLite parameter limit
-      const batchSize = 10; // Reduced from 50 to 10 to avoid "too many SQL variables" error
-      for (let i = 0; i < users.length; i += batchSize) {
-        const batch = users.slice(i, i + batchSize);
-        console.log(`🔔 Processing batch ${Math.floor(i/batchSize) + 1}, users ${i + 1}-${Math.min(i + batchSize, users.length)}`);
-        
-        // Use individual INSERT statements instead of batch INSERT to avoid parameter limits
-        for (const user of batch) {
-          const userNotificationId = `un_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 6)}`;
-          
-          await db.prepare(`
-            INSERT INTO user_notifications (id, user_id, notification_id, created_at)
-            VALUES (?, ?, ?, ?)
-          `).bind(
-            userNotificationId,
-            user.id,
-            notificationId,
-            createdAt
-          ).run();
-        }
-      }
+      // Use a more efficient approach: create a single query with all user IDs
+      // This avoids the "too many SQL variables" error while being much faster
+      const userIds = users.map(user => user.id);
+      
+      // Insert user notifications using a single query with IN clause
+      const placeholders = userIds.map(() => '?').join(',');
+      const userNotificationIds = userIds.map((_, index) => 
+        `un_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 6)}`
+      );
+      
+      // Create the values for the batch insert
+      const values = userIds.map((_, index) => 
+        `(?, ?, ?, ?)`
+      ).join(', ');
+      
+      const allParams = userIds.flatMap((userId, index) => [
+        userNotificationIds[index],
+        userId,
+        notificationId,
+        createdAt
+      ]);
+      
+      console.log('🔔 Inserting user notifications in single batch...');
+      await db.prepare(`
+        INSERT INTO user_notifications (id, user_id, notification_id, created_at)
+        VALUES ${values}
+      `).bind(...allParams).run();
+      
+      console.log('🔔 User notifications created successfully');
     }
 
     console.log('🔔 System notification process completed successfully');
