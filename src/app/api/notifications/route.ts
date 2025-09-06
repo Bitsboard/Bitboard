@@ -52,7 +52,8 @@ export async function GET(request: NextRequest) {
         sn.message,
         sn.icon,
         sn.action_url,
-        sn.target_group
+        sn.target_group,
+        sn.priority
       FROM user_notifications un
       JOIN system_notifications sn ON un.notification_id = sn.id
       JOIN users u ON un.user_id = u.id

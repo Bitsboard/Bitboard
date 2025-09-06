@@ -62,8 +62,8 @@ export async function POST(request: NextRequest) {
 
     // Insert system notification
     await db.prepare(`
-      INSERT INTO system_notifications (id, title, message, icon, target_group, action_url, created_at, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'active')
+      INSERT INTO system_notifications (id, title, message, icon, target_group, action_url, created_at, status, priority)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?)
     `).bind(
       notificationId,
       body.title,
@@ -71,7 +71,8 @@ export async function POST(request: NextRequest) {
       body.icon,
       body.targetGroup,
       body.actionUrl || null,
-      createdAt
+      createdAt,
+      body.priority || 'normal'
     ).run();
 
     console.log('🔔 System notification created successfully');

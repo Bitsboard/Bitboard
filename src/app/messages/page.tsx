@@ -36,6 +36,7 @@ interface SystemNotification {
   read: boolean;
   type: 'system' | 'welcome' | 'update';
   icon?: 'info' | 'success' | 'warning' | 'error' | 'system';
+  priority?: 'low' | 'normal' | 'high' | 'urgent';
 }
 
 interface Message {
@@ -233,7 +234,8 @@ export default function MessagesPage() {
             timestamp: notification.received_at * 1000, // Convert from seconds to milliseconds
             read: !!notification.read_at,
             type: 'system' as const,
-            icon: notification.icon
+            icon: notification.icon,
+            priority: notification.priority || 'normal'
           }));
           console.log('🔔 Transformed notifications:', transformedNotifications);
           setSystemNotifications(transformedNotifications);
@@ -798,7 +800,23 @@ export default function MessagesPage() {
                           (item.itemType === 'notification' && selectedNotification === item.id)
                             ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white'
                             : item.itemType === 'notification'
-                            ? 'bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20'
+                            ? (() => {
+                                // Get priority from the notification data
+                                const notification = item as SystemNotification;
+                                const priority = notification.priority || 'normal';
+                                switch (priority) {
+                                  case 'urgent':
+                                    return 'bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/40 border-l-4 border-red-500';
+                                  case 'high':
+                                    return 'bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/40 border-l-4 border-orange-500';
+                                  case 'normal':
+                                    return 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/40 border-l-4 border-blue-500';
+                                  case 'low':
+                                    return 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/30 dark:to-gray-800/40 border-l-4 border-gray-500';
+                                  default:
+                                    return 'bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 border-l-4 border-purple-500';
+                                }
+                              })()
                             : 'bg-white/60 dark:bg-neutral-900/60'
                         }`}
                       >
@@ -1301,7 +1319,24 @@ export default function MessagesPage() {
                   {/* System Notification View - Email Style */}
                   <div className="flex-1 flex flex-col">
                     {/* Email Header */}
-                    <div className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700 p-4">
+                    <div className={`border-b border-neutral-200 dark:border-neutral-700 p-4 ${
+                      (() => {
+                        const notification = systemNotifications.find(n => n.id === selectedNotification);
+                        const priority = notification?.priority || 'normal';
+                        switch (priority) {
+                          case 'urgent':
+                            return 'bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/40';
+                          case 'high':
+                            return 'bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/40';
+                          case 'normal':
+                            return 'bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/40';
+                          case 'low':
+                            return 'bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900/30 dark:to-gray-800/40';
+                          default:
+                            return 'bg-white dark:bg-neutral-900';
+                        }
+                      })()
+                    }`}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           {/* Notification Icon */}
@@ -1367,11 +1402,22 @@ export default function MessagesPage() {
                     <div className="flex-1 p-6 bg-neutral-50 dark:bg-neutral-800/50">
                       <div className="max-w-4xl">
                         <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-700 p-6">
-                          <div className="prose prose-neutral dark:prose-invert max-w-none">
-                            <div className="text-neutral-700 dark:text-neutral-300 leading-relaxed whitespace-pre-wrap">
-                              {systemNotifications.find(n => n.id === selectedNotification)?.message}
+                            <div className="prose prose-neutral dark:prose-invert max-w-none">
+                              <div className="text-neutral-700 dark:text-neutral-300 leading-relaxed">
+                                {(() => {
+                                  const message = systemNotifications.find(n => n.id === selectedNotification)?.message || '';
+                                  // Simple Markdown rendering
+                                  let text = message;
+                                  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                                  text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+                                  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">$1</a>');
+                                  text = text.replace(/^> (.*$)/gm, '<blockquote class="border-l-4 border-gray-300 pl-4 italic my-2">$1</blockquote>');
+                                  text = text.replace(/^---$/gm, '<hr class="my-4 border-gray-300">');
+                                  text = text.replace(/\n/g, '<br>');
+                                  return <div dangerouslySetInnerHTML={{ __html: text }} />;
+                                })()}
+                              </div>
                             </div>
-                          </div>
                         </div>
                       </div>
                     </div>

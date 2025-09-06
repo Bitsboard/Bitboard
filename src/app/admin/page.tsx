@@ -834,17 +834,121 @@ export default function AdminPage() {
                     <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-2">
                       Message *
                     </label>
-                    <textarea
-                      value={notificationForm.message}
-                      onChange={(e) => setNotificationForm(prev => ({ ...prev, message: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      placeholder="Enter notification message"
-                      rows={4}
-                      required
-                      maxLength={500}
-                    />
-                    <div className="text-xs text-neutral-500 mt-1 text-right">
-                      {notificationForm.message.length}/500
+                    <div className="space-y-3">
+                      {/* Rich Text Toolbar */}
+                      <div className="flex flex-wrap gap-2 p-2 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const textarea = document.getElementById('message-textarea') as HTMLTextAreaElement;
+                            const start = textarea.selectionStart;
+                            const end = textarea.selectionEnd;
+                            const selectedText = textarea.value.substring(start, end);
+                            const newText = textarea.value.substring(0, start) + `**${selectedText}**` + textarea.value.substring(end);
+                            setNotificationForm(prev => ({ ...prev, message: newText }));
+                            setTimeout(() => {
+                              textarea.focus();
+                              textarea.setSelectionRange(start + 2, end + 2);
+                            }, 0);
+                          }}
+                          className="px-3 py-1 text-xs font-medium bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                          title="Bold"
+                        >
+                          <strong>B</strong>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const textarea = document.getElementById('message-textarea') as HTMLTextAreaElement;
+                            const start = textarea.selectionStart;
+                            const end = textarea.selectionEnd;
+                            const selectedText = textarea.value.substring(start, end);
+                            const newText = textarea.value.substring(0, start) + `*${selectedText}*` + textarea.value.substring(end);
+                            setNotificationForm(prev => ({ ...prev, message: newText }));
+                            setTimeout(() => {
+                              textarea.focus();
+                              textarea.setSelectionRange(start + 1, end + 1);
+                            }, 0);
+                          }}
+                          className="px-3 py-1 text-xs font-medium bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                          title="Italic"
+                        >
+                          <em>I</em>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const textarea = document.getElementById('message-textarea') as HTMLTextAreaElement;
+                            const start = textarea.selectionStart;
+                            const end = textarea.selectionEnd;
+                            const selectedText = textarea.value.substring(start, end);
+                            const newText = textarea.value.substring(0, start) + `[${selectedText}](URL)` + textarea.value.substring(end);
+                            setNotificationForm(prev => ({ ...prev, message: newText }));
+                            setTimeout(() => {
+                              textarea.focus();
+                              textarea.setSelectionRange(start + selectedText.length + 2, start + selectedText.length + 5);
+                            }, 0);
+                          }}
+                          className="px-3 py-1 text-xs font-medium bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                          title="Link"
+                        >
+                          🔗
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const textarea = document.getElementById('message-textarea') as HTMLTextAreaElement;
+                            const start = textarea.selectionStart;
+                            const end = textarea.selectionEnd;
+                            const selectedText = textarea.value.substring(start, end);
+                            const newText = textarea.value.substring(0, start) + `\n\n---\n\n` + textarea.value.substring(end);
+                            setNotificationForm(prev => ({ ...prev, message: newText }));
+                            setTimeout(() => {
+                              textarea.focus();
+                              textarea.setSelectionRange(start + 3, start + 3);
+                            }, 0);
+                          }}
+                          className="px-3 py-1 text-xs font-medium bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                          title="Divider"
+                        >
+                          ➖
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const textarea = document.getElementById('message-textarea') as HTMLTextAreaElement;
+                            const start = textarea.selectionStart;
+                            const end = textarea.selectionEnd;
+                            const selectedText = textarea.value.substring(start, end);
+                            const newText = textarea.value.substring(0, start) + `\n\n> ${selectedText}\n\n` + textarea.value.substring(end);
+                            setNotificationForm(prev => ({ ...prev, message: newText }));
+                            setTimeout(() => {
+                              textarea.focus();
+                              textarea.setSelectionRange(start + 4, start + 4 + selectedText.length);
+                            }, 0);
+                          }}
+                          className="px-3 py-1 text-xs font-medium bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                          title="Quote"
+                        >
+                          💬
+                        </button>
+                      </div>
+                      
+                      <textarea
+                        id="message-textarea"
+                        value={notificationForm.message}
+                        onChange={(e) => setNotificationForm(prev => ({ ...prev, message: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono text-sm"
+                        placeholder="Enter notification message (supports Markdown formatting)"
+                        rows={8}
+                        required
+                      />
+                      <div className="text-xs text-neutral-500 mt-1">
+                        <div className="flex justify-between">
+                          <span>Supports Markdown: **bold**, *italic*, [links](url), > quotes, --- dividers</span>
+                          <span>{notificationForm.message.length} characters</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -1017,9 +1121,18 @@ export default function AdminPage() {
                               </span>
                             </div>
                             
-                            <p className="text-sm text-neutral-600 dark:text-neutral-300 line-clamp-2">
-                              {notificationForm.message || 'Notification message will appear here...'}
-                            </p>
+                            <div className="text-sm text-neutral-600 dark:text-neutral-300 line-clamp-2 prose prose-sm max-w-none">
+                              {notificationForm.message ? (() => {
+                                // Simple Markdown rendering for preview
+                                let text = notificationForm.message;
+                                text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                                text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+                                text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:underline">$1</a>');
+                                text = text.replace(/^> (.*$)/gm, '<blockquote class="border-l-4 border-gray-300 pl-4 italic">$1</blockquote>');
+                                text = text.replace(/^---$/gm, '<hr class="my-2 border-gray-300">');
+                                return <div dangerouslySetInnerHTML={{ __html: text }} />;
+                              })() : 'Notification message will appear here...'}
+                            </div>
                           </div>
                         </div>
                       </div>
