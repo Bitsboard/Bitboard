@@ -14,8 +14,10 @@ interface SystemNotificationRequest {
 }
 
 export async function POST(request: NextRequest) {
+  console.log('🔔 Admin notifications - POST request started');
   try {
     // Check admin authentication
+    console.log('🔔 Admin notifications - Getting session...');
     const session = await getSessionFromRequest(request);
     console.log('🔔 Admin notifications - session:', session);
     
@@ -25,12 +27,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Get environment variables from Cloudflare context (not process.env on Edge)
+    console.log('🔔 Admin notifications - Getting environment context...');
     const env = getRequestContext().env;
+    console.log('🔔 Admin notifications - Environment context:', !!env);
+    console.log('🔔 Admin notifications - ADMIN_EMAILS raw:', env.ADMIN_EMAILS);
+    
     const adminEmails = ((env.ADMIN_EMAILS as string) ?? '')
       .split(',')
       .map((e: string) => e.trim())
       .filter(Boolean);
-    console.log('🔔 Admin notifications - adminEmails:', adminEmails);
+    console.log('🔔 Admin notifications - adminEmails processed:', adminEmails);
     console.log('🔔 Admin notifications - user email:', session.user.email);
     
     if (!adminEmails.includes(session.user.email)) {
@@ -38,7 +44,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 });
     }
 
+    console.log('🔔 Admin notifications - Parsing request body...');
     const body: SystemNotificationRequest = await request.json();
+    console.log('🔔 Admin notifications - Request body:', body);
     
     // Validate required fields
     if (!body.targetGroup || !body.title || !body.message || !body.icon) {
