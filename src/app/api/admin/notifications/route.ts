@@ -97,42 +97,20 @@ export async function POST(request: NextRequest) {
     
     console.log('🔔 Found users:', users.length);
 
-    // Create user notification records in efficient batches
+    // Create user notification records using set-based INSERT...SELECT (much more efficient!)
     if (users.length > 0) {
-      console.log('🔔 Creating user notifications for', users.length, 'users');
+      console.log('🔔 Creating user notifications for', users.length, 'users using set-based approach');
       
-      const BATCH_SIZE = 100; // Process 100 users at a time (400 parameters max)
-      const userIds = users.map(user => user.id);
+      // Use INSERT...SELECT to fan out to all users in one efficient query
+      // This is much faster than batched VALUES and scales to thousands of users
+      await db.prepare(`
+        INSERT OR IGNORE INTO user_notifications (user_id, notification_id, created_at)
+        SELECT id, ?, ?
+        FROM users
+        WHERE 1=1
+      `).bind(notificationId, createdAt).run();
       
-      // Process users in batches
-      for (let i = 0; i < userIds.length; i += BATCH_SIZE) {
-        const batch = userIds.slice(i, i + BATCH_SIZE);
-        console.log(`🔔 Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(userIds.length / BATCH_SIZE)} (${batch.length} users)`);
-        
-        // Create user notification IDs for this batch
-        const userNotificationIds = batch.map((_, index) => 
-          `un_${Date.now()}_${i + index}_${Math.random().toString(36).substr(2, 6)}`
-        );
-        
-        // Create the values for this batch
-        const values = batch.map((_, index) => 
-          `(?, ?, ?, ?)`
-        ).join(', ');
-        
-        const batchParams = batch.flatMap((userId, index) => [
-          userNotificationIds[index],
-          userId,
-          notificationId,
-          createdAt
-        ]);
-        
-        await db.prepare(`
-          INSERT INTO user_notifications (id, user_id, notification_id, created_at)
-          VALUES ${values}
-        `).bind(...batchParams).run();
-      }
-      
-      console.log('🔔 User notifications created successfully');
+      console.log('🔔 User notifications created successfully with set-based approach');
     }
 
     console.log('🔔 System notification process completed successfully');
