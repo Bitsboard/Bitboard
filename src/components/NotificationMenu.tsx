@@ -5,6 +5,7 @@ import { useTheme } from "@/lib/contexts/ThemeContext";
 import { useLang } from "@/lib/i18n-client";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/lib/settings";
 
 interface Notification {
   id: string;
@@ -14,6 +15,7 @@ interface Notification {
   timestamp: number;
   read: boolean;
   actionUrl?: string;
+  icon?: 'info' | 'success' | 'warning' | 'error' | 'system';
 }
 
 interface NotificationMenuProps {
@@ -24,48 +26,55 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const lang = useLang();
+  const { user } = useUser();
 
-  // Mock notifications - in a real app, these would come from an API
-  useEffect(() => {
-    // Try to load notifications from localStorage first
-    try {
-      const savedNotifications = localStorage.getItem('notifications');
-      if (savedNotifications) {
-        const parsed = JSON.parse(savedNotifications);
-        // Clean up old URLs that might point to /notifications
-        const cleanedNotifications = parsed.map((n: Notification) => ({
-          ...n,
-          actionUrl: n.actionUrl === '/notifications' ? '/messages' : n.actionUrl
-        }));
-        setNotifications(cleanedNotifications);
-        setUnreadCount(cleanedNotifications.filter((n: Notification) => !n.read).length);
-        // Save the cleaned version back to localStorage
-        localStorage.setItem('notifications', JSON.stringify(cleanedNotifications));
-        return;
-      }
-    } catch (error) {
-      console.warn('Failed to load notifications from localStorage:', error);
+  // Load notifications from API
+  const loadNotifications = async () => {
+    if (!user?.email) {
+      setNotifications([]);
+      setUnreadCount(0);
+      return;
     }
 
-    // Fallback to welcome notification for fresh accounts
-    const mockNotifications: Notification[] = [
-      {
-        id: 'welcome',
-        type: 'system',
-        title: 'Welcome to bitsbarter!',
-        message: 'Welcome to the Bitcoin trading platform. Check out our safety guidelines to get started.',
-        timestamp: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
-        read: false,
-        actionUrl: '/messages'
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/notifications?userEmail=${encodeURIComponent(user.email)}`);
+      if (response.ok) {
+        const data = await response.json() as { success: boolean; notifications: any[] };
+        if (data.success && data.notifications.length > 0) {
+          const transformedNotifications: Notification[] = data.notifications.map(notification => ({
+            id: notification.user_notification_id || notification.notification_id,
+            type: 'system' as const,
+            title: notification.title,
+            message: notification.message,
+            timestamp: notification.received_at * 1000, // Convert from seconds to milliseconds
+            read: !!notification.read_at,
+            actionUrl: notification.action_url || '/messages',
+            icon: notification.icon
+          }));
+          setNotifications(transformedNotifications);
+        } else {
+          setNotifications([]);
+        }
+      } else {
+        console.error('Failed to load notifications:', response.status);
+        setNotifications([]);
       }
-    ];
-    
-    setNotifications(mockNotifications);
-    setUnreadCount(mockNotifications.filter(n => !n.read).length);
-  }, []);
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+      setNotifications([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadNotifications();
+  }, [user?.email]);
 
   // Update unread count whenever notifications change
   useEffect(() => {
@@ -84,66 +93,132 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const markAsRead = (notificationId: string) => {
+  const markAsRead = async (notificationId: string) => {
+    // Update local state immediately for better UX
     setNotifications(prev => {
       const updated = prev.map(n => 
         n.id === notificationId ? { ...n, read: true } : n
       );
-      // Persist to localStorage
-      try {
-        localStorage.setItem('notifications', JSON.stringify(updated));
-      } catch (error) {
-        console.warn('Failed to save notifications to localStorage:', error);
-      }
       return updated;
     });
-    // Update unread count based on the new state
-    setUnreadCount(prev => {
-      const newCount = Math.max(0, prev - 1);
-      return newCount;
-    });
+
+    // Mark as read on server
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          notificationId: notificationId,
+          action: 'mark_read'
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Failed to mark notification as read');
+        // Revert local state if server call failed
+        setNotifications(prev => {
+          const reverted = prev.map(n => 
+            n.id === notificationId ? { ...n, read: false } : n
+          );
+          return reverted;
+        });
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      // Revert local state if server call failed
+      setNotifications(prev => {
+        const reverted = prev.map(n => 
+          n.id === notificationId ? { ...n, read: false } : n
+        );
+        return reverted;
+      });
+    }
   };
 
-  const markAllAsRead = () => {
+  const markAllAsRead = async () => {
+    // Update local state immediately for better UX
     setNotifications(prev => {
       const updated = prev.map(n => ({ ...n, read: true }));
-      // Persist to localStorage
-      try {
-        localStorage.setItem('notifications', JSON.stringify(updated));
-      } catch (error) {
-        console.warn('Failed to save notifications to localStorage:', error);
-      }
       return updated;
     });
     setUnreadCount(0);
+
+    // Mark all as read on server
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'mark_all_read'
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Failed to mark all notifications as read');
+        // Revert local state if server call failed
+        setNotifications(prev => {
+          const reverted = prev.map(n => ({ ...n, read: false }));
+          return reverted;
+        });
+        setUnreadCount(notifications.filter(n => !n.read).length);
+      }
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      // Revert local state if server call failed
+      setNotifications(prev => {
+        const reverted = prev.map(n => ({ ...n, read: false }));
+        return reverted;
+      });
+      setUnreadCount(notifications.filter(n => !n.read).length);
+    }
   };
 
-  const getNotificationIcon = (type: Notification['type']) => {
-    switch (type) {
-      case 'message':
-        return (
-          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
-            <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-          </div>
-        );
-      case 'update':
-        return (
-          <div className="w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
-            <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        );
-      case 'system':
-        return (
-          <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center">
-            <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        );
+  const getNotificationIcon = (notification: Notification) => {
+    const icon = notification.icon || 'system';
+    const type = notification.type;
+    
+    // Use specific icon if provided, otherwise fall back to type-based icons
+    if (icon === 'info') {
+      return (
+        <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
+          <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+      );
+    } else if (icon === 'success') {
+      return (
+        <div className="w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+          <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+      );
+    } else if (icon === 'warning') {
+      return (
+        <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/20 rounded-full flex items-center justify-center">
+          <svg className="w-4 h-4 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+        </div>
+      );
+    } else if (icon === 'error') {
+      return (
+        <div className="w-8 h-8 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+          <svg className="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+      );
+    } else {
+      // Default system icon
+      return (
+        <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center">
+          <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19h6a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
+      );
     }
   };
 
@@ -225,7 +300,12 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
           </div>
 
           <div className="max-h-96 overflow-y-auto">
-            {notifications.length === 0 ? (
+            {isLoading ? (
+              <div className="p-6 text-center">
+                <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                <p className="text-neutral-500 dark:text-neutral-400">Loading notifications...</p>
+              </div>
+            ) : notifications.length === 0 ? (
               <div className="p-6 text-center">
                 <div className="w-12 h-12 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-3">
                   <svg className="w-6 h-6 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -253,7 +333,7 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
                     }}
                   >
                     <div className="flex items-start gap-3">
-                      {getNotificationIcon(notification.type)}
+                      {getNotificationIcon(notification)}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between">
                           <h4 className={`text-sm font-medium ${
