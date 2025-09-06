@@ -233,16 +233,20 @@ export default function MessagesPage() {
         console.log('🔔 Notifications data:', data);
         
         if (data.success && data.notifications.length > 0) {
-          const transformedNotifications: SystemNotification[] = data.notifications.map(notification => ({
-            id: notification.user_notification_id || notification.notification_id,
-            title: notification.title,
-            message: notification.message,
-            timestamp: notification.received_at * 1000, // Convert from seconds to milliseconds
-            read: !!notification.read_at,
-            type: 'system' as const,
-            icon: notification.icon,
-            priority: notification.priority || 'normal'
-          }));
+          const transformedNotifications: SystemNotification[] = data.notifications.map(notification => {
+            const id = notification.user_notification_id || notification.notification_id;
+            console.log('🔔 Notification mapping - user_notification_id:', notification.user_notification_id, 'notification_id:', notification.notification_id, 'final_id:', id);
+            return {
+              id,
+              title: notification.title,
+              message: notification.message,
+              timestamp: notification.received_at * 1000, // Convert from seconds to milliseconds
+              read: !!notification.read_at,
+              type: 'system' as const,
+              icon: notification.icon,
+              priority: notification.priority || 'normal'
+            };
+          });
           console.log('🔔 Transformed notifications:', transformedNotifications);
           console.log('🔔 Setting system notifications to:', transformedNotifications);
           setSystemNotifications(transformedNotifications);
@@ -597,10 +601,12 @@ export default function MessagesPage() {
         setSystemNotifications(prev => {
           console.log('🔔 Previous notifications in setState:', prev);
           const filtered = prev.filter(n => {
-            console.log('🔔 Checking notification:', n.id, 'against:', notificationId, 'match:', n.id !== notificationId);
-            return n.id !== notificationId;
+            const shouldKeep = n.id !== notificationId;
+            console.log('🔔 Checking notification:', n.id, 'against:', notificationId, 'shouldKeep:', shouldKeep);
+            return shouldKeep;
           });
           console.log('🔔 Updated notifications after delete:', filtered);
+          console.log('🔔 Count before:', prev.length, 'Count after:', filtered.length);
           return filtered;
         });
         
