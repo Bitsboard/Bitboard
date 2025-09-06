@@ -95,8 +95,7 @@ export default function AdminPage() {
     icon: 'info' as 'info' | 'success' | 'warning' | 'error' | 'system',
     actionUrl: '',
     priority: 'normal' as 'low' | 'normal' | 'high' | 'urgent',
-    expiresAt: '',
-    template: 'custom' as 'custom' | 'maintenance' | 'feature' | 'security' | 'welcome'
+    expiresAt: ''
   });
   const [sendingNotification, setSendingNotification] = useState(false);
   const [notificationSuccess, setNotificationSuccess] = useState<string | null>(null);
@@ -246,8 +245,7 @@ export default function AdminPage() {
       icon: 'info',
       actionUrl: '',
       priority: 'normal',
-      expiresAt: '',
-      template: 'custom'
+      expiresAt: ''
     });
     setNotificationError(null);
     setNotificationSuccess(null);
@@ -255,44 +253,6 @@ export default function AdminPage() {
   };
 
   // Template presets
-  const templates = {
-    maintenance: {
-      title: 'Scheduled Maintenance',
-      message: 'We will be performing scheduled maintenance on our systems. During this time, some features may be temporarily unavailable. We apologize for any inconvenience.',
-      icon: 'warning' as const,
-      priority: 'high' as const
-    },
-    feature: {
-      title: 'New Feature Available',
-      message: 'We\'ve added a new feature to improve your experience! Check it out and let us know what you think.',
-      icon: 'success' as const,
-      priority: 'normal' as const
-    },
-    security: {
-      title: 'Security Update',
-      message: 'We\'ve implemented important security updates to keep your account safe. Please ensure you\'re using the latest version of the app.',
-      icon: 'error' as const,
-      priority: 'urgent' as const
-    },
-    welcome: {
-      title: 'Welcome to bitsbarter!',
-      message: 'Welcome to the Bitcoin trading platform. Check out our safety guidelines to get started.',
-      icon: 'info' as const,
-      priority: 'normal' as const
-    }
-  };
-
-  const applyTemplate = (templateKey: keyof typeof templates) => {
-    const template = templates[templateKey];
-    setNotificationForm(prev => ({
-      ...prev,
-      title: template.title,
-      message: template.message,
-      icon: template.icon,
-      priority: template.priority,
-      template: templateKey
-    }));
-  };
 
 
 
@@ -752,31 +712,6 @@ export default function AdminPage() {
                 </div>
 
                 <form onSubmit={sendSystemNotification} className="p-6 space-y-6">
-                  {/* Template Selection */}
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-2">
-                      Template
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {Object.entries(templates).map(([key, template]) => (
-                        <button
-                          key={key}
-                          type="button"
-                          onClick={() => applyTemplate(key as keyof typeof templates)}
-                          className={`p-3 rounded-lg border-2 transition-colors text-left ${
-                            notificationForm.template === key
-                              ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
-                              : 'border-neutral-300 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-600'
-                          }`}
-                        >
-                          <div className="font-medium text-sm capitalize">{key}</div>
-                          <div className="text-xs text-neutral-600 dark:text-neutral-400 mt-1">
-                            {template.title}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
 
                   {/* Target Group */}
                   <div>
@@ -834,9 +769,11 @@ export default function AdminPage() {
                     <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-2">
                       Message *
                     </label>
-                    <div className="space-y-3">
-                      {/* Rich Text Toolbar */}
-                      <div className="flex flex-wrap gap-2 p-2 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
+                    
+                    {/* Rich Text Editor */}
+                    <div className="border border-neutral-300 dark:border-neutral-700 rounded-lg overflow-hidden">
+                      {/* Enhanced Toolbar */}
+                      <div className="flex items-center gap-1 p-3 bg-neutral-50 dark:bg-neutral-800 border-b border-neutral-300 dark:border-neutral-700">
                         <button
                           type="button"
                           onClick={() => {
@@ -844,14 +781,14 @@ export default function AdminPage() {
                             const start = textarea.selectionStart;
                             const end = textarea.selectionEnd;
                             const selectedText = textarea.value.substring(start, end);
-                            const newText = textarea.value.substring(0, start) + `**${selectedText}**` + textarea.value.substring(end);
+                            const newText = textarea.value.substring(0, start) + `**${selectedText || 'bold text'}**` + textarea.value.substring(end);
                             setNotificationForm(prev => ({ ...prev, message: newText }));
                             setTimeout(() => {
                               textarea.focus();
-                              textarea.setSelectionRange(start + 2, end + 2);
+                              textarea.setSelectionRange(start + 2, start + 2 + (selectedText || 'bold text').length);
                             }, 0);
                           }}
-                          className="px-3 py-1 text-xs font-medium bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                          className="px-3 py-2 text-sm font-bold bg-white dark:bg-neutral-700 rounded hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors border border-neutral-200 dark:border-neutral-600"
                           title="Bold"
                         >
                           <strong>B</strong>
@@ -863,14 +800,14 @@ export default function AdminPage() {
                             const start = textarea.selectionStart;
                             const end = textarea.selectionEnd;
                             const selectedText = textarea.value.substring(start, end);
-                            const newText = textarea.value.substring(0, start) + `*${selectedText}*` + textarea.value.substring(end);
+                            const newText = textarea.value.substring(0, start) + `*${selectedText || 'italic text'}*` + textarea.value.substring(end);
                             setNotificationForm(prev => ({ ...prev, message: newText }));
                             setTimeout(() => {
                               textarea.focus();
-                              textarea.setSelectionRange(start + 1, end + 1);
+                              textarea.setSelectionRange(start + 1, start + 1 + (selectedText || 'italic text').length);
                             }, 0);
                           }}
-                          className="px-3 py-1 text-xs font-medium bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                          className="px-3 py-2 text-sm italic bg-white dark:bg-neutral-700 rounded hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors border border-neutral-200 dark:border-neutral-600"
                           title="Italic"
                         >
                           <em>I</em>
@@ -882,18 +819,23 @@ export default function AdminPage() {
                             const start = textarea.selectionStart;
                             const end = textarea.selectionEnd;
                             const selectedText = textarea.value.substring(start, end);
-                            const newText = textarea.value.substring(0, start) + `[${selectedText}](URL)` + textarea.value.substring(end);
-                            setNotificationForm(prev => ({ ...prev, message: newText }));
-                            setTimeout(() => {
-                              textarea.focus();
-                              textarea.setSelectionRange(start + selectedText.length + 2, start + selectedText.length + 5);
-                            }, 0);
+                            const linkText = selectedText || 'link text';
+                            const url = prompt('Enter URL:', 'https://');
+                            if (url && url !== 'https://') {
+                              const newText = textarea.value.substring(0, start) + `[${linkText}](${url})` + textarea.value.substring(end);
+                              setNotificationForm(prev => ({ ...prev, message: newText }));
+                              setTimeout(() => {
+                                textarea.focus();
+                                textarea.setSelectionRange(start + 1, start + 1 + linkText.length);
+                              }, 0);
+                            }
                           }}
-                          className="px-3 py-1 text-xs font-medium bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                          className="px-3 py-2 text-sm bg-white dark:bg-neutral-700 rounded hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors border border-neutral-200 dark:border-neutral-600"
                           title="Link"
                         >
                           🔗
                         </button>
+                        <div className="w-px h-6 bg-neutral-300 dark:bg-neutral-600 mx-2"></div>
                         <button
                           type="button"
                           onClick={() => {
@@ -901,17 +843,17 @@ export default function AdminPage() {
                             const start = textarea.selectionStart;
                             const end = textarea.selectionEnd;
                             const selectedText = textarea.value.substring(start, end);
-                            const newText = textarea.value.substring(0, start) + `\n\n---\n\n` + textarea.value.substring(end);
+                            const newText = textarea.value.substring(0, start) + `# ${selectedText || 'heading'}` + textarea.value.substring(end);
                             setNotificationForm(prev => ({ ...prev, message: newText }));
                             setTimeout(() => {
                               textarea.focus();
-                              textarea.setSelectionRange(start + 3, start + 3);
+                              textarea.setSelectionRange(start + 2, start + 2 + (selectedText || 'heading').length);
                             }, 0);
                           }}
-                          className="px-3 py-1 text-xs font-medium bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
-                          title="Divider"
+                          className="px-3 py-2 text-sm bg-white dark:bg-neutral-700 rounded hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors border border-neutral-200 dark:border-neutral-600"
+                          title="Heading"
                         >
-                          ➖
+                          H
                         </button>
                         <button
                           type="button"
@@ -920,33 +862,72 @@ export default function AdminPage() {
                             const start = textarea.selectionStart;
                             const end = textarea.selectionEnd;
                             const selectedText = textarea.value.substring(start, end);
-                            const newText = textarea.value.substring(0, start) + `\n\n> ${selectedText}\n\n` + textarea.value.substring(end);
+                            const newText = textarea.value.substring(0, start) + `> ${selectedText || 'quote text'}` + textarea.value.substring(end);
                             setNotificationForm(prev => ({ ...prev, message: newText }));
                             setTimeout(() => {
                               textarea.focus();
-                              textarea.setSelectionRange(start + 4, start + 4 + selectedText.length);
+                              textarea.setSelectionRange(start + 2, start + 2 + (selectedText || 'quote text').length);
                             }, 0);
                           }}
-                          className="px-3 py-1 text-xs font-medium bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+                          className="px-3 py-2 text-sm bg-white dark:bg-neutral-700 rounded hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors border border-neutral-200 dark:border-neutral-600"
                           title="Quote"
                         >
-                          💬
+                          "
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const textarea = document.getElementById('message-textarea') as HTMLTextAreaElement;
+                            const start = textarea.selectionStart;
+                            const end = textarea.selectionEnd;
+                            const selectedText = textarea.value.substring(start, end);
+                            const newText = textarea.value.substring(0, start) + `\`${selectedText || 'code'}\`` + textarea.value.substring(end);
+                            setNotificationForm(prev => ({ ...prev, message: newText }));
+                            setTimeout(() => {
+                              textarea.focus();
+                              textarea.setSelectionRange(start + 1, start + 1 + (selectedText || 'code').length);
+                            }, 0);
+                          }}
+                          className="px-3 py-2 text-sm bg-white dark:bg-neutral-700 rounded hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors border border-neutral-200 dark:border-neutral-600"
+                          title="Code"
+                        >
+                          &lt;/&gt;
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const textarea = document.getElementById('message-textarea') as HTMLTextAreaElement;
+                            const start = textarea.selectionStart;
+                            const newText = textarea.value.substring(0, start) + '\n---\n' + textarea.value.substring(start);
+                            setNotificationForm(prev => ({ ...prev, message: newText }));
+                            setTimeout(() => {
+                              textarea.focus();
+                              textarea.setSelectionRange(start + 2, start + 2);
+                            }, 0);
+                          }}
+                          className="px-3 py-2 text-sm bg-white dark:bg-neutral-700 rounded hover:bg-neutral-100 dark:hover:bg-neutral-600 transition-colors border border-neutral-200 dark:border-neutral-600"
+                          title="Divider"
+                        >
+                          —
                         </button>
                       </div>
                       
+                      {/* Editor */}
                       <textarea
                         id="message-textarea"
                         value={notificationForm.message}
                         onChange={(e) => setNotificationForm(prev => ({ ...prev, message: e.target.value }))}
-                        className="w-full px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono text-sm"
-                        placeholder="Enter notification message (supports Markdown formatting)"
+                        className="w-full p-4 bg-white dark:bg-neutral-900 focus:outline-none resize-none text-sm leading-relaxed font-sans"
+                        placeholder="Enter your notification message... Use the toolbar above for formatting"
                         rows={8}
                         required
                       />
-                      <div className="text-xs text-neutral-500 mt-1">
-                        <div className="flex justify-between">
-                          <span>Supports Markdown: **bold**, *italic*, [links](url), &gt; quotes, --- dividers</span>
-                          <span>{notificationForm.message.length} characters</span>
+                      
+                      {/* Character count and help */}
+                      <div className="px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border-t border-neutral-300 dark:border-neutral-700">
+                        <div className="flex justify-between items-center text-xs text-neutral-500 dark:text-neutral-400">
+                          <span>Supports Markdown formatting • Real-time preview available</span>
+                          <span className="font-medium">{notificationForm.message.length} characters</span>
                         </div>
                       </div>
                     </div>
@@ -1121,17 +1102,41 @@ export default function AdminPage() {
                               </span>
                             </div>
                             
-                            <div className="text-sm text-neutral-600 dark:text-neutral-300 line-clamp-2 prose prose-sm max-w-none">
+                            <div className="text-sm text-neutral-600 dark:text-neutral-300 prose prose-sm max-w-none">
                               {notificationForm.message ? (() => {
-                                // Simple Markdown rendering for preview
+                                // Enhanced Markdown rendering for preview
                                 let text = notificationForm.message;
-                                text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                                text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
-                                text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:underline">$1</a>');
-                                text = text.replace(/^> (.*$)/gm, '<blockquote class="border-l-4 border-gray-300 pl-4 italic">$1</blockquote>');
-                                text = text.replace(/^---$/gm, '<hr class="my-2 border-gray-300">');
+                                
+                                // Headers
+                                text = text.replace(/^# (.*$)/gm, '<h1 class="text-lg font-bold text-neutral-900 dark:text-white mb-2">$1</h1>');
+                                text = text.replace(/^## (.*$)/gm, '<h2 class="text-base font-bold text-neutral-900 dark:text-white mb-1">$1</h2>');
+                                text = text.replace(/^### (.*$)/gm, '<h3 class="text-sm font-bold text-neutral-900 dark:text-white mb-1">$1</h3>');
+                                
+                                // Bold and italic
+                                text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-neutral-900 dark:text-white">$1</strong>');
+                                text = text.replace(/\*(.*?)\*/g, '<em class="italic">$1</em>');
+                                
+                                // Links
+                                text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" target="_blank" rel="noopener noreferrer">$1</a>');
+                                
+                                // Code
+                                text = text.replace(/`([^`]+)`/g, '<code class="bg-neutral-100 dark:bg-neutral-800 px-1 py-0.5 rounded text-xs font-mono">$1</code>');
+                                
+                                // Quotes
+                                text = text.replace(/^> (.*$)/gm, '<blockquote class="border-l-4 border-blue-300 dark:border-blue-600 pl-4 italic my-2 text-neutral-700 dark:text-neutral-300">$1</blockquote>');
+                                
+                                // Dividers
+                                text = text.replace(/^---$/gm, '<hr class="my-3 border-neutral-300 dark:border-neutral-600">');
+                                
+                                // Line breaks
+                                text = text.replace(/\n/g, '<br>');
+                                
                                 return <div dangerouslySetInnerHTML={{ __html: text }} />;
-                              })() : 'Notification message will appear here...'}
+                              })() : (
+                                <div className="text-neutral-400 dark:text-neutral-500 italic">
+                                  Notification message will appear here...
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
