@@ -219,7 +219,9 @@ export default function MessagesPage() {
 
     console.log('🔔 Loading notifications for user:', user.email);
     try {
-      const response = await fetch(`/api/notifications?userEmail=${encodeURIComponent(user.email)}`);
+      const url = `/api/notifications?userEmail=${encodeURIComponent(user.email)}`;
+      console.log('🔔 Making request to:', url);
+      const response = await fetch(url);
       console.log('🔔 Notifications API response:', response.status, response.statusText);
       
       if (response.ok) {
