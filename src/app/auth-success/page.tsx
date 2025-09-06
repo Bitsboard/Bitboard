@@ -4,19 +4,17 @@ import { useEffect } from 'react';
 
 export default function AuthSuccessPage() {
   useEffect(() => {
-    // This page is opened after successful Google OAuth
-    // Check if we're in a popup or redirect flow
+    // This page is opened in a popup after successful Google OAuth
+    // We need to close the popup and communicate success to the parent
     
+    // Send message to parent window
     if (window.opener) {
-      // Popup flow: send message to parent and close
       window.opener.postMessage({ type: 'GOOGLE_AUTH_SUCCESS' }, '*');
+      // Close the popup
       window.close();
     } else {
-      // Redirect flow: redirect to home page
-      // Add a small delay to ensure session is set
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 1000);
+      // Fallback: redirect to home if not opened as popup
+      window.location.href = '/';
     }
   }, []);
 
