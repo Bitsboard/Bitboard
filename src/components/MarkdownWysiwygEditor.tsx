@@ -1,19 +1,16 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import {
-  LexicalComposer,
-  RichTextPlugin,
-  ContentEditable,
-  HistoryPlugin,
-} from "@lexical/react/LexicalComposer";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { CheckListPlugin } from "@lexical/react/LexicalCheckListPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
-import { CodeHighlightPlugin } from "@lexical/react/LexicalCodeHighlightPlugin";
 import { $convertFromMarkdownString, $convertToMarkdownString } from "@lexical/markdown";
 import { mergeRegister } from "@lexical/utils";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
@@ -121,13 +118,13 @@ export default function MarkdownWysiwygEditor({
                 />
               }
               placeholder={<Placeholder text={placeholder} />}
+              ErrorBoundary={({ children }) => <div>{children}</div>}
             />
             <HistoryPlugin />
             <AutoFocusPlugin />
             <ListPlugin />
             <CheckListPlugin />
             <LinkPlugin />
-            <CodeHighlightPlugin />
             <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
             <EmitMarkdownOnChange onChange={onChange} />
           </div>
