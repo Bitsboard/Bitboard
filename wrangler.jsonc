@@ -29,8 +29,6 @@
     "vars": {
         "NODE_ENV": "staging",
         "DEBUG": "false",
-        "VERBOSE_LOGGING": "false",
-        "ADMIN_EMAILS": "georged1997@gmail.com",
-        "ADMIN_PASSWORD": "admin123"
+        "VERBOSE_LOGGING": "false"
     }
 }
