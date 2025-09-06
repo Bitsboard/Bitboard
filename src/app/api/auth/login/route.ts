@@ -23,7 +23,7 @@ export async function GET(req: Request) {
   const isPopup = url.searchParams.get('popup') === 'true';
 
   const clientId = process.env.GOOGLE_CLIENT_ID || '';
-  const callbackUrl = new URL('/api/auth/callback', url.origin).toString();
+  const callbackUrl = new URL('/api/debug/oauth', url.origin).toString();
   const state = randomUrlSafeString(16);
   const codeVerifier = randomUrlSafeString(64);
   const codeChallenge = await sha256Base64Url(codeVerifier);
