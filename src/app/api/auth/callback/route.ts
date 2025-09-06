@@ -5,6 +5,38 @@ import { getRequestContext } from '@cloudflare/next-on-pages';
 import { applyAPISecurity, secureResponse, logAPIUsage } from '@/lib/middleware/apiSecurity';
 import { SecurityMonitor } from '@/lib/security/securityMonitor';
 
+// Function to send welcome notification to new users
+async function sendWelcomeNotification(db: D1Database, userId: string, createdAt: number) {
+  // Create welcome system notification
+  const notificationId = `welcome_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  await db.prepare(`
+    INSERT INTO system_notifications (id, title, message, icon, target_group, action_url, created_at, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, 'active')
+  `).bind(
+    notificationId,
+    'Welcome to bitsbarter!',
+    'Welcome to the Bitcoin trading platform. Check out our safety guidelines to get started.',
+    'info',
+    'all',
+    '/safety',
+    createdAt
+  ).run();
+
+  // Create user notification record
+  const userNotificationId = `un_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+  
+  await db.prepare(`
+    INSERT INTO user_notifications (id, user_id, notification_id, created_at)
+    VALUES (?, ?, ?, ?)
+  `).bind(
+    userNotificationId,
+    userId,
+    notificationId,
+    createdAt
+  ).run();
+}
+
 export async function GET(req: Request): Promise<Response> {
   const startTime = Date.now();
   const endpoint = '/api/auth/callback';
@@ -177,6 +209,15 @@ export async function GET(req: Request): Promise<Response> {
           INSERT INTO users (id, email, username, sso, verified, created_at, image, has_chosen_username, thumbs_up, deals, last_active, is_admin, banned)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).bind(userId, user.email, null, 'google', 0, currentTime, user.picture ?? null, 0, 0, 0, currentTime, 0, 0).run();
+        
+        // Send welcome notification to new user
+        try {
+          await sendWelcomeNotification(db, userId, currentTime);
+          console.log('🔔 Welcome notification sent to new user:', user.email);
+        } catch (welcomeError) {
+          console.error('Failed to send welcome notification:', welcomeError);
+          // Don't fail the signup if welcome notification fails
+        }
           
       } else {
         
