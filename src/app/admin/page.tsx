@@ -101,7 +101,6 @@ export default function AdminPage() {
   const [notificationSuccess, setNotificationSuccess] = useState<string | null>(null);
   const [notificationError, setNotificationError] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [showFormattedEditor, setShowFormattedEditor] = useState(false);
   
   const router = useRouter();
   const lang = useLang();
@@ -922,89 +921,79 @@ export default function AdminPage() {
                         </button>
                       </div>
                       
-                      {/* Editor Toggle */}
-                      <div className="flex items-center gap-2 mb-2">
-                        <button
-                          type="button"
-                          onClick={() => setShowFormattedEditor(false)}
-                          className={`px-3 py-1 text-xs rounded ${
-                            !showFormattedEditor 
-                              ? 'bg-blue-500 text-white' 
-                              : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300'
-                          }`}
-                        >
-                          Raw
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setShowFormattedEditor(true)}
-                          className={`px-3 py-1 text-xs rounded ${
-                            showFormattedEditor 
-                              ? 'bg-blue-500 text-white' 
-                              : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300'
-                          }`}
-                        >
-                          Formatted
-                        </button>
-                      </div>
-
-                      {/* Editor */}
-                      {!showFormattedEditor ? (
-                        <textarea
-                          id="message-textarea"
-                          value={notificationForm.message}
-                          onChange={(e) => setNotificationForm(prev => ({ ...prev, message: e.target.value }))}
-                          className="w-full p-4 bg-white dark:bg-neutral-900 focus:outline-none resize-none text-sm leading-relaxed font-sans text-neutral-900 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-400 border border-neutral-200 dark:border-neutral-700 rounded-lg"
-                          placeholder="Enter your notification message... Use the toolbar above for formatting"
-                          rows={8}
-                          required
-                        />
-                      ) : (
-                        <div 
-                          className="w-full p-4 bg-white dark:bg-neutral-900 text-sm leading-relaxed font-sans text-neutral-900 dark:text-white border border-neutral-200 dark:border-neutral-700 rounded-lg min-h-[200px]"
-                          style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
-                        >
-                          {(() => {
-                            if (!notificationForm.message) {
-                              return <span className="text-neutral-400 dark:text-neutral-500">Enter your notification message... Use the toolbar above for formatting</span>;
-                            }
-                            
-                            // Enhanced Markdown rendering for formatted view
-                            let text = notificationForm.message;
-                            
-                            // Headers
-                            text = text.replace(/^# (.*$)/gm, '<h1 class="text-lg font-bold text-neutral-900 dark:text-white mb-2 mt-3">$1</h1>');
-                            text = text.replace(/^## (.*$)/gm, '<h2 class="text-base font-bold text-neutral-900 dark:text-white mb-2 mt-2">$1</h2>');
-                            text = text.replace(/^### (.*$)/gm, '<h3 class="text-sm font-bold text-neutral-900 dark:text-white mb-1 mt-2">$1</h3>');
-                            
-                            // Bold and italic
-                            text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-neutral-900 dark:text-white">$1</strong>');
-                            text = text.replace(/\*(.*?)\*/g, '<em class="italic text-neutral-900 dark:text-white">$1</em>');
-                            
-                            // Links
-                            text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" target="_blank" rel="noopener noreferrer">$1</a>');
-                            
-                            // Code
-                            text = text.replace(/`([^`]+)`/g, '<code class="bg-neutral-100 dark:bg-neutral-800 px-1 py-0.5 rounded text-xs font-mono text-neutral-800 dark:text-neutral-200">$1</code>');
-                            
-                            // Quotes
-                            text = text.replace(/^> (.*$)/gm, '<blockquote class="border-l-4 border-blue-300 dark:border-blue-600 pl-4 italic my-2 text-neutral-700 dark:text-neutral-300">$1</blockquote>');
-                            
-                            // Dividers
-                            text = text.replace(/^---$/gm, '<hr class="my-3 border-neutral-300 dark:border-neutral-600">');
-                            
-                            // Line breaks
-                            text = text.replace(/\n/g, '<br>');
-                            
-                            return <div dangerouslySetInnerHTML={{ __html: text }} />;
-                          })()}
+                      {/* Rich Text Editor with Live Preview */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        {/* Raw Markdown Editor */}
+                        <div>
+                          <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-2">
+                            Raw Markdown
+                          </label>
+                          <textarea
+                            id="message-textarea"
+                            value={notificationForm.message}
+                            onChange={(e) => setNotificationForm(prev => ({ ...prev, message: e.target.value }))}
+                            className="w-full p-4 bg-white dark:bg-neutral-900 focus:outline-none resize-none text-sm leading-relaxed font-sans text-neutral-900 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-400 border border-neutral-200 dark:border-neutral-700 rounded-lg"
+                            placeholder="Enter your notification message... Use the toolbar above for formatting"
+                            rows={8}
+                            required
+                          />
                         </div>
-                      )}
+                        
+                        {/* Live Preview */}
+                        <div>
+                          <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-2">
+                            Live Preview
+                          </label>
+                          <div 
+                            className="w-full p-4 bg-white dark:bg-neutral-900 text-sm leading-relaxed font-sans text-neutral-900 dark:text-white border border-neutral-200 dark:border-neutral-700 rounded-lg min-h-[200px]"
+                            style={{ 
+                              minHeight: '200px',
+                              whiteSpace: 'pre-wrap',
+                              wordWrap: 'break-word'
+                            }}
+                          >
+                            {(() => {
+                              if (!notificationForm.message) {
+                                return <span className="text-neutral-400 dark:text-neutral-500">Live preview will appear here as you type...</span>;
+                              }
+                              
+                              // Enhanced Markdown rendering for live preview
+                              let text = notificationForm.message;
+                              
+                              // Headers
+                              text = text.replace(/^# (.*$)/gm, '<h1 class="text-lg font-bold text-neutral-900 dark:text-white mb-2 mt-3">$1</h1>');
+                              text = text.replace(/^## (.*$)/gm, '<h2 class="text-base font-bold text-neutral-900 dark:text-white mb-2 mt-2">$1</h2>');
+                              text = text.replace(/^### (.*$)/gm, '<h3 class="text-sm font-bold text-neutral-900 dark:text-white mb-1 mt-2">$1</h3>');
+                              
+                              // Bold and italic
+                              text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-neutral-900 dark:text-white">$1</strong>');
+                              text = text.replace(/\*(.*?)\*/g, '<em class="italic text-neutral-900 dark:text-white">$1</em>');
+                              
+                              // Links
+                              text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" target="_blank" rel="noopener noreferrer">$1</a>');
+                              
+                              // Code
+                              text = text.replace(/`([^`]+)`/g, '<code class="bg-neutral-100 dark:bg-neutral-800 px-1 py-0.5 rounded text-xs font-mono text-neutral-800 dark:text-neutral-200">$1</code>');
+                              
+                              // Quotes
+                              text = text.replace(/^> (.*$)/gm, '<blockquote class="border-l-4 border-blue-300 dark:border-blue-600 pl-4 italic my-2 text-neutral-700 dark:text-neutral-300">$1</blockquote>');
+                              
+                              // Dividers
+                              text = text.replace(/^---$/gm, '<hr class="my-3 border-neutral-300 dark:border-neutral-600">');
+                              
+                              // Line breaks
+                              text = text.replace(/\n/g, '<br>');
+                              
+                              return <div dangerouslySetInnerHTML={{ __html: text }} />;
+                            })()}
+                          </div>
+                        </div>
+                      </div>
                       
                       {/* Character count and help */}
                       <div className="px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border-t border-neutral-300 dark:border-neutral-700">
                         <div className="flex justify-between items-center text-xs text-neutral-500 dark:text-neutral-400">
-                          <span>Supports Markdown formatting • Toggle between Raw and Formatted view</span>
+                          <span>Supports Markdown formatting • Live preview updates as you type</span>
                           <span className="font-medium">{notificationForm.message.length} characters</span>
                         </div>
                       </div>
