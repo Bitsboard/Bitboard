@@ -945,7 +945,7 @@ export default function AdminPage() {
                       />
                       <div className="text-xs text-neutral-500 mt-1">
                         <div className="flex justify-between">
-                          <span>Supports Markdown: **bold**, *italic*, [links](url), > quotes, --- dividers</span>
+                          <span>Supports Markdown: **bold**, *italic*, [links](url), &gt; quotes, --- dividers</span>
                           <span>{notificationForm.message.length} characters</span>
                         </div>
                       </div>
