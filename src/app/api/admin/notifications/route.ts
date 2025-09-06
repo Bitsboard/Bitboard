@@ -97,37 +97,40 @@ export async function POST(request: NextRequest) {
     
     console.log('🔔 Found users:', users.length);
 
-    // Create user notification records
+    // Create user notification records in batches to avoid SQLite parameter limit
     if (users.length > 0) {
       console.log('🔔 Creating user notifications for', users.length, 'users');
       
-      // Use a more efficient approach: create a single query with all user IDs
-      // This avoids the "too many SQL variables" error while being much faster
+      const BATCH_SIZE = 50; // Process 50 users at a time to stay under SQLite limits
       const userIds = users.map(user => user.id);
       
-      // Insert user notifications using a single query with IN clause
-      const placeholders = userIds.map(() => '?').join(',');
-      const userNotificationIds = userIds.map((_, index) => 
-        `un_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 6)}`
-      );
-      
-      // Create the values for the batch insert
-      const values = userIds.map((_, index) => 
-        `(?, ?, ?, ?)`
-      ).join(', ');
-      
-      const allParams = userIds.flatMap((userId, index) => [
-        userNotificationIds[index],
-        userId,
-        notificationId,
-        createdAt
-      ]);
-      
-      console.log('🔔 Inserting user notifications in single batch...');
-      await db.prepare(`
-        INSERT INTO user_notifications (id, user_id, notification_id, created_at)
-        VALUES ${values}
-      `).bind(...allParams).run();
+      // Process users in batches
+      for (let i = 0; i < userIds.length; i += BATCH_SIZE) {
+        const batch = userIds.slice(i, i + BATCH_SIZE);
+        console.log(`🔔 Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(userIds.length / BATCH_SIZE)} (${batch.length} users)`);
+        
+        // Create user notification IDs for this batch
+        const userNotificationIds = batch.map((_, index) => 
+          `un_${Date.now()}_${i + index}_${Math.random().toString(36).substr(2, 6)}`
+        );
+        
+        // Create the values for this batch
+        const values = batch.map((_, index) => 
+          `(?, ?, ?, ?)`
+        ).join(', ');
+        
+        const batchParams = batch.flatMap((userId, index) => [
+          userNotificationIds[index],
+          userId,
+          notificationId,
+          createdAt
+        ]);
+        
+        await db.prepare(`
+          INSERT INTO user_notifications (id, user_id, notification_id, created_at)
+          VALUES ${values}
+        `).bind(...batchParams).run();
+      }
       
       console.log('🔔 User notifications created successfully');
     }
