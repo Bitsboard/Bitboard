@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
 
     const userId = userResult.id;
 
-    // Get user's notifications
+    // Get user's notifications - only show notifications sent after user account was created
     const notifications = await db.prepare(`
       SELECT 
         un.id as user_notification_id,
@@ -55,7 +55,8 @@ export async function GET(request: NextRequest) {
         sn.target_group
       FROM user_notifications un
       JOIN system_notifications sn ON un.notification_id = sn.id
-      WHERE un.user_id = ? AND sn.status = 'active'
+      JOIN users u ON un.user_id = u.id
+      WHERE un.user_id = ? AND sn.status = 'active' AND sn.created_at >= u.created_at
       ORDER BY un.created_at DESC
       LIMIT 50
     `).bind(userId).all();
