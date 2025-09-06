@@ -193,8 +193,19 @@ export async function isAdmin(email: string | undefined | null): Promise<boolean
   if (!email) return false;
 
   try {
-    // Get admin emails from environment variables
-    const adminEmailsEnv = process.env.ADMIN_EMAILS || '';
+    // Get admin emails from environment variables - try Cloudflare context first
+    let adminEmailsEnv = '';
+    
+    try {
+      // Try to get from Cloudflare context first (Edge runtime)
+      const { getRequestContext } = require('@cloudflare/next-on-pages');
+      const env = getRequestContext().env;
+      adminEmailsEnv = env.ADMIN_EMAILS || '';
+    } catch {
+      // Fallback to process.env for Node runtime
+      adminEmailsEnv = process.env.ADMIN_EMAILS || '';
+    }
+    
     const adminEmails = adminEmailsEnv.split(',').map(email => email.trim()).filter(Boolean);
     
     if (adminEmails.includes(email)) return true;

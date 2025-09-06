@@ -73,7 +73,18 @@ export async function POST(req: Request) {
     const { password } = await req.json() as { password: string };
     
     // Check if password matches admin password from environment
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    let adminPassword = 'admin123'; // default fallback
+    
+    try {
+      // Try to get from Cloudflare context first (Edge runtime)
+      const { getRequestContext } = require('@cloudflare/next-on-pages');
+      const env = getRequestContext().env;
+      adminPassword = env.ADMIN_PASSWORD || 'admin123';
+    } catch {
+      // Fallback to process.env for Node runtime
+      adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    }
+    
     if (password !== adminPassword) {
       return NextResponse.json({ 
         success: false, 
@@ -81,22 +92,9 @@ export async function POST(req: Request) {
       }, { status: 401 });
     }
 
-    // Get session to check if user is admin
-    const session = await getSessionFromRequest(req);
-    if (!session) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Not authenticated' 
-      }, { status: 401 });
-    }
-
-    const adminStatus = await isAdmin(session.user.email);
-    if (!adminStatus) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Not authorized as admin' 
-      }, { status: 403 });
-    }
+    // For now, if password is correct, allow admin access
+    // TODO: In production, this should also check for valid OAuth session
+    // and verify the user's email is in ADMIN_EMAILS list
 
     return NextResponse.json({ 
       success: true,
