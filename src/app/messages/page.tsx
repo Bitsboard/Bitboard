@@ -215,10 +215,10 @@ export default function MessagesPage() {
   const loadSystemNotifications = async () => {
     console.log('🔔 loadSystemNotifications called, user:', user);
     
-    // If no user, don't load notifications
+    // If no user, don't load notifications - PRESERVE EXISTING DATA
     if (!user?.email) {
-      console.log('🔔 No user email, not loading notifications');
-      setSystemNotifications([]);
+      console.log('🔔 No user email, not loading notifications - PRESERVING EXISTING DATA');
+      // Don't clear existing data when user is null - this prevents data loss
       return;
     }
 
@@ -247,18 +247,20 @@ export default function MessagesPage() {
           console.log('🔔 Transformed notifications:', transformedNotifications);
           setSystemNotifications(transformedNotifications);
         } else {
-          console.log('🔔 No notifications from API');
-          setSystemNotifications([]);
+          console.log('🔔 No notifications from API - PRESERVING EXISTING DATA');
+          // Don't clear existing data when API returns no notifications
         }
       } else {
         console.error('🔔 Error loading system notifications:', response.status, response.statusText);
         const errorText = await response.text();
         console.error('🔔 Error response body:', errorText);
-        setSystemNotifications([]);
+        console.log('🔔 PRESERVING EXISTING DATA due to API error');
+        // Don't clear existing data on API error - preserve what we have
       }
     } catch (error) {
       console.error('🔔 Error loading system notifications:', error);
-      setSystemNotifications([]);
+      console.log('🔔 PRESERVING EXISTING DATA due to error');
+      // Don't clear existing data on error - preserve what we have
     }
   };
 
