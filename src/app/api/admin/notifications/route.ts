@@ -101,23 +101,26 @@ export async function POST(request: NextRequest) {
     if (users.length > 0) {
       console.log('🔔 Creating user notifications for', users.length, 'users');
       
-      // Insert user notifications in batches
-      const batchSize = 50;
+      // Insert user notifications in smaller batches to avoid SQLite parameter limit
+      const batchSize = 10; // Reduced from 50 to 10 to avoid "too many SQL variables" error
       for (let i = 0; i < users.length; i += batchSize) {
         const batch = users.slice(i, i + batchSize);
+        console.log(`🔔 Processing batch ${Math.floor(i/batchSize) + 1}, users ${i + 1}-${Math.min(i + batchSize, users.length)}`);
         
-        const values = batch.map(() => `(?, ?, ?, ?)`).join(', ');
-        const batchParams = batch.flatMap((user, index) => [
-          `un_${Date.now()}_${i + index}_${Math.random().toString(36).substr(2, 6)}`,
-          user.id,
-          notificationId,
-          createdAt
-        ]);
-
-        await db.prepare(`
-          INSERT INTO user_notifications (id, user_id, notification_id, created_at)
-          VALUES ${values}
-        `).bind(...batchParams).run();
+        // Use individual INSERT statements instead of batch INSERT to avoid parameter limits
+        for (const user of batch) {
+          const userNotificationId = `un_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 6)}`;
+          
+          await db.prepare(`
+            INSERT INTO user_notifications (id, user_id, notification_id, created_at)
+            VALUES (?, ?, ?, ?)
+          `).bind(
+            userNotificationId,
+            user.id,
+            notificationId,
+            createdAt
+          ).run();
+        }
       }
     }
 
