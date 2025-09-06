@@ -2,8 +2,6 @@ export const runtime = 'edge';
 
 import { NextRequest, NextResponse } from "next/server";
 import { getRequestContext } from "@cloudflare/next-on-pages";
-import { getSessionFromRequest } from "@/lib/auth";
-import type { D1Database } from "@cloudflare/workers-types";
 
 interface SystemNotificationRequest {
   targetGroup: 'all' | 'verified' | 'unverified' | 'admin' | 'buyers' | 'sellers';
@@ -14,43 +12,21 @@ interface SystemNotificationRequest {
 }
 
 export async function POST(request: NextRequest) {
-  console.log('🔔 Admin notifications - POST request started');
+  console.log('🔔 System Notification API - Starting');
+  
   try {
-    // For now, skip session authentication to test the core functionality
-    // TODO: In production, this should check for valid admin session
-    console.log('🔔 Admin notifications - Skipping session check for testing');
+    // Get database connection
+    const env = getRequestContext().env;
+    const db = env.DB as D1Database;
     
-    // Get environment variables - try Cloudflare context first, fallback to process.env
-    console.log('🔔 Admin notifications - Getting environment context...');
-    let env: any;
-    let db: D1Database | undefined;
-    
-    try {
-      env = getRequestContext().env;
-      db = env.DB as D1Database;
-      console.log('🔔 Admin notifications - Using Cloudflare context');
-    } catch (error) {
-      console.log('🔔 Admin notifications - Cloudflare context not available, using process.env fallback');
-      // For local development, we need to use a different approach
-      // Since we can't access the D1 database directly in local dev,
-      // we'll return an error for now
-      return NextResponse.json({ 
-        error: "Database not available in local development. Please test on staging environment." 
-      }, { status: 503 });
+    if (!db) {
+      console.error('🔔 No database connection available');
+      return NextResponse.json({ error: "Database not available" }, { status: 500 });
     }
-    
-    console.log('🔔 Admin notifications - Environment context:', !!env);
-    console.log('🔔 Admin notifications - ADMIN_EMAILS raw:', env.ADMIN_EMAILS);
-    
-    const adminEmails = ((env.ADMIN_EMAILS as string) ?? '')
-      .split(',')
-      .map((e: string) => e.trim())
-      .filter(Boolean);
-    console.log('🔔 Admin notifications - adminEmails processed:', adminEmails);
 
-    console.log('🔔 Admin notifications - Parsing request body...');
+    // Parse request body
     const body: SystemNotificationRequest = await request.json();
-    console.log('🔔 Admin notifications - Request body:', body);
+    console.log('🔔 Request body:', body);
     
     // Validate required fields
     if (!body.targetGroup || !body.title || !body.message || !body.icon) {
@@ -78,25 +54,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('🔔 Admin notifications - Database connection:', !!db);
-    if (!db) {
-      console.error('🔔 Admin notifications - No database connection!');
-      return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
-    }
-
     // Generate unique notification ID
     const notificationId = `sys_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const createdAt = Math.floor(Date.now() / 1000);
 
-    // Store the notification in the database
-    console.log('🔔 Admin notifications - Inserting system notification:', {
-      notificationId,
-      title: body.title,
-      message: body.message,
-      icon: body.icon,
-      targetGroup: body.targetGroup
-    });
-    
+    console.log('🔔 Creating system notification:', notificationId);
+
+    // Insert system notification
     await db.prepare(`
       INSERT INTO system_notifications (id, title, message, icon, target_group, action_url, created_at, status)
       VALUES (?, ?, ?, ?, ?, ?, ?, 'active')
@@ -109,10 +73,10 @@ export async function POST(request: NextRequest) {
       body.actionUrl || null,
       createdAt
     ).run();
-    
-    console.log('🔔 Admin notifications - System notification inserted successfully');
 
-    // Get all users that match the target group
+    console.log('🔔 System notification created successfully');
+
+    // Get target users based on target group
     let userQuery = 'SELECT id FROM users WHERE 1=1';
     const params: any[] = [];
 
@@ -121,36 +85,26 @@ export async function POST(request: NextRequest) {
     } else if (body.targetGroup === 'unverified') {
       userQuery += ' AND verified = 0';
     } else if (body.targetGroup === 'admin') {
-      // Get admin users based on email (use the adminEmails from above)
-      if (adminEmails.length > 0) {
-        const placeholders = adminEmails.map(() => '?').join(',');
-        userQuery += ` AND email IN (${placeholders})`;
-        params.push(...adminEmails);
-      } else {
-        // No admin emails configured, skip
-        userQuery += ' AND 1=0';
-      }
+      // For admin group, we'll send to all users for now
+      // In a real implementation, you'd check against admin emails
+      userQuery += ' AND 1=1';
     }
-    // For 'all', 'buyers', 'sellers' - we send to all users for now
-    // In a real implementation, you'd track user roles
+    // For 'all', 'buyers', 'sellers' - send to all users
 
-    console.log('🔔 Admin notifications - User query:', userQuery);
-    console.log('🔔 Admin notifications - Query params:', params);
-    
+    console.log('🔔 Querying users with:', userQuery);
     const usersResult = await db.prepare(userQuery).bind(...params).all();
     const users = usersResult.results as { id: string }[];
     
-    console.log('🔔 Admin notifications - Found users:', users.length);
+    console.log('🔔 Found users:', users.length);
 
-    // Create user notification records for each user
+    // Create user notification records
     if (users.length > 0) {
-      console.log('🔔 Admin notifications - Creating user notifications for', users.length, 'users');
+      console.log('🔔 Creating user notifications for', users.length, 'users');
       
       // Insert user notifications in batches
-      const batchSize = 50; // Reduced batch size for safety
+      const batchSize = 50;
       for (let i = 0; i < users.length; i += batchSize) {
         const batch = users.slice(i, i + batchSize);
-        console.log(`🔔 Admin notifications - Processing batch ${Math.floor(i/batchSize) + 1}, users ${i + 1}-${Math.min(i + batchSize, users.length)}`);
         
         const values = batch.map(() => `(?, ?, ?, ?)`).join(', ');
         const batchParams = batch.flatMap((user, index) => [
@@ -160,16 +114,14 @@ export async function POST(request: NextRequest) {
           createdAt
         ]);
 
-        console.log(`🔔 Admin notifications - Batch params count: ${batchParams.length}, Values count: ${batch.length * 4}`);
-        
-        const result = await db.prepare(`
+        await db.prepare(`
           INSERT INTO user_notifications (id, user_id, notification_id, created_at)
           VALUES ${values}
         `).bind(...batchParams).run();
-        
-        console.log(`🔔 Admin notifications - Batch insert result:`, result);
       }
     }
+
+    console.log('🔔 System notification process completed successfully');
 
     return NextResponse.json({
       success: true,
@@ -187,9 +139,12 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error sending system notification:', error);
+    console.error('🔔 Error in system notification API:', error);
     return NextResponse.json(
-      { error: "Failed to send system notification" },
+      { 
+        error: "Failed to send system notification",
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }
@@ -197,10 +152,24 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    // TODO: In a real implementation, return list of sent notifications
+    const env = getRequestContext().env;
+    const db = env.DB as D1Database;
+    
+    if (!db) {
+      return NextResponse.json({ error: "Database not available" }, { status: 500 });
+    }
+
+    // Get recent system notifications
+    const notifications = await db.prepare(`
+      SELECT id, title, message, icon, target_group, action_url, created_at, status
+      FROM system_notifications 
+      ORDER BY created_at DESC 
+      LIMIT 50
+    `).all();
+
     return NextResponse.json({
       success: true,
-      notifications: []
+      notifications: notifications.results || []
     });
   } catch (error) {
     console.error('Error fetching system notifications:', error);

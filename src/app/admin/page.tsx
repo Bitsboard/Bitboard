@@ -150,18 +150,19 @@ export default function AdminPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/admin/check', {
+      const response = await fetch('/api/admin/simple-auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password })
       });
 
       if (response.ok) {
-        const data = await response.json() as { success: boolean; error?: string };
+        const data = await response.json() as { success: boolean; error?: string; token?: string };
         if (data.success) {
           setIsAuthenticated(true);
           setPassword("");
-          // No localStorage - rely on session
+          // Store the simple token for this session
+          sessionStorage.setItem('adminToken', data.token || '');
           loadStats();
         } else {
           setError(data.error || 'Invalid password');
@@ -178,7 +179,8 @@ export default function AdminPage() {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/admin/logout', { method: 'POST' });
+      // Clear the simple token
+      sessionStorage.removeItem('adminToken');
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
@@ -194,16 +196,19 @@ export default function AdminPage() {
     setNotificationSuccess(null);
 
     try {
+      console.log('🔔 Sending system notification:', notificationForm);
+      
       const response = await fetch('/api/admin/notifications', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
         body: JSON.stringify(notificationForm),
       });
 
+      console.log('🔔 Response status:', response.status);
       const data = await response.json() as { success: boolean; message?: string; error?: string };
+      console.log('🔔 Response data:', data);
 
       if (response.ok && data.success) {
         setNotificationSuccess(data.message || 'Notification sent successfully');
