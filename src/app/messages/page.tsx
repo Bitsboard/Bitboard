@@ -207,14 +207,21 @@ export default function MessagesPage() {
   };
 
   const loadSystemNotifications = async () => {
+    console.log('🔔 loadSystemNotifications called, user:', user);
     if (!user?.email) {
+      console.log('🔔 No user email, skipping notification load');
       return;
     }
 
+    console.log('🔔 Loading notifications for user:', user.email);
     try {
       const response = await fetch('/api/notifications');
+      console.log('🔔 Notifications API response:', response.status, response.statusText);
+      
       if (response.ok) {
         const data = await response.json() as { success: boolean; notifications: any[] };
+        console.log('🔔 Notifications data:', data);
+        
         if (data.success) {
           const transformedNotifications: SystemNotification[] = data.notifications.map(notification => ({
             id: notification.id,
@@ -225,13 +232,18 @@ export default function MessagesPage() {
             type: 'system' as const,
             icon: notification.icon
           }));
+          console.log('🔔 Transformed notifications:', transformedNotifications);
           setSystemNotifications(transformedNotifications);
+        } else {
+          console.log('🔔 API returned success: false');
         }
       } else {
-        console.error('Error loading system notifications:', response.status, response.statusText);
+        console.error('🔔 Error loading system notifications:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('🔔 Error response body:', errorText);
       }
     } catch (error) {
-      console.error('Error loading system notifications:', error);
+      console.error('🔔 Error loading system notifications:', error);
     }
   };
 
@@ -618,9 +630,13 @@ export default function MessagesPage() {
   };
 
   useEffect(() => {
+    console.log('🔔 Messages page useEffect, user:', user);
     if (user?.email) {
+      console.log('🔔 User has email, loading chats and notifications');
       loadChats();
       loadSystemNotifications();
+    } else {
+      console.log('🔔 No user email, not loading data');
     }
   }, [user?.email]);
 
