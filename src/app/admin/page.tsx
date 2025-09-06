@@ -940,6 +940,49 @@ export default function AdminPage() {
                         </div>
                       </div>
                     </div>
+                    
+                    {/* Live Preview */}
+                    {notificationForm.message && (
+                      <div className="mt-4 border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 bg-neutral-50 dark:bg-neutral-800/50">
+                        <h4 className="text-sm font-medium text-neutral-900 dark:text-white mb-3">Live Preview</h4>
+                        <div className="bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4">
+                          <div className="prose prose-sm max-w-none">
+                            <div className="text-neutral-700 dark:text-neutral-300 leading-relaxed">
+                              {(() => {
+                                // Enhanced Markdown rendering for live preview
+                                let text = notificationForm.message;
+                                
+                                // Headers
+                                text = text.replace(/^# (.*$)/gm, '<h1 class="text-lg font-bold text-neutral-900 dark:text-white mb-2 mt-3">$1</h1>');
+                                text = text.replace(/^## (.*$)/gm, '<h2 class="text-base font-bold text-neutral-900 dark:text-white mb-2 mt-2">$1</h2>');
+                                text = text.replace(/^### (.*$)/gm, '<h3 class="text-sm font-bold text-neutral-900 dark:text-white mb-1 mt-2">$1</h3>');
+                                
+                                // Bold and italic
+                                text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-neutral-900 dark:text-white">$1</strong>');
+                                text = text.replace(/\*(.*?)\*/g, '<em class="italic">$1</em>');
+                                
+                                // Links
+                                text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" target="_blank" rel="noopener noreferrer">$1</a>');
+                                
+                                // Code
+                                text = text.replace(/`([^`]+)`/g, '<code class="bg-neutral-100 dark:bg-neutral-800 px-1 py-0.5 rounded text-xs font-mono text-neutral-800 dark:text-neutral-200">$1</code>');
+                                
+                                // Quotes
+                                text = text.replace(/^> (.*$)/gm, '<blockquote class="border-l-4 border-blue-300 dark:border-blue-600 pl-4 italic my-2 text-neutral-700 dark:text-neutral-300">$1</blockquote>');
+                                
+                                // Dividers
+                                text = text.replace(/^---$/gm, '<hr class="my-3 border-neutral-300 dark:border-neutral-600">');
+                                
+                                // Line breaks
+                                text = text.replace(/\n/g, '<br>');
+                                
+                                return <div dangerouslySetInnerHTML={{ __html: text }} />;
+                              })()}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Icon */}
@@ -1087,14 +1130,6 @@ export default function AdminPage() {
                                 {notificationForm.title || 'Notification Title'}
                               </h3>
                               <div className="flex items-center gap-2">
-                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                                  notificationForm.priority === 'urgent' ? 'bg-red-500 text-white' :
-                                  notificationForm.priority === 'high' ? 'bg-orange-500 text-white' :
-                                  notificationForm.priority === 'normal' ? 'bg-blue-500 text-white' :
-                                  'bg-gray-500 text-white'
-                                }`}>
-                                  {notificationForm.priority.toUpperCase()}
-                                </span>
                                 <span className="text-xs text-neutral-500 dark:text-neutral-400">
                                   Now
                                 </span>

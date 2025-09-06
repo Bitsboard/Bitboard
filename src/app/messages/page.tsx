@@ -1039,7 +1039,16 @@ export default function MessagesPage() {
                               <p className={`text-xs truncate mb-1 ${
                                 selectedChat === item.id ? 'text-white/80' : 'text-neutral-600 dark:text-neutral-300'
                               }`}>
-                                {item.last_message}
+                                {(() => {
+                                  // Simple Markdown rendering for conversation preview
+                                  let text = item.last_message || '';
+                                  text = text.replace(/\*\*(.*?)\*\*/g, '$1'); // Remove bold markers
+                                  text = text.replace(/\*(.*?)\*/g, '$1'); // Remove italic markers
+                                  text = text.replace(/`([^`]+)`/g, '$1'); // Remove code markers
+                                  text = text.replace(/^#+\s*/gm, ''); // Remove heading markers
+                                  text = text.replace(/^>\s*/gm, ''); // Remove quote markers
+                                  return text;
+                                })()}
                               </p>
                               
                               {/* Bottom Row: Unread Count */}
@@ -1514,14 +1523,33 @@ export default function MessagesPage() {
                               <div className="text-neutral-700 dark:text-neutral-300 leading-relaxed">
                                 {(() => {
                                   const message = systemNotifications.find(n => n.id === selectedNotification)?.message || '';
-                                  // Simple Markdown rendering
+                                  // Enhanced Markdown rendering
                                   let text = message;
-                                  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                                  text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
-                                  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">$1</a>');
-                                  text = text.replace(/^> (.*$)/gm, '<blockquote class="border-l-4 border-gray-300 pl-4 italic my-2">$1</blockquote>');
-                                  text = text.replace(/^---$/gm, '<hr class="my-4 border-gray-300">');
+                                  
+                                  // Headers
+                                  text = text.replace(/^# (.*$)/gm, '<h1 class="text-xl font-bold text-neutral-900 dark:text-white mb-3 mt-4">$1</h1>');
+                                  text = text.replace(/^## (.*$)/gm, '<h2 class="text-lg font-bold text-neutral-900 dark:text-white mb-2 mt-3">$1</h2>');
+                                  text = text.replace(/^### (.*$)/gm, '<h3 class="text-base font-bold text-neutral-900 dark:text-white mb-2 mt-2">$1</h3>');
+                                  
+                                  // Bold and italic
+                                  text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-neutral-900 dark:text-white">$1</strong>');
+                                  text = text.replace(/\*(.*?)\*/g, '<em class="italic">$1</em>');
+                                  
+                                  // Links
+                                  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" target="_blank" rel="noopener noreferrer">$1</a>');
+                                  
+                                  // Code
+                                  text = text.replace(/`([^`]+)`/g, '<code class="bg-neutral-100 dark:bg-neutral-800 px-1 py-0.5 rounded text-xs font-mono text-neutral-800 dark:text-neutral-200">$1</code>');
+                                  
+                                  // Quotes
+                                  text = text.replace(/^> (.*$)/gm, '<blockquote class="border-l-4 border-blue-300 dark:border-blue-600 pl-4 italic my-3 text-neutral-700 dark:text-neutral-300">$1</blockquote>');
+                                  
+                                  // Dividers
+                                  text = text.replace(/^---$/gm, '<hr class="my-4 border-neutral-300 dark:border-neutral-600">');
+                                  
+                                  // Line breaks
                                   text = text.replace(/\n/g, '<br>');
+                                  
                                   return <div dangerouslySetInnerHTML={{ __html: text }} />;
                                 })()}
                               </div>
