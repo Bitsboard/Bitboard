@@ -39,10 +39,17 @@ export async function getSessionFromRequestEdge(req: NextRequest): Promise<Sessi
     const secret = env.NEXTAUTH_SECRET;
     const token = req.cookies.get('session')?.value ?? '';
 
-    if (!token) return null;
+    console.log('🔔 getSessionFromRequestEdge - token exists:', !!token);
+    console.log('🔔 getSessionFromRequestEdge - secret exists:', !!secret);
+
+    if (!token) {
+      console.log('🔔 getSessionFromRequestEdge - No token found');
+      return null;
+    }
 
     // Use the same verification method as the original auth.ts
     const payload = await verifyJwtHS256(token, secret);
+    console.log('🔔 getSessionFromRequestEdge - payload:', payload ? 'valid' : 'invalid');
     if (!payload) return null;
     
     return {

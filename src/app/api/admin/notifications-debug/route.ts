@@ -26,11 +26,17 @@ export async function POST(request: NextRequest) {
     // C. Session (using edge-safe code)
     let session;
     try {
+      console.log('🔔 Debug - Getting session...');
       session = await getSessionFromRequestEdge(request);
+      console.log('🔔 Debug - Session result:', session ? 'found' : 'null');
     } catch (e) {
+      console.log('🔔 Debug - Session error:', e);
       return NextResponse.json({ stage: 'C', error: 'session failed', detail: String(e) }, { status: 500 });
     }
-    if (!session?.user?.email) return NextResponse.json({ stage: 'C', error: 'no session' }, { status: 401 });
+    if (!session?.user?.email) {
+      console.log('🔔 Debug - No session or email');
+      return NextResponse.json({ stage: 'C', error: 'no session', session: !!session, user: !!session?.user, email: session?.user?.email }, { status: 401 });
+    }
 
     // D. Admin emails
     const adminEmails = String(env.ADMIN_EMAILS ?? '')
