@@ -10,6 +10,7 @@ import OfferModal from '@/components/OfferModal';
 import OfferMessage from '@/components/OfferMessage';
 import { generateProfilePicture, getInitials, formatPostAge, formatCADAmount, cn } from "@/lib/utils";
 import { useBtcRate } from '@/lib/hooks/useBtcRate';
+import MarkdownWysiwygEditor from '@/components/MarkdownWysiwygEditor';
 
 interface Chat {
   id: string;
@@ -1347,7 +1348,25 @@ export default function MessagesPage() {
                                       : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100'
                                   }`}
                                 >
-                                  <p className="text-sm">{item.content}</p>
+                                  <div 
+                                    className="text-sm prose prose-sm dark:prose-invert max-w-none"
+                                    dangerouslySetInnerHTML={{
+                                      __html: (() => {
+                                        let text = item.content || '';
+                                        // Enhanced Markdown rendering for messages
+                                        text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                                        text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+                                        text = text.replace(/`([^`]+)`/g, '<code class="bg-black/20 dark:bg-white/20 px-1 py-0.5 rounded text-xs font-mono">$1</code>');
+                                        text = text.replace(/^# (.*$)/gm, '<div class="font-bold text-base">$1</div>');
+                                        text = text.replace(/^## (.*$)/gm, '<div class="font-semibold text-sm">$1</div>');
+                                        text = text.replace(/^### (.*$)/gm, '<div class="font-medium text-sm">$1</div>');
+                                        text = text.replace(/^> (.*$)/gm, '<div class="border-l-2 border-current/30 pl-2 italic">$1</div>');
+                                        text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="underline hover:no-underline" target="_blank" rel="noopener noreferrer">$1</a>');
+                                        text = text.replace(/\n/g, '<br>');
+                                        return text;
+                                      })()
+                                    }}
+                                  />
                                 </div>
                               </div>
                             )}
@@ -1370,14 +1389,15 @@ export default function MessagesPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
                       </button>
-                      <input
-                        type="text"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        placeholder="Type your message..."
-                        className="flex-1 px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-xl bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
+                      <div className="flex-1">
+                        <MarkdownWysiwygEditor
+                          value={newMessage}
+                          onChange={setNewMessage}
+                          placeholder="Type your message..."
+                          className="min-h-[60px]"
+                          minHeight={60}
+                        />
+                      </div>
                       <button
                         onClick={sendMessage}
                         disabled={!newMessage.trim() || isSending}
