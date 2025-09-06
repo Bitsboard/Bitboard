@@ -64,12 +64,26 @@ export async function POST(request: NextRequest) {
 
     const env = getRequestContext().env;
     const db = env.DB as D1Database;
+    
+    console.log('🔔 Admin notifications - Database connection:', !!db);
+    if (!db) {
+      console.error('🔔 Admin notifications - No database connection!');
+      return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
+    }
 
     // Generate unique notification ID
     const notificationId = `sys_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const createdAt = Math.floor(Date.now() / 1000);
 
     // Store the notification in the database
+    console.log('🔔 Admin notifications - Inserting system notification:', {
+      notificationId,
+      title: body.title,
+      message: body.message,
+      icon: body.icon,
+      targetGroup: body.targetGroup
+    });
+    
     await db.prepare(`
       INSERT INTO system_notifications (id, title, message, icon, target_group, action_url, created_at, status)
       VALUES (?, ?, ?, ?, ?, ?, ?, 'active')
@@ -82,6 +96,8 @@ export async function POST(request: NextRequest) {
       body.actionUrl || null,
       createdAt
     ).run();
+    
+    console.log('🔔 Admin notifications - System notification inserted successfully');
 
     // Get all users that match the target group
     let userQuery = 'SELECT id FROM users WHERE 1=1';
