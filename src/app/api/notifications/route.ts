@@ -97,17 +97,28 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'mark_read' && notificationId) {
-      // Mark specific notification as read
+      // Mark specific notification as read using user_notification_id
       await db.prepare(`
         UPDATE user_notifications 
         SET read_at = ? 
-        WHERE user_id = ? AND notification_id = ?
+        WHERE id = ?
       `).bind(
         Math.floor(Date.now() / 1000),
-        session.user.id,
         notificationId
       ).run();
     } else if (action === 'mark_all_read') {
+      // Get user ID from email first
+      const userResult = await db
+        .prepare("SELECT id FROM users WHERE email = ?")
+        .bind(session.user.email)
+        .first();
+
+      if (!userResult) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
+
+      const userId = userResult.id;
+
       // Mark all notifications as read
       await db.prepare(`
         UPDATE user_notifications 
@@ -115,7 +126,7 @@ export async function POST(request: NextRequest) {
         WHERE user_id = ? AND read_at IS NULL
       `).bind(
         Math.floor(Date.now() / 1000),
-        session.user.id
+        userId
       ).run();
     }
 
