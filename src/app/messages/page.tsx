@@ -73,6 +73,9 @@ export default function MessagesPage() {
   const [messagesCache, setMessagesCache] = useState<Record<string, Message[]>>({});
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   
+  // Debounce click handlers to prevent rapid API calls
+  const [clickTimeout, setClickTimeout] = useState<NodeJS.Timeout | null>(null);
+  
   // Delete conversation modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [conversationToDelete, setConversationToDelete] = useState<Chat | null>(null);
@@ -480,6 +483,23 @@ export default function MessagesPage() {
     }
   };
 
+  // Debounced click handler to prevent rapid API calls
+  const handleItemClick = (item: any) => {
+    if (clickTimeout) {
+      clearTimeout(clickTimeout);
+    }
+    
+    const timeout = setTimeout(() => {
+      if (item.itemType === 'chat') {
+        loadMessages(item.id);
+      } else {
+        selectNotification(item as SystemNotification);
+      }
+    }, 100); // 100ms debounce
+    
+    setClickTimeout(timeout);
+  };
+
   const selectNotification = async (notification: SystemNotification) => {
     setSelectedNotification(notification.id);
     setSelectedChat(null);
@@ -719,14 +739,14 @@ export default function MessagesPage() {
     return () => clearInterval(interval);
   }, [selectedChat]);
 
-  // Periodic refresh of conversation list and notifications (every 15 seconds for better real-time updates)
+  // Periodic refresh of conversation list and notifications (every 60 seconds to reduce load)
   useEffect(() => {
     if (!user?.email) return;
     
     const interval = setInterval(() => {
       loadChats(false); // Don't show loading spinner for periodic refresh
       loadSystemNotifications(); // Refresh notifications too
-    }, 15000); // 15 seconds - more frequent than message refresh
+    }, 60000); // 60 seconds - reduced frequency to prevent performance issues
     
     return () => clearInterval(interval);
   }, [user?.email]);
@@ -744,6 +764,15 @@ export default function MessagesPage() {
       window.removeEventListener('notificationStateChanged', handleStateChange as EventListener);
     };
   }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (clickTimeout) {
+        clearTimeout(clickTimeout);
+      }
+    };
+  }, [clickTimeout]);
 
   // Filter chats and notifications based on unread status
   // Memoize filtered and combined items to prevent unnecessary re-renders
@@ -766,6 +795,34 @@ export default function MessagesPage() {
   // Calculate counts for filter buttons
   const totalCount = chats.length + systemNotifications.length;
   const unreadCount = chats.filter(c => c.unread_count > 0).length + systemNotifications.filter(n => !n.read).length;
+
+  // Memoize className calculation for better performance
+  const getItemClassName = React.useCallback((item: any) => {
+    const isSelected = (item.itemType === 'chat' && selectedChat === item.id) ||
+                      (item.itemType === 'notification' && selectedNotification === item.id);
+    
+    if (isSelected) {
+      return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 bg-gradient-to-r from-orange-500 to-amber-500 text-white';
+    }
+    
+    if (item.itemType === 'notification') {
+      const priority = item.priority || 'normal';
+      switch (priority) {
+        case 'urgent':
+          return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 bg-gradient-to-br from-red-100 to-red-200 dark:from-red-800/50 dark:to-red-700/60 border-l-4 border-red-500';
+        case 'high':
+          return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-800/50 dark:to-orange-700/60 border-l-4 border-orange-500';
+        case 'normal':
+          return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/50 dark:to-blue-700/60 border-l-4 border-blue-500';
+        case 'low':
+          return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800/50 dark:to-gray-700/60 border-l-4 border-gray-500';
+        default:
+          return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-800/50 dark:to-violet-700/60 border-l-4 border-purple-500';
+      }
+    }
+    
+    return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 bg-white/60 dark:bg-neutral-900/60';
+  }, [selectedChat, selectedNotification]);
 
   return (
     <div className="h-[calc(100vh-4rem)] bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-950 dark:to-neutral-900">
@@ -842,37 +899,8 @@ export default function MessagesPage() {
                     {combinedItems.map((item) => (
                       <div
                         key={`${item.itemType}-${item.id}`}
-                        onClick={() => {
-                          if (item.itemType === 'chat') {
-                            loadMessages(item.id);
-                          } else {
-                            selectNotification(item as SystemNotification);
-                          }
-                        }}
-                        className={`p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 ${
-                          (item.itemType === 'chat' && selectedChat === item.id) ||
-                          (item.itemType === 'notification' && selectedNotification === item.id)
-                            ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white'
-                            : item.itemType === 'notification'
-                            ? (() => {
-                                // Get priority from the notification data
-                                const notification = item as SystemNotification;
-                                const priority = notification.priority || 'normal';
-                                switch (priority) {
-                                  case 'urgent':
-                                    return 'bg-gradient-to-br from-red-100 to-red-200 dark:from-red-800/50 dark:to-red-700/60 border-l-4 border-red-500';
-                                  case 'high':
-                                    return 'bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-800/50 dark:to-orange-700/60 border-l-4 border-orange-500';
-                                  case 'normal':
-                                    return 'bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/50 dark:to-blue-700/60 border-l-4 border-blue-500';
-                                  case 'low':
-                                    return 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800/50 dark:to-gray-700/60 border-l-4 border-gray-500';
-                                  default:
-                                    return 'bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-800/50 dark:to-violet-700/60 border-l-4 border-purple-500';
-                                }
-                              })()
-                            : 'bg-white/60 dark:bg-neutral-900/60'
-                        }`}
+                        onClick={() => handleItemClick(item)}
+                        className={getItemClassName(item)}
                       >
                         {item.itemType === 'notification' ? (
                           /* System Notification Layout - Email Style */
