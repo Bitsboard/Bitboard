@@ -8,6 +8,8 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getSessionFromRequest(request);
     const adminEmails = process.env.ADMIN_EMAILS?.split(',') || [];
+    console.log('🔔 Debug auth - ADMIN_EMAILS env var:', process.env.ADMIN_EMAILS);
+    console.log('🔔 Debug auth - adminEmails array:', adminEmails);
     const cookieHeader = request.headers.get('cookie') || '';
     
     // Parse cookies manually
