@@ -263,17 +263,24 @@ export default function MessagesPage() {
   };
 
   const loadMessages = async (chatId: string) => {
+    console.log('🔔 loadMessages called with chatId:', chatId);
+    console.log('🔔 Current user state in loadMessages:', user);
+    console.log('🔔 Current chats length in loadMessages:', chats.length);
+    console.log('🔔 Current notifications length in loadMessages:', systemNotifications.length);
+    
     if (!user?.email) {
-      
+      console.log('🔔 No user email, not loading messages');
       return;
     }
     
+    // Set selected states immediately to prevent UI flicker
+    setSelectedChat(chatId);
+    setSelectedNotification(null);
+    
     // Check cache first
     if (messagesCache[chatId]) {
-      
+      console.log('🔔 Using cached messages for chat:', chatId);
       setMessages(messagesCache[chatId]);
-      setSelectedChat(chatId);
-      setSelectedNotification(null);
       return;
     }
     
@@ -449,6 +456,11 @@ export default function MessagesPage() {
   };
 
   const confirmDeleteConversation = async () => {
+    console.log('🔔 confirmDeleteConversation called');
+    console.log('🔔 conversationToDelete:', conversationToDelete);
+    console.log('🔔 Current user state:', user);
+    console.log('🔔 Current chats length:', chats.length);
+    
     if (!conversationToDelete) return;
 
     try {
@@ -464,11 +476,17 @@ export default function MessagesPage() {
       });
 
       if (response.ok) {
+        console.log('🔔 Conversation deleted successfully');
         // Remove the conversation from the local state
-        setChats(prev => prev.filter(chat => chat.id !== conversationToDelete.id));
+        setChats(prev => {
+          const newChats = prev.filter(chat => chat.id !== conversationToDelete.id);
+          console.log('🔔 Updated chats length:', newChats.length);
+          return newChats;
+        });
         
         // If this was the selected chat, clear the selection
         if (selectedChat === conversationToDelete.id) {
+          console.log('🔔 Clearing selected chat and messages');
           setSelectedChat(null);
           setMessages([]);
         }
@@ -486,14 +504,22 @@ export default function MessagesPage() {
 
   // Debounced click handler to prevent rapid API calls
   const handleItemClick = (item: any) => {
+    console.log('🔔 handleItemClick called with item:', item);
+    console.log('🔔 Current user state:', user);
+    console.log('🔔 Current chats length:', chats.length);
+    console.log('🔔 Current notifications length:', systemNotifications.length);
+    
     if (clickTimeout) {
       clearTimeout(clickTimeout);
     }
     
     const timeout = setTimeout(() => {
+      console.log('🔔 Executing click action after debounce');
       if (item.itemType === 'chat') {
+        console.log('🔔 Loading messages for chat:', item.id);
         loadMessages(item.id);
       } else {
+        console.log('🔔 Selecting notification:', item.id);
         selectNotification(item as SystemNotification);
       }
     }, 100); // 100ms debounce
@@ -701,7 +727,12 @@ export default function MessagesPage() {
   };
 
   useEffect(() => {
-    console.log('🔔 Messages page useEffect, user:', user);
+    console.log('🔔 Messages page useEffect triggered');
+    console.log('🔔 User state:', user);
+    console.log('🔔 Current chats length:', chats.length);
+    console.log('🔔 Current notifications length:', systemNotifications.length);
+    console.log('🔔 isInitialLoad:', isInitialLoad);
+    
     if (user?.email) {
       console.log('🔔 User has email, loading chats and notifications');
       loadChats();
@@ -715,6 +746,7 @@ export default function MessagesPage() {
       if (isInitialLoad) {
         // Wait a bit for user to load
         const timer = setTimeout(() => {
+          console.log('🔔 Setting isInitialLoad to false after timeout');
           setIsInitialLoad(false);
         }, 2000);
         return () => clearTimeout(timer);
