@@ -358,7 +358,17 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
                           )}
                         </div>
                         <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1 line-clamp-2">
-                          {notification.message}
+                          {(() => {
+                            // Strip Markdown formatting for header display
+                            let text = notification.message || '';
+                            text = text.replace(/\*\*(.*?)\*\*/g, '$1'); // Remove bold markers
+                            text = text.replace(/\*(.*?)\*/g, '$1'); // Remove italic markers
+                            text = text.replace(/`([^`]+)`/g, '$1'); // Remove code markers
+                            text = text.replace(/^#+\s*/gm, ''); // Remove heading markers
+                            text = text.replace(/^>\s*/gm, ''); // Remove quote markers
+                            text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1'); // Remove link markers, keep text
+                            return text;
+                          })()}
                         </p>
                         <p className="text-xs text-neutral-500 dark:text-neutral-500 mt-2">
                           {formatTimestamp(notification.timestamp)}

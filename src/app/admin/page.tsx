@@ -959,7 +959,7 @@ export default function AdminPage() {
                                 
                                 // Bold and italic
                                 text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-neutral-900 dark:text-white">$1</strong>');
-                                text = text.replace(/\*(.*?)\*/g, '<em class="italic">$1</em>');
+                                text = text.replace(/\*(.*?)\*/g, '<em class="italic text-neutral-900 dark:text-white">$1</em>');
                                 
                                 // Links
                                 text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" target="_blank" rel="noopener noreferrer">$1</a>');
@@ -1158,7 +1158,7 @@ export default function AdminPage() {
                                 
                                 // Bold and italic
                                 text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-neutral-900 dark:text-white">$1</strong>');
-                                text = text.replace(/\*(.*?)\*/g, '<em class="italic">$1</em>');
+                                text = text.replace(/\*(.*?)\*/g, '<em class="italic text-neutral-900 dark:text-white">$1</em>');
                                 
                                 // Links
                                 text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" target="_blank" rel="noopener noreferrer">$1</a>');
