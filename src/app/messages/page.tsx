@@ -530,11 +530,13 @@ export default function MessagesPage() {
   };
 
   const selectNotification = async (notification: SystemNotification) => {
+    console.log('🔔 selectNotification called with:', notification);
     setSelectedNotification(notification.id);
     setSelectedChat(null);
     
     // Mark as read if not already read
     if (!notification.read) {
+      console.log('🔔 Marking notification as read:', notification.id);
       try {
         const response = await fetch('/api/notifications', {
           method: 'POST',
@@ -545,12 +547,16 @@ export default function MessagesPage() {
           })
         });
 
+        console.log('🔔 Mark read response:', response.status, response.ok);
         if (response.ok) {
+          console.log('🔔 Updating local state to mark as read');
           // Update local state
           setSystemNotifications(prev => {
-            return prev.map(n => 
+            const updated = prev.map(n => 
               n.id === notification.id ? { ...n, read: true } : n
             );
+            console.log('🔔 Updated notifications:', updated);
+            return updated;
           });
           
           // Trigger events to refresh all notification components
@@ -559,15 +565,20 @@ export default function MessagesPage() {
             detail: { action: 'mark_read', notificationId: notification.id }
           }));
         } else {
-          console.error('Failed to mark notification as read');
+          console.error('Failed to mark notification as read:', response.status);
+          const errorText = await response.text();
+          console.error('Error response:', errorText);
         }
       } catch (error) {
         console.error('Error marking notification as read:', error);
       }
+    } else {
+      console.log('🔔 Notification already read, skipping mark_read');
     }
   };
 
   const deleteNotification = async (notificationId: string) => {
+    console.log('🔔 deleteNotification called with:', notificationId);
     try {
       const response = await fetch('/api/notifications', {
         method: 'POST',
@@ -578,12 +589,19 @@ export default function MessagesPage() {
         })
       });
 
+      console.log('🔔 Delete response:', response.status, response.ok);
       if (response.ok) {
+        console.log('🔔 Removing notification from local state');
         // Remove from local state
-        setSystemNotifications(prev => prev.filter(n => n.id !== notificationId));
+        setSystemNotifications(prev => {
+          const filtered = prev.filter(n => n.id !== notificationId);
+          console.log('🔔 Updated notifications after delete:', filtered);
+          return filtered;
+        });
         
         // If this was the selected notification, clear selection
         if (selectedNotification === notificationId) {
+          console.log('🔔 Clearing selected notification');
           setSelectedNotification(null);
         }
         
@@ -593,7 +611,9 @@ export default function MessagesPage() {
           detail: { action: 'delete', notificationId }
         }));
       } else {
-        console.error('Failed to delete notification');
+        console.error('Failed to delete notification:', response.status);
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
       }
     } catch (error) {
       console.error('Error deleting notification:', error);
