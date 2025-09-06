@@ -24,8 +24,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if user is admin
-    const adminEmails = process.env.ADMIN_EMAILS?.split(',') || [];
+    // Get environment variables from Cloudflare context (not process.env on Edge)
+    const env = getRequestContext().env;
+    const adminEmails = (env.ADMIN_EMAILS ?? '')
+      .split(',')
+      .map((e: string) => e.trim())
+      .filter(Boolean);
     console.log('🔔 Admin notifications - adminEmails:', adminEmails);
     console.log('🔔 Admin notifications - user email:', session.user.email);
     
@@ -62,7 +66,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const env = getRequestContext().env;
+    // Database is already available from env above
     const db = env.DB as D1Database;
     
     console.log('🔔 Admin notifications - Database connection:', !!db);
@@ -108,8 +112,7 @@ export async function POST(request: NextRequest) {
     } else if (body.targetGroup === 'unverified') {
       userQuery += ' AND verified = 0';
     } else if (body.targetGroup === 'admin') {
-      // Get admin users based on email
-      const adminEmails = process.env.ADMIN_EMAILS?.split(',') || [];
+      // Get admin users based on email (use the adminEmails from above)
       if (adminEmails.length > 0) {
         const placeholders = adminEmails.map(() => '?').join(',');
         userQuery += ` AND email IN (${placeholders})`;
@@ -132,27 +135,30 @@ export async function POST(request: NextRequest) {
 
     // Create user notification records for each user
     if (users.length > 0) {
-      const userNotificationId = `un_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      console.log('🔔 Admin notifications - Creating user notifications for', users.length, 'users');
       
       // Insert user notifications in batches
-      const batchSize = 100;
+      const batchSize = 50; // Reduced batch size for safety
       for (let i = 0; i < users.length; i += batchSize) {
         const batch = users.slice(i, i + batchSize);
-        const values = batch.map(() => 
-          `(?, ?, ?, ?)`
-        ).join(', ');
+        console.log(`🔔 Admin notifications - Processing batch ${Math.floor(i/batchSize) + 1}, users ${i + 1}-${Math.min(i + batchSize, users.length)}`);
         
+        const values = batch.map(() => `(?, ?, ?, ?)`).join(', ');
         const batchParams = batch.flatMap((user, index) => [
-          `${userNotificationId}_${i + index}`,
+          `un_${Date.now()}_${i + index}_${Math.random().toString(36).substr(2, 6)}`,
           user.id,
           notificationId,
           createdAt
         ]);
 
-        await db.prepare(`
+        console.log(`🔔 Admin notifications - Batch params count: ${batchParams.length}, Values count: ${batch.length * 4}`);
+        
+        const result = await db.prepare(`
           INSERT INTO user_notifications (id, user_id, notification_id, created_at)
           VALUES ${values}
         `).bind(...batchParams).run();
+        
+        console.log(`🔔 Admin notifications - Batch insert result:`, result);
       }
     }
 
