@@ -222,8 +222,7 @@ export default function AdminPage() {
           icon: 'info',
           actionUrl: '',
           priority: 'normal',
-          expiresAt: '',
-          template: 'custom'
+          expiresAt: ''
         });
         setShowNotificationForm(false);
       } else {
