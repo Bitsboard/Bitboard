@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     // Get environment variables from Cloudflare context (not process.env on Edge)
     const env = getRequestContext().env;
-    const adminEmails = (env.ADMIN_EMAILS ?? '')
+    const adminEmails = ((env.ADMIN_EMAILS as string) ?? '')
       .split(',')
       .map((e: string) => e.trim())
       .filter(Boolean);
