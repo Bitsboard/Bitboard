@@ -244,6 +244,7 @@ export default function MessagesPage() {
             priority: notification.priority || 'normal'
           }));
           console.log('🔔 Transformed notifications:', transformedNotifications);
+          console.log('🔔 Setting system notifications to:', transformedNotifications);
           setSystemNotifications(transformedNotifications);
         } else {
           console.log('🔔 No notifications from API - PRESERVING EXISTING DATA');
@@ -589,9 +590,16 @@ export default function MessagesPage() {
       console.log('🔔 Delete response:', response.status, response.ok);
       if (response.ok) {
         console.log('🔔 Removing notification from local state');
+        console.log('🔔 Current notifications before delete:', systemNotifications);
+        console.log('🔔 Looking for notification with ID:', notificationId);
+        
         // Remove from local state
         setSystemNotifications(prev => {
-          const filtered = prev.filter(n => n.id !== notificationId);
+          console.log('🔔 Previous notifications in setState:', prev);
+          const filtered = prev.filter(n => {
+            console.log('🔔 Checking notification:', n.id, 'against:', notificationId, 'match:', n.id !== notificationId);
+            return n.id !== notificationId;
+          });
           console.log('🔔 Updated notifications after delete:', filtered);
           return filtered;
         });
