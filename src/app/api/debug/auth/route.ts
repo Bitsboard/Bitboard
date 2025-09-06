@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
         user: session.user ? {
           id: session.user.id,
           email: session.user.email,
-          name: session.user.name
+          username: session.user.username
         } : null
       } : null,
       adminEmails: adminEmails,
