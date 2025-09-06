@@ -12,7 +12,7 @@ interface SystemNotificationRequest {
 }
 
 export async function POST(request: NextRequest) {
-  console.log('🔔 System Notification API - Starting');
+  console.log('🔔 System Notification API - Starting - NEW VERSION 2025-09-06');
   
   try {
     // Get database connection
