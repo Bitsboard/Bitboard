@@ -16,6 +16,7 @@ interface Notification {
   read: boolean;
   actionUrl?: string;
   icon?: 'info' | 'success' | 'warning' | 'error' | 'system';
+  priority?: 'low' | 'normal' | 'high' | 'urgent';
 }
 
 interface NotificationMenuProps {
@@ -54,7 +55,8 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
             timestamp: notification.received_at * 1000, // Convert from seconds to milliseconds
             read: !!notification.read_at,
             actionUrl: notification.action_url || '/messages',
-            icon: notification.icon
+            icon: notification.icon,
+            priority: notification.priority || 'normal'
           }));
           setNotifications(transformedNotifications);
         } else {
@@ -324,7 +326,21 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
                   <div
                     key={notification.id}
                     className={`p-4 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors duration-200 cursor-pointer ${
-                      !notification.read ? 'bg-blue-50 dark:bg-blue-900/10' : ''
+                      !notification.read ? (() => {
+                        const priority = notification.priority || 'normal';
+                        switch (priority) {
+                          case 'urgent':
+                            return 'bg-gradient-to-br from-red-100 to-red-200 dark:from-red-800/50 dark:to-red-700/60 border-l-4 border-red-500';
+                          case 'high':
+                            return 'bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-800/50 dark:to-orange-700/60 border-l-4 border-orange-500';
+                          case 'normal':
+                            return 'bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/50 dark:to-blue-700/60 border-l-4 border-blue-500';
+                          case 'low':
+                            return 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800/50 dark:to-gray-700/60 border-l-4 border-gray-500';
+                          default:
+                            return 'bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-800/50 dark:to-violet-700/60 border-l-4 border-purple-500';
+                        }
+                      })() : ''
                     }`}
                     onClick={() => {
                       if (notification.actionUrl) {

@@ -859,15 +859,15 @@ export default function MessagesPage() {
                                 const priority = notification.priority || 'normal';
                                 switch (priority) {
                                   case 'urgent':
-                                    return 'bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/40 border-l-4 border-red-500';
+                                    return 'bg-gradient-to-br from-red-100 to-red-200 dark:from-red-800/50 dark:to-red-700/60 border-l-4 border-red-500';
                                   case 'high':
-                                    return 'bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/40 border-l-4 border-orange-500';
+                                    return 'bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-800/50 dark:to-orange-700/60 border-l-4 border-orange-500';
                                   case 'normal':
-                                    return 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/40 border-l-4 border-blue-500';
+                                    return 'bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/50 dark:to-blue-700/60 border-l-4 border-blue-500';
                                   case 'low':
-                                    return 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/30 dark:to-gray-800/40 border-l-4 border-gray-500';
+                                    return 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800/50 dark:to-gray-700/60 border-l-4 border-gray-500';
                                   default:
-                                    return 'bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 border-l-4 border-purple-500';
+                                    return 'bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-800/50 dark:to-violet-700/60 border-l-4 border-purple-500';
                                 }
                               })()
                             : 'bg-white/60 dark:bg-neutral-900/60'
@@ -947,23 +947,23 @@ export default function MessagesPage() {
                                 }`}>
                                   bitsbarter
                                 </span>
-                                <span className={`text-xs ${
-                                  selectedNotification === item.id ? 'text-white/60' : 'text-neutral-400 dark:text-neutral-500'
-                                }`}>
-                                  •
-                                </span>
-                                <span className={`text-xs ${
-                                  selectedNotification === item.id ? 'text-white/60' : 'text-neutral-400 dark:text-neutral-500'
-                                }`}>
-                                  System Notification
-                                </span>
                               </div>
                               
                               {/* Email-style preview */}
                               <p className={`text-sm line-clamp-2 ${
                                 selectedNotification === item.id ? 'text-white/90' : 'text-neutral-600 dark:text-neutral-300'
                               }`}>
-                                {item.message}
+                                {(() => {
+                                  // Strip Markdown formatting for conversation preview
+                                  let text = item.message || '';
+                                  text = text.replace(/\*\*(.*?)\*\*/g, '$1'); // Remove bold markers
+                                  text = text.replace(/\*(.*?)\*/g, '$1'); // Remove italic markers
+                                  text = text.replace(/`([^`]+)`/g, '$1'); // Remove code markers
+                                  text = text.replace(/^#+\s*/gm, ''); // Remove heading markers
+                                  text = text.replace(/^>\s*/gm, ''); // Remove quote markers
+                                  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1'); // Remove link markers, keep text
+                                  return text;
+                                })()}
                               </p>
                             </div>
                             
