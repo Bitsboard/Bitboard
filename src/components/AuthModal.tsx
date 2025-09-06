@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import type { User } from "@/lib/types";
 
 interface AuthModalProps {
@@ -9,14 +9,27 @@ interface AuthModalProps {
   dark: boolean;
 }
 
+type OAuthMsg =
+  | { type: "OAUTH_READY" }
+  | { type: "OAUTH_HEARTBEAT" }
+  | { type: "OAUTH_SUCCESS"; code: string; state?: string }
+  | { type: "OAUTH_ERROR"; error: string }
+  | { type: "OAUTH_CLOSE" };
+
 export function AuthModal({ onClose, onAuthed, dark }: AuthModalProps) {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [loginUrl, setLoginUrl] = useState<string>('/api/auth/login');
+  const chanRef = useRef<BroadcastChannel | null>(null);
+  const heartbeatTimer = useRef<number | null>(null);
+  const heartbeatMisses = useRef(0);
+  const HEARTBEAT_INTERVAL_MS = 800;    // how often popup pings
+  const HEARTBEAT_GRACE_MISSES = 4;     // ~3–4 missed beats => assume closed
 
   useEffect(() => {
     // Get current page URL to redirect back after login
     const currentUrl = window.location.pathname + window.location.search + window.location.hash;
     setLoginUrl(`/api/auth/login?redirect=${encodeURIComponent(currentUrl)}&popup=true`);
+    return () => cleanup();
   }, []);
 
   // Check for authentication completion
@@ -44,61 +57,87 @@ export function AuthModal({ onClose, onAuthed, dark }: AuthModalProps) {
     return () => clearInterval(interval);
   }, [onAuthed]);
 
-  const handleGoogleSignIn = () => {
+  function cleanup() {
+    if (heartbeatTimer.current) {
+      window.clearInterval(heartbeatTimer.current);
+      heartbeatTimer.current = null;
+    }
+    if (chanRef.current) {
+      chanRef.current.close();
+      chanRef.current = null;
+    }
+    setIsAuthenticating(false);
+  }
+
+  function beginHeartbeatWatch() {
+    // Every interval, if we *didn't* receive a heartbeat since last tick, count a miss.
+    heartbeatTimer.current = window.setInterval(() => {
+      heartbeatMisses.current += 1;
+      if (heartbeatMisses.current >= HEARTBEAT_GRACE_MISSES) {
+        // Treat as popup-closed or crashed.
+        console.info("OAuth popup presumed closed (missed heartbeats).");
+        cleanup();
+      }
+      // Reset expectation for next beat; receiving a beat sets it back to 0.
+    }, HEARTBEAT_INTERVAL_MS + 300); // a little more than popup ping to avoid jitter
+  }
+
+  const handleGoogleSignIn = async () => {
     setIsAuthenticating(true);
-    
-    // Open OAuth flow in a popup window
-    const popup = window.open(
+
+    // Use noopener so there is no live reference needed.
+    // (We won't touch popup.closed at all.)
+    window.open(
       loginUrl,
-      'googleSignIn',
-      'width=500,height=600,scrollbars=yes,resizable=yes'
+      "_blank",
+      "popup=yes,width=520,height=700,noopener,noreferrer"
     );
 
-    if (popup) {
-      // Listen for success message from popup
-      const handleMessage = (event: MessageEvent) => {
-        if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
-          setIsAuthenticating(false);
-          // The popup will close itself, and we'll detect the session change
+    // Create a fresh channel and listeners
+    chanRef.current?.close();
+    const chan = new BroadcastChannel("oauth-google");
+    chanRef.current = chan;
+
+    heartbeatMisses.current = 0;
+    beginHeartbeatWatch();
+
+    chan.onmessage = async (ev: MessageEvent<OAuthMsg>) => {
+      const msg = ev.data;
+      if (!msg || typeof msg !== "object") return;
+
+      switch (msg.type) {
+        case "OAUTH_READY": {
+          // popup is alive and on our origin
+          heartbeatMisses.current = 0;
+          break;
         }
-      };
-
-      window.addEventListener('message', handleMessage);
-
-      // Check if popup was closed manually - use a different approach to avoid CORS
-      const checkClosed = setInterval(() => {
-        try {
-          // Try to access popup properties that might trigger CORS
-          const isClosed = popup.closed;
-          if (isClosed) {
-            clearInterval(checkClosed);
-            window.removeEventListener('message', handleMessage);
-            setIsAuthenticating(false);
+        case "OAUTH_HEARTBEAT": {
+          heartbeatMisses.current = 0;
+          break;
+        }
+        case "OAUTH_SUCCESS": {
+          // Exchange code for tokens on your backend
+          try {
+            // The session should already be created by the callback
+            // Just refresh the page to show the logged-in state
+            window.location.reload();
+          } catch (e) {
+            console.error(e);
+          } finally {
+            // Ask popup to close itself (best-effort)
+            chan.postMessage({ type: "OAUTH_CLOSE" });
+            cleanup();
           }
-        } catch (error) {
-          // CORS blocks access to popup.closed - this is expected
-          // We'll rely on the message listener and timeout instead
-          console.log('Popup access blocked by CORS (expected)');
+          break;
         }
-      }, 1000);
-
-      // Timeout after 30 seconds if no response
-      setTimeout(() => {
-        clearInterval(checkClosed);
-        window.removeEventListener('message', handleMessage);
-        setIsAuthenticating(false);
-        try {
-          if (popup && !popup.closed) {
-            popup.close();
-          }
-        } catch (error) {
-          // CORS might block this too
+        case "OAUTH_ERROR": {
+          console.error("OAuth error:", (msg as any).error);
+          chan.postMessage({ type: "OAUTH_CLOSE" });
+          cleanup();
+          break;
         }
-      }, 30000);
-    } else {
-      // Fallback to redirect if popup blocked
-      window.location.href = loginUrl;
-    }
+      }
+    };
   };
 
   return (

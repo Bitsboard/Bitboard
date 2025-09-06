@@ -4,18 +4,50 @@ import { useEffect } from 'react';
 
 export default function AuthSuccessPage() {
   useEffect(() => {
-    // This page is opened in a popup after successful Google OAuth
-    // We need to close the popup and communicate success to the parent
-    
-    // Send message to parent window
-    if (window.opener) {
-      window.opener.postMessage({ type: 'GOOGLE_AUTH_SUCCESS' }, '*');
-      // Close the popup
-      window.close();
-    } else {
-      // Fallback: redirect to home if not opened as popup
-      window.location.href = '/';
+    // Parse search params from Google's redirect
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    const state = params.get("state");
+    const error = params.get("error");
+
+    const chan = new BroadcastChannel("oauth-google");
+    chan.postMessage({ type: "OAUTH_READY" });
+
+    // Heartbeat so parent can detect if we suddenly go away.
+    const HEARTBEAT_INTERVAL_MS = 800;
+    const hb = setInterval(() => {
+      chan.postMessage({ type: "OAUTH_HEARTBEAT" });
+    }, HEARTBEAT_INTERVAL_MS);
+
+    // Send outcome
+    if (error) {
+      chan.postMessage({ type: "OAUTH_ERROR", error });
+    } else if (code) {
+      chan.postMessage({ type: "OAUTH_SUCCESS", code, state });
     }
+
+    // If parent acknowledges, close the popup
+    chan.onmessage = (ev) => {
+      if (ev.data && ev.data.type === "OAUTH_CLOSE") {
+        clearInterval(hb);
+        chan.close();
+        // Best-effort close; if blocked by browser, user can still close manually.
+        window.close();
+      }
+    };
+
+    // Fallback: if user navigates away or closes
+    // (Not guaranteed to fire, but harmless to include)
+    window.addEventListener("pagehide", () => {
+      clearInterval(hb);
+      chan.close();
+    });
+
+    // Cleanup on unmount
+    return () => {
+      clearInterval(hb);
+      chan.close();
+    };
   }, []);
 
   return (
