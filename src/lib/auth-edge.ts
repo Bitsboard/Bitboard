@@ -74,13 +74,5 @@ export async function getSessionFromRequestEdge(req: NextRequest): Promise<Sessi
   }
 }
 
-export async function createJwtEdge(payload: JwtPayload): Promise<string> {
-  const env = getRequestContext().env as any;
-  const secret = new TextEncoder().encode(env.NEXTAUTH_SECRET);
-  
-  return await new SignJWT(payload)
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('7d')
-    .sign(secret);
-}
+// Note: createJwtEdge function removed since we're using the original auth.ts functions
+// If needed, this can be re-implemented using the same WebCrypto approach as signJwtHS256
