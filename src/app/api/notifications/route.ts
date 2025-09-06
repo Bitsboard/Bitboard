@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { action, notificationId } = await request.json() as { 
-      action: 'mark_read' | 'mark_all_read'; 
+      action: 'mark_read' | 'mark_all_read' | 'delete' | 'mark_unread'; 
       notificationId?: string 
     };
 
@@ -129,6 +129,19 @@ export async function POST(request: NextRequest) {
         Math.floor(Date.now() / 1000),
         userId
       ).run();
+    } else if (action === 'delete' && notificationId) {
+      // Delete specific notification
+      await db.prepare(`
+        DELETE FROM user_notifications 
+        WHERE id = ?
+      `).bind(notificationId).run();
+    } else if (action === 'mark_unread' && notificationId) {
+      // Mark specific notification as unread
+      await db.prepare(`
+        UPDATE user_notifications 
+        SET read_at = NULL 
+        WHERE id = ?
+      `).bind(notificationId).run();
     }
 
     return NextResponse.json({ success: true });

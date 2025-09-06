@@ -500,12 +500,45 @@ export default function MessagesPage() {
               n.id === notification.id ? { ...n, read: true } : n
             );
           });
+          
+          // Trigger a custom event to refresh header notifications
+          window.dispatchEvent(new CustomEvent('refreshNotifications'));
         } else {
           console.error('Failed to mark notification as read');
         }
       } catch (error) {
         console.error('Error marking notification as read:', error);
       }
+    }
+  };
+
+  const deleteNotification = async (notificationId: string) => {
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          notificationId: notificationId,
+          action: 'delete'
+        })
+      });
+
+      if (response.ok) {
+        // Remove from local state
+        setSystemNotifications(prev => prev.filter(n => n.id !== notificationId));
+        
+        // If this was the selected notification, clear selection
+        if (selectedNotification === notificationId) {
+          setSelectedNotification(null);
+        }
+        
+        // Trigger a custom event to refresh header notifications
+        window.dispatchEvent(new CustomEvent('refreshNotifications'));
+      } else {
+        console.error('Failed to delete notification');
+      }
+    } catch (error) {
+      console.error('Error deleting notification:', error);
     }
   };
   
@@ -913,6 +946,22 @@ export default function MessagesPage() {
                                 {item.message}
                               </p>
                             </div>
+                            
+                            {/* Delete Button - Bottom Right */}
+                            {selectedNotification === item.id && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteNotification(item.id);
+                                }}
+                                className="absolute bottom-2 right-2 p-1 transition-all duration-200 hover:scale-110"
+                                title="Delete notification"
+                              >
+                                <svg className="w-4 h-4 text-white hover:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            )}
                           </div>
                         ) : (
                           /* Chat Layout */
@@ -1386,15 +1435,72 @@ export default function MessagesPage() {
                           </div>
                         </div>
                         
-                        <button
-                          onClick={() => setSelectedNotification(null)}
-                          className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors"
-                          title="Close notification"
-                        >
-                          <svg className="w-5 h-5 text-neutral-500 dark:text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
+                        <div className="flex items-center gap-2">
+                          {/* Mark as Unread Button */}
+                          {systemNotifications.find(n => n.id === selectedNotification)?.read && (
+                            <button
+                              onClick={async () => {
+                                const notification = systemNotifications.find(n => n.id === selectedNotification);
+                                if (notification) {
+                                  try {
+                                    const response = await fetch('/api/notifications', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({
+                                        notificationId: notification.id,
+                                        action: 'mark_unread'
+                                      })
+                                    });
+
+                                    if (response.ok) {
+                                      // Update local state
+                                      setSystemNotifications(prev => 
+                                        prev.map(n => 
+                                          n.id === notification.id ? { ...n, read: false } : n
+                                        )
+                                      );
+                                      // Trigger refresh for header
+                                      window.dispatchEvent(new CustomEvent('refreshNotifications'));
+                                    } else {
+                                      console.error('Failed to mark notification as unread');
+                                    }
+                                  } catch (error) {
+                                    console.error('Error marking notification as unread:', error);
+                                  }
+                                }
+                              }}
+                              className="px-3 py-1.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                              title="Mark as unread"
+                            >
+                              Mark Unread
+                            </button>
+                          )}
+                          
+                          {/* Delete Button */}
+                          <button
+                            onClick={() => {
+                              const notification = systemNotifications.find(n => n.id === selectedNotification);
+                              if (notification) {
+                                deleteNotification(notification.id);
+                              }
+                            }}
+                            className="px-3 py-1.5 text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                            title="Delete notification"
+                          >
+                            Delete
+                          </button>
+                          
+                          {/* Close Button */}
+                          <button
+                            onClick={() => setSelectedNotification(null)}
+                            className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors"
+                            title="Close notification"
+                          >
+                            <svg className="w-5 h-5 text-neutral-500 dark:text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                     </div>
                     

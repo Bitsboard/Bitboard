@@ -76,6 +76,16 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
     loadNotifications();
   }, [user?.email]);
 
+  // Listen for refresh events from other components
+  useEffect(() => {
+    const handleRefresh = () => {
+      loadNotifications();
+    };
+
+    window.addEventListener('refreshNotifications', handleRefresh);
+    return () => window.removeEventListener('refreshNotifications', handleRefresh);
+  }, [user?.email]);
+
   // Update unread count whenever notifications change
   useEffect(() => {
     const unreadCount = notifications.filter(n => !n.read).length;
