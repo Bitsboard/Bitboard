@@ -116,21 +116,22 @@ export default function MessagesPage() {
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
     if (messageDate.getTime() === yesterday.getTime()) {
-      return `Yesterday ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      return `Yesterday at ${date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
     }
     
     // If message is from this week (within 7 days)
     const weekAgo = new Date(today);
     weekAgo.setDate(weekAgo.getDate() - 7);
     if (messageDate.getTime() > weekAgo.getTime()) {
-      return date.toLocaleDateString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleDateString([], { weekday: 'short' }) + ' at ' + date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
     }
     
     // For older messages, show full date and time
     return date.toLocaleDateString([], { 
       month: 'short', 
-      day: 'numeric', 
-      hour: '2-digit', 
+      day: 'numeric'
+    }) + ' at ' + date.toLocaleTimeString([], { 
+      hour: 'numeric', 
       minute: '2-digit' 
     });
   };
@@ -193,8 +194,8 @@ export default function MessagesPage() {
           return prev;
         });
         
-        // Auto-select the most recent chat
-        if (transformedChats.length > 0 && !selectedChat) {
+        // Auto-select the most recent item (chat or notification)
+        if (transformedChats.length > 0 && !selectedChat && !selectedNotification) {
           setSelectedChat(transformedChats[0].id);
           loadMessages(transformedChats[0].id);
         }
@@ -858,6 +859,19 @@ export default function MessagesPage() {
     ...filteredChats.map(chat => ({ ...chat, itemType: 'chat' as const }))
   ], [filteredNotifications, filteredChats]);
 
+  // Auto-select the topmost item if nothing is selected
+  React.useEffect(() => {
+    if (combinedItems.length > 0 && !selectedChat && !selectedNotification) {
+      const topItem = combinedItems[0];
+      if (topItem.itemType === 'notification') {
+        setSelectedNotification(topItem.id);
+      } else if (topItem.itemType === 'chat') {
+        setSelectedChat(topItem.id);
+        loadMessages(topItem.id);
+      }
+    }
+  }, [combinedItems, selectedChat, selectedNotification]);
+
   // Calculate counts for filter buttons
   const totalCount = chats.length + systemNotifications.length;
   const unreadCount = chats.filter(c => c.unread_count > 0).length + systemNotifications.filter(n => !n.read).length;
@@ -972,34 +986,40 @@ export default function MessagesPage() {
                           /* System Notification Layout - Email Style */
                           <div className="flex items-start gap-3 p-2">
                             <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center shadow-sm ${
-                              item.icon === 'info' ? 'bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-900' :
-                              item.icon === 'success' ? 'bg-gradient-to-br from-green-100 to-green-200 dark:from-green-800 dark:to-green-900' :
-                              item.icon === 'warning' ? 'bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-800 dark:to-yellow-900' :
-                              item.icon === 'error' ? 'bg-gradient-to-br from-red-100 to-red-200 dark:from-red-800 dark:to-red-900' :
-                              'bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-800 dark:to-purple-900'
+                              item.read 
+                                ? item.icon === 'info' ? 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/40' :
+                                  item.icon === 'success' ? 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/40' :
+                                  item.icon === 'warning' ? 'bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/30 dark:to-yellow-800/40' :
+                                  item.icon === 'error' ? 'bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/40' :
+                                  'bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/40'
+                                : item.icon === 'info' ? 'bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-900' :
+                                  item.icon === 'success' ? 'bg-gradient-to-br from-green-100 to-green-200 dark:from-green-800 dark:to-green-900' :
+                                  item.icon === 'warning' ? 'bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-800 dark:to-yellow-900' :
+                                  item.icon === 'error' ? 'bg-gradient-to-br from-red-100 to-red-200 dark:from-red-800 dark:to-red-900' :
+                                  'bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-800 dark:to-purple-900'
                             }`}>
                               {item.icon === 'info' && (
-                                <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className={`w-5 h-5 ${item.read ? 'text-blue-400 dark:text-blue-500' : 'text-blue-600 dark:text-blue-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               )}
                               {item.icon === 'success' && (
-                                <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className={`w-5 h-5 ${item.read ? 'text-green-400 dark:text-green-500' : 'text-green-600 dark:text-green-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               )}
                               {item.icon === 'warning' && (
-                                <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className={`w-5 h-5 ${item.read ? 'text-yellow-400 dark:text-yellow-500' : 'text-yellow-600 dark:text-yellow-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
                                 </svg>
                               )}
                               {item.icon === 'error' && (
-                                <svg className="w-5 h-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className={`w-5 h-5 ${item.read ? 'text-red-400 dark:text-red-500' : 'text-red-600 dark:text-red-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               )}
                               {(!item.icon || item.icon === 'system') && (
-                                <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className={`w-5 h-5 ${item.read ? 'text-purple-400 dark:text-purple-500' : 'text-purple-600 dark:text-purple-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19h6a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
                               )}
@@ -1012,7 +1032,7 @@ export default function MessagesPage() {
                                   selectedNotification === item.id 
                                     ? 'text-white font-semibold' 
                                     : item.read 
-                                      ? 'text-neutral-600 dark:text-neutral-400 font-normal' 
+                                      ? 'text-neutral-500 dark:text-neutral-500 font-normal' 
                                       : 'text-neutral-900 dark:text-white font-bold'
                                 }`}>
                                   {item.title}
@@ -1025,7 +1045,7 @@ export default function MessagesPage() {
                                   selectedNotification === item.id 
                                     ? 'text-white/70' 
                                     : item.read 
-                                      ? 'text-neutral-400 dark:text-neutral-500' 
+                                      ? 'text-neutral-400 dark:text-neutral-600' 
                                       : 'text-neutral-600 dark:text-neutral-300'
                                 }`}>
                                   {formatTimestamp(item.timestamp)}
@@ -1037,7 +1057,7 @@ export default function MessagesPage() {
                                 selectedNotification === item.id 
                                   ? 'text-white/90' 
                                   : item.read 
-                                    ? 'text-neutral-500 dark:text-neutral-400' 
+                                    ? 'text-neutral-400 dark:text-neutral-500' 
                                     : 'text-neutral-700 dark:text-neutral-200'
                               }`}>
                                 {(() => {

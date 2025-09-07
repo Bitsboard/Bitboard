@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
       JOIN system_notifications sn ON un.notification_id = sn.id
       JOIN users u ON un.user_id = u.id
       WHERE un.user_id = ? AND sn.status = 'active' AND sn.created_at >= u.created_at
-      ORDER BY un.created_at DESC
+      ORDER BY un.read_at IS NULL DESC, un.created_at DESC
       LIMIT 50
     `).bind(userId).all();
 
