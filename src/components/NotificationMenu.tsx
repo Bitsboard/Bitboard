@@ -76,20 +76,20 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
 
       // Process chat conversations
       if (chatsResponse.ok) {
-        const chatsData = await chatsResponse.json() as { success: boolean; chats: any[] };
-        if (chatsData.success && chatsData.chats.length > 0) {
+        const chatsData = await chatsResponse.json() as { chats: any[] };
+        if (chatsData.chats && chatsData.chats.length > 0) {
           const transformedChats: Notification[] = chatsData.chats.map(chat => ({
             id: chat.id,
             type: 'chat' as const,
-            title: chat.listing_title || 'Chat',
-            message: chat.last_message || 'No messages yet',
-            timestamp: chat.last_message_time * 1000, // Convert from seconds to milliseconds
-            read: chat.unread_count === 0,
+            title: chat.listing?.title || 'Chat',
+            message: chat.lastMessageText || 'No messages yet',
+            timestamp: chat.lastMessageAt || chat.createdAt || 0, // Already in milliseconds
+            read: (chat.unread_count || 0) === 0,
             actionUrl: '/messages',
             icon: 'system' as const,
-            other_user: chat.other_user,
-            listing_title: chat.listing_title,
-            unread_count: chat.unread_count
+            other_user: chat.seller?.name || 'Unknown User',
+            listing_title: chat.listing?.title || 'Chat',
+            unread_count: chat.unread_count || 0
           }));
           allItems.push(...transformedChats);
         }
@@ -140,7 +140,9 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
 
   // Update unread count whenever notifications change
   useEffect(() => {
-    const unreadCount = notifications.filter(n => !n.read).length;
+    const unreadCount = notifications.filter(n => 
+      n.type === 'system' ? !n.read : (n.unread_count || 0) > 0
+    ).length;
     setUnreadCount(unreadCount);
   }, [notifications]);
 
