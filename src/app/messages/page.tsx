@@ -1311,10 +1311,10 @@ export default function MessagesPage() {
               {selectedChat ? (
                 <>
                   {/* Chat Header */}
-                  <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-4 rounded-t-3xl">
-                    <div className="flex gap-4">
+                  <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-2 rounded-t-3xl">
+                    <div className="flex gap-3">
                       {/* Left: Listing Image */}
-                      <div className="p-2 flex-shrink-0">
+                      <div className="p-1 flex-shrink-0">
                         <img
                           src={chats.find(c => c.id === selectedChat)?.listing_image || '/placeholder-listing.jpg'}
                           alt="Listing"
