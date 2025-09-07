@@ -1415,24 +1415,24 @@ export default function MessagesPage() {
                               );
                             }
                             return unit === 'BTC' ? (
-                              <div>
+                              <div className="flex items-center gap-2">
                                 <span className="text-lg font-semibold">
                                   {(Number(priceSat) / 100000000).toFixed(8)} BTC
                                 </span>
                                 {/* Dollar equivalent */}
-                                <div className="text-sm text-white/80">
-                                  {formatCADAmount((Number(priceSat) / 100000000) * (btcCad || 0))}
-                                </div>
+                                <span className="text-sm text-white/80">
+                                  ({formatCADAmount((Number(priceSat) / 100000000) * (btcCad || 0))})
+                                </span>
                               </div>
                             ) : (
-                              <div>
+                              <div className="flex items-center gap-2">
                                 <span className="text-lg font-semibold">
                                   {priceSat.toLocaleString()} sats
                                 </span>
                                 {/* Dollar equivalent */}
-                                <div className="text-sm text-white/80">
-                                  {formatCADAmount((Number(priceSat) / 100000000) * (btcCad || 0))}
-                                </div>
+                                <span className="text-sm text-white/80">
+                                  ({formatCADAmount((Number(priceSat) / 100000000) * (btcCad || 0))})
+                                </span>
                               </div>
                             );
                           })()}
@@ -1494,7 +1494,8 @@ export default function MessagesPage() {
                                   await openListingModal(Number(selectedChatData.listing_id));
                                 }
                               }}
-                              className="px-3 py-1.5 text-sm font-medium text-orange-600 bg-white hover:bg-orange-50 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md"
+                              className="px-3 py-1.5 text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-lg hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors"
+                              title="View listing"
                             >
                               View Listing
                             </button>
