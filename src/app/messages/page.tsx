@@ -550,6 +550,8 @@ export default function MessagesPage() {
     
     const timeout = setTimeout(() => {
       if (item.itemType === 'chat') {
+        setSelectedChat(item.id);
+        setSelectedNotification(null);
         loadMessages(item.id);
       } else {
         selectNotification(item as SystemNotification);
