@@ -1534,7 +1534,7 @@ export default function MessagesPage() {
                               onClick={() => {
                                 const selectedChatData = chats.find(c => c.id === selectedChat);
                                 if (selectedChatData) {
-                                  handleDeleteChat(selectedChatData);
+                                  handleDeleteConversation(selectedChatData);
                                 }
                               }}
                               className="px-2 py-1 text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
