@@ -35,49 +35,48 @@ export default function DeleteNotificationModal({
         )}
         onClick={(e) => e.stopPropagation()}
       >
-          {/* Header */}
-          <div className={cn(
-            "px-6 py-4 border-b",
-            dark ? "border-neutral-700" : "border-neutral-200"
+        {/* Header */}
+        <div className={cn(
+          "px-6 py-4 border-b",
+          dark ? "border-neutral-700" : "border-neutral-200"
+        )}>
+          <h3 className={cn(
+            "text-lg font-semibold",
+            dark ? "text-white" : "text-neutral-900"
           )}>
-            <h3 className={cn(
-              "text-lg font-semibold",
-              dark ? "text-white" : "text-neutral-900"
-            )}>
-              Delete Notification
-            </h3>
-          </div>
-          
-          {/* Content */}
-          <div className="px-6 py-4">
-            <p className={cn(
-              "text-sm leading-relaxed",
-              dark ? "text-neutral-300" : "text-neutral-600"
-            )}>
-              Are you sure you want to delete this message?
-            </p>
-          </div>
-          
-          {/* Actions */}
-          <div className="px-6 py-4 flex gap-3 justify-end">
-            <button
-              onClick={onClose}
-              className={cn(
-                "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-                dark
-                  ? "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white"
-                  : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200 hover:text-neutral-900"
-              )}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={onConfirm}
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-red-500 text-white hover:bg-red-600 transition-all duration-200"
-            >
-              Delete
-            </button>
-          </div>
+            Delete Notification
+          </h3>
+        </div>
+        
+        {/* Content */}
+        <div className="px-6 py-4">
+          <p className={cn(
+            "text-sm leading-relaxed",
+            dark ? "text-neutral-300" : "text-neutral-600"
+          )}>
+            Are you sure you want to delete this message?
+          </p>
+        </div>
+        
+        {/* Actions */}
+        <div className="px-6 py-4 flex gap-3 justify-end">
+          <button
+            onClick={onClose}
+            className={cn(
+              "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+              dark
+                ? "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white"
+                : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200 hover:text-neutral-900"
+            )}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-red-500 text-white hover:bg-red-600 transition-all duration-200"
+          >
+            Delete
+          </button>
         </div>
       </div>
     </div>
