@@ -874,6 +874,11 @@ export default function MessagesPage() {
     const isSelected = (item.itemType === 'chat' && selectedChat === item.id) ||
                       (item.itemType === 'notification' && selectedNotification === item.id);
     
+    // Debug logging
+    if (item.itemType === 'chat') {
+      console.log('Chat item:', item.id, 'selectedChat:', selectedChat, 'isSelected:', isSelected);
+    }
+    
     if (isSelected) {
       // Selected: Always use bright orange vertical line regardless of read/unread status
       const isUnread = item.itemType === 'notification' ? !item.read : item.unread_count > 0;
