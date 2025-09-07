@@ -882,26 +882,78 @@ export default function MessagesPage() {
                       (item.itemType === 'notification' && selectedNotification === item.id);
     
     if (isSelected) {
-      return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 bg-gradient-to-r from-orange-500 to-amber-500 text-white';
-    }
-    
-    if (item.itemType === 'notification') {
-      const priority = item.priority || 'normal';
-      switch (priority) {
-        case 'urgent':
-          return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 bg-gradient-to-br from-red-100 to-red-200 dark:from-red-800/50 dark:to-red-700/60 border-l-4 border-red-500';
-        case 'high':
-          return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-800/50 dark:to-orange-700/60 border-l-4 border-orange-500';
-        case 'normal':
-          return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/50 dark:to-blue-700/60 border-l-4 border-blue-500';
-        case 'low':
-          return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800/50 dark:to-gray-700/60 border-l-4 border-gray-500';
-        default:
-          return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-800/50 dark:to-violet-700/60 border-l-4 border-purple-500';
+      // Use subtle selection with left border instead of orange gradient
+      const isUnread = item.itemType === 'notification' ? !item.read : item.unread_count > 0;
+      if (isUnread) {
+        // Selected unread: keep vibrant styling but add selection border
+        if (item.itemType === 'notification') {
+          const priority = item.priority || 'normal';
+          switch (priority) {
+            case 'urgent':
+              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-8 border-red-800 shadow-lg';
+            case 'high':
+              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-orange-50 dark:hover:bg-orange-900/20 bg-gradient-to-br from-orange-200 to-orange-300 dark:from-orange-700 dark:to-orange-600 border-l-8 border-orange-800 shadow-lg';
+            case 'normal':
+              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-200 to-blue-300 dark:from-blue-700 dark:to-blue-600 border-l-8 border-blue-800 shadow-lg';
+            case 'low':
+              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-900/20 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 border-l-8 border-gray-800 shadow-lg';
+            default:
+              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 bg-gradient-to-br from-purple-200 to-purple-300 dark:from-purple-700 dark:to-purple-600 border-l-8 border-purple-800 shadow-lg';
+          }
+        } else {
+          // Selected unread chat
+          return 'p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/60 dark:to-blue-700/60 shadow-lg border-l-8 border-blue-800';
+        }
+      } else {
+        // Selected read: subtle selection with left border
+        return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800/20 dark:to-neutral-700/20 border-l-8 border-neutral-400 dark:border-neutral-500';
       }
     }
     
-    return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 bg-white/60 dark:bg-neutral-900/60';
+    // Check if item is unread
+    const isUnread = item.itemType === 'notification' ? !item.read : item.unread_count > 0;
+    
+    if (item.itemType === 'notification') {
+      const priority = item.priority || 'normal';
+      if (isUnread) {
+        // UNREAD: Very vibrant and high contrast
+        switch (priority) {
+          case 'urgent':
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-4 border-red-600 shadow-md';
+          case 'high':
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-orange-50 dark:hover:bg-orange-900/20 bg-gradient-to-br from-orange-200 to-orange-300 dark:from-orange-700 dark:to-orange-600 border-l-4 border-orange-600 shadow-md';
+          case 'normal':
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-200 to-blue-300 dark:from-blue-700 dark:to-blue-600 border-l-4 border-blue-600 shadow-md';
+          case 'low':
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-900/20 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 border-l-4 border-gray-600 shadow-md';
+          default:
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 bg-gradient-to-br from-purple-200 to-purple-300 dark:from-purple-700 dark:to-purple-600 border-l-4 border-purple-600 shadow-md';
+        }
+      } else {
+        // READ: Very faded and low contrast
+        switch (priority) {
+          case 'urgent':
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800/20 dark:to-neutral-700/20 border-l-4 border-neutral-300 dark:border-neutral-600';
+          case 'high':
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800/20 dark:to-neutral-700/20 border-l-4 border-neutral-300 dark:border-neutral-600';
+          case 'normal':
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800/20 dark:to-neutral-700/20 border-l-4 border-neutral-300 dark:border-neutral-600';
+          case 'low':
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800/20 dark:to-neutral-700/20 border-l-4 border-neutral-300 dark:border-neutral-600';
+          default:
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800/20 dark:to-neutral-700/20 border-l-4 border-neutral-300 dark:border-neutral-600';
+        }
+      }
+    }
+    
+    // Chat items
+    if (isUnread) {
+      // UNREAD: Very vibrant and high contrast
+      return 'p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/60 dark:to-blue-700/60 shadow-md border-l-4 border-blue-500';
+    } else {
+      // READ: Very faded and low contrast
+      return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800/20 dark:to-neutral-700/20';
+    }
   }, [selectedChat, selectedNotification]);
 
   return (
@@ -1030,10 +1082,12 @@ export default function MessagesPage() {
                               <div className="mb-1">
                                 <h3 className={`text-sm ${
                                   selectedNotification === item.id 
-                                    ? 'text-white font-semibold' 
+                                    ? item.read 
+                                      ? 'text-neutral-400 dark:text-neutral-500 font-semibold' 
+                                      : 'text-neutral-900 dark:text-white font-black'
                                     : item.read 
-                                      ? 'text-neutral-500 dark:text-neutral-500 font-normal' 
-                                      : 'text-neutral-900 dark:text-white font-bold'
+                                      ? 'text-neutral-300 dark:text-neutral-600 font-light' 
+                                      : 'text-neutral-900 dark:text-white font-black'
                                 }`}>
                                   {item.title}
                                 </h3>
@@ -1043,10 +1097,12 @@ export default function MessagesPage() {
                               <div className="mb-2">
                                 <span className={`text-xs ${
                                   selectedNotification === item.id 
-                                    ? 'text-white/70' 
-                                    : item.read 
+                                    ? item.read 
                                       ? 'text-neutral-400 dark:text-neutral-600' 
-                                      : 'text-neutral-600 dark:text-neutral-300'
+                                      : 'text-neutral-700 dark:text-neutral-200'
+                                    : item.read 
+                                      ? 'text-neutral-300 dark:text-neutral-700' 
+                                      : 'text-neutral-700 dark:text-neutral-200'
                                 }`}>
                                   {formatTimestamp(item.timestamp)}
                                 </span>
@@ -1055,10 +1111,12 @@ export default function MessagesPage() {
                               {/* Rows 3+4: Truncated message */}
                               <p className={`text-sm line-clamp-2 ${
                                 selectedNotification === item.id 
-                                  ? 'text-white/90' 
-                                  : item.read 
+                                  ? item.read 
                                     ? 'text-neutral-400 dark:text-neutral-500' 
-                                    : 'text-neutral-700 dark:text-neutral-200'
+                                    : 'text-neutral-800 dark:text-neutral-100'
+                                  : item.read 
+                                    ? 'text-neutral-300 dark:text-neutral-600' 
+                                    : 'text-neutral-800 dark:text-neutral-100'
                               }`}>
                                 {(() => {
                                   // Strip Markdown formatting for conversation preview
@@ -1100,8 +1158,12 @@ export default function MessagesPage() {
                                 {/* Username Pill with Profile Icon */}
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-all duration-200 ${
                                   selectedChat === item.id 
-                                    ? 'bg-white/20 text-white border border-white/30'
-                                    : 'bg-white/10 dark:bg-neutral-800/50 text-neutral-700 dark:text-neutral-300 border border-neutral-300/60 dark:border-neutral-700/50 hover:bg-white/20 dark:hover:bg-neutral-700/50'
+                                    ? item.unread_count > 0
+                                      ? 'bg-white/20 dark:bg-neutral-700/60 text-neutral-900 dark:text-white border border-neutral-400/80 dark:border-neutral-500/80 hover:bg-white/30 dark:hover:bg-neutral-600/60 font-bold'
+                                      : 'bg-white/10 dark:bg-neutral-800/30 text-neutral-500 dark:text-neutral-500 border border-neutral-300/60 dark:border-neutral-600/60 hover:bg-white/20 dark:hover:bg-neutral-700/40 font-semibold'
+                                    : item.unread_count > 0
+                                      ? 'bg-white/20 dark:bg-neutral-700/60 text-neutral-900 dark:text-white border border-neutral-400/80 dark:border-neutral-500/80 hover:bg-white/30 dark:hover:bg-neutral-600/60 font-bold'
+                                      : 'bg-white/5 dark:bg-neutral-800/20 text-neutral-400 dark:text-neutral-600 border border-neutral-200/40 dark:border-neutral-700/30 hover:bg-white/10 dark:hover:bg-neutral-700/30 font-light'
                                 }`}>
                                   {/* Profile Icon */}
                                   <div className="flex-shrink-0 -ml-1">
@@ -1146,8 +1208,14 @@ export default function MessagesPage() {
                               
                               {/* Listing Title */}
                               <h3
-                                className={`font-semibold text-sm truncate mb-1 cursor-pointer ${
-                                  selectedChat === item.id ? 'text-white' : 'text-neutral-900 dark:text-white'
+                                className={`text-sm truncate mb-1 cursor-pointer ${
+                                  selectedChat === item.id 
+                                    ? item.unread_count > 0
+                                      ? 'text-neutral-900 dark:text-white font-black'
+                                      : 'text-neutral-500 dark:text-neutral-500 font-semibold'
+                                    : item.unread_count > 0
+                                      ? 'text-neutral-900 dark:text-white font-black'
+                                      : 'text-neutral-400 dark:text-neutral-600 font-light'
                                 }`}
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -1162,7 +1230,13 @@ export default function MessagesPage() {
                               
                               {/* Last Message */}
                               <p className={`text-xs truncate mb-1 ${
-                                selectedChat === item.id ? 'text-white/80' : 'text-neutral-600 dark:text-neutral-300'
+                                selectedChat === item.id 
+                                  ? item.unread_count > 0
+                                    ? 'text-neutral-700 dark:text-neutral-200'
+                                    : 'text-neutral-400 dark:text-neutral-500'
+                                  : item.unread_count > 0
+                                    ? 'text-neutral-700 dark:text-neutral-200'
+                                    : 'text-neutral-300 dark:text-neutral-600'
                               }`}>
                                 {(() => {
                                   // Simple Markdown rendering for conversation preview
@@ -1179,10 +1253,10 @@ export default function MessagesPage() {
                               {/* Bottom Row: Unread Count */}
                               {item.unread_count > 0 && (
                                 <div className="flex justify-end">
-                                  <span className={`text-xs px-2 py-0.5 rounded-full min-w-[18px] text-center font-medium ${
+                                  <span className={`text-xs px-2 py-0.5 rounded-full min-w-[18px] text-center font-bold ${
                                     selectedChat === item.id 
-                                      ? 'bg-white/20 text-white'
-                                      : 'bg-red-500 text-white'
+                                      ? 'bg-red-700 text-white shadow-lg'
+                                      : 'bg-red-600 text-white shadow-md'
                                   }`}>
                                     {item.unread_count}
                                   </span>
@@ -1192,8 +1266,14 @@ export default function MessagesPage() {
                             
                             {/* Age of Last Message - Top Right */}
                             <div className="flex-shrink-0">
-                              <span className={`text-xs font-bold ${
-                                selectedChat === item.id ? 'text-white/70' : 'text-neutral-500 dark:text-neutral-400'
+                              <span className={`text-xs ${
+                                selectedChat === item.id 
+                                  ? item.unread_count > 0
+                                    ? 'text-neutral-600 dark:text-neutral-300 font-bold'
+                                    : 'text-neutral-400 dark:text-neutral-500 font-semibold'
+                                  : item.unread_count > 0
+                                    ? 'text-neutral-600 dark:text-neutral-300 font-bold'
+                                    : 'text-neutral-300 dark:text-neutral-600 font-light'
                               }`}>
                                 {formatPostAge(item.last_message_time)}
                               </span>
