@@ -36,7 +36,7 @@ export default function PublicProfilePage() {
   // State for user data
   const [userListings, setUserListings] = useState<Listing[]>([]);
   const [allUserListings, setAllUserListings] = useState<Listing[]>([]); // Store all loaded listings for sorting
-  const [userProfile, setUserProfile] = useState<{ id: string; username: string; verified: boolean; registeredAt: number; profilePhoto: string; thumbsUp?: number; deals?: number; rating?: number; lastActive?: number } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ id: string; username: string; verified: boolean; registeredAt: number; profilePhoto: string; thumbsUp?: number; deals?: number; lastActive?: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -273,7 +273,7 @@ export default function PublicProfilePage() {
 
   // Get user info from API response or fallback to default values
   const userVerified = userProfile?.verified || false;
-  const userScore = userProfile?.rating || 0; // Use rating field from API (same as thumbs_up)
+  const userScore = userProfile?.thumbsUp || 0; // Use thumbsUp field from API
   const memberSinceDate = userProfile?.registeredAt ? new Date(userProfile.registeredAt * 1000) : new Date();
   
   // Use locale-aware date formatting with fallback
