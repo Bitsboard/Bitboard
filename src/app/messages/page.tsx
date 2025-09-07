@@ -1359,13 +1359,13 @@ export default function MessagesPage() {
               {selectedChat ? (
                 <>
                   {/* Chat Header */}
-                  <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-2 rounded-t-3xl">
-                    <div className="flex items-end gap-3">
-                      {/* Listing Image - Restore original size */}
+                  <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-4 rounded-t-3xl">
+                    <div className="flex gap-4">
+                      {/* Left: Listing Image */}
                       <img
                         src={chats.find(c => c.id === selectedChat)?.listing_image || '/placeholder-listing.jpg'}
                         alt="Listing"
-                        className="w-32 h-32 rounded-tl-2xl rounded-tr-lg rounded-br-lg rounded-bl-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        className="w-24 h-24 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity flex-shrink-0"
                         onClick={async () => {
                           const selectedChatData = chats.find(c => c.id === selectedChat);
                           if (selectedChatData?.listing_id) {
@@ -1374,12 +1374,11 @@ export default function MessagesPage() {
                         }}
                       />
                       
-                      {/* Content Section */}
-                      <div className="flex-1 min-w-0 flex flex-col justify-between h-32">
-                        {/* Top Section: Selling Tag + Title */}
-                        <div>
-                          {/* Top Row: Selling Tag + Title */}
-                          <div className="flex items-center gap-2 mb-1">
+                      {/* Right: Content Rows */}
+                      <div className="flex-1 min-w-0">
+                        {/* Row 1: Selling Tag + Title + Age + Location */}
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
                             {/* Selling/Looking For Tag */}
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold text-white ${
                               chats.find(c => c.id === selectedChat)?.listing_ad_type === 'want' 
@@ -1390,132 +1389,116 @@ export default function MessagesPage() {
                             </span>
                             
                             {/* Listing Title */}
-                            <h2 className="text-lg font-bold text-white truncate flex-1">
+                            <h2 className="text-lg font-bold text-white truncate">
                               {chats.find(c => c.id === selectedChat)?.listing_title || 'Untitled Listing'}
                             </h2>
                           </div>
                           
-                          {/* Price + Dollar Equivalent */}
-                          <div className="text-white/90 mb-1">
-                            {(() => {
-                              const priceSat = chats.find(c => c.id === selectedChat)?.listing_price_sat || 0;
-                              if (priceSat === -1) {
-                                return (
-                                  <div>
-                                    <span className="text-lg font-semibold">Make an offer</span>
-                                  </div>
-                                );
-                              }
-                              return unit === 'BTC' ? (
-                                <div>
-                                  <span className="text-lg font-semibold">
-                                    {(Number(priceSat) / 100000000).toFixed(8)} BTC
-                                  </span>
-                                  {/* Dollar equivalent */}
-                                  <div className="text-sm text-white/80">
-                                    {formatCADAmount((Number(priceSat) / 100000000) * (btcCad || 0))}
-                                  </div>
-                                </div>
-                              ) : (
-                                <div>
-                                  <span className="text-lg font-semibold">
-                                    {priceSat.toLocaleString()} sats
-                                  </span>
-                                  {/* Dollar equivalent */}
-                                  <div className="text-sm text-white/80">
-                                    {formatCADAmount((Number(priceSat) / 100000000) * (btcCad || 0))}
-                                  </div>
-                                </div>
-                              );
-                            })()}
-                          </div>
-                        </div>
-                        
-                        {/* Bottom Section: Username Pill with Reputation */}
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="inline-flex items-center px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50 border border-neutral-300/60 dark:border-neutral-700/50 hover:scale-105 hover:shadow-md"
-                            onClick={() => {
-                              const selectedChatData = chats.find(c => c.id === selectedChat);
-                              if (selectedChatData?.other_user) {
-                                router.push(`/profile/${selectedChatData.other_user}`);
-                              }
-                            }}
-                          >
-                            <div className="flex-shrink-0 -ml-1">
-                              <img
-                                src={generateProfilePicture(chats.find(c => c.id === selectedChat)?.other_user || '')}
-                                alt={`${chats.find(c => c.id === selectedChat)?.other_user}'s profile picture`}
-                                className="w-5 h-5 rounded-full object-cover"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.display = 'none';
-                                  const parent = target.parentElement;
-                                  if (parent) {
-                                    const fallback = parent.querySelector('div') as HTMLDivElement;
-                                    if (fallback) fallback.classList.remove('hidden');
-                                  }
-                                }}
-                              />
-                              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center hidden">
-                                <span className="text-xs font-bold text-white">{getInitials(chats.find(c => c.id === selectedChat)?.other_user || '')}</span>
-                              </div>
-                            </div>
-                            <span className="text-sm ml-1 text-white">{chats.find(c => c.id === selectedChat)?.other_user}</span>
-                          </div>
-                          
-                          {/* Verified Badge */}
-                          {chats.find(c => c.id === selectedChat)?.other_user_verified && (
-                            <span className="verified-badge inline-flex h-5 w-5 items-center justify-center rounded-full text-white font-bold shadow-md" style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }} aria-label="Verified" title="User has verified their identity">
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                            </span>
-                          )}
-                          
-                          {/* User Reputation - Fixed */}
-                          <div className="flex items-center gap-1">
-                            <span className="text-sm text-white/80">+{chats.find(c => c.id === selectedChat)?.seller_thumbsUp || 0} 👍</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Right Side: Age + Location + Action Buttons */}
-                      <div className="flex flex-col justify-between h-32 -ml-2">
-                        {/* Top Section: Age + Location */}
-                        <div className="flex items-center gap-1 mt-2">
-                          {/* Posting Age */}
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium text-white bg-white/20 backdrop-blur-sm">
+                          {/* Age + Location in one pill */}
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium text-white bg-white/20 backdrop-blur-sm flex-shrink-0">
                             {chats.find(c => c.id === selectedChat)?.listing_created_at ? 
                               `${formatPostAge(chats.find(c => c.id === selectedChat)?.listing_created_at!)} ago` : 
                               'Unknown'
-                            }
-                          </span>
-                          
-                          {/* "in" text */}
-                          <span className="text-white/80 text-sm">in</span>
-                          
-                          {/* Location Tag */}
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium text-white bg-white/20 backdrop-blur-sm">
-                            {chats.find(c => c.id === selectedChat)?.listing_location || 'Location N/A'}
+                            } in {chats.find(c => c.id === selectedChat)?.listing_location || 'Location N/A'}
                           </span>
                         </div>
                         
-                        {/* Bottom Section: Action Buttons - All same shape */}
-                        <div className="flex flex-col gap-2">
-                          {/* View Listing Button */}
-                          <button
-                            onClick={async () => {
-                              const selectedChatData = chats.find(c => c.id === selectedChat);
-                              if (selectedChatData?.listing_id) {
-                                await openListingModal(Number(selectedChatData.listing_id));
-                              }
-                            }}
-                            className="px-2 py-1.5 text-sm font-medium text-orange-600 bg-white hover:bg-orange-50 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-md w-fit"
-                          >
-                            View Listing
-                          </button>
+                        {/* Row 2: Price + Dollar Equivalent */}
+                        <div className="text-white/90 mb-3">
+                          {(() => {
+                            const priceSat = chats.find(c => c.id === selectedChat)?.listing_price_sat || 0;
+                            if (priceSat === -1) {
+                              return (
+                                <div>
+                                  <span className="text-lg font-semibold">Make an offer</span>
+                                </div>
+                              );
+                            }
+                            return unit === 'BTC' ? (
+                              <div>
+                                <span className="text-lg font-semibold">
+                                  {(Number(priceSat) / 100000000).toFixed(8)} BTC
+                                </span>
+                                {/* Dollar equivalent */}
+                                <div className="text-sm text-white/80">
+                                  {formatCADAmount((Number(priceSat) / 100000000) * (btcCad || 0))}
+                                </div>
+                              </div>
+                            ) : (
+                              <div>
+                                <span className="text-lg font-semibold">
+                                  {priceSat.toLocaleString()} sats
+                                </span>
+                                {/* Dollar equivalent */}
+                                <div className="text-sm text-white/80">
+                                  {formatCADAmount((Number(priceSat) / 100000000) * (btcCad || 0))}
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                        
+                        {/* Row 3: Username + Reputation + Action Buttons */}
+                        <div className="flex items-center justify-between">
+                          {/* Left: Username + Reputation */}
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className="inline-flex items-center px-3 py-1.5 rounded-full font-medium transition-all duration-200 cursor-pointer relative bg-white/10 hover:bg-white/20 border border-white/20 hover:scale-105 hover:shadow-md"
+                              onClick={() => {
+                                const selectedChatData = chats.find(c => c.id === selectedChat);
+                                if (selectedChatData?.other_user) {
+                                  router.push(`/profile/${selectedChatData.other_user}`);
+                                }
+                              }}
+                            >
+                              <div className="flex-shrink-0 -ml-1">
+                                <img
+                                  src={generateProfilePicture(chats.find(c => c.id === selectedChat)?.other_user || '')}
+                                  alt={`${chats.find(c => c.id === selectedChat)?.other_user}'s profile picture`}
+                                  className="w-5 h-5 rounded-full object-cover"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    const parent = target.parentElement;
+                                    if (parent) {
+                                      const fallback = parent.querySelector('div') as HTMLDivElement;
+                                      if (fallback) fallback.classList.remove('hidden');
+                                    }
+                                  }}
+                                />
+                                <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center hidden">
+                                  <span className="text-xs font-bold text-white">{getInitials(chats.find(c => c.id === selectedChat)?.other_user || '')}</span>
+                                </div>
+                              </div>
+                              <span className="text-sm ml-1 text-white">{chats.find(c => c.id === selectedChat)?.other_user}</span>
+                            </div>
+                            
+                            {/* Verified Badge */}
+                            {chats.find(c => c.id === selectedChat)?.other_user_verified && (
+                              <span className="verified-badge inline-flex h-5 w-5 items-center justify-center rounded-full text-white font-bold shadow-md" style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }} aria-label="Verified" title="User has verified their identity">
+                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                              </span>
+                            )}
+                            
+                            {/* User Reputation */}
+                            <span className="text-sm text-white/80">+{chats.find(c => c.id === selectedChat)?.seller_thumbsUp || 0} 👍</span>
+                          </div>
                           
-                          {/* Action Buttons Row - Same shape and size */}
-                          <div className="flex gap-2">
+                          {/* Right: Action Buttons */}
+                          <div className="flex items-center gap-2">
+                            {/* View Listing Button */}
+                            <button
+                              onClick={async () => {
+                                const selectedChatData = chats.find(c => c.id === selectedChat);
+                                if (selectedChatData?.listing_id) {
+                                  await openListingModal(Number(selectedChatData.listing_id));
+                                }
+                              }}
+                              className="px-3 py-1.5 text-sm font-medium text-orange-600 bg-white hover:bg-orange-50 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md"
+                            >
+                              View Listing
+                            </button>
+                            
                             {/* Mark as Unread Button */}
                             <button
                               onClick={async () => {
@@ -1528,7 +1511,7 @@ export default function MessagesPage() {
                                   );
                                 }
                               }}
-                              className="px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                              className="px-3 py-1.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
                               title="Mark as unread"
                             >
                               Mark Unread
@@ -1542,7 +1525,7 @@ export default function MessagesPage() {
                                   handleDeleteConversation(selectedChatData);
                                 }
                               }}
-                              className="px-2 py-1 text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                              className="px-3 py-1.5 text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
                               title="Delete conversation"
                             >
                               Delete
