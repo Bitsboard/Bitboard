@@ -1508,22 +1508,42 @@ export default function MessagesPage() {
                           </span>
                         </div>
                         
-                        {/* Bottom Section: View Listing Button - Aligned with bottom of image */}
-                        <button
-                          onClick={async () => {
-                            const selectedChatData = chats.find(c => c.id === selectedChat);
+                        {/* Bottom Section: Action Buttons - Aligned with bottom of image */}
+                        <div className="flex flex-col gap-2">
+                          {/* View Listing Button */}
+                          <button
+                            onClick={async () => {
+                              const selectedChatData = chats.find(c => c.id === selectedChat);
 
-                            if (selectedChatData?.listing_id) {
+                              if (selectedChatData?.listing_id) {
 
-                              await openListingModal(Number(selectedChatData.listing_id));
-                            } else {
+                                await openListingModal(Number(selectedChatData.listing_id));
+                              } else {
 
-                            }
-                          }}
-                          className="px-2 py-1.5 text-sm font-medium text-orange-600 bg-white hover:bg-orange-50 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-md w-fit"
-                        >
-                          View Listing
-                        </button>
+                              }
+                            }}
+                            className="px-2 py-1.5 text-sm font-medium text-orange-600 bg-white hover:bg-orange-50 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-md w-fit"
+                          >
+                            View Listing
+                          </button>
+                          
+                          {/* Action Buttons Row */}
+                          <div className="flex gap-2">
+                            {/* Delete Button */}
+                            <button
+                              onClick={() => {
+                                const selectedChatData = chats.find(c => c.id === selectedChat);
+                                if (selectedChatData) {
+                                  handleDeleteChat(selectedChatData);
+                                }
+                              }}
+                              className="px-2 py-1 text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                              title="Delete conversation"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
