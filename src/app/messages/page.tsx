@@ -1362,17 +1362,19 @@ export default function MessagesPage() {
                   <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-4 rounded-t-3xl">
                     <div className="flex gap-4">
                       {/* Left: Listing Image */}
-                      <img
-                        src={chats.find(c => c.id === selectedChat)?.listing_image || '/placeholder-listing.jpg'}
-                        alt="Listing"
-                        className="w-24 h-24 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity flex-shrink-0"
-                        onClick={async () => {
-                          const selectedChatData = chats.find(c => c.id === selectedChat);
-                          if (selectedChatData?.listing_id) {
-                            await openListingModal(Number(selectedChatData.listing_id));
-                          }
-                        }}
-                      />
+                      <div className="p-2 flex-shrink-0">
+                        <img
+                          src={chats.find(c => c.id === selectedChat)?.listing_image || '/placeholder-listing.jpg'}
+                          alt="Listing"
+                          className="w-24 h-24 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={async () => {
+                            const selectedChatData = chats.find(c => c.id === selectedChat);
+                            if (selectedChatData?.listing_id) {
+                              await openListingModal(Number(selectedChatData.listing_id));
+                            }
+                          }}
+                        />
+                      </div>
                       
                       {/* Right: Content Rows */}
                       <div className="flex-1 min-w-0">
@@ -1443,7 +1445,7 @@ export default function MessagesPage() {
                           {/* Left: Username + Reputation */}
                           <div className="flex items-center gap-2">
                             <div 
-                              className="inline-flex items-center px-3 py-1.5 rounded-full font-medium transition-all duration-200 cursor-pointer relative bg-white/10 hover:bg-white/20 border border-white/20 hover:scale-105 hover:shadow-md"
+                              className="inline-flex items-center px-2 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative bg-white/10 hover:bg-white/20 border border-white/20 hover:scale-105 hover:shadow-md"
                               onClick={() => {
                                 const selectedChatData = chats.find(c => c.id === selectedChat);
                                 if (selectedChatData?.other_user) {
@@ -1455,7 +1457,7 @@ export default function MessagesPage() {
                                 <img
                                   src={generateProfilePicture(chats.find(c => c.id === selectedChat)?.other_user || '')}
                                   alt={`${chats.find(c => c.id === selectedChat)?.other_user}'s profile picture`}
-                                  className="w-5 h-5 rounded-full object-cover"
+                                  className="w-4 h-4 rounded-full object-cover"
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement;
                                     target.style.display = 'none';
@@ -1466,11 +1468,11 @@ export default function MessagesPage() {
                                     }
                                   }}
                                 />
-                                <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center hidden">
+                                <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center hidden">
                                   <span className="text-xs font-bold text-white">{getInitials(chats.find(c => c.id === selectedChat)?.other_user || '')}</span>
                                 </div>
                               </div>
-                              <span className="text-sm ml-1 text-white">{chats.find(c => c.id === selectedChat)?.other_user}</span>
+                              <span className="text-xs ml-1 text-white">{chats.find(c => c.id === selectedChat)?.other_user}</span>
                             </div>
                             
                             {/* Verified Badge */}
