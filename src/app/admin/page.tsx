@@ -221,7 +221,6 @@ export default function AdminPage() {
           message: '',
           icon: 'info',
           actionUrl: '',
-          priority: 'normal',
           expiresAt: ''
         });
         setShowNotificationForm(false);
