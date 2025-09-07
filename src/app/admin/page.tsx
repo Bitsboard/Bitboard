@@ -90,17 +90,14 @@ export default function AdminPage() {
   // System notification state
   const [showNotificationForm, setShowNotificationForm] = useState(false);
   const [notificationForm, setNotificationForm] = useState({
-    targetGroup: 'all' as 'all' | 'verified' | 'unverified' | 'admin' | 'buyers' | 'sellers',
+    targetGroup: 'all' as 'all' | 'verified' | 'unverified' | 'admin',
     title: '',
     message: '',
-    icon: 'info' as 'info' | 'success' | 'warning' | 'error' | 'system',
-    actionUrl: '',
-    expiresAt: ''
+    icon: 'info' as 'info' | 'success' | 'warning' | 'error' | 'system'
   });
   const [sendingNotification, setSendingNotification] = useState(false);
   const [notificationSuccess, setNotificationSuccess] = useState<string | null>(null);
   const [notificationError, setNotificationError] = useState<string | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
   
   const router = useRouter();
   const lang = useLang();
@@ -219,9 +216,7 @@ export default function AdminPage() {
           targetGroup: 'all',
           title: '',
           message: '',
-          icon: 'info',
-          actionUrl: '',
-          expiresAt: ''
+          icon: 'info'
         });
         setShowNotificationForm(false);
       } else {
@@ -235,20 +230,6 @@ export default function AdminPage() {
     }
   };
 
-  const resetNotificationForm = () => {
-    setNotificationForm({
-      targetGroup: 'all',
-      title: '',
-      message: '',
-      icon: 'info',
-      actionUrl: '',
-      priority: 'normal',
-      expiresAt: ''
-    });
-    setNotificationError(null);
-    setNotificationSuccess(null);
-    setShowPreview(false);
-  };
 
   // Template presets
 
@@ -735,8 +716,6 @@ export default function AdminPage() {
                       <option value="verified">Verified Users Only</option>
                       <option value="unverified">Unverified Users Only</option>
                       <option value="admin">Admin Users Only</option>
-                      <option value="buyers">Buyers Only</option>
-                      <option value="sellers">Sellers Only</option>
                     </select>
                   </div>
 
@@ -829,153 +808,6 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  {/* Action URL (Optional) */}
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-2">
-                      Action URL (Optional)
-                    </label>
-                    <input
-                      type="url"
-                      value={notificationForm.actionUrl}
-                      onChange={(e) => setNotificationForm(prev => ({ ...prev, actionUrl: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      placeholder="https://example.com (optional)"
-                    />
-                    <div className="text-xs text-neutral-500 mt-1">
-                      Users can click this URL when viewing the notification
-                    </div>
-                  </div>
-
-                  {/* Expiration Date (Optional) */}
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-2">
-                      Expiration Date (Optional)
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={notificationForm.expiresAt}
-                      onChange={(e) => setNotificationForm(prev => ({ ...prev, expiresAt: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    />
-                    <div className="text-xs text-neutral-500 mt-1">
-                      Notification will automatically expire at this time
-                    </div>
-                  </div>
-
-                  {/* Preview Button */}
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setShowPreview(!showPreview)}
-                      className="flex-1 px-4 py-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
-                    >
-                      {showPreview ? 'Hide Preview' : 'Show Preview'}
-                    </button>
-                  </div>
-
-                  {/* Preview */}
-                  {showPreview && (
-                    <div className="border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 bg-neutral-50 dark:bg-neutral-800/50">
-                      <h4 className="text-sm font-medium text-neutral-900 dark:text-white mb-3">Preview</h4>
-                      <div className="bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4">
-                        <div className="flex items-start gap-3">
-                          <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center shadow-sm ${
-                            notificationForm.icon === 'info' ? 'bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-900' :
-                            notificationForm.icon === 'success' ? 'bg-gradient-to-br from-green-100 to-green-200 dark:from-green-800 dark:to-green-900' :
-                            notificationForm.icon === 'warning' ? 'bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-800 dark:to-yellow-900' :
-                            notificationForm.icon === 'error' ? 'bg-gradient-to-br from-red-100 to-red-200 dark:from-red-800 dark:to-red-900' :
-                            'bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-800 dark:to-purple-900'
-                          }`}>
-                            {notificationForm.icon === 'info' && (
-                              <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                            )}
-                            {notificationForm.icon === 'success' && (
-                              <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                            )}
-                            {notificationForm.icon === 'warning' && (
-                              <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                              </svg>
-                            )}
-                            {notificationForm.icon === 'error' && (
-                              <svg className="w-5 h-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                            )}
-                            {(!notificationForm.icon || notificationForm.icon === 'system') && (
-                              <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19h6a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                              </svg>
-                            )}
-                          </div>
-                          
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-1">
-                              <h3 className="font-semibold text-sm text-neutral-900 dark:text-white">
-                                {notificationForm.title || 'Notification Title'}
-                              </h3>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                                  Now
-                                </span>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center gap-1 mb-2">
-                              <span className="text-xs font-medium text-neutral-600 dark:text-neutral-400">
-                                bitsbarter
-                              </span>
-                              <span className="text-xs text-neutral-400 dark:text-neutral-500">•</span>
-                              <span className="text-xs text-neutral-400 dark:text-neutral-500">
-                                System Notification
-                              </span>
-                            </div>
-                            
-                            <div className="text-sm text-neutral-600 dark:text-neutral-300 prose prose-sm max-w-none">
-                              {notificationForm.message ? (() => {
-                                // Enhanced Markdown rendering for preview
-                                let text = notificationForm.message;
-                                
-                                // Headers
-                                text = text.replace(/^# (.*$)/gm, '<h1 class="text-lg font-bold text-neutral-900 dark:text-white mb-2">$1</h1>');
-                                text = text.replace(/^## (.*$)/gm, '<h2 class="text-base font-bold text-neutral-900 dark:text-white mb-1">$1</h2>');
-                                text = text.replace(/^### (.*$)/gm, '<h3 class="text-sm font-bold text-neutral-900 dark:text-white mb-1">$1</h3>');
-                                
-                                // Bold and italic
-                                text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-neutral-900 dark:text-white">$1</strong>');
-                                text = text.replace(/\*(.*?)\*/g, '<em class="italic text-neutral-900 dark:text-white">$1</em>');
-                                
-                                // Links
-                                text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" target="_blank" rel="noopener noreferrer">$1</a>');
-                                
-                                // Code
-                                text = text.replace(/`([^`]+)`/g, '<code class="bg-neutral-100 dark:bg-neutral-800 px-1 py-0.5 rounded text-xs font-mono">$1</code>');
-                                
-                                // Quotes
-                                text = text.replace(/^> (.*$)/gm, '<blockquote class="border-l-4 border-blue-300 dark:border-blue-600 pl-4 italic my-2 text-neutral-700 dark:text-neutral-300">$1</blockquote>');
-                                
-                                // Dividers
-                                text = text.replace(/^---$/gm, '<hr class="my-3 border-neutral-300 dark:border-neutral-600">');
-                                
-                                // Line breaks
-                                text = text.replace(/\n/g, '<br>');
-                                
-                                return <div dangerouslySetInnerHTML={{ __html: text }} />;
-                              })() : (
-                                <div className="text-neutral-400 dark:text-neutral-500 italic">
-                                  Notification message will appear here...
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
 
                   {/* Success/Error Messages */}
                   {notificationSuccess && (
