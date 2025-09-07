@@ -1036,51 +1036,89 @@ export default function MessagesPage() {
                       >
                         {item.itemType === 'notification' ? (
                           /* System Notification Layout - Email Style */
-                          <div className="flex items-start gap-3 p-2">
-                            <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center shadow-sm ${
-                              item.read 
-                                ? item.icon === 'info' ? 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/40' :
-                                  item.icon === 'success' ? 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/40' :
-                                  item.icon === 'warning' ? 'bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/30 dark:to-yellow-800/40' :
-                                  item.icon === 'error' ? 'bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/40' :
-                                  'bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/40'
-                                : item.icon === 'info' ? 'bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-900' :
-                                  item.icon === 'success' ? 'bg-gradient-to-br from-green-100 to-green-200 dark:from-green-800 dark:to-green-900' :
-                                  item.icon === 'warning' ? 'bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-800 dark:to-yellow-900' :
-                                  item.icon === 'error' ? 'bg-gradient-to-br from-red-100 to-red-200 dark:from-red-800 dark:to-red-900' :
-                                  'bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-800 dark:to-purple-900'
-                            }`}>
-                              {item.icon === 'info' && (
-                                <svg className={`w-5 h-5 ${item.read ? 'text-blue-400 dark:text-blue-500' : 'text-blue-600 dark:text-blue-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                              )}
-                              {item.icon === 'success' && (
-                                <svg className={`w-5 h-5 ${item.read ? 'text-green-400 dark:text-green-500' : 'text-green-600 dark:text-green-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                              )}
-                              {item.icon === 'warning' && (
-                                <svg className={`w-5 h-5 ${item.read ? 'text-yellow-400 dark:text-yellow-500' : 'text-yellow-600 dark:text-yellow-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                                </svg>
-                              )}
-                              {item.icon === 'error' && (
-                                <svg className={`w-5 h-5 ${item.read ? 'text-red-400 dark:text-red-500' : 'text-red-600 dark:text-red-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                              )}
-                              {(!item.icon || item.icon === 'system') && (
-                                <svg className={`w-5 h-5 ${item.read ? 'text-purple-400 dark:text-purple-500' : 'text-purple-600 dark:text-purple-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19h6a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                              )}
-                            </div>
-                            
+                          <div className="flex items-start gap-3 relative">
                             <div className="flex-1 min-w-0">
-                              {/* Row 1: Title */}
-                              <div className="mb-1">
-                                <h3 className={`text-sm ${
+                              {/* Row 1: Small Icon + Title */}
+                              <div className="flex items-center gap-2 mb-2">
+                                {/* Small notification icon */}
+                                <div className={`flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center ${
+                                  selectedNotification === item.id 
+                                    ? item.read 
+                                      ? 'bg-neutral-400/20 dark:bg-neutral-500/20' 
+                                      : 'bg-white/20 dark:bg-neutral-700/60'
+                                    : item.read 
+                                      ? 'bg-neutral-300/20 dark:bg-neutral-600/20' 
+                                      : 'bg-white/20 dark:bg-neutral-700/60'
+                                }`}>
+                                  {item.icon === 'info' && (
+                                    <svg className={`w-2.5 h-2.5 ${
+                                      selectedNotification === item.id 
+                                        ? item.read 
+                                          ? 'text-neutral-400 dark:text-neutral-500' 
+                                          : 'text-white'
+                                        : item.read 
+                                          ? 'text-neutral-300 dark:text-neutral-600' 
+                                          : 'text-white'
+                                    }`} fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                    </svg>
+                                  )}
+                                  {item.icon === 'success' && (
+                                    <svg className={`w-2.5 h-2.5 ${
+                                      selectedNotification === item.id 
+                                        ? item.read 
+                                          ? 'text-neutral-400 dark:text-neutral-500' 
+                                          : 'text-white'
+                                        : item.read 
+                                          ? 'text-neutral-300 dark:text-neutral-600' 
+                                          : 'text-white'
+                                    }`} fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                    </svg>
+                                  )}
+                                  {item.icon === 'warning' && (
+                                    <svg className={`w-2.5 h-2.5 ${
+                                      selectedNotification === item.id 
+                                        ? item.read 
+                                          ? 'text-neutral-400 dark:text-neutral-500' 
+                                          : 'text-white'
+                                        : item.read 
+                                          ? 'text-neutral-300 dark:text-neutral-600' 
+                                          : 'text-white'
+                                    }`} fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                    </svg>
+                                  )}
+                                  {item.icon === 'error' && (
+                                    <svg className={`w-2.5 h-2.5 ${
+                                      selectedNotification === item.id 
+                                        ? item.read 
+                                          ? 'text-neutral-400 dark:text-neutral-500' 
+                                          : 'text-white'
+                                        : item.read 
+                                          ? 'text-neutral-300 dark:text-neutral-600' 
+                                          : 'text-white'
+                                    }`} fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                    </svg>
+                                  )}
+                                  {(!item.icon || item.icon === 'system') && (
+                                    <svg className={`w-2.5 h-2.5 ${
+                                      selectedNotification === item.id 
+                                        ? item.read 
+                                          ? 'text-neutral-400 dark:text-neutral-500' 
+                                          : 'text-white'
+                                        : item.read 
+                                          ? 'text-neutral-300 dark:text-neutral-600' 
+                                          : 'text-white'
+                                    }`} fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm2 2a1 1 0 000 2h6a1 1 0 100-2H5z" clipRule="evenodd" />
+                                    </svg>
+                                  )}
+                                </div>
+                                
+                                {/* Title */}
+                                <h3 className={`text-sm flex-1 ${
                                   selectedNotification === item.id 
                                     ? item.read 
                                       ? 'text-neutral-400 dark:text-neutral-500 font-semibold' 
@@ -1093,22 +1131,7 @@ export default function MessagesPage() {
                                 </h3>
                               </div>
                               
-                              {/* Row 2: Timestamp */}
-                              <div className="mb-2">
-                                <span className={`text-xs ${
-                                  selectedNotification === item.id 
-                                    ? item.read 
-                                      ? 'text-neutral-400 dark:text-neutral-600' 
-                                      : 'text-neutral-700 dark:text-neutral-200'
-                                    : item.read 
-                                      ? 'text-neutral-300 dark:text-neutral-700' 
-                                      : 'text-neutral-700 dark:text-neutral-200'
-                                }`}>
-                                  {formatTimestamp(item.timestamp)}
-                                </span>
-                              </div>
-                              
-                              {/* Rows 3+4: Truncated message */}
+                              {/* Rows 2-3: Truncated message */}
                               <p className={`text-sm line-clamp-2 ${
                                 selectedNotification === item.id 
                                   ? item.read 
@@ -1132,20 +1155,37 @@ export default function MessagesPage() {
                               </p>
                             </div>
                             
+                            {/* Age of Notification - Top Right */}
+                            <div className="flex-shrink-0">
+                              <span className={`text-xs ${
+                                selectedNotification === item.id 
+                                  ? item.read 
+                                    ? 'text-neutral-400 dark:text-neutral-500 font-semibold' 
+                                    : 'text-neutral-600 dark:text-neutral-300 font-bold'
+                                  : item.read 
+                                    ? 'text-neutral-300 dark:text-neutral-600 font-light' 
+                                    : 'text-neutral-600 dark:text-neutral-300 font-bold'
+                              }`}>
+                                {formatPostAge(item.timestamp)}
+                              </span>
+                            </div>
+                            
                             {/* Delete Button - Bottom Right */}
                             {selectedNotification === item.id && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  deleteNotification(item.id);
-                                }}
-                                className="absolute bottom-2 right-2 p-1 transition-all duration-200 hover:scale-110"
-                                title="Delete notification"
-                              >
-                                <svg className="w-4 h-4 text-white hover:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              </button>
+                              <div className="flex-shrink-0 ml-2">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteNotification(item.id);
+                                  }}
+                                  className="p-1 text-neutral-400 hover:text-red-500 transition-colors duration-200"
+                                  title="Delete notification"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </div>
                             )}
                           </div>
                         ) : (
