@@ -176,7 +176,7 @@ export default function MessagesPage() {
             last_message: chat.lastMessageText || chat.latest_message_text || 'No messages yet',
             last_message_time: chat.latest_message_time || chat.lastMessageAt || chat.created_at || 0,
             unread_count: chat.unread_count || 0,
-            seller_thumbsUp: chat.seller?.thumbsUp || 0
+            seller_thumbsUp: chat.seller?.rating || 0
                 }));
         
         // Only update if there are actual changes to prevent flashing
@@ -1359,191 +1359,152 @@ export default function MessagesPage() {
               {selectedChat ? (
                 <>
                   {/* Chat Header */}
-                  <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-2 rounded-t-3xl">
-                    <div className="flex items-end gap-3">
-                      {/* Listing Image - Fix top-left corner rounding */}
-                      <img
-                        src={chats.find(c => c.id === selectedChat)?.listing_image || '/placeholder-listing.jpg'}
-                        alt="Listing"
-                        className="w-32 h-32 rounded-tl-2xl rounded-tr-lg rounded-br-lg rounded-bl-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={async () => {
-                          const selectedChatData = chats.find(c => c.id === selectedChat);
-                  
-                          if (selectedChatData?.listing_id) {
-                            
-                            await openListingModal(Number(selectedChatData.listing_id));
-                          } else {
-                            
-                          }
-                        }}
-                      />
-                      
-                      {/* Content Section */}
-                      <div className="flex-1 min-w-0 flex flex-col justify-between h-32">
-                        {/* Top Section: Selling Tag + Title + Age + Location */}
-                        <div>
-                          {/* Top Row: Selling Tag + Title + Age + Location */}
-                          <div className="flex items-center gap-2 mb-1">
-                            {/* Selling/Looking For Tag */}
+                  <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-4 rounded-t-3xl">
+                    <div className="flex items-center justify-between">
+                      {/* Left Section: Listing Info */}
+                      <div className="flex items-center gap-4">
+                        {/* Listing Image */}
+                        <img
+                          src={chats.find(c => c.id === selectedChat)?.listing_image || '/placeholder-listing.jpg'}
+                          alt="Listing"
+                          className="w-16 h-16 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={async () => {
+                            const selectedChatData = chats.find(c => c.id === selectedChat);
+                            if (selectedChatData?.listing_id) {
+                              await openListingModal(Number(selectedChatData.listing_id));
+                            }
+                          }}
+                        />
+                        
+                        {/* Listing Details */}
+                        <div className="flex flex-col gap-1">
+                          {/* Title and Ad Type */}
+                          <div className="flex items-center gap-2">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold text-white ${
                               chats.find(c => c.id === selectedChat)?.listing_ad_type === 'want' 
                                 ? 'bg-gradient-to-r from-fuchsia-500 to-violet-500' 
                                 : 'bg-gradient-to-r from-emerald-500 to-teal-500'
                             }`}>
-                              {(() => {
-                                const adType = chats.find(c => c.id === selectedChat)?.listing_ad_type;
-                        
-                                return adType === 'want' ? 'Looking For' : 'Selling';
-                              })()}
+                              {chats.find(c => c.id === selectedChat)?.listing_ad_type === 'want' ? 'Looking For' : 'Selling'}
                             </span>
-                            
-                            {/* Listing Title - Directly to the right of selling tag */}
-                            <h2 className="text-lg font-bold text-white truncate flex-1">
+                            <h2 className="text-lg font-bold text-white truncate max-w-xs">
                               {chats.find(c => c.id === selectedChat)?.listing_title || 'Untitled Listing'}
                             </h2>
                           </div>
                           
-                          {/* Price + Dollar Equivalent */}
-                          <div className="text-white/90 mb-1">
-                            {/* Primary Price */}
+                          {/* Price */}
+                          <div className="text-white/90">
                             {(() => {
                               const priceSat = chats.find(c => c.id === selectedChat)?.listing_price_sat || 0;
                               if (priceSat === -1) {
-                                return (
-                                  <div>
-                                    <span className="text-lg font-semibold">Make an offer</span>
-                                  </div>
-                                );
+                                return <span className="text-sm font-semibold">Make an offer</span>;
                               }
                               return unit === 'BTC' ? (
-                                <div>
-                                  <span className="text-lg font-semibold">
-                                    {(Number(priceSat) / 100000000).toFixed(8)} BTC
-                                  </span>
-                                  {/* Dollar equivalent */}
-                                  <div className="text-sm text-white/80">
-                                    {formatCADAmount((Number(priceSat) / 100000000) * (btcCad || 0))}
-                                  </div>
-                                </div>
+                                <span className="text-sm font-semibold">
+                                  {(Number(priceSat) / 100000000).toFixed(8)} BTC
+                                </span>
                               ) : (
-                                <div>
-                                  <span className="text-lg font-semibold">
-                                    {priceSat.toLocaleString()} sats
-                                  </span>
-                                  {/* Dollar equivalent */}
-                                  <div className="text-sm text-white/80">
-                                    {formatCADAmount((Number(priceSat) / 100000000) * (btcCad || 0))}
-                                  </div>
-                                </div>
+                                <span className="text-sm font-semibold">
+                                  {priceSat.toLocaleString()} sats
+                                </span>
                               );
                             })()}
                           </div>
                         </div>
-                        
-                        {/* Bottom Section: Username Pill - Aligned with bottom of image */}
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="inline-flex items-center px-3 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative bg-white/10 dark:bg-neutral-800/50 hover:bg-white/20 dark:hover:bg-neutral-700/50 border border-neutral-300/60 dark:border-neutral-700/50 hover:scale-105 hover:shadow-md"
-                            onClick={() => {
-                              const selectedChatData = chats.find(c => c.id === selectedChat);
-                              if (selectedChatData?.other_user) {
-                                router.push(`/profile/${selectedChatData.other_user}`);
-                              }
-                            }}
-                          >
-                            <div className="flex-shrink-0 -ml-1">
-                              <img
-                                src={generateProfilePicture(chats.find(c => c.id === selectedChat)?.other_user || '')}
-                                alt={`${chats.find(c => c.id === selectedChat)?.other_user}'s profile picture`}
-                                className="w-5 h-5 rounded-full object-cover"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.display = 'none';
-                                  const parent = target.parentElement;
-                                  if (parent) {
-                                    const fallback = parent.querySelector('div') as HTMLDivElement;
-                                    if (fallback) fallback.classList.remove('hidden');
-                                  }
-                                }}
-                              />
-                              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center hidden">
-                                <span className="text-xs font-bold text-white">{getInitials(chats.find(c => c.id === selectedChat)?.other_user || '')}</span>
-                              </div>
+                      </div>
+                      
+                      {/* Center Section: User Info */}
+                      <div className="flex items-center gap-3">
+                        {/* User Profile */}
+                        <div 
+                          className="inline-flex items-center px-3 py-1.5 rounded-full font-medium transition-all duration-200 cursor-pointer relative bg-white/10 hover:bg-white/20 border border-white/20 hover:scale-105 hover:shadow-md"
+                          onClick={() => {
+                            const selectedChatData = chats.find(c => c.id === selectedChat);
+                            if (selectedChatData?.other_user) {
+                              router.push(`/profile/${selectedChatData.other_user}`);
+                            }
+                          }}
+                        >
+                          <div className="flex-shrink-0 -ml-1">
+                            <img
+                              src={generateProfilePicture(chats.find(c => c.id === selectedChat)?.other_user || '')}
+                              alt={`${chats.find(c => c.id === selectedChat)?.other_user}'s profile picture`}
+                              className="w-5 h-5 rounded-full object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                const parent = target.parentElement;
+                                if (parent) {
+                                  const fallback = parent.querySelector('div') as HTMLDivElement;
+                                  if (fallback) fallback.classList.remove('hidden');
+                                }
+                              }}
+                            />
+                            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center hidden">
+                              <span className="text-xs font-bold text-white">{getInitials(chats.find(c => c.id === selectedChat)?.other_user || '')}</span>
                             </div>
-                            <span className="text-sm ml-1 text-white">{chats.find(c => c.id === selectedChat)?.other_user}</span>
                           </div>
+                          <span className="text-sm ml-1 text-white">{chats.find(c => c.id === selectedChat)?.other_user}</span>
                           
                           {/* Verified Badge */}
                           {chats.find(c => c.id === selectedChat)?.other_user_verified && (
-                            <span className="verified-badge inline-flex h-5 w-5 items-center justify-center rounded-full text-white font-bold shadow-md" style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }} aria-label="Verified" title="User has verified their identity">
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            <span className="ml-1 verified-badge inline-flex h-4 w-4 items-center justify-center rounded-full text-white font-bold shadow-md" style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }} aria-label="Verified" title="User has verified their identity">
+                              <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                             </span>
                           )}
                           
-                          {/* User Reputation - +x 👍 format */}
-                          <div className="flex items-center gap-1">
-                            <span className="text-sm text-white/80">+{chats.find(c => c.id === selectedChat)?.seller_thumbsUp || 0} 👍</span>
-                          </div>
+                          {/* User Reputation */}
+                          <span className="ml-1 text-sm text-white/80">+{chats.find(c => c.id === selectedChat)?.seller_thumbsUp || 0} 👍</span>
                         </div>
                       </div>
                       
-                      {/* Right Side: Age + Location + View Listing Button */}
-                      <div className="flex flex-col justify-between h-32 -ml-2">
-                        {/* Top Section: Age + Location - Aligned with top of header */}
-                        <div className="flex items-center gap-1 mt-2">
-                          {/* Posting Age - Use same logic as grid/list cards */}
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium text-white bg-white/20 backdrop-blur-sm">
-                            {chats.find(c => c.id === selectedChat)?.listing_created_at ? 
-                              `${formatPostAge(chats.find(c => c.id === selectedChat)?.listing_created_at!)} ago` : 
-                              'Unknown'
+                      {/* Right Section: Action Buttons */}
+                      <div className="flex items-center gap-2">
+                        {/* View Listing Button */}
+                        <button
+                          onClick={async () => {
+                            const selectedChatData = chats.find(c => c.id === selectedChat);
+                            if (selectedChatData?.listing_id) {
+                              await openListingModal(Number(selectedChatData.listing_id));
                             }
-                          </span>
-                          
-                          {/* "in" text */}
-                          <span className="text-white/80 text-sm">in</span>
-                          
-                          {/* Location Tag - No pin icon */}
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium text-white bg-white/20 backdrop-blur-sm">
-                            {chats.find(c => c.id === selectedChat)?.listing_location || 'Location N/A'}
-                          </span>
-                        </div>
+                          }}
+                          className="px-3 py-1.5 text-sm font-medium text-orange-600 bg-white hover:bg-orange-50 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md"
+                        >
+                          View Listing
+                        </button>
                         
-                        {/* Bottom Section: Action Buttons - Aligned with bottom of image */}
-                        <div className="flex flex-col gap-2">
-                          {/* View Listing Button */}
-                          <button
-                            onClick={async () => {
-                              const selectedChatData = chats.find(c => c.id === selectedChat);
-
-                              if (selectedChatData?.listing_id) {
-
-                                await openListingModal(Number(selectedChatData.listing_id));
-                              } else {
-
-                              }
-                            }}
-                            className="px-2 py-1.5 text-sm font-medium text-orange-600 bg-white hover:bg-orange-50 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-md w-fit"
-                          >
-                            View Listing
-                          </button>
-                          
-                          {/* Action Buttons Row */}
-                          <div className="flex gap-2">
-                            {/* Delete Button */}
-                            <button
-                              onClick={() => {
-                                const selectedChatData = chats.find(c => c.id === selectedChat);
-                                if (selectedChatData) {
-                                  handleDeleteConversation(selectedChatData);
-                                }
-                              }}
-                              className="px-2 py-1 text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
-                              title="Delete conversation"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </div>
+                        {/* Mark as Unread Button */}
+                        <button
+                          onClick={async () => {
+                            const selectedChatData = chats.find(c => c.id === selectedChat);
+                            if (selectedChatData) {
+                              // For now, just update local state since unread count API isn't implemented
+                              setChats(prev => 
+                                prev.map(c => 
+                                  c.id === selectedChatData.id ? { ...c, unread_count: 1 } : c
+                                )
+                              );
+                            }
+                          }}
+                          className="px-3 py-1.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                          title="Mark as unread"
+                        >
+                          Mark Unread
+                        </button>
+                        
+                        {/* Delete Button */}
+                        <button
+                          onClick={() => {
+                            const selectedChatData = chats.find(c => c.id === selectedChat);
+                            if (selectedChatData) {
+                              handleDeleteConversation(selectedChatData);
+                            }
+                          }}
+                          className="px-3 py-1.5 text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                          title="Delete conversation"
+                        >
+                          Delete
+                        </button>
                       </div>
                     </div>
                   </div>
