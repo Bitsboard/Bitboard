@@ -504,12 +504,40 @@ export default function MessagesPage() {
     
     // Mark as read if not already read
     if (!notification.read) {
+      // For old notifications with null userNotificationId, we need to mark read differently
+      if (!notification.userNotificationId) {
+        try {
+          const response = await fetch('/api/notifications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              notificationId: notification.id,
+              action: 'mark_read_by_system_id',
+              userEmail: user?.email
+            })
+          });
+
+          if (response.ok) {
+            // Update local state
+            setSystemNotifications(prev => 
+              prev.map(n => n.id === notification.id ? { ...n, read: true } : n)
+            );
+          } else {
+            console.error('Failed to mark old notification as read:', response.status);
+          }
+        } catch (error) {
+          console.error('Error marking old notification as read:', error);
+        }
+        return;
+      }
+
+      // Use userNotificationId for new notifications
       try {
         const response = await fetch('/api/notifications', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            notificationId: notification.id,
+            notificationId: notification.userNotificationId,
             action: 'mark_read'
           })
         });

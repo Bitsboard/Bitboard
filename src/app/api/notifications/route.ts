@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { action, notificationId, userEmail } = await request.json() as { 
-      action: 'mark_read' | 'mark_all_read' | 'delete' | 'mark_unread' | 'delete_by_system_id'; 
+      action: 'mark_read' | 'mark_all_read' | 'delete' | 'mark_unread' | 'delete_by_system_id' | 'mark_read_by_system_id'; 
       notificationId?: string;
       userEmail?: string;
     };
@@ -156,6 +156,30 @@ export async function POST(request: NextRequest) {
         DELETE FROM user_notifications 
         WHERE notification_id = ? AND user_id = ?
       `).bind(notificationId, userId).run();
+    } else if (action === 'mark_read_by_system_id' && notificationId && userEmail) {
+      // Mark old notifications as read by system notification ID and user email
+      // First get user ID
+      const userResult = await db
+        .prepare("SELECT id FROM users WHERE email = ?")
+        .bind(userEmail)
+        .first();
+
+      if (!userResult) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
+
+      const userId = userResult.id;
+      
+      // Mark as read in user_notifications using system notification ID and user ID
+      await db.prepare(`
+        UPDATE user_notifications 
+        SET read_at = ? 
+        WHERE notification_id = ? AND user_id = ?
+      `).bind(
+        Math.floor(Date.now() / 1000),
+        notificationId,
+        userId
+      ).run();
     } else if (action === 'mark_unread' && notificationId) {
       // Mark specific notification as unread
       await db.prepare(`
