@@ -215,30 +215,23 @@ export default function MessagesPage() {
   };
 
   const loadSystemNotifications = async () => {
-    console.log('🔔 loadSystemNotifications called, user:', user);
     
     // If no user, don't load notifications
     if (!user?.email) {
-      console.log('🔔 No user email, not loading notifications');
       return;
     }
 
-    console.log('🔔 Loading notifications for user:', user.email);
     try {
       const url = `/api/notifications?userEmail=${encodeURIComponent(user.email)}`;
-      console.log('🔔 Making request to:', url);
       const response = await fetch(url);
-      console.log('🔔 Notifications API response:', response.status, response.statusText);
       
       if (response.ok) {
         const data = await response.json() as { success: boolean; notifications: any[] };
-        console.log('🔔 Notifications data:', data);
         
         if (data.success && data.notifications.length > 0) {
           const transformedNotifications: SystemNotification[] = data.notifications.map(notification => {
             // Use user_notification_id for delete operations, fallback to notification_id for display
             const id = notification.user_notification_id || notification.notification_id;
-            console.log('🔔 Notification mapping - user_notification_id:', notification.user_notification_id, 'notification_id:', notification.notification_id, 'final_id:', id);
             return {
               id,
               // Store both IDs for proper API operations
@@ -253,35 +246,19 @@ export default function MessagesPage() {
               priority: notification.priority || 'normal'
             };
           });
-          console.log('🔔 Transformed notifications:', transformedNotifications);
-          console.log('🔔 Setting system notifications to:', transformedNotifications);
           setSystemNotifications(transformedNotifications);
-        } else {
-          console.log('🔔 No notifications from API - PRESERVING EXISTING DATA');
-          // Don't clear existing data when API returns no notifications
         }
       } else {
-        console.error('🔔 Error loading system notifications:', response.status, response.statusText);
-        const errorText = await response.text();
-        console.error('🔔 Error response body:', errorText);
-        console.log('🔔 PRESERVING EXISTING DATA due to API error');
-        // Don't clear existing data on API error - preserve what we have
+        console.error('Error loading system notifications:', response.status, response.statusText);
       }
     } catch (error) {
-      console.error('🔔 Error loading system notifications:', error);
-      console.log('🔔 PRESERVING EXISTING DATA due to error');
-      // Don't clear existing data on error - preserve what we have
+      console.error('Error loading system notifications:', error);
     }
   };
 
   const loadMessages = async (chatId: string) => {
-    console.log('🔔 loadMessages called with chatId:', chatId);
-    console.log('🔔 Current user state in loadMessages:', user);
-    console.log('🔔 Current chats length in loadMessages:', chats.length);
-    console.log('🔔 Current notifications length in loadMessages:', systemNotifications.length);
     
     if (!user?.email) {
-      console.log('🔔 No user email, not loading messages');
       return;
     }
     
@@ -291,7 +268,6 @@ export default function MessagesPage() {
     
     // Check cache first
     if (messagesCache[chatId]) {
-      console.log('🔔 Using cached messages for chat:', chatId);
       setMessages(messagesCache[chatId]);
       return;
     }
@@ -468,10 +444,6 @@ export default function MessagesPage() {
   };
 
   const confirmDeleteConversation = async () => {
-    console.log('🔔 confirmDeleteConversation called');
-    console.log('🔔 conversationToDelete:', conversationToDelete);
-    console.log('🔔 Current user state:', user);
-    console.log('🔔 Current chats length:', chats.length);
     
     if (!conversationToDelete) return;
 
@@ -488,17 +460,11 @@ export default function MessagesPage() {
       });
 
       if (response.ok) {
-        console.log('🔔 Conversation deleted successfully');
         // Remove the conversation from the local state
-        setChats(prev => {
-          const newChats = prev.filter(chat => chat.id !== conversationToDelete.id);
-          console.log('🔔 Updated chats length:', newChats.length);
-          return newChats;
-        });
+        setChats(prev => prev.filter(chat => chat.id !== conversationToDelete.id));
         
         // If this was the selected chat, clear the selection
         if (selectedChat === conversationToDelete.id) {
-          console.log('🔔 Clearing selected chat and messages');
           setSelectedChat(null);
           setMessages([]);
         }
@@ -516,22 +482,15 @@ export default function MessagesPage() {
 
   // Debounced click handler to prevent rapid API calls
   const handleItemClick = (item: any) => {
-    console.log('🔔 handleItemClick called with item:', item);
-    console.log('🔔 Current user state:', user);
-    console.log('🔔 Current chats length:', chats.length);
-    console.log('🔔 Current notifications length:', systemNotifications.length);
     
     if (clickTimeout) {
       clearTimeout(clickTimeout);
     }
     
     const timeout = setTimeout(() => {
-      console.log('🔔 Executing click action after debounce');
       if (item.itemType === 'chat') {
-        console.log('🔔 Loading messages for chat:', item.id);
         loadMessages(item.id);
       } else {
-        console.log('🔔 Selecting notification:', item.id);
         selectNotification(item as SystemNotification);
       }
     }, 100); // 100ms debounce
@@ -540,13 +499,11 @@ export default function MessagesPage() {
   };
 
   const selectNotification = async (notification: SystemNotification) => {
-    console.log('🔔 selectNotification called with:', notification);
     setSelectedNotification(notification.id);
     setSelectedChat(null);
     
     // Mark as read if not already read
     if (!notification.read) {
-      console.log('🔔 Marking notification as read:', notification.id);
       try {
         const response = await fetch('/api/notifications', {
           method: 'POST',
@@ -557,21 +514,11 @@ export default function MessagesPage() {
           })
         });
 
-        console.log('🔔 Mark read response:', response.status, response.ok);
         if (response.ok) {
-          console.log('🔔 Updating local state to mark as read');
           // Update local state
-          setSystemNotifications(prev => {
-            const updated = prev.map(n => 
-              n.id === notification.id ? { ...n, read: true } : n
-            );
-            console.log('🔔 Updated notifications:', updated);
-            return updated;
-          });
-          
-          // Don't trigger refresh events after mark_read - we've already updated local state
-          // This prevents the user state race condition from causing data to reappear
-          console.log('🔔 Mark read completed - not triggering refresh events to prevent race condition');
+          setSystemNotifications(prev => 
+            prev.map(n => n.id === notification.id ? { ...n, read: true } : n)
+          );
         } else {
           console.error('Failed to mark notification as read:', response.status);
           const errorText = await response.text();
@@ -580,24 +527,20 @@ export default function MessagesPage() {
       } catch (error) {
         console.error('Error marking notification as read:', error);
       }
-    } else {
-      console.log('🔔 Notification already read, skipping mark_read');
     }
   };
 
   const deleteNotification = async (notificationId: string) => {
-    console.log('🔔 deleteNotification called with:', notificationId);
     
     // Find the notification to get the correct user_notification_id
     const notification = systemNotifications.find(n => n.id === notificationId);
     if (!notification) {
-      console.error('🔔 Notification not found in local state:', notificationId);
+      console.error('Notification not found in local state:', notificationId);
       return;
     }
     
     // For old notifications with null userNotificationId, we need to delete differently
     if (!notification.userNotificationId) {
-      console.log('🔔 Old notification detected - using system notification ID for delete');
       // For old notifications, we'll delete by system notification ID + user email
       try {
         const response = await fetch('/api/notifications', {
@@ -610,27 +553,24 @@ export default function MessagesPage() {
           })
         });
         
-        console.log('🔔 Delete by system ID response:', response.status, response.ok);
         if (response.ok) {
           // Remove from local state
           setSystemNotifications(prev => prev.filter(n => n.id !== notificationId));
           if (selectedNotification === notificationId) {
             setSelectedNotification(null);
           }
-          console.log('🔔 Old notification deleted successfully');
         } else {
-          console.error('🔔 Failed to delete old notification:', response.status);
+          console.error('Failed to delete old notification:', response.status);
         }
         return;
       } catch (error) {
-        console.error('🔔 Error deleting old notification:', error);
+        console.error('Error deleting old notification:', error);
         return;
       }
     }
     
     // Use userNotificationId for new notifications
     const deleteId = notification.userNotificationId;
-    console.log('🔔 Using user notification ID:', deleteId, 'for notification:', notificationId);
     
     try {
       const response = await fetch('/api/notifications', {
@@ -642,34 +582,14 @@ export default function MessagesPage() {
         })
       });
 
-      console.log('🔔 Delete response:', response.status, response.ok);
       if (response.ok) {
-        console.log('🔔 Removing notification from local state');
-        console.log('🔔 Current notifications before delete:', systemNotifications);
-        console.log('🔔 Looking for notification with ID:', notificationId);
-        
         // Remove from local state
-        setSystemNotifications(prev => {
-          console.log('🔔 Previous notifications in setState:', prev);
-          const filtered = prev.filter(n => {
-            const shouldKeep = n.id !== notificationId;
-            console.log('🔔 Checking notification:', n.id, 'against:', notificationId, 'shouldKeep:', shouldKeep);
-            return shouldKeep;
-          });
-          console.log('🔔 Updated notifications after delete:', filtered);
-          console.log('🔔 Count before:', prev.length, 'Count after:', filtered.length);
-          return filtered;
-        });
+        setSystemNotifications(prev => prev.filter(n => n.id !== notificationId));
         
         // If this was the selected notification, clear selection
         if (selectedNotification === notificationId) {
-          console.log('🔔 Clearing selected notification');
           setSelectedNotification(null);
         }
-        
-        // Don't trigger refresh events after delete - we've already updated local state
-        // This prevents the user state race condition from causing data to reappear
-        console.log('🔔 Delete completed - not triggering refresh events to prevent race condition');
       } else {
         console.error('Failed to delete notification:', response.status);
         const errorText = await response.text();
@@ -809,26 +729,18 @@ export default function MessagesPage() {
   };
 
   useEffect(() => {
-    console.log('🔔 Messages page useEffect triggered');
-    console.log('🔔 User state:', user);
-    console.log('🔔 Current chats length:', chats.length);
-    console.log('🔔 Current notifications length:', systemNotifications.length);
-    console.log('🔔 isInitialLoad:', isInitialLoad);
     
     if (user?.email) {
-      console.log('🔔 User has email, loading chats and notifications');
       loadChats();
       loadSystemNotifications();
       setIsInitialLoad(false);
     } else {
-      console.log('🔔 No user email, not loading data');
       // Don't clear existing data if user becomes null temporarily
       // This prevents data loss during authentication state changes
       // Only set initial load to false if we've never had a user
       if (isInitialLoad) {
         // Wait a bit for user to load
         const timer = setTimeout(() => {
-          console.log('🔔 Setting isInitialLoad to false after timeout');
           setIsInitialLoad(false);
         }, 2000);
         return () => clearTimeout(timer);
