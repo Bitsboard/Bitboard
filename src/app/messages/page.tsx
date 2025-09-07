@@ -6,6 +6,7 @@ import { useTheme } from '@/lib/contexts/ThemeContext';
 import { useUser, useSettings } from '@/lib/settings';
 import { ListingModal } from '@/components/ListingModal';
 import DeleteConversationModal from '@/components/DeleteConversationModal';
+import DeleteNotificationModal from '@/components/DeleteNotificationModal';
 import OfferModal from '@/components/OfferModal';
 import OfferMessage from '@/components/OfferMessage';
 import { generateProfilePicture, getInitials, formatPostAge, formatCADAmount, cn } from "@/lib/utils";
@@ -82,6 +83,10 @@ export default function MessagesPage() {
   // Delete conversation modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [conversationToDelete, setConversationToDelete] = useState<Chat | null>(null);
+  
+  // Delete notification modal state
+  const [showDeleteNotificationModal, setShowDeleteNotificationModal] = useState(false);
+  const [notificationToDelete, setNotificationToDelete] = useState<SystemNotification | null>(null);
   
   // Offer modal state
   const [showOfferModal, setShowOfferModal] = useState(false);
@@ -444,6 +449,11 @@ export default function MessagesPage() {
     setShowDeleteModal(true);
   };
 
+  const handleDeleteNotification = (notification: SystemNotification) => {
+    setNotificationToDelete(notification);
+    setShowDeleteNotificationModal(true);
+  };
+
   const confirmDeleteConversation = async () => {
     
     if (!conversationToDelete) return;
@@ -478,6 +488,57 @@ export default function MessagesPage() {
       }
     } catch (error) {
       console.error('Error deleting conversation:', error);
+    }
+  };
+
+  const confirmDeleteNotification = async () => {
+    if (!notificationToDelete) return;
+
+    try {
+      let response;
+      
+      // For old notifications with null userNotificationId, we need to delete differently
+      if (!notificationToDelete.userNotificationId) {
+        // For old notifications, we'll delete by system notification ID + user email
+        response = await fetch('/api/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            notificationId: notificationToDelete.id,
+            action: 'delete_by_system_id',
+            userEmail: user?.email
+          })
+        });
+      } else {
+        // Use userNotificationId for new notifications
+        response = await fetch('/api/notifications', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            notificationId: notificationToDelete.userNotificationId
+          }),
+        });
+      }
+
+      if (response.ok) {
+        // Remove the notification from the local state
+        setSystemNotifications(prev => prev.filter(notification => notification.id !== notificationToDelete.id));
+        
+        // If this was the selected notification, clear the selection
+        if (selectedNotification === notificationToDelete.id) {
+          setSelectedNotification(null);
+        }
+        
+        // Close the modal
+        setShowDeleteNotificationModal(false);
+        setNotificationToDelete(null);
+      } else {
+        console.error('Failed to delete notification');
+      }
+    } catch (error) {
+      console.error('Error deleting notification:', error);
     }
   };
 
@@ -559,75 +620,6 @@ export default function MessagesPage() {
     }
   };
 
-  const deleteNotification = async (notificationId: string) => {
-    
-    // Find the notification to get the correct user_notification_id
-    const notification = systemNotifications.find(n => n.id === notificationId);
-    if (!notification) {
-      console.error('Notification not found in local state:', notificationId);
-      return;
-    }
-    
-    // For old notifications with null userNotificationId, we need to delete differently
-    if (!notification.userNotificationId) {
-      // For old notifications, we'll delete by system notification ID + user email
-      try {
-        const response = await fetch('/api/notifications', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            notificationId: notificationId,
-            action: 'delete_by_system_id',
-            userEmail: user?.email
-          })
-        });
-        
-        if (response.ok) {
-          // Remove from local state
-          setSystemNotifications(prev => prev.filter(n => n.id !== notificationId));
-          if (selectedNotification === notificationId) {
-            setSelectedNotification(null);
-          }
-        } else {
-          console.error('Failed to delete old notification:', response.status);
-        }
-        return;
-      } catch (error) {
-        console.error('Error deleting old notification:', error);
-        return;
-      }
-    }
-    
-    // Use userNotificationId for new notifications
-    const deleteId = notification.userNotificationId;
-    
-    try {
-      const response = await fetch('/api/notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          notificationId: deleteId,
-          action: 'delete'
-        })
-      });
-
-      if (response.ok) {
-        // Remove from local state
-        setSystemNotifications(prev => prev.filter(n => n.id !== notificationId));
-        
-        // If this was the selected notification, clear selection
-        if (selectedNotification === notificationId) {
-          setSelectedNotification(null);
-        }
-      } else {
-        console.error('Failed to delete notification:', response.status);
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
-      }
-    } catch (error) {
-      console.error('Error deleting notification:', error);
-    }
-  };
   
   // Function to refresh messages for a specific chat (for real-time updates)
   const refreshMessages = async (chatId: string) => {
@@ -887,16 +879,17 @@ export default function MessagesPage() {
       if (isUnread) {
         // Selected unread: keep vibrant styling but add selection border
         if (item.itemType === 'notification') {
-          const priority = item.priority || 'normal';
-          switch (priority) {
-            case 'urgent':
-              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-4 border-red-600 shadow-md';
-            case 'high':
-              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-orange-50 dark:hover:bg-orange-900/20 bg-gradient-to-br from-orange-200 to-orange-300 dark:from-orange-700 dark:to-orange-600 border-l-4 border-orange-600 shadow-md';
-            case 'normal':
+          const icon = item.icon || 'system';
+          switch (icon) {
+            case 'info':
               return 'p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-200 to-blue-300 dark:from-blue-700 dark:to-blue-600 border-l-4 border-blue-600 shadow-md';
-            case 'low':
-              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-900/20 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 border-l-4 border-gray-600 shadow-md';
+            case 'success':
+              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-green-50 dark:hover:bg-green-900/20 bg-gradient-to-br from-green-200 to-green-300 dark:from-green-700 dark:to-green-600 border-l-4 border-green-600 shadow-md';
+            case 'warning':
+              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-4 border-red-600 shadow-md';
+            case 'error':
+              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-4 border-red-600 shadow-md';
+            case 'system':
             default:
               return 'p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 bg-gradient-to-br from-purple-200 to-purple-300 dark:from-purple-700 dark:to-purple-600 border-l-4 border-purple-600 shadow-md';
           }
@@ -907,16 +900,17 @@ export default function MessagesPage() {
       } else {
         // Selected read: subtle selection with left border and faded colors
         if (item.itemType === 'notification') {
-          const priority = item.priority || 'normal';
-          switch (priority) {
-            case 'urgent':
-              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10 border-l-4 border-red-400 dark:border-red-500';
-            case 'high':
-              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-orange-50/30 dark:hover:bg-orange-900/10 bg-gradient-to-br from-orange-50/20 to-orange-100/20 dark:from-orange-900/10 dark:to-orange-800/10 border-l-4 border-orange-400 dark:border-orange-500';
-            case 'normal':
+          const icon = item.icon || 'system';
+          switch (icon) {
+            case 'info':
               return 'p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 bg-gradient-to-br from-blue-50/20 to-blue-100/20 dark:from-blue-900/10 dark:to-blue-800/10 border-l-4 border-blue-400 dark:border-blue-500';
-            case 'low':
-              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-gray-50/30 dark:hover:bg-gray-900/10 bg-gradient-to-br from-gray-50/20 to-gray-100/20 dark:from-gray-900/10 dark:to-gray-800/10 border-l-4 border-gray-400 dark:border-gray-500';
+            case 'success':
+              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-green-50/30 dark:hover:bg-green-900/10 bg-gradient-to-br from-green-50/20 to-green-100/20 dark:from-green-900/10 dark:to-green-800/10 border-l-4 border-green-400 dark:border-green-500';
+            case 'warning':
+              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10 border-l-4 border-red-400 dark:border-red-500';
+            case 'error':
+              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10 border-l-4 border-red-400 dark:border-red-500';
+            case 'system':
             default:
               return 'p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50/30 dark:hover:bg-purple-900/10 bg-gradient-to-br from-purple-50/20 to-purple-100/20 dark:from-purple-900/10 dark:to-purple-800/10 border-l-4 border-purple-400 dark:border-purple-500';
           }
@@ -931,33 +925,34 @@ export default function MessagesPage() {
     const isUnread = item.itemType === 'notification' ? !item.read : item.unread_count > 0;
     
     if (item.itemType === 'notification') {
-      const priority = item.priority || 'normal';
+      const icon = item.icon || 'system';
       if (isUnread) {
         // UNREAD: Very vibrant and high contrast
-        switch (priority) {
-          case 'urgent':
-            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-4 border-red-600 shadow-md';
-          case 'high':
-            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-orange-50 dark:hover:bg-orange-900/20 bg-gradient-to-br from-orange-200 to-orange-300 dark:from-orange-700 dark:to-orange-600 border-l-4 border-orange-600 shadow-md';
-          case 'normal':
+        switch (icon) {
+          case 'info':
             return 'p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-200 to-blue-300 dark:from-blue-700 dark:to-blue-600 border-l-4 border-blue-600 shadow-md';
-          case 'low':
-            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-900/20 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 border-l-4 border-gray-600 shadow-md';
+          case 'success':
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-green-50 dark:hover:bg-green-900/20 bg-gradient-to-br from-green-200 to-green-300 dark:from-green-700 dark:to-green-600 border-l-4 border-green-600 shadow-md';
+          case 'warning':
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-4 border-red-600 shadow-md';
+          case 'error':
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-4 border-red-600 shadow-md';
+          case 'system':
           default:
             return 'p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 bg-gradient-to-br from-purple-200 to-purple-300 dark:from-purple-700 dark:to-purple-600 border-l-4 border-purple-600 shadow-md';
         }
       } else {
         // READ: Very faded and low contrast but still colored
-        const priority = item.priority || 'normal';
-        switch (priority) {
-          case 'urgent':
-            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10';
-          case 'high':
-            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-orange-50/30 dark:hover:bg-orange-900/10 bg-gradient-to-br from-orange-50/20 to-orange-100/20 dark:from-orange-900/10 dark:to-orange-800/10';
-          case 'normal':
+        switch (icon) {
+          case 'info':
             return 'p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 bg-gradient-to-br from-blue-50/20 to-blue-100/20 dark:from-blue-900/10 dark:to-blue-800/10';
-          case 'low':
-            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-gray-50/30 dark:hover:bg-gray-900/10 bg-gradient-to-br from-gray-50/20 to-gray-100/20 dark:from-gray-900/10 dark:to-gray-800/10';
+          case 'success':
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-green-50/30 dark:hover:bg-green-900/10 bg-gradient-to-br from-green-50/20 to-green-100/20 dark:from-green-900/10 dark:to-green-800/10';
+          case 'warning':
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10';
+          case 'error':
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10';
+          case 'system':
           default:
             return 'p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50/30 dark:hover:bg-purple-900/10 bg-gradient-to-br from-purple-50/20 to-purple-100/20 dark:from-purple-900/10 dark:to-purple-800/10';
         }
@@ -1064,11 +1059,11 @@ export default function MessagesPage() {
                                     <svg className={`w-2.5 h-2.5 ${
                                       selectedNotification === item.id 
                                         ? item.read 
-                                          ? 'text-neutral-400 dark:text-neutral-500' 
+                                          ? 'text-blue-400 dark:text-blue-500' 
                                           : 'text-white'
                                         : item.read 
-                                          ? 'text-neutral-300 dark:text-neutral-600' 
-                                          : 'text-white'
+                                          ? 'text-blue-300 dark:text-blue-600' 
+                                          : 'text-blue-600 dark:text-blue-400'
                                     }`} fill="currentColor" viewBox="0 0 20 20">
                                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                                     </svg>
@@ -1077,11 +1072,11 @@ export default function MessagesPage() {
                                     <svg className={`w-2.5 h-2.5 ${
                                       selectedNotification === item.id 
                                         ? item.read 
-                                          ? 'text-neutral-400 dark:text-neutral-500' 
+                                          ? 'text-green-400 dark:text-green-500' 
                                           : 'text-white'
                                         : item.read 
-                                          ? 'text-neutral-300 dark:text-neutral-600' 
-                                          : 'text-white'
+                                          ? 'text-green-300 dark:text-green-600' 
+                                          : 'text-green-600 dark:text-green-400'
                                     }`} fill="currentColor" viewBox="0 0 20 20">
                                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                     </svg>
@@ -1090,11 +1085,11 @@ export default function MessagesPage() {
                                     <svg className={`w-2.5 h-2.5 ${
                                       selectedNotification === item.id 
                                         ? item.read 
-                                          ? 'text-neutral-400 dark:text-neutral-500' 
+                                          ? 'text-red-400 dark:text-red-500' 
                                           : 'text-white'
                                         : item.read 
-                                          ? 'text-neutral-300 dark:text-neutral-600' 
-                                          : 'text-white'
+                                          ? 'text-red-300 dark:text-red-600' 
+                                          : 'text-red-600 dark:text-red-400'
                                     }`} fill="currentColor" viewBox="0 0 20 20">
                                       <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                                     </svg>
@@ -1103,11 +1098,11 @@ export default function MessagesPage() {
                                     <svg className={`w-2.5 h-2.5 ${
                                       selectedNotification === item.id 
                                         ? item.read 
-                                          ? 'text-neutral-400 dark:text-neutral-500' 
+                                          ? 'text-red-400 dark:text-red-500' 
                                           : 'text-white'
                                         : item.read 
-                                          ? 'text-neutral-300 dark:text-neutral-600' 
-                                          : 'text-white'
+                                          ? 'text-red-300 dark:text-red-600' 
+                                          : 'text-red-600 dark:text-red-400'
                                     }`} fill="currentColor" viewBox="0 0 20 20">
                                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                                     </svg>
@@ -1116,11 +1111,11 @@ export default function MessagesPage() {
                                     <svg className={`w-2.5 h-2.5 ${
                                       selectedNotification === item.id 
                                         ? item.read 
-                                          ? 'text-neutral-400 dark:text-neutral-500' 
+                                          ? 'text-purple-400 dark:text-purple-500' 
                                           : 'text-white'
                                         : item.read 
-                                          ? 'text-neutral-300 dark:text-neutral-600' 
-                                          : 'text-white'
+                                          ? 'text-purple-300 dark:text-purple-600' 
+                                          : 'text-purple-600 dark:text-purple-400'
                                     }`} fill="currentColor" viewBox="0 0 20 20">
                                       <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm2 2a1 1 0 000 2h6a1 1 0 100-2H5z" clipRule="evenodd" />
                                     </svg>
@@ -1185,12 +1180,12 @@ export default function MessagesPage() {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  deleteNotification(item.id);
+                                  handleDeleteNotification(item);
                                 }}
                                 className="absolute bottom-0 right-0 p-1 transition-all duration-200 hover:scale-110"
                                 title="Delete notification"
                               >
-                                <svg className="w-4 h-4 text-white hover:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <svg className="w-4 h-4 text-neutral-400 hover:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
                               </button>
@@ -1897,6 +1892,18 @@ export default function MessagesPage() {
         onConfirm={confirmDeleteConversation}
         dark={dark}
         username={conversationToDelete?.other_user || "this user"}
+      />
+      
+      {/* Delete Notification Modal */}
+      <DeleteNotificationModal
+        isOpen={showDeleteNotificationModal}
+        onClose={() => {
+          setShowDeleteNotificationModal(false);
+          setNotificationToDelete(null);
+        }}
+        onConfirm={confirmDeleteNotification}
+        dark={dark}
+        notificationTitle={notificationToDelete?.title || "this notification"}
       />
       
       {/* Offer Modal */}

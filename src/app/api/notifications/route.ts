@@ -199,3 +199,44 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    // Get user session
+    const session = await getSessionFromRequest(request);
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { notificationId } = await request.json() as { 
+      notificationId: string;
+    };
+
+    // Get database connection
+    const env = getRequestContext().env;
+    const db = env.DB as D1Database;
+    
+    if (!db) {
+      return NextResponse.json({ error: "Database not available" }, { status: 500 });
+    }
+
+    if (!notificationId) {
+      return NextResponse.json({ error: "Notification ID is required" }, { status: 400 });
+    }
+
+    // Delete specific notification by user_notification_id
+    await db.prepare(`
+      DELETE FROM user_notifications 
+      WHERE id = ?
+    `).bind(notificationId).run();
+
+    return NextResponse.json({ success: true });
+
+  } catch (error) {
+    console.error('Error deleting notification:', error);
+    return NextResponse.json(
+      { error: "Failed to delete notification" },
+      { status: 500 }
+    );
+  }
+}
