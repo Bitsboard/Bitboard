@@ -1006,47 +1006,39 @@ export default function MessagesPage() {
                             </div>
                             
                             <div className="flex-1 min-w-0">
-                              {/* Email-style header */}
-                              <div className="flex items-center justify-between mb-1">
-                                <h3 className={`font-semibold text-sm ${
-                                  selectedNotification === item.id ? 'text-white' : 'text-neutral-900 dark:text-white'
+                              {/* Row 1: Title */}
+                              <div className="mb-1">
+                                <h3 className={`text-sm ${
+                                  selectedNotification === item.id 
+                                    ? 'text-white font-semibold' 
+                                    : item.read 
+                                      ? 'text-neutral-600 dark:text-neutral-400 font-normal' 
+                                      : 'text-neutral-900 dark:text-white font-bold'
                                 }`}>
                                   {item.title}
                                 </h3>
-                                <div className="flex items-center gap-2">
-                                  {!item.read && (
-                                    <span className={`text-xs px-2 py-0.5 rounded-full min-w-[18px] text-center font-medium ${
-                                      selectedNotification === item.id 
-                                        ? 'bg-white/20 text-white'
-                                        : item.icon === 'info' ? 'bg-blue-500 text-white' :
-                                          item.icon === 'success' ? 'bg-green-500 text-white' :
-                                          item.icon === 'warning' ? 'bg-yellow-500 text-white' :
-                                          item.icon === 'error' ? 'bg-red-500 text-white' :
-                                          'bg-purple-500 text-white'
-                                    }`}>
-                                      New
-                                    </span>
-                                  )}
-                                  <span className={`text-xs ${
-                                    selectedNotification === item.id ? 'text-white/70' : 'text-neutral-500 dark:text-neutral-400'
-                                  }`}>
-                                    {formatTimestamp(item.timestamp)}
-                                  </span>
-                                </div>
                               </div>
                               
-                              {/* Email-style sender */}
-                              <div className="flex items-center gap-1 mb-2">
-                                <span className={`text-xs font-medium ${
-                                  selectedNotification === item.id ? 'text-white/80' : 'text-neutral-600 dark:text-neutral-400'
+                              {/* Row 2: Timestamp */}
+                              <div className="mb-2">
+                                <span className={`text-xs ${
+                                  selectedNotification === item.id 
+                                    ? 'text-white/70' 
+                                    : item.read 
+                                      ? 'text-neutral-400 dark:text-neutral-500' 
+                                      : 'text-neutral-600 dark:text-neutral-300'
                                 }`}>
-                                  bitsbarter
+                                  {formatTimestamp(item.timestamp)}
                                 </span>
                               </div>
                               
-                              {/* Email-style preview */}
+                              {/* Rows 3+4: Truncated message */}
                               <p className={`text-sm line-clamp-2 ${
-                                selectedNotification === item.id ? 'text-white/90' : 'text-neutral-600 dark:text-neutral-300'
+                                selectedNotification === item.id 
+                                  ? 'text-white/90' 
+                                  : item.read 
+                                    ? 'text-neutral-500 dark:text-neutral-400' 
+                                    : 'text-neutral-700 dark:text-neutral-200'
                               }`}>
                                 {(() => {
                                   // Strip Markdown formatting for conversation preview
