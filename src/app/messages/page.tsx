@@ -905,8 +905,25 @@ export default function MessagesPage() {
           return 'p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/60 dark:to-blue-700/60 shadow-md border-l-4 border-blue-500';
         }
       } else {
-        // Selected read: subtle selection with left border
-        return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800/20 dark:to-neutral-700/20 border-l-4 border-neutral-400 dark:border-neutral-500';
+        // Selected read: subtle selection with left border and faded colors
+        if (item.itemType === 'notification') {
+          const priority = item.priority || 'normal';
+          switch (priority) {
+            case 'urgent':
+              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10 border-l-4 border-red-400 dark:border-red-500';
+            case 'high':
+              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-orange-50/30 dark:hover:bg-orange-900/10 bg-gradient-to-br from-orange-50/20 to-orange-100/20 dark:from-orange-900/10 dark:to-orange-800/10 border-l-4 border-orange-400 dark:border-orange-500';
+            case 'normal':
+              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 bg-gradient-to-br from-blue-50/20 to-blue-100/20 dark:from-blue-900/10 dark:to-blue-800/10 border-l-4 border-blue-400 dark:border-blue-500';
+            case 'low':
+              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-gray-50/30 dark:hover:bg-gray-900/10 bg-gradient-to-br from-gray-50/20 to-gray-100/20 dark:from-gray-900/10 dark:to-gray-800/10 border-l-4 border-gray-400 dark:border-gray-500';
+            default:
+              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50/30 dark:hover:bg-purple-900/10 bg-gradient-to-br from-purple-50/20 to-purple-100/20 dark:from-purple-900/10 dark:to-purple-800/10 border-l-4 border-purple-400 dark:border-purple-500';
+          }
+        } else {
+          // Selected read chat
+          return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800/20 dark:to-neutral-700/20 border-l-4 border-neutral-400 dark:border-neutral-500';
+        }
       }
     }
     
@@ -930,8 +947,20 @@ export default function MessagesPage() {
             return 'p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 bg-gradient-to-br from-purple-200 to-purple-300 dark:from-purple-700 dark:to-purple-600 border-l-4 border-purple-600 shadow-md';
         }
       } else {
-        // READ: Very faded and low contrast
-        return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800/20 dark:to-neutral-700/20';
+        // READ: Very faded and low contrast but still colored
+        const priority = item.priority || 'normal';
+        switch (priority) {
+          case 'urgent':
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10';
+          case 'high':
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-orange-50/30 dark:hover:bg-orange-900/10 bg-gradient-to-br from-orange-50/20 to-orange-100/20 dark:from-orange-900/10 dark:to-orange-800/10';
+          case 'normal':
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 bg-gradient-to-br from-blue-50/20 to-blue-100/20 dark:from-blue-900/10 dark:to-blue-800/10';
+          case 'low':
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-gray-50/30 dark:hover:bg-gray-900/10 bg-gradient-to-br from-gray-50/20 to-gray-100/20 dark:from-gray-900/10 dark:to-gray-800/10';
+          default:
+            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50/30 dark:hover:bg-purple-900/10 bg-gradient-to-br from-purple-50/20 to-purple-100/20 dark:from-purple-900/10 dark:to-purple-800/10';
+        }
       }
     }
     
@@ -1153,20 +1182,18 @@ export default function MessagesPage() {
                             
                             {/* Delete Button - Bottom Right */}
                             {selectedNotification === item.id && (
-                              <div className="absolute bottom-2 right-2">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    deleteNotification(item.id);
-                                  }}
-                                  className="p-1 text-neutral-400 hover:text-red-500 transition-colors duration-200"
-                                  title="Delete notification"
-                                >
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                </button>
-                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteNotification(item.id);
+                                }}
+                                className="absolute bottom-0 right-0 p-1 transition-all duration-200 hover:scale-110"
+                                title="Delete notification"
+                              >
+                                <svg className="w-4 h-4 text-white hover:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
                             )}
                           </div>
                         ) : (
