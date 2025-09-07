@@ -19,27 +19,22 @@ export default function DeleteConversationModal({
   if (!isOpen) return null;
 
   return (
-    <>
-      {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black/50 z-40"
-        onClick={onClose}
-      />
-      
-      {/* Modal */}
-      <div className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center p-4",
+    <div 
+      className={cn(
+        "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50",
         "animate-in fade-in duration-200"
-      )}>
-        <div 
-          className={cn(
-            "w-full max-w-md rounded-2xl shadow-xl border",
-            dark 
-              ? "bg-neutral-900 border-neutral-700" 
-              : "bg-white border-neutral-200"
-          )}
-          onClick={(e) => e.stopPropagation()}
-        >
+      )}
+      onClick={onClose}
+    >
+      <div 
+        className={cn(
+          "w-full max-w-md rounded-2xl shadow-xl border",
+          dark 
+            ? "bg-neutral-900 border-neutral-700" 
+            : "bg-white border-neutral-200"
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
           {/* Header */}
           <div className={cn(
             "px-6 py-4 border-b",
@@ -85,6 +80,6 @@ export default function DeleteConversationModal({
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
