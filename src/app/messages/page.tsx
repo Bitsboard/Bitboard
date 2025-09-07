@@ -595,9 +595,42 @@ export default function MessagesPage() {
       return;
     }
     
-    // Use userNotificationId if available, otherwise fall back to the display ID
-    const deleteId = notification.userNotificationId || notificationId;
-    console.log('🔔 Using delete ID:', deleteId, 'for notification:', notificationId);
+    // For old notifications with null userNotificationId, we need to delete differently
+    if (!notification.userNotificationId) {
+      console.log('🔔 Old notification detected - using system notification ID for delete');
+      // For old notifications, we'll delete by system notification ID + user email
+      try {
+        const response = await fetch('/api/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            notificationId: notificationId,
+            action: 'delete_by_system_id',
+            userEmail: user?.email
+          })
+        });
+        
+        console.log('🔔 Delete by system ID response:', response.status, response.ok);
+        if (response.ok) {
+          // Remove from local state
+          setSystemNotifications(prev => prev.filter(n => n.id !== notificationId));
+          if (selectedNotification === notificationId) {
+            setSelectedNotification(null);
+          }
+          console.log('🔔 Old notification deleted successfully');
+        } else {
+          console.error('🔔 Failed to delete old notification:', response.status);
+        }
+        return;
+      } catch (error) {
+        console.error('🔔 Error deleting old notification:', error);
+        return;
+      }
+    }
+    
+    // Use userNotificationId for new notifications
+    const deleteId = notification.userNotificationId;
+    console.log('🔔 Using user notification ID:', deleteId, 'for notification:', notificationId);
     
     try {
       const response = await fetch('/api/notifications', {

@@ -87,9 +87,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { action, notificationId } = await request.json() as { 
-      action: 'mark_read' | 'mark_all_read' | 'delete' | 'mark_unread'; 
-      notificationId?: string 
+    const { action, notificationId, userEmail } = await request.json() as { 
+      action: 'mark_read' | 'mark_all_read' | 'delete' | 'mark_unread' | 'delete_by_system_id'; 
+      notificationId?: string;
+      userEmail?: string;
     };
 
     // Get database connection
@@ -133,11 +134,30 @@ export async function POST(request: NextRequest) {
         userId
       ).run();
     } else if (action === 'delete' && notificationId) {
-      // Delete specific notification
+      // Delete specific notification by user_notification_id
       await db.prepare(`
         DELETE FROM user_notifications 
         WHERE id = ?
       `).bind(notificationId).run();
+    } else if (action === 'delete_by_system_id' && notificationId && userEmail) {
+      // Delete old notifications by system notification ID and user email
+      // First get user ID
+      const userResult = await db
+        .prepare("SELECT id FROM users WHERE email = ?")
+        .bind(userEmail)
+        .first();
+
+      if (!userResult) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
+
+      const userId = userResult.id;
+      
+      // Delete from user_notifications using system notification ID and user ID
+      await db.prepare(`
+        DELETE FROM user_notifications 
+        WHERE notification_id = ? AND user_id = ?
+      `).bind(notificationId, userId).run();
     } else if (action === 'mark_unread' && notificationId) {
       // Mark specific notification as unread
       await db.prepare(`
