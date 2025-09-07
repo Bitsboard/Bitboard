@@ -684,11 +684,11 @@ export default function MessagesPage() {
   // Function to open listing modal
   const openListingModal = async (listingId: number) => {
     try {
-      
-      
+      console.log('openListingModal called with listingId:', listingId);
       
       // Fetch the real listing data from the API
       const response = await fetch(`/api/listings/${listingId}`);
+      console.log('API response status:', response.status);
       if (!response.ok) {
         console.error('Failed to fetch listing:', response.status);
         return;
@@ -732,13 +732,15 @@ export default function MessagesPage() {
 
       
       // Set the modal with the transformed listing data
+      console.log('Setting modal with transformed listing:', transformedListing);
       setModal('active', transformedListing);
+      console.log('Modal state set, modals.active should now be:', transformedListing);
 
       
       
       // Force a re-render to see if the modal state changes
       setTimeout(() => {
-
+        console.log('Modal state after timeout:', modals.active);
       }, 100);
     } catch (error) {
       console.error('Error fetching listing:', error);
@@ -1323,8 +1325,12 @@ export default function MessagesPage() {
                           className="w-24 h-24 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
                           onClick={async () => {
                             const selectedChatData = chats.find(c => c.id === selectedChat);
+                            console.log('Listing image clicked, selectedChatData:', selectedChatData);
                             if (selectedChatData?.listing_id) {
+                              console.log('Opening listing modal for ID:', selectedChatData.listing_id);
                               await openListingModal(Number(selectedChatData.listing_id));
+                            } else {
+                              console.log('No listing_id found for selected chat');
                             }
                           }}
                         />
@@ -1446,8 +1452,12 @@ export default function MessagesPage() {
                             <button
                               onClick={async () => {
                                 const selectedChatData = chats.find(c => c.id === selectedChat);
+                                console.log('View Listing button clicked, selectedChatData:', selectedChatData);
                                 if (selectedChatData?.listing_id) {
+                                  console.log('Opening listing modal for ID:', selectedChatData.listing_id);
                                   await openListingModal(Number(selectedChatData.listing_id));
+                                } else {
+                                  console.log('No listing_id found for selected chat');
                                 }
                               }}
                               className="px-3 py-1.5 text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-lg hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors"
