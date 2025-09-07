@@ -1762,7 +1762,7 @@ export default function MessagesPage() {
                             onClick={() => {
                               const notification = systemNotifications.find(n => n.id === selectedNotification);
                               if (notification) {
-                                deleteNotification(notification.id);
+                                handleDeleteNotification(notification);
                               }
                             }}
                             className="px-3 py-1.5 text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
