@@ -881,20 +881,20 @@ export default function MessagesPage() {
           const icon = item.icon || 'system';
           switch (icon) {
             case 'info':
-              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-200 to-blue-300 dark:from-blue-700 dark:to-blue-600 border-l-4 border-blue-600 shadow-md';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-200 to-blue-300 dark:from-blue-700 dark:to-blue-600 border-l-4 border-blue-600 shadow-md';
             case 'success':
-              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-green-50 dark:hover:bg-green-900/20 bg-gradient-to-br from-green-200 to-green-300 dark:from-green-700 dark:to-green-600 border-l-4 border-green-600 shadow-md';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-green-50 dark:hover:bg-green-900/20 bg-gradient-to-br from-green-200 to-green-300 dark:from-green-700 dark:to-green-600 border-l-4 border-green-600 shadow-md';
             case 'warning':
-              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-4 border-red-600 shadow-md';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-4 border-red-600 shadow-md';
             case 'error':
-              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-4 border-red-600 shadow-md';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-4 border-red-600 shadow-md';
             case 'system':
             default:
-              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 bg-gradient-to-br from-purple-200 to-purple-300 dark:from-purple-700 dark:to-purple-600 border-l-4 border-purple-600 shadow-md';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 bg-gradient-to-br from-purple-200 to-purple-300 dark:from-purple-700 dark:to-purple-600 border-l-4 border-purple-600 shadow-md';
           }
         } else {
           // Selected unread chat
-          return 'p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/60 dark:to-blue-700/60 shadow-md border-l-4 border-blue-500';
+          return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/60 dark:to-blue-700/60 shadow-md border-l-4 border-blue-500';
         }
       } else {
         // Selected read: subtle selection with left border and faded colors
@@ -902,20 +902,20 @@ export default function MessagesPage() {
           const icon = item.icon || 'system';
           switch (icon) {
             case 'info':
-              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 bg-gradient-to-br from-blue-50/20 to-blue-100/20 dark:from-blue-900/10 dark:to-blue-800/10 border-l-4 border-blue-400 dark:border-blue-500';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 bg-gradient-to-br from-blue-50/20 to-blue-100/20 dark:from-blue-900/10 dark:to-blue-800/10 border-l-4 border-blue-400 dark:border-blue-500';
             case 'success':
-              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-green-50/30 dark:hover:bg-green-900/10 bg-gradient-to-br from-green-50/20 to-green-100/20 dark:from-green-900/10 dark:to-green-800/10 border-l-4 border-green-400 dark:border-green-500';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-green-50/30 dark:hover:bg-green-900/10 bg-gradient-to-br from-green-50/20 to-green-100/20 dark:from-green-900/10 dark:to-green-800/10 border-l-4 border-green-400 dark:border-green-500';
             case 'warning':
-              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10 border-l-4 border-red-400 dark:border-red-500';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10 border-l-4 border-red-400 dark:border-red-500';
             case 'error':
-              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10 border-l-4 border-red-400 dark:border-red-500';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10 border-l-4 border-red-400 dark:border-red-500';
             case 'system':
             default:
-              return 'p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50/30 dark:hover:bg-purple-900/10 bg-gradient-to-br from-purple-50/20 to-purple-100/20 dark:from-purple-900/10 dark:to-purple-800/10 border-l-4 border-purple-400 dark:border-purple-500';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50/30 dark:hover:bg-purple-900/10 bg-gradient-to-br from-purple-50/20 to-purple-100/20 dark:from-purple-900/10 dark:to-purple-800/10 border-l-4 border-purple-400 dark:border-purple-500';
           }
         } else {
           // Selected read chat
-          return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800/20 dark:to-neutral-700/20 border-l-4 border-neutral-400 dark:border-neutral-500';
+          return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800/20 dark:to-neutral-700/20 border-l-4 border-neutral-400 dark:border-neutral-500';
         }
       }
     }
@@ -929,31 +929,31 @@ export default function MessagesPage() {
         // UNREAD: Very vibrant and high contrast
         switch (icon) {
           case 'info':
-            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-200 to-blue-300 dark:from-blue-700 dark:to-blue-600 border-l-4 border-blue-600 shadow-md';
+            return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-200 to-blue-300 dark:from-blue-700 dark:to-blue-600 border-l-4 border-blue-600 shadow-md';
           case 'success':
-            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-green-50 dark:hover:bg-green-900/20 bg-gradient-to-br from-green-200 to-green-300 dark:from-green-700 dark:to-green-600 border-l-4 border-green-600 shadow-md';
+            return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-green-50 dark:hover:bg-green-900/20 bg-gradient-to-br from-green-200 to-green-300 dark:from-green-700 dark:to-green-600 border-l-4 border-green-600 shadow-md';
           case 'warning':
-            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-4 border-red-600 shadow-md';
+            return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-4 border-red-600 shadow-md';
           case 'error':
-            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-4 border-red-600 shadow-md';
+            return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-4 border-red-600 shadow-md';
           case 'system':
           default:
-            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 bg-gradient-to-br from-purple-200 to-purple-300 dark:from-purple-700 dark:to-purple-600 border-l-4 border-purple-600 shadow-md';
+            return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 bg-gradient-to-br from-purple-200 to-purple-300 dark:from-purple-700 dark:to-purple-600 border-l-4 border-purple-600 shadow-md';
         }
       } else {
         // READ: Very faded and low contrast but still colored
         switch (icon) {
           case 'info':
-            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 bg-gradient-to-br from-blue-50/20 to-blue-100/20 dark:from-blue-900/10 dark:to-blue-800/10';
+            return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 bg-gradient-to-br from-blue-50/20 to-blue-100/20 dark:from-blue-900/10 dark:to-blue-800/10';
           case 'success':
-            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-green-50/30 dark:hover:bg-green-900/10 bg-gradient-to-br from-green-50/20 to-green-100/20 dark:from-green-900/10 dark:to-green-800/10';
+            return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-green-50/30 dark:hover:bg-green-900/10 bg-gradient-to-br from-green-50/20 to-green-100/20 dark:from-green-900/10 dark:to-green-800/10';
           case 'warning':
-            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10';
+            return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10';
           case 'error':
-            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10';
+            return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10';
           case 'system':
           default:
-            return 'p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50/30 dark:hover:bg-purple-900/10 bg-gradient-to-br from-purple-50/20 to-purple-100/20 dark:from-purple-900/10 dark:to-purple-800/10';
+            return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50/30 dark:hover:bg-purple-900/10 bg-gradient-to-br from-purple-50/20 to-purple-100/20 dark:from-purple-900/10 dark:to-purple-800/10';
         }
       }
     }
@@ -961,10 +961,10 @@ export default function MessagesPage() {
     // Chat items
     if (isUnread) {
       // UNREAD: Very vibrant and high contrast
-      return 'p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/60 dark:to-blue-700/60 shadow-md border-l-4 border-blue-500';
+      return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/60 dark:to-blue-700/60 shadow-md border-l-4 border-blue-500';
     } else {
       // READ: Very faded and low contrast
-      return 'p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800/20 dark:to-neutral-700/20';
+      return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800/20 dark:to-neutral-700/20';
     }
   }, [selectedChat, selectedNotification]);
 
@@ -1187,21 +1187,19 @@ export default function MessagesPage() {
                               </span>
                             </div>
                             
-                            {/* Delete Button - Bottom Right */}
-                            {selectedNotification === item.id && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteNotification(item);
-                                }}
-                                className="absolute bottom-0 right-0 p-1 transition-all duration-200 hover:scale-110"
-                                title="Delete notification"
-                              >
-                                <svg className="w-4 h-4 text-white hover:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              </button>
-                            )}
+                            {/* Delete Button - Bottom Right (Show on Hover) */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteNotification(item);
+                              }}
+                              className="absolute bottom-0 right-0 p-1 transition-all duration-200 hover:scale-110 opacity-0 group-hover:opacity-100"
+                              title="Delete notification"
+                            >
+                              <svg className="w-4 h-4 text-white hover:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
                           </div>
                         ) : (
                           /* Chat Layout */
@@ -1334,21 +1332,19 @@ export default function MessagesPage() {
                               </span>
                             </div>
                             
-                            {/* Delete Button - Bottom Right */}
-                            {selectedChat === item.id && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteConversation(item);
-                                }}
-                                className="absolute bottom-0 right-0 p-1 transition-all duration-200 hover:scale-110"
-                                title="Delete conversation"
-                              >
-                                <svg className="w-4 h-4 text-white hover:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              </button>
-                            )}
+                            {/* Delete Button - Bottom Right (Show on Hover) */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteConversation(item);
+                              }}
+                              className="absolute bottom-0 right-0 p-1 transition-all duration-200 hover:scale-110 opacity-0 group-hover:opacity-100"
+                              title="Delete conversation"
+                            >
+                              <svg className="w-4 h-4 text-white hover:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
                           </div>
                         )}
                       </div>
