@@ -874,11 +874,6 @@ export default function MessagesPage() {
     const isSelected = (item.itemType === 'chat' && selectedChat === item.id) ||
                       (item.itemType === 'notification' && selectedNotification === item.id);
     
-    // Debug logging
-    if (item.itemType === 'chat') {
-      console.log('Chat item:', item.id, 'selectedChat:', selectedChat, 'isSelected:', isSelected);
-    }
-    
     if (isSelected) {
       // Selected: Always use bright orange vertical line regardless of read/unread status
       const isUnread = item.itemType === 'notification' ? !item.read : item.unread_count > 0;
@@ -901,7 +896,7 @@ export default function MessagesPage() {
           }
         } else {
           // Selected unread chat
-          return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/60 dark:to-blue-700/60 shadow-md border-l-8 border-orange-500';
+          return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/60 dark:to-blue-700/60 shadow-md border-l-8 border-orange-600';
         }
       } else {
         // Selected read: keep faded colors but add bright orange selection border
@@ -922,7 +917,7 @@ export default function MessagesPage() {
           }
         } else {
           // Selected read chat
-          return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800/20 dark:to-neutral-700/20 border-l-8 border-orange-500';
+          return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800/20 dark:to-neutral-700/20 border-l-8 border-orange-600';
         }
       }
     }
