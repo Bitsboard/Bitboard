@@ -64,10 +64,7 @@ export default function DeleteConversationModal({
           </div>
           
           {/* Actions */}
-          <div className={cn(
-            "px-6 py-4 border-t flex gap-3 justify-end",
-            dark ? "border-neutral-700" : "border-neutral-200"
-          )}>
+          <div className="px-6 py-4 flex gap-3 justify-end">
             <button
               onClick={onClose}
               className={cn(

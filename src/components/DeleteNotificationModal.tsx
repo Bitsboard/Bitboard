@@ -59,15 +59,12 @@ export default function DeleteNotificationModal({
               "text-sm leading-relaxed",
               dark ? "text-neutral-300" : "text-neutral-600"
             )}>
-              Are you sure you wish to delete <strong>"{notificationTitle}"</strong>? This action cannot be undone.
+              Are you sure you want to delete this message?
             </p>
           </div>
           
           {/* Actions */}
-          <div className={cn(
-            "px-6 py-4 border-t flex gap-3 justify-end",
-            dark ? "border-neutral-700" : "border-neutral-200"
-          )}>
+          <div className="px-6 py-4 flex gap-3 justify-end">
             <button
               onClick={onClose}
               className={cn(
