@@ -23,8 +23,8 @@ async function sendWelcomeNotification(db: D1Database, userId: string, createdAt
     createdAt
   ).run();
 
-  // Create user notification record
-  const userNotificationId = `un_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+  // Create user notification record - use random ID without timestamp
+  const userNotificationId = `un_${Math.random().toString(36).substr(2, 16)}`;
   
   await db.prepare(`
     INSERT INTO user_notifications (id, user_id, notification_id, created_at)

@@ -239,7 +239,7 @@ export default function MessagesPage() {
               systemNotificationId: notification.notification_id,
               title: notification.title,
               message: notification.message,
-              timestamp: notification.received_at * 1000, // Convert from seconds to milliseconds
+              timestamp: notification.received_at, // Keep as seconds since formatTimestamp expects seconds
               read: !!notification.read_at,
               type: 'system' as const,
               icon: notification.icon,

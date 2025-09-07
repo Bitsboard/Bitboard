@@ -105,16 +105,18 @@ export async function POST(request: NextRequest) {
       
       // Use INSERT...SELECT to fan out to all users in one efficient query
       // This is much faster than batched VALUES and scales to thousands of users
+      // Use current timestamp for each user notification (when they receive it)
+      const userNotificationTimestamp = Math.floor(Date.now() / 1000);
       await db.prepare(`
         INSERT OR IGNORE INTO user_notifications (id, user_id, notification_id, created_at)
         SELECT 
-          'un_' || ? || '_' || substr(hex(randomblob(8)), 1, 8),
+          'un_' || substr(hex(randomblob(16)), 1, 16),
           id, 
           ?, 
           ?
         FROM users
         WHERE 1=1
-      `).bind(createdAt, notificationId, createdAt).run();
+      `).bind(notificationId, userNotificationTimestamp).run();
       
       console.log('🔔 User notifications created successfully with set-based approach');
     }
