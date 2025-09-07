@@ -9,7 +9,6 @@ interface SystemNotificationRequest {
   message: string;
   icon: 'info' | 'success' | 'warning' | 'error' | 'system';
   actionUrl?: string;
-  priority?: 'low' | 'normal' | 'high' | 'urgent';
 }
 
 export async function POST(request: NextRequest) {
@@ -64,7 +63,7 @@ export async function POST(request: NextRequest) {
     // Insert system notification
     await db.prepare(`
       INSERT INTO system_notifications (id, title, message, icon, target_group, action_url, created_at, status, priority)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'active', 'normal')
     `).bind(
       notificationId,
       body.title,
@@ -72,8 +71,7 @@ export async function POST(request: NextRequest) {
       body.icon,
       body.targetGroup,
       body.actionUrl || null,
-      createdAt,
-      body.priority || 'normal'
+      createdAt
     ).run();
 
     console.log('🔔 System notification created successfully');

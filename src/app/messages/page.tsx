@@ -11,7 +11,6 @@ import OfferModal from '@/components/OfferModal';
 import OfferMessage from '@/components/OfferMessage';
 import { generateProfilePicture, getInitials, formatPostAge, formatCADAmount, cn } from "@/lib/utils";
 import { useBtcRate } from '@/lib/hooks/useBtcRate';
-import MarkdownWysiwygEditor from '@/components/MarkdownWysiwygEditor';
 
 interface Chat {
   id: string;
@@ -1619,12 +1618,20 @@ export default function MessagesPage() {
                         </svg>
                       </button>
                       <div className="flex-1">
-                        <MarkdownWysiwygEditor
+                        <textarea
                           value={newMessage}
-                          onChange={setNewMessage}
+                          onChange={(e) => setNewMessage(e.target.value)}
                           placeholder="Type your message..."
-                          className="min-h-[60px]"
-                          minHeight={60}
+                          className="w-full px-4 py-3 rounded-xl border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none min-h-[60px] max-h-32"
+                          rows={3}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              if (newMessage.trim() && !isSending) {
+                                sendMessage();
+                              }
+                            }
+                          }}
                         />
                       </div>
                       <button

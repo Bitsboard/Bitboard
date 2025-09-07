@@ -95,7 +95,6 @@ export default function AdminPage() {
     message: '',
     icon: 'info' as 'info' | 'success' | 'warning' | 'error' | 'system',
     actionUrl: '',
-    priority: 'normal' as 'low' | 'normal' | 'high' | 'urgent',
     expiresAt: ''
   });
   const [sendingNotification, setSendingNotification] = useState(false);
@@ -742,21 +741,6 @@ export default function AdminPage() {
                     </select>
                   </div>
 
-                  {/* Priority */}
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-900 dark:text-white mb-2">
-                      Priority
-                    </label>
-                    <select
-                      value={notificationForm.priority}
-                      onChange={(e) => setNotificationForm(prev => ({ ...prev, priority: e.target.value as any }))}
-                    >
-                      <option value="low">Low</option>
-                      <option value="normal">Normal</option>
-                      <option value="high">High</option>
-                      <option value="urgent">Urgent</option>
-                    </select>
-                  </div>
 
                   {/* Title */}
                   <div>

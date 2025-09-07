@@ -9,7 +9,7 @@ import { useUser } from "@/lib/settings";
 
 interface Notification {
   id: string;
-  type: 'message' | 'update' | 'system';
+  type: 'message' | 'update' | 'system' | 'chat';
   title: string;
   message: string;
   timestamp: number;
@@ -17,6 +17,10 @@ interface Notification {
   actionUrl?: string;
   icon?: 'info' | 'success' | 'warning' | 'error' | 'system';
   priority?: 'low' | 'normal' | 'high' | 'urgent';
+  // Chat-specific fields
+  other_user?: string;
+  listing_title?: string;
+  unread_count?: number;
 }
 
 interface NotificationMenuProps {
@@ -33,7 +37,7 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
   const lang = useLang();
   const { user } = useUser();
 
-  // Load notifications from API
+  // Load notifications and chats from API
   const loadNotifications = async () => {
     if (!user?.email) {
       setNotifications([]);
@@ -43,11 +47,19 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/notifications?userEmail=${encodeURIComponent(user.email)}`);
-      if (response.ok) {
-        const data = await response.json() as { success: boolean; notifications: any[] };
-        if (data.success && data.notifications.length > 0) {
-          const transformedNotifications: Notification[] = data.notifications.map(notification => ({
+      // Load both notifications and chats in parallel
+      const [notificationsResponse, chatsResponse] = await Promise.all([
+        fetch(`/api/notifications?userEmail=${encodeURIComponent(user.email)}`),
+        fetch(`/api/chat/list?userEmail=${encodeURIComponent(user.email)}`)
+      ]);
+
+      const allItems: Notification[] = [];
+
+      // Process system notifications
+      if (notificationsResponse.ok) {
+        const notificationsData = await notificationsResponse.json() as { success: boolean; notifications: any[] };
+        if (notificationsData.success && notificationsData.notifications.length > 0) {
+          const transformedNotifications: Notification[] = notificationsData.notifications.map(notification => ({
             id: notification.user_notification_id || notification.notification_id,
             type: 'system' as const,
             title: notification.title,
@@ -58,17 +70,45 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
             icon: notification.icon,
             priority: notification.priority || 'normal'
           }));
-          setNotifications(transformedNotifications);
-        } else {
-          setNotifications([]);
+          allItems.push(...transformedNotifications);
         }
-      } else {
-        console.error('Failed to load notifications:', response.status);
-        setNotifications([]);
       }
+
+      // Process chat conversations
+      if (chatsResponse.ok) {
+        const chatsData = await chatsResponse.json() as { success: boolean; chats: any[] };
+        if (chatsData.success && chatsData.chats.length > 0) {
+          const transformedChats: Notification[] = chatsData.chats.map(chat => ({
+            id: chat.id,
+            type: 'chat' as const,
+            title: chat.listing_title || 'Chat',
+            message: chat.last_message || 'No messages yet',
+            timestamp: chat.last_message_time * 1000, // Convert from seconds to milliseconds
+            read: chat.unread_count === 0,
+            actionUrl: '/messages',
+            icon: 'system' as const,
+            other_user: chat.other_user,
+            listing_title: chat.listing_title,
+            unread_count: chat.unread_count
+          }));
+          allItems.push(...transformedChats);
+        }
+      }
+
+      // Sort by timestamp (newest first) and set state
+      allItems.sort((a, b) => b.timestamp - a.timestamp);
+      setNotifications(allItems);
+
+      // Calculate unread count
+      const unread = allItems.filter(item => 
+        item.type === 'system' ? !item.read : (item.unread_count || 0) > 0
+      ).length;
+      setUnreadCount(unread);
+
     } catch (error) {
-      console.error('Error loading notifications:', error);
+      console.error('Error loading notifications and chats:', error);
       setNotifications([]);
+      setUnreadCount(0);
     } finally {
       setIsLoading(false);
     }
@@ -116,35 +156,53 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
   }, []);
 
   const markAsRead = async (notificationId: string) => {
-    // Mark as read on server first
-    try {
-      const response = await fetch('/api/notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          notificationId: notificationId,
-          action: 'mark_read'
-        })
-      });
-
-      if (response.ok) {
-        // Update local state after successful server update
-        setNotifications(prev => {
-          const updated = prev.map(n => 
-            n.id === notificationId ? { ...n, read: true } : n
-          );
-          return updated;
+    // Find the notification to check its type
+    const notification = notifications.find(n => n.id === notificationId);
+    
+    // Only mark system notifications as read via API
+    if (notification && notification.type !== 'chat') {
+      try {
+        const response = await fetch('/api/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            notificationId: notificationId,
+            action: 'mark_read'
+          })
         });
-        
-        // Dispatch event to notify other components
-        window.dispatchEvent(new CustomEvent('notificationStateChanged', {
-          detail: { action: 'mark_read', notificationId }
-        }));
-      } else {
-        console.error('Failed to mark notification as read');
+
+        if (response.ok) {
+          // Update local state after successful server update
+          setNotifications(prev => {
+            const updated = prev.map(n => 
+              n.id === notificationId ? { ...n, read: true } : n
+            );
+            return updated;
+          });
+          
+          // Dispatch event to notify other components
+          window.dispatchEvent(new CustomEvent('notificationStateChanged', {
+            detail: { action: 'mark_read', notificationId }
+          }));
+        } else {
+          console.error('Failed to mark notification as read');
+        }
+      } catch (error) {
+        console.error('Error marking notification as read:', error);
       }
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
+    } else {
+      // For chat conversations, just update local state (they're marked as read when viewed)
+      setNotifications(prev => {
+        const updated = prev.map(n => 
+          n.id === notificationId ? { ...n, read: true } : n
+        );
+        return updated;
+      });
+      
+      // Dispatch event to notify other components
+      window.dispatchEvent(new CustomEvent('notificationStateChanged', {
+        detail: { action: 'mark_read', notificationId }
+      }));
     }
   };
 
@@ -327,18 +385,22 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
                     key={notification.id}
                     className={`p-4 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors duration-200 cursor-pointer ${
                       !notification.read ? (() => {
-                        const priority = notification.priority || 'normal';
-                        switch (priority) {
-                          case 'urgent':
-                            return 'bg-gradient-to-br from-red-100 to-red-200 dark:from-red-800/50 dark:to-red-700/60 border-l-4 border-red-500';
-                          case 'high':
-                            return 'bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-800/50 dark:to-orange-700/60 border-l-4 border-orange-500';
-                          case 'normal':
-                            return 'bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/50 dark:to-blue-700/60 border-l-4 border-blue-500';
-                          case 'low':
-                            return 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800/50 dark:to-gray-700/60 border-l-4 border-gray-500';
-                          default:
-                            return 'bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-800/50 dark:to-violet-700/60 border-l-4 border-purple-500';
+                        if (notification.type === 'chat') {
+                          return 'bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/50 dark:to-blue-700/60 border-l-4 border-blue-500';
+                        } else {
+                          const priority = notification.priority || 'normal';
+                          switch (priority) {
+                            case 'urgent':
+                              return 'bg-gradient-to-br from-red-100 to-red-200 dark:from-red-800/50 dark:to-red-700/60 border-l-4 border-red-500';
+                            case 'high':
+                              return 'bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-800/50 dark:to-orange-700/60 border-l-4 border-orange-500';
+                            case 'normal':
+                              return 'bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/50 dark:to-blue-700/60 border-l-4 border-blue-500';
+                            case 'low':
+                              return 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800/50 dark:to-gray-700/60 border-l-4 border-gray-500';
+                            default:
+                              return 'bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-800/50 dark:to-violet-700/60 border-l-4 border-purple-500';
+                          }
                         }
                       })() : ''
                     }`}
@@ -353,7 +415,15 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
                     }}
                   >
                     <div className="flex items-start gap-3">
-                      {getNotificationIcon(notification)}
+                      {notification.type === 'chat' ? (
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                          <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                          </svg>
+                        </div>
+                      ) : (
+                        getNotificationIcon(notification)
+                      )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between">
                           <h4 className={`text-sm font-medium ${
@@ -361,7 +431,10 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
                               ? 'text-neutral-900 dark:text-white' 
                               : 'text-neutral-700 dark:text-neutral-300'
                           }`}>
-                            {notification.title}
+                            {notification.type === 'chat' 
+                              ? `${notification.other_user} - ${notification.listing_title}`
+                              : notification.title
+                            }
                           </h4>
                           {!notification.read && (
                             <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2"></div>
