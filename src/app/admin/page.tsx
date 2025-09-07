@@ -686,7 +686,14 @@ export default function AdminPage() {
                     <button
                       onClick={() => {
                         setShowNotificationForm(false);
-                        resetNotificationForm();
+                        setNotificationForm({
+                          targetGroup: 'all',
+                          title: '',
+                          message: '',
+                          icon: 'info'
+                        });
+                        setNotificationError(null);
+                        setNotificationSuccess(null);
                       }}
                       className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                     >
