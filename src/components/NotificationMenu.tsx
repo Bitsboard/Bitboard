@@ -434,7 +434,7 @@ export function NotificationMenu({ dark }: NotificationMenuProps) {
                               : 'text-neutral-700 dark:text-neutral-300'
                           }`}>
                             {notification.type === 'chat' 
-                              ? `${notification.other_user} - ${notification.listing_title}`
+                              ? notification.listing_title
                               : notification.title
                             }
                           </h4>

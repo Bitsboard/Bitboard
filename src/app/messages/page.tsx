@@ -1047,92 +1047,51 @@ export default function MessagesPage() {
                         className={getItemClassName(item)}
                       >
                         {item.itemType === 'notification' ? (
-                          /* System Notification Layout - Email Style */
+                          /* System Notification Layout - Pill Style */
                           <div className="flex items-start gap-3 relative">
                             <div className="flex-1 min-w-0">
-                              {/* Row 1: Small Icon + Title */}
+                              {/* Row 1: Bitsbarter Team Pill */}
                               <div className="flex items-center gap-2 mb-2">
-                                {/* Small notification icon */}
-                                <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
-                                  {item.icon === 'info' && (
-                                    <svg className={`w-4 h-4 ${
-                                      selectedNotification === item.id 
-                                        ? item.read 
-                                          ? 'text-blue-400 dark:text-blue-500' 
-                                          : 'text-white'
-                                        : item.read 
-                                          ? 'text-blue-300 dark:text-blue-600' 
-                                          : 'text-blue-600 dark:text-blue-400'
-                                    }`} fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                                    </svg>
-                                  )}
-                                  {item.icon === 'success' && (
-                                    <svg className={`w-4 h-4 ${
-                                      selectedNotification === item.id 
-                                        ? item.read 
-                                          ? 'text-green-400 dark:text-green-500' 
-                                          : 'text-white'
-                                        : item.read 
-                                          ? 'text-green-300 dark:text-green-600' 
-                                          : 'text-green-600 dark:text-green-400'
-                                    }`} fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                  )}
-                                  {item.icon === 'warning' && (
-                                    <svg className={`w-4 h-4 ${
-                                      selectedNotification === item.id 
-                                        ? item.read 
-                                          ? 'text-red-400 dark:text-red-500' 
-                                          : 'text-white'
-                                        : item.read 
-                                          ? 'text-red-300 dark:text-red-600' 
-                                          : 'text-red-600 dark:text-red-400'
-                                    }`} fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                    </svg>
-                                  )}
-                                  {item.icon === 'error' && (
-                                    <svg className={`w-4 h-4 ${
-                                      selectedNotification === item.id 
-                                        ? item.read 
-                                          ? 'text-red-400 dark:text-red-500' 
-                                          : 'text-white'
-                                        : item.read 
-                                          ? 'text-red-300 dark:text-red-600' 
-                                          : 'text-red-600 dark:text-red-400'
-                                    }`} fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                                    </svg>
-                                  )}
-                                  {(!item.icon || item.icon === 'system') && (
-                                    <svg className={`w-4 h-4 ${
-                                      selectedNotification === item.id 
-                                        ? item.read 
-                                          ? 'text-purple-400 dark:text-purple-500' 
-                                          : 'text-white'
-                                        : item.read 
-                                          ? 'text-purple-300 dark:text-purple-600' 
-                                          : 'text-purple-600 dark:text-purple-400'
-                                    }`} fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm2 2a1 1 0 000 2h6a1 1 0 100-2H5z" clipRule="evenodd" />
-                                    </svg>
-                                  )}
+                                <div 
+                                  className={`inline-flex items-center px-2 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative ${
+                                    selectedNotification === item.id 
+                                      ? item.read 
+                                        ? 'bg-white/10 hover:bg-white/20 border border-white/20' 
+                                        : 'bg-white/20 hover:bg-white/30 border border-white/30'
+                                      : item.read 
+                                        ? 'bg-white/5 hover:bg-white/10 border border-white/10' 
+                                        : 'bg-white/10 hover:bg-white/20 border border-white/20'
+                                  }`}
+                                >
+                                  <div className="flex-shrink-0 -ml-1">
+                                    <img
+                                      src="/Bitsbarterlogo.svg"
+                                      alt="Bitsbarter"
+                                      className="w-4 h-4 rounded-full object-cover"
+                                      onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        target.style.display = 'none';
+                                        const parent = target.parentElement;
+                                        if (parent) {
+                                          const fallback = parent.querySelector('div') as HTMLDivElement;
+                                          if (fallback) fallback.classList.remove('hidden');
+                                        }
+                                      }}
+                                    />
+                                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center hidden">
+                                      <span className="text-xs font-bold text-white">B</span>
+                                    </div>
+                                  </div>
+                                  <span className={`text-xs ml-1 ${
+                                    selectedNotification === item.id 
+                                      ? item.read 
+                                        ? 'text-neutral-400 dark:text-neutral-500' 
+                                        : 'text-white'
+                                      : item.read 
+                                        ? 'text-neutral-300 dark:text-neutral-600' 
+                                        : 'text-white'
+                                  }`}>Bitsbarter team</span>
                                 </div>
-                                
-                                {/* "Bitsbarter team" */}
-                                <h3 className={`text-sm flex-1 ${
-                                  selectedNotification === item.id 
-                                    ? item.read 
-                                      ? 'text-neutral-400 dark:text-neutral-500 font-semibold' 
-                                      : 'text-neutral-900 dark:text-white font-black'
-                                    : item.read 
-                                      ? 'text-neutral-300 dark:text-neutral-600 font-light' 
-                                      : 'text-neutral-900 dark:text-white font-black'
-                                }`}>
-                                  Bitsbarter team
-                                </h3>
                               </div>
                               
                               {/* Row 2: Title */}
