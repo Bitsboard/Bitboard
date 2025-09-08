@@ -273,9 +273,13 @@ export default function OfferModal({
           );
           background-size: 200% 100%;
           animation: gradient-shift 2s ease-in-out infinite;
-          border-radius: 8px;
+          border-radius: 8px 0 0 8px;
           transition: width 0.2s ease;
           z-index: 2;
+        }
+        
+        .slider-fill.max {
+          border-radius: 8px;
         }
 
         .animated-slider {
@@ -434,7 +438,7 @@ export default function OfferModal({
                     <div className="relative pt-3">
                       {/* Pin Icon positioned above slider */}
                       <div 
-                        className="absolute -top-4 transform -translate-x-1/2 z-20 transition-all duration-200 ease-out"
+                        className="absolute -top-2 transform -translate-x-1/2 z-20 transition-all duration-200 ease-out"
                         style={{
                           left: `${Math.min(Math.max((getSliderValue() / listingPrice) * 100, 0), 100)}%`
                         }}
@@ -455,7 +459,10 @@ export default function OfferModal({
                                 const rect = slider.getBoundingClientRect();
                                 const x = e.clientX - rect.left;
                                 const percentage = x / rect.width;
-                                const newValue = Math.round(percentage * listingPrice);
+                                
+                                // Snap to 5% increments
+                                const snappedPercentage = Math.round(percentage * 20) / 20; // 20 steps = 5% each
+                                const newValue = Math.round(snappedPercentage * listingPrice);
                                 const clampedValue = Math.max(0, Math.min(newValue, listingPrice));
                                 
                                 // Update the slider value
@@ -466,7 +473,11 @@ export default function OfferModal({
                                 const handleMouseMove = (moveEvent: MouseEvent) => {
                                   const newX = moveEvent.clientX - rect.left;
                                   const newPercentage = newX / rect.width;
-                                  const newClampedValue = Math.max(0, Math.min(Math.round(newPercentage * listingPrice), listingPrice));
+                                  
+                                  // Snap to 5% increments
+                                  const newSnappedPercentage = Math.round(newPercentage * 20) / 20;
+                                  const newClampedValue = Math.max(0, Math.min(Math.round(newSnappedPercentage * listingPrice), listingPrice));
+                                  
                                   slider.value = newClampedValue.toString();
                                   handleSliderChange(newClampedValue);
                                 };
@@ -489,7 +500,7 @@ export default function OfferModal({
                         <div className="slider-track"></div>
                         {/* Animated fill */}
                         <div 
-                          className="slider-fill"
+                          className={`slider-fill ${getSliderValue() >= listingPrice ? 'max' : ''}`}
                           style={{
                             width: `${Math.min(Math.max((getSliderValue() / listingPrice) * 100, 0), 100)}%`
                           }}
