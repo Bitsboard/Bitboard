@@ -685,6 +685,8 @@ export default function MessagesPage() {
   // Function to open listing modal
   const openListingModal = async (listingId: string | number) => {
     try {
+      console.log('🔍 Opening listing modal with ID:', listingId, 'type:', typeof listingId);
+      
       // Fetch the real listing data from the API
       const response = await fetch(`/api/listings/${listingId}`);
       if (!response.ok) {
@@ -692,43 +694,11 @@ export default function MessagesPage() {
         return;
       }
       
-      const dbListing = await response.json() as any;
+      const listingData = await response.json();
+      console.log('🔍 Listing data from API:', listingData);
       
-      // Transform the database listing to match the expected Listing interface
-      const transformedListing = {
-        id: String(dbListing.id),
-        title: dbListing.title || 'Untitled Listing',
-        description: dbListing.description || 'No description available',
-        priceSats: Number(dbListing.price_sat) || 0,
-        category: dbListing.category || 'Featured',
-        location: dbListing.location || 'Location Unknown',
-        lat: Number(dbListing.lat) || 0,
-        lng: Number(dbListing.lng) || 0,
-        type: dbListing.type || 'sell',
-        images: dbListing.images ? (Array.isArray(dbListing.images) ? dbListing.images : [dbListing.images]) : 
-                dbListing.listing_image ? [dbListing.listing_image] : 
-                dbListing.image ? [dbListing.image] : 
-                dbListing.photo ? [dbListing.photo] :
-                dbListing.photo_url ? [dbListing.photo_url] :
-                dbListing.image_url ? [dbListing.image_url] : [],
-        boostedUntil: dbListing.boosted_until ? Number(dbListing.boosted_until) : null,
-        seller: {
-          name: dbListing.seller_name || dbListing.posted_by || dbListing.username || 'Unknown Seller',
-          score: Number(dbListing.seller_score) || 0,
-          deals: Number(dbListing.seller_deals) || 0,
-          rating: Number(dbListing.seller_rating) || 0,
-          verifications: {
-            email: Boolean(dbListing.seller_verified_email || dbListing.verified_email),
-            phone: Boolean(dbListing.seller_verified_phone || dbListing.verified_phone),
-            lnurl: Boolean(dbListing.seller_verified_lnurl || dbListing.verified_lnurl)
-          },
-          onTimeRelease: Number(dbListing.seller_on_time_release) || 0
-        },
-        createdAt: Number(dbListing.created_at) || Date.now()
-      };
-      
-      // Set the modal with the transformed listing data
-      setModal('active', transformedListing);
+      // The listings API now returns the correct transformed data, so use it directly
+      setModal('active', listingData);
     } catch (error) {
       console.error('Error fetching listing:', error);
     }
