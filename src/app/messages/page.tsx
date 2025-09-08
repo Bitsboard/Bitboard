@@ -726,7 +726,7 @@ export default function MessagesPage() {
         },
         createdAt: Number(dbListing.created_at) || Date.now()
       };
-
+      
       // Set the modal with the transformed listing data
       setModal('active', transformedListing);
     } catch (error) {
@@ -927,7 +927,7 @@ export default function MessagesPage() {
           case 'error':
             return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-4 border-red-600 shadow-md';
           case 'system':
-          default:
+        default:
             return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 bg-gradient-to-br from-purple-200 to-purple-300 dark:from-purple-700 dark:to-purple-600 border-l-4 border-purple-600 shadow-md';
         }
       } else {
@@ -1060,7 +1060,7 @@ export default function MessagesPage() {
                                 
                                 {/* Bitsbarter Team Pill */}
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-all duration-200 ${
-                                  selectedNotification === item.id 
+                                      selectedNotification === item.id 
                                     ? !item.read
                                       ? 'bg-white/20 dark:bg-neutral-700/60 text-neutral-900 dark:text-white border border-neutral-400/80 dark:border-neutral-500/80 hover:bg-white/30 dark:hover:bg-neutral-600/60 font-bold'
                                       : 'bg-white/10 dark:bg-neutral-800/30 text-neutral-500 dark:text-neutral-500 border border-neutral-300/60 dark:border-neutral-600/60 hover:bg-white/20 dark:hover:bg-neutral-700/40 font-semibold'
@@ -1069,7 +1069,7 @@ export default function MessagesPage() {
                                       : 'bg-white/5 dark:bg-neutral-800/20 text-neutral-400 dark:text-neutral-600 border border-neutral-200/40 dark:border-neutral-700/30 hover:bg-white/10 dark:hover:bg-neutral-700/30 font-light'
                                 }`}>
                                   <span className="ml-1">The bitsbarter team</span>
-                                </span>
+                                  </span>
                               </div>
                               
                               {/* Row 2: Title */}
@@ -1125,18 +1125,18 @@ export default function MessagesPage() {
                             </div>
                             
                             {/* Delete Button - Bottom Right (Show on Hover) */}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                 handleDeleteNotification(item);
-                              }}
+                                }}
                               className="absolute bottom-0 right-0 p-1 transition-all duration-200 hover:scale-110 opacity-0 group-hover:opacity-100"
-                              title="Delete notification"
-                            >
+                                title="Delete notification"
+                              >
                               <svg className="w-4 h-4 text-neutral-600 dark:text-white hover:text-neutral-800 dark:hover:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
                           </div>
                         ) : (
                           /* Chat Layout */
@@ -1269,18 +1269,18 @@ export default function MessagesPage() {
                             </div>
                             
                             {/* Delete Button - Bottom Right (Show on Hover) */}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteConversation(item);
-                              }}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteConversation(item);
+                                }}
                               className="absolute bottom-0 right-0 p-1 transition-all duration-200 hover:scale-110 opacity-0 group-hover:opacity-100"
-                              title="Delete conversation"
-                            >
+                                title="Delete conversation"
+                              >
                               <svg className="w-4 h-4 text-neutral-600 dark:text-white hover:text-neutral-800 dark:hover:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
                           </div>
                         )}
                       </div>
@@ -1299,17 +1299,17 @@ export default function MessagesPage() {
                     <div className="flex gap-3">
                       {/* Left: Listing Image */}
                       <div className="p-1 flex-shrink-0">
-                        <img
-                          src={chats.find(c => c.id === selectedChat)?.listing_image || '/placeholder-listing.jpg'}
-                          alt="Listing"
+                      <img
+                        src={chats.find(c => c.id === selectedChat)?.listing_image || '/placeholder-listing.jpg'}
+                        alt="Listing"
                           className="w-24 h-24 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                          onClick={async () => {
-                            const selectedChatData = chats.find(c => c.id === selectedChat);
-                            if (selectedChatData?.listing_id) {
+                        onClick={async () => {
+                          const selectedChatData = chats.find(c => c.id === selectedChat);
+                          if (selectedChatData?.listing_id) {
                               await openListingModal(selectedChatData.listing_id);
-                            }
-                          }}
-                        />
+                          }
+                        }}
+                      />
                       </div>
                       
                       {/* Right: Content Rows */}
@@ -1343,85 +1343,85 @@ export default function MessagesPage() {
                         
                         {/* Row 2: Price + Dollar Equivalent */}
                         <div className="text-white/90 mb-3">
-                          {(() => {
-                            const priceSat = chats.find(c => c.id === selectedChat)?.listing_price_sat || 0;
-                            if (priceSat === -1) {
-                              return (
-                                <div>
-                                  <span className="text-lg font-semibold">Make an offer</span>
+                            {(() => {
+                              const priceSat = chats.find(c => c.id === selectedChat)?.listing_price_sat || 0;
+                              if (priceSat === -1) {
+                                return (
+                                  <div>
+                                    <span className="text-lg font-semibold">Make an offer</span>
+                                  </div>
+                                );
+                              }
+                              return unit === 'BTC' ? (
+                              <div className="flex items-center gap-2">
+                                  <span className="text-lg font-semibold">
+                                    {(Number(priceSat) / 100000000).toFixed(8)} BTC
+                                  </span>
+                                  {/* Dollar equivalent */}
+                                <span className="text-sm text-white/80">
+                                  ({formatCADAmount((Number(priceSat) / 100000000) * (btcCad || 0))})
+                                </span>
+                                </div>
+                              ) : (
+                              <div className="flex items-center gap-2">
+                                  <span className="text-lg font-semibold">
+                                    {priceSat.toLocaleString()} sats
+                                  </span>
+                                  {/* Dollar equivalent */}
+                                <span className="text-sm text-white/80">
+                                  ({formatCADAmount((Number(priceSat) / 100000000) * (btcCad || 0))})
+                                </span>
                                 </div>
                               );
-                            }
-                            return unit === 'BTC' ? (
-                              <div className="flex items-center gap-2">
-                                <span className="text-lg font-semibold">
-                                  {(Number(priceSat) / 100000000).toFixed(8)} BTC
-                                </span>
-                                {/* Dollar equivalent */}
-                                <span className="text-sm text-white/80">
-                                  ({formatCADAmount((Number(priceSat) / 100000000) * (btcCad || 0))})
-                                </span>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                <span className="text-lg font-semibold">
-                                  {priceSat.toLocaleString()} sats
-                                </span>
-                                {/* Dollar equivalent */}
-                                <span className="text-sm text-white/80">
-                                  ({formatCADAmount((Number(priceSat) / 100000000) * (btcCad || 0))})
-                                </span>
-                              </div>
-                            );
-                          })()}
+                            })()}
                         </div>
                         
                         {/* Row 3: Username + Reputation + Action Buttons */}
                         <div className="flex items-center justify-between">
                           {/* Left: Username + Reputation */}
-                          <div className="flex items-center gap-2">
-                            <div 
+                        <div className="flex items-center gap-2">
+                          <div 
                               className="inline-flex items-center px-2 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative bg-white/10 hover:bg-white/20 border border-white/20 hover:scale-105 hover:shadow-md"
-                              onClick={() => {
-                                const selectedChatData = chats.find(c => c.id === selectedChat);
-                                if (selectedChatData?.other_user) {
-                                  router.push(`/profile/${selectedChatData.other_user}`);
-                                }
-                              }}
-                            >
-                              <div className="flex-shrink-0 -ml-1">
-                                <img
-                                  src={generateProfilePicture(chats.find(c => c.id === selectedChat)?.other_user || '')}
-                                  alt={`${chats.find(c => c.id === selectedChat)?.other_user}'s profile picture`}
+                            onClick={() => {
+                              const selectedChatData = chats.find(c => c.id === selectedChat);
+                              if (selectedChatData?.other_user) {
+                                router.push(`/profile/${selectedChatData.other_user}`);
+                              }
+                            }}
+                          >
+                            <div className="flex-shrink-0 -ml-1">
+                              <img
+                                src={generateProfilePicture(chats.find(c => c.id === selectedChat)?.other_user || '')}
+                                alt={`${chats.find(c => c.id === selectedChat)?.other_user}'s profile picture`}
                                   className="w-4 h-4 rounded-full object-cover"
-                                  onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.style.display = 'none';
-                                    const parent = target.parentElement;
-                                    if (parent) {
-                                      const fallback = parent.querySelector('div') as HTMLDivElement;
-                                      if (fallback) fallback.classList.remove('hidden');
-                                    }
-                                  }}
-                                />
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  const parent = target.parentElement;
+                                  if (parent) {
+                                    const fallback = parent.querySelector('div') as HTMLDivElement;
+                                    if (fallback) fallback.classList.remove('hidden');
+                                  }
+                                }}
+                              />
                                 <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center hidden">
-                                  <span className="text-xs font-bold text-white">{getInitials(chats.find(c => c.id === selectedChat)?.other_user || '')}</span>
-                                </div>
+                                <span className="text-xs font-bold text-white">{getInitials(chats.find(c => c.id === selectedChat)?.other_user || '')}</span>
                               </div>
-                              <span className="text-xs ml-1 text-white">{chats.find(c => c.id === selectedChat)?.other_user}</span>
                             </div>
-                            
-                            {/* Verified Badge */}
-                            {chats.find(c => c.id === selectedChat)?.other_user_verified && (
-                              <span className="verified-badge inline-flex h-5 w-5 items-center justify-center rounded-full text-white font-bold shadow-md" style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }} aria-label="Verified" title="User has verified their identity">
-                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                              </span>
-                            )}
-                            
-                            {/* User Reputation */}
-                            <span className="text-sm text-white/80">+{chats.find(c => c.id === selectedChat)?.seller_thumbsUp || 0} 👍</span>
+                              <span className="text-xs ml-1 text-white">{chats.find(c => c.id === selectedChat)?.other_user}</span>
                           </div>
                           
+                          {/* Verified Badge */}
+                          {chats.find(c => c.id === selectedChat)?.other_user_verified && (
+                            <span className="verified-badge inline-flex h-5 w-5 items-center justify-center rounded-full text-white font-bold shadow-md" style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }} aria-label="Verified" title="User has verified their identity">
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </span>
+                          )}
+                          
+                            {/* User Reputation */}
+                            <span className="text-sm text-white/80">+{chats.find(c => c.id === selectedChat)?.seller_thumbsUp || 0} 👍</span>
+                      </div>
+                      
                           {/* Right: Action Buttons */}
                           <div className="flex items-center gap-2">
                             {/* View Listing Button */}
@@ -1439,9 +1439,9 @@ export default function MessagesPage() {
                             </button>
                             
                             {/* Mark as Unread Button */}
-                            <button
-                              onClick={async () => {
-                                const selectedChatData = chats.find(c => c.id === selectedChat);
+                        <button
+                          onClick={async () => {
+                            const selectedChatData = chats.find(c => c.id === selectedChat);
                                 if (selectedChatData) {
                                   setChats(prev => 
                                     prev.map(c => 
@@ -1468,7 +1468,7 @@ export default function MessagesPage() {
                               title="Delete conversation"
                             >
                               Delete
-                            </button>
+                        </button>
                           </div>
                         </div>
                       </div>
@@ -1842,6 +1842,7 @@ export default function MessagesPage() {
           dark={dark}
           user={user}
           onShowAuth={() => setModal('showAuth', true)}
+          fromMessagesPage={true}
         />
       )}
       

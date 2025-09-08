@@ -23,6 +23,7 @@ interface ListingModalProps {
   open: boolean;
   user?: any;
   onShowAuth?: () => void;
+  fromMessagesPage?: boolean; // New prop to indicate if opened from messages page
 }
 
 function accent(listing: Listing) {
@@ -32,7 +33,7 @@ function accent(listing: Listing) {
   return { stripe: "from-fuchsia-500 to-violet-500", chip: "from-fuchsia-500 to-violet-500" };
 }
 
-export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, open, user, onShowAuth }: ListingModalProps) {
+export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, open, user, onShowAuth, fromMessagesPage = false }: ListingModalProps) {
   const boosted = Boolean(listing.boostedUntil && listing.boostedUntil > Date.now());
   const lang = useLang();
   const a = accent(listing);
@@ -96,7 +97,12 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
       }
     } else {
       
-      setShowChat(true);
+      // If opened from messages page, close the modal instead of opening chat
+      if (fromMessagesPage) {
+        onClose();
+      } else {
+        setShowChat(true);
+      }
     }
   }
 

@@ -32,9 +32,17 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   
   try {
     
-    // First, try to get just the basic listing data
+    // Get listing data with seller information
     const listing = await db.prepare(`
-      SELECT * FROM listings WHERE id = ?
+      SELECT 
+        l.*,
+        u.username as seller_username,
+        u.thumbs_up as seller_thumbs_up,
+        u.deals as seller_deals,
+        u.verified as seller_verified
+      FROM listings l
+      LEFT JOIN users u ON l.posted_by = u.id
+      WHERE l.id = ?
     `).bind(id).first();
     
     if (!listing) {
@@ -84,12 +92,13 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
       images: images, // Use real images from listing_images table
       boostedUntil: dbListing.boosted_until || null,
       seller: {
-        name: dbListing.seller_username || dbListing.username || 'Unknown',
+        name: dbListing.seller_username || 'Unknown',
         score: 0,
-        deals: 0,
+        deals: Number(dbListing.seller_deals) || 0,
         rating: 0,
+        thumbsUp: Number(dbListing.seller_thumbs_up) || 0,
         verifications: {
-          email: false,
+          email: Boolean(dbListing.seller_verified),
           phone: false,
           lnurl: false
         },
