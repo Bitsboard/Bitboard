@@ -544,20 +544,16 @@ export default function MessagesPage() {
 
   // Debounced click handler to prevent rapid API calls
   const handleItemClick = (item: any) => {
-    console.log('🔍 Conversation item clicked:', item.itemType, item.id);
-    
     if (clickTimeout) {
       clearTimeout(clickTimeout);
     }
     
     const timeout = setTimeout(() => {
       if (item.itemType === 'chat') {
-        console.log('🔍 Selecting chat:', item.id);
         setSelectedChat(item.id);
         setSelectedNotification(null);
         loadMessages(item.id);
       } else {
-        console.log('🔍 Selecting notification:', item.id);
         selectNotification(item as SystemNotification);
       }
     }, 100); // 100ms debounce
@@ -687,9 +683,6 @@ export default function MessagesPage() {
 
   // Function to open listing modal
   const openListingModal = async (listingId: string | number) => {
-    console.log('🔍 openListingModal called with:', listingId);
-    console.trace('🔍 openListingModal call stack:');
-    
     try {
       // Fetch the real listing data from the API
       const response = await fetch(`/api/listings/${listingId}`);
@@ -1191,13 +1184,6 @@ export default function MessagesPage() {
                                       ? 'text-neutral-900 dark:text-white font-black'
                                       : 'text-neutral-400 dark:text-neutral-600 font-light'
                                 }`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  // First select the chat, then open the listing modal
-                                  loadMessages(item.id);
-                                  handleListingClick(item.listing_id, item.listing_title);
-                                }}
-                                title="Click to view listing details"
                               >
                                 {item.listing_title}
                               </h3>
