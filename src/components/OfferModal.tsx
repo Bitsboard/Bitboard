@@ -255,6 +255,7 @@ export default function OfferModal({
           background: #e5e7eb;
           border-radius: 8px;
           pointer-events: none;
+          z-index: 1;
         }
 
         .slider-fill {
@@ -274,6 +275,7 @@ export default function OfferModal({
           animation: gradient-shift 2s ease-in-out infinite;
           border-radius: 8px;
           transition: width 0.2s ease;
+          z-index: 2;
         }
 
         .animated-slider {
@@ -409,8 +411,8 @@ export default function OfferModal({
                     {unit === "BTC" ? `₿${formatAmount(amount)}` : `${formatAmount(amount)} sats`}
                     {btcRate && (
                       <div className={cn(
-                        "text-lg font-medium mt-1",
-                        dark ? "text-orange-300" : "text-orange-600"
+                        "text-sm font-normal mt-1",
+                        dark ? "text-neutral-400" : "text-neutral-500"
                       )}>
                         {formatCADAmount(satsToFiat(amount, btcRate))}
                       </div>
@@ -432,18 +434,31 @@ export default function OfferModal({
                     <div className="relative pt-3">
                       {/* Pin Icon positioned above slider */}
                       <div 
-                        className="absolute -top-3 transform -translate-x-1/2 z-20 transition-all duration-200 ease-out pointer-events-none"
+                        className="absolute -top-3 transform -translate-x-1/2 z-20 transition-all duration-200 ease-out"
                         style={{
-                          left: `${Math.min(Math.max((getSliderValue() / listingPrice) * 100, 0), 100)}%`
+                          left: `${Math.min(Math.max((getSliderValue() / listingPrice) * 100, 0), 99)}%`
                         }}
                       >
                         <div className="relative group">
                           <img 
                             src="/Bitsbarterlogo.svg" 
                             alt="Pin" 
-                            className="w-6 h-6 drop-shadow-lg transition-transform duration-200 group-hover:scale-110"
+                            className="w-6 h-6 drop-shadow-lg transition-transform duration-200 group-hover:scale-110 cursor-pointer"
                             draggable={false}
                             onDragStart={(e) => e.preventDefault()}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              // Forward the mouse event to the slider
+                              const slider = e.currentTarget.closest('.relative')?.querySelector('input[type="range"]') as HTMLInputElement;
+                              if (slider) {
+                                slider.focus();
+                                slider.dispatchEvent(new MouseEvent('mousedown', {
+                                  clientX: e.clientX,
+                                  clientY: e.clientY,
+                                  bubbles: true
+                                }));
+                              }
+                            }}
                           />
                         </div>
                       </div>
@@ -455,7 +470,7 @@ export default function OfferModal({
                         <div 
                           className="slider-fill"
                           style={{
-                            width: `${Math.min(Math.max((getSliderValue() / listingPrice) * 100, 0), 100)}%`
+                            width: `${Math.min(Math.max((getSliderValue() / listingPrice) * 100, 0), 99)}%`
                           }}
                         ></div>
                         {/* Invisible slider input */}
