@@ -85,6 +85,22 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
       location: listing.location,
       type: listing.type
     });
+    
+    // Detailed seller object logging
+    console.log('🔍 Detailed seller object:', {
+      name: listing.seller?.name,
+      thumbsUp: listing.seller?.thumbsUp,
+      deals: listing.seller?.deals,
+      verifications: listing.seller?.verifications
+    });
+    
+    // Price and date debugging
+    console.log('🔍 Price and date details:', {
+      priceSats: listing.priceSats,
+      createdAt: listing.createdAt,
+      createdAtDate: new Date(listing.createdAt),
+      priceSatsType: typeof listing.priceSats
+    });
   }, [listing]);
 
   function sanitizeTitle(raw: string, type: "sell" | "want"): string {

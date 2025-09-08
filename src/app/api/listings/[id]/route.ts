@@ -87,7 +87,16 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
       seller_thumbs_up: dbListing.seller_thumbs_up,
       seller_deals: dbListing.seller_deals,
       seller_verified: dbListing.seller_verified,
-      location: dbListing.location
+      location: dbListing.location,
+      posted_by: dbListing.posted_by
+    });
+    
+    // Check if JOIN worked
+    console.log('🔍 JOIN check - seller data available:', {
+      hasSellerUsername: !!dbListing.seller_username,
+      hasSellerThumbsUp: dbListing.seller_thumbs_up !== null && dbListing.seller_thumbs_up !== undefined,
+      hasSellerDeals: dbListing.seller_deals !== null && dbListing.seller_deals !== undefined,
+      hasSellerVerified: dbListing.seller_verified !== null && dbListing.seller_verified !== undefined
     });
 
     // Transform the data to match the expected Listing interface
