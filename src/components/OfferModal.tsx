@@ -34,17 +34,45 @@ export default function OfferModal({
   existingOffer
 }: OfferModalProps) {
   const [amount, setAmount] = useState<number>(0);
+  const [rawInput, setRawInput] = useState<string>(""); // Track raw input for BTC
   const [expirationHours, setExpirationHours] = useState(24); // Default to 24 hours
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAbortConfirm, setShowAbortConfirm] = useState(false);
 
   // Set default amount to listing price when modal opens
   useEffect(() => {
-    if (isOpen && listingPrice && listingPrice > 0) {
-      setAmount(listingPrice);
+    if (isOpen) {
+      if (existingOffer) {
+        // Show existing offer
+        setAmount(existingOffer.amount_sat);
+        if (unit === "BTC") {
+          setRawInput(formatBTCDisplay(existingOffer.amount_sat));
+        } else {
+          setRawInput(formatAmount(existingOffer.amount_sat));
+        }
+        // Set expiration hours from existing offer
+        if (existingOffer.expires_at) {
+          const now = Math.floor(Date.now() / 1000);
+          const hoursLeft = Math.max(1, Math.ceil((existingOffer.expires_at - now) / 3600));
+          setExpirationHours(hoursLeft);
+        }
+      } else if (listingPrice && listingPrice > 0) {
+        // New offer with listing price
+        setAmount(listingPrice);
+        if (unit === "BTC") {
+          setRawInput(formatBTCDisplay(listingPrice));
+        } else {
+          setRawInput(formatAmount(listingPrice));
+        }
+        setExpirationHours(24); // Reset to 24 hours default
+      } else {
+        // New offer without listing price
+        setAmount(0);
+        setRawInput("");
+        setExpirationHours(24);
+      }
     }
-    setExpirationHours(24); // Reset to 24 hours default
-  }, [isOpen, listingPrice]);
+  }, [isOpen, listingPrice, unit, existingOffer]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,12 +130,31 @@ export default function OfferModal({
     return (amount / 100000000).toFixed(8);
   };
 
+  // Format BTC for display without forcing 8 decimals
+  const formatBTCDisplay = (amount: number) => {
+    const btc = amount / 100000000;
+    // If it's a whole number, don't show decimals
+    if (btc % 1 === 0) {
+      return btc.toString();
+    }
+    // Otherwise show up to 8 decimals, removing trailing zeros
+    return btc.toFixed(8).replace(/\.?0+$/, '');
+  };
+
   const handleAmountChange = (value: string) => {
+    // Update raw input
+    setRawInput(value);
+    
     const newAmount = parseAmount(value);
     
     // If listing price exists and new amount exceeds it, revert to listing price
     if (listingPrice && listingPrice > 0 && newAmount > listingPrice) {
       setAmount(listingPrice);
+      if (unit === "BTC") {
+        setRawInput(formatBTCDisplay(listingPrice));
+      } else {
+        setRawInput(formatAmount(listingPrice));
+      }
     } else {
       setAmount(newAmount);
     }
@@ -115,6 +162,11 @@ export default function OfferModal({
 
   const handleSliderChange = (value: number) => {
     setAmount(value);
+    if (unit === "BTC") {
+      setRawInput(formatBTCDisplay(value));
+    } else {
+      setRawInput(formatAmount(value));
+    }
   };
 
   const getSliderSteps = () => {
@@ -162,32 +214,20 @@ export default function OfferModal({
           height: 20px;
           width: 20px;
           border-radius: 50%;
-          background: #f97316;
+          background: transparent;
           cursor: pointer;
-          border: 3px solid white;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-          transition: all 0.2s ease;
-        }
-        
-        .slider::-webkit-slider-thumb:hover {
-          transform: scale(1.1);
-          box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+          border: none;
+          box-shadow: none;
         }
         
         .slider::-moz-range-thumb {
           height: 20px;
           width: 20px;
           border-radius: 50%;
-          background: #f97316;
+          background: transparent;
           cursor: pointer;
-          border: 3px solid white;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-          transition: all 0.2s ease;
-        }
-        
-        .slider::-moz-range-thumb:hover {
-          transform: scale(1.1);
-          box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+          border: none;
+          box-shadow: none;
         }
 
         @keyframes gradient-shift {
@@ -202,28 +242,38 @@ export default function OfferModal({
           }
         }
 
-        .animated-slider {
+        .slider-track {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 8px;
+          background: #e5e7eb;
+          border-radius: 8px;
+          pointer-events: none;
+        }
+
+        .slider-fill {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 8px;
           background: linear-gradient(
             90deg,
-            #f97316 0%,
-            #f97316 var(--fill-percentage, 0%),
-            #e5e7eb var(--fill-percentage, 0%),
-            #e5e7eb 100%
+            #f97316,
+            #fb923c,
+            #f97316,
+            #fb923c,
+            #f97316
           );
           background-size: 200% 100%;
           animation: gradient-shift 2s ease-in-out infinite;
+          border-radius: 8px;
+          transition: width 0.2s ease;
         }
 
-        .animated-slider::-webkit-slider-thumb {
-          background: linear-gradient(45deg, #f97316, #fb923c, #f97316);
-          background-size: 200% 200%;
-          animation: gradient-shift 2s ease-in-out infinite;
-        }
-
-        .animated-slider::-moz-range-thumb {
-          background: linear-gradient(45deg, #f97316, #fb923c, #f97316);
-          background-size: 200% 200%;
-          animation: gradient-shift 2s ease-in-out infinite;
+        .animated-slider {
+          background: transparent;
         }
       `}</style>
       
@@ -381,30 +431,30 @@ export default function OfferModal({
                             alt="Pin" 
                             className="w-6 h-6 drop-shadow-lg transition-transform duration-200 group-hover:scale-110"
                           />
-                          {/* Small triangle pointing down to slider */}
-                          <div 
-                            className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 transition-all duration-200"
-                            style={{
-                              borderLeft: '4px solid transparent',
-                              borderRight: '4px solid transparent',
-                              borderTop: '6px solid #f97316'
-                            }}
-                          />
                         </div>
                       </div>
                       
-                      <input
-                        type="range"
-                        min="0"
-                        max={listingPrice}
-                        step={Math.round(listingPrice / 20)}
-                        value={getSliderValue()}
-                        onChange={(e) => handleSliderChange(parseInt(e.target.value))}
-                        className="w-full h-2 rounded-lg appearance-none cursor-pointer slider animated-slider"
-                        style={{
-                          '--fill-percentage': `${(getSliderValue() / listingPrice) * 100}%`
-                        } as React.CSSProperties}
-                      />
+                      <div className="relative h-2">
+                        {/* Background track */}
+                        <div className="slider-track"></div>
+                        {/* Animated fill */}
+                        <div 
+                          className="slider-fill"
+                          style={{
+                            width: `${(getSliderValue() / listingPrice) * 100}%`
+                          }}
+                        ></div>
+                        {/* Invisible slider input */}
+                        <input
+                          type="range"
+                          min="0"
+                          max={listingPrice}
+                          step={Math.round(listingPrice / 20)}
+                          value={getSliderValue()}
+                          onChange={(e) => handleSliderChange(parseInt(e.target.value))}
+                          className="w-full h-2 rounded-lg appearance-none cursor-pointer slider animated-slider absolute top-0 left-0 z-10"
+                        />
+                      </div>
                       <div className="flex justify-between text-xs mt-2">
                         <span className={cn(
                           "font-medium",
@@ -426,7 +476,7 @@ export default function OfferModal({
                   <div className="relative">
                     <input
                       type="text"
-                      value={unit === "BTC" ? formatBTCAmount(amount) : formatAmount(amount)}
+                      value={rawInput}
                       onChange={(e) => handleAmountChange(e.target.value)}
                       placeholder={unit === "BTC" ? "0.00000000" : "0"}
                       className={cn(
