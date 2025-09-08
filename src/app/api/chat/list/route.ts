@@ -81,7 +81,8 @@ export async function GET(req: NextRequest) {
         seller.verified as seller_verified,
         seller.thumbs_up as seller_rating,
         seller.deals as seller_deals,
-        COALESCE(last_msg.text, '') as last_message_text
+        COALESCE(last_msg.text, '') as last_message_text,
+        COALESCE(message_stats.unread_count, 0) as unread_count
       FROM chats c
       JOIN listings l ON c.listing_id = l.id
       JOIN users seller ON l.posted_by = seller.id
@@ -113,6 +114,13 @@ export async function GET(req: NextRequest) {
           FROM offers
         ) combined_activity
       ) last_msg ON c.id = last_msg.chat_id AND last_msg.rn = 1
+      LEFT JOIN (
+        SELECT 
+          chat_id,
+          COUNT(CASE WHEN read_at IS NULL AND from_id != ? THEN 1 END) AS unread_count
+        FROM messages
+        GROUP BY chat_id
+      ) message_stats ON c.id = message_stats.chat_id
       WHERE (c.buyer_id = ? OR c.seller_id = ?)
         AND c.buyer_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = ?)
         AND c.seller_id NOT IN (SELECT blocked_id FROM user_blocks WHERE blocker_id = ?)
@@ -126,7 +134,7 @@ export async function GET(req: NextRequest) {
     try {
       chats = await db
         .prepare(basicChatsQuery)
-        .bind(userId, userId, userId, userId, userId, userId, userId)
+        .bind(userId, userId, userId, userId, userId, userId, userId, userId)
         .all();
     } catch (dbError) {
       console.error('🔍 Chat API: Database query failed:', dbError);
@@ -157,7 +165,8 @@ export async function GET(req: NextRequest) {
       },
       lastMessageAt: chat.last_message_at * 1000,
       createdAt: chat.created_at * 1000,
-      lastMessageText: chat.last_message_text
+      lastMessageText: chat.last_message_text,
+      unread_count: chat.unread_count || 0
     }));
 
     return NextResponse.json({ chats: transformedChats, userId: userId });

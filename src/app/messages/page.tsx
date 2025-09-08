@@ -1167,8 +1167,19 @@ export default function MessagesPage() {
                           <div className="flex items-start gap-3 relative">
                             {/* Content - New Layout */}
                             <div className="flex-1 min-w-0">
-                              {/* Top Row: Username Pill Only */}
+                              {/* Top Row: Unread Count + Username Pill */}
                               <div className="flex items-center gap-2 mb-1">
+                                {/* Unread Count Badge */}
+                                {item.unread_count > 0 && (
+                                  <span className={`text-xs px-2 py-0.5 rounded-full min-w-[18px] text-center font-bold ${
+                                    selectedChat === item.id 
+                                      ? 'bg-red-700 text-white shadow-lg'
+                                      : 'bg-red-600 text-white shadow-md'
+                                  }`}>
+                                    {item.unread_count}
+                                  </span>
+                                )}
+                                
                                 {/* Username Pill with Profile Icon */}
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-all duration-200 ${
                                   selectedChat === item.id 
@@ -1264,18 +1275,6 @@ export default function MessagesPage() {
                                 })()}
                               </p>
                               
-                              {/* Bottom Row: Unread Count */}
-                              {item.unread_count > 0 && (
-                                <div className="flex justify-end">
-                                  <span className={`text-xs px-2 py-0.5 rounded-full min-w-[18px] text-center font-bold ${
-                                    selectedChat === item.id 
-                                      ? 'bg-red-700 text-white shadow-lg'
-                                      : 'bg-red-600 text-white shadow-md'
-                                  }`}>
-                                    {item.unread_count}
-                                  </span>
-                                </div>
-                              )}
                             </div>
                             
                             {/* Age of Last Message - Top Right */}

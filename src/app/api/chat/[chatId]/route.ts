@@ -102,14 +102,19 @@ export async function GET(
     const allItems = [...transformedMessages, ...transformedOffers]
       .sort((a, b) => a.created_at - b.created_at);
     
-    // ✅ OPTIMIZED: Only mark messages as read if they're from the other user AND we're on the first page
-    // This prevents unnecessary updates when loading older messages
+    // Mark messages as read if they're from the other user
+    // Only do this if we're loading recent messages (page 1) to avoid performance issues
     if (page === 1) {
-      await db.prepare(`
-        UPDATE messages 
-        SET read_at = ? 
-        WHERE chat_id = ? AND from_id != ? AND (read_at IS NULL OR read_at = 0)
-      `).bind(Math.floor(Date.now() / 1000), chatId, userId).run();
+      try {
+        await db.prepare(`
+          UPDATE messages 
+          SET read_at = ? 
+          WHERE chat_id = ? AND from_id != ? AND (read_at IS NULL OR read_at = 0)
+        `).bind(Math.floor(Date.now() / 1000), chatId, userId).run();
+      } catch (readError) {
+        console.error('Error marking messages as read:', readError);
+        // Don't fail the request for this
+      }
     }
     
     return NextResponse.json({ 
