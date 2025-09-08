@@ -434,29 +434,50 @@ export default function OfferModal({
                     <div className="relative pt-3">
                       {/* Pin Icon positioned above slider */}
                       <div 
-                        className="absolute -top-1 transform -translate-x-1/2 z-20 transition-all duration-200 ease-out"
+                        className="absolute -top-4 transform -translate-x-1/2 z-20 transition-all duration-200 ease-out"
                         style={{
                           left: `${Math.min(Math.max((getSliderValue() / listingPrice) * 100, 0), 100)}%`
                         }}
                       >
-                        <div className="relative group">
+                        <div className="relative group flex-shrink-0">
                           <img 
                             src="/Bitsbarterlogo.svg" 
                             alt="Pin" 
-                            className="w-[28px] h-[28px] drop-shadow-lg transition-transform duration-200 group-hover:scale-110 cursor-pointer"
+                            className="w-[28px] h-[28px] min-w-[28px] min-h-[28px] drop-shadow-lg transition-transform duration-200 group-hover:scale-110 cursor-pointer flex-shrink-0"
                             draggable={false}
                             onDragStart={(e) => e.preventDefault()}
                             onMouseDown={(e) => {
                               e.preventDefault();
-                              // Forward the mouse event to the slider
-                              const slider = e.currentTarget.closest('.relative')?.querySelector('input[type="range"]') as HTMLInputElement;
+                              // Get the slider input
+                              const slider = document.querySelector('input[type="range"]') as HTMLInputElement;
                               if (slider) {
-                                slider.focus();
-                                slider.dispatchEvent(new MouseEvent('mousedown', {
-                                  clientX: e.clientX,
-                                  clientY: e.clientY,
-                                  bubbles: true
-                                }));
+                                // Calculate the position relative to the slider
+                                const rect = slider.getBoundingClientRect();
+                                const x = e.clientX - rect.left;
+                                const percentage = x / rect.width;
+                                const newValue = Math.round(percentage * listingPrice);
+                                const clampedValue = Math.max(0, Math.min(newValue, listingPrice));
+                                
+                                // Update the slider value
+                                slider.value = clampedValue.toString();
+                                handleSliderChange(clampedValue);
+                                
+                                // Add mouse move and mouse up listeners for dragging
+                                const handleMouseMove = (moveEvent: MouseEvent) => {
+                                  const newX = moveEvent.clientX - rect.left;
+                                  const newPercentage = newX / rect.width;
+                                  const newClampedValue = Math.max(0, Math.min(Math.round(newPercentage * listingPrice), listingPrice));
+                                  slider.value = newClampedValue.toString();
+                                  handleSliderChange(newClampedValue);
+                                };
+                                
+                                const handleMouseUp = () => {
+                                  document.removeEventListener('mousemove', handleMouseMove);
+                                  document.removeEventListener('mouseup', handleMouseUp);
+                                };
+                                
+                                document.addEventListener('mousemove', handleMouseMove);
+                                document.addEventListener('mouseup', handleMouseUp);
                               }
                             }}
                           />
