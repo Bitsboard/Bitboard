@@ -98,6 +98,17 @@ export default function OfferModal({
     }
   };
 
+  const handleAmountChange = (value: string) => {
+    const newAmount = parseAmount(value);
+    
+    // If listing price exists and new amount exceeds it, revert to listing price
+    if (listingPrice && listingPrice > 0 && newAmount > listingPrice) {
+      setAmount(listingPrice);
+    } else {
+      setAmount(newAmount);
+    }
+  };
+
   const handleAbortConfirm = async () => {
     if (!existingOffer || !onAbortOffer) return;
     
@@ -219,7 +230,7 @@ export default function OfferModal({
                     type={unit === "BTC" ? "number" : "text"}
                     step={unit === "BTC" ? "0.00000001" : undefined}
                     value={formatAmount(amount)}
-                    onChange={(e) => setAmount(parseAmount(e.target.value))}
+                    onChange={(e) => handleAmountChange(e.target.value)}
                     placeholder="0"
                     className={cn(
                       "w-full px-3 py-2 rounded-md border text-lg font-medium",
@@ -240,12 +251,22 @@ export default function OfferModal({
                   </div>
                 </div>
                 {listingPrice && listingPrice > 0 && (
-                  <p className={cn(
-                    "text-xs mt-1",
-                    dark ? "text-neutral-400" : "text-neutral-500"
-                  )}>
-                    Listing price: {unit === "BTC" ? `₿${formatAmount(listingPrice)}` : `${formatAmount(listingPrice)} sats`}
-                  </p>
+                  <div className="mt-1">
+                    <p className={cn(
+                      "text-xs",
+                      dark ? "text-neutral-400" : "text-neutral-500"
+                    )}>
+                      Listing price: {unit === "BTC" ? `₿${formatAmount(listingPrice)}` : `${formatAmount(listingPrice)} sats`}
+                    </p>
+                    {amount >= listingPrice && (
+                      <p className={cn(
+                        "text-xs font-medium",
+                        dark ? "text-orange-400" : "text-orange-600"
+                      )}>
+                        Maximum offer amount reached
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
 
