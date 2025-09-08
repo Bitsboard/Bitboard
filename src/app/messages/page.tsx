@@ -685,8 +685,6 @@ export default function MessagesPage() {
   // Function to open listing modal
   const openListingModal = async (listingId: string | number) => {
     try {
-      console.log('🔍 Opening listing modal with ID:', listingId, 'type:', typeof listingId);
-      
       // Fetch the real listing data from the API
       const response = await fetch(`/api/listings/${listingId}`);
       if (!response.ok) {
@@ -695,7 +693,6 @@ export default function MessagesPage() {
       }
       
       const listingData = await response.json();
-      console.log('🔍 Listing data from API:', listingData);
       
       // The listings API now returns the correct transformed data, so use it directly
       setModal('active', listingData);

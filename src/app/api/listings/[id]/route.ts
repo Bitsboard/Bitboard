@@ -77,27 +77,6 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
       }
     }
     
-    // Debug: Log the raw database data
-    console.log('🔍 Raw database listing data:', {
-      id: dbListing.id,
-      title: dbListing.title,
-      price_sat: dbListing.price_sat,
-      created_at: dbListing.created_at,
-      seller_username: dbListing.seller_username,
-      seller_thumbs_up: dbListing.seller_thumbs_up,
-      seller_deals: dbListing.seller_deals,
-      seller_verified: dbListing.seller_verified,
-      location: dbListing.location,
-      posted_by: dbListing.posted_by
-    });
-    
-    // Check if JOIN worked
-    console.log('🔍 JOIN check - seller data available:', {
-      hasSellerUsername: !!dbListing.seller_username,
-      hasSellerThumbsUp: dbListing.seller_thumbs_up !== null && dbListing.seller_thumbs_up !== undefined,
-      hasSellerDeals: dbListing.seller_deals !== null && dbListing.seller_deals !== undefined,
-      hasSellerVerified: dbListing.seller_verified !== null && dbListing.seller_verified !== undefined
-    });
 
     // Transform the data to match the expected Listing interface
     const transformedListing = {
@@ -129,15 +108,6 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
       createdAt: Number(dbListing.created_at) || Date.now()
     };
 
-    // Debug: Log the transformed data
-    console.log('🔍 Transformed listing data:', {
-      id: transformedListing.id,
-      title: transformedListing.title,
-      priceSats: transformedListing.priceSats,
-      createdAt: transformedListing.createdAt,
-      seller: transformedListing.seller,
-      location: transformedListing.location
-    });
     
     return NextResponse.json(transformedListing);
   } catch (error) {
