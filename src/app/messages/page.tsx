@@ -388,7 +388,7 @@ export default function MessagesPage() {
     }
   };
 
-  const sendOffer = async (amount: number, expiresAt?: number) => {
+  const sendOffer = async (amount: number, expiresAt: number) => {
     if (!selectedChat || !user?.email) return;
 
     try {

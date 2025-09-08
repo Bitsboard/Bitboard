@@ -223,7 +223,7 @@ export function ChatModalRefactored({
         <OfferModal
           isOpen={showOfferModal}
           onClose={() => setShowOfferModal(false)}
-          onSendOffer={async (amount: number, expiresAt?: number) => {
+          onSendOffer={async (amount: number, expiresAt: number) => {
             // Handle offer sending logic here
             setShowOfferModal(false);
             loadChat();

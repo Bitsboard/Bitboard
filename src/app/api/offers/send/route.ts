@@ -23,13 +23,30 @@ export async function POST(req: NextRequest) {
       chatId: string;
       listingId: string;
       amountSat: number;
-      expiresAt?: number;
+      expiresAt: number; // Now required
     };
 
     let { chatId, listingId, amountSat, expiresAt } = body;
 
-    if (!listingId || !amountSat || amountSat <= 0) {
-      return NextResponse.json({ error: "Invalid offer data" }, { status: 400 });
+    if (!listingId || !amountSat || amountSat <= 0 || !expiresAt) {
+      return NextResponse.json({ error: "Invalid offer data - all fields including expiration time are required" }, { status: 400 });
+    }
+
+    // Validate expiration time is in the future
+    const now = Math.floor(Date.now() / 1000);
+    if (expiresAt <= now) {
+      return NextResponse.json({ error: "Expiration time must be in the future" }, { status: 400 });
+    }
+
+    // Validate expiration time is within allowed range (1 hour to 24 hours)
+    const timeUntilExpiry = expiresAt - now;
+    const minExpiry = 60 * 60; // 1 hour in seconds
+    const maxExpiry = 24 * 60 * 60; // 24 hours in seconds
+    
+    if (timeUntilExpiry < minExpiry || timeUntilExpiry > maxExpiry) {
+      return NextResponse.json({ 
+        error: "Expiration time must be between 1 hour and 24 hours from now" 
+      }, { status: 400 });
     }
 
     // Get current user ID
@@ -198,7 +215,7 @@ export async function POST(req: NextRequest) {
       `)
       .bind(
         offerId, chatId, listingId, currentUserId, otherUserId,
-        amountSat, expiresAt || null, currentTime, currentTime
+        amountSat, expiresAt, currentTime, currentTime
       )
       .run();
 

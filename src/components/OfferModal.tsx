@@ -7,7 +7,7 @@ import type { Unit } from "@/lib/types";
 interface OfferModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSendOffer: (amount: number, expiresAt?: number) => void;
+  onSendOffer: (amount: number, expiresAt: number) => void;
   onAbortOffer?: (offerId: string, action: 'abort') => void;
   listingPrice?: number; // in satoshis
   dark?: boolean;
@@ -34,8 +34,7 @@ export default function OfferModal({
   existingOffer
 }: OfferModalProps) {
   const [amount, setAmount] = useState<number>(0);
-  const [hasExpiration, setHasExpiration] = useState(false);
-  const [expirationDays, setExpirationDays] = useState(1);
+  const [expirationHours, setExpirationHours] = useState(24); // Default to 24 hours
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAbortConfirm, setShowAbortConfirm] = useState(false);
 
@@ -44,8 +43,7 @@ export default function OfferModal({
     if (isOpen && listingPrice && listingPrice > 0) {
       setAmount(listingPrice);
     }
-    setHasExpiration(false);
-    setExpirationDays(1);
+    setExpirationHours(24); // Reset to 24 hours default
   }, [isOpen, listingPrice]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,9 +55,8 @@ export default function OfferModal({
 
     setIsSubmitting(true);
     try {
-      const expiresAt = hasExpiration 
-        ? Math.floor(Date.now() / 1000) + (expirationDays * 24 * 60 * 60)
-        : undefined;
+      // All offers must expire - calculate expiration time in seconds
+      const expiresAt = Math.floor(Date.now() / 1000) + (expirationHours * 60 * 60);
       
       await onSendOffer(amount, expiresAt);
       onClose();
@@ -277,26 +274,31 @@ export default function OfferModal({
                 )}
               </div>
 
-              {/* Expiration Toggle */}
-              <div className="space-y-3">
-                <label className="flex items-center space-x-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={hasExpiration}
-                    onChange={(e) => setHasExpiration(e.target.checked)}
+              {/* Expiration Time (Required) */}
+              <div className="space-y-2">
+                <label className={cn(
+                  "block text-sm font-medium",
+                  dark ? "text-neutral-300" : "text-neutral-700"
+                )}>
+                  Offer Expiration Time
+                </label>
+                <div className="flex items-center space-x-2">
+                  <select
+                    value={expirationHours}
+                    onChange={(e) => setExpirationHours(parseInt(e.target.value))}
                     className={cn(
-                      "w-4 h-4 rounded border-2 focus:ring-2 focus:ring-blue-500",
+                      "flex-1 px-3 py-2 rounded-lg border text-sm",
+                      "focus:outline-none focus:ring-2 focus:ring-blue-500",
                       dark 
-                        ? "bg-neutral-800 border-neutral-600 text-blue-500" 
-                        : "bg-white border-neutral-300 text-blue-500"
+                        ? "bg-neutral-800 border-neutral-600 text-white" 
+                        : "bg-white border-neutral-300 text-neutral-900"
                     )}
-                  />
-                  <span className={cn(
-                    "text-sm font-medium",
-                    dark ? "text-neutral-300" : "text-neutral-700"
-                  )}>
-                    Set expiration time
-                  </span>
+                  >
+                    <option value={1}>1 hour</option>
+                    <option value={4}>4 hours</option>
+                    <option value={12}>12 hours</option>
+                    <option value={24}>24 hours</option>
+                  </select>
                   <div className="relative group">
                     <svg 
                       className="w-4 h-4 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 cursor-help" 
@@ -315,36 +317,20 @@ export default function OfferModal({
                         ? "bg-neutral-800 border-neutral-700 text-neutral-200" 
                         : "bg-white border-neutral-200 text-neutral-700"
                     )}>
-                      This will allow the offer to automatically expire in a set amount of time if no action is taken
+                      All offers automatically expire after the selected time if no action is taken
                       <div className={cn(
                         "absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent",
                         dark ? "border-t-neutral-800" : "border-t-white"
                       )}></div>
                     </div>
                   </div>
-                </label>
-
-                {hasExpiration && (
-                  <div className="ml-7">
-                    <select
-                      value={expirationDays}
-                      onChange={(e) => setExpirationDays(parseInt(e.target.value))}
-                      className={cn(
-                        "w-full px-3 py-2 rounded-lg border text-sm",
-                        "focus:outline-none focus:ring-2 focus:ring-blue-500",
-                        dark 
-                          ? "bg-neutral-800 border-neutral-600 text-white" 
-                          : "bg-white border-neutral-300 text-neutral-900"
-                      )}
-                    >
-                      <option value={1}>1 day</option>
-                      <option value={3}>3 days</option>
-                      <option value={7}>1 week</option>
-                      <option value={14}>2 weeks</option>
-                      <option value={30}>1 month</option>
-                    </select>
-                  </div>
-                )}
+                </div>
+                <p className={cn(
+                  "text-xs",
+                  dark ? "text-neutral-400" : "text-neutral-500"
+                )}>
+                  This offer will expire on {new Date(Date.now() + (expirationHours * 60 * 60 * 1000)).toLocaleString()}
+                </p>
               </div>
 
               {/* Actions */}

@@ -333,7 +333,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
     }
   };
 
-  const sendOffer = async (amount: number, expiresAt?: number) => {
+  const sendOffer = async (amount: number, expiresAt: number) => {
     if (!user?.email) {
       return;
     }
