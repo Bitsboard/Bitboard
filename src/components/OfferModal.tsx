@@ -98,6 +98,10 @@ export default function OfferModal({
     }
   };
 
+  const formatBTCAmount = (amount: number) => {
+    return (amount / 100000000).toFixed(8);
+  };
+
   const handleAmountChange = (value: string) => {
     const newAmount = parseAmount(value);
     
@@ -389,11 +393,10 @@ export default function OfferModal({
                   /* Manual input for items without asking price */
                   <div className="relative">
                     <input
-                      type={unit === "BTC" ? "number" : "text"}
-                      step={unit === "BTC" ? "0.00000001" : undefined}
-                      value={formatAmount(amount)}
+                      type="text"
+                      value={unit === "BTC" ? formatBTCAmount(amount) : formatAmount(amount)}
                       onChange={(e) => handleAmountChange(e.target.value)}
-                      placeholder="0"
+                      placeholder={unit === "BTC" ? "0.00000000" : "0"}
                       className={cn(
                         "w-full px-4 py-3 rounded-xl border-2 text-lg font-medium text-center",
                         "focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
@@ -401,7 +404,7 @@ export default function OfferModal({
                           ? "bg-neutral-800 border-neutral-600 text-white placeholder-neutral-400" 
                           : "bg-white border-neutral-300 text-neutral-900 placeholder-neutral-500"
                       )}
-                      maxLength={unit === "BTC" ? 12 : 10}
+                      maxLength={unit === "BTC" ? 15 : 10}
                     />
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">
                       <span className={cn(
