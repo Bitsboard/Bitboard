@@ -113,21 +113,21 @@ export default function MessagesPage() {
     
     // If message is from today, show time only
     if (messageDate.getTime() === today.getTime()) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase();
     }
     
     // If message is from yesterday
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
     if (messageDate.getTime() === yesterday.getTime()) {
-      return `Yesterday at ${date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+      return `Yesterday at ${date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase()}`;
     }
     
     // If message is from this week (within 7 days)
     const weekAgo = new Date(today);
     weekAgo.setDate(weekAgo.getDate() - 7);
     if (messageDate.getTime() > weekAgo.getTime()) {
-      return date.toLocaleDateString([], { weekday: 'short' }) + ' at ' + date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      return date.toLocaleDateString([], { weekday: 'short' }) + ' at ' + date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase();
     }
     
     // For older messages, show full date and time
@@ -136,8 +136,9 @@ export default function MessagesPage() {
       day: 'numeric'
     }) + ' at ' + date.toLocaleTimeString([], { 
       hour: 'numeric', 
-      minute: '2-digit' 
-    });
+      minute: '2-digit',
+      hour12: true
+    }).toUpperCase();
   };
 
   const loadChats = async (showLoading = true) => {
