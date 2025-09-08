@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { cn, formatBTCFromSats } from "@/lib/utils";
+import { cn, formatBTCFromSats, formatCADAmount, satsToFiat } from "@/lib/utils";
+import { useBtcRate } from "@/lib/contexts/BtcRateContext";
 import type { Unit } from "@/lib/types";
 
 interface OfferModalProps {
@@ -38,6 +39,9 @@ export default function OfferModal({
   const [expirationHours, setExpirationHours] = useState(24); // Default to 24 hours
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAbortConfirm, setShowAbortConfirm] = useState(false);
+  
+  // Get BTC rate for dollar equivalent
+  const btcRate = useBtcRate();
 
   // Set default amount to listing price when modal opens
   useEffect(() => {
@@ -403,6 +407,14 @@ export default function OfferModal({
                     dark ? "text-white" : "text-neutral-900"
                   )}>
                     {unit === "BTC" ? `₿${formatAmount(amount)}` : `${formatAmount(amount)} sats`}
+                    {btcRate && (
+                      <div className={cn(
+                        "text-lg font-medium mt-1",
+                        dark ? "text-orange-300" : "text-orange-600"
+                      )}>
+                        {formatCADAmount(satsToFiat(amount, btcRate))}
+                      </div>
+                    )}
                   </div>
                   {listingPrice && listingPrice > 0 && (
                     <div className={cn(
@@ -420,9 +432,9 @@ export default function OfferModal({
                     <div className="relative pt-3">
                       {/* Pin Icon positioned above slider */}
                       <div 
-                        className="absolute -top-3 transform -translate-x-1/2 z-10 transition-all duration-200 ease-out"
+                        className="absolute -top-3 transform -translate-x-1/2 z-20 transition-all duration-200 ease-out pointer-events-none"
                         style={{
-                          left: `${(getSliderValue() / listingPrice) * 100}%`
+                          left: `${Math.min(Math.max((getSliderValue() / listingPrice) * 100, 0), 100)}%`
                         }}
                       >
                         <div className="relative group">
@@ -430,6 +442,8 @@ export default function OfferModal({
                             src="/Bitsbarterlogo.svg" 
                             alt="Pin" 
                             className="w-6 h-6 drop-shadow-lg transition-transform duration-200 group-hover:scale-110"
+                            draggable={false}
+                            onDragStart={(e) => e.preventDefault()}
                           />
                         </div>
                       </div>
@@ -441,7 +455,7 @@ export default function OfferModal({
                         <div 
                           className="slider-fill"
                           style={{
-                            width: `${(getSliderValue() / listingPrice) * 100}%`
+                            width: `${Math.min(Math.max((getSliderValue() / listingPrice) * 100, 0), 100)}%`
                           }}
                         ></div>
                         {/* Invisible slider input */}
