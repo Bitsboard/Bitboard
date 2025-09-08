@@ -211,24 +211,19 @@ export default function OfferModal({
               ? "from-orange-500/10 to-orange-600/10 border-b border-orange-500/20" 
               : "from-orange-50 to-orange-100 border-b border-orange-200"
           )}>
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center">
-                <span className="text-white text-sm font-bold">₿</span>
-              </div>
-              <div>
-                <h2 className={cn(
-                  "text-xl font-bold",
-                  dark ? "text-white" : "text-neutral-900"
-                )}>
-                  {existingOffer ? "Your Offer" : "Make an Offer"}
-                </h2>
-                <p className={cn(
-                  "text-sm",
-                  dark ? "text-orange-200" : "text-orange-600"
-                )}>
-                  {existingOffer ? "Current offer details" : "Set your offer amount and expiration"}
-                </p>
-              </div>
+            <div>
+              <h2 className={cn(
+                "text-xl font-bold",
+                dark ? "text-white" : "text-neutral-900"
+              )}>
+                {existingOffer ? "Your Offer" : "Make an Offer"}
+              </h2>
+              <p className={cn(
+                "text-sm",
+                dark ? "text-orange-200" : "text-orange-600"
+              )}>
+                {existingOffer ? "Current offer details" : "Set your offer amount and expiration"}
+              </p>
             </div>
           </div>
 
@@ -314,24 +309,6 @@ export default function OfferModal({
             <form onSubmit={handleSubmit} className="p-6 space-y-8">
               {/* Amount Section */}
               <div className="space-y-4">
-                <div className="text-center">
-                  <h3 className={cn(
-                    "text-lg font-bold mb-1",
-                    dark ? "text-white" : "text-neutral-900"
-                  )}>
-                    Offer Amount
-                  </h3>
-                  <p className={cn(
-                    "text-sm",
-                    dark ? "text-neutral-400" : "text-neutral-600"
-                  )}>
-                    {listingPrice && listingPrice > 0 
-                      ? `Set your offer between 0 and ${unit === "BTC" ? `₿${formatAmount(listingPrice)}` : `${formatAmount(listingPrice)} sats`}`
-                      : "Enter your offer amount"
-                    }
-                  </p>
-                </div>
-
                 {/* Amount Display */}
                 <div className="text-center">
                   <div className={cn(
@@ -340,14 +317,6 @@ export default function OfferModal({
                   )}>
                     {unit === "BTC" ? `₿${formatAmount(amount)}` : `${formatAmount(amount)} sats`}
                   </div>
-                  {listingPrice && listingPrice > 0 && (
-                    <div className={cn(
-                      "text-sm font-medium",
-                      dark ? "text-orange-400" : "text-orange-600"
-                    )}>
-                      {Math.round((amount / listingPrice) * 100)}% of asking price
-                    </div>
-                  )}
                 </div>
 
                 {/* Slider for items with asking price */}
@@ -439,23 +408,8 @@ export default function OfferModal({
 
               {/* Expiration Section */}
               <div className="space-y-4">
-                <div className="text-center">
-                  <h3 className={cn(
-                    "text-lg font-bold mb-1",
-                    dark ? "text-white" : "text-neutral-900"
-                  )}>
-                    Offer Expiration
-                  </h3>
-                  <p className={cn(
-                    "text-sm",
-                    dark ? "text-neutral-400" : "text-neutral-600"
-                  )}>
-                    How long should this offer remain valid?
-                  </p>
-                </div>
-
                 <div className="grid grid-cols-4 gap-2">
-                  {[1, 4, 12, 24].map((hours) => (
+                  {[24, 12, 4, 1].map((hours) => (
                     <button
                       key={hours}
                       type="button"
@@ -473,20 +427,8 @@ export default function OfferModal({
                       )}
                     >
                       <div className="text-sm font-bold">{hours}h</div>
-                      <div className="text-xs opacity-75">
-                        {hours === 1 ? "Quick" : hours === 4 ? "Fast" : hours === 12 ? "Standard" : "Extended"}
-                      </div>
                     </button>
                   ))}
-                </div>
-
-                <div className="text-center">
-                  <div className={cn(
-                    "text-sm font-medium px-4 py-2 rounded-lg border",
-                    dark ? "bg-neutral-800/50 border-neutral-700 text-neutral-300" : "bg-neutral-100 border-neutral-200 text-neutral-600"
-                  )}>
-                    ⏰ Expires {new Date(Date.now() + (expirationHours * 60 * 60 * 1000)).toLocaleString()}
-                  </div>
                 </div>
               </div>
 
