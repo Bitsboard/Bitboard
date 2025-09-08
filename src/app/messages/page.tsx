@@ -683,7 +683,7 @@ export default function MessagesPage() {
   };
 
   // Function to open listing modal
-  const openListingModal = async (listingId: number) => {
+  const openListingModal = async (listingId: string | number) => {
     try {
       // Fetch the real listing data from the API
       const response = await fetch(`/api/listings/${listingId}`);
@@ -735,8 +735,7 @@ export default function MessagesPage() {
   };
 
   const handleListingClick = (listingId: string, title: string) => {
-
-    openListingModal(Number(listingId));
+    openListingModal(listingId);
   };
 
   useEffect(() => {
@@ -1306,16 +1305,8 @@ export default function MessagesPage() {
                           className="w-24 h-24 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
                           onClick={async () => {
                             const selectedChatData = chats.find(c => c.id === selectedChat);
-                            console.log('Listing image clicked - selectedChatData:', selectedChatData);
-                            console.log('listing_id value:', selectedChatData?.listing_id, 'type:', typeof selectedChatData?.listing_id);
                             if (selectedChatData?.listing_id) {
-                              const listingId = Number(selectedChatData.listing_id);
-                              console.log('Converted listingId:', listingId);
-                              if (!isNaN(listingId)) {
-                                await openListingModal(listingId);
-                              } else {
-                                console.error('Invalid listing_id:', selectedChatData.listing_id);
-                              }
+                              await openListingModal(selectedChatData.listing_id);
                             }
                           }}
                         />
@@ -1437,16 +1428,8 @@ export default function MessagesPage() {
                             <button
                               onClick={async () => {
                                 const selectedChatData = chats.find(c => c.id === selectedChat);
-                                console.log('View Listing button clicked - selectedChatData:', selectedChatData);
-                                console.log('listing_id value:', selectedChatData?.listing_id, 'type:', typeof selectedChatData?.listing_id);
                                 if (selectedChatData?.listing_id) {
-                                  const listingId = Number(selectedChatData.listing_id);
-                                  console.log('Converted listingId:', listingId);
-                                  if (!isNaN(listingId)) {
-                                    await openListingModal(listingId);
-                                  } else {
-                                    console.error('Invalid listing_id:', selectedChatData.listing_id);
-                                  }
+                                  await openListingModal(selectedChatData.listing_id);
                                 }
                               }}
                               className="px-3 py-1.5 text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-lg hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors"
