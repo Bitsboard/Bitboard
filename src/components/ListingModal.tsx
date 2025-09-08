@@ -74,13 +74,18 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
     }
   };
   
-  // Debug: Log btcCad value and listing title
+  // Debug: Log listing data received by modal
   React.useEffect(() => {
-    
-    
-    
-    
-  }, [btcCad, unit, listing.priceSats, listing.title, listing, listing.images]);
+    console.log('🔍 ListingModal received listing data:', {
+      id: listing.id,
+      title: listing.title,
+      priceSats: listing.priceSats,
+      createdAt: listing.createdAt,
+      seller: listing.seller,
+      location: listing.location,
+      type: listing.type
+    });
+  }, [listing]);
 
   function sanitizeTitle(raw: string, type: "sell" | "want"): string {
     if (type !== "want") return raw;
