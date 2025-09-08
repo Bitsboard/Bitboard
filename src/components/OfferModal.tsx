@@ -535,21 +535,19 @@ export default function OfferModal({
 
       {/* Abort Confirmation Modal */}
       {showAbortConfirm && (
-        <>
+        <div 
+          className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setShowAbortConfirm(false)}
+        >
           <div 
-            className="fixed inset-0 bg-black/50 z-60"
-            onClick={() => setShowAbortConfirm(false)}
-          />
-          <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
-            <div 
-              className={cn(
-                "w-full max-w-sm rounded-2xl shadow-2xl border-2 p-6",
-                dark 
-                  ? "bg-gradient-to-br from-neutral-900 to-neutral-800 border-red-500/30" 
-                  : "bg-gradient-to-br from-white to-neutral-50 border-red-200"
-              )}
-              onClick={(e) => e.stopPropagation()}
-            >
+            className={cn(
+              "w-full max-w-sm rounded-2xl shadow-2xl border-2 p-6",
+              dark 
+                ? "bg-gradient-to-br from-neutral-900 to-neutral-800 border-red-500/30" 
+                : "bg-gradient-to-br from-white to-neutral-50 border-red-200"
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
               <div className="text-center mb-6">
                 <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">⚠️</span>
@@ -596,7 +594,6 @@ export default function OfferModal({
               </div>
             </div>
           </div>
-        </>
       )}
     </>
   );
