@@ -1836,6 +1836,7 @@ export default function MessagesPage() {
         onSendOffer={sendOffer}
         listingPrice={selectedChat ? chats.find(c => c.id === selectedChat)?.listing_price_sat : undefined}
         dark={dark}
+        unit={unit}
       />
     </div>
   );

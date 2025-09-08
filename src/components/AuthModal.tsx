@@ -151,7 +151,7 @@ export function AuthModal({ onClose, onAuthed, dark }: AuthModalProps) {
   };
 
   return (
-    <div className={`fixed inset-0 z-[9999] flex items-center justify-center ${dark ? 'bg-black/50' : 'bg-white/50'}`}>
+    <div className={`fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-sm ${dark ? 'bg-black/60' : 'bg-white/60'}`}>
       <div className={`rounded-2xl p-6 max-w-sm w-full mx-4 ${dark ? 'bg-neutral-900 border border-neutral-700' : 'bg-white border border-neutral-200'} shadow-2xl`}>
         <div className="text-center space-y-6">
           <div>

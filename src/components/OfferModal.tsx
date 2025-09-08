@@ -317,15 +317,23 @@ export default function OfferModal({
                   )}>
                     {unit === "BTC" ? `₿${formatAmount(amount)}` : `${formatAmount(amount)} sats`}
                   </div>
+                  {listingPrice && listingPrice > 0 && (
+                    <div className={cn(
+                      "text-sm font-medium",
+                      dark ? "text-orange-400" : "text-orange-600"
+                    )}>
+                      {Math.round((amount / listingPrice) * 100)}% of asking price
+                    </div>
+                  )}
                 </div>
 
                 {/* Slider for items with asking price */}
                 {listingPrice && listingPrice > 0 ? (
                   <div className="space-y-4">
-                    <div className="relative pt-8">
+                    <div className="relative pt-6">
                       {/* Pin Icon positioned above slider */}
                       <div 
-                        className="absolute -top-8 transform -translate-x-1/2 z-10 transition-all duration-200 ease-out"
+                        className="absolute -top-6 transform -translate-x-1/2 z-10 transition-all duration-200 ease-out"
                         style={{
                           left: `${(getSliderValue() / listingPrice) * 100}%`
                         }}
@@ -357,7 +365,8 @@ export default function OfferModal({
                         onChange={(e) => handleSliderChange(parseInt(e.target.value))}
                         className="w-full h-2 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer slider"
                         style={{
-                          background: `linear-gradient(to right, #f97316 0%, #f97316 ${(getSliderValue() / listingPrice) * 100}%, #e5e7eb ${(getSliderValue() / listingPrice) * 100}%, #e5e7eb 100%)`
+                          background: `linear-gradient(to right, #f97316 0%, #f97316 ${(getSliderValue() / listingPrice) * 100}%, #e5e7eb ${(getSliderValue() / listingPrice) * 100}%, #e5e7eb 100%)`,
+                          animation: getSliderValue() > 0 ? 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' : 'none'
                         }}
                       />
                       <div className="flex justify-between text-xs mt-2">
@@ -408,6 +417,21 @@ export default function OfferModal({
 
               {/* Expiration Section */}
               <div className="space-y-4">
+                <div className="text-center">
+                  <h3 className={cn(
+                    "text-lg font-bold mb-1",
+                    dark ? "text-white" : "text-neutral-900"
+                  )}>
+                    Offer Expiration
+                  </h3>
+                  <p className={cn(
+                    "text-sm",
+                    dark ? "text-neutral-400" : "text-neutral-600"
+                  )}>
+                    How long should this offer remain valid?
+                  </p>
+                </div>
+
                 <div className="grid grid-cols-4 gap-2">
                   {[24, 12, 4, 1].map((hours) => (
                     <button

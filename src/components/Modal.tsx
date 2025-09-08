@@ -60,7 +60,7 @@ export function Modal({
             ref={overlayRef}
             className={cn(
                 "fixed inset-0 flex items-center justify-center p-4",
-                "bg-black/60",
+                "bg-black/60 backdrop-blur-sm",
                 overlayClassName
             )}
             style={{ zIndex }}
