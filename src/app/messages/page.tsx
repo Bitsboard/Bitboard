@@ -1088,11 +1088,11 @@ export default function MessagesPage() {
                                   <span className={`text-xs ${
                                     selectedNotification === item.id 
                                       ? item.read 
-                                        ? 'text-neutral-400 dark:text-neutral-500' 
-                                        : 'text-white'
+                                        ? 'text-neutral-500 dark:text-neutral-500' 
+                                        : 'text-neutral-900 dark:text-white'
                                       : item.read 
-                                        ? 'text-neutral-300 dark:text-neutral-600' 
-                                        : 'text-white'
+                                        ? 'text-neutral-500 dark:text-neutral-500' 
+                                        : 'text-neutral-900 dark:text-white'
                                   }`}>The bitsbarter team</span>
                                 </div>
                               </div>
