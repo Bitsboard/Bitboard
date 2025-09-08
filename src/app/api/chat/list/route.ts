@@ -145,28 +145,31 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ chats: [] });
     }
 
+    // Debug: Log raw chat data from database
+    console.log('🔍 Raw chat data from database:', chats.results.map((chat: any) => ({
+      id: chat.id,
+      listing_id: chat.listing_id,
+      listing_id_type: typeof chat.listing_id,
+      seller_name: chat.seller_name,
+      seller_rating: chat.seller_rating
+    })));
+
     // Transform chats to match expected format
     const transformedChats = chats.results.map((chat: any) => ({
       id: chat.id,
-      listing: {
-        id: chat.listing_id,
-        title: chat.listing_title,
-        priceSat: chat.listing_price,
-        imageUrl: chat.listing_image,
-        location: chat.listing_location,
-        type: chat.listing_type,
-        createdAt: chat.listing_created_at * 1000
-      },
-      seller: {
-        name: chat.seller_name,
-        verified: Boolean(chat.seller_verified),
-        rating: chat.seller_rating || 0,
-        deals: chat.seller_deals || 0
-      },
-      lastMessageAt: chat.last_message_at * 1000,
-      createdAt: chat.created_at * 1000,
-      lastMessageText: chat.last_message_text,
-      unread_count: chat.unread_count || 0
+      other_user: chat.seller_name,
+      other_user_verified: Boolean(chat.seller_verified),
+      listing_id: String(chat.listing_id), // Convert to string to match expected interface
+      listing_title: chat.listing_title,
+      listing_image: chat.listing_image || '/placeholder-listing.jpg',
+      listing_price_sat: chat.listing_price,
+      listing_created_at: chat.listing_created_at,
+      listing_location: chat.listing_location,
+      listing_ad_type: chat.listing_type,
+      last_message: chat.last_message_text,
+      last_message_time: chat.last_message_at,
+      unread_count: chat.unread_count || 0,
+      seller_thumbsUp: chat.seller_rating || 0
     }));
 
     return NextResponse.json({ chats: transformedChats, userId: userId });
