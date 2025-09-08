@@ -12,9 +12,22 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     return NextResponse.json({ error: "@cloudflare/next-on-pages not available" }, { status: 500 });
   }
   const db = mod.getRequestContext().env.DB as D1Database;
-  const id = Number(params.id);
-  if (!Number.isInteger(id) || id < 1) {
-    return NextResponse.json({ error: "invalid id" }, { status: 400 });
+  
+  // Handle both string and numeric IDs
+  let id: string | number = params.id;
+  
+  // Try to convert to number if it's a string that looks like a number
+  if (typeof id === 'string' && /^\d+$/.test(id)) {
+    const numericId = Number(id);
+    if (Number.isInteger(numericId) && numericId > 0) {
+      id = numericId;
+    }
+  }
+  
+  // If it's still a string (like 'V6PJhUdwoU'), we'll use it as-is
+  // If it's a number, we'll use it as-is
+  if (typeof id === 'string' && !/^[A-Za-z0-9]+$/.test(id)) {
+    return NextResponse.json({ error: "invalid id format" }, { status: 400 });
   }
   
   try {
@@ -101,10 +114,24 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
     return NextResponse.json({ error: "@cloudflare/next-on-pages not available" }, { status: 500 });
   }
   const db = mod.getRequestContext().env.DB as D1Database;
-  const id = Number(params.id);
-  if (!Number.isInteger(id) || id < 1) {
-    return NextResponse.json({ error: "invalid id" }, { status: 400 });
+  
+  // Handle both string and numeric IDs
+  let id: string | number = params.id;
+  
+  // Try to convert to number if it's a string that looks like a number
+  if (typeof id === 'string' && /^\d+$/.test(id)) {
+    const numericId = Number(id);
+    if (Number.isInteger(numericId) && numericId > 0) {
+      id = numericId;
+    }
   }
+  
+  // If it's still a string (like 'V6PJhUdwoU'), we'll use it as-is
+  // If it's a number, we'll use it as-is
+  if (typeof id === 'string' && !/^[A-Za-z0-9]+$/.test(id)) {
+    return NextResponse.json({ error: "invalid id format" }, { status: 400 });
+  }
+  
   const res = await db.prepare("DELETE FROM listings WHERE id = ?").bind(id).run();
   const changes = (res as any).meta?.changes ?? 0;
   return NextResponse.json({ ok: changes > 0 });
