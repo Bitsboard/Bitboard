@@ -885,20 +885,20 @@ export default function MessagesPage() {
           const icon = item.icon || 'system';
           switch (icon) {
             case 'info':
-              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-200 to-blue-300 dark:from-blue-700 dark:to-blue-600 border-l-8 border-orange-400 shadow-md';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-200 to-blue-300 dark:from-blue-700 dark:to-blue-600 border-l-8 border-orange-500 shadow-md';
             case 'success':
-              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-green-50 dark:hover:bg-green-900/20 bg-gradient-to-br from-green-200 to-green-300 dark:from-green-700 dark:to-green-600 border-l-8 border-orange-400 shadow-md';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-green-50 dark:hover:bg-green-900/20 bg-gradient-to-br from-green-200 to-green-300 dark:from-green-700 dark:to-green-600 border-l-8 border-orange-500 shadow-md';
             case 'warning':
-              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-8 border-orange-400 shadow-md';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-8 border-orange-500 shadow-md';
             case 'error':
-              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-8 border-orange-400 shadow-md';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-600 border-l-8 border-orange-500 shadow-md';
             case 'system':
             default:
-              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 bg-gradient-to-br from-purple-200 to-purple-300 dark:from-purple-700 dark:to-purple-600 border-l-8 border-orange-400 shadow-md';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 bg-gradient-to-br from-purple-200 to-purple-300 dark:from-purple-700 dark:to-purple-600 border-l-8 border-orange-500 shadow-md';
           }
         } else {
           // Selected unread chat
-          return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/60 dark:to-blue-700/60 shadow-md border-l-8 border-orange-400';
+          return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/60 dark:to-blue-700/60 shadow-md border-l-8 border-orange-600';
         }
       } else {
         // Selected read: keep faded colors but add bright orange selection border
@@ -906,20 +906,20 @@ export default function MessagesPage() {
           const icon = item.icon || 'system';
           switch (icon) {
             case 'info':
-              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 bg-gradient-to-br from-blue-50/20 to-blue-100/20 dark:from-blue-900/10 dark:to-blue-800/10 border-l-8 border-orange-400';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 bg-gradient-to-br from-blue-50/20 to-blue-100/20 dark:from-blue-900/10 dark:to-blue-800/10 border-l-8 border-orange-500';
             case 'success':
-              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-green-50/30 dark:hover:bg-green-900/10 bg-gradient-to-br from-green-50/20 to-green-100/20 dark:from-green-900/10 dark:to-green-800/10 border-l-8 border-orange-400';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-green-50/30 dark:hover:bg-green-900/10 bg-gradient-to-br from-green-50/20 to-green-100/20 dark:from-green-900/10 dark:to-green-800/10 border-l-8 border-orange-500';
             case 'warning':
-              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10 border-l-8 border-orange-400';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10 border-l-8 border-orange-500';
             case 'error':
-              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10 border-l-8 border-orange-400';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 bg-gradient-to-br from-red-50/20 to-red-100/20 dark:from-red-900/10 dark:to-red-800/10 border-l-8 border-orange-500';
             case 'system':
             default:
-              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50/30 dark:hover:bg-purple-900/10 bg-gradient-to-br from-purple-50/20 to-purple-100/20 dark:from-purple-900/10 dark:to-purple-800/10 border-l-8 border-orange-400';
+              return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-purple-50/30 dark:hover:bg-purple-900/10 bg-gradient-to-br from-purple-50/20 to-purple-100/20 dark:from-purple-900/10 dark:to-purple-800/10 border-l-8 border-orange-500';
           }
         } else {
           // Selected read chat
-          return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800/20 dark:to-neutral-700/20 border-l-8 border-orange-400';
+          return 'group p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800/20 dark:to-neutral-700/20 border-l-8 border-orange-600';
         }
       }
     }
@@ -1049,6 +1049,11 @@ export default function MessagesPage() {
                         key={`${item.itemType}-${item.id}`}
                         onClick={() => handleItemClick(item)}
                         className={getItemClassName(item)}
+                        style={{
+                          borderLeftColor: (item.itemType === 'chat' && selectedChat === item.id) || 
+                                         (item.itemType === 'notification' && selectedNotification === item.id) 
+                                         ? '#f97316' : undefined
+                        }}
                       >
                         {item.itemType === 'notification' ? (
                           /* System Notification Layout - Pill Style */
