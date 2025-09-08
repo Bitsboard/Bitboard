@@ -353,7 +353,32 @@ export default function OfferModal({
                 {/* Slider for items with asking price */}
                 {listingPrice && listingPrice > 0 ? (
                   <div className="space-y-4">
-                    <div className="relative">
+                    <div className="relative pt-8">
+                      {/* Pin Icon positioned above slider */}
+                      <div 
+                        className="absolute -top-8 transform -translate-x-1/2 z-10 transition-all duration-200 ease-out"
+                        style={{
+                          left: `${(getSliderValue() / listingPrice) * 100}%`
+                        }}
+                      >
+                        <div className="relative group">
+                          <img 
+                            src="/Bitsbarterlogo.svg" 
+                            alt="Pin" 
+                            className="w-6 h-6 drop-shadow-lg transition-transform duration-200 group-hover:scale-110"
+                          />
+                          {/* Small triangle pointing down to slider */}
+                          <div 
+                            className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 transition-all duration-200"
+                            style={{
+                              borderLeft: '4px solid transparent',
+                              borderRight: '4px solid transparent',
+                              borderTop: '6px solid #f97316'
+                            }}
+                          />
+                        </div>
+                      </div>
+                      
                       <input
                         type="range"
                         min="0"
