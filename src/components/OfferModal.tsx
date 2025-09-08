@@ -303,7 +303,7 @@ export default function OfferModal({
         >
           {/* Header */}
           <div className={cn(
-            "px-6 py-5 bg-gradient-to-r",
+            "px-6 py-5 bg-gradient-to-r flex items-center justify-between",
             dark 
               ? "from-orange-500/10 to-orange-600/10 border-b border-orange-500/20" 
               : "from-orange-50 to-orange-100 border-b border-orange-200"
@@ -315,13 +315,28 @@ export default function OfferModal({
               )}>
                 {existingOffer ? "Your Offer" : "Make an Offer"}
               </h2>
-              <p className={cn(
-                "text-sm",
-                dark ? "text-orange-200" : "text-orange-600"
-              )}>
-                {existingOffer ? "Current offer details" : "Set your offer amount and expiration"}
-              </p>
+              {existingOffer && (
+                <p className={cn(
+                  "text-sm",
+                  dark ? "text-orange-200" : "text-orange-600"
+                )}>
+                  Current offer details
+                </p>
+              )}
             </div>
+            <button
+              onClick={onClose}
+              className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
+                dark 
+                  ? "hover:bg-neutral-700 text-neutral-400 hover:text-white" 
+                  : "hover:bg-neutral-200 text-neutral-500 hover:text-neutral-700"
+              )}
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
 
           {/* Content */}
@@ -564,12 +579,36 @@ export default function OfferModal({
               {/* Expiration Section */}
               <div className="space-y-4">
                 <div className="text-center">
-                  <h3 className={cn(
-                    "text-lg font-bold mb-1",
-                    dark ? "text-white" : "text-neutral-900"
-                  )}>
-                    Offer Expiration
-                  </h3>
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <h3 className={cn(
+                      "text-lg font-bold",
+                      dark ? "text-white" : "text-neutral-900"
+                    )}>
+                      Offer Expiration
+                    </h3>
+                    <div className="relative group">
+                      <div className={cn(
+                        "w-4 h-4 rounded-full flex items-center justify-center cursor-help",
+                        dark ? "bg-neutral-700 text-neutral-400" : "bg-neutral-200 text-neutral-600"
+                      )}>
+                        <span className="text-xs font-bold">i</span>
+                      </div>
+                      <div className={cn(
+                        "absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10",
+                        dark ? "bg-neutral-800 text-neutral-200 border border-neutral-700" : "bg-neutral-900 text-white border border-neutral-600"
+                      )}>
+                        Your offer will remain valid until the expiration timer runs out, until you revoke your offer, or if the other user accepts/declines it.
+                        <div className={cn(
+                          "absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0",
+                          dark ? "border-t-neutral-800" : "border-t-neutral-900"
+                        )} style={{
+                          borderLeft: '4px solid transparent',
+                          borderRight: '4px solid transparent',
+                          borderTop: '4px solid currentColor'
+                        }}></div>
+                      </div>
+                    </div>
+                  </div>
                   <p className={cn(
                     "text-sm",
                     dark ? "text-neutral-400" : "text-neutral-600"
