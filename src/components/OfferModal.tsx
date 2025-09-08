@@ -189,16 +189,49 @@ export default function OfferModal({
           transform: scale(1.1);
           box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
         }
+
+        @keyframes gradient-shift {
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
+        }
+
+        .animated-slider {
+          background: linear-gradient(
+            90deg,
+            #f97316 0%,
+            #f97316 var(--fill-percentage, 0%),
+            #e5e7eb var(--fill-percentage, 0%),
+            #e5e7eb 100%
+          );
+          background-size: 200% 100%;
+          animation: gradient-shift 2s ease-in-out infinite;
+        }
+
+        .animated-slider::-webkit-slider-thumb {
+          background: linear-gradient(45deg, #f97316, #fb923c, #f97316);
+          background-size: 200% 200%;
+          animation: gradient-shift 2s ease-in-out infinite;
+        }
+
+        .animated-slider::-moz-range-thumb {
+          background: linear-gradient(45deg, #f97316, #fb923c, #f97316);
+          background-size: 200% 200%;
+          animation: gradient-shift 2s ease-in-out infinite;
+        }
       `}</style>
       
-      {/* Backdrop */}
+      {/* Modal with backdrop */}
       <div 
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
-      />
-      
-      {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      >
         <div 
           className={cn(
             "w-full max-w-md rounded-2xl shadow-2xl border-2 overflow-hidden",
@@ -334,10 +367,10 @@ export default function OfferModal({
                 {/* Slider for items with asking price */}
                 {listingPrice && listingPrice > 0 ? (
                   <div className="space-y-4">
-                    <div className="relative pt-6">
+                    <div className="relative pt-3">
                       {/* Pin Icon positioned above slider */}
                       <div 
-                        className="absolute -top-6 transform -translate-x-1/2 z-10 transition-all duration-200 ease-out"
+                        className="absolute -top-3 transform -translate-x-1/2 z-10 transition-all duration-200 ease-out"
                         style={{
                           left: `${(getSliderValue() / listingPrice) * 100}%`
                         }}
@@ -367,11 +400,10 @@ export default function OfferModal({
                         step={Math.round(listingPrice / 20)}
                         value={getSliderValue()}
                         onChange={(e) => handleSliderChange(parseInt(e.target.value))}
-                        className="w-full h-2 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer slider"
+                        className="w-full h-2 rounded-lg appearance-none cursor-pointer slider animated-slider"
                         style={{
-                          background: `linear-gradient(to right, #f97316 0%, #f97316 ${(getSliderValue() / listingPrice) * 100}%, #e5e7eb ${(getSliderValue() / listingPrice) * 100}%, #e5e7eb 100%)`,
-                          animation: getSliderValue() > 0 ? 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' : 'none'
-                        }}
+                          '--fill-percentage': `${(getSliderValue() / listingPrice) * 100}%`
+                        } as React.CSSProperties}
                       />
                       <div className="flex justify-between text-xs mt-2">
                         <span className={cn(

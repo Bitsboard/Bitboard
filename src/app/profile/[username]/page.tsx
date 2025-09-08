@@ -761,7 +761,7 @@ export default function PublicProfilePage() {
 
       {/* Username Change Modal */}
       {modals.showUsernameChange && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className={`bg-white dark:bg-neutral-800 rounded-2xl p-6 max-w-md w-full shadow-2xl border ${dark ? 'border-neutral-700' : 'border-neutral-200'}`}>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-yellow-500/20 flex items-center justify-center">
