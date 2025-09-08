@@ -685,18 +685,14 @@ export default function MessagesPage() {
   // Function to open listing modal
   const openListingModal = async (listingId: number) => {
     try {
-      console.log('openListingModal called with listingId:', listingId);
-      
       // Fetch the real listing data from the API
       const response = await fetch(`/api/listings/${listingId}`);
-      console.log('API response status:', response.status);
       if (!response.ok) {
         console.error('Failed to fetch listing:', response.status);
         return;
       }
       
       const dbListing = await response.json() as any;
-      
       
       // Transform the database listing to match the expected Listing interface
       const transformedListing = {
@@ -731,18 +727,8 @@ export default function MessagesPage() {
         createdAt: Number(dbListing.created_at) || Date.now()
       };
 
-      
       // Set the modal with the transformed listing data
-      console.log('Setting modal with transformed listing:', transformedListing);
       setModal('active', transformedListing);
-      console.log('Modal state set, modals.active should now be:', transformedListing);
-
-      
-      
-      // Force a re-render to see if the modal state changes
-      setTimeout(() => {
-        console.log('Modal state after timeout:', modals.active);
-      }, 100);
     } catch (error) {
       console.error('Error fetching listing:', error);
     }
@@ -1148,7 +1134,7 @@ export default function MessagesPage() {
                               className="absolute bottom-0 right-0 p-1 transition-all duration-200 hover:scale-110 opacity-0 group-hover:opacity-100"
                               title="Delete notification"
                             >
-                              <svg className="w-4 h-4 text-white hover:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <svg className="w-4 h-4 text-neutral-600 dark:text-white hover:text-neutral-800 dark:hover:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                               </svg>
                             </button>
@@ -1320,12 +1306,8 @@ export default function MessagesPage() {
                           className="w-24 h-24 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
                           onClick={async () => {
                             const selectedChatData = chats.find(c => c.id === selectedChat);
-                            console.log('Listing image clicked, selectedChatData:', selectedChatData);
                             if (selectedChatData?.listing_id) {
-                              console.log('Opening listing modal for ID:', selectedChatData.listing_id);
                               await openListingModal(Number(selectedChatData.listing_id));
-                            } else {
-                              console.log('No listing_id found for selected chat');
                             }
                           }}
                         />
@@ -1447,12 +1429,8 @@ export default function MessagesPage() {
                             <button
                               onClick={async () => {
                                 const selectedChatData = chats.find(c => c.id === selectedChat);
-                                console.log('View Listing button clicked, selectedChatData:', selectedChatData);
                                 if (selectedChatData?.listing_id) {
-                                  console.log('Opening listing modal for ID:', selectedChatData.listing_id);
                                   await openListingModal(Number(selectedChatData.listing_id));
-                                } else {
-                                  console.log('No listing_id found for selected chat');
                                 }
                               }}
                               className="px-3 py-1.5 text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-lg hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors"
