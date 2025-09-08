@@ -1040,7 +1040,7 @@ export default function MessagesPage() {
                               </div>
                               
                               {/* Row 2: Title */}
-                              <h3 className={`text-sm truncate mb-1 cursor-pointer ${
+                              <h3 className={`text-sm truncate mb-1 ${
                                 selectedNotification === item.id 
                                   ? !item.read
                                     ? 'text-neutral-900 dark:text-white font-black'
@@ -1176,7 +1176,7 @@ export default function MessagesPage() {
                               
                               {/* Listing Title */}
                               <h3
-                                className={`text-sm truncate mb-1 cursor-pointer ${
+                                className={`text-sm truncate mb-1 ${
                                   selectedChat === item.id 
                                     ? item.unread_count > 0
                                       ? 'text-neutral-900 dark:text-white font-black'
