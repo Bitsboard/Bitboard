@@ -1074,51 +1074,41 @@ export default function MessagesPage() {
                                 />
                                 
                                 {/* Bitsbarter Team Pill */}
-                                <div 
-                                  className={`inline-flex items-center px-2 py-1 rounded-full font-medium transition-all duration-200 cursor-pointer relative ${
-                                    selectedNotification === item.id 
-                                      ? item.read 
-                                        ? 'bg-white/10 hover:bg-white/20 border border-white/20' 
-                                        : 'bg-white/20 hover:bg-white/30 border border-white/30'
-                                      : item.read 
-                                        ? 'bg-white/5 hover:bg-white/10 border border-white/10' 
-                                        : 'bg-white/10 hover:bg-white/20 border border-white/20'
-                                  }`}
-                                >
-                                  <span className={`text-xs ${
-                                    selectedNotification === item.id 
-                                      ? item.read 
-                                        ? 'text-neutral-500 dark:text-neutral-500' 
-                                        : 'text-neutral-900 dark:text-white'
-                                      : item.read 
-                                        ? 'text-neutral-500 dark:text-neutral-500' 
-                                        : 'text-neutral-900 dark:text-white'
-                                  }`}>The bitsbarter team</span>
-                                </div>
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                                  selectedNotification === item.id 
+                                    ? !item.read
+                                      ? 'bg-white/20 dark:bg-neutral-700/60 text-neutral-900 dark:text-white border border-neutral-400/80 dark:border-neutral-500/80 hover:bg-white/30 dark:hover:bg-neutral-600/60 font-bold'
+                                      : 'bg-white/10 dark:bg-neutral-800/30 text-neutral-500 dark:text-neutral-500 border border-neutral-300/60 dark:border-neutral-600/60 hover:bg-white/20 dark:hover:bg-neutral-700/40 font-semibold'
+                                    : !item.read
+                                      ? 'bg-white/20 dark:bg-neutral-700/60 text-neutral-900 dark:text-white border border-neutral-400/80 dark:border-neutral-500/80 hover:bg-white/30 dark:hover:bg-neutral-600/60 font-bold'
+                                      : 'bg-white/5 dark:bg-neutral-800/20 text-neutral-400 dark:text-neutral-600 border border-neutral-200/40 dark:border-neutral-700/30 hover:bg-white/10 dark:hover:bg-neutral-700/30 font-light'
+                                }`}>
+                                  <span className="ml-1">The bitsbarter team</span>
+                                </span>
                               </div>
                               
                               {/* Row 2: Title */}
-                              <h4 className={`text-sm mb-1 ${
+                              <h3 className={`text-sm truncate mb-1 cursor-pointer ${
                                 selectedNotification === item.id 
-                                  ? item.read 
-                                    ? 'text-neutral-400 dark:text-neutral-500 font-semibold' 
-                                    : 'text-neutral-900 dark:text-white font-black'
-                                  : item.read 
-                                    ? 'text-neutral-300 dark:text-neutral-600 font-light' 
-                                    : 'text-neutral-900 dark:text-white font-black'
+                                  ? !item.read
+                                    ? 'text-neutral-900 dark:text-white font-black'
+                                    : 'text-neutral-500 dark:text-neutral-500 font-semibold'
+                                  : !item.read
+                                    ? 'text-neutral-900 dark:text-white font-black'
+                                    : 'text-neutral-400 dark:text-neutral-600 font-light'
                               }`}>
                                 {item.title}
-                              </h4>
+                              </h3>
                               
                               {/* Rows 3-4: Truncated message */}
-                              <p className={`text-sm line-clamp-2 ${
+                              <p className={`text-xs truncate mb-1 ${
                                 selectedNotification === item.id 
-                                  ? item.read 
-                                    ? 'text-neutral-400 dark:text-neutral-500' 
-                                    : 'text-neutral-800 dark:text-neutral-100'
-                                  : item.read 
-                                    ? 'text-neutral-300 dark:text-neutral-600' 
-                                    : 'text-neutral-800 dark:text-neutral-100'
+                                  ? !item.read
+                                    ? 'text-neutral-700 dark:text-neutral-200'
+                                    : 'text-neutral-400 dark:text-neutral-500'
+                                  : !item.read
+                                    ? 'text-neutral-700 dark:text-neutral-200'
+                                    : 'text-neutral-300 dark:text-neutral-600'
                               }`}>
                                 {(() => {
                                   // Strip Markdown formatting for conversation preview
