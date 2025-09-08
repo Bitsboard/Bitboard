@@ -127,92 +127,109 @@ export default function OfferModal({
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div 
           className={cn(
-            "w-full max-w-md rounded-2xl shadow-xl border",
+            "w-full max-w-md rounded-2xl shadow-2xl border-2",
             dark 
-              ? "bg-neutral-900 border-neutral-700" 
-              : "bg-white border-neutral-200"
+              ? "bg-neutral-900 border-orange-500/30" 
+              : "bg-white border-orange-200"
           )}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           <div className={cn(
-            "px-6 py-4 border-b",
-            dark ? "border-neutral-700" : "border-neutral-200"
+            "px-6 py-4 border-b bg-gradient-to-r",
+            dark 
+              ? "border-orange-500/30 from-orange-500/10 to-orange-600/10" 
+              : "border-orange-200 from-orange-50 to-orange-100"
           )}>
-            <h2 className={cn(
-              "text-lg font-semibold",
-              dark ? "text-white" : "text-neutral-900"
-            )}>
-              {existingOffer ? "Your Offer" : "Make an Offer"}
-            </h2>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+              <h2 className={cn(
+                "text-lg font-bold",
+                dark ? "text-white" : "text-neutral-900"
+              )}>
+                {existingOffer ? "Your Offer" : "Make an Offer"}
+              </h2>
+            </div>
           </div>
 
           {/* Content */}
           {existingOffer ? (
             // Show existing offer details
-            <div className="p-6 space-y-6">
+            <div className="p-6 space-y-5">
               {/* Offer Details */}
               <div className="space-y-4">
                 <div className={cn(
-                  "p-4 rounded-lg border-2",
+                  "p-5 rounded-xl border-2 bg-gradient-to-br",
                   existingOffer.status === 'pending' 
-                    ? "bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800"
-                    : "bg-gray-50 border-gray-200 dark:bg-gray-900/20 dark:border-gray-800"
+                    ? "from-orange-50 to-orange-100 border-orange-300 dark:from-orange-900/20 dark:to-orange-800/20 dark:border-orange-500/50"
+                    : "from-neutral-50 to-neutral-100 border-neutral-300 dark:from-neutral-800/20 dark:to-neutral-700/20 dark:border-neutral-600"
                 )}>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className={cn(
-                      "text-sm font-semibold",
-                      existingOffer.status === 'pending' 
-                        ? "text-blue-800 dark:text-blue-200" 
-                        : "text-gray-800 dark:text-gray-200"
-                    )}>
-                      {existingOffer.status === 'pending' ? 'Pending Offer' : 'Offer Status: ' + existingOffer.status}
-                    </span>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-2">
+                      <div className={cn(
+                        "w-2 h-2 rounded-full",
+                        existingOffer.status === 'pending' ? "bg-orange-500" : "bg-neutral-500"
+                      )}></div>
+                      <span className={cn(
+                        "text-sm font-bold",
+                        existingOffer.status === 'pending' 
+                          ? "text-orange-800 dark:text-orange-200" 
+                          : "text-neutral-800 dark:text-neutral-200"
+                      )}>
+                        {existingOffer.status === 'pending' ? 'Pending Offer' : 'Offer Status: ' + existingOffer.status}
+                      </span>
+                    </div>
                   </div>
                   
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <div className={cn(
-                      "text-2xl font-bold",
+                      "text-3xl font-black",
                       existingOffer.status === 'pending' 
-                        ? "text-blue-900 dark:text-blue-100" 
-                        : "text-gray-900 dark:text-gray-100"
+                        ? "text-orange-900 dark:text-orange-100" 
+                        : "text-neutral-900 dark:text-neutral-100"
                     )}>
                       {unit === 'BTC' ? `₿${formatAmount(existingOffer.amount_sat)}` : `${formatAmount(existingOffer.amount_sat)} sats`}
                     </div>
                     
                     {existingOffer.expires_at && (
-                      <div className={cn(
-                        "text-sm",
-                        existingOffer.status === 'pending' 
-                          ? "text-blue-700 dark:text-blue-300" 
-                          : "text-gray-600 dark:text-gray-400"
-                      )}>
-                        ⏰ Expires: {new Date(existingOffer.expires_at * 1000).toLocaleString()}
+                      <div className="flex items-center space-x-2">
+                        <span className="text-orange-500">⏰</span>
+                        <div className={cn(
+                          "text-sm font-semibold",
+                          existingOffer.status === 'pending' 
+                            ? "text-orange-700 dark:text-orange-300" 
+                            : "text-neutral-600 dark:text-neutral-400"
+                        )}>
+                          Expires: {new Date(existingOffer.expires_at * 1000).toLocaleString()}
+                        </div>
                       </div>
                     )}
                     
-                    <div className={cn(
-                      "text-xs",
-                      existingOffer.status === 'pending' 
-                        ? "text-blue-600 dark:text-blue-400" 
-                        : "text-gray-500 dark:text-gray-500"
-                    )}>
-                      Created: {new Date(existingOffer.created_at * 1000).toLocaleString()}
+                    <div className="flex items-center space-x-2">
+                      <div className="w-1 h-1 rounded-full bg-neutral-400"></div>
+                      <div className={cn(
+                        "text-xs font-medium",
+                        existingOffer.status === 'pending' 
+                          ? "text-orange-600 dark:text-orange-400" 
+                          : "text-neutral-500 dark:text-neutral-500"
+                      )}>
+                        Created: {new Date(existingOffer.created_at * 1000).toLocaleString()}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex space-x-3 pt-4">
+              <div className="flex space-x-3 pt-2">
                 <button
                   type="button"
                   onClick={onClose}
                   className={cn(
-                    "flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                    "flex-1 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 border-2",
                     dark 
-                      ? "bg-neutral-700 text-neutral-200 hover:bg-neutral-600" 
-                      : "bg-neutral-200 text-neutral-700 hover:bg-neutral-300"
+                      ? "bg-neutral-800 border-neutral-600 text-neutral-300 hover:bg-neutral-700 hover:border-orange-500/50 hover:text-white" 
+                      : "bg-neutral-100 border-neutral-300 text-neutral-700 hover:bg-neutral-200 hover:border-orange-300 hover:text-neutral-900"
                   )}
                 >
                   Close
@@ -221,21 +238,24 @@ export default function OfferModal({
                   <button
                     type="button"
                     onClick={() => setShowAbortConfirm(true)}
-                    className="flex-1 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all duration-200 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
+                    className="flex-1 px-4 py-3 rounded-xl text-sm font-bold text-white transition-all duration-200 border-2 bg-gradient-to-r from-red-500 to-red-600 border-red-500 hover:from-red-600 hover:to-red-700 hover:border-red-600 hover:shadow-lg hover:shadow-red-500/25"
                   >
-                    Abort Offer
+                    <div className="flex items-center justify-center space-x-2">
+                      <span>⚠️</span>
+                      <span>Abort Offer</span>
+                    </div>
                   </button>
                 )}
               </div>
             </div>
           ) : (
             // Show new offer form
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="p-6 space-y-5">
               {/* Amount Input */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <label className={cn(
-                  "block text-sm font-medium",
-                  dark ? "text-neutral-300" : "text-neutral-700"
+                  "block text-sm font-semibold",
+                  dark ? "text-neutral-200" : "text-neutral-800"
                 )}>
                   Offer Amount ({unit === "BTC" ? "BTC" : "sats"})
                 </label>
@@ -247,51 +267,54 @@ export default function OfferModal({
                     onChange={(e) => setAmount(parseAmount(e.target.value))}
                     placeholder="0"
                     className={cn(
-                      "w-full px-4 py-3 rounded-lg border text-lg font-medium",
-                      "focus:outline-none focus:ring-2 focus:ring-blue-500",
+                      "w-full px-4 py-3 rounded-xl border-2 text-lg font-bold transition-all duration-200",
+                      "focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
                       dark 
-                        ? "bg-neutral-800 border-neutral-600 text-white placeholder-neutral-400" 
-                        : "bg-white border-neutral-300 text-neutral-900 placeholder-neutral-500"
+                        ? "bg-neutral-800 border-neutral-600 text-white placeholder-neutral-400 hover:border-orange-500/50" 
+                        : "bg-white border-neutral-300 text-neutral-900 placeholder-neutral-500 hover:border-orange-300"
                     )}
                     maxLength={unit === "BTC" ? 12 : 10}
                   />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
                     <span className={cn(
-                      "text-sm font-medium",
-                      dark ? "text-neutral-400" : "text-neutral-500"
+                      "text-sm font-bold",
+                      dark ? "text-orange-400" : "text-orange-600"
                     )}>
                       {unit === "BTC" ? "₿" : "sats"}
                     </span>
                   </div>
                 </div>
                 {listingPrice && listingPrice > 0 && (
-                  <p className={cn(
-                    "text-xs",
-                    dark ? "text-neutral-400" : "text-neutral-500"
-                  )}>
-                    Listing price: {unit === "BTC" ? `₿${formatAmount(listingPrice)}` : `${formatAmount(listingPrice)} sats`}
-                  </p>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-1 h-1 rounded-full bg-orange-500"></div>
+                    <p className={cn(
+                      "text-xs font-medium",
+                      dark ? "text-neutral-400" : "text-neutral-600"
+                    )}>
+                      Listing price: {unit === "BTC" ? `₿${formatAmount(listingPrice)}` : `${formatAmount(listingPrice)} sats`}
+                    </p>
+                  </div>
                 )}
               </div>
 
-              {/* Expiration Time (Required) */}
+              {/* Expiration Time (Required) - Compact Layout */}
               <div className="space-y-2">
-                <label className={cn(
-                  "block text-sm font-medium",
-                  dark ? "text-neutral-300" : "text-neutral-700"
-                )}>
-                  Offer Expiration Time
-                </label>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center justify-between">
+                  <label className={cn(
+                    "text-sm font-semibold flex items-center space-x-2",
+                    dark ? "text-neutral-200" : "text-neutral-800"
+                  )}>
+                    <span>⏰</span>
+                    <span>Offer expires in</span>
+                  </label>
                   <select
                     value={expirationHours}
                     onChange={(e) => setExpirationHours(parseInt(e.target.value))}
                     className={cn(
-                      "flex-1 px-3 py-2 rounded-lg border text-sm",
-                      "focus:outline-none focus:ring-2 focus:ring-blue-500",
-                      dark 
-                        ? "bg-neutral-800 border-neutral-600 text-white" 
-                        : "bg-white border-neutral-300 text-neutral-900"
+                      "px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all duration-200",
+                      "focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
+                      "bg-gradient-to-r from-orange-50 to-orange-100 border-orange-300 text-orange-800",
+                      "dark:from-orange-900/30 dark:to-orange-800/30 dark:border-orange-500/50 dark:text-orange-200"
                     )}
                   >
                     <option value={1}>1 hour</option>
@@ -299,50 +322,28 @@ export default function OfferModal({
                     <option value={12}>12 hours</option>
                     <option value={24}>24 hours</option>
                   </select>
-                  <div className="relative group">
-                    <svg 
-                      className="w-4 h-4 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 cursor-help" 
-                      fill="none" 
-                      viewBox="0 0 24 24" 
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {/* Tooltip */}
-                    <div className={cn(
-                      "absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 text-xs rounded-lg shadow-lg border z-10",
-                      "opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none",
-                      "w-64 text-center",
-                      dark 
-                        ? "bg-neutral-800 border-neutral-700 text-neutral-200" 
-                        : "bg-white border-neutral-200 text-neutral-700"
-                    )}>
-                      All offers automatically expire after the selected time if no action is taken
-                      <div className={cn(
-                        "absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent",
-                        dark ? "border-t-neutral-800" : "border-t-white"
-                      )}></div>
-                    </div>
-                  </div>
                 </div>
-                <p className={cn(
-                  "text-xs",
-                  dark ? "text-neutral-400" : "text-neutral-500"
-                )}>
-                  This offer will expire on {new Date(Date.now() + (expirationHours * 60 * 60 * 1000)).toLocaleString()}
-                </p>
+                <div className="flex items-center space-x-2">
+                  <div className="w-1 h-1 rounded-full bg-orange-500"></div>
+                  <p className={cn(
+                    "text-xs font-medium",
+                    dark ? "text-neutral-400" : "text-neutral-600"
+                  )}>
+                    Expires: {new Date(Date.now() + (expirationHours * 60 * 60 * 1000)).toLocaleString()}
+                  </p>
+                </div>
               </div>
 
               {/* Actions */}
-              <div className="flex space-x-3 pt-4">
+              <div className="flex space-x-3 pt-2">
                 <button
                   type="button"
                   onClick={onClose}
                   className={cn(
-                    "flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
+                    "flex-1 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 border-2",
                     dark 
-                      ? "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white" 
-                      : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200 hover:text-neutral-900"
+                      ? "bg-neutral-800 border-neutral-600 text-neutral-300 hover:bg-neutral-700 hover:border-orange-500/50 hover:text-white" 
+                      : "bg-neutral-100 border-neutral-300 text-neutral-700 hover:bg-neutral-200 hover:border-orange-300 hover:text-neutral-900"
                   )}
                 >
                   Cancel
@@ -351,12 +352,23 @@ export default function OfferModal({
                   type="submit"
                   disabled={amount <= 0 || isSubmitting}
                   className={cn(
-                    "flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
-                    "bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700",
-                    "disabled:opacity-50 disabled:cursor-not-allowed disabled:from-orange-300 disabled:to-orange-400"
+                    "flex-1 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 border-2",
+                    "bg-gradient-to-r from-orange-500 to-orange-600 border-orange-500 text-white",
+                    "hover:from-orange-600 hover:to-orange-700 hover:border-orange-600 hover:shadow-lg hover:shadow-orange-500/25",
+                    "disabled:opacity-50 disabled:cursor-not-allowed disabled:from-orange-300 disabled:to-orange-400 disabled:border-orange-300 disabled:shadow-none"
                   )}
                 >
-                  {isSubmitting ? "Sending..." : "Send Offer"}
+                  {isSubmitting ? (
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Sending...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center space-x-2">
+                      <span>🚀</span>
+                      <span>Send Offer</span>
+                    </div>
+                  )}
                 </button>
               </div>
             </form>
@@ -374,21 +386,24 @@ export default function OfferModal({
           <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
             <div 
               className={cn(
-                "w-full max-w-sm rounded-2xl shadow-xl border p-6",
+                "w-full max-w-sm rounded-2xl shadow-2xl border-2 p-6",
                 dark 
-                  ? "bg-neutral-900 border-neutral-700" 
-                  : "bg-white border-neutral-200"
+                  ? "bg-neutral-900 border-red-500/30" 
+                  : "bg-white border-red-200"
               )}
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className={cn(
-                "text-lg font-semibold mb-4",
-                dark ? "text-white" : "text-neutral-900"
-              )}>
-                Abort Offer?
-              </h3>
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                <h3 className={cn(
+                  "text-lg font-bold",
+                  dark ? "text-white" : "text-neutral-900"
+                )}>
+                  Abort Offer?
+                </h3>
+              </div>
               <p className={cn(
-                "text-sm mb-6",
+                "text-sm mb-6 font-medium",
                 dark ? "text-neutral-300" : "text-neutral-600"
               )}>
                 Are you sure you want to abort this offer? This action cannot be undone.
@@ -397,10 +412,10 @@ export default function OfferModal({
                 <button
                   onClick={() => setShowAbortConfirm(false)}
                   className={cn(
-                    "flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                    "flex-1 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 border-2",
                     dark 
-                      ? "bg-neutral-700 text-neutral-200 hover:bg-neutral-600" 
-                      : "bg-neutral-200 text-neutral-700 hover:bg-neutral-300"
+                      ? "bg-neutral-800 border-neutral-600 text-neutral-300 hover:bg-neutral-700 hover:border-orange-500/50 hover:text-white" 
+                      : "bg-neutral-100 border-neutral-300 text-neutral-700 hover:bg-neutral-200 hover:border-orange-300 hover:text-neutral-900"
                   )}
                 >
                   Cancel
@@ -408,9 +423,19 @@ export default function OfferModal({
                 <button
                   onClick={handleAbortConfirm}
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all duration-200 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-3 rounded-xl text-sm font-bold text-white transition-all duration-200 border-2 bg-gradient-to-r from-red-500 to-red-600 border-red-500 hover:from-red-600 hover:to-red-700 hover:border-red-600 hover:shadow-lg hover:shadow-red-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                 >
-                  {isSubmitting ? "Aborting..." : "Abort"}
+                  {isSubmitting ? (
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Aborting...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center space-x-2">
+                      <span>⚠️</span>
+                      <span>Abort</span>
+                    </div>
+                  )}
                 </button>
               </div>
             </div>
