@@ -35,7 +35,7 @@ export default function OfferModal({
   existingOffer
 }: OfferModalProps) {
   const [amount, setAmount] = useState<number>(0);
-  const [rawInput, setRawInput] = useState<string>(""); // Track raw input for BTC
+  const [rawInput, setRawInput] = useState<string>("0.00000000"); // Track raw input for BTC
   const [expirationHours, setExpirationHours] = useState(24); // Default to 24 hours
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAbortConfirm, setShowAbortConfirm] = useState(false);
@@ -183,68 +183,86 @@ export default function OfferModal({
   };
 
   const handleAmountChange = (value: string) => {
-    // For BTC, enforce 8 decimal place limit
     if (unit === "BTC") {
-      const parts = value.split('.');
-      if (parts.length === 2 && parts[1].length > 8) {
-        // Truncate to 8 decimal places
-        value = parts[0] + '.' + parts[1].substring(0, 8);
-      }
-    }
-    
-    // For 'make an offer' listings, don't apply listing price validation
-    if (!listingPrice || listingPrice <= 0) {
-      // Parse abbreviations for sats
+      // Calculator-style BTC input
+      handleBTCCalculatorInput(value);
+    } else {
+      // For sats, use the original logic
       const parsedValue = parseAbbreviations(value);
-      
-      // Update raw input
       setRawInput(parsedValue);
-      
       const newAmount = parseAmount(parsedValue);
       
       // Validate min/max limits
       if (newAmount < MIN_SATS) {
         setAmount(MIN_SATS);
-        setRawInput(unit === "BTC" ? "0.00000000" : "1");
+        setRawInput("1");
         return;
       }
       
       if (newAmount > MAX_SATS) {
         setAmount(MAX_SATS);
-        setRawInput(unit === "BTC" ? "9.99999999" : "999,999,999");
+        setRawInput("999,999,999");
         return;
       }
       
       setAmount(newAmount);
-    } else {
-      // For listings with price, use the original logic
-      const parsedValue = parseAbbreviations(value);
-      setRawInput(parsedValue);
-      const newAmount = parseAmount(parsedValue);
-      
-      if (newAmount < MIN_SATS) {
-        setAmount(MIN_SATS);
-        setRawInput(unit === "BTC" ? "0.00000000" : "1");
-        return;
-      }
-      
-      if (newAmount > MAX_SATS) {
-        setAmount(MAX_SATS);
-        setRawInput(unit === "BTC" ? "9.99999999" : "999,999,999");
-        return;
-      }
-      
-      if (newAmount > listingPrice) {
-        setAmount(listingPrice);
-        if (unit === "BTC") {
-          setRawInput(formatBTCDisplay(listingPrice));
-        } else {
-          setRawInput(formatAmount(listingPrice));
-        }
-      } else {
-        setAmount(newAmount);
-      }
     }
+  };
+
+  const handleBTCCalculatorInput = (value: string) => {
+    // Remove any non-digit characters except decimal point
+    const cleaned = value.replace(/[^\d.]/g, '');
+    
+    // If empty or just decimal point, reset to default
+    if (!cleaned || cleaned === '.') {
+      setRawInput("0.00000000");
+      setAmount(0);
+      return;
+    }
+    
+    // Split into integer and decimal parts
+    const parts = cleaned.split('.');
+    const integerPart = parts[0] || '0';
+    const decimalPart = parts[1] || '';
+    
+    // Limit integer part to 9 digits (max 9.99999999 BTC)
+    const limitedInteger = integerPart.length > 9 ? integerPart.substring(0, 9) : integerPart;
+    
+    // Limit decimal part to 8 digits
+    const limitedDecimal = decimalPart.length > 8 ? decimalPart.substring(0, 8) : decimalPart;
+    
+    // Pad decimal part to 8 digits with zeros
+    const paddedDecimal = limitedDecimal.padEnd(8, '0');
+    
+    // Create the formatted string
+    const formatted = `${limitedInteger}.${paddedDecimal}`;
+    
+    // Parse the amount
+    const btcAmount = parseFloat(formatted);
+    const satsAmount = btcToSats(btcAmount);
+    
+    // Validate limits
+    if (satsAmount < MIN_SATS) {
+      setRawInput("0.00000000");
+      setAmount(0);
+      return;
+    }
+    
+    if (satsAmount > MAX_SATS) {
+      setRawInput("9.99999999");
+      setAmount(MAX_SATS);
+      return;
+    }
+    
+    // For listings with price, check against listing price
+    if (listingPrice && listingPrice > 0 && satsAmount > listingPrice) {
+      setRawInput(formatBTCDisplay(listingPrice));
+      setAmount(listingPrice);
+      return;
+    }
+    
+    setRawInput(formatted);
+    setAmount(satsAmount);
   };
 
   const handleSliderChange = (value: number) => {
@@ -579,26 +597,73 @@ export default function OfferModal({
                   /* Manual input for items without asking price */
                   <div className="space-y-4">
                     {unit === "BTC" ? (
-                      /* Simple BTC input */
+                      /* Calculator-style BTC input */
                       <div className="relative">
-                        <input
-                          type="text"
-                          value={rawInput}
-                          onChange={(e) => handleAmountChange(e.target.value)}
-                          placeholder="0.00000000"
-                          className={cn(
-                            "w-full px-6 py-4 rounded-2xl border-2 text-xl font-mono text-center transition-all duration-200",
-                            "focus:outline-none focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500",
-                            "border-neutral-200 dark:border-neutral-700",
-                            "shadow-sm hover:shadow-md focus:shadow-lg",
-                            dark 
-                              ? "bg-neutral-900 text-white placeholder-neutral-500" 
-                              : "bg-white text-neutral-900 placeholder-neutral-400"
-                          )}
-                          inputMode="decimal"
-                          pattern="[0-9]*\\.?[0-9]*"
-                          maxLength={15}
-                        />
+                        <div className={cn(
+                          "w-full px-6 py-4 rounded-2xl border-2 text-xl font-mono text-center transition-all duration-200",
+                          "focus-within:outline-none focus-within:ring-4 focus-within:ring-orange-500/20 focus-within:border-orange-500",
+                          "border-neutral-200 dark:border-neutral-700",
+                          "shadow-sm hover:shadow-md focus-within:shadow-lg",
+                          dark
+                            ? "bg-neutral-900"
+                            : "bg-white"
+                        )}>
+                          {/* Visual display of BTC amount with calculator-style formatting */}
+                          <div className="flex items-center justify-center gap-1">
+                            {/* Integer part */}
+                            <span className={cn(
+                              "text-xl font-semibold",
+                              dark ? "text-white" : "text-neutral-900"
+                            )}>
+                              {rawInput.split('.')[0] || '0'}
+                            </span>
+                            
+                            {/* Decimal point */}
+                            <span className={cn(
+                              "text-xl font-semibold",
+                              dark ? "text-white" : "text-neutral-900"
+                            )}>
+                              .
+                            </span>
+                            
+                            {/* 8 decimal places with significance highlighting */}
+                            <div className="flex">
+                              {[0,1,2,3,4,5,6,7].map((i) => {
+                                const decimalPart = rawInput.split('.')[1] || '';
+                                const digit = decimalPart[i] || '0';
+                                
+                                // Find the last non-zero digit to determine significance
+                                const lastNonZeroIndex = decimalPart.split('').reverse().findIndex(d => d !== '0');
+                                const isSignificant = lastNonZeroIndex === -1 || i <= (decimalPart.length - 1 - lastNonZeroIndex);
+                                
+                                return (
+                                  <span
+                                    key={i}
+                                    className={cn(
+                                      "text-xl font-semibold transition-colors duration-150",
+                                      isSignificant
+                                        ? dark ? "text-white" : "text-neutral-900"
+                                        : dark ? "text-neutral-500" : "text-neutral-400"
+                                    )}
+                                  >
+                                    {digit}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </div>
+                          
+                          {/* Hidden input for actual interaction */}
+                          <input
+                            type="text"
+                            value={rawInput}
+                            onChange={(e) => handleAmountChange(e.target.value)}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-text font-mono"
+                            inputMode="decimal"
+                            pattern="[0-9]*\\.?[0-9]*"
+                            style={{ caretColor: 'transparent' }}
+                          />
+                        </div>
                         <div className="absolute right-6 top-1/2 -translate-y-1/2">
                           <span className={cn(
                             "text-lg font-bold",
