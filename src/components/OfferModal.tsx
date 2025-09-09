@@ -421,15 +421,16 @@ export default function OfferModal({
         // Simple sats input for make an offer
         const parsedValue = parseAbbreviations(value);
         setRawInput(parsedValue);
-        const newAmount = parseAmount(parsedValue);
         
-        // Validate min/max limits
-        if (newAmount < MIN_SATS) {
-          setAmount(MIN_SATS);
-          setRawInput("1");
+        // Allow empty field for make an offer listings
+        if (!parsedValue || parsedValue === "") {
+          setAmount(0);
           return;
         }
         
+        const newAmount = parseAmount(parsedValue);
+        
+        // Validate max limit only (allow empty/zero for make an offer)
         if (newAmount > MAX_SATS) {
           setAmount(MAX_SATS);
           setRawInput("999,999,999");
