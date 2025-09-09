@@ -40,6 +40,12 @@ export default function OfferModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAbortConfirm, setShowAbortConfirm] = useState(false);
   
+  // Min/Max limits
+  const MIN_SATS = 1; // 0.00000001 BTC
+  const MAX_SATS = 999999999; // 9.99999999 BTC
+  const MIN_BTC = 0.00000001;
+  const MAX_BTC = 9.99999999;
+  
   // Get BTC rate for dollar equivalent
   const btcRate = useBtcRate();
 
@@ -71,8 +77,8 @@ export default function OfferModal({
         setExpirationHours(24); // Reset to 24 hours default
       } else {
         // New offer without listing price
-        setAmount(0);
-        setRawInput("");
+        setAmount(MIN_SATS);
+        setRawInput(unit === "BTC" ? "0.00000000" : "1");
         setExpirationHours(24);
       }
     }
@@ -81,7 +87,7 @@ export default function OfferModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (amount <= 0) {
+    if (amount < MIN_SATS || amount > MAX_SATS) {
       return;
     }
 
@@ -117,6 +123,27 @@ export default function OfferModal({
     return satoshis.toLocaleString();
   };
 
+  // Parse abbreviations (k, m) for sats
+  const parseAbbreviations = (value: string) => {
+    if (unit !== "sats") return value;
+    
+    const cleanValue = value.toLowerCase().trim();
+    const match = cleanValue.match(/^([\d.]+)([km])?$/);
+    
+    if (!match) return value;
+    
+    const [, number, suffix] = match;
+    const num = parseFloat(number);
+    
+    if (isNaN(num)) return value;
+    
+    switch (suffix) {
+      case 'k': return (num * 1000).toString();
+      case 'm': return (num * 1000000).toString();
+      default: return number;
+    }
+  };
+
   const parseAmount = (value: string): number => {
     if (unit === "BTC") {
       // For BTC, allow decimal input
@@ -146,10 +173,26 @@ export default function OfferModal({
   };
 
   const handleAmountChange = (value: string) => {
-    // Update raw input
-    setRawInput(value);
+    // Parse abbreviations for sats
+    const parsedValue = parseAbbreviations(value);
     
-    const newAmount = parseAmount(value);
+    // Update raw input
+    setRawInput(parsedValue);
+    
+    const newAmount = parseAmount(parsedValue);
+    
+    // Validate min/max limits
+    if (newAmount < MIN_SATS) {
+      setAmount(MIN_SATS);
+      setRawInput(unit === "BTC" ? "0.00000000" : "1");
+      return;
+    }
+    
+    if (newAmount > MAX_SATS) {
+      setAmount(MAX_SATS);
+      setRawInput(unit === "BTC" ? "9.99999999" : "999,999,999");
+      return;
+    }
     
     // If listing price exists and new amount exceeds it, revert to listing price
     if (listingPrice && listingPrice > 0 && newAmount > listingPrice) {
@@ -210,83 +253,7 @@ export default function OfferModal({
   if (!isOpen) return null;
 
   return (
-    <>
-      {/* Custom Styles */}
-      <style jsx>{`
-        .slider::-webkit-slider-thumb {
-          appearance: none;
-          height: 20px;
-          width: 20px;
-          border-radius: 50%;
-          background: transparent;
-          cursor: pointer;
-          border: none;
-          box-shadow: none;
-        }
-        
-        .slider::-moz-range-thumb {
-          height: 20px;
-          width: 20px;
-          border-radius: 50%;
-          background: transparent;
-          cursor: pointer;
-          border: none;
-          box-shadow: none;
-        }
-
-        @keyframes gradient-shift {
-          0% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-          100% {
-            background-position: 0% 50%;
-          }
-        }
-
-        .slider-track {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 8px;
-          background: #e5e7eb;
-          border-radius: 8px;
-          pointer-events: none;
-          z-index: 1;
-        }
-
-        .slider-fill {
-          position: absolute;
-          top: 0;
-          left: 0;
-          height: 8px;
-          background: linear-gradient(
-            90deg,
-            #f97316,
-            #fb923c,
-            #f97316,
-            #fb923c,
-            #f97316
-          );
-          background-size: 200% 100%;
-          animation: gradient-shift 2s ease-in-out infinite;
-          border-radius: 8px 0 0 8px;
-          transition: width 0.2s ease;
-          z-index: 2;
-        }
-        
-        .slider-fill.max {
-          border-radius: 8px;
-        }
-
-        .animated-slider {
-          background: transparent;
-        }
-      `}</style>
-      
+    <div>
       {/* Modal with backdrop */}
       <div 
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
@@ -443,7 +410,7 @@ export default function OfferModal({
                       dark ? "text-orange-400" : "text-orange-600"
                     )}>
                       {Math.round((amount / listingPrice) * 100)}% of asking price
-                    </div>
+                  </div>
                   )}
                 </div>
 
@@ -508,8 +475,8 @@ export default function OfferModal({
                             }}
                           />
                         </div>
-                      </div>
-                      
+              </div>
+
                       <div className="relative h-2">
                         {/* Background track */}
                         <div className="slider-track"></div>
@@ -521,7 +488,7 @@ export default function OfferModal({
                           }}
                         ></div>
                         {/* Invisible slider input */}
-                        <input
+                  <input
                           type="range"
                           min="0"
                           max={listingPrice}
@@ -538,45 +505,133 @@ export default function OfferModal({
                         )}>
                           0
                         </span>
-                        <span className={cn(
+                  <span className={cn(
                           "font-medium",
                           dark ? "text-neutral-400" : "text-neutral-500"
-                        )}>
+                  )}>
                           {unit === "BTC" ? `₿${formatAmount(listingPrice)}` : `${formatAmount(listingPrice)} sats`}
-                        </span>
+                  </span>
                       </div>
                     </div>
                   </div>
                 ) : (
                   /* Manual input for items without asking price */
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={rawInput}
-                    onChange={(e) => handleAmountChange(e.target.value)}
-                    placeholder={unit === "BTC" ? "0.00000000" : "0"}
-                    className={cn(
-                      "w-full px-6 py-4 rounded-2xl border-2 text-xl font-semibold text-center transition-all duration-200",
-                      "focus:outline-none focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500",
+                {unit === "BTC" ? (
+                  /* Special BTC input with always visible 9 digits */
+                  <div className="relative">
+                    <div className={cn(
+                      "w-full px-6 py-4 rounded-2xl border-2 text-xl font-mono text-center transition-all duration-200",
+                      "focus-within:outline-none focus-within:ring-4 focus-within:ring-orange-500/20 focus-within:border-orange-500",
                       "border-neutral-200 dark:border-neutral-700",
-                      "shadow-sm hover:shadow-md focus:shadow-lg",
+                      "shadow-sm hover:shadow-md focus-within:shadow-lg",
                       dark 
-                        ? "bg-neutral-900 text-white placeholder-neutral-500" 
-                        : "bg-white text-neutral-900 placeholder-neutral-400"
-                    )}
-                    inputMode={unit === "BTC" ? "decimal" : "numeric"}
-                    pattern={unit === "BTC" ? "[0-9]*\\.?[0-9]*" : "[0-9]*"}
-                    maxLength={unit === "BTC" ? 15 : 10}
-                  />
-                  <div className="absolute right-6 top-1/2 -translate-y-1/2">
-                    <span className={cn(
-                      "text-lg font-bold",
-                      dark ? "text-orange-400" : "text-orange-600"
+                        ? "bg-neutral-900" 
+                        : "bg-white"
                     )}>
-                      {unit === "BTC" ? "₿" : "sats"}
-                    </span>
+                      {/* Visual display of BTC amount with 9 digits */}
+                      <div className="flex items-center justify-center gap-1">
+                        {/* Integer part */}
+                        <span className={cn(
+                          "text-xl font-semibold",
+                          dark ? "text-white" : "text-neutral-900"
+                        )}>
+                          {rawInput.split('.')[0] || '0'}
+                        </span>
+                        
+                        {/* Decimal point */}
+                        <span className={cn(
+                          "text-xl font-semibold",
+                          dark ? "text-white" : "text-neutral-900"
+                        )}>
+                          .
+                        </span>
+                        
+                        {/* 8 decimal places with significance highlighting */}
+                        <div className="flex">
+                          {[0,1,2,3,4,5,6,7].map((i) => {
+                            const decimalPart = rawInput.split('.')[1] || '';
+                            const digit = decimalPart[i] || '0';
+                            
+                            // Find the last non-zero digit to determine significance
+                            const lastNonZeroIndex = decimalPart.split('').reverse().findIndex(d => d !== '0');
+                            const isSignificant = lastNonZeroIndex === -1 || i <= (decimalPart.length - 1 - lastNonZeroIndex);
+                            
+                            return (
+                              <span 
+                                key={i}
+                                className={cn(
+                                  "text-xl font-semibold transition-colors duration-150",
+                                  isSignificant
+                                    ? dark ? "text-white" : "text-neutral-900"
+                                    : dark ? "text-neutral-500" : "text-neutral-400"
+                                )}
+                              >
+                                {digit}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      
+                      {/* Hidden input for actual interaction */}
+                      <input
+                        type="text"
+                        value={rawInput}
+                        onChange={(e) => handleAmountChange(e.target.value)}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-text font-mono"
+                        inputMode="decimal"
+                        pattern="[0-9]*\\.?[0-9]*"
+                        style={{ caretColor: 'transparent' }}
+                        onKeyDown={(e) => {
+                          // Prevent backspace when at minimum value
+                          if (e.key === 'Backspace' && rawInput === '0.00000000') {
+                            e.preventDefault();
+                          }
+                        }}
+                      />
+                    </div>
+                    
+                    {/* Bitcoin symbol */}
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2">
+                      <span className={cn(
+                        "text-lg font-bold",
+                        dark ? "text-orange-400" : "text-orange-600"
+                      )}>
+                        ₿
+                      </span>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  /* Regular sats input with abbreviations */
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={rawInput}
+                      onChange={(e) => handleAmountChange(e.target.value)}
+                      placeholder="1"
+                      className={cn(
+                        "w-full px-6 py-4 rounded-2xl border-2 text-xl font-semibold text-center transition-all duration-200",
+                        "focus:outline-none focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500",
+                        "border-neutral-200 dark:border-neutral-700",
+                        "shadow-sm hover:shadow-md focus:shadow-lg",
+                        dark 
+                          ? "bg-neutral-900 text-white placeholder-neutral-500" 
+                          : "bg-white text-neutral-900 placeholder-neutral-400"
+                      )}
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={15}
+                    />
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2">
+                      <span className={cn(
+                        "text-lg font-bold",
+                        dark ? "text-orange-400" : "text-orange-600"
+                      )}>
+                        sats
+                      </span>
+                    </div>
+                  </div>
+                )}
                 )}
               </div>
 
@@ -748,6 +803,6 @@ export default function OfferModal({
             </div>
           </div>
       )}
-    </>
+    </div>
   );
 }
