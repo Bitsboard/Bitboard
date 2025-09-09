@@ -135,21 +135,40 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
       ? 'md:translate-x-[calc(var(--offer-w)*-0.5)]'
       : 'md:translate-x-0';
 
-  // Use data-state for proper CSS transitions instead of inline styles
-  const dockState = isDesktop && isOfferOpen ? 'open' : 'closed';
+  // Use a two-phase approach: first render in closed state, then transition to open
+  const [dockPhase, setDockPhase] = React.useState<'closed' | 'transitioning' | 'open'>('closed');
   
-  // Add a small delay to ensure the dock is properly positioned before OfferModal can portal
   React.useEffect(() => {
     if (isOfferOpen && isDesktop) {
-      // Small delay to ensure CSS transition has started
-      const timer = setTimeout(() => setDockReady(true), 50);
-      return () => clearTimeout(timer);
+      // Phase 1: Start in closed state
+      setDockPhase('closed');
+      setDockReady(false);
+      
+      // Phase 2: After a brief delay, start transition
+      const transitionTimer = setTimeout(() => {
+        setDockPhase('transitioning');
+      }, 10);
+      
+      // Phase 3: After transition completes, mark as ready
+      const readyTimer = setTimeout(() => {
+        setDockPhase('open');
+        setDockReady(true);
+      }, 50);
+      
+      return () => {
+        clearTimeout(transitionTimer);
+        clearTimeout(readyTimer);
+      };
     } else {
+      setDockPhase('closed');
       setDockReady(false);
     }
   }, [isOfferOpen, isDesktop, setDockReady]);
   
-  console.log('🎯 ListingModal: dockState:', dockState, 'isDesktop:', isDesktop, 'isOfferOpen:', isOfferOpen);
+  // Determine dock state based on phase
+  const dockState = dockPhase === 'open' ? 'open' : 'closed';
+  
+  console.log('🎯 ListingModal: dockPhase:', dockPhase, 'dockState:', dockState, 'isDesktop:', isDesktop, 'isOfferOpen:', isOfferOpen);
   console.log('🎯 ListingModal: About to render dock with data-state:', dockState);
   console.log('🎯 ListingModal: showChat:', showChat);
   console.log('🎯 ListingModal: dockReady:', dockReady);
@@ -164,7 +183,8 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
         style={{ width: offerWidthPx }}
         className={cn(
           "pointer-events-auto fixed right-0 top-0 h-full shadow-2xl transition-transform duration-300 ease-out transform-gpu",
-          dockState === 'closed' ? "translate-x-[420px]" : "translate-x-0",
+          // Always start in closed position, then transition to open
+          dockPhase === 'open' ? "translate-x-0" : "translate-x-[420px]",
           isDesktop ? "block" : "hidden"
         )}
       />
