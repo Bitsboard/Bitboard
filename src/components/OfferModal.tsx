@@ -173,37 +173,58 @@ export default function OfferModal({
   };
 
   const handleAmountChange = (value: string) => {
-    // Parse abbreviations for sats
-    const parsedValue = parseAbbreviations(value);
-    
-    // Update raw input
-    setRawInput(parsedValue);
-    
-    const newAmount = parseAmount(parsedValue);
-    
-    // Validate min/max limits
-    if (newAmount < MIN_SATS) {
-      setAmount(MIN_SATS);
-      setRawInput(unit === "BTC" ? "0.00000000" : "1");
-      return;
-    }
-    
-    if (newAmount > MAX_SATS) {
-      setAmount(MAX_SATS);
-      setRawInput(unit === "BTC" ? "9.99999999" : "999,999,999");
-      return;
-    }
-    
-    // If listing price exists and new amount exceeds it, revert to listing price
-    if (listingPrice && listingPrice > 0 && newAmount > listingPrice) {
-      setAmount(listingPrice);
-      if (unit === "BTC") {
-        setRawInput(formatBTCDisplay(listingPrice));
-      } else {
-        setRawInput(formatAmount(listingPrice));
+    // For 'make an offer' listings, don't apply listing price validation
+    if (!listingPrice || listingPrice <= 0) {
+      // Parse abbreviations for sats
+      const parsedValue = parseAbbreviations(value);
+      
+      // Update raw input
+      setRawInput(parsedValue);
+      
+      const newAmount = parseAmount(parsedValue);
+      
+      // Validate min/max limits
+      if (newAmount < MIN_SATS) {
+        setAmount(MIN_SATS);
+        setRawInput(unit === "BTC" ? "0.00000000" : "1");
+        return;
       }
-    } else {
+      
+      if (newAmount > MAX_SATS) {
+        setAmount(MAX_SATS);
+        setRawInput(unit === "BTC" ? "9.99999999" : "999,999,999");
+        return;
+      }
+      
       setAmount(newAmount);
+    } else {
+      // For listings with price, use the original logic
+      const parsedValue = parseAbbreviations(value);
+      setRawInput(parsedValue);
+      const newAmount = parseAmount(parsedValue);
+      
+      if (newAmount < MIN_SATS) {
+        setAmount(MIN_SATS);
+        setRawInput(unit === "BTC" ? "0.00000000" : "1");
+        return;
+      }
+      
+      if (newAmount > MAX_SATS) {
+        setAmount(MAX_SATS);
+        setRawInput(unit === "BTC" ? "9.99999999" : "999,999,999");
+        return;
+      }
+      
+      if (newAmount > listingPrice) {
+        setAmount(listingPrice);
+        if (unit === "BTC") {
+          setRawInput(formatBTCDisplay(listingPrice));
+        } else {
+          setRawInput(formatAmount(listingPrice));
+        }
+      } else {
+        setAmount(newAmount);
+      }
     }
   };
 
@@ -537,123 +558,78 @@ export default function OfferModal({
                   </div>
                 ) : (
                   /* Manual input for items without asking price */
-                  <div>
+                  <div className="space-y-4">
                     {unit === "BTC" ? (
-                  /* Special BTC input with always visible 9 digits */
-                  <div className="relative">
-                    <div className={cn(
-                      "w-full px-6 py-4 rounded-2xl border-2 text-xl font-mono text-center transition-all duration-200",
-                      "focus-within:outline-none focus-within:ring-4 focus-within:ring-orange-500/20 focus-within:border-orange-500",
-                      "border-neutral-200 dark:border-neutral-700",
-                      "shadow-sm hover:shadow-md focus-within:shadow-lg",
-                      dark 
-                        ? "bg-neutral-900" 
-                        : "bg-white"
-                    )}>
-                      {/* Visual display of BTC amount with 9 digits */}
-                      <div className="flex items-center justify-center gap-1">
-                        {/* Integer part */}
-                        <span className={cn(
-                          "text-xl font-semibold",
-                          dark ? "text-white" : "text-neutral-900"
-                        )}>
-                          {rawInput.split('.')[0] || '0'}
-                        </span>
-                        
-                        {/* Decimal point */}
-                        <span className={cn(
-                          "text-xl font-semibold",
-                          dark ? "text-white" : "text-neutral-900"
-                        )}>
-                          .
-                        </span>
-                        
-                        {/* 8 decimal places with significance highlighting */}
-                        <div className="flex">
-                          {[0,1,2,3,4,5,6,7].map((i) => {
-                            const decimalPart = rawInput.split('.')[1] || '';
-                            const digit = decimalPart[i] || '0';
-                            
-                            // Find the last non-zero digit to determine significance
-                            const lastNonZeroIndex = decimalPart.split('').reverse().findIndex(d => d !== '0');
-                            const isSignificant = lastNonZeroIndex === -1 || i <= (decimalPart.length - 1 - lastNonZeroIndex);
-                            
-                            return (
-                              <span 
-                                key={i}
-                                className={cn(
-                                  "text-xl font-semibold transition-colors duration-150",
-                                  isSignificant
-                                    ? dark ? "text-white" : "text-neutral-900"
-                                    : dark ? "text-neutral-500" : "text-neutral-400"
-                                )}
-                              >
-                                {digit}
-                              </span>
-                            );
-                          })}
+                      /* Simple BTC input */
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={rawInput}
+                          onChange={(e) => handleAmountChange(e.target.value)}
+                          placeholder="0.00000000"
+                          className={cn(
+                            "w-full px-6 py-4 rounded-2xl border-2 text-xl font-mono text-center transition-all duration-200",
+                            "focus:outline-none focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500",
+                            "border-neutral-200 dark:border-neutral-700",
+                            "shadow-sm hover:shadow-md focus:shadow-lg",
+                            dark 
+                              ? "bg-neutral-900 text-white placeholder-neutral-500" 
+                              : "bg-white text-neutral-900 placeholder-neutral-400"
+                          )}
+                          inputMode="decimal"
+                          pattern="[0-9]*\\.?[0-9]*"
+                          maxLength={15}
+                        />
+                        <div className="absolute right-6 top-1/2 -translate-y-1/2">
+                          <span className={cn(
+                            "text-lg font-bold",
+                            dark ? "text-orange-400" : "text-orange-600"
+                          )}>
+                            ₿
+                          </span>
                         </div>
                       </div>
-                      
-                      {/* Hidden input for actual interaction */}
-                      <input
-                        type="text"
-                        value={rawInput}
-                        onChange={(e) => handleAmountChange(e.target.value)}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-text font-mono"
-                        inputMode="decimal"
-                        pattern="[0-9]*\\.?[0-9]*"
-                        style={{ caretColor: 'transparent' }}
-                        onKeyDown={(e) => {
-                          // Prevent backspace when at minimum value
-                          if (e.key === 'Backspace' && rawInput === '0.00000000') {
-                            e.preventDefault();
-                          }
-                        }}
-                      />
-                    </div>
+                    ) : (
+                      /* Sats input with abbreviations */
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={rawInput}
+                          onChange={(e) => handleAmountChange(e.target.value)}
+                          placeholder="1"
+                          className={cn(
+                            "w-full px-6 py-4 rounded-2xl border-2 text-xl font-semibold text-center transition-all duration-200",
+                            "focus:outline-none focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500",
+                            "border-neutral-200 dark:border-neutral-700",
+                            "shadow-sm hover:shadow-md focus:shadow-lg",
+                            dark 
+                              ? "bg-neutral-900 text-white placeholder-neutral-500" 
+                              : "bg-white text-neutral-900 placeholder-neutral-400"
+                          )}
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          maxLength={15}
+                        />
+                        <div className="absolute right-6 top-1/2 -translate-y-1/2">
+                          <span className={cn(
+                            "text-lg font-bold",
+                            dark ? "text-orange-400" : "text-orange-600"
+                          )}>
+                            sats
+                          </span>
+                        </div>
+                      </div>
+                    )}
                     
-                    {/* Bitcoin symbol */}
-                    <div className="absolute right-6 top-1/2 -translate-y-1/2">
-                      <span className={cn(
-                        "text-lg font-bold",
-                        dark ? "text-orange-400" : "text-orange-600"
+                    {/* Help text for sats abbreviations */}
+                    {unit === "sats" && (
+                      <p className={cn(
+                        "text-xs text-center",
+                        dark ? "text-neutral-500" : "text-neutral-400"
                       )}>
-                        ₿
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  /* Regular sats input with abbreviations */
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={rawInput}
-                      onChange={(e) => handleAmountChange(e.target.value)}
-                      placeholder="1"
-                      className={cn(
-                        "w-full px-6 py-4 rounded-2xl border-2 text-xl font-semibold text-center transition-all duration-200",
-                        "focus:outline-none focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500",
-                        "border-neutral-200 dark:border-neutral-700",
-                        "shadow-sm hover:shadow-md focus:shadow-lg",
-                        dark 
-                          ? "bg-neutral-900 text-white placeholder-neutral-500" 
-                          : "bg-white text-neutral-900 placeholder-neutral-400"
-                      )}
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      maxLength={15}
-                    />
-                    <div className="absolute right-6 top-1/2 -translate-y-1/2">
-                      <span className={cn(
-                        "text-lg font-bold",
-                        dark ? "text-orange-400" : "text-orange-600"
-                      )}>
-                        sats
-                      </span>
-                    </div>
-                  </div>
-                )}
+                        Use 'k' for thousands (1k = 1,000) or 'm' for millions (1m = 1,000,000)
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
