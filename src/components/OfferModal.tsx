@@ -478,8 +478,19 @@ export default function OfferModal({
               </div>
 
                       <div className="relative h-2">
-                        {/* Background track */}
-                        <div className="slider-track"></div>
+                        {/* Background track - clickable */}
+                        <div 
+                          className="slider-track cursor-pointer"
+                          onClick={(e) => {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const x = e.clientX - rect.left;
+                            const percentage = x / rect.width;
+                            const snappedPercentage = Math.round(percentage * 20) / 20; // Snap to 5% increments
+                            const newValue = Math.round(snappedPercentage * listingPrice);
+                            const clampedValue = Math.max(0, Math.min(newValue, listingPrice));
+                            handleSliderChange(clampedValue);
+                          }}
+                        ></div>
                         {/* Animated fill */}
                         <div 
                           className={`slider-fill ${getSliderValue() >= listingPrice ? 'max' : ''}`}
