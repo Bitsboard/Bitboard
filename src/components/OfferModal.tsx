@@ -933,34 +933,35 @@ export default function OfferModal({
                       </div>
                     )}
                     
-                    {/* Clear button for both BTC and sats inputs */}
-                    {rawInput && (
-                      <div className="flex justify-end">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (unit === "BTC") {
-                              // Reset BTC field
-                              setBtcDigits("000000000");
-                              setBtcMask(Array(9).fill(false));
-                              setRawInput("0.00000000");
-                              setAmount(0);
-                            } else {
-                              // Reset sats field
-                              setRawInput("");
-                              setAmount(0);
-                            }
-                          }}
-                          className={cn(
-                            "text-xs font-medium transition-colors duration-200",
-                            "hover:opacity-80",
-                            dark ? "text-orange-400" : "text-orange-600"
-                          )}
-                        >
-                          Clear
-                        </button>
-                      </div>
-                    )}
+                    {/* Clear button for both BTC and sats inputs - always visible */}
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (unit === "BTC") {
+                            // Reset BTC field
+                            setBtcDigits("000000000");
+                            setBtcMask(Array(9).fill(false));
+                            setRawInput("0.00000000");
+                            setAmount(0);
+                          } else {
+                            // Reset sats field
+                            setRawInput("");
+                            setAmount(0);
+                          }
+                        }}
+                        disabled={!rawInput || rawInput === "0.00000000" || rawInput === ""}
+                        className={cn(
+                          "text-xs font-medium transition-colors duration-200",
+                          "hover:opacity-80 disabled:cursor-not-allowed",
+                          rawInput && rawInput !== "0.00000000" && rawInput !== ""
+                            ? (dark ? "text-orange-400" : "text-orange-600")
+                            : (dark ? "text-neutral-500" : "text-neutral-400")
+                        )}
+                      >
+                        Clear
+                      </button>
+                    </div>
                     
                   </div>
                 )}
