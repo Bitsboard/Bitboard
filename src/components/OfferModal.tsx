@@ -11,6 +11,7 @@ interface OfferModalProps {
   onSendOffer: (amount: number, expiresAt: number) => void;
   onAbortOffer?: (offerId: string, action: 'abort') => void;
   listingPrice?: number; // in satoshis
+  listingTitle?: string; // listing title for subtitle
   dark?: boolean;
   unit?: Unit;
   existingOffer?: {
@@ -30,6 +31,7 @@ export default function OfferModal({
   onSendOffer,
   onAbortOffer,
   listingPrice,
+  listingTitle,
   dark = false,
   unit = "sats",
   existingOffer
@@ -590,6 +592,14 @@ export default function OfferModal({
             )}>
               {existingOffer ? "Your Offer" : "Make an Offer"}
             </h2>
+              {listingTitle && (
+                <p className={cn(
+                  "text-sm mt-1 truncate",
+                  dark ? "text-neutral-400" : "text-neutral-500"
+                )}>
+                  {listingTitle}
+                </p>
+              )}
               {existingOffer && (
                 <p className={cn(
                   "text-sm",
