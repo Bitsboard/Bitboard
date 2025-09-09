@@ -551,23 +551,27 @@ export default function OfferModal({
                   /* Manual input for items without asking price */
                 <div className="relative">
                   <input
-                      type="text"
-                      value={rawInput}
-                      onChange={(e) => handleAmountChange(e.target.value)}
-                      placeholder={unit === "BTC" ? "0.00000000" : "0"}
+                    type="text"
+                    value={rawInput}
+                    onChange={(e) => handleAmountChange(e.target.value)}
+                    placeholder={unit === "BTC" ? "0.00000000" : "0"}
                     className={cn(
-                        "w-full px-4 py-3 rounded-xl border-2 text-lg font-medium text-center",
-                        "focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
+                      "w-full px-6 py-4 rounded-2xl border-2 text-xl font-semibold text-center transition-all duration-200",
+                      "focus:outline-none focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500",
+                      "border-neutral-200 dark:border-neutral-700",
+                      "shadow-sm hover:shadow-md focus:shadow-lg",
                       dark 
-                        ? "bg-neutral-800 border-neutral-600 text-white placeholder-neutral-400" 
-                        : "bg-white border-neutral-300 text-neutral-900 placeholder-neutral-500"
+                        ? "bg-neutral-900 text-white placeholder-neutral-500" 
+                        : "bg-white text-neutral-900 placeholder-neutral-400"
                     )}
-                      maxLength={unit === "BTC" ? 15 : 10}
+                    inputMode={unit === "BTC" ? "decimal" : "numeric"}
+                    pattern={unit === "BTC" ? "[0-9]*\\.?[0-9]*" : "[0-9]*"}
+                    maxLength={unit === "BTC" ? 15 : 10}
                   />
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                  <div className="absolute right-6 top-1/2 -translate-y-1/2">
                     <span className={cn(
-                        "text-sm font-bold",
-                        dark ? "text-orange-400" : "text-orange-600"
+                      "text-lg font-bold",
+                      dark ? "text-orange-400" : "text-orange-600"
                     )}>
                       {unit === "BTC" ? "₿" : "sats"}
                     </span>
