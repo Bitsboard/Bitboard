@@ -62,7 +62,7 @@ export default function OfferModal({
         }
       } else if (listingPrice && listingPrice > 0) {
         // New offer with listing price
-        setAmount(listingPrice);
+      setAmount(listingPrice);
         if (unit === "BTC") {
           setRawInput(formatBTCDisplay(listingPrice));
         } else {
@@ -303,18 +303,18 @@ export default function OfferModal({
         >
           {/* Header */}
           <div className={cn(
-            "px-6 py-5 bg-gradient-to-r flex items-center justify-between",
+            "px-6 py-5 flex items-center justify-between",
             dark 
-              ? "from-orange-500/5 to-orange-600/5 border-b border-orange-500/10" 
-              : "from-orange-50/50 to-orange-100/50 border-b border-orange-200/50"
+              ? "bg-neutral-900 border-b border-neutral-800" 
+              : "bg-white border-b border-neutral-200"
           )}>
             <div>
-              <h2 className={cn(
+            <h2 className={cn(
                 "text-xl font-bold",
-                dark ? "text-white" : "text-neutral-900"
-              )}>
-                {existingOffer ? "Your Offer" : "Make an Offer"}
-              </h2>
+              dark ? "text-white" : "text-neutral-900"
+            )}>
+              {existingOffer ? "Your Offer" : "Make an Offer"}
+            </h2>
               {existingOffer && (
                 <p className={cn(
                   "text-sm",
@@ -353,24 +353,24 @@ export default function OfferModal({
                 )}>
                   <div className={cn(
                     "text-3xl font-black mb-2",
-                    existingOffer.status === 'pending' 
+                      existingOffer.status === 'pending' 
                       ? "text-orange-900 dark:text-orange-100" 
                       : "text-neutral-900 dark:text-neutral-100"
-                  )}>
+                    )}>
                     {unit === 'BTC' ? `₿${formatAmount(existingOffer.amount_sat)}` : `${formatAmount(existingOffer.amount_sat)} sats`}
                   </div>
-                  <div className={cn(
+                    <div className={cn(
                     "text-sm font-bold px-4 py-2 rounded-full inline-block",
-                    existingOffer.status === 'pending' 
+                      existingOffer.status === 'pending' 
                       ? "bg-orange-500 text-white"
                       : "bg-neutral-500 text-white"
-                  )}>
+                    )}>
                     {existingOffer.status === 'pending' ? 'PENDING' : existingOffer.status.toUpperCase()}
                   </div>
-                </div>
-                
+                    </div>
+                    
                 {/* Expiration */}
-                {existingOffer.expires_at && (
+                    {existingOffer.expires_at && (
                   <div className={cn(
                     "p-4 rounded-lg border",
                     dark ? "bg-neutral-800/50 border-neutral-700" : "bg-neutral-100 border-neutral-200"
@@ -549,30 +549,30 @@ export default function OfferModal({
                   </div>
                 ) : (
                   /* Manual input for items without asking price */
-                  <div className="relative">
-                    <input
+                <div className="relative">
+                  <input
                       type="text"
                       value={rawInput}
                       onChange={(e) => handleAmountChange(e.target.value)}
                       placeholder={unit === "BTC" ? "0.00000000" : "0"}
-                      className={cn(
+                    className={cn(
                         "w-full px-4 py-3 rounded-xl border-2 text-lg font-medium text-center",
                         "focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
-                        dark 
-                          ? "bg-neutral-800 border-neutral-600 text-white placeholder-neutral-400" 
-                          : "bg-white border-neutral-300 text-neutral-900 placeholder-neutral-500"
-                      )}
+                      dark 
+                        ? "bg-neutral-800 border-neutral-600 text-white placeholder-neutral-400" 
+                        : "bg-white border-neutral-300 text-neutral-900 placeholder-neutral-500"
+                    )}
                       maxLength={unit === "BTC" ? 15 : 10}
-                    />
+                  />
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                      <span className={cn(
+                    <span className={cn(
                         "text-sm font-bold",
                         dark ? "text-orange-400" : "text-orange-600"
-                      )}>
-                        {unit === "BTC" ? "₿" : "sats"}
-                      </span>
-                    </div>
+                    )}>
+                      {unit === "BTC" ? "₿" : "sats"}
+                    </span>
                   </div>
+                </div>
                 )}
               </div>
 
@@ -594,18 +594,17 @@ export default function OfferModal({
                         <span className="text-xs font-bold">i</span>
                       </div>
                       <div className={cn(
-                        "absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50",
-                        dark ? "bg-neutral-800 text-neutral-200 border border-neutral-700" : "bg-neutral-900 text-white border border-neutral-600"
-                      )} style={{ maxWidth: '200px', wordWrap: 'break-word' }}>
+                        "fixed px-3 py-2 rounded text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none",
+                        "bg-black text-white shadow-lg",
+                        "z-[9999]"
+                      )} style={{
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        maxWidth: '300px',
+                        whiteSpace: 'normal'
+                      }}>
                         Your offer will remain valid until the expiration timer runs out, until you revoke your offer, or if the other user accepts/declines it.
-                        <div className={cn(
-                          "absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0",
-                          dark ? "border-t-neutral-800" : "border-t-neutral-900"
-                        )} style={{
-                          borderLeft: '4px solid transparent',
-                          borderRight: '4px solid transparent',
-                          borderTop: '4px solid currentColor'
-                        }}></div>
                       </div>
                     </div>
                   </div>
@@ -638,7 +637,7 @@ export default function OfferModal({
                       <div className="text-sm font-bold">{hours}h</div>
                     </button>
                   ))}
-                </div>
+                  </div>
               </div>
 
               {/* Actions */}
@@ -685,35 +684,35 @@ export default function OfferModal({
 
       {/* Abort Confirmation Modal */}
       {showAbortConfirm && (
-        <div 
-          className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-          onClick={() => setShowAbortConfirm(false)}
-        >
           <div 
-            className={cn(
+          className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowAbortConfirm(false)}
+        >
+            <div 
+              className={cn(
               "w-full max-w-sm rounded-2xl shadow-2xl border-2 p-6",
-              dark 
+                dark 
                 ? "bg-gradient-to-br from-neutral-900 to-neutral-800 border-red-500/30" 
                 : "bg-gradient-to-br from-white to-neutral-50 border-red-200"
-            )}
-            onClick={(e) => e.stopPropagation()}
-          >
+              )}
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="text-center mb-6">
                 <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">⚠️</span>
                 </div>
-                <h3 className={cn(
+              <h3 className={cn(
                   "text-xl font-bold mb-2",
-                  dark ? "text-white" : "text-neutral-900"
-                )}>
-                  Abort Offer?
-                </h3>
-                <p className={cn(
+                dark ? "text-white" : "text-neutral-900"
+              )}>
+                Abort Offer?
+              </h3>
+              <p className={cn(
                   "text-sm",
-                  dark ? "text-neutral-300" : "text-neutral-600"
-                )}>
-                  Are you sure you want to abort this offer? This action cannot be undone.
-                </p>
+                dark ? "text-neutral-300" : "text-neutral-600"
+              )}>
+                Are you sure you want to abort this offer? This action cannot be undone.
+              </p>
               </div>
               <div className="flex space-x-4">
                 <button
