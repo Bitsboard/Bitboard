@@ -884,23 +884,35 @@ export default function OfferModal({
                           </span>
                         </div>
                         
-                        {/* Clear button */}
-                        {rawInput && (
-                          <button
-                            type="button"
-                            onClick={() => {
+                      </div>
+                    )}
+                    
+                    {/* Clear button for both BTC and sats inputs */}
+                    {rawInput && (
+                      <div className="flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (unit === "BTC") {
+                              // Reset BTC field
+                              setBtcDigits("000000000");
+                              setBtcMask(Array(9).fill(false));
+                              setRawInput("0.00000000");
+                              setAmount(0);
+                            } else {
+                              // Reset sats field
                               setRawInput("");
                               setAmount(0);
-                            }}
-                            className={cn(
-                              "absolute bottom-1 right-2 text-xs font-medium transition-colors duration-200",
-                              "hover:opacity-80",
-                              dark ? "text-orange-400" : "text-orange-600"
-                            )}
-                          >
-                            Clear
-                          </button>
-                        )}
+                            }
+                          }}
+                          className={cn(
+                            "text-xs font-medium transition-colors duration-200",
+                            "hover:opacity-80",
+                            dark ? "text-orange-400" : "text-orange-600"
+                          )}
+                        >
+                          Clear
+                        </button>
                       </div>
                     )}
                     
