@@ -794,9 +794,8 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       
       {/* Offer Modal */}
       <OfferModal
-        isOpen={showOfferModal}
+        isOpen={true} // Always render, orchestrator controls visibility
         onClose={() => {
-          setShowOfferModal(false);
           setExistingOffer(null);
         }}
         onSendOffer={sendOffer}
