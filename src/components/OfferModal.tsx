@@ -883,18 +883,27 @@ export default function OfferModal({
                             sats
                           </span>
                         </div>
+                        
+                        {/* Clear button */}
+                        {rawInput && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRawInput("");
+                              setAmount(0);
+                            }}
+                            className={cn(
+                              "absolute bottom-1 right-2 text-xs font-medium transition-colors duration-200",
+                              "hover:opacity-80",
+                              dark ? "text-orange-400" : "text-orange-600"
+                            )}
+                          >
+                            Clear
+                          </button>
+                        )}
                       </div>
                     )}
                     
-                    {/* Help text for sats abbreviations */}
-                    {unit === "sats" && (
-                      <p className={cn(
-                        "text-xs text-center",
-                        dark ? "text-neutral-500" : "text-neutral-400"
-                      )}>
-                        Use 'k' for thousands (1k = 1,000) or 'm' for millions (1m = 1,000,000)
-                      </p>
-                    )}
                   </div>
                 )}
               </div>
