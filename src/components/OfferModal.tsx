@@ -57,13 +57,15 @@ export default function OfferModal({
       return null;
     }
     
-    // Check if dock is in the correct state (should be 'open' when isOfferOpen is true)
-    const dockState = offerDockRef.current.getAttribute('data-state');
-    console.log('🎯 OfferModal: Dock state before portal:', dockState);
+    // Check if dock has the correct CSS classes (should have translate-x-0 when open)
+    const dockClasses = offerDockRef.current.className;
+    const hasTranslateX0 = dockClasses.includes('translate-x-0');
+    console.log('🎯 OfferModal: Dock classes:', dockClasses);
+    console.log('🎯 OfferModal: Has translate-x-0:', hasTranslateX0);
     
-    // If dock is still closed, wait a bit for the CSS transition
-    if (isOfferOpen && dockState === 'closed') {
-      console.log('🎯 OfferModal: Dock still closed, waiting for transition...');
+    // If dock doesn't have translate-x-0, wait a bit for the CSS transition
+    if (isOfferOpen && !hasTranslateX0) {
+      console.log('🎯 OfferModal: Dock still off-screen, waiting for transition...');
       return null;
     }
     
