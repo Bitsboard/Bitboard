@@ -135,29 +135,22 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
       ? 'md:translate-x-[calc(var(--offer-w)*-0.5)]'
       : 'md:translate-x-0';
 
-  const dockTransform =
-    isDesktop && isOfferOpen ? 'translateX(0px)' : `translateX(${offerWidthPx}px)`;
+  // Use data-state for proper CSS transitions instead of inline styles
+  const dockState = isDesktop && isOfferOpen ? 'open' : 'closed';
   
-  console.log('🎯 ListingModal: dockTransform:', dockTransform, 'isDesktop:', isDesktop, 'isOfferOpen:', isOfferOpen);
-  
-  // Force a re-render to ensure the dock gets the correct transform
-  const [dockKey, setDockKey] = React.useState(0);
-  React.useEffect(() => {
-    if (isOfferOpen) {
-      setDockKey(prev => prev + 1);
-    }
-  }, [isOfferOpen]);
+  console.log('🎯 ListingModal: dockState:', dockState, 'isDesktop:', isDesktop, 'isOfferOpen:', isOfferOpen);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       {/* Right-side dock that OfferModal will portal into (desktop only) */}
       <div
-        key={dockKey}
         ref={offerDockRef}
         aria-hidden
-        style={{ width: offerWidthPx, transform: dockTransform }}
+        data-state={dockState}
+        style={{ width: offerWidthPx }}
         className={cn(
-          "pointer-events-auto fixed right-0 top-0 h-full shadow-2xl transition-transform duration-300 ease-out",
+          "pointer-events-auto fixed right-0 top-0 h-full shadow-2xl transition-transform duration-300 ease-out transform-gpu",
+          "data-[state=closed]:translate-x-[420px] data-[state=open]:translate-x-0",
           isDesktop ? "block" : "hidden"
         )}
       />

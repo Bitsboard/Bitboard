@@ -57,13 +57,13 @@ export default function OfferModal({
       return null;
     }
     
-    // Check if dock is in the correct position (should be translateX(0px) when open)
-    const dockTransform = offerDockRef.current.style.transform;
-    console.log('🎯 OfferModal: Dock transform before portal:', dockTransform);
+    // Check if dock is in the correct state (should be 'open' when isOfferOpen is true)
+    const dockState = offerDockRef.current.getAttribute('data-state');
+    console.log('🎯 OfferModal: Dock state before portal:', dockState);
     
-    // If dock is still off-screen, wait a bit for the CSS transition
-    if (isOfferOpen && dockTransform.includes('420px')) {
-      console.log('🎯 OfferModal: Dock still off-screen, waiting for transition...');
+    // If dock is still closed, wait a bit for the CSS transition
+    if (isOfferOpen && dockState === 'closed') {
+      console.log('🎯 OfferModal: Dock still closed, waiting for transition...');
       return null;
     }
     
