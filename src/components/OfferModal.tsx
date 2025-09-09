@@ -150,6 +150,50 @@ export default function OfferModal({
     }
   };
 
+  // Validate sats input - only allow digits, k, m, and one decimal point
+  const validateSatsInput = (value: string): string => {
+    // Remove any invalid characters except digits, k, m, and decimal point
+    let cleaned = value.replace(/[^0-9km.]/gi, '');
+    
+    // Ensure only one decimal point
+    const decimalCount = (cleaned.match(/\./g) || []).length;
+    if (decimalCount > 1) {
+      // Keep only the first decimal point
+      const firstDecimalIndex = cleaned.indexOf('.');
+      cleaned = cleaned.substring(0, firstDecimalIndex + 1) + 
+                cleaned.substring(firstDecimalIndex + 1).replace(/\./g, '');
+    }
+    
+    // Ensure k and m are only at the end
+    const kCount = (cleaned.match(/k/gi) || []).length;
+    const mCount = (cleaned.match(/m/gi) || []).length;
+    
+    if (kCount > 1 || mCount > 1) {
+      // Keep only the last k or m
+      const lastK = cleaned.lastIndexOf('k');
+      const lastM = cleaned.lastIndexOf('m');
+      const lastIndex = Math.max(lastK, lastM);
+      if (lastIndex !== -1) {
+        cleaned = cleaned.substring(0, lastIndex) + cleaned.substring(lastIndex).replace(/[km]/gi, '') + cleaned[lastIndex];
+      }
+    }
+    
+    // Ensure k and m don't appear together
+    if (kCount > 0 && mCount > 0) {
+      const lastK = cleaned.lastIndexOf('k');
+      const lastM = cleaned.lastIndexOf('m');
+      if (lastK > lastM) {
+        // Keep k, remove m
+        cleaned = cleaned.replace(/m/gi, '');
+      } else {
+        // Keep m, remove k
+        cleaned = cleaned.replace(/k/gi, '');
+      }
+    }
+    
+    return cleaned;
+  };
+
   const parseAmount = (value: string): number => {
     if (unit === "BTC") {
       // For BTC, allow decimal input but limit to 8 decimal places
@@ -419,8 +463,9 @@ export default function OfferModal({
         return;
       } else {
         // Simple sats input for make an offer
-        const parsedValue = parseAbbreviations(value);
-        setRawInput(parsedValue);
+        const validatedValue = validateSatsInput(value);
+        const parsedValue = parseAbbreviations(validatedValue);
+        setRawInput(validatedValue);
         
         // Allow empty field for make an offer listings
         if (!parsedValue || parsedValue === "") {
