@@ -213,8 +213,15 @@ export default function OfferModal({
     // Remove any non-digit characters except decimal point
     const cleaned = value.replace(/[^\d.]/g, '');
     
-    // If empty or just decimal point, reset to default
-    if (!cleaned || cleaned === '.') {
+    // If empty, reset to default
+    if (!cleaned) {
+      setRawInput("0.00000000");
+      setAmount(0);
+      return;
+    }
+    
+    // If just a decimal point, treat as 0.00000000
+    if (cleaned === '.') {
       setRawInput("0.00000000");
       setAmount(0);
       return;
@@ -222,8 +229,23 @@ export default function OfferModal({
     
     // Split into integer and decimal parts
     const parts = cleaned.split('.');
-    const integerPart = parts[0] || '0';
-    const decimalPart = parts[1] || '';
+    let integerPart = parts[0] || '0';
+    let decimalPart = parts[1] || '';
+    
+    // If user typed digits without decimal point, treat them as decimal places
+    // e.g., "1234" becomes "0.00001234"
+    if (parts.length === 1 && cleaned.length > 0) {
+      // Move digits to decimal part, pad with zeros
+      const digits = cleaned;
+      if (digits.length <= 8) {
+        decimalPart = digits.padStart(8, '0');
+        integerPart = '0';
+      } else {
+        // If more than 8 digits, split between integer and decimal
+        integerPart = digits.substring(0, digits.length - 8);
+        decimalPart = digits.substring(digits.length - 8);
+      }
+    }
     
     // Limit integer part to 9 digits (max 9.99999999 BTC)
     const limitedInteger = integerPart.length > 9 ? integerPart.substring(0, 9) : integerPart;
@@ -567,7 +589,7 @@ export default function OfferModal({
                           }}
                         ></div>
                         {/* Invisible slider input */}
-                        <input
+                  <input
                           type="range"
                           min="0"
                           max={listingPrice}
