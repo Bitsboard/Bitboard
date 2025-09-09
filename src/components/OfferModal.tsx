@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { cn, formatBTCFromSats, formatCADAmount, satsToFiat } from "@/lib/utils";
 import { useBtcRate } from "@/lib/contexts/BtcRateContext";
 import type { Unit } from "@/lib/types";
@@ -78,7 +78,13 @@ export default function OfferModal({
       } else {
         // New offer without listing price
         setAmount(0);
-        setRawInput(unit === "BTC" ? "" : "");
+        if (unit === "BTC") {
+          setBtcDigits("000000000");
+          setBtcMask(Array(9).fill(false));
+          setRawInput("0.00000000");
+        } else {
+          setRawInput("");
+        }
         setExpirationHours(24);
       }
     }
@@ -182,36 +188,235 @@ export default function OfferModal({
     return btc.toFixed(8).replace(/\.?0+$/, '');
   };
 
+  // Bitcoin Amount Field Logic (for 'make an offer' listings only)
+  const [btcDigits, setBtcDigits] = useState<string>("000000000"); // 9-digit buffer
+  const [btcMask, setBtcMask] = useState<boolean[]>(Array(9).fill(false)); // edited digits
+  const btcInputRef = useRef<HTMLInputElement>(null);
+
+  const DIGITS = 9; // 1 integer + 8 decimals
+  const VIEW_LEN = 10; // "d.dddddddd" (includes '.')
+  const DOT_POS = 1; // index of '.' in the view string
+
+  // Format 9-digit string → "d.dddddddd"
+  const digitsToView = (d: string): string => {
+    const p = d.padStart(DIGITS, "0");
+    return `${p[0]}.${p.slice(1)}`;
+  };
+
+  // Extract sats from formatted view
+  const viewToSats = (view: string): number => {
+    const digits = view.replace(/\D/g, "").slice(0, DIGITS).padStart(DIGITS, "0");
+    return Number(digits);
+  };
+
+  // Map caret position (0..10) → digit index (0..8)
+  const posToDigitIndex = (pos: number): number => {
+    if (pos <= DOT_POS) return 0; // positions 0 and 1 (dot) map to the integer digit
+    return Math.min(DIGITS - 1, pos - 1);
+  };
+
+  // Move one step right, skipping the dot
+  const stepRight = (pos: number): number => {
+    let p = pos + 1;
+    if (p === DOT_POS) p += 1;
+    return Math.min(VIEW_LEN, p);
+  };
+
+  // Move one step left, skipping the dot
+  const stepLeft = (pos: number): number => {
+    let p = pos - 1;
+    if (p === DOT_POS) p -= 1;
+    return Math.max(0, p);
+  };
+
+  // Never leave the caret *on* the dot
+  const normalizeCaret = (pos: number): number => {
+    return pos === DOT_POS ? DOT_POS + 1 : pos;
+  };
+
+  // Map digit index (0..8) → caret position (0..10)
+  const digitIndexToPos = (idx: number): number => {
+    return Math.min(VIEW_LEN, Math.max(0, idx <= 0 ? 0 : idx + 1));
+  };
+
+  // Commit helper: updates buffer, mask, view, caret, and emits sats
+  const commitBtc = (nextDigits: string, nextMask: boolean[], nextCaret?: number) => {
+    const d = nextDigits.replace(/\D/g, "").slice(-DIGITS).padStart(DIGITS, "0");
+    const m = (nextMask.length === DIGITS ? nextMask : nextMask.slice(-DIGITS)).slice(0, DIGITS);
+    const nextView = digitsToView(d);
+    setBtcDigits(d);
+    setBtcMask(m);
+    setRawInput(nextView);
+    const satsAmount = viewToSats(nextView);
+    setAmount(satsAmount);
+
+    if (typeof nextCaret === "number" && btcInputRef.current) {
+      const el = btcInputRef.current;
+      requestAnimationFrame(() => {
+        const pos = Math.max(0, Math.min(VIEW_LEN, nextCaret));
+        el.setSelectionRange(pos, pos);
+      });
+    }
+  };
+
+  // Utility: are we typing at the very end?
+  const atEnd = (el: HTMLInputElement) => {
+    const s = el.selectionStart ?? VIEW_LEN;
+    const e = el.selectionEnd ?? s;
+    const collapsed = s === e;
+    return collapsed && (s >= VIEW_LEN);
+  };
+
+  // Append/shift a digit at the end (ATM style)
+  const handleDigitAtEnd = (digit: string) => {
+    const d2 = btcDigits.slice(1) + digit;
+    const m2 = btcMask.slice(1).concat(true);
+    commitBtc(d2, m2, VIEW_LEN);
+  };
+
+  // Overwrite a digit at a caret position and advance right
+  const handleDigitOverwrite = (caret: number, digit: string) => {
+    const pos = normalizeCaret(caret);
+    const di = posToDigitIndex(pos);
+    const arr = btcDigits.split("");
+    const m = btcMask.slice();
+    arr[di] = digit;
+    m[di] = true;
+    commitBtc(arr.join(""), m, stepRight(pos));
+  };
+
+  // Backspace at end pops one (shift right, 0 on left)
+  const handleBackspaceAtEnd = () => {
+    const d2 = "0" + btcDigits.slice(0, -1);
+    const m2 = [false, ...btcMask.slice(0, -1)];
+    commitBtc(d2, m2, VIEW_LEN);
+  };
+
+  // Backspace in the middle zeroes the digit to the left of the caret
+  const handleBackspaceOverwrite = (caret: number) => {
+    let pos = stepLeft(normalizeCaret(caret));
+    const di = posToDigitIndex(pos);
+    const arr = btcDigits.split("");
+    const m = btcMask.slice();
+    arr[di] = "0";
+    m[di] = false;
+    commitBtc(arr.join(""), m, pos);
+  };
+
+  // Delete in the middle zeroes the digit at the caret
+  const handleDeleteOverwrite = (caret: number) => {
+    let pos = normalizeCaret(caret);
+    const di = posToDigitIndex(pos);
+    const arr = btcDigits.split("");
+    const m = btcMask.slice();
+    arr[di] = "0";
+    m[di] = false;
+    commitBtc(arr.join(""), m, pos);
+  };
+
+  // BTC Input Keyboard Handler
+  const handleBtcKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!listingPrice || listingPrice <= 0) {
+      const el = e.currentTarget;
+      const key = e.key;
+
+      if (key === "Tab") return;
+
+      // '.' jumps caret to the decimals
+      if (key === ".") {
+        e.preventDefault();
+        commitBtc(btcDigits, btcMask, DOT_POS + 1);
+        return;
+      }
+
+      // Arrow/Home/End navigation
+      if (key === "ArrowLeft" || key === "ArrowRight" || key === "Home" || key === "End") {
+        e.preventDefault();
+        let pos = el.selectionStart ?? VIEW_LEN;
+        if (key === "ArrowLeft") pos = stepLeft(pos);
+        if (key === "ArrowRight") pos = stepRight(pos);
+        if (key === "Home") pos = 0;
+        if (key === "End") pos = VIEW_LEN;
+        commitBtc(btcDigits, btcMask, pos);
+        return;
+      }
+
+      // Backspace/Delete behavior
+      if (key === "Backspace" || key === "Delete") {
+        e.preventDefault();
+        if (atEnd(el)) {
+          if (key === "Backspace") handleBackspaceAtEnd();
+        } else {
+          const caret = el.selectionStart ?? VIEW_LEN;
+          if (key === "Backspace") handleBackspaceOverwrite(caret);
+          else handleDeleteOverwrite(caret);
+        }
+        return;
+      }
+
+      // Digits 0..9
+      if (/^[0-9]$/.test(key)) {
+        e.preventDefault();
+        if (atEnd(el)) handleDigitAtEnd(key);
+        else handleDigitOverwrite(el.selectionStart ?? VIEW_LEN, key);
+        return;
+      }
+
+      e.preventDefault();
+    }
+  };
+
+  // BTC Input Paste Handler
+  const handleBtcPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    if (!listingPrice || listingPrice <= 0) {
+      e.preventDefault();
+      const text = e.clipboardData.getData("text") ?? "";
+      const onlyDigits = text.replace(/\D/g, "");
+      if (!onlyDigits) return;
+
+      const el = e.currentTarget;
+      if (atEnd(el)) {
+        // Append series at end (shift-per-char)
+        let d = btcDigits;
+        let m = btcMask.slice();
+        for (const ch of onlyDigits) {
+          d = d.slice(1) + ch;
+          m = m.slice(1).concat(true);
+        }
+        commitBtc(d, m, VIEW_LEN);
+      } else {
+        // Overwrite forward from the caret
+        const start = normalizeCaret(el.selectionStart ?? VIEW_LEN);
+        let dArr = btcDigits.split("");
+        let mArr = btcMask.slice();
+        let di = posToDigitIndex(start);
+        for (let i = 0; i < onlyDigits.length && di < DIGITS; i++, di++) {
+          dArr[di] = onlyDigits[i];
+          mArr[di] = true;
+        }
+        const nextPos = Math.min(VIEW_LEN, digitIndexToPos(di));
+        commitBtc(dArr.join(""), mArr, nextPos);
+      }
+    }
+  };
+
+  // Visual mask (contiguous run + dot rule)
+  const visualMask = useMemo(() => {
+    const m = btcMask.slice();
+    const first = m.indexOf(true);
+    const last = m.lastIndexOf(true);
+    if (first !== -1 && last !== -1 && last >= first) {
+      for (let i = first; i <= last; i++) m[i] = true; // fill internal gaps
+    }
+    return m;
+  }, [btcMask]);
+
   const handleAmountChange = (value: string) => {
     // For 'make an offer' listings, use simple input logic
     if (!listingPrice || listingPrice <= 0) {
       if (unit === "BTC") {
-        // Simple BTC input for make an offer
-        const cleaned = value.replace(/[^\d.]/g, '');
-        setRawInput(cleaned);
-        
-        if (!cleaned) {
-          setAmount(0);
-          return;
-        }
-        
-        const btcAmount = parseFloat(cleaned) || 0;
-        const satsAmount = btcToSats(btcAmount);
-        
-        // Validate limits
-        if (satsAmount < MIN_SATS) {
-          setAmount(MIN_SATS);
-          setRawInput("0.00000001");
-          return;
-        }
-        
-        if (satsAmount > MAX_SATS) {
-          setAmount(MAX_SATS);
-          setRawInput("9.99999999");
-          return;
-        }
-        
-        setAmount(satsAmount);
+        // BTC input is handled by the specialized handlers above
+        return;
       } else {
         // Simple sats input for make an offer
         const parsedValue = parseAbbreviations(value);
@@ -596,26 +801,50 @@ export default function OfferModal({
                   /* Manual input for items without asking price */
                   <div className="space-y-4">
                     {unit === "BTC" ? (
-                      /* Simple BTC input for make an offer */
+                      /* Advanced BTC input for make an offer */
                       <div className="relative">
                         <input
+                          ref={btcInputRef}
                           type="text"
                           value={rawInput}
-                          onChange={(e) => handleAmountChange(e.target.value)}
+                          readOnly
+                          onKeyDown={handleBtcKeyDown}
+                          onPaste={handleBtcPaste}
                           placeholder="0.00000000"
                           className={cn(
                             "w-full px-6 py-4 rounded-2xl border-2 text-xl font-mono text-center transition-all duration-200",
                             "focus:outline-none focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500",
                             "border-neutral-200 dark:border-neutral-700",
                             "shadow-sm hover:shadow-md focus:shadow-lg",
+                            "text-transparent caret-gray-900",
                             dark 
-                              ? "bg-neutral-900 text-white placeholder-neutral-500" 
-                              : "bg-white text-neutral-900 placeholder-neutral-400"
+                              ? "bg-neutral-900" 
+                              : "bg-white"
                           )}
-                          inputMode="decimal"
-                          pattern="[0-9]*\\.?[0-9]*"
-                          maxLength={15}
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                         />
+                        
+                        {/* Visual overlay with character-level styling */}
+                        <div className="pointer-events-none absolute inset-0 px-6 py-4 font-mono text-xl text-center flex items-center justify-center">
+                          {Array.from({ length: VIEW_LEN }).map((_, i) => {
+                            const ch = rawInput[i] ?? "";
+                            if (i === DOT_POS) {
+                              // Decimal dot is black ONLY if the integer (digit index 0) is black
+                              const dotCls = visualMask[0] 
+                                ? (dark ? "text-white" : "text-neutral-900")
+                                : (dark ? "text-neutral-500" : "text-neutral-400");
+                              return <span key={i} className={dotCls}>.</span>;
+                            }
+                            const di = i <= DOT_POS ? 0 : i - 1; // view index → digit index mapping
+                            const isEdited = !!visualMask[di];
+                            const cls = isEdited 
+                              ? (dark ? "text-white" : "text-neutral-900")
+                              : (dark ? "text-neutral-500" : "text-neutral-400");
+                            return <span key={i} className={cls}>{ch}</span>;
+                          })}
+                        </div>
+                        
                         <div className="absolute right-6 top-1/2 -translate-y-1/2">
                           <span className={cn(
                             "text-lg font-bold",
