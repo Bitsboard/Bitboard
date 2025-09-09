@@ -126,15 +126,17 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
   if (showChat) {
     
     return (
-      <ChatModal
-        listing={listing}
-        onClose={onClose} // This will close the entire modal and return to base page
-        dark={dark}
-        btcCad={btcCad}
-        unit={unit}
-        onBackToListing={() => setShowChat(false)} // This goes back to listing modal
-        user={user}
-      />
+      <ModalOrchestratorProvider offerWidthPx={420}>
+        <ChatModal
+          listing={listing}
+          onClose={onClose} // This will close the entire modal and return to base page
+          dark={dark}
+          btcCad={btcCad}
+          unit={unit}
+          onBackToListing={() => setShowChat(false)} // This goes back to listing modal
+          user={user}
+        />
+      </ModalOrchestratorProvider>
     );
   }
 
