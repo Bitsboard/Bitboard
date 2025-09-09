@@ -56,6 +56,17 @@ export default function OfferModal({
       console.log('🎯 OfferModal: Not rendering - mounted:', mounted, 'dockRef:', !!offerDockRef.current);
       return null;
     }
+    
+    // Check if dock is in the correct position (should be translateX(0px) when open)
+    const dockTransform = offerDockRef.current.style.transform;
+    console.log('🎯 OfferModal: Dock transform before portal:', dockTransform);
+    
+    // If dock is still off-screen, wait a bit for the CSS transition
+    if (isOfferOpen && dockTransform.includes('420px')) {
+      console.log('🎯 OfferModal: Dock still off-screen, waiting for transition...');
+      return null;
+    }
+    
     console.log('🎯 OfferModal: Creating portal to dock');
     return createPortal(
       isOfferOpen ? <OfferContent onClose={closeOffer} dark={dark} unit={unit} listingPrice={listingPrice} listingTitle={listingTitle} existingOffer={existingOffer} onSendOffer={onSendOffer} onAbortOffer={onAbortOffer} /> : null,

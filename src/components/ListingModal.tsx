@@ -139,11 +139,20 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
     isDesktop && isOfferOpen ? 'translateX(0px)' : `translateX(${offerWidthPx}px)`;
   
   console.log('🎯 ListingModal: dockTransform:', dockTransform, 'isDesktop:', isDesktop, 'isOfferOpen:', isOfferOpen);
+  
+  // Force a re-render to ensure the dock gets the correct transform
+  const [dockKey, setDockKey] = React.useState(0);
+  React.useEffect(() => {
+    if (isOfferOpen) {
+      setDockKey(prev => prev + 1);
+    }
+  }, [isOfferOpen]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       {/* Right-side dock that OfferModal will portal into (desktop only) */}
       <div
+        key={dockKey}
         ref={offerDockRef}
         aria-hidden
         style={{ width: offerWidthPx, transform: dockTransform }}
