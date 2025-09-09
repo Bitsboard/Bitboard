@@ -488,14 +488,14 @@ export default function OfferModal({
                           }}
                         ></div>
                         {/* Invisible slider input */}
-                  <input
+                        <input
                           type="range"
                           min="0"
                           max={listingPrice}
                           step={Math.round(listingPrice / 20)}
                           value={getSliderValue()}
                           onChange={(e) => handleSliderChange(parseInt(e.target.value))}
-                          className="w-full h-2 rounded-lg appearance-none cursor-pointer slider animated-slider absolute top-0 left-0 z-10"
+                          className="w-full h-2 rounded-lg appearance-none cursor-pointer slider animated-slider absolute top-0 left-0 opacity-0 z-0"
                         />
                       </div>
                       <div className="flex justify-between text-xs mt-2">
