@@ -64,6 +64,12 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
   // Get orchestrator state
   const { isOfferOpen, isDesktop, offerDockRef, offerWidthPx } = useModalOrchestrator();
   
+  // Debug dock ref
+  React.useEffect(() => {
+    console.log('🎯 ListingModal: offerDockRef.current:', offerDockRef.current);
+    console.log('🎯 ListingModal: isDesktop:', isDesktop);
+  }, [offerDockRef.current, isDesktop]);
+  
   // Track view when modal opens
   React.useEffect(() => {
     if (open && listing.id) {
@@ -154,6 +160,10 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       {/* Right-side dock that OfferModal will portal into (desktop only) */}
+      {(() => {
+        console.log('🎯 ListingModal: Rendering dock div, isDesktop:', isDesktop);
+        return null;
+      })()}
       <div
         ref={offerDockRef}
         aria-hidden
