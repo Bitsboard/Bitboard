@@ -140,6 +140,7 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
   
   console.log('🎯 ListingModal: dockState:', dockState, 'isDesktop:', isDesktop, 'isOfferOpen:', isOfferOpen);
   console.log('🎯 ListingModal: About to render dock with data-state:', dockState);
+  console.log('🎯 ListingModal: showChat:', showChat);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">

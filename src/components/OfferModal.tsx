@@ -48,6 +48,7 @@ export default function OfferModal({
   console.log('🎯 OfferModal: orchestrator state:', { isDesktop, isOfferOpen, mounted });
   console.log('🎯 OfferModal: offerDockRef.current:', offerDockRef.current);
   console.log('🎯 OfferModal: dock transform style:', offerDockRef.current?.style?.transform);
+  console.log('🎯 OfferModal: Component rendered, checking conditions...');
 
   // Desktop: render into the right-side dock (owned by ListingModal)
   if (isDesktop) {
