@@ -44,9 +44,6 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
   // Get orchestrator functions
   const { openOffer, isOfferOpen, isDesktop } = useModalOrchestrator();
   
-  // Debug logging
-  console.log('🎯 ChatModal: orchestrator state:', { isOfferOpen, isDesktop });
-  
 
   
   const lang = useLang();

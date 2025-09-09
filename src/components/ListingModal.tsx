@@ -137,6 +137,8 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
 
   const dockTransform =
     isDesktop && isOfferOpen ? 'translateX(0px)' : `translateX(${offerWidthPx}px)`;
+  
+  console.log('🎯 ListingModal: dockTransform:', dockTransform, 'isDesktop:', isDesktop, 'isOfferOpen:', isOfferOpen);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
