@@ -42,7 +42,10 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
   const [existingOffer, setExistingOffer] = useState<any>(null);
   
   // Get orchestrator functions
-  const { openOffer } = useModalOrchestrator();
+  const { openOffer, isOfferOpen, isDesktop } = useModalOrchestrator();
+  
+  // Debug logging
+  console.log('🎯 ChatModal: orchestrator state:', { isOfferOpen, isDesktop });
   
 
   
@@ -690,8 +693,13 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
           
           <button
             onClick={async () => {
+              console.log('🎯 ChatModal: Offer button clicked!');
+              console.log('🎯 ChatModal: openOffer function:', openOffer);
+              console.log('🎯 ChatModal: chat?.id:', chat?.id);
+              
               // If no chat exists, just open the modal - the sendOffer function will handle chat creation
               if (!chat?.id) {
+                console.log('🎯 ChatModal: No chat ID, calling openOffer()');
                 openOffer();
                 return;
               }
@@ -716,14 +724,17 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                   
                   if (data.hasExistingOffer && data.existingOffer) {
                     // Set the existing offer and show the modal to display it
+                    console.log('🎯 ChatModal: Has existing offer, calling openOffer()');
                     setExistingOffer(data.existingOffer);
                     openOffer();
                     return;
                   }
                 }
+                console.log('🎯 ChatModal: No existing offer, calling openOffer()');
                 openOffer();
               } catch (error) {
                 // Allow modal to open if check fails
+                console.log('🎯 ChatModal: Error checking offers, calling openOffer()');
                 openOffer();
               }
             }}

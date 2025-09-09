@@ -43,10 +43,19 @@ export default function OfferModal({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
+  
+  // Debug logging
+  console.log('🎯 OfferModal: orchestrator state:', { isDesktop, isOfferOpen, mounted });
+  console.log('🎯 OfferModal: offerDockRef.current:', offerDockRef.current);
 
   // Desktop: render into the right-side dock (owned by ListingModal)
   if (isDesktop) {
-    if (!mounted || !offerDockRef.current) return null;
+    console.log('🎯 OfferModal: Desktop mode, checking conditions:', { mounted, dockRef: !!offerDockRef.current, isOfferOpen });
+    if (!mounted || !offerDockRef.current) {
+      console.log('🎯 OfferModal: Not rendering - mounted:', mounted, 'dockRef:', !!offerDockRef.current);
+      return null;
+    }
+    console.log('🎯 OfferModal: Creating portal to dock');
     return createPortal(
       isOfferOpen ? <OfferContent onClose={closeOffer} dark={dark} unit={unit} listingPrice={listingPrice} listingTitle={listingTitle} existingOffer={existingOffer} onSendOffer={onSendOffer} onAbortOffer={onAbortOffer} /> : null,
       offerDockRef.current
@@ -54,6 +63,7 @@ export default function OfferModal({
   }
 
   // Mobile: render as overlay (existing behavior)
+  console.log('🎯 OfferModal: Mobile mode, isOfferOpen:', isOfferOpen);
   if (!isOfferOpen) return null;
   
   return (
