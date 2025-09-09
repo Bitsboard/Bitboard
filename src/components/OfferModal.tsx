@@ -146,8 +146,18 @@ export default function OfferModal({
 
   const parseAmount = (value: string): number => {
     if (unit === "BTC") {
-      // For BTC, allow decimal input
+      // For BTC, allow decimal input but limit to 8 decimal places
       const cleaned = value.replace(/[^\d.]/g, '');
+      
+      // Check if there are more than 8 decimal places
+      const parts = cleaned.split('.');
+      if (parts.length === 2 && parts[1].length > 8) {
+        // Truncate to 8 decimal places
+        const truncated = parts[0] + '.' + parts[1].substring(0, 8);
+        const btc = parseFloat(truncated) || 0;
+        return btcToSats(btc);
+      }
+      
       const btc = parseFloat(cleaned) || 0;
       return btcToSats(btc);
     } else {
@@ -173,6 +183,15 @@ export default function OfferModal({
   };
 
   const handleAmountChange = (value: string) => {
+    // For BTC, enforce 8 decimal place limit
+    if (unit === "BTC") {
+      const parts = value.split('.');
+      if (parts.length === 2 && parts[1].length > 8) {
+        // Truncate to 8 decimal places
+        value = parts[0] + '.' + parts[1].substring(0, 8);
+      }
+    }
+    
     // For 'make an offer' listings, don't apply listing price validation
     if (!listingPrice || listingPrice <= 0) {
       // Parse abbreviations for sats
