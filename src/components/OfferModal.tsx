@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { cn, formatBTCFromSats, formatCADAmount, satsToFiat } from "@/lib/utils";
 import { useBtcRate } from "@/lib/contexts/BtcRateContext";
 import type { Unit } from "@/lib/types";
+import { useModalOrchestrator } from "./modal-orchestrator";
 
 interface OfferModalProps {
   isOpen: boolean;
@@ -36,6 +38,52 @@ export default function OfferModal({
   unit = "sats",
   existingOffer
 }: OfferModalProps) {
+  // Get orchestrator state
+  const { isDesktop, isOfferOpen, closeOffer, offerDockRef } = useModalOrchestrator();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  // Desktop: render into the right-side dock (owned by ListingModal)
+  if (isDesktop) {
+    if (!mounted || !offerDockRef.current) return null;
+    return createPortal(
+      isOfferOpen ? <OfferContent onClose={closeOffer} dark={dark} unit={unit} listingPrice={listingPrice} listingTitle={listingTitle} existingOffer={existingOffer} onSendOffer={onSendOffer} onAbortOffer={onAbortOffer} /> : null,
+      offerDockRef.current
+    );
+  }
+
+  // Mobile: render as overlay (existing behavior)
+  if (!isOfferOpen) return null;
+  
+  return (
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 p-4 md:hidden">
+      <div className="w-full max-w-md rounded-2xl bg-white p-4 shadow-xl">
+        <OfferContent onClose={closeOffer} dark={dark} unit={unit} listingPrice={listingPrice} listingTitle={listingTitle} existingOffer={existingOffer} onSendOffer={onSendOffer} onAbortOffer={onAbortOffer} />
+      </div>
+    </div>
+  );
+}
+
+function OfferContent({
+  onClose,
+  dark = false,
+  unit = "sats",
+  listingPrice,
+  listingTitle,
+  existingOffer,
+  onSendOffer,
+  onAbortOffer
+}: {
+  onClose: () => void;
+  dark?: boolean;
+  unit?: Unit;
+  listingPrice?: number;
+  listingTitle?: string;
+  existingOffer?: any;
+  onSendOffer: (amount: number, expiresAt: number) => void;
+  onAbortOffer?: (offerId: string, action: 'abort') => void;
+}) {
   const [amount, setAmount] = useState<number>(0);
   const [rawInput, setRawInput] = useState<string>("0.00000000"); // Track raw input for BTC
   const [expirationHours, setExpirationHours] = useState(24); // Default to 24 hours
@@ -53,7 +101,6 @@ export default function OfferModal({
 
   // Set default amount to listing price when modal opens
   useEffect(() => {
-    if (isOpen) {
       if (existingOffer) {
         // Show existing offer
         setAmount(existingOffer.amount_sat);
@@ -89,8 +136,7 @@ export default function OfferModal({
         }
         setExpirationHours(24);
       }
-    }
-  }, [isOpen, listingPrice, unit, existingOffer]);
+  }, [listingPrice, unit, existingOffer]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -559,8 +605,6 @@ export default function OfferModal({
       setIsSubmitting(false);
     }
   };
-
-  if (!isOpen) return null;
 
   return (
     <div>

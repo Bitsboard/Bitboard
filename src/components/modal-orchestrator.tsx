@@ -15,7 +15,17 @@ const Ctx = createContext<OrchestratorCtx | null>(null);
 
 export function useModalOrchestrator() {
   const ctx = useContext(Ctx);
-  if (!ctx) throw new Error('useModalOrchestrator must be used within <ModalOrchestratorProvider>');
+  if (!ctx) {
+    // Return default values when not within provider (e.g., on messages page)
+    return {
+      isOfferOpen: false,
+      openOffer: () => {},
+      closeOffer: () => {},
+      isDesktop: false,
+      offerDockRef: { current: null },
+      offerWidthPx: 420
+    };
+  }
   return ctx;
 }
 
