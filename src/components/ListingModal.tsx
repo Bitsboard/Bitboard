@@ -62,7 +62,7 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
   const [isTrackingView, setIsTrackingView] = React.useState(false);
   
   // Get orchestrator state
-  const { isOfferOpen, isDesktop, offerDockRef, offerWidthPx } = useModalOrchestrator();
+  const { isOfferOpen, isDesktop, offerDockRef, offerWidthPx, dockReady, setDockReady } = useModalOrchestrator();
   
   
   // Track view when modal opens
@@ -138,9 +138,21 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
   // Use data-state for proper CSS transitions instead of inline styles
   const dockState = isDesktop && isOfferOpen ? 'open' : 'closed';
   
+  // Add a small delay to ensure the dock is properly positioned before OfferModal can portal
+  React.useEffect(() => {
+    if (isOfferOpen && isDesktop) {
+      // Small delay to ensure CSS transition has started
+      const timer = setTimeout(() => setDockReady(true), 50);
+      return () => clearTimeout(timer);
+    } else {
+      setDockReady(false);
+    }
+  }, [isOfferOpen, isDesktop, setDockReady]);
+  
   console.log('🎯 ListingModal: dockState:', dockState, 'isDesktop:', isDesktop, 'isOfferOpen:', isOfferOpen);
   console.log('🎯 ListingModal: About to render dock with data-state:', dockState);
   console.log('🎯 ListingModal: showChat:', showChat);
+  console.log('🎯 ListingModal: dockReady:', dockReady);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">

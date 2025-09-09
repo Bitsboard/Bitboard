@@ -9,6 +9,8 @@ type OrchestratorCtx = {
   isDesktop: boolean;
   offerDockRef: React.RefObject<HTMLDivElement>;
   offerWidthPx: number; // used by both the dock and the listing shift
+  dockReady: boolean;
+  setDockReady: (ready: boolean) => void;
 };
 
 const Ctx = createContext<OrchestratorCtx | null>(null);
@@ -28,7 +30,9 @@ export function useModalOrchestrator() {
       },
       isDesktop: false,
       offerDockRef: { current: null },
-      offerWidthPx: 420
+      offerWidthPx: 420,
+      dockReady: false,
+      setDockReady: () => {}
     };
   }
   console.log('🎯 useModalOrchestrator: Context found, returning:', { 
@@ -56,6 +60,7 @@ export function ModalOrchestratorProvider({
   offerWidthPx = 420, // tune as desired
 }: React.PropsWithChildren<{ offerWidthPx?: number }>) {
   const [isOfferOpen, setIsOfferOpen] = useState(false);
+  const [dockReady, setDockReady] = useState(false);
   const openOffer = () => {
     console.log('🎯 ModalOrchestrator: openOffer() called');
     setIsOfferOpen(true);
@@ -63,17 +68,18 @@ export function ModalOrchestratorProvider({
   const closeOffer = () => {
     console.log('🎯 ModalOrchestrator: closeOffer() called');
     setIsOfferOpen(false);
+    setDockReady(false);
   };
 
   const isDesktop = useMediaQuery('(min-width: 768px)'); // Tailwind's md breakpoint
   const offerDockRef = useRef<HTMLDivElement>(null);
 
   // Debug logging
-  console.log('🎯 ModalOrchestrator state:', { isOfferOpen, isDesktop, offerWidthPx });
+  console.log('🎯 ModalOrchestrator state:', { isOfferOpen, isDesktop, offerWidthPx, dockReady });
 
   const value = useMemo(
-    () => ({ isOfferOpen, openOffer, closeOffer, isDesktop, offerDockRef, offerWidthPx }),
-    [isOfferOpen, isDesktop, offerWidthPx]
+    () => ({ isOfferOpen, openOffer, closeOffer, isDesktop, offerDockRef, offerWidthPx, dockReady, setDockReady }),
+    [isOfferOpen, isDesktop, offerWidthPx, dockReady]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

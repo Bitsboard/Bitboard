@@ -39,7 +39,7 @@ export default function OfferModal({
   existingOffer
 }: OfferModalProps) {
   // Get orchestrator state
-  const { isDesktop, isOfferOpen, closeOffer, offerDockRef } = useModalOrchestrator();
+  const { isDesktop, isOfferOpen, closeOffer, offerDockRef, dockReady } = useModalOrchestrator();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
@@ -58,15 +58,12 @@ export default function OfferModal({
       return null;
     }
     
-    // Check if dock has the correct CSS classes (should have translate-x-0 when open)
-    const dockClasses = offerDockRef.current.className;
-    const hasTranslateX0 = dockClasses.includes('translate-x-0');
-    console.log('🎯 OfferModal: Dock classes:', dockClasses);
-    console.log('🎯 OfferModal: Has translate-x-0:', hasTranslateX0);
+    // Check if dock is ready for portaling (ensures CSS transition has started)
+    console.log('🎯 OfferModal: dockReady:', dockReady);
     
-    // If dock doesn't have translate-x-0, wait a bit for the CSS transition
-    if (isOfferOpen && !hasTranslateX0) {
-      console.log('🎯 OfferModal: Dock still off-screen, waiting for transition...');
+    // If dock isn't ready, wait a bit for the CSS transition
+    if (isOfferOpen && !dockReady) {
+      console.log('🎯 OfferModal: Dock not ready, waiting for transition...');
       return null;
     }
     
