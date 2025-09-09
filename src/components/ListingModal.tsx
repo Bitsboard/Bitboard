@@ -169,8 +169,8 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
         aria-hidden
         style={{ width: offerWidthPx, transform: dockTransform }}
         className={cn(
-          "pointer-events-auto fixed right-0 top-0 h-full shadow-2xl transition-transform duration-300 ease-out hidden md:block",
-          dark ? "bg-neutral-900" : "bg-white"
+          "pointer-events-auto fixed right-0 top-0 h-full shadow-2xl transition-transform duration-300 ease-out",
+          isDesktop ? "block" : "hidden"
         )}
       />
 
