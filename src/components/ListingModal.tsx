@@ -12,6 +12,7 @@ import type { Listing, Category, Unit, Seller } from "@/lib/types";
 import { ChatModal } from "./ChatModal";
 import { PrimaryButton } from "./ui/Button";
 import { Avatar } from "./ui/Avatar";
+import { ModalOrchestratorProvider, useModalOrchestrator } from "./modal-orchestrator";
 
 interface ListingModalProps {
   listing: Listing;
@@ -34,12 +35,34 @@ function accent(listing: Listing) {
 }
 
 export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, open, user, onShowAuth, fromMessagesPage = false }: ListingModalProps) {
+  return (
+    <ModalOrchestratorProvider offerWidthPx={420}>
+      <ListingShell 
+        listing={listing} 
+        onClose={onClose} 
+        unit={unit} 
+        btcCad={btcCad} 
+        dark={dark} 
+        onChat={onChat} 
+        open={open} 
+        user={user} 
+        onShowAuth={onShowAuth} 
+        fromMessagesPage={fromMessagesPage} 
+      />
+    </ModalOrchestratorProvider>
+  );
+}
+
+function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user, onShowAuth, fromMessagesPage = false }: ListingModalProps) {
   const boosted = Boolean(listing.boostedUntil && listing.boostedUntil > Date.now());
   const lang = useLang();
   const a = accent(listing);
   const [sellerImageError, setSellerImageError] = React.useState(false);
   const [showChat, setShowChat] = React.useState(false);
   const [isTrackingView, setIsTrackingView] = React.useState(false);
+  
+  // Get orchestrator state
+  const { isOfferOpen, isDesktop, offerDockRef, offerWidthPx } = useModalOrchestrator();
   
   // Track view when modal opens
   React.useEffect(() => {
@@ -115,8 +138,42 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
     );
   }
 
+  // CSS var so Tailwind arbitrary values can reference it in calc()
+  const style = { ['--offer-w' as any]: `${offerWidthPx}px` };
+
+  // When the offer is open on desktop, shift listing left by ~half the dock width.
+  // (Visually reads as "making room" without needing exact listing width.)
+  const shiftClass =
+    isDesktop && isOfferOpen
+      ? 'md:translate-x-[calc(var(--offer-w)*-0.5)]'
+      : 'md:translate-x-0';
+
+  const dockTransform =
+    isDesktop && isOfferOpen ? 'translateX(0px)' : `translateX(${offerWidthPx}px)`;
+
   return (
-    <Modal open={open} onClose={onClose} dark={dark} size="lg" ariaLabel={listing.title}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      {/* Right-side dock that OfferModal will portal into (desktop only) */}
+      <div
+        ref={offerDockRef}
+        aria-hidden
+        style={{ width: offerWidthPx, transform: dockTransform }}
+        className={cn(
+          "pointer-events-auto fixed right-0 top-0 h-full shadow-2xl transition-transform duration-300 ease-out hidden md:block",
+          dark ? "bg-neutral-900" : "bg-white"
+        )}
+      />
+
+      {/* Listing container */}
+      <div
+        style={style}
+        className={cn(
+          "relative z-10 w-full max-w-5xl rounded-2xl shadow-xl transition-transform duration-300 ease-out",
+          shiftClass,
+          dark ? "bg-neutral-950 text-neutral-100" : "bg-white text-neutral-900"
+        )}
+      >
+        <Modal open={open} onClose={onClose} dark={dark} size="lg" ariaLabel={listing.title}>
       <ModalHeader dark={dark}>
         <div className="flex items-center gap-2">
           <span className={cn("flex-shrink-0 rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>
@@ -267,6 +324,8 @@ export function ListingModal({ listing, onClose, unit, btcCad, dark, onChat, ope
         </div>
       </div>
     </Modal>
+      </div>
+    </div>
   );
 }
 

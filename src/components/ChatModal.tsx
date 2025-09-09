@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useLang } from "@/lib/i18n-client";
 import { PrimaryButton } from "./ui/Button";
 import { Avatar } from "./ui/Avatar";
+import { useModalOrchestrator } from "./modal-orchestrator";
 
 interface ChatModalProps {
   listing: Listing;
@@ -39,6 +40,9 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
   const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
   const [showOfferModal, setShowOfferModal] = useState(false);
   const [existingOffer, setExistingOffer] = useState<any>(null);
+  
+  // Get orchestrator functions
+  const { openOffer } = useModalOrchestrator();
   
 
   
@@ -688,7 +692,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
             onClick={async () => {
               // If no chat exists, just open the modal - the sendOffer function will handle chat creation
               if (!chat?.id) {
-                setShowOfferModal(true);
+                openOffer();
                 return;
               }
               
@@ -713,14 +717,14 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                   if (data.hasExistingOffer && data.existingOffer) {
                     // Set the existing offer and show the modal to display it
                     setExistingOffer(data.existingOffer);
-                    setShowOfferModal(true);
+                    openOffer();
                     return;
                   }
                 }
-                setShowOfferModal(true);
+                openOffer();
               } catch (error) {
                 // Allow modal to open if check fails
-                setShowOfferModal(true);
+                openOffer();
               }
             }}
             disabled={false}
