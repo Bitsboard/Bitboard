@@ -493,9 +493,19 @@ export default function OfferModal({
                         ></div>
                         {/* Animated fill */}
                         <div 
-                          className={`slider-fill ${getSliderValue() >= listingPrice ? 'max' : ''}`}
+                          className={`slider-fill ${getSliderValue() >= listingPrice ? 'max' : ''} cursor-pointer`}
                           style={{
                             width: `${Math.min(Math.max((getSliderValue() / listingPrice) * 100, 0), 100)}%`
+                          }}
+                          onClick={(e) => {
+                            const rect = e.currentTarget.parentElement?.getBoundingClientRect();
+                            if (!rect) return;
+                            const x = e.clientX - rect.left;
+                            const percentage = x / rect.width;
+                            const snappedPercentage = Math.round(percentage * 20) / 20; // Snap to 5% increments
+                            const newValue = Math.round(snappedPercentage * listingPrice);
+                            const clampedValue = Math.max(0, Math.min(newValue, listingPrice));
+                            handleSliderChange(clampedValue);
                           }}
                         ></div>
                         {/* Invisible slider input */}
