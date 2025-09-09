@@ -128,21 +128,7 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
     }
   }
 
-  // If showing chat, render ChatModal instead
-  if (showChat) {
-    
-    return (
-      <ChatModal
-        listing={listing}
-        onClose={onClose} // This will close the entire modal and return to base page
-        dark={dark}
-        btcCad={btcCad}
-        unit={unit}
-        onBackToListing={() => setShowChat(false)} // This goes back to listing modal
-        user={user}
-      />
-    );
-  }
+  // Always render the dock and container, conditionally show ChatModal or ListingModal content
 
   // CSS var so Tailwind arbitrary values can reference it in calc()
   const style = { ['--offer-w' as any]: `${offerWidthPx}px` };
@@ -174,15 +160,27 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
         )}
       />
 
-      {/* Listing container */}
-      <div
-        style={style}
-        className={cn(
-          "relative z-10 w-full max-w-5xl rounded-2xl shadow-xl transition-transform duration-300 ease-out",
-          shiftClass,
-          dark ? "bg-neutral-950 text-neutral-100" : "bg-white text-neutral-900"
-        )}
-      >
+      {/* Conditionally render ChatModal or ListingModal content */}
+      {showChat ? (
+        <ChatModal
+          listing={listing}
+          onClose={onClose} // This will close the entire modal and return to base page
+          dark={dark}
+          btcCad={btcCad}
+          unit={unit}
+          onBackToListing={() => setShowChat(false)} // This goes back to listing modal
+          user={user}
+        />
+      ) : (
+        /* Listing container */
+        <div
+          style={style}
+          className={cn(
+            "relative z-10 w-full max-w-5xl rounded-2xl shadow-xl transition-transform duration-300 ease-out",
+            shiftClass,
+            dark ? "bg-neutral-950 text-neutral-100" : "bg-white text-neutral-900"
+          )}
+        >
         <Modal open={open} onClose={onClose} dark={dark} size="lg" ariaLabel={listing.title}>
       <ModalHeader dark={dark}>
         <div className="flex items-center gap-2">
@@ -334,7 +332,8 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
         </div>
       </div>
     </Modal>
-      </div>
+        </div>
+      )}
     </div>
   );
 }
