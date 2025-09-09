@@ -465,7 +465,7 @@ export default function OfferModal({
         // Simple sats input for make an offer
         const validatedValue = validateSatsInput(value);
         const parsedValue = parseAbbreviations(validatedValue);
-        setRawInput(validatedValue);
+        setRawInput(parsedValue);
         
         // Allow empty field for make an offer listings
         if (!parsedValue || parsedValue === "") {
