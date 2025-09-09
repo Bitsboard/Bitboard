@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { PriceBlock } from "./PriceBlock";
 import { Modal } from "./Modal";
 import OfferModal from "./OfferModal";
+console.log('🎯 ChatModal: OfferModal import truthy?', !!OfferModal);
 import OfferMessage from "./OfferMessage";
 import { generateProfilePicture, getInitials, cn } from "@/lib/utils";
 import type { Listing, Category, Unit, Seller, Message, Chat } from "@/lib/types";
@@ -793,6 +794,10 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       </div>
       
       {/* Offer Modal */}
+      {(() => {
+        console.log('🎯 ChatModal: About to render OfferModal');
+        return null;
+      })()}
       <OfferModal
         isOpen={true} // Always render, orchestrator controls visibility
         onClose={() => {
