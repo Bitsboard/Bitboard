@@ -516,7 +516,8 @@ export default function OfferModal({
                   </div>
                 ) : (
                   /* Manual input for items without asking price */
-                {unit === "BTC" ? (
+                  <div>
+                    {unit === "BTC" ? (
                   /* Special BTC input with always visible 9 digits */
                   <div className="relative">
                     <div className={cn(
@@ -632,6 +633,7 @@ export default function OfferModal({
                     </div>
                   </div>
                 )}
+                  </div>
                 )}
               </div>
 
