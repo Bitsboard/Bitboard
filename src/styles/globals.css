@@ -309,9 +309,9 @@ a:focus-visible {
   top: 0;
   left: 0;
   height: 8px;
-  background: linear-gradient(90deg, #f97316, #fbbf24, #f97316);
-  background-size: 200% 100%;
-  animation: gradient-shift 2s linear infinite;
+  background: linear-gradient(90deg, #f97316, #fbbf24, #f97316, #fbbf24, #f97316);
+  background-size: 300% 100%;
+  animation: gradient-shift 3s linear infinite;
   border-radius: 4px 0 0 4px;
   z-index: 2;
 }
@@ -325,7 +325,7 @@ a:focus-visible {
     background-position: 0% 50%;
   }
   100% {
-    background-position: 100% 50%;
+    background-position: 200% 50%;
   }
 }
 
