@@ -1210,8 +1210,7 @@ function OfferContent({
               </div>
             </div>
           </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
