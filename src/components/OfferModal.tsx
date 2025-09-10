@@ -69,7 +69,19 @@ export default function OfferModal({
     
     console.log('🎯 OfferModal: Creating portal to dock');
     return createPortal(
-      isOfferOpen ? <OfferContent onClose={closeOffer} dark={dark} unit={unit} listingPrice={listingPrice} listingTitle={listingTitle} existingOffer={existingOffer} onSendOffer={onSendOffer} onAbortOffer={onAbortOffer} /> : null,
+      isOfferOpen ? (
+        <div 
+          className={cn(
+            "w-full h-full rounded-2xl shadow-2xl border-2 overflow-hidden",
+            dark 
+              ? "bg-gradient-to-br from-neutral-900 to-neutral-800 border-neutral-700" 
+              : "bg-gradient-to-br from-white to-neutral-50 border-neutral-200"
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <OfferContent onClose={closeOffer} dark={dark} unit={unit} listingPrice={listingPrice} listingTitle={listingTitle} existingOffer={existingOffer} onSendOffer={onSendOffer} onAbortOffer={onAbortOffer} />
+        </div>
+      ) : null,
       offerDockRef.current
     );
   }
