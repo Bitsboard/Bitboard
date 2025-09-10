@@ -26,6 +26,7 @@ interface ModalProps {
     maxHeightVh?: number;
     zIndex?: number;
     showBackground?: boolean; // New prop to control background
+    onClick?: () => void; // New prop for click handler
     children: React.ReactNode;
 }
 
@@ -43,6 +44,7 @@ export function Modal({
     maxHeightVh = 90,
     zIndex = 50,
     showBackground = true, // Default to true for backward compatibility
+    onClick,
     children,
 }: ModalProps) {
     const overlayRef = React.useRef<HTMLDivElement | null>(null);
@@ -86,6 +88,7 @@ export function Modal({
                     className
                 )}
                 style={{ maxHeight: `${maxHeightVh}vh`, ...panelStyle }}
+                onClick={onClick}
             >
                 {children}
             </div>

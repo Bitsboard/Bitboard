@@ -209,6 +209,12 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
           className="transition-transform duration-300 ease-out"
           style={style}
           showBackground={false} // Don't show background since ListingModal provides it
+          onClick={() => {
+            // Close offer modal when clicking on chat modal (if offer is open)
+            if (isOfferOpen) {
+              closeOffer();
+            }
+          }}
         />
       ) : (
         /* Listing container */

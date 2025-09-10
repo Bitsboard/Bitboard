@@ -24,9 +24,10 @@ interface ChatModalProps {
   className?: string;
   style?: React.CSSProperties;
   showBackground?: boolean; // New prop to control background
+  onClick?: () => void; // New prop for click handler
 }
 
-export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListing, user, className, style, showBackground = true }: ChatModalProps) {
+export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListing, user, className, style, showBackground = true, onClick }: ChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [chat, setChat] = useState<Chat | null>(null);
   const [text, setText] = useState("");
@@ -429,6 +430,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       panelStyle={style}
       maxHeightVh={95}
       showBackground={showBackground}
+      onClick={onClick}
     >
       {/* Header with listing details and back button */}
       <div className={cn("relative flex items-center justify-between border-b px-6 py-4", dark ? "border-neutral-900" : "border-neutral-200")}>
