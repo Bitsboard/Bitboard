@@ -172,7 +172,15 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
   
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      onClick={(e) => {
+        // Only close if clicking directly on the backdrop, not on modal content
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
       {/* Right-side dock that OfferModal will portal into (desktop only) */}
       <div
         ref={offerDockRef}
