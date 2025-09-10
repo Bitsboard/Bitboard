@@ -18,16 +18,11 @@ const Ctx = createContext<OrchestratorCtx | null>(null);
 export function useModalOrchestrator() {
   const ctx = useContext(Ctx);
   if (!ctx) {
-    console.log('🎯 useModalOrchestrator: No context found, using default values');
     // Return default values when not within provider (e.g., on messages page)
     return {
       isOfferOpen: false,
-      openOffer: () => {
-        console.log('🎯 useModalOrchestrator: openOffer() called (default - no context)');
-      },
-      closeOffer: () => {
-        console.log('🎯 useModalOrchestrator: closeOffer() called (default - no context)');
-      },
+      openOffer: () => {},
+      closeOffer: () => {},
       isDesktop: false,
       offerDockRef: { current: null },
       offerWidthPx: 420,
@@ -35,10 +30,6 @@ export function useModalOrchestrator() {
       setDockReady: () => {}
     };
   }
-  console.log('🎯 useModalOrchestrator: Context found, returning:', { 
-    isOfferOpen: ctx.isOfferOpen, 
-    isDesktop: ctx.isDesktop 
-  });
   return ctx;
 }
 
@@ -61,21 +52,14 @@ export function ModalOrchestratorProvider({
 }: React.PropsWithChildren<{ offerWidthPx?: number }>) {
   const [isOfferOpen, setIsOfferOpen] = useState(false);
   const [dockReady, setDockReady] = useState(false);
-  const openOffer = () => {
-    console.log('🎯 ModalOrchestrator: openOffer() called');
-    setIsOfferOpen(true);
-  };
+  const openOffer = () => setIsOfferOpen(true);
   const closeOffer = () => {
-    console.log('🎯 ModalOrchestrator: closeOffer() called');
     setIsOfferOpen(false);
     setDockReady(false);
   };
 
   const isDesktop = useMediaQuery('(min-width: 768px)'); // Tailwind's md breakpoint
   const offerDockRef = useRef<HTMLDivElement>(null);
-
-  // Debug logging
-  console.log('🎯 ModalOrchestrator state:', { isOfferOpen, isDesktop, offerWidthPx, dockReady });
 
   const value = useMemo(
     () => ({ isOfferOpen, openOffer, closeOffer, isDesktop, offerDockRef, offerWidthPx, dockReady, setDockReady }),

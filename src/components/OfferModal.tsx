@@ -43,52 +43,29 @@ export default function OfferModal({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
-  
-  // Debug logging
-  console.log('🎯 OfferModal: orchestrator state:', { isDesktop, isOfferOpen, mounted });
-  console.log('🎯 OfferModal: offerDockRef.current:', offerDockRef.current);
-  console.log('🎯 OfferModal: dock transform style:', offerDockRef.current?.style?.transform);
-  console.log('🎯 OfferModal: Component rendered, checking conditions...');
+
+  // Don't render if not open
+  if (!isOfferOpen) return null;
 
   // Desktop: render into the right-side dock (owned by ListingModal)
-  if (isDesktop) {
-    console.log('🎯 OfferModal: Desktop mode, checking conditions:', { mounted, dockRef: !!offerDockRef.current, isOfferOpen });
-    if (!mounted || !offerDockRef.current) {
-      console.log('🎯 OfferModal: Not rendering - mounted:', mounted, 'dockRef:', !!offerDockRef.current);
-      return null;
-    }
-    
-    // Check if dock is ready for portaling (ensures CSS transition has started)
-    console.log('🎯 OfferModal: dockReady:', dockReady);
-    
-    // If dock isn't ready, wait a bit for the CSS transition
-    if (isOfferOpen && !dockReady) {
-      console.log('🎯 OfferModal: Dock not ready, waiting for transition...');
-      return null;
-    }
-    
-    console.log('🎯 OfferModal: Creating portal to dock');
+  if (isDesktop && mounted && offerDockRef.current && dockReady) {
     return createPortal(
-      isOfferOpen ? (
-        <div 
-          className={cn(
-            "w-full h-full rounded-2xl shadow-2xl border-2 overflow-hidden",
-            dark 
-              ? "bg-gradient-to-br from-neutral-900 to-neutral-800 border-neutral-700" 
-              : "bg-gradient-to-br from-white to-neutral-50 border-neutral-200"
-          )}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <OfferContent onClose={closeOffer} dark={dark} unit={unit} listingPrice={listingPrice} listingTitle={listingTitle} existingOffer={existingOffer} onSendOffer={onSendOffer} onAbortOffer={onAbortOffer} />
-        </div>
-      ) : null,
+      <div 
+        className={cn(
+          "w-full h-full rounded-2xl shadow-2xl border-2 overflow-hidden",
+          dark 
+            ? "bg-gradient-to-br from-neutral-900 to-neutral-800 border-neutral-700" 
+            : "bg-gradient-to-br from-white to-neutral-50 border-neutral-200"
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <OfferContent onClose={closeOffer} dark={dark} unit={unit} listingPrice={listingPrice} listingTitle={listingTitle} existingOffer={existingOffer} onSendOffer={onSendOffer} onAbortOffer={onAbortOffer} />
+      </div>,
       offerDockRef.current
     );
   }
 
   // Mobile: render as overlay (existing behavior)
-  console.log('🎯 OfferModal: Mobile mode, isOfferOpen:', isOfferOpen);
-  if (!isOfferOpen) return null;
   
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 p-4 md:hidden">
@@ -119,8 +96,8 @@ function OfferContent({
   onAbortOffer?: (offerId: string, action: 'abort') => void;
 }) {
   const [amount, setAmount] = useState<number>(0);
-  const [rawInput, setRawInput] = useState<string>("0.00000000"); // Track raw input for BTC
-  const [expirationHours, setExpirationHours] = useState(24); // Default to 24 hours
+  const [rawInput, setRawInput] = useState<string>("0.00000000");
+  const [expirationHours, setExpirationHours] = useState(24);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAbortConfirm, setShowAbortConfirm] = useState(false);
   
@@ -133,44 +110,37 @@ function OfferContent({
   // Get BTC rate for dollar equivalent
   const btcRate = useBtcRate();
 
-  // Set default amount to listing price when modal opens
+  // Initialize amount and input when modal opens
   useEffect(() => {
-      if (existingOffer) {
-        // Show existing offer
-        setAmount(existingOffer.amount_sat);
-        if (unit === "BTC") {
-          setRawInput(formatBTCDisplay(existingOffer.amount_sat));
-        } else {
-          setRawInput(formatAmount(existingOffer.amount_sat));
-        }
-        // Set expiration hours from existing offer
-        if (existingOffer.expires_at) {
-          const now = Math.floor(Date.now() / 1000);
-          const hoursLeft = Math.max(1, Math.ceil((existingOffer.expires_at - now) / 3600));
-          setExpirationHours(hoursLeft);
-        }
-      } else if (listingPrice && listingPrice > 0) {
-        // New offer with listing price
-      setAmount(listingPrice);
-        if (unit === "BTC") {
-          setRawInput(formatBTCDisplay(listingPrice));
-        } else {
-          setRawInput(formatAmount(listingPrice));
-        }
-        setExpirationHours(24); // Reset to 24 hours default
-      } else {
-        // New offer without listing price
-        setAmount(0);
-        if (unit === "BTC") {
-          setBtcDigits("000000000");
-          setBtcMask(Array(9).fill(false));
-          setRawInput("0.00000000");
-        } else {
-          setRawInput("");
-        }
-        setExpirationHours(24);
+    if (existingOffer) {
+      // Show existing offer
+      setAmount(existingOffer.amount_sat);
+      setRawInput(unit === "BTC" ? formatBTCDisplay(existingOffer.amount_sat) : formatAmount(existingOffer.amount_sat));
+      
+      // Set expiration hours from existing offer
+      if (existingOffer.expires_at) {
+        const now = Math.floor(Date.now() / 1000);
+        const hoursLeft = Math.max(1, Math.ceil((existingOffer.expires_at - now) / 3600));
+        setExpirationHours(hoursLeft);
       }
-  }, [listingPrice, unit, existingOffer]);
+    } else if (listingPrice && listingPrice > 0) {
+      // New offer with listing price
+      setAmount(listingPrice);
+      setRawInput(unit === "BTC" ? formatBTCDisplay(listingPrice) : formatAmount(listingPrice));
+      setExpirationHours(24);
+    } else {
+      // New offer without listing price
+      setAmount(0);
+      if (unit === "BTC") {
+        setBtcDigits("000000000");
+        setBtcMask(Array(9).fill(false));
+        setRawInput("0.00000000");
+      } else {
+        setRawInput("");
+      }
+      setExpirationHours(24);
+    }
+  }, [listingPrice, unit, existingOffer, formatAmount, formatBTCDisplay]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -187,7 +157,7 @@ function OfferContent({
       await onSendOffer(amount, expiresAt);
       onClose();
     } catch (error) {
-      console.error('❌ OfferModal: Error sending offer:', error);
+      console.error('Error sending offer:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -567,7 +537,7 @@ function OfferContent({
         setAmount(newAmount);
       }
     } else {
-      // For listings with price, use the original logic (DON'T TOUCH)
+      // For listings with price, use the original logic
       const parsedValue = parseAbbreviations(value);
       setRawInput(parsedValue);
       const newAmount = parseAmount(parsedValue);
@@ -586,11 +556,7 @@ function OfferContent({
       
       if (newAmount > listingPrice) {
         setAmount(listingPrice);
-        if (unit === "BTC") {
-          setRawInput(formatBTCDisplay(listingPrice));
-        } else {
-          setRawInput(formatAmount(listingPrice));
-        }
+        setRawInput(unit === "BTC" ? formatBTCDisplay(listingPrice) : formatAmount(listingPrice));
       } else {
         setAmount(newAmount);
       }
@@ -634,7 +600,7 @@ function OfferContent({
       setShowAbortConfirm(false);
       onClose();
     } catch (error) {
-      console.error('❌ OfferModal: Error aborting offer:', error);
+      console.error('Error aborting offer:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -1208,212 +1174,6 @@ function OfferContent({
           </div>
       )}
       
-      {/* Desktop version - no background, just the modal content */}
-      <div className="hidden md:block">
-        <div 
-          className={cn(
-            "w-full max-w-md rounded-2xl shadow-2xl border-2 overflow-hidden",
-            dark 
-              ? "bg-gradient-to-br from-neutral-900 to-neutral-800 border-neutral-700" 
-              : "bg-gradient-to-br from-white to-neutral-50 border-neutral-200"
-          )}
-          onClick={(e) => e.stopPropagation()} // Prevent click from bubbling up
-        >
-          {/* Header */}
-          <div className={cn(
-            "px-6 py-5 flex items-center justify-between",
-            dark 
-              ? "bg-neutral-900 border-b border-neutral-800" 
-              : "bg-neutral-50 border-b border-neutral-200"
-          )}>
-            <div className="flex items-center gap-3">
-              <div className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center",
-                dark ? "bg-orange-500" : "bg-orange-500"
-              )}>
-                <span className="text-white font-bold text-lg">₿</span>
-              </div>
-              <div>
-                <h3 className={cn(
-                  "text-lg font-bold",
-                  dark ? "text-white" : "text-neutral-900"
-                )}>
-                  Make an Offer
-                </h3>
-                <p className={cn(
-                  "text-sm",
-                  dark ? "text-neutral-400" : "text-neutral-600"
-                )}>
-                  {listingTitle}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className={cn(
-                "w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200",
-                dark 
-                  ? "hover:bg-neutral-800 text-neutral-400 hover:text-white" 
-                  : "hover:bg-neutral-100 text-neutral-500 hover:text-neutral-700"
-              )}
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          
-          {/* Main Content */}
-          {existingOffer ? (
-            // Show existing offer details
-            <div className="p-6">
-              <div className="text-center space-y-6">
-                <div className={cn(
-                  "p-6 rounded-xl border-2",
-                  existingOffer.status === 'pending' 
-                    ? "bg-gradient-to-br from-orange-50 to-orange-100 border-orange-300 dark:from-orange-900/20 dark:to-orange-800/20 dark:border-orange-500/50"
-                    : "bg-gradient-to-br from-neutral-50 to-neutral-100 border-neutral-300 dark:from-neutral-800/20 dark:to-neutral-700/20 dark:border-neutral-600"
-                )}>
-                  <div className={cn(
-                    "text-3xl font-black mb-2",
-                      existingOffer.status === 'pending' 
-                      ? "text-orange-900 dark:text-orange-100" 
-                      : "text-neutral-900 dark:text-neutral-100"
-                    )}>
-                    {unit === 'BTC' ? `₿${formatAmount(existingOffer.amount_sat)}` : `${formatAmount(existingOffer.amount_sat)} sats`}
-                  </div>
-                    <div className={cn(
-                    "text-sm font-bold px-4 py-2 rounded-full inline-block",
-                      existingOffer.status === 'pending' 
-                      ? "bg-orange-500 text-white"
-                      : "bg-neutral-500 text-white"
-                    )}>
-                    {existingOffer.status === 'pending' ? 'PENDING' : existingOffer.status.toUpperCase()}
-                  </div>
-                    </div>
-              </div>
-            </div>
-          ) : (
-            // Show new offer form
-            <form onSubmit={handleSubmit} className="p-6 space-y-8">
-              <div className="space-y-4">
-                <div className="text-center">
-                  <div className={cn(
-                    "text-4xl font-black mb-2",
-                    dark ? "text-white" : "text-neutral-900"
-                  )}>
-                    {unit === "BTC" ? `₿${formatAmount(amount)}` : `${formatAmount(amount)} sats`}
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className={cn(
-                      "block text-sm font-bold mb-2",
-                      dark ? "text-neutral-300" : "text-neutral-700"
-                    )}>
-                      Bitcoin (BTC)
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        step="0.00000001"
-                        min="0"
-                        value={rawInput}
-                        onChange={(e) => handleAmountChange(e.target.value)}
-                        className={cn(
-                          "w-full px-4 py-3 rounded-xl border-2 text-lg font-bold transition-all duration-200",
-                          dark 
-                            ? "bg-neutral-800 border-neutral-600 text-white focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20" 
-                            : "bg-white border-neutral-300 text-neutral-900 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
-                        )}
-                        placeholder="0.00000000"
-                      />
-                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                        <span className={cn(
-                          "text-lg font-bold",
-                          dark ? "text-orange-400" : "text-orange-600"
-                        )}>
-                          ₿
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <label className={cn(
-                      "block text-sm font-bold mb-2",
-                      dark ? "text-neutral-300" : "text-neutral-700"
-                    )}>
-                      Satoshis
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        step="1"
-                        min="0"
-                        value={amount}
-                        onChange={(e) => setAmount(Number(e.target.value))}
-                        className={cn(
-                          "w-full px-4 py-3 rounded-xl border-2 text-lg font-bold transition-all duration-200",
-                          dark 
-                            ? "bg-neutral-800 border-neutral-600 text-white focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20" 
-                            : "bg-white border-neutral-300 text-neutral-900 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
-                        )}
-                        placeholder="0"
-                      />
-                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                        <span className={cn(
-                          "text-sm font-bold",
-                          dark ? "text-orange-400" : "text-orange-600"
-                        )}>
-                          sats
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => { setAmount(0); setRawInput("0.00000000"); }}
-                    className={cn(
-                      "w-full px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 border-2",
-                      dark 
-                        ? "bg-neutral-700 border-neutral-600 text-neutral-300 hover:bg-neutral-600 hover:border-orange-400 hover:text-white" 
-                        : "bg-neutral-100 border-neutral-300 text-neutral-700 hover:bg-neutral-200 hover:border-orange-300 hover:text-neutral-900"
-                    )}
-                  >
-                    Clear
-                  </button>
-                </div>
-              </div>
-              <div className="flex space-x-4 pt-6">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className={cn(
-                    "flex-1 px-6 py-3 rounded-xl text-sm font-bold transition-all duration-200 border-2",
-                    dark 
-                      ? "bg-neutral-800 border-neutral-600 text-neutral-300 hover:bg-neutral-700 hover:border-orange-400 hover:text-white" 
-                      : "bg-neutral-100 border-neutral-300 text-neutral-700 hover:bg-neutral-200 hover:border-orange-300 hover:text-neutral-900"
-                  )}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting || amount === 0}
-                  className={cn(
-                    "flex-1 px-6 py-3 rounded-xl text-sm font-bold text-white transition-all duration-200 border-2",
-                    (isSubmitting || amount === 0)
-                      ? "bg-neutral-500 border-neutral-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-orange-500 to-orange-600 border-orange-500 hover:from-orange-600 hover:to-orange-700 hover:border-orange-600 hover:shadow-lg hover:shadow-orange-500/25"
-                  )}
-                >
-                  {isSubmitting ? "Sending..." : "Send Offer"}
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
-      </div>
     </div>
   );
 }

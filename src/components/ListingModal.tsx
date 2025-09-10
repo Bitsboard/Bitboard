@@ -168,10 +168,6 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
   // Determine dock state based on phase
   const dockState = dockPhase === 'open' ? 'open' : 'closed';
   
-  console.log('🎯 ListingModal: dockPhase:', dockPhase, 'dockState:', dockState, 'isDesktop:', isDesktop, 'isOfferOpen:', isOfferOpen);
-  console.log('🎯 ListingModal: About to render dock with data-state:', dockState);
-  console.log('🎯 ListingModal: showChat:', showChat);
-  console.log('🎯 ListingModal: dockReady:', dockReady);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
