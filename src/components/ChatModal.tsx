@@ -22,9 +22,10 @@ interface ChatModalProps {
   onBackToListing?: () => void;
   user?: { id: string; email: string; username?: string };
   className?: string;
+  showBackground?: boolean; // New prop to control background
 }
 
-export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListing, user, className }: ChatModalProps) {
+export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListing, user, className, showBackground = true }: ChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [chat, setChat] = useState<Chat | null>(null);
   const [text, setText] = useState("");
@@ -425,6 +426,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       ariaLabel={`Chat about ${listing.title}`}
       panelClassName={cn("flex w-full flex-col h-[95vh]", className)}
       maxHeightVh={95}
+      showBackground={showBackground}
     >
       {/* Header with listing details and back button */}
       <div className={cn("relative flex items-center justify-between border-b px-6 py-4", dark ? "border-neutral-900" : "border-neutral-200")}>

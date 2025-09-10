@@ -200,6 +200,7 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
           onBackToListing={() => setShowChat(false)} // This goes back to listing modal
           user={user}
           className={cn("transition-transform duration-300 ease-out", shiftClass)}
+          showBackground={false} // Don't show background since ListingModal provides it
         />
       ) : (
         /* Listing container */

@@ -24,6 +24,7 @@ interface ModalProps {
     ariaLabel?: string;
     maxHeightVh?: number;
     zIndex?: number;
+    showBackground?: boolean; // New prop to control background
     children: React.ReactNode;
 }
 
@@ -39,6 +40,7 @@ export function Modal({
     ariaLabel,
     maxHeightVh = 90,
     zIndex = 50,
+    showBackground = true, // Default to true for backward compatibility
     children,
 }: ModalProps) {
     const overlayRef = React.useRef<HTMLDivElement | null>(null);
@@ -60,7 +62,7 @@ export function Modal({
             ref={overlayRef}
             className={cn(
                 "fixed inset-0 flex items-center justify-center p-4",
-                "bg-black/60 backdrop-blur-sm",
+                showBackground && "bg-black/60 backdrop-blur-sm",
                 overlayClassName
             )}
             style={{ zIndex }}
