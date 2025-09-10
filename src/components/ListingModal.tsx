@@ -225,7 +225,7 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
             dark ? "bg-neutral-950 text-neutral-100" : "bg-white text-neutral-900"
           )}
         >
-        <Modal open={open} onClose={onClose} dark={dark} size="lg" ariaLabel={listing.title}>
+        <Modal open={open} onClose={onClose} dark={dark} size="lg" ariaLabel={listing.title} showBackground={false}>
       <ModalHeader dark={dark}>
         <div className="flex items-center gap-2">
           <span className={cn("flex-shrink-0 rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold text-white", a.chip)}>
