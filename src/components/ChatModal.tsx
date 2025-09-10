@@ -697,13 +697,15 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
           
           <button
             onClick={async () => {
-              // If no chat exists, just open the modal - the sendOffer function will handle chat creation
+              // Open modal immediately for responsive UX
+              openOffer();
+              
+              // If no chat exists, the sendOffer function will handle chat creation
               if (!chat?.id) {
-                openOffer();
                 return;
               }
               
-              // Check for existing offers before opening modal
+              // Check for existing offers in the background after modal opens
               try {
                 const response = await fetch(`/api/offers/check?listingId=${encodeURIComponent(listing.id)}&chatId=${encodeURIComponent(chat.id)}`);
                 if (response.ok) {
@@ -722,16 +724,13 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
                   };
                   
                   if (data.hasExistingOffer && data.existingOffer) {
-                    // Set the existing offer and show the modal to display it
+                    // Set the existing offer to display in the modal
                     setExistingOffer(data.existingOffer);
-                    openOffer();
-                    return;
                   }
                 }
-                openOffer();
               } catch (error) {
-                // Allow modal to open if check fails
-                openOffer();
+                // Silently fail - modal is already open
+                console.error('Failed to check existing offers:', error);
               }
             }}
             disabled={false}
