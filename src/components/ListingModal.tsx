@@ -128,11 +128,11 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
   // CSS var so Tailwind arbitrary values can reference it in calc()
   const style = { ['--offer-w' as any]: `${offerWidthPx}px` };
 
-  // When the offer is open on desktop, shift listing left to create 50px gap.
-  // Offer modal is 420px wide, so we need: 420px + 50px gap = 470px total shift
+  // When the offer is open on desktop, shift listing left to create small gap.
+  // Offer modal is 420px wide, so we need: 420px + 20px gap = 440px total shift
   const shiftClass =
     isDesktop && isOfferOpen
-      ? 'md:translate-x-[-350px]' // Reduced from 470px to 350px for better spacing
+      ? 'md:translate-x-[-200px]' // Much smaller shift for tighter spacing
       : 'md:translate-x-0';
 
   // Use a two-phase approach: first render in closed state, then transition to open
@@ -183,8 +183,8 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
         style={{ width: offerWidthPx }}
         className={cn(
           "pointer-events-auto fixed top-0 h-full shadow-2xl transition-transform duration-300 ease-out transform-gpu z-50",
-          // Position dock to slide into position with proper spacing
-          dockPhase === 'open' ? "right-[50px]" : "right-0 translate-x-full",
+          // Position dock to slide into position with tighter spacing
+          dockPhase === 'open' ? "right-[20px]" : "right-0 translate-x-full",
           isDesktop ? "block" : "hidden"
         )}
       />
