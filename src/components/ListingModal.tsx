@@ -132,7 +132,7 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
   // (Visually reads as "making room" without needing exact listing width.)
   const shiftClass =
     isDesktop && isOfferOpen
-      ? 'md:translate-x-[calc(var(--offer-w)*-0.5)]'
+      ? 'md:translate-x-[-210px]' // Half of 420px offer width
       : 'md:translate-x-0';
 
   // Use a two-phase approach: first render in closed state, then transition to open
@@ -191,15 +191,17 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
 
       {/* Conditionally render ChatModal or ListingModal content */}
       {showChat ? (
-        <ChatModal
-          listing={listing}
-          onClose={onClose} // This will close the entire modal and return to base page
-          dark={dark}
-          btcCad={btcCad}
-          unit={unit}
-          onBackToListing={() => setShowChat(false)} // This goes back to listing modal
-          user={user}
-        />
+        <div className={cn("transition-transform duration-300 ease-out", shiftClass)}>
+          <ChatModal
+            listing={listing}
+            onClose={onClose} // This will close the entire modal and return to base page
+            dark={dark}
+            btcCad={btcCad}
+            unit={unit}
+            onBackToListing={() => setShowChat(false)} // This goes back to listing modal
+            user={user}
+          />
+        </div>
       ) : (
         /* Listing container */
         <div
