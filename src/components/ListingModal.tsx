@@ -128,11 +128,11 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
   // CSS var so Tailwind arbitrary values can reference it in calc()
   const style = { ['--offer-w' as any]: `${offerWidthPx}px` };
 
-  // When the offer is open on desktop, shift listing left by ~half the dock width.
-  // (Visually reads as "making room" without needing exact listing width.)
+  // When the offer is open on desktop, shift listing left by more than half the dock width.
+  // This ensures the right edge of ChatModal is left of the offer modal's left edge.
   const shiftClass =
     isDesktop && isOfferOpen
-      ? 'md:translate-x-[-210px]' // Half of 420px offer width
+      ? 'md:translate-x-[-300px]' // More than half of 420px offer width for proper spacing
       : 'md:translate-x-0';
 
   // Use a two-phase approach: first render in closed state, then transition to open
