@@ -21,9 +21,10 @@ interface ChatModalProps {
   unit: Unit;
   onBackToListing?: () => void;
   user?: { id: string; email: string; username?: string };
+  className?: string;
 }
 
-export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListing, user }: ChatModalProps) {
+export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListing, user, className }: ChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [chat, setChat] = useState<Chat | null>(null);
   const [text, setText] = useState("");
@@ -422,7 +423,7 @@ export function ChatModal({ listing, onClose, dark, btcCad, unit, onBackToListin
       dark={dark}
       size="md"
       ariaLabel={`Chat about ${listing.title}`}
-      panelClassName={cn("flex w-full flex-col h-[95vh]")}
+      panelClassName={cn("flex w-full flex-col h-[95vh]", className)}
       maxHeightVh={95}
     >
       {/* Header with listing details and back button */}

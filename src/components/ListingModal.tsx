@@ -191,17 +191,16 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
 
       {/* Conditionally render ChatModal or ListingModal content */}
       {showChat ? (
-        <div className={cn("transition-transform duration-300 ease-out", shiftClass)}>
-          <ChatModal
-            listing={listing}
-            onClose={onClose} // This will close the entire modal and return to base page
-            dark={dark}
-            btcCad={btcCad}
-            unit={unit}
-            onBackToListing={() => setShowChat(false)} // This goes back to listing modal
-            user={user}
-          />
-        </div>
+        <ChatModal
+          listing={listing}
+          onClose={onClose} // This will close the entire modal and return to base page
+          dark={dark}
+          btcCad={btcCad}
+          unit={unit}
+          onBackToListing={() => setShowChat(false)} // This goes back to listing modal
+          user={user}
+          className={cn("transition-transform duration-300 ease-out", shiftClass)}
+        />
       ) : (
         /* Listing container */
         <div
