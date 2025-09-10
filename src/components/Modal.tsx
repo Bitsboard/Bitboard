@@ -20,6 +20,7 @@ interface ModalProps {
     className?: string;
     overlayClassName?: string;
     panelClassName?: string;
+    panelStyle?: React.CSSProperties;
     closeOnOverlay?: boolean;
     ariaLabel?: string;
     maxHeightVh?: number;
@@ -36,6 +37,7 @@ export function Modal({
     className,
     overlayClassName,
     panelClassName,
+    panelStyle,
     closeOnOverlay = true,
     ariaLabel,
     maxHeightVh = 90,
@@ -83,7 +85,7 @@ export function Modal({
                     panelClassName,
                     className
                 )}
-                style={{ maxHeight: `${maxHeightVh}vh` }}
+                style={{ maxHeight: `${maxHeightVh}vh`, ...panelStyle }}
             >
                 {children}
             </div>

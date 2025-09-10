@@ -125,16 +125,17 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
 
   // Always render the dock and container, conditionally show ChatModal or ListingModal content
 
-  // CSS var so Tailwind arbitrary values can reference it in calc()
-  const style = { ['--offer-w' as any]: `${offerWidthPx}px` };
-
   // When the offer is open on desktop, shift listing left to create consistent gap.
   // Chat modal moves left, offer modal slides in from right
   const GAP_PX = 50; // Fixed gap between modals
-  const shiftClass =
-    isDesktop && isOfferOpen
-      ? `md:translate-x-[${-offerWidthPx - GAP_PX}px]` // Fixed shift: offer width + gap
-      : 'md:translate-x-0';
+  const shiftAmount = isDesktop && isOfferOpen ? -(offerWidthPx + GAP_PX) : 0;
+
+  // CSS vars and styles for dynamic positioning
+  const style = { 
+    ['--offer-w' as any]: `${offerWidthPx}px`,
+    transform: isDesktop && isOfferOpen ? `translateX(${shiftAmount}px)` : 'translateX(0px)',
+    transition: 'transform 300ms ease-out'
+  };
 
   // Use a two-phase approach: first render in closed state, then transition to open
   const [dockPhase, setDockPhase] = React.useState<'closed' | 'transitioning' | 'open'>('closed');
@@ -196,7 +197,8 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
           unit={unit}
           onBackToListing={() => setShowChat(false)} // This goes back to listing modal
           user={user}
-          className={cn("transition-transform duration-300 ease-out", shiftClass)}
+          className="transition-transform duration-300 ease-out"
+          style={style}
           showBackground={false} // Don't show background since ListingModal provides it
         />
       ) : (
@@ -205,7 +207,6 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
           style={style}
           className={cn(
             "relative z-10 w-full max-w-5xl rounded-2xl shadow-xl transition-transform duration-300 ease-out",
-            shiftClass,
             dark ? "bg-neutral-950 text-neutral-100" : "bg-white text-neutral-900"
           )}
         >
