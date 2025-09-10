@@ -52,7 +52,7 @@ export default function OfferModal({
     return createPortal(
       <div 
         className={cn(
-          "w-full h-full rounded-2xl shadow-2xl border-2 overflow-hidden",
+          "w-full max-h-[90vh] rounded-2xl shadow-2xl border-2 overflow-hidden",
           dark 
             ? "bg-gradient-to-br from-neutral-900 to-neutral-800 border-neutral-700" 
             : "bg-gradient-to-br from-white to-neutral-50 border-neutral-200"

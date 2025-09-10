@@ -128,11 +128,12 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
   // CSS var so Tailwind arbitrary values can reference it in calc()
   const style = { ['--offer-w' as any]: `${offerWidthPx}px` };
 
-  // When the offer is open on desktop, shift listing left to create 50px gap.
+  // When the offer is open on desktop, shift listing left to create consistent gap.
   // Chat modal moves left, offer modal slides in from right
+  const GAP_PX = 50; // Fixed gap between modals
   const shiftClass =
     isDesktop && isOfferOpen
-      ? 'md:translate-x-[-470px]' // 420px offer width + 50px gap = 470px total shift
+      ? `md:translate-x-[${-offerWidthPx - GAP_PX}px]` // Fixed shift: offer width + gap
       : 'md:translate-x-0';
 
   // Use a two-phase approach: first render in closed state, then transition to open
@@ -178,9 +179,9 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
         data-state={dockState}
         style={{ width: offerWidthPx }}
         className={cn(
-          "pointer-events-auto fixed top-0 h-full shadow-2xl transition-transform duration-300 ease-out transform-gpu z-50",
-          // Position dock 50px from right edge when open
-          dockPhase === 'open' ? "right-[50px]" : "right-0 translate-x-full",
+          "pointer-events-auto fixed top-1/2 -translate-y-1/2 shadow-2xl transition-transform duration-300 ease-out transform-gpu z-50",
+          // Position dock with fixed gap from right edge when open
+          dockPhase === 'open' ? `right-[${GAP_PX}px]` : "right-0 translate-x-full",
           isDesktop ? "block" : "hidden"
         )}
       />
