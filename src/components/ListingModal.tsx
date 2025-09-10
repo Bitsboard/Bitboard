@@ -182,24 +182,26 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
         data-state={dockState}
         style={{ width: offerWidthPx }}
         className={cn(
-          "pointer-events-auto fixed right-0 top-0 h-full shadow-2xl transition-transform duration-300 ease-out transform-gpu",
-          // Always start in closed position, then transition to open
-          dockPhase === 'open' ? "translate-x-0" : "translate-x-[420px]",
+          "pointer-events-auto fixed top-0 h-full shadow-2xl transition-transform duration-300 ease-out transform-gpu z-50",
+          // Position dock to slide into center, starting from off-screen right
+          dockPhase === 'open' ? "right-1/2 translate-x-1/2" : "right-0 translate-x-full",
           isDesktop ? "block" : "hidden"
         )}
       />
 
       {/* Conditionally render ChatModal or ListingModal content */}
       {showChat ? (
-        <ChatModal
-          listing={listing}
-          onClose={onClose} // This will close the entire modal and return to base page
-          dark={dark}
-          btcCad={btcCad}
-          unit={unit}
-          onBackToListing={() => setShowChat(false)} // This goes back to listing modal
-          user={user}
-        />
+        <div className={cn("transition-transform duration-300 ease-out", shiftClass)}>
+          <ChatModal
+            listing={listing}
+            onClose={onClose} // This will close the entire modal and return to base page
+            dark={dark}
+            btcCad={btcCad}
+            unit={unit}
+            onBackToListing={() => setShowChat(false)} // This goes back to listing modal
+            user={user}
+          />
+        </div>
       ) : (
         /* Listing container */
         <div
