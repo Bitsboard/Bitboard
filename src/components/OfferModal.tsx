@@ -708,20 +708,20 @@ function OfferContent({
                     
                 {/* Expiration */}
                     {existingOffer.expires_at && (
-                  <div className={cn(
+                      <div className={cn(
                     "p-4 rounded-lg border",
                     dark ? "bg-neutral-800/50 border-neutral-700" : "bg-neutral-100 border-neutral-200"
                   )}>
                     <div className="flex items-center justify-center space-x-2">
                       <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                      <div className={cn(
+                    <div className={cn(
                         "text-sm font-medium",
                         dark ? "text-neutral-300" : "text-neutral-600"
                       )}>
                         Expires {new Date(existingOffer.expires_at * 1000).toLocaleString()}
-                      </div>
                     </div>
                   </div>
+                </div>
                 )}
               </div>
 
@@ -890,15 +890,15 @@ function OfferContent({
                         />
                       </div>
                       <div className="flex justify-between text-xs mt-2">
-                        <span className={cn(
+                    <span className={cn(
                           "font-medium",
-                          dark ? "text-neutral-400" : "text-neutral-500"
-                        )}>
+                      dark ? "text-neutral-400" : "text-neutral-500"
+                    )}>
                           0
-                        </span>
+                    </span>
                   <span className={cn(
                           "font-medium",
-                          dark ? "text-neutral-400" : "text-neutral-500"
+                    dark ? "text-neutral-400" : "text-neutral-500"
                   )}>
                           {unit === "BTC" ? `₿${formatAmount(listingPrice)}` : `${formatAmount(listingPrice)} sats`}
                   </span>
@@ -951,8 +951,8 @@ function OfferContent({
                               : (dark ? "text-neutral-500" : "text-neutral-400");
                             return <span key={i} className={cls}>{ch}</span>;
                           })}
-                        </div>
-                        
+              </div>
+
                         <div className="absolute right-6 top-1/2 -translate-y-1/2">
                           <span className={cn(
                             "text-lg font-bold",
@@ -965,31 +965,31 @@ function OfferContent({
                     ) : (
                       /* Sats input with abbreviations */
                       <div className="relative">
-                        <input
+                  <input
                           type="text"
                           value={rawInput}
                           onChange={(e) => handleAmountChange(e.target.value)}
                           placeholder="1"
-                          className={cn(
+                    className={cn(
                             "w-full px-6 py-4 rounded-2xl border-2 text-xl font-semibold text-center transition-all duration-200",
                             "focus:outline-none focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500",
                             "border-neutral-200 dark:border-neutral-700",
                             "shadow-sm hover:shadow-md focus:shadow-lg",
-                            dark 
+                      dark 
                               ? "bg-neutral-900 text-white placeholder-neutral-500" 
                               : "bg-white text-neutral-900 placeholder-neutral-400"
-                          )}
+                    )}
                           inputMode="numeric"
                           pattern="[0-9]*"
                           maxLength={15}
-                        />
+                  />
                         <div className="absolute right-6 top-1/2 -translate-y-1/2">
-                          <span className={cn(
+                  <span className={cn(
                             "text-lg font-bold",
                             dark ? "text-orange-400" : "text-orange-600"
-                          )}>
+                  )}>
                             sats
-                          </span>
+                  </span>
                         </div>
                         
                       </div>
@@ -1040,7 +1040,7 @@ function OfferContent({
                       Offer Expiration
                     </h3>
                     <div className="relative group">
-                      <div className={cn(
+                    <div className={cn(
                         "w-4 h-4 rounded-full flex items-center justify-center cursor-help",
                         dark ? "bg-neutral-700 text-neutral-400" : "bg-neutral-200 text-neutral-600"
                       )}>
@@ -1058,8 +1058,8 @@ function OfferContent({
                         whiteSpace: 'normal'
                       }}>
                         Your offer will remain valid until the expiration timer runs out, until you revoke your offer, or if the other user accepts/declines it.
-                      </div>
                     </div>
+                  </div>
                   </div>
                   <p className={cn(
                     "text-sm",
@@ -1250,6 +1250,156 @@ function OfferContent({
               </svg>
             </button>
           </div>
+          
+          {/* Main Content */}
+          {existingOffer ? (
+            // Show existing offer details
+            <div className="p-6">
+              <div className="text-center space-y-6">
+                <div className={cn(
+                  "p-6 rounded-xl border-2",
+                  existingOffer.status === 'pending' 
+                    ? "bg-gradient-to-br from-orange-50 to-orange-100 border-orange-300 dark:from-orange-900/20 dark:to-orange-800/20 dark:border-orange-500/50"
+                    : "bg-gradient-to-br from-neutral-50 to-neutral-100 border-neutral-300 dark:from-neutral-800/20 dark:to-neutral-700/20 dark:border-neutral-600"
+                )}>
+                  <div className={cn(
+                    "text-3xl font-black mb-2",
+                      existingOffer.status === 'pending' 
+                      ? "text-orange-900 dark:text-orange-100" 
+                      : "text-neutral-900 dark:text-neutral-100"
+                    )}>
+                    {unit === 'BTC' ? `₿${formatAmount(existingOffer.amount_sat)}` : `${formatAmount(existingOffer.amount_sat)} sats`}
+                  </div>
+                    <div className={cn(
+                    "text-sm font-bold px-4 py-2 rounded-full inline-block",
+                      existingOffer.status === 'pending' 
+                      ? "bg-orange-500 text-white"
+                      : "bg-neutral-500 text-white"
+                    )}>
+                    {existingOffer.status === 'pending' ? 'PENDING' : existingOffer.status.toUpperCase()}
+                  </div>
+                    </div>
+              </div>
+            </div>
+          ) : (
+            // Show new offer form
+            <form onSubmit={handleSubmit} className="p-6 space-y-8">
+              <div className="space-y-4">
+                <div className="text-center">
+                  <div className={cn(
+                    "text-4xl font-black mb-2",
+                    dark ? "text-white" : "text-neutral-900"
+                  )}>
+                    {unit === "BTC" ? `₿${formatAmount(amount)}` : `${formatAmount(amount)} sats`}
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className={cn(
+                      "block text-sm font-bold mb-2",
+                      dark ? "text-neutral-300" : "text-neutral-700"
+                    )}>
+                      Bitcoin (BTC)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        step="0.00000001"
+                        min="0"
+                        value={rawInput}
+                        onChange={(e) => handleAmountChange(e.target.value)}
+                        className={cn(
+                          "w-full px-4 py-3 rounded-xl border-2 text-lg font-bold transition-all duration-200",
+                          dark 
+                            ? "bg-neutral-800 border-neutral-600 text-white focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20" 
+                            : "bg-white border-neutral-300 text-neutral-900 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
+                        )}
+                        placeholder="0.00000000"
+                      />
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                        <span className={cn(
+                          "text-lg font-bold",
+                          dark ? "text-orange-400" : "text-orange-600"
+                        )}>
+                          ₿
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label className={cn(
+                      "block text-sm font-bold mb-2",
+                      dark ? "text-neutral-300" : "text-neutral-700"
+                    )}>
+                      Satoshis
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        step="1"
+                        min="0"
+                        value={amount}
+                        onChange={(e) => setAmount(Number(e.target.value))}
+                        className={cn(
+                          "w-full px-4 py-3 rounded-xl border-2 text-lg font-bold transition-all duration-200",
+                          dark 
+                            ? "bg-neutral-800 border-neutral-600 text-white focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20" 
+                            : "bg-white border-neutral-300 text-neutral-900 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
+                        )}
+                        placeholder="0"
+                      />
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                        <span className={cn(
+                          "text-sm font-bold",
+                          dark ? "text-orange-400" : "text-orange-600"
+                        )}>
+                          sats
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setAmount(0); setRawInput("0.00000000"); }}
+                    className={cn(
+                      "w-full px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 border-2",
+                      dark 
+                        ? "bg-neutral-700 border-neutral-600 text-neutral-300 hover:bg-neutral-600 hover:border-orange-400 hover:text-white" 
+                        : "bg-neutral-100 border-neutral-300 text-neutral-700 hover:bg-neutral-200 hover:border-orange-300 hover:text-neutral-900"
+                    )}
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+              <div className="flex space-x-4 pt-6">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className={cn(
+                    "flex-1 px-6 py-3 rounded-xl text-sm font-bold transition-all duration-200 border-2",
+                    dark 
+                      ? "bg-neutral-800 border-neutral-600 text-neutral-300 hover:bg-neutral-700 hover:border-orange-400 hover:text-white" 
+                      : "bg-neutral-100 border-neutral-300 text-neutral-700 hover:bg-neutral-200 hover:border-orange-300 hover:text-neutral-900"
+                  )}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || amount === 0}
+                  className={cn(
+                    "flex-1 px-6 py-3 rounded-xl text-sm font-bold text-white transition-all duration-200 border-2",
+                    (isSubmitting || amount === 0)
+                      ? "bg-neutral-500 border-neutral-500 cursor-not-allowed"
+                      : "bg-gradient-to-r from-orange-500 to-orange-600 border-orange-500 hover:from-orange-600 hover:to-orange-700 hover:border-orange-600 hover:shadow-lg hover:shadow-orange-500/25"
+                  )}
+                >
+                  {isSubmitting ? "Sending..." : "Send Offer"}
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     </div>
