@@ -140,7 +140,7 @@ function OfferContent({
       }
       setExpirationHours(24);
     }
-  }, [listingPrice, unit, existingOffer, formatAmount, formatBTCDisplay]);
+  }, [listingPrice, unit, existingOffer]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
