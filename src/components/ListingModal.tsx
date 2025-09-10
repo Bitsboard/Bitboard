@@ -129,10 +129,10 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
   const style = { ['--offer-w' as any]: `${offerWidthPx}px` };
 
   // When the offer is open on desktop, shift listing left to create small gap.
-  // Offer modal is 420px wide, so we need: 420px + 20px gap = 440px total shift
+  // Both modals should be positioned relative to each other, not screen edges
   const shiftClass =
     isDesktop && isOfferOpen
-      ? 'md:translate-x-[-200px]' // Much smaller shift for tighter spacing
+      ? 'md:translate-x-[-220px]' // 420px offer width + 20px gap = 440px total shift
       : 'md:translate-x-0';
 
   // Use a two-phase approach: first render in closed state, then transition to open
@@ -183,8 +183,8 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
         style={{ width: offerWidthPx }}
         className={cn(
           "pointer-events-auto fixed top-0 h-full shadow-2xl transition-transform duration-300 ease-out transform-gpu z-50",
-          // Position dock to slide into position with tighter spacing
-          dockPhase === 'open' ? "right-[20px]" : "right-0 translate-x-full",
+          // Position dock relative to main modal, not screen edge
+          dockPhase === 'open' ? "right-[-220px]" : "right-0 translate-x-full",
           isDesktop ? "block" : "hidden"
         )}
       />
