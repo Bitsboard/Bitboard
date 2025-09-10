@@ -630,20 +630,6 @@ function OfferContent({
 
   return (
     <div>
-      {/* Modal with backdrop - hidden on desktop since ListingModal provides background */}
-      <div 
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm md:hidden"
-        onClick={onClose}
-      >
-        <div 
-          className={cn(
-            "w-full max-w-md rounded-2xl shadow-2xl border-2 overflow-hidden",
-            dark 
-              ? "bg-gradient-to-br from-neutral-900 to-neutral-800 border-neutral-700" 
-              : "bg-gradient-to-br from-white to-neutral-50 border-neutral-200"
-          )}
-          onClick={(e) => e.stopPropagation()}
-        >
           {/* Header */}
           <div className={cn(
             "px-6 py-5 flex items-center justify-between",
@@ -1146,8 +1132,6 @@ function OfferContent({
               </div>
             </form>
           )}
-        </div>
-      </div>
 
       {/* Abort Confirmation Modal */}
       {showAbortConfirm && (
