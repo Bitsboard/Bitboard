@@ -217,12 +217,14 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
           }}
         />
       ) : (
-        /* Listing container */
+        /* Listing container - hide on mobile when offer modal is open */
         <div
           style={style}
           className={cn(
             "relative z-10 w-full max-w-5xl rounded-2xl shadow-xl transition-transform duration-300 ease-out",
-            dark ? "bg-neutral-950 text-neutral-100" : "bg-white text-neutral-900"
+            dark ? "bg-neutral-950 text-neutral-100" : "bg-white text-neutral-900",
+            // Hide listing modal content on mobile when offer modal is open
+            isOfferOpen && !isDesktop ? "hidden" : ""
           )}
         >
         <Modal open={open} onClose={onClose} dark={dark} size="lg" ariaLabel={listing.title} showBackground={false}>
