@@ -174,7 +174,7 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
   console.log('🎯 ListingModal: dockReady:', dockReady);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       {/* Right-side dock that OfferModal will portal into (desktop only) */}
       <div
         ref={offerDockRef}
