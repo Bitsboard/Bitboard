@@ -127,7 +127,7 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
 
   // When the offer is open on desktop, shift listing left to create consistent gap.
   // Chat modal moves left, offer modal slides in from right
-  const GAP_PX = 50; // Fixed gap between modals
+  const GAP_PX = 80; // Fixed gap between modals
   const shiftAmount = isDesktop && isOfferOpen ? -(offerWidthPx + GAP_PX) : 0;
 
   // CSS vars and styles for dynamic positioning
