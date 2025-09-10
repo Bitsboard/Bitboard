@@ -132,7 +132,7 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
   // Offer modal is 420px wide, so we need: 420px + 50px gap = 470px total shift
   const shiftClass =
     isDesktop && isOfferOpen
-      ? 'md:translate-x-[-470px]' // 420px offer width + 50px gap = 470px total shift
+      ? 'md:translate-x-[-350px]' // Reduced from 470px to 350px for better spacing
       : 'md:translate-x-0';
 
   // Use a two-phase approach: first render in closed state, then transition to open
@@ -183,7 +183,7 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
         style={{ width: offerWidthPx }}
         className={cn(
           "pointer-events-auto fixed top-0 h-full shadow-2xl transition-transform duration-300 ease-out transform-gpu z-50",
-          // Position dock to slide into position with 50px gap from chat modal
+          // Position dock to slide into position with proper spacing
           dockPhase === 'open' ? "right-[50px]" : "right-0 translate-x-full",
           isDesktop ? "block" : "hidden"
         )}

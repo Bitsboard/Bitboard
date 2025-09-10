@@ -630,9 +630,9 @@ function OfferContent({
 
   return (
     <div>
-      {/* Modal with backdrop */}
+      {/* Modal with backdrop - hidden on desktop since ListingModal provides background */}
       <div 
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm md:hidden"
         onClick={onClose}
       >
         <div 
@@ -1211,6 +1211,63 @@ function OfferContent({
             </div>
           </div>
       )}
+      
+      {/* Desktop version - no background, just the modal content */}
+      <div className="hidden md:block">
+        <div 
+          className={cn(
+            "w-full max-w-md rounded-2xl shadow-2xl border-2 overflow-hidden",
+            dark 
+              ? "bg-gradient-to-br from-neutral-900 to-neutral-800 border-neutral-700" 
+              : "bg-gradient-to-br from-white to-neutral-50 border-neutral-200"
+          )}
+          onClick={(e) => e.stopPropagation()} // Prevent click from bubbling up
+        >
+          {/* Header */}
+          <div className={cn(
+            "px-6 py-5 flex items-center justify-between",
+            dark 
+              ? "bg-neutral-900 border-b border-neutral-800" 
+              : "bg-neutral-50 border-b border-neutral-200"
+          )}>
+            <div className="flex items-center gap-3">
+              <div className={cn(
+                "w-10 h-10 rounded-full flex items-center justify-center",
+                dark ? "bg-orange-500" : "bg-orange-500"
+              )}>
+                <span className="text-white font-bold text-lg">₿</span>
+              </div>
+              <div>
+                <h3 className={cn(
+                  "text-lg font-bold",
+                  dark ? "text-white" : "text-neutral-900"
+                )}>
+                  Make an Offer
+                </h3>
+                <p className={cn(
+                  "text-sm",
+                  dark ? "text-neutral-400" : "text-neutral-600"
+                )}>
+                  {listingTitle}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className={cn(
+                "w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200",
+                dark 
+                  ? "hover:bg-neutral-800 text-neutral-400 hover:text-white" 
+                  : "hover:bg-neutral-100 text-neutral-500 hover:text-neutral-700"
+              )}
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
