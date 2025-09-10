@@ -189,7 +189,7 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
         style={{ width: offerWidthPx }}
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          "pointer-events-auto fixed top-1/2 -translate-y-1/2 shadow-2xl transition-transform duration-300 ease-out transform-gpu z-50",
+          "pointer-events-auto fixed top-1/2 -translate-y-1/2 shadow-2xl transition-transform duration-300 ease-out transform-gpu z-[100]",
           // Position dock with fixed gap from right edge when open
           dockPhase === 'open' ? `right-[${GAP_PX}px]` : "right-0 translate-x-full",
           isDesktop ? "block" : "hidden"
