@@ -62,7 +62,7 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
   const [isTrackingView, setIsTrackingView] = React.useState(false);
   
   // Get orchestrator state
-  const { isOfferOpen, isDesktop, offerDockRef, offerWidthPx, dockReady, setDockReady } = useModalOrchestrator();
+  const { isOfferOpen, isDesktop, offerDockRef, offerWidthPx, dockReady, setDockReady, closeOffer } = useModalOrchestrator();
   
   
   // Track view when modal opens
