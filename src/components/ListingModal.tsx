@@ -127,7 +127,7 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
 
   // When the offer is open on desktop, shift listing left to create consistent gap.
   // Chat modal moves left, offer modal slides in from right
-  const GAP_PX = 120; // Fixed gap between modals
+  const GAP_PX = 150; // Fixed gap between modals
   const shiftAmount = isDesktop && isOfferOpen ? -(offerWidthPx + GAP_PX) : 0;
 
   // CSS vars and styles for dynamic positioning
@@ -179,6 +179,7 @@ function ListingShell({ listing, onClose, unit, btcCad, dark, onChat, open, user
         aria-hidden
         data-state={dockState}
         style={{ width: offerWidthPx }}
+        onClick={(e) => e.stopPropagation()}
         className={cn(
           "pointer-events-auto fixed top-1/2 -translate-y-1/2 shadow-2xl transition-transform duration-300 ease-out transform-gpu z-50",
           // Position dock with fixed gap from right edge when open
